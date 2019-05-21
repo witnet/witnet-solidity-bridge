@@ -1,0 +1,44 @@
+{
+  "name": "witnet-ethereum-bridge",
+  "version": "0.1.0",
+  "description": "Witnet-Ethereum Bridge Interface",
+  "main": "",
+  "scripts": {
+    "test": "truffle test --network test",
+    "console": "truffle console --network",
+    "postinstall": "npm run compile-contracts",
+    "compile-contracts": "truffle compile --all",
+    "fmt": "solium -d contracts && eslint ./test",
+    "fmt!": "solium -d contracts --fix && eslint ./test --fix",
+    "solium": "solium -d contracts",
+    "solium:fix": "solium -d contracts --fix",
+    "lint": "eslint ./test",
+    "lint:fix": "eslint ./test --fix",
+    "coverage": "solidity-coverage"
+  },
+  "author": "Witnet Foundation <info@witnet.foundation>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/witnet/witnet-ethereum-bridge.git"
+  },
+  "keywords": [
+    "bridge",
+    "witnet",
+    "ethereum"
+  ],
+  "license": "GPL-3.0",
+  "dependencies": {
+    "truffle-hdwallet-provider": "^1.0.7"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "ethlint": "^1.2.4",
+    "ganache-cli": "^6.4.3",
+    "solidity-coverage": "^0.5.11"
+  }
+}

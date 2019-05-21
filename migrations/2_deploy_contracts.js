@@ -1,5 +1,6 @@
-var WBI=artifacts.require ("./WitnetBridgeInterface.sol");
+var WBI = artifacts.require("./WitnetBridgeInterface.sol")
 
-module.exports = function(deployer) {
-      deployer.deploy(WBI);
+module.exports = function (deployer, network, accounts) {
+  console.log("Network:", network)
+  deployer.deploy(WBI)
 }

@@ -13,9 +13,10 @@ contract WitnetBridgeInterface {
     {
     }
 
-    function post_drs(bytes memory dr, uint256 post_reward, uint256 report_reward) public returns(uint256 id) {
+    function post_dr(bytes memory dr, uint256 post_reward, uint256 report_reward) public returns(uint256 id) {
         id = uint256(keccak256(dr));
-        requests[id] = DataRequest(dr, "");
+        requests[id].script = dr;
+        requests[id].result = "";
         return id;
     }
 
