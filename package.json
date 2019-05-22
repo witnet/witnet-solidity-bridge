@@ -4,8 +4,8 @@
   "description": "Witnet-Ethereum Bridge Interface",
   "main": "",
   "scripts": {
-    "test": "truffle test --network test",
-    "console": "truffle console --network",
+    "test": "truffle test",
+    "console": "truffle console",
     "postinstall": "npm run compile-contracts",
     "compile-contracts": "truffle compile --all",
     "fmt": "solium -d contracts && eslint ./test",
