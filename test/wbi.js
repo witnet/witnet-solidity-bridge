@@ -1,6 +1,8 @@
 const WBI = artifacts.require("WitnetBridgeInterface")
 const truffleAssert = require("truffle-assertions")
 
+var wait = ms => new Promise((r, j)=>setTimeout(r, ms))
+
 contract("WBI", accounts => {
   describe("WBI test suite", () => {
     let wbiInstance
@@ -108,6 +110,38 @@ contract("WBI", accounts => {
       let readDrBytes = await wbiInstance.read_dr.call(0)
       assert.equal(drBytes, readDrBytes)
     })
+
+    it("should subscribe to an event, wait for its emision, and read result", async () => {
+      const drBytes = web3.utils.fromAscii("This is a DR")
+      const resBytes = web3.utils.fromAscii("This is a result")
+
+
+      const tx1 = wbiInstance.post_dr(drBytes, {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      const txHash1 = await waitForHash(tx1)
+      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      // Subscribe to PostResult event
+      wbiInstance.PostResult({}, async function(error, event) { 
+        let readresBytes1 = await wbiInstance.read_result.call(data1)
+        console.log("asserting")
+        assert.equal(resBytes, readresBytes1)
+      })
+
+      let data1 = txReceipt1.logs[0].data
+      const tx2 = await wbiInstance.report_result(data1, resBytes).on('transactionHash', hash => txHash = hash)
+
+/*      const tx2 = wbiInstance.report_result(data1, resBytes)
+      const txHash2 = await waitForHash(tx2)
+      let txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)*/
+      
+      // wait for the async method to finish
+      await wait(500)
+      truffleAssert.eventEmitted(tx2, "PostResult", (ev) => {
+        return ev.id.eq(web3.utils.toBN(data1))
+      })
+    })
   })
 })
 
@@ -116,7 +150,3 @@ const waitForHash = txQ =>
     txQ.on("transactionHash", resolve).catch(reject)
   )
 
-const waitForHash2 = txQ =>
-  new Promise((resolve, reject) =>
-    txQ.on("transactionHash", resolve).catch(reject)
-  )

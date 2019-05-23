@@ -12,6 +12,8 @@ contract WitnetBridgeInterface {
   mapping (uint256 => DataRequest) public requests;
 
   event PostDataRequest(address indexed _from, uint256 id);
+  event PostResult(address indexed _from, uint256 id);
+
 
 
   constructor () public
@@ -34,6 +36,7 @@ contract WitnetBridgeInterface {
 
   function report_result (uint256 id, bytes memory result) public {
     requests[id].result = result;
+    emit PostResult(msg.sender, id);
     msg.sender.transfer(requests[id].reward);
   }
 
