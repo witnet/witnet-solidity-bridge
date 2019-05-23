@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 contract WitnetBridgeInterface {
-  
+
   struct DataRequest {
     bytes script;
     bytes result;
@@ -11,17 +11,20 @@ contract WitnetBridgeInterface {
   uint256 counter;
   mapping (uint256 => DataRequest) public requests;
 
+  event PostDataRequest(address indexed _from, uint256 id);
+
+
   constructor () public
   {
     counter = 0;
   }
 
   function post_dr(bytes memory dr) public payable returns(uint256 id) {
-    id = counter;
-    counter++;
+    id = counter++;
     requests[id].script = dr;
     requests[id].result = "";
     requests[id].reward = msg.value;
+    emit PostDataRequest(msg.sender, id);
     return id;
   }
 

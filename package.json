@@ -39,6 +39,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "ethlint": "^1.2.4",
     "ganache-cli": "^6.4.3",
-    "solidity-coverage": "^0.5.11"
+    "solidity-coverage": "^0.5.11",
+    "truffle-assertions": "^0.9.0"
   }
 }

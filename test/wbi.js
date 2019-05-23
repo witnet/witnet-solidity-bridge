@@ -1,4 +1,5 @@
 const WBI = artifacts.require("WitnetBridgeInterface")
+const truffleAssert = require("truffle-assertions")
 
 contract("WBI", accounts => {
   describe("WBI test suite", () => {
@@ -8,16 +9,17 @@ contract("WBI", accounts => {
     })
 
     it("should allow post and read drs", async () => {
-      const waitForHash = (txQ) => new Promise((resolve, reject) => txQ.on("transactionHash", hash => resolve(hash)).catch(reject))
       // Take current balance
       var account1 = accounts[0]
       let actualBalance1 = await web3.eth.getBalance(account1)
 
-      const drBytes = web3.utils.fromAscii("This is a DR?")
-      const drBytes2 = web3.utils.fromAscii("This is a second DR?")
-      let contract_balance = await web3.eth.getBalance(wbiInstance.address)
+      const drBytes = web3.utils.fromAscii("This is a DR")
+      const drBytes2 = web3.utils.fromAscii("This is a second DR")
 
-      const tx = wbiInstance.post_dr(drBytes, { from: account1, value: web3.utils.toWei("1", "ether") })
+      const tx = wbiInstance.post_dr(drBytes, {
+        from: account1,
+        value: web3.utils.toWei("1", "ether"),
+      })
       await waitForHash(tx)
       const tx2 = wbiInstance.post_dr(drBytes2)
       await waitForHash(tx2)
@@ -26,26 +28,30 @@ contract("WBI", accounts => {
       let readDrBytes2 = await wbiInstance.read_dr.call(1)
 
       let afterBalance1 = await web3.eth.getBalance(account1)
-      let contract_balance_after = await web3.eth.getBalance(wbiInstance.address)
+      let contractBalanceAfter = await web3.eth.getBalance(
+        wbiInstance.address
+      )
 
       assert(afterBalance1 < actualBalance1)
-      assert.equal(web3.utils.toWei("1", "ether"), contract_balance_after)
+      assert.equal(web3.utils.toWei("1", "ether"), contractBalanceAfter)
 
       assert.equal(drBytes, readDrBytes)
       assert.equal(drBytes2, readDrBytes2)
     })
+
     it("should allow post and read result", async () => {
       var account1 = accounts[0]
       var account2 = accounts[1]
       let actualBalance1 = await web3.eth.getBalance(account1)
       let actualBalance2 = await web3.eth.getBalance(account2)
 
-      const waitForHash = (txQ) => new Promise((resolve, reject) => txQ.on("transactionHash", hash => resolve(hash)).catch(reject))
+      const drBytes = web3.utils.fromAscii("This is a DR")
+      const resBytes = web3.utils.fromAscii("This is a result")
 
-      const drBytes = web3.utils.fromAscii("This is a DR?")
-      const resBytes = web3.utils.fromAscii("This is a result?")
-
-      const tx = wbiInstance.post_dr(drBytes, { from: account1, value: web3.utils.toWei("1", "ether") })
+      const tx = wbiInstance.post_dr(drBytes, {
+        from: account1,
+        value: web3.utils.toWei("1", "ether"),
+      })
       await waitForHash(tx)
 
       // report result
@@ -55,14 +61,62 @@ contract("WBI", accounts => {
       let afterBalance1 = await web3.eth.getBalance(account1)
       let afterBalance2 = await web3.eth.getBalance(account2)
 
-      let contract_balance_after = await web3.eth.getBalance(wbiInstance.address)
+      let contractBalanceAfter = await web3.eth.getBalance(
+        wbiInstance.address
+      )
 
       assert(afterBalance1 < actualBalance1)
       assert(afterBalance2 > actualBalance2)
-      assert.equal(0, contract_balance_after)
+      assert.equal(0, contractBalanceAfter)
       let readResBytes = await wbiInstance.read_result.call(0)
 
       assert.equal(resBytes, readResBytes)
     })
+
+    it("should return the data request id", async () => {
+      const drBytes1 = web3.utils.fromAscii("This is a DR")
+      const drBytes2 = web3.utils.fromAscii("This is a second DR")
+
+      const tx1 = wbiInstance.post_dr(drBytes1, {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      const txHash1 = await waitForHash(tx1)
+      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      let data1 = txReceipt1.logs[0].data
+
+      const tx2 = wbiInstance.post_dr(drBytes2)
+      const txHash2 = await waitForHash(tx2)
+      let txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
+      let data2 = txReceipt2.logs[0].data
+
+      let readDrBytes1 = await wbiInstance.read_dr.call(data1)
+      let readDrBytes2 = await wbiInstance.read_dr.call(data2)
+      
+      assert.equal(drBytes1, readDrBytes1)
+      assert.equal(drBytes2, readDrBytes2)
+    })
+
+    it("should emit an event with the id", async () => {
+      const drBytes = web3.utils.fromAscii("This is a DR")
+
+      let txHash;
+      const tx = await wbiInstance.post_dr(drBytes).on('transactionHash', hash => txHash = hash)
+      truffleAssert.eventEmitted(tx, "PostDataRequest", (ev) => {
+        return ev.id.toString() === "0"
+      })
+      let readDrBytes = await wbiInstance.read_dr.call(0)
+      assert.equal(drBytes, readDrBytes)
+    })
   })
 })
+
+const waitForHash = txQ =>
+  new Promise((resolve, reject) =>
+    txQ.on("transactionHash", resolve).catch(reject)
+  )
+
+const waitForHash2 = txQ =>
+  new Promise((resolve, reject) =>
+    txQ.on("transactionHash", resolve).catch(reject)
+  )
