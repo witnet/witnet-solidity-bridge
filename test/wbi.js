@@ -19,9 +19,9 @@ contract("WBI", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const drBytes2 = web3.utils.fromAscii("This is a second DR")
 
-      const half_wei = web3.utils.toWei("0.5", "ether")
+      const half_ether = web3.utils.toWei("0.5", "ether")
 
-      const tx1 = wbiInstance.post_dr(drBytes, half_wei, {
+      const tx1 = wbiInstance.post_dr(drBytes, half_ether, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -42,7 +42,7 @@ contract("WBI", accounts => {
         wbiInstance.address
       )
 
-      assert(afterBalance1 < actualBalance1)
+      assert(parseInt(afterBalance1, 10) < parseInt(actualBalance1, 10))
       assert.equal(web3.utils.toWei("1", "ether"), contractBalanceAfter)
 
       assert.equal(drBytes, readDrBytes)
@@ -57,10 +57,10 @@ contract("WBI", accounts => {
 
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
-      const half_wei = web3.utils.toWei("0.5", "ether")
+      const half_ether = web3.utils.toWei("0.5", "ether")
 
-      const tx1 = wbiInstance.post_dr(drBytes, half_wei, {
-        from: accounts[0],
+      const tx1 = wbiInstance.post_dr(drBytes, half_ether, {
+        from: account1,
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
@@ -68,26 +68,34 @@ contract("WBI", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       const tx2 = wbiInstance.claim_drs([id1], resBytes, {
-        from: accounts[1],
+        from: account2,
       })
-      const txHash2 = await waitForHash(tx2)
 
+
+      const txHash2 = await waitForHash(tx2)
+      
       const tx3 = wbiInstance.report_dr_inclusion(id1, resBytes, 1, {
-        from: accounts[1],
+        from: account2,
       })
+
       const txHash3 = await waitForHash(tx3)
+      const afterBalance2 = await web3.eth.getBalance(account2)
+      assert(parseInt(afterBalance2, 10) > parseInt(actualBalance2, 10))
+
 
       // report result
       let restx = wbiInstance.report_result(id1, resBytes, 1, resBytes, { from: account2 })
       await waitForHash(restx)
 
       let afterBalance1 = await web3.eth.getBalance(account1)
-      let afterBalance2 = await web3.eth.getBalance(account2)
+      let balance_final = await web3.eth.getBalance(account2)
       let contractBalanceAfter = await web3.eth.getBalance(
         wbiInstance.address
       )
-      assert(afterBalance1 < actualBalance1)
-      assert(afterBalance2 > actualBalance2)
+
+      assert(parseInt(afterBalance1, 10) < parseInt(actualBalance1, 10))
+      assert(parseInt(balance_final, 10) > parseInt(afterBalance2, 10))
+
       assert.equal(0, contractBalanceAfter)
 
       let readResBytes = await wbiInstance.read_result.call(id1)
@@ -97,10 +105,8 @@ contract("WBI", accounts => {
     it("should return the data request id", async () => {
       const drBytes1 = web3.utils.fromAscii("This is a DR")
       const drBytes2 = web3.utils.fromAscii("This is a second DR")
-      const half_wei = web3.utils.toWei("0.5", "ether")
-
-
-      const tx1 = wbiInstance.post_dr(drBytes1, half_wei, {
+      const half_ether = web3.utils.toWei("0.5", "ether")
+      const tx1 = wbiInstance.post_dr(drBytes1, half_ether, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -136,9 +142,9 @@ contract("WBI", accounts => {
     it("should subscribe to an event, wait for its emision, and read result", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
-      const half_wei = web3.utils.toWei("0.5", "ether")
+      const half_ether = web3.utils.toWei("0.5", "ether")
 
-      const tx1 = wbiInstance.post_dr(drBytes, half_wei, {
+      const tx1 = wbiInstance.post_dr(drBytes, half_ether, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
