@@ -59,12 +59,14 @@ contract WitnetBridgeInterface {
   function claim_drs(uint256[] memory ids, bytes memory PoE) public {
     uint256 current_epoch = block.number;
     // PoE pleaseee
+    uint256 index;
     for (uint i = 0; i < ids.length; i++) {
-      if((requests[i].timestamp == 0 || current_epoch-requests[i].timestamp > 13) &&
-      requests[i].dr_hash==0 &&
-      requests[i].result.length==0){
-        requests[i].pkh_claim = msg.sender;
-        requests[i].timestamp = current_epoch;
+      index = ids[i];
+      if((requests[index].timestamp == 0 || current_epoch-requests[index].timestamp > 13) &&
+      requests[index].dr_hash==0 &&
+      requests[index].result.length==0){
+        requests[index].pkh_claim = msg.sender;
+        requests[index].timestamp = current_epoch;
       }
       else{
         revert("One of the DR was already claimed. Espabila");
