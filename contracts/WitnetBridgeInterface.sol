@@ -13,13 +13,19 @@ contract WitnetBridgeInterface {
   }
 
   mapping (uint256 => DataRequest) public requests;
-  uint256[] available_drs;
 
   event PostDataRequest(address indexed _from, uint256);
   event InclusionDataRequest(address indexed _from, uint256 id);
   event PostResult(address indexed _from, uint256 id);
 
+  // @dev Post DR to be resolved by witnet
+  /// @param dr Data request body
+  /// @param tallie_reward The quantity from msg.value that is destinated to result posting
+  /// @return id indicating sha256(id)
   function post_dr(bytes memory dr, uint256 tallie_reward) public payable returns(uint256 id) {
+    if (msg.value < tallie_reward){
+      revert("You should send a greater amount than the one sent as tallie");
+    }
     id = uint256(sha256(dr));
     if(requests[id].dr.length != 0) {
       requests[id].tallie_reward += tallie_reward;
@@ -34,17 +40,22 @@ contract WitnetBridgeInterface {
     requests[id].timestamp = 0;
     requests[id].dr_hash = 0;
     requests[id].pkh_claim = address(0);
-    available_drs.push(id);
     emit PostDataRequest(msg.sender, id);
     return id;
   }
 
+  // @dev Upgrade DR to be resolved by witnet
+  /// @param id Data request id
+  /// @param tallie_reward The quantity from msg.value that is destinated to result posting
   function upgrade_dr(uint256 id, uint256 tallie_reward) public payable {
     // Only allow if not claimed
     requests[id].inclusion_reward += msg.value - tallie_reward;
     requests[id].tallie_reward += tallie_reward;
   }
-  // max_value to be passed to make sure the claimer has enough money to perform the action
+
+  // @dev Claim drs to be posted to Witnet by the node
+  /// @param ids Data request ids to be claimed
+  /// @param PoE PoE claiming eligibility
   function claim_drs(uint256[] memory ids, bytes memory PoE) public {
     uint256 current_epoch = block.number;
     // PoE pleaseee
@@ -60,7 +71,10 @@ contract WitnetBridgeInterface {
       }
     }
   }
-
+  // @dev Report DR inclusion in WBI
+  /// @param id DR id
+  /// @param poi Proof of Inclusion
+  /// @param block_hash Block hash in which the DR was included
   function report_dr_inclusion (uint256 id, bytes memory poi, uint256 block_hash) public {
     if (requests[id].dr_hash == 0){
       if (verify_poi(poi)){
@@ -72,18 +86,31 @@ contract WitnetBridgeInterface {
     emit InclusionDataRequest(msg.sender, id);
   }
 
-  function report_result (uint256 id, bytes memory result) public {
+  // @dev Report result of DR in WBI
+  /// @param id DR id
+  /// @param poi Proof of Inclusion
+  /// @param block_hash hash of the block in which the result was inserted
+  /// @param result The actual result
+  function report_result (uint256 id, bytes memory poi, uint256 block_hash, bytes memory result) public {
     if (requests[id].dr_hash!=0 && requests[id].result.length==0){
-      requests[id].result = result;
-      msg.sender.transfer(requests[id].tallie_reward);
-      emit PostResult(msg.sender, id);
+      if (verify_poi(poi)){
+        requests[id].result = result;
+        msg.sender.transfer(requests[id].tallie_reward);
+        emit PostResult(msg.sender, id);
+      }
     }
   }
 
+  // @dev Read DR from WBI
+  /// @param id DR id
+  /// @return The dr
   function read_dr (uint256 id) public view returns(bytes memory){
     return requests[id].dr;
   }
 
+  // @dev Read result from WBI
+  /// @param id DR id
+  /// @return The result of the DR
   function read_result (uint256 id) public view returns(bytes memory){
     return requests[id].result;
   }
