@@ -16,10 +16,18 @@ contract WitnetBridgeInterface {
   uint256[] available_drs;
 
   event PostDataRequest(address indexed _from, uint256);
+  event InclusionDataRequest(address indexed _from, uint256 id);
+
   event PostResult(address indexed _from, uint256 id);
 
   function post_dr(bytes memory dr, uint256 tallie_reward) public payable returns(uint256 id) {
-    id = uint256(keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1), dr)));
+    id = uint256(sha256(dr));
+    if(requests[id].dr.length != 0) {
+      requests[id].tallie_reward += tallie_reward;
+      requests[id].inclusion_reward += msg.value - tallie_reward;
+      return id;
+    }
+
     requests[id].dr = dr;
     requests[id].inclusion_reward = msg.value - tallie_reward;
     requests[id].tallie_reward = tallie_reward;
@@ -34,8 +42,8 @@ contract WitnetBridgeInterface {
 
   function upgrade_dr(uint256 id, uint256 tallie_reward) public payable {
     // Only allow if not claimed
-    requests[id].inclusion_reward = msg.value - tallie_reward;
-    requests[id].tallie_reward = tallie_reward;
+    requests[id].inclusion_reward += msg.value - tallie_reward;
+    requests[id].tallie_reward += tallie_reward;
   }
   // max_value to be passed to make sure the claimer has enough money to perform the action
   function claim_drs(uint256[] memory ids, bytes memory PoE) public {
@@ -62,6 +70,7 @@ contract WitnetBridgeInterface {
         requests[id].pkh_claim.transfer(requests[id].inclusion_reward);
       }
     }
+    emit InclusionDataRequest(msg.sender, id);
   }
 
   function report_result (uint256 id, bytes memory result) public {
@@ -70,6 +79,10 @@ contract WitnetBridgeInterface {
       msg.sender.transfer(requests[id].tallie_reward);
       emit PostResult(msg.sender, id);
     }
+  }
+
+  function read_dr (uint256 id) public view returns(bytes memory){
+    return requests[id].dr;
   }
 
   function read_result (uint256 id) public view returns(bytes memory){
