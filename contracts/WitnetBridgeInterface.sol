@@ -17,7 +17,6 @@ contract WitnetBridgeInterface {
 
   event PostDataRequest(address indexed _from, uint256);
   event InclusionDataRequest(address indexed _from, uint256 id);
-
   event PostResult(address indexed _from, uint256 id);
 
   function post_dr(bytes memory dr, uint256 tallie_reward) public payable returns(uint256 id) {
