@@ -48,6 +48,35 @@ contract("WBI", accounts => {
       assert.equal(drBytes, readDrBytes)
       assert.equal(drBytes2, readDrBytes2)
     })
+    it("should upgrade the reward of the data request in the contract", async () => {     
+      const drBytes = web3.utils.fromAscii("This is a DR")
+      const halfEther = web3.utils.toWei("0.5", "ether")
+      // one ether to the dr reward
+      const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      const txHash1 = await waitForHash(tx1)
+      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
+
+      let contractBalanceBefore = await web3.eth.getBalance(
+        wbiInstance.address
+      )
+      assert.equal(web3.utils.toWei("1", "ether"), contractBalanceBefore)
+
+      const tx2 = wbiInstance.upgradeDataRequest(id1, halfEther, {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      await waitForHash(tx2)
+
+      let contractBalanceAfter = await web3.eth.getBalance(
+        wbiInstance.address
+      )
+
+      assert.equal(web3.utils.toWei("2", "ether"), contractBalanceAfter)
+    })
 
     it("should allow post and read result", async () => {
       var account1 = accounts[0]
@@ -156,12 +185,12 @@ contract("WBI", accounts => {
       const tx2 = wbiInstance.claimDataRequests([data1], resBytes, {
         from: accounts[1],
       })
-      const txHash2 = await waitForHash(tx2)
+      await waitForHash(tx2)
 
       const tx3 = wbiInstance.reportDataRequestInclusion(data1, resBytes, 1, {
         from: accounts[1],
       })
-      const txHash3 = await waitForHash(tx3)      
+      await waitForHash(tx3)
 
       const tx4 = await wbiInstance.reportResult(data1, resBytes, 1, resBytes)
       // wait for the async method to finish
