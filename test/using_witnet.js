@@ -35,12 +35,12 @@ contract("Using witnet", accounts => {
       let txReceipt0 = await web3.eth.getTransactionReceipt(txHash0)
       let id0 = txReceipt0.logs[0].data
       assert.equal(id0, expectedId)
-      let readDrBytes = await wbi.read_dr.call(id0)
+      let readDrBytes = await wbi.readDataRequest.call(id0)
       assert.equal(readDrBytes, web3.utils.utf8ToHex(stringDr))
 
       let drInfo = await wbi.requests(expectedId)
-      let inclusionReward = drInfo.inclusion_reward
-      let tallyReward = drInfo.tallie_reward
+      let inclusionReward = drInfo.inclusionReward
+      let tallyReward = drInfo.tallieReward
       assert.equal("70", inclusionReward.toString())
       assert.equal("30", tallyReward.toString())
 
@@ -58,7 +58,7 @@ contract("Using witnet", accounts => {
       let stringDr = "DataRequest Example"
       let expectedId = "0x" + sha.sha256(stringDr)
       let actualBalance = await web3.eth.getBalance(accounts[0])
-      let readDrBytes = await wbi.read_dr.call(expectedId)
+      let readDrBytes = await wbi.readDataRequest.call(expectedId)
       assert.equal(readDrBytes, web3.utils.utf8ToHex(stringDr))
       let tx1 = usingWitnet.witnetUpgradeDataRequest(expectedId, 30, {
         from: accounts[0],
@@ -67,8 +67,8 @@ contract("Using witnet", accounts => {
 
       await waitForHash(tx1)
       let drInfo = await wbi.requests(expectedId)
-      let inclusionReward = drInfo.inclusion_reward
-      let tallyReward = drInfo.tallie_reward
+      let inclusionReward = drInfo.inclusionReward
+      let tallyReward = drInfo.tallieReward
       assert.equal("140", inclusionReward.toString())
       assert.equal("60", tallyReward.toString())
 
@@ -88,25 +88,25 @@ contract("Using witnet", accounts => {
       let expectedBlockHash = 0x123456
 
       // Claim Data Request Inclusion
-      let tx2 = wbi.claim_drs([expectedId], web3.utils.utf8ToHex("PoE"))
+      let tx2 = wbi.claimDataRequests([expectedId], web3.utils.utf8ToHex("PoE"))
       await waitForHash(tx2)
 
       let drInfo2 = await wbi.requests(expectedId)
-      let pkh = drInfo2.pkh_claim
+      let pkh = drInfo2.pkhClaim
       let timestamp = drInfo2.timestamp
       assert(timestamp)
       assert.equal(pkh, accounts[0])
 
       // Show PoI of Data Request Inclusion
-      let tx3 = wbi.report_dr_inclusion(expectedId, web3.utils.utf8ToHex("PoI"), expectedBlockHash)
+      let tx3 = wbi.reportDataRequestInclusion(expectedId, web3.utils.utf8ToHex("PoI"), expectedBlockHash)
       await waitForHash(tx3)
 
       let drInfo3 = await wbi.requests(expectedId)
-      let blockHash = drInfo3.dr_hash
+      let blockHash = drInfo3.drHash
       assert.equal(expectedBlockHash, blockHash)
 
       // Report result
-      let tx4 = wbi.report_result(expectedId, web3.utils.utf8ToHex("PoI"),
+      let tx4 = wbi.reportResult(expectedId, web3.utils.utf8ToHex("PoI"),
         expectedBlockHash, web3.utils.utf8ToHex("Result"))
       await waitForHash(tx4)
 

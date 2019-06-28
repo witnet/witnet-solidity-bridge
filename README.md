@@ -5,7 +5,7 @@
 
 The WitnetBridgeInterface provides the following functionalities:
 
-- **post_dr**:
+- **postDataRequest**:
   - _description_: posts a data request in the WBI to be resolved in Witnet with total reward specified in msg.value.
   - _inputs_:
     - _dr_: the data request bytes.
@@ -13,46 +13,46 @@ The WitnetBridgeInterface provides the following functionalities:
   - output:
     - _id_: the id of the dr.
 
-- **upgrade_dr**:
+- **upgradeDataRequest**:
   - _description_: updates the total reward of the data request by adding more value to it.
   - _inputs_:
     - id: the id of the data request.
     - _tallie_reward_: the new reward 
 
-- **claim_drs**:
+- **claimDataRequests**:
   - _description_: claims the data requests specified by the input ids and assigns the potential data request inclusion reward to the claiming pkh.
   - _inputs_:
     - _ids_: the ids of the data request.
     - _poe_: the proof of eligibility of the bridge node to claim data requests
 
-- **report_dr_inclusion**:
+- **reportDataRequestInclusion**:
   - _description_: reports the proof of inclusion to unlock the inclusion reward to the claiming pkh.
   - _inputs_:
     - _id_: the id of the data request.
     - _poi_: the proof of inclusion of the data requests in one block in Witnet.
     - *block_hash*: the hash of the block in which the data request was inserted.
-- **report_result**:
+- **reportResult**:
   - _description_: reports the result of a data request in Witnet.
   - _inputs_:
     - _id_: the id of the data request.
     - _poi_: the proof of inclusion of the result in one block in Witnet.
     - *block_hash*: the hash of the block in which the result (tallie) was inserted.
     - *result*: the result itself.
-- **read_dr**:
+- **readDataRequest**:
   - *description*: reads the bytes of one dr in the WBI.
   - *inputs*:
     - *id*: the id of the data request.
   - *output*:
     - the data request bytes.
-- **read_result**:
+- **readResult**:
   - *description*: reads the result of one dr in the WBI.
   - *inputs*:
     - *id*: the id of the data request.
   - *output*:
     - the result of the data request.
-- **verify_poe**:
+- **verifyPoe**:
   - TBD
-- **verify_poI**:
+- **verifyPoi**:
   - TBD
 
 ## Known limitations:

@@ -4,123 +4,124 @@ contract WitnetBridgeInterface {
 
   struct DataRequest {
     bytes dr;
-    uint256 inclusion_reward;
-    uint256 tallie_reward;
+    uint256 inclusionReward;
+    uint256 tallieReward;
     bytes result;
     uint256 timestamp;
-    uint256 dr_hash;
-    address payable pkh_claim;
+    uint256 drHash;
+    address payable pkhClaim;
   }
 
   mapping (uint256 => DataRequest) public requests;
 
-  event PostDataRequest(address indexed _from, uint256);
-  event InclusionDataRequest(address indexed _from, uint256 id);
-  event PostResult(address indexed _from, uint256 id);
+  event PostDataRequest(address indexed _from, uint256 _id);
+  event InclusionDataRequest(address indexed _from, uint256 _id);
+  event PostResult(address indexed _from, uint256 _id);
 
   // @dev Post DR to be resolved by witnet
-  /// @param dr Data request body
-  /// @param tallie_reward The quantity from msg.value that is destinated to result posting
-  /// @return id indicating sha256(id)
-  function post_dr(bytes memory dr, uint256 tallie_reward) public payable returns(uint256 id) {
-    if (msg.value < tallie_reward){
+  /// @param _dr Data request body
+  /// @param _tallieReward The quantity from msg.value that is destinated to result posting
+  /// @return _id indicating sha256(id)
+  function postDataRequest(bytes memory _dr, uint256 _tallieReward) public payable returns(uint256 _id) {
+    if (msg.value < _tallieReward){
       revert("You should send a greater amount than the one sent as tallie");
     }
-    id = uint256(sha256(dr));
-    if(requests[id].dr.length != 0) {
-      requests[id].tallie_reward += tallie_reward;
-      requests[id].inclusion_reward += msg.value - tallie_reward;
-      return id;
+    _id = uint256(sha256(_dr));
+    if(requests[_id].dr.length != 0) {
+      requests[_id].tallieReward += _tallieReward;
+      requests[_id].inclusionReward += msg.value - _tallieReward;
+      return _id;
     }
 
-    requests[id].dr = dr;
-    requests[id].inclusion_reward = msg.value - tallie_reward;
-    requests[id].tallie_reward = tallie_reward;
-    requests[id].result = "";
-    requests[id].timestamp = 0;
-    requests[id].dr_hash = 0;
-    requests[id].pkh_claim = address(0);
-    emit PostDataRequest(msg.sender, id);
-    return id;
+    requests[_id].dr = _dr;
+    requests[_id].inclusionReward = msg.value - _tallieReward;
+    requests[_id].tallieReward = _tallieReward;
+    requests[_id].result = "";
+    requests[_id].timestamp = 0;
+    requests[_id].drHash = 0;
+    requests[_id].pkhClaim = address(0);
+    emit PostDataRequest(msg.sender, _id);
+    return _id;
   }
 
   // @dev Upgrade DR to be resolved by witnet
-  /// @param id Data request id
-  /// @param tallie_reward The quantity from msg.value that is destinated to result posting
-  function upgrade_dr(uint256 id, uint256 tallie_reward) public payable {
+  /// @param _id Data request id
+  /// @param _tallieReward The quantity from msg.value that is destinated to result posting
+  function upgradeDataRequest(uint256 _id, uint256 _tallieReward) public payable {
     // Only allow if not claimed
-    requests[id].inclusion_reward += msg.value - tallie_reward;
-    requests[id].tallie_reward += tallie_reward;
+    requests[_id].inclusionReward += msg.value - _tallieReward;
+    requests[_id].tallieReward += _tallieReward;
   }
 
   // @dev Claim drs to be posted to Witnet by the node
-  /// @param ids Data request ids to be claimed
-  /// @param PoE PoE claiming eligibility
-  function claim_drs(uint256[] memory ids, bytes memory PoE) public {
-    uint256 current_epoch = block.number;
-    // PoE pleaseee
+  /// @param _ids Data request ids to be claimed
+  /// @param _poe PoE claiming eligibility
+  function claimDataRequests(uint256[] memory _ids, bytes memory _poe) public {
+    uint256 currentEpoch = block.number;
     uint256 index;
-    for (uint i = 0; i < ids.length; i++) {
-      index = ids[i];
-      if((requests[index].timestamp == 0 || current_epoch-requests[index].timestamp > 13) &&
-      requests[index].dr_hash==0 &&
-      requests[index].result.length==0){
-        requests[index].pkh_claim = msg.sender;
-        requests[index].timestamp = current_epoch;
-      }
-      else{
-        revert("One of the DR was already claimed. Espabila");
+    if(verifyPoe(_poe)){
+      for (uint i = 0; i < _ids.length; i++) {
+        index = _ids[i];
+        if((requests[index].timestamp == 0 || currentEpoch-requests[index].timestamp > 13) &&
+        requests[index].drHash==0 &&
+        requests[index].result.length==0){
+          requests[index].pkhClaim = msg.sender;
+          requests[index].timestamp = currentEpoch;
+        }
+        else{
+          revert("One of the DR was already claimed. Espabila");
+        }
       }
     }
   }
   // @dev Report DR inclusion in WBI
-  /// @param id DR id
-  /// @param poi Proof of Inclusion
-  /// @param block_hash Block hash in which the DR was included
-  function report_dr_inclusion (uint256 id, bytes memory poi, uint256 block_hash) public {
-    if (requests[id].dr_hash == 0){
-      if (verify_poi(poi)){
+  /// @param _id DR id
+  /// @param _poi Proof of Inclusion
+  /// @param _blockHash Block hash in which the DR was included
+  function reportDataRequestInclusion (uint256 _id, bytes memory _poi, uint256 _blockHash) public {
+    if (requests[_id].drHash == 0){
+      if (verifyPoi(_poi)){
         // This should be equal to tx_hash, derived from sha256(dr, dr_rest) (PoI[0])
-        requests[id].dr_hash = block_hash;
-        requests[id].pkh_claim.transfer(requests[id].inclusion_reward);
+        requests[_id].drHash = _blockHash;
+        requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
       }
     }
-    emit InclusionDataRequest(msg.sender, id);
+    emit InclusionDataRequest(msg.sender, _id);
   }
 
   // @dev Report result of DR in WBI
-  /// @param id DR id
-  /// @param poi Proof of Inclusion
-  /// @param block_hash hash of the block in which the result was inserted
-  /// @param result The actual result
-  function report_result (uint256 id, bytes memory poi, uint256 block_hash, bytes memory result) public {
-    if (requests[id].dr_hash!=0 && requests[id].result.length==0){
-      if (verify_poi(poi)){
-        requests[id].result = result;
-        msg.sender.transfer(requests[id].tallie_reward);
-        emit PostResult(msg.sender, id);
+  /// @param _id DR id
+  /// @param _poi Proof of Inclusion
+  /// @param _blockHash hash of the block in which the result was inserted
+  /// @param _result The actual result
+  function reportResult (uint256 _id, bytes memory _poi, uint256 _blockHash, bytes memory _result) public {
+    if (requests[_id].drHash!=0 && requests[_id].result.length==0){
+      if (verifyPoi(_poi)){
+        requests[_id].result = _result;
+        msg.sender.transfer(requests[_id].tallieReward);
+        emit PostResult(msg.sender, _id);
       }
     }
   }
 
   // @dev Read DR from WBI
-  /// @param id DR id
+  /// @param _id DR id
   /// @return The dr
-  function read_dr (uint256 id) public view returns(bytes memory){
-    return requests[id].dr;
+  function readDataRequest (uint256 _id) public view returns(bytes memory){
+    return requests[_id].dr;
   }
 
   // @dev Read result from WBI
-  /// @param id DR id
+  /// @param _id DR id
   /// @return The result of the DR
-  function read_result (uint256 id) public view returns(bytes memory){
-    return requests[id].result;
+  function readResult (uint256 _id) public view returns(bytes memory){
+    return requests[_id].result;
   }
 
-  function verify_poe(bytes memory poe) internal pure returns(bool){
+  function verifyPoe(bytes memory _poe) internal pure returns(bool){
     return true;
   }
-  function verify_poi(bytes memory poi) internal pure returns(bool){
+  function verifyPoi(bytes memory _poi) internal pure returns(bool){
     return true;
   }
 }
