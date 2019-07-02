@@ -109,7 +109,7 @@ contract("WBI", accounts => {
       })
       await waitForHash(txRelay)
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, resBytes, 1, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(id1, resBytes, 1, 1, {
         from: account2,
       })
 
@@ -196,7 +196,7 @@ contract("WBI", accounts => {
       })
       await waitForHash(tx2)
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(data1, resBytes, 1, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(data1, resBytes, 1, 1, {
         from: accounts[1],
       })
       await waitForHash(tx3)
@@ -232,7 +232,7 @@ contract("WBI", accounts => {
       })
       await waitForHash(tx2)
       // should fail to read blockhash from a non-existing block
-      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(data1, resBytes, 2, {
+      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(data1, resBytes, 2, 2, {
         from: accounts[1],
       }), "Non-existing block")
     })

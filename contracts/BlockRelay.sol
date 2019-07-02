@@ -39,6 +39,7 @@ contract BlockRelay {
 
   // @dev Read the DR merkle root
   /// @param _blockHash Hash of the block header
+  /// @return merkle root for the DR in the block header
   function readDrMerkleRoot(uint256 _blockHash) public view returns(uint256 drMerkleRoot) {
     if(blocks[_blockHash].dr_hash_merkle_root==0) {
       revert("Non-existing block");
@@ -51,6 +52,7 @@ contract BlockRelay {
 
   // @dev Read the tally merkle root
   /// @param _blockHash Hash of the block header
+  /// merkle root for the tallies in the block header
   function readTallyMerkleRoot(uint256 _blockHash) public view returns(uint256 tallyMerkleRoot) {
     if(blocks[_blockHash].tally_hash_merkle_root==0) {
       revert("Non-existing block");

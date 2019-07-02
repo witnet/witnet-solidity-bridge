@@ -87,12 +87,13 @@ contract WitnetBridgeInterface {
   /// @param _id DR id
   /// @param _poi Proof of Inclusion
   /// @param _blockHash Block hash in which the DR was included
-  function reportDataRequestInclusion (uint256 _id, bytes memory _poi, uint256 _blockHash) public {
+  /// @param _drTxHash Hash of the data request transaction (TODO to be removed in the future)
+  function reportDataRequestInclusion (uint256 _id, bytes memory _poi, uint256 _blockHash, uint256 _drTxHash) public {
     if (requests[_id].drHash == 0){
       uint256 drRoot = blockRelay.readDrMerkleRoot(_blockHash);
       if (verifyPoi(_poi, drRoot, drRoot)){
         // This should be equal to tx_hash, derived from sha256(dr, dr_rest) (PoI[0])
-        requests[_id].drHash = _blockHash;
+        requests[_id].drHash = _drTxHash;
         requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
       }
     }

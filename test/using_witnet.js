@@ -109,7 +109,7 @@ contract("Using witnet", accounts => {
       })
 
       // Show PoI of Data Request Inclusion
-      let tx3 = wbi.reportDataRequestInclusion(expectedId, web3.utils.utf8ToHex("PoI"), expectedBlockHash)
+      let tx3 = wbi.reportDataRequestInclusion(expectedId, web3.utils.utf8ToHex("PoI"), expectedBlockHash, expectedBlockHash)
       await waitForHash(tx3)
 
       let drInfo3 = await wbi.requests(expectedId)
