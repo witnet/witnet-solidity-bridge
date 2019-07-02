@@ -1,4 +1,5 @@
 const WBI = artifacts.require("WitnetBridgeInterface")
+const BlockRelay = artifacts.require("BlockRelay")
 const truffleAssert = require("truffle-assertions")
 const sha = require("js-sha256")
 
@@ -7,8 +8,10 @@ var wait = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 contract("WBI", accounts => {
   describe("WBI test suite", () => {
     let wbiInstance
+    let blockRelay
     beforeEach(async () => {
-      wbiInstance = await WBI.new()
+      blockRelay = await BlockRelay.deployed()
+      wbiInstance = await WBI.new(blockRelay.address)
     })
 
     it("should allow post and read drs", async () => {
@@ -100,6 +103,12 @@ contract("WBI", accounts => {
         from: account2,
       })
       await waitForHash(tx2)
+
+      const txRelay = blockRelay.postNewBlock(1, 1, 1, {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay)
+
       const tx3 = wbiInstance.reportDataRequestInclusion(id1, resBytes, 1, {
         from: account2,
       })
@@ -198,6 +207,34 @@ contract("WBI", accounts => {
       truffleAssert.eventEmitted(tx4, "PostResult", (ev) => {
         return ev[1].eq(web3.utils.toBN(data1))
       })
+    })
+    it("should revert the transacation when trying to read from a non-existent block", async () => {
+      const drBytes = web3.utils.fromAscii("This is a DR")
+      const resBytes = web3.utils.fromAscii("This is a result")
+      const halfEther = web3.utils.toWei("0.5", "ether")
+
+      const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      const txHash1 = await waitForHash(tx1)
+      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      let data1 = txReceipt1.logs[0].data
+      assert.equal(web3.utils.hexToNumberString(data1), web3.utils.hexToNumberString(sha.sha256("This is a DR")))
+      // Subscribe to reportResult event
+      wbiInstance.PostResult({}, async (_error, event) => {
+        let readresBytes1 = await wbiInstance.readResult.call(data1)
+        assert.equal(resBytes, readresBytes1)
+      })
+
+      const tx2 = wbiInstance.claimDataRequests([data1], resBytes, {
+        from: accounts[1],
+      })
+      await waitForHash(tx2)
+      // should fail to read blockhash from a non-existing block
+      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(data1, resBytes, 2, {
+        from: accounts[1],
+      }), "Non-existing block")
     })
   })
 })

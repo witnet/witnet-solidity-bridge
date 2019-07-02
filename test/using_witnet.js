@@ -1,13 +1,19 @@
 const UsingWitnet = artifacts.require("UsingWitnet")
 const WBI = artifacts.require("WitnetBridgeInterface")
+const BlockRelay = artifacts.require("BlockRelay")
+
 const sha = require("js-sha256")
 
 contract("Using witnet", accounts => {
   describe("Using witnet test suite", () => {
     let usingWitnet
     let wbi
+    let blockRelay
     before(async () => {
-      wbi = await WBI.deployed()
+      blockRelay = await BlockRelay.deployed({
+        from: accounts[0],
+      })
+      wbi = await WBI.deployed(blockRelay.address)
       usingWitnet = await UsingWitnet.deployed()
     })
 
@@ -96,6 +102,11 @@ contract("Using witnet", accounts => {
       let timestamp = drInfo2.timestamp
       assert(timestamp)
       assert.equal(pkh, accounts[0])
+
+      // Report block
+      blockRelay.postNewBlock(expectedBlockHash, expectedBlockHash, expectedBlockHash, {
+        from: accounts[0],
+      })
 
       // Show PoI of Data Request Inclusion
       let tx3 = wbi.reportDataRequestInclusion(expectedId, web3.utils.utf8ToHex("PoI"), expectedBlockHash)
