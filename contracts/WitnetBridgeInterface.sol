@@ -1,5 +1,8 @@
 pragma solidity ^0.5.0;
 
+import "./BlockRelay.sol";
+
+
 contract WitnetBridgeInterface {
 
   struct DataRequest {
@@ -12,11 +15,17 @@ contract WitnetBridgeInterface {
     address payable pkhClaim;
   }
 
+  BlockRelay blockRelay;
+
   mapping (uint256 => DataRequest) public requests;
 
   event PostDataRequest(address indexed _from, uint256 _id);
   event InclusionDataRequest(address indexed _from, uint256 _id);
   event PostResult(address indexed _from, uint256 _id);
+
+  constructor (address _blockRelayAddress) public {
+    blockRelay = BlockRelay(_blockRelayAddress);
+  }
 
   // @dev Post DR to be resolved by witnet
   /// @param _dr Data request body
@@ -80,7 +89,8 @@ contract WitnetBridgeInterface {
   /// @param _blockHash Block hash in which the DR was included
   function reportDataRequestInclusion (uint256 _id, bytes memory _poi, uint256 _blockHash) public {
     if (requests[_id].drHash == 0){
-      if (verifyPoi(_poi)){
+      uint256 drRoot = blockRelay.readDrMerkleRoot(_blockHash);
+      if (verifyPoi(_poi, drRoot, drRoot)){
         // This should be equal to tx_hash, derived from sha256(dr, dr_rest) (PoI[0])
         requests[_id].drHash = _blockHash;
         requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
@@ -96,7 +106,8 @@ contract WitnetBridgeInterface {
   /// @param _result The actual result
   function reportResult (uint256 _id, bytes memory _poi, uint256 _blockHash, bytes memory _result) public {
     if (requests[_id].drHash!=0 && requests[_id].result.length==0){
-      if (verifyPoi(_poi)){
+      uint256 tallie_root = blockRelay.readTallyMerkleRoot(_blockHash);
+      if (verifyPoi(_poi, tallie_root, tallie_root)){
         requests[_id].result = _result;
         msg.sender.transfer(requests[_id].tallieReward);
         emit PostResult(msg.sender, _id);
@@ -121,7 +132,8 @@ contract WitnetBridgeInterface {
   function verifyPoe(bytes memory _poe) internal pure returns(bool){
     return true;
   }
-  function verifyPoi(bytes memory _poi) internal pure returns(bool){
+
+  function verifyPoi(bytes memory _poi, uint256 root, uint256 data) internal pure returns(bool){
     return true;
   }
 }
