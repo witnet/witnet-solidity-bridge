@@ -84,6 +84,10 @@ contract("WBI", accounts => {
     it("should allow post and read result", async () => {
       var account1 = accounts[0]
       var account2 = accounts[1]
+      var blockHeader = 1
+      var drHash = 1
+      var tallyHash = 1
+      var dummySybling = 1
       let actualBalance1 = await web3.eth.getBalance(account1)
       let actualBalance2 = await web3.eth.getBalance(account2)
 
@@ -104,12 +108,12 @@ contract("WBI", accounts => {
       })
       await waitForHash(tx2)
 
-      const txRelay = blockRelay.postNewBlock(1, 1, 1, {
+      const txRelay = blockRelay.postNewBlock(blockHeader, drHash, tallyHash, {
         from: accounts[0],
       })
       await waitForHash(txRelay)
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, resBytes, 1, 1, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader, {
         from: account2,
       })
 
@@ -117,7 +121,7 @@ contract("WBI", accounts => {
       const afterBalance2 = await web3.eth.getBalance(account2)
       assert(parseInt(afterBalance2, 10) > parseInt(actualBalance2, 10))
       // report result
-      let restx = wbiInstance.reportResult(id1, resBytes, 1, resBytes, { from: account2 })
+      let restx = wbiInstance.reportResult(id1, [dummySybling], 1, blockHeader, resBytes, { from: account2 })
       await waitForHash(restx)
 
       let afterBalance1 = await web3.eth.getBalance(account1)
@@ -176,6 +180,8 @@ contract("WBI", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
+      var blockHeader = 1
+      var dummySybling = 1
 
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
         from: accounts[0],
@@ -196,12 +202,12 @@ contract("WBI", accounts => {
       })
       await waitForHash(tx2)
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(data1, resBytes, 1, 1, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [dummySybling], 1, blockHeader, {
         from: accounts[1],
       })
       await waitForHash(tx3)
 
-      const tx4 = await wbiInstance.reportResult(data1, resBytes, 1, resBytes)
+      const tx4 = await wbiInstance.reportResult(data1, [dummySybling], 1, blockHeader, resBytes)
       // wait for the async method to finish
       await wait(500)
       truffleAssert.eventEmitted(tx4, "PostResult", (ev) => {
@@ -212,6 +218,8 @@ contract("WBI", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
+      var fakeBlockHeader = 2;
+      var dummySybling = 1
 
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
         from: accounts[0],
@@ -232,7 +240,7 @@ contract("WBI", accounts => {
       })
       await waitForHash(tx2)
       // should fail to read blockhash from a non-existing block
-      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(data1, resBytes, 2, 2, {
+      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(data1, [dummySybling], 2, fakeBlockHeader, {
         from: accounts[1],
       }), "Non-existing block")
     })

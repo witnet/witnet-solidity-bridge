@@ -83,32 +83,36 @@ contract WitnetBridgeInterface {
       }
     }
   }
+
   // @dev Report DR inclusion in WBI
   /// @param _id DR id
   /// @param _poi Proof of Inclusion
+  /// @param _index The index in the merkle tree
   /// @param _blockHash Block hash in which the DR was included
-  /// @param _drTxHash Hash of the data request transaction (TODO to be removed in the future)
-  function reportDataRequestInclusion (uint256 _id, bytes memory _poi, uint256 _blockHash, uint256 _drTxHash) public {
+  function reportDataRequestInclusion (uint256 _id, uint256[] memory _poi, uint256 _index, uint256 _blockHash) public {
     if (requests[_id].drHash == 0){
       uint256 drRoot = blockRelay.readDrMerkleRoot(_blockHash);
-      if (verifyPoi(_poi, drRoot, drRoot)){
-        // This should be equal to tx_hash, derived from sha256(dr, dr_rest) (PoI[0])
-        requests[_id].drHash = _drTxHash;
+      uint256 drHash = uint256(sha256(abi.encodePacked(_id, _poi[0])));
+      if (verifyPoi(_poi, drRoot, _index, _id)){
+        requests[_id].drHash = drHash;
         requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
+        emit InclusionDataRequest(msg.sender, _id);
       }
     }
-    emit InclusionDataRequest(msg.sender, _id);
   }
 
   // @dev Report result of DR in WBI
   /// @param _id DR id
-  /// @param _poi Proof of Inclusion
+  /// @param _poi Proof of Inclusion as a vector of hashes
+  /// @param _index The index in the merkle tree
   /// @param _blockHash hash of the block in which the result was inserted
   /// @param _result The actual result
-  function reportResult (uint256 _id, bytes memory _poi, uint256 _blockHash, bytes memory _result) public {
+  function reportResult (uint256 _id, uint256[] memory _poi, uint256 _index, uint256 _blockHash, bytes memory _result) public {
     if (requests[_id].drHash!=0 && requests[_id].result.length==0){
-      uint256 tallie_root = blockRelay.readTallyMerkleRoot(_blockHash);
-      if (verifyPoi(_poi, tallie_root, tallie_root)){
+      uint256 tallyRoot = blockRelay.readTallyMerkleRoot(_blockHash);
+      // this should leave it ready for PoI
+      uint256 resHash = uint256(sha256(abi.encodePacked(uint256(sha256(_result)), requests[_id].drHash)));
+      if (verifyPoi(_poi, tallyRoot, _index, resHash)){
         requests[_id].result = _result;
         msg.sender.transfer(requests[_id].tallieReward);
         emit PostResult(msg.sender, _id);
@@ -134,7 +138,7 @@ contract WitnetBridgeInterface {
     return true;
   }
 
-  function verifyPoi(bytes memory _poi, uint256 root, uint256 data) internal pure returns(bool){
+  function verifyPoi(uint256[] memory _poi, uint256 _root, uint256 _index, uint256 element) internal pure returns(bool){
     return true;
   }
 }

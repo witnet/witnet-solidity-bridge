@@ -47,7 +47,6 @@ contract BlockRelay {
     else{
       drMerkleRoot = blocks[_blockHash].dr_hash_merkle_root;
     }
-
   }
 
   // @dev Read the tally merkle root
