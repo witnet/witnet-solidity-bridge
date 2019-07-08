@@ -31,6 +31,7 @@
     "truffle-hdwallet-provider": "^1.0.7"
   },
   "devDependencies": {
+    "openzeppelin-solidity": "2.3.0",
     "js-sha256": "^0.9.0",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",

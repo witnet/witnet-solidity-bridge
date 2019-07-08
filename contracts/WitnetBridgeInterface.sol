@@ -1,9 +1,11 @@
 pragma solidity ^0.5.0;
 
 import "./BlockRelay.sol";
-
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract WitnetBridgeInterface {
+
+  using SafeMath for uint256;
 
   struct DataRequest {
     bytes dr;
@@ -78,7 +80,7 @@ contract WitnetBridgeInterface {
           requests[index].timestamp = currentEpoch;
         }
         else{
-          revert("One of the DR was already claimed. Espabila");
+          revert("One of the DR was already claimed");
         }
       }
     }
