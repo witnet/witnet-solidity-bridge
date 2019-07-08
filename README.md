@@ -14,61 +14,80 @@ The WitnetBridgeInterface provides the following methods:
   - _description_: posts a data request in the WBI to be resolved 
   in Witnet with total reward specified in msg.value.
   - _inputs_:
-    - _dr_: the data request bytes.
-    - _tallie_reward_: the reward from the value sent to the contract
+    - *_dr*: the data request bytes.
+    - *_tallyReward*: the reward from the value sent to the contract
      that is destinated to reward the result inclusion.
   - output:
-    - _id_: the id of the dr.
+    - *_id*: the id of the dr.
 
 - **upgradeDataRequest**:
-  - _description_: updates the total reward of the data request by 
+  - *description*: updates the total reward of the data request by 
   adding more value to it.
-  - _inputs_:
-    - id: the id of the data request.
-    - _tallie_reward_: the new reward 
+  - *_inputs*:
+    - *_id*: the id of the data request.
+    - *_tallyReward*: the new reward 
 
 - **claimDataRequests**:
   - _description_: claims the data requests specified by the input ids
    and assigns the potential data request inclusion reward to the 
    claiming pkh.
   - _inputs_:
-    - _ids_: the ids of the data request.
-    - _poe_: the proof of eligibility of the bridge node to claim 
+    - *_ids*: the ids of the data request.
+    - *_poe*: the proof of eligibility of the bridge node to claim 
     data requests
 
 - **reportDataRequestInclusion**:
   - _description_: reports the proof of inclusion to unlock the 
   inclusion reward to the claiming pkh.
   - _inputs_:
-    - _id_: the id of the data request.
-    - _poi_: the proof of inclusion of the data requests in one block 
+    - *_id*: the id of the data request.
+    - *_poi*: the proof of inclusion of the data requests in one block 
     in Witnet.
-    - *block_hash*: the hash of the block in which the data request 
+    - *_index*: index in the merkle tree.
+    - *_blockHash*: the hash of the block in which the data request 
     was inserted.
 - **reportResult**:
   - _description_: reports the result of a data request in Witnet.
   - _inputs_:
-    - _id_: the id of the data request.
-    - _poi_: the proof of inclusion of the result in one block in Witnet.
-    - *block_hash*: the hash of the block in which the result (tallie) 
+    - *_id*: the id of the data request.
+    - *_poi*: the proof of inclusion of the result in one block in Witnet.
+    - *_index*: index in the merkle tree.
+    - *_blockHash*: the hash of the block in which the result (tally) 
     was inserted.
-    - *result*: the result itself.
+    - *_result*: the result itself.
 - **readDataRequest**:
-  - *description*: reads the bytes of one dr in the WBI.
-  - *inputs*:
-    - *id*: the id of the data request.
-  - *output*:
+  - _description_: reads the bytes of one dr in the WBI.
+  - _inputs_:
+    - *_id*: the id of the data request.
+  - _output_:
     - the data request bytes.
 - **readResult**:
-  - *description*: reads the result of one dr in the WBI.
-  - *inputs*:
-    - *id*: the id of the data request.
-  - *output*:
+  - _description_: reads the result of one dr in the WBI.
+  - _inputs_:
+    - *_id*: the id of the data request.
+  - _output_:
     - the result of the data request.
-- **verifyPoe**:
-  - TBD
-- **verifyPoi**:
-  - TBD
+
+The Block Relay has the following methods:
+
+- **postNewBlock**:
+  - _description_: post new block in the block relay.
+  - _inputs_:
+    - *_blockHash*: Hash of the block header.
+    - *_drMerkleRoot*: merkle root belonging to the data requests.
+    - *_tallyMerkleRoot*: merkle root belonging to the tallies.
+- **readDrMerkleRoot**:
+  - _description_: read the DR merkle root.
+  - _inputs_:
+    - *_blockHash*: hash of the block header.
+  - _output_:
+    - merkle root for the DR in the block header.
+- **readTallyMerkleRoot**:
+  - _description_: read the tally merkle root.
+  - _inputs_:
+    - *_blockHash*: hash of the block header.
+  - _output_:
+    - merkle root for the tallies in the block header.
   
 The UsingWitnet provides the following methods:
 
@@ -77,33 +96,32 @@ The UsingWitnet provides the following methods:
   data request in the WBI to be resolved in Witnet with total reward 
   specified in msg.value.
   - _inputs_:
-    - _dr_: the data request bytes.
-    - _tallie_reward_: the reward from the value sent to the contract
+    - *_dr*: the data request bytes.
+    - *_tallyReward*: the reward from the value sent to the contract
      that is destinated to reward the result inclusion.
-  - output:
-    - _id_: the id of the dr.
+  - _output_:
+    - *_id*: the id of the dr.
 
 - **witnetUpgradeDataRequest**:
   - _description_: call to the WBI method `upgradeDataRequest` to updates 
   the total reward of the data request by adding more value to it.
   - _inputs_:
-    - id: the id of the data request.
-    - _tallie_reward_: the new reward 
+    - *_id*: the id of the data request.
+    - *_tallyReward*: the new reward 
 
 - **witnetReadResult**:
-  - *description*: call to the WBI method `readResult` to reads
+  - _description_: call to the WBI method `readResult` to reads
    the result of one dr in the WBI.
-  - *inputs*:
-    - *id*: the id of the data request.
-  - *output*:
+  - _inputs_:
+    - *_id*: the id of the data request.
+  - _output_:
     - the result of the data request.
 
 ## Known limitations:
 
+- `block relay` is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to achieve a decentralized block header reporting.
 - `verify_poe` is still empty. Proof of eligibility verification trough
  VRF should be implemented.
-
-- `block relay` is missing.
 
 - `verify_poi` is still empty. Once `block relay` is ready, Proof of 
 inclusion should be implemented.

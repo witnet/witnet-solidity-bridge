@@ -45,7 +45,7 @@ contract("Using witnet", accounts => {
 
       let drInfo = await wbi.requests(expectedId)
       let inclusionReward = drInfo.inclusionReward
-      let tallyReward = drInfo.tallieReward
+      let tallyReward = drInfo.tallyReward
       assert.equal("70", inclusionReward.toString())
       assert.equal("30", tallyReward.toString())
 
@@ -73,7 +73,7 @@ contract("Using witnet", accounts => {
       await waitForHash(tx1)
       let drInfo = await wbi.requests(expectedId)
       let inclusionReward = drInfo.inclusionReward
-      let tallyReward = drInfo.tallieReward
+      let tallyReward = drInfo.tallyReward
       assert.equal("140", inclusionReward.toString())
       assert.equal("60", tallyReward.toString())
 
@@ -97,7 +97,7 @@ contract("Using witnet", accounts => {
       let drHashRoot = web3.utils.hexToBytes("0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8")
       var hash = sha.sha256.create()
       hash.update(web3.utils.hexToBytes("0xba6357c24b3b0e9274b71e480b660da3aa11cb7e7a08046f9d244f31adc69878"))
-      hash.update(web3.utils.hexToBytes("0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"))
+      hash.update(drHashRoot)
       let expectedDrHash = "0x" + hash.hex()
       // Claim Data Request Inclusion
       let tx2 = wbi.claimDataRequests([expectedId], web3.utils.utf8ToHex("PoE"))

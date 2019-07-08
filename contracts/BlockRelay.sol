@@ -2,11 +2,14 @@ pragma solidity ^0.5.0;
 
 contract BlockRelay {
 
-  struct MerkleRoots {
-    uint256 dr_hash_merkle_root;
-    uint256 tally_hash_merkle_root;
-  }
 
+  struct MerkleRoots {
+    // hash of the merkle root of the DRs in Witnet
+    uint256 drHashMerkleRoot;
+    // hash of the merkle root of the tallies in Witnet
+    uint256 tallyHashMerkleRoot;
+  }
+  // Address of the block pusher
   address witnet;
 
   mapping (uint256 => MerkleRoots) public blocks;
@@ -14,6 +17,7 @@ contract BlockRelay {
   event NewBlock(address indexed _from, uint256 _id);
 
   constructor() public{
+    // Only the contract deployer is able to push blocks
     witnet = msg.sender;
   }
 
@@ -28,12 +32,12 @@ contract BlockRelay {
   /// @param _tallyMerkleRoot Merkle root belonging to the tallies
   function postNewBlock(uint256 _blockHash, uint256 _drMerkleRoot, uint256 _tallyMerkleRoot) public onlyWitnet {
     uint256 id = _blockHash;
-    if(blocks[id].dr_hash_merkle_root!=0) {
+    if(blocks[id].drHashMerkleRoot!=0) {
       revert("Existing block");
     }
     else{
-      blocks[id].dr_hash_merkle_root = _drMerkleRoot;
-      blocks[id].tally_hash_merkle_root = _tallyMerkleRoot;
+      blocks[id].drHashMerkleRoot = _drMerkleRoot;
+      blocks[id].tallyHashMerkleRoot = _tallyMerkleRoot;
     }
   }
 
@@ -41,11 +45,11 @@ contract BlockRelay {
   /// @param _blockHash Hash of the block header
   /// @return merkle root for the DR in the block header
   function readDrMerkleRoot(uint256 _blockHash) public view returns(uint256 drMerkleRoot) {
-    if(blocks[_blockHash].dr_hash_merkle_root==0) {
+    if(blocks[_blockHash].drHashMerkleRoot==0) {
       revert("Non-existing block");
     }
     else{
-      drMerkleRoot = blocks[_blockHash].dr_hash_merkle_root;
+      drMerkleRoot = blocks[_blockHash].drHashMerkleRoot;
     }
   }
 
@@ -53,11 +57,11 @@ contract BlockRelay {
   /// @param _blockHash Hash of the block header
   /// merkle root for the tallies in the block header
   function readTallyMerkleRoot(uint256 _blockHash) public view returns(uint256 tallyMerkleRoot) {
-    if(blocks[_blockHash].tally_hash_merkle_root==0) {
+    if(blocks[_blockHash].tallyHashMerkleRoot==0) {
       revert("Non-existing block");
     }
     else{
-      tallyMerkleRoot = blocks[_blockHash].tally_hash_merkle_root;
+      tallyMerkleRoot = blocks[_blockHash].tallyHashMerkleRoot;
     }
   }
 }

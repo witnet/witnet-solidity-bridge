@@ -8,7 +8,7 @@ contract WitnetBridgeInterface {
   struct DataRequest {
     bytes dr;
     uint256 inclusionReward;
-    uint256 tallieReward;
+    uint256 tallyReward;
     bytes result;
     uint256 timestamp;
     uint256 drHash;
@@ -29,22 +29,22 @@ contract WitnetBridgeInterface {
 
   // @dev Post DR to be resolved by witnet
   /// @param _dr Data request body
-  /// @param _tallieReward The quantity from msg.value that is destinated to result posting
+  /// @param _tallyReward The quantity from msg.value that is destinated to result posting
   /// @return _id indicating sha256(id)
-  function postDataRequest(bytes memory _dr, uint256 _tallieReward) public payable returns(uint256 _id) {
-    if (msg.value < _tallieReward){
-      revert("You should send a greater amount than the one sent as tallie");
+  function postDataRequest(bytes memory _dr, uint256 _tallyReward) public payable returns(uint256 _id) {
+    if (msg.value < _tallyReward){
+      revert("You should send a greater amount than the one sent as tally");
     }
     _id = uint256(sha256(_dr));
     if(requests[_id].dr.length != 0) {
-      requests[_id].tallieReward += _tallieReward;
-      requests[_id].inclusionReward += msg.value - _tallieReward;
+      requests[_id].tallyReward += _tallyReward;
+      requests[_id].inclusionReward += msg.value - _tallyReward;
       return _id;
     }
 
     requests[_id].dr = _dr;
-    requests[_id].inclusionReward = msg.value - _tallieReward;
-    requests[_id].tallieReward = _tallieReward;
+    requests[_id].inclusionReward = msg.value - _tallyReward;
+    requests[_id].tallyReward = _tallyReward;
     requests[_id].result = "";
     requests[_id].timestamp = 0;
     requests[_id].drHash = 0;
@@ -55,11 +55,11 @@ contract WitnetBridgeInterface {
 
   // @dev Upgrade DR to be resolved by witnet
   /// @param _id Data request id
-  /// @param _tallieReward The quantity from msg.value that is destinated to result posting
-  function upgradeDataRequest(uint256 _id, uint256 _tallieReward) public payable {
+  /// @param _tallyReward The quantity from msg.value that is destinated to result posting
+  function upgradeDataRequest(uint256 _id, uint256 _tallyReward) public payable {
     // Only allow if not claimed
-    requests[_id].inclusionReward += msg.value - _tallieReward;
-    requests[_id].tallieReward += _tallieReward;
+    requests[_id].inclusionReward += msg.value - _tallyReward;
+    requests[_id].tallyReward += _tallyReward;
   }
 
   // @dev Claim drs to be posted to Witnet by the node
@@ -114,7 +114,7 @@ contract WitnetBridgeInterface {
       uint256 resHash = uint256(sha256(abi.encodePacked(uint256(sha256(_result)), requests[_id].drHash)));
       if (verifyPoi(_poi, tallyRoot, _index, resHash)){
         requests[_id].result = _result;
-        msg.sender.transfer(requests[_id].tallieReward);
+        msg.sender.transfer(requests[_id].tallyReward);
         emit PostResult(msg.sender, _id);
       }
     }
