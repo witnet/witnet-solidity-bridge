@@ -129,6 +129,26 @@ inclusion should be implemented.
 
 ## Usage
 
+`UsingWitnet.sol` contract can be used directly by inheritance or by instantiating it.
+
+The following code explains how to use it.
+
+```solidity
+pragma solidity ^0.5.0;
+
+import "./UsingWitnet.sol";
+
+contract Example is UsingWitnet {
+
+  uint256 drCost = 10;
+  uint256 tallyReward = 5;
+
+  function myOwnDrPost(bytes memory dr) public view returns(uint256 id) {
+    id =  witnetPostDataRequest.value(drCost)(dr, tallyReward);
+  }
+}
+```
+
 ## License
 
 `witnet-ethereum-bridge` is published under the [MIT license][license].
