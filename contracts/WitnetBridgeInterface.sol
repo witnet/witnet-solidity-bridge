@@ -25,6 +25,32 @@ contract WitnetBridgeInterface {
   event InclusionDataRequest(address indexed _from, uint256 _id);
   event PostResult(address indexed _from, uint256 _id);
 
+  //ensures the reward is not greater than the value
+  modifier payingEnough(uint256 _value, uint256 _tally) {
+    require(_value >= _tally, "You should send a greater amount than the one sent as tally");
+    _;
+  }
+  //ensures the poe is valid
+  modifier poeValid(bytes memory _poe) {
+    require(verifyPoe(_poe) == true, "Not a valid PoE");
+    _;
+  }
+  //ensures the DR inclusion has not been reported
+  modifier drNotIncluded(uint256 _id) {
+    require(requests[_id].drHash == 0, "DR already included");
+    _;
+  }
+  //ensures the DR inclusion has been reported
+  modifier drIncluded(uint256 _id) {
+    require(requests[_id].drHash != 0, "DR not yet Included");
+    _;
+  }
+  //ensures the result has not been reported
+  modifier resultNotIncluded(uint256 _id) {
+    require(requests[_id].result.length == 0, "Result already included");
+    _;
+  }
+
   constructor (address _blockRelayAddress) public {
     blockRelay = BlockRelay(_blockRelayAddress);
   }
@@ -33,10 +59,11 @@ contract WitnetBridgeInterface {
   /// @param _dr Data request body
   /// @param _tallyReward The quantity from msg.value that is destinated to result posting
   /// @return _id indicating sha256(id)
-  function postDataRequest(bytes memory _dr, uint256 _tallyReward) public payable returns(uint256 _id) {
-    if (msg.value < _tallyReward){
-      revert("You should send a greater amount than the one sent as tally");
-    }
+  function postDataRequest(bytes memory _dr, uint256 _tallyReward)
+    public
+    payable
+    payingEnough(msg.value, _tallyReward)
+  returns(uint256 _id) {
     _id = uint256(sha256(_dr));
     if(requests[_id].dr.length != 0) {
       requests[_id].tallyReward += _tallyReward;
@@ -58,8 +85,11 @@ contract WitnetBridgeInterface {
   // @dev Upgrade DR to be resolved by witnet
   /// @param _id Data request id
   /// @param _tallyReward The quantity from msg.value that is destinated to result posting
-  function upgradeDataRequest(uint256 _id, uint256 _tallyReward) public payable {
-    // Only allow if not claimed
+  function upgradeDataRequest(uint256 _id, uint256 _tallyReward)
+    public
+    payable
+    payingEnough(msg.value, _tallyReward)
+  {
     requests[_id].inclusionReward += msg.value - _tallyReward;
     requests[_id].tallyReward += _tallyReward;
   }
@@ -67,21 +97,22 @@ contract WitnetBridgeInterface {
   // @dev Claim drs to be posted to Witnet by the node
   /// @param _ids Data request ids to be claimed
   /// @param _poe PoE claiming eligibility
-  function claimDataRequests(uint256[] memory _ids, bytes memory _poe) public {
+  function claimDataRequests(uint256[] memory _ids, bytes memory _poe)
+    public
+    poeValid(_poe)
+  {
     uint256 currentEpoch = block.number;
     uint256 index;
-    if(verifyPoe(_poe)){
-      for (uint i = 0; i < _ids.length; i++) {
-        index = _ids[i];
-        if((requests[index].timestamp == 0 || currentEpoch-requests[index].timestamp > 13) &&
-        requests[index].drHash==0 &&
-        requests[index].result.length==0){
-          requests[index].pkhClaim = msg.sender;
-          requests[index].timestamp = currentEpoch;
-        }
-        else{
-          revert("One of the DR was already claimed");
-        }
+    for (uint i = 0; i < _ids.length; i++) {
+      index = _ids[i];
+      if((requests[index].timestamp == 0 || currentEpoch-requests[index].timestamp > 13) &&
+      requests[index].drHash == 0 &&
+      requests[index].result.length == 0){
+        requests[index].pkhClaim = msg.sender;
+        requests[index].timestamp = currentEpoch;
+      }
+      else{
+        revert("One of the DR was already claimed");
       }
     }
   }
@@ -91,15 +122,24 @@ contract WitnetBridgeInterface {
   /// @param _poi Proof of Inclusion
   /// @param _index The index in the merkle tree
   /// @param _blockHash Block hash in which the DR was included
-  function reportDataRequestInclusion (uint256 _id, uint256[] memory _poi, uint256 _index, uint256 _blockHash) public {
-    if (requests[_id].drHash == 0){
-      uint256 drRoot = blockRelay.readDrMerkleRoot(_blockHash);
-      uint256 drHash = uint256(sha256(abi.encodePacked(_id, _poi[0])));
-      if (verifyPoi(_poi, drRoot, _index, _id)){
-        requests[_id].drHash = drHash;
-        requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
-        emit InclusionDataRequest(msg.sender, _id);
-      }
+  function reportDataRequestInclusion (
+    uint256 _id,
+    uint256[] memory _poi,
+    uint256 _index,
+    uint256 _blockHash
+    )
+    public
+    drNotIncluded(_id)
+ {
+    uint256 drRoot = blockRelay.readDrMerkleRoot(_blockHash);
+    uint256 drHash = uint256(sha256(abi.encodePacked(_id, _poi[0])));
+    if (verifyPoi(_poi, drRoot, _index, _id)){
+      requests[_id].drHash = drHash;
+      requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
+      emit InclusionDataRequest(msg.sender, _id);
+    }
+    else{
+      revert("Invalid PoI");
     }
   }
 
@@ -109,16 +149,27 @@ contract WitnetBridgeInterface {
   /// @param _index The index in the merkle tree
   /// @param _blockHash hash of the block in which the result was inserted
   /// @param _result The actual result
-  function reportResult (uint256 _id, uint256[] memory _poi, uint256 _index, uint256 _blockHash, bytes memory _result) public {
-    if (requests[_id].drHash!=0 && requests[_id].result.length==0){
-      uint256 tallyRoot = blockRelay.readTallyMerkleRoot(_blockHash);
-      // this should leave it ready for PoI
-      uint256 resHash = uint256(sha256(abi.encodePacked(uint256(sha256(_result)), requests[_id].drHash)));
-      if (verifyPoi(_poi, tallyRoot, _index, resHash)){
-        requests[_id].result = _result;
-        msg.sender.transfer(requests[_id].tallyReward);
-        emit PostResult(msg.sender, _id);
-      }
+  function reportResult (
+    uint256 _id,
+    uint256[] memory _poi,
+    uint256 _index,
+    uint256 _blockHash,
+    bytes memory _result
+    )
+    public
+    drIncluded(_id)
+    resultNotIncluded(_id)
+ {
+    uint256 tallyRoot = blockRelay.readTallyMerkleRoot(_blockHash);
+    // this should leave it ready for PoI
+    uint256 resHash = uint256(sha256(abi.encodePacked(uint256(sha256(_result)), requests[_id].drHash)));
+    if (verifyPoi(_poi, tallyRoot, _index, resHash)){
+      requests[_id].result = _result;
+      msg.sender.transfer(requests[_id].tallyReward);
+      emit PostResult(msg.sender, _id);
+    }
+    else{
+      revert("Invalid PoI");
     }
   }
 
