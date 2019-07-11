@@ -2,8 +2,6 @@ pragma solidity ^0.5.0;
 
 import "./WitnetBridgeInterface.sol";
 
-
-
 /**
  * @title The UsingWitnet contract
  * @notice Contract writers can inherit this contract in order to create requests for the
@@ -17,8 +15,6 @@ contract UsingWitnet{
   * @notice Include an address to specify the WitnetBridgeInterface
   * @param _wbi WitnetBridgeInterface address
   */
-  // TODO: Remove this constructor to allow to child contracts define
-  // its own constructor and use another way to include the WBI address
   constructor (address _wbi) public {
     wbi = WitnetBridgeInterface(_wbi);
   }

@@ -218,7 +218,7 @@ contract("WBI", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
-      var fakeBlockHeader = 2;
+      var fakeBlockHeader = 2
       var dummySybling = 1
 
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
@@ -292,8 +292,6 @@ contract("WBI", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
       const resBytes = web3.utils.fromAscii("This is a result")
       var blockHeader = 1
-      var drHash = 1
-      var tallyHash = 1
       var dummySybling = 1
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
@@ -355,7 +353,7 @@ contract("WBI", accounts => {
         from: accounts[1],
       })
       await waitForHash(tx2)
-      
+
       const tx3 = wbiInstance.reportDataRequestInclusion(data1, [dummySybling], 1, blockHeader, {
         from: accounts[0],
       })

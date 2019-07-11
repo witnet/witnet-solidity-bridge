@@ -1,7 +1,8 @@
 # witnet-ethereum-bridge [![](https://travis-ci.com/witnet/witnet-ethereum-bridge.svg?branch=master)](https://travis-ci.com/witnet/witnet-ethereum-brdige)
 
 `witnet-ethereum-bridge` is an open source implementation of a bridge 
-from Ethereum to Witnet. This repository provides two contracts. 
+from Ethereum to Witnet. This repository provides two contracts:
+
 - The `Witnet Bridge Interface`(WBI), which provides all the needed 
 functionality to bridge data requests from Ethereum to Witnet, and 
 - `UsingWitnet`, a client contract that aims at facilitating developers 
@@ -120,10 +121,8 @@ The UsingWitnet provides the following methods:
 ## Known limitations:
 
 - `block relay` is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to achieve a decentralized block header reporting.
-- `verify_poe` is still empty. Proof of eligibility verification trough
- VRF should be implemented.
-- `verify_poi` is still empty. Once `block relay` is ready, Proof of 
-inclusion should be implemented.
+- `verify_poe` is still empty. Proof of eligibility verification trough VRF should be implemented.
+- `verify_poi` is still empty. Once `block relay` is ready, Proof of inclusion should be implemented.
 
 ## Usage
 

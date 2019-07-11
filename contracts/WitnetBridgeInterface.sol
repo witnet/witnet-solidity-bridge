@@ -3,6 +3,14 @@ pragma solidity ^0.5.0;
 import "./BlockRelay.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
+
+/**
+ * @title Witnet Bridge Interface
+ * @notice Contract to bridge requests to Witnet
+ * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network
+  * The result of these will be posted to this contract by the bridge nodes.
+ * @author Witnet Foundation
+ */
 contract WitnetBridgeInterface {
 
   using SafeMath for uint256;
@@ -21,31 +29,34 @@ contract WitnetBridgeInterface {
 
   mapping (uint256 => DataRequest) public requests;
 
+  // Event emitted when a new DR is posted
   event PostDataRequest(address indexed _from, uint256 _id);
+  // Event emitted when a DR inclusion proof is posted
   event InclusionDataRequest(address indexed _from, uint256 _id);
+  // Event emitted when a result proof is posted
   event PostResult(address indexed _from, uint256 _id);
 
-  //ensures the reward is not greater than the value
+  // Ensures the reward is not greater than the value
   modifier payingEnough(uint256 _value, uint256 _tally) {
     require(_value >= _tally, "You should send a greater amount than the one sent as tally");
     _;
   }
-  //ensures the poe is valid
+  // Ensures the poe is valid
   modifier poeValid(bytes memory _poe) {
     require(verifyPoe(_poe) == true, "Not a valid PoE");
     _;
   }
-  //ensures the DR inclusion has not been reported
+  // Ensures the DR inclusion has not been reported
   modifier drNotIncluded(uint256 _id) {
     require(requests[_id].drHash == 0, "DR already included");
     _;
   }
-  //ensures the DR inclusion has been reported
+  // Ensures the DR inclusion has been reported
   modifier drIncluded(uint256 _id) {
     require(requests[_id].drHash != 0, "DR not yet Included");
     _;
   }
-  //ensures the result has not been reported
+  // Ensures the result has not been reported
   modifier resultNotIncluded(uint256 _id) {
     require(requests[_id].result.length == 0, "Result already included");
     _;
@@ -55,7 +66,7 @@ contract WitnetBridgeInterface {
     blockRelay = BlockRelay(_blockRelayAddress);
   }
 
-  // @dev Post DR to be resolved by witnet
+  /// @dev Post DR to be resolved by Witnet
   /// @param _dr Data request body
   /// @param _tallyReward The quantity from msg.value that is destinated to result posting
   /// @return _id indicating sha256(id)
@@ -82,7 +93,7 @@ contract WitnetBridgeInterface {
     return _id;
   }
 
-  // @dev Upgrade DR to be resolved by witnet
+  /// @dev Upgrade DR to be resolved by Witnet
   /// @param _id Data request id
   /// @param _tallyReward The quantity from msg.value that is destinated to result posting
   function upgradeDataRequest(uint256 _id, uint256 _tallyReward)
@@ -94,7 +105,7 @@ contract WitnetBridgeInterface {
     requests[_id].tallyReward += _tallyReward;
   }
 
-  // @dev Claim drs to be posted to Witnet by the node
+  /// @dev Claim drs to be posted to Witnet by the node
   /// @param _ids Data request ids to be claimed
   /// @param _poe PoE claiming eligibility
   function claimDataRequests(uint256[] memory _ids, bytes memory _poe)
@@ -117,7 +128,7 @@ contract WitnetBridgeInterface {
     }
   }
 
-  // @dev Report DR inclusion in WBI
+  /// @dev Report DR inclusion in WBI
   /// @param _id DR id
   /// @param _poi Proof of Inclusion
   /// @param _index The index in the merkle tree
@@ -143,7 +154,7 @@ contract WitnetBridgeInterface {
     }
   }
 
-  // @dev Report result of DR in WBI
+  /// @dev Report result of DR in WBI
   /// @param _id DR id
   /// @param _poi Proof of Inclusion as a vector of hashes
   /// @param _index The index in the merkle tree
@@ -173,14 +184,14 @@ contract WitnetBridgeInterface {
     }
   }
 
-  // @dev Read DR from WBI
+  /// @dev Read DR from WBI
   /// @param _id DR id
   /// @return The dr
   function readDataRequest (uint256 _id) public view returns(bytes memory){
     return requests[_id].dr;
   }
 
-  // @dev Read result from WBI
+  /// @dev Read result from WBI
   /// @param _id DR id
   /// @return The result of the DR
   function readResult (uint256 _id) public view returns(bytes memory){

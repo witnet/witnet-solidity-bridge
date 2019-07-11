@@ -1,5 +1,10 @@
 pragma solidity ^0.5.0;
 
+/**
+ * @title Block relay contract
+ * @notice Contract to store/read block headers from the Witnet network
+ * @author Witnet Foundation
+ */
 contract BlockRelay {
 
   struct MerkleRoots {
@@ -13,6 +18,7 @@ contract BlockRelay {
 
   mapping (uint256 => MerkleRoots) public blocks;
 
+  // Event emitted when a new block is posted to the contract
   event NewBlock(address indexed _from, uint256 _id);
 
   constructor() public{
@@ -20,23 +26,23 @@ contract BlockRelay {
     witnet = msg.sender;
   }
 
-  //only the owner should be able to push blocks
+  // Only the owner should be able to push blocks
   modifier isOwner() {
     require(msg.sender == witnet, "Sender not authorized"); // If it is incorrect here, it reverts.
     _; // Otherwise, it continues.
   }
-  //ensures block exists
+  // Ensures block exists
   modifier blockExists(uint256 _id){
     require(blocks[_id].drHashMerkleRoot!=0, "Non-existing block");
     _;
   }
-   //ensures block does not exist
+   // Ensures block does not exist
   modifier blockNotExists(uint256 _id){
     require(blocks[_id].drHashMerkleRoot==0, "Existing block");
     _;
   }
 
-  // @dev Post new block in the block relay
+  /// @dev Post new block in the block relay
   /// @param _blockHash Hash of the block header
   /// @param _drMerkleRoot Merkle root belonging to the data requests
   /// @param _tallyMerkleRoot Merkle root belonging to the tallies
@@ -55,7 +61,7 @@ contract BlockRelay {
     }
   }
 
-  // @dev Read the DR merkle root
+  /// @dev Read the DR merkle root
   /// @param _blockHash Hash of the block header
   /// @return merkle root for the DR in the block header
   function readDrMerkleRoot(uint256 _blockHash)
@@ -67,7 +73,7 @@ contract BlockRelay {
     drMerkleRoot = blocks[_blockHash].drHashMerkleRoot;
   }
 
-  // @dev Read the tally merkle root
+  /// @dev Read the tally merkle root
   /// @param _blockHash Hash of the block header
   /// merkle root for the tallies in the block header
   function readTallyMerkleRoot(uint256 _blockHash)
