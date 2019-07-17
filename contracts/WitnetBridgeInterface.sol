@@ -173,7 +173,7 @@ contract WitnetBridgeInterface {
  {
     uint256 tallyRoot = blockRelay.readTallyMerkleRoot(_blockHash);
     // this should leave it ready for PoI
-    uint256 resHash = uint256(sha256(abi.encodePacked(uint256(sha256(_result)), requests[_id].drHash)));
+    uint256 resHash = uint256(sha256(abi.encodePacked(requests[_id].drHash, _result)));
     if (verifyPoi(_poi, tallyRoot, _index, resHash)){
       requests[_id].result = _result;
       msg.sender.transfer(requests[_id].tallyReward);
