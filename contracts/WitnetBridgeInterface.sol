@@ -202,7 +202,18 @@ contract WitnetBridgeInterface {
     return true;
   }
 
-  function verifyPoi(uint256[] memory _poi, uint256 _root, uint256 _index, uint256 element) internal pure returns(bool){
-    return true;
+  function verifyPoi(uint256[] memory _poi, uint256 _root, uint256 _index, uint256 element) public pure returns(bool){
+    uint256 tree = element;
+    uint256 index = _index;
+    for (uint i = 0; i<_poi.length; i++){
+      if(index%2 == 0){
+        tree = uint256(sha256(abi.encodePacked(tree, _poi[i])));
+      }
+      else{
+        tree = uint256(sha256(abi.encodePacked(_poi[i], tree)));
+      }
+      index = index>>1;
+    }
+    return _root==tree;
   }
 }
