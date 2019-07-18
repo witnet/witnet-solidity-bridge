@@ -197,6 +197,13 @@ contract WitnetBridgeInterface {
     return requests[_id].result;
   }
 
+  /// @dev Read drHash from WBI
+  /// @param _id DR id
+  /// @return The hash of the DataRequest transaction in Witnet
+  function readDrHash (uint256 _id) public view returns(uint256){
+    return requests[_id].drHash;
+  }
+
   function verifyPoe(bytes memory _poe) internal pure returns(bool){
     return true;
   }
