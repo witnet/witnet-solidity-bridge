@@ -89,16 +89,21 @@ contract("Using witnet", accounts => {
 
     it("read Data Request result", async () => {
       let stringDr = "DataRequest Example"
+      let stringRes = "Result"
       let expectedId = "0x" + sha.sha256(stringDr)
       let expectedBlockHash = 0x123456
-      let drRootHash = 0x654321
       let tallyRootHash = 0x112233
       let dummySybling = 1
       let drHashRoot = web3.utils.hexToBytes("0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8")
       var hash = sha.sha256.create()
-      hash.update(web3.utils.hexToBytes("0xba6357c24b3b0e9274b71e480b660da3aa11cb7e7a08046f9d244f31adc69878"))
+      hash.update(web3.utils.hexToBytes(expectedId))
       hash.update(drHashRoot)
       let expectedDrHash = "0x" + hash.hex()
+      hash = sha.sha256.create()
+      hash.update(web3.utils.hexToBytes(expectedDrHash))
+      hash.update(web3.utils.hexToBytes(web3.utils.utf8ToHex(stringRes)))
+      var expectedResHash = "0x" + hash.hex()
+
       // Claim Data Request Inclusion
       let tx2 = wbi.claimDataRequests([expectedId], web3.utils.utf8ToHex("PoE"))
       await waitForHash(tx2)
@@ -110,22 +115,22 @@ contract("Using witnet", accounts => {
       assert.equal(pkh, accounts[0])
 
       // Report block
-      blockRelay.postNewBlock(expectedBlockHash, drRootHash, tallyRootHash, {
+      blockRelay.postNewBlock(expectedBlockHash, expectedDrHash, expectedResHash, {
         from: accounts[0],
       })
 
       // Show PoI of Data Request Inclusion
       let tx3 = wbi.reportDataRequestInclusion(expectedId,
         ["0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"],
-        1,
+        0,
         expectedBlockHash)
       await waitForHash(tx3)
       let drInfo3 = await wbi.requests(expectedId)
       let DrHash = drInfo3.drHash
       assert.equal(expectedDrHash, web3.utils.toHex(DrHash))
       // Report result
-      let tx4 = wbi.reportResult(expectedId, [dummySybling], 1,
-        expectedBlockHash, web3.utils.utf8ToHex("Result"))
+      let tx4 = wbi.reportResult(expectedId, [], 0,
+        expectedBlockHash, web3.utils.utf8ToHex(stringRes))
       await waitForHash(tx4)
 
       let drInfo4 = await wbi.requests(expectedId)

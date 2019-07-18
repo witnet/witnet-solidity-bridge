@@ -144,12 +144,11 @@ contract WitnetBridgeInterface {
  {
     uint256 drRoot = blockRelay.readDrMerkleRoot(_blockHash);
     uint256 drHash = uint256(sha256(abi.encodePacked(_id, _poi[0])));
-    if (verifyPoi(_poi, drRoot, _index, _id)){
+    if (verifyPoi(_poi, drRoot, _index, _id)) {
       requests[_id].drHash = drHash;
       requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
       emit InclusionDataRequest(msg.sender, _id);
-    }
-    else{
+    } else {
       revert("Invalid PoI");
     }
   }
@@ -202,8 +201,19 @@ contract WitnetBridgeInterface {
     return true;
   }
 
-  function verifyPoi(uint256[] memory _poi, uint256 _root, uint256 _index, uint256 element) public pure returns(bool){
-    uint256 tree = element;
+  /// @dev Verifies the validity of a PoI
+  /// @param _poi the proof of inclusion as [leaf1, leaf2,..]
+  /// @param _root the merkle root
+  /// @param _index the index in the merkle tree of the element to verify
+  /// @param _element the element
+  /// @return true or false depending the validity
+  function verifyPoi(
+    uint256[] memory _poi,
+    uint256 _root,
+    uint256 _index,
+    uint256 _element)
+  public pure returns(bool){
+    uint256 tree = _element;
     uint256 index = _index;
     for (uint i = 0; i<_poi.length; i++){
       if(index%2 == 0){

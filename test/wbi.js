@@ -5,6 +5,21 @@ const sha = require("js-sha256")
 
 var wait = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 
+function calculateRoots (drBytes, resBytes) {
+  var hash = sha.sha256.create()
+  hash.update(web3.utils.hexToBytes(drBytes))
+  var drHash = "0x" + hash.hex()
+  hash = sha.sha256.create()
+  hash.update(web3.utils.hexToBytes(drHash))
+  hash.update(web3.utils.hexToBytes(drHash))
+  let expectedDrHash = "0x" + hash.hex()
+  hash = sha.sha256.create()
+  hash.update(web3.utils.hexToBytes(expectedDrHash))
+  hash.update(web3.utils.hexToBytes(resBytes))
+  let expectedResHash = "0x" + hash.hex()
+  return [expectedDrHash, expectedResHash]
+}
+
 contract("WBI", accounts => {
   describe("WBI test suite", () => {
     let wbiInstance
@@ -93,6 +108,7 @@ contract("WBI", accounts => {
 
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
+      const roots = calculateRoots(drBytes, resBytes)
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
@@ -108,12 +124,12 @@ contract("WBI", accounts => {
       })
       await waitForHash(tx2)
 
-      const txRelay = blockRelay.postNewBlock(blockHeader, drHash, tallyHash, {
+      const txRelay = blockRelay.postNewBlock(blockHeader, roots[0], roots[1], {
         from: accounts[0],
       })
       await waitForHash(txRelay)
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [id1], 0, blockHeader, {
         from: account2,
       })
 
@@ -121,7 +137,7 @@ contract("WBI", accounts => {
       const afterBalance2 = await web3.eth.getBalance(account2)
       assert(parseInt(afterBalance2, 10) > parseInt(actualBalance2, 10))
       // report result
-      let restx = wbiInstance.reportResult(id1, [dummySybling], 1, blockHeader, resBytes, { from: account2 })
+      let restx = wbiInstance.reportResult(id1, [], 0, blockHeader, resBytes, { from: account2 })
       await waitForHash(restx)
 
       let afterBalance1 = await web3.eth.getBalance(account1)
@@ -202,12 +218,12 @@ contract("WBI", accounts => {
       })
       await waitForHash(tx2)
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [dummySybling], 1, blockHeader, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [data1], 0, blockHeader, {
         from: accounts[1],
       })
       await waitForHash(tx3)
 
-      const tx4 = await wbiInstance.reportResult(data1, [dummySybling], 1, blockHeader, resBytes)
+      const tx4 = await wbiInstance.reportResult(data1, [], 0, blockHeader, resBytes)
       // wait for the async method to finish
       await wait(500)
       truffleAssert.eventEmitted(tx4, "PostResult", (ev) => {
@@ -291,7 +307,8 @@ contract("WBI", accounts => {
     it("should revert because DR was already reported", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
       const resBytes = web3.utils.fromAscii("This is a result")
-      var blockHeader = 1
+      const roots = calculateRoots(drBytes, resBytes)
+      var blockHeader = 2
       var dummySybling = 1
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
@@ -306,7 +323,12 @@ contract("WBI", accounts => {
       })
       await waitForHash(tx2)
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [dummySybling], 1, blockHeader, {
+      const txRelay = blockRelay.postNewBlock(blockHeader, roots[0], roots[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay)
+
+      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [data1], 0, blockHeader, {
         from: accounts[0],
       })
       await waitForHash(tx3)
@@ -315,7 +337,7 @@ contract("WBI", accounts => {
         from: accounts[1],
       }), "DR already included")
     })
-    it("should revert because of reporting a result for which de DR inclusion was notreported", async () => {
+    it("should revert because of reporting a result for which the DR inclusion was not reported", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR6")
       const resBytes = web3.utils.fromAscii("This is a result")
       var blockHeader = 1
@@ -336,11 +358,12 @@ contract("WBI", accounts => {
       await truffleAssert.reverts(wbiInstance.reportResult(data1, [dummySybling], 1, blockHeader, resBytes, {
         from: accounts[1] }), "DR not yet Included")
     })
-    it("should revert because of reporting a result for which de DR inclusion was notreported", async () => {
-      const drBytes = web3.utils.fromAscii("This is a DR6")
+    it("should revert because of reporting a result for which the result was already reported", async () => {
+      const drBytes = web3.utils.fromAscii("This is a DR7")
       const resBytes = web3.utils.fromAscii("This is a result")
-      var blockHeader = 1
-      var dummySybling = 1
+      const roots = calculateRoots(drBytes, resBytes)
+
+      var blockHeader = 3
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
@@ -353,17 +376,21 @@ contract("WBI", accounts => {
         from: accounts[1],
       })
       await waitForHash(tx2)
+      
+      const txRelay = blockRelay.postNewBlock(blockHeader, roots[0], roots[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay)
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [dummySybling], 1, blockHeader, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [data1], 0, blockHeader, {
         from: accounts[0],
       })
       await waitForHash(tx3)
 
-      const tx4 = wbiInstance.reportResult(data1, [dummySybling], 1, blockHeader, resBytes, {
+      const tx4 = wbiInstance.reportResult(data1, [], 0, blockHeader, resBytes, {
         from: accounts[1] })
       await waitForHash(tx4)
-
-      await truffleAssert.reverts(wbiInstance.reportResult(data1, [dummySybling], 1, blockHeader, resBytes, {
+      await truffleAssert.reverts(wbiInstance.reportResult(data1, [], 1, blockHeader, resBytes, {
         from: accounts[1] }), "Result already included")
     })
   })
