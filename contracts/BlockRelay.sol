@@ -13,8 +13,17 @@ contract BlockRelay {
     // hash of the merkle root of the tallies in Witnet
     uint256 tallyHashMerkleRoot;
   }
+  struct Beacon {
+    // hash of the last block
+    uint256 blockHash;
+    // epoch of the last block
+    uint256 epoch;
+  }
+
   // Address of the block pusher
   address witnet;
+  // Last block reported
+  Beacon lastBlock;
 
   mapping (uint256 => MerkleRoots) public blocks;
 
@@ -44,14 +53,17 @@ contract BlockRelay {
 
   /// @dev Post new block into the block relay
   /// @param _blockHash Hash of the block header
-  /// @param _drMerkleRoot The root hash of the requests-only merkle tree as contained in the block header.
-  /// @param _tallyMerkleRoot The root hash of the tallies-only merkle tree as contained in the block header.
-  function postNewBlock(uint256 _blockHash, uint256 _drMerkleRoot, uint256 _tallyMerkleRoot)
+  /// @param _epoch Witnet epoch to which the block belongs to
+  /// @param _drMerkleRoot Merkle root belonging to the data requests
+  /// @param _tallyMerkleRoot Merkle root belonging to the tallies
+  function postNewBlock(uint256 _blockHash, uint256 _epoch, uint256 _drMerkleRoot, uint256 _tallyMerkleRoot)
     public
     isOwner
     blockDoesNotExist(_blockHash)
   {
     uint256 id = _blockHash;
+    lastBlock.blockHash = id;
+    lastBlock.epoch = _epoch;
     blocks[id].drHashMerkleRoot = _drMerkleRoot;
     blocks[id].tallyHashMerkleRoot = _tallyMerkleRoot;
   }
@@ -78,5 +90,15 @@ contract BlockRelay {
   returns(uint256 tallyMerkleRoot)
   {
     tallyMerkleRoot = blocks[_blockHash].tallyHashMerkleRoot;
+  }
+
+  /// @dev Read the beacon of the last block inserted
+  /// @return bytes to be signed by the node
+  function getLastBeacon()
+    public
+    view
+  returns(bytes memory)
+  {
+    return abi.encodePacked(lastBlock.blockHash, lastBlock.epoch);
   }
 }

@@ -233,4 +233,14 @@ contract WitnetBridgeInterface {
     }
     return _root==tree;
   }
+
+  /// @dev Read the beacon of the last block inserted
+  /// @return bytes to be signed by the node as PoE
+  function getLastBeacon()
+    public
+    view
+  returns(bytes memory)
+  {
+    return blockRelay.getLastBeacon();
+  }
 }

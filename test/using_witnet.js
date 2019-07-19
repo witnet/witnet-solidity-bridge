@@ -112,6 +112,7 @@ contract("Using witnet", accounts => {
       hash.update(web3.utils.hexToBytes(expectedDrHash))
       hash.update(web3.utils.hexToBytes(web3.utils.utf8ToHex(stringRes)))
       var expectedResHash = "0x" + hash.hex()
+      const epoch = 1
 
       // Claim Data Request Inclusion
       let tx2 = wbi.claimDataRequests([expectedId], web3.utils.utf8ToHex("PoE"))
@@ -124,7 +125,7 @@ contract("Using witnet", accounts => {
       assert.equal(pkh, accounts[0])
 
       // Report block
-      blockRelay.postNewBlock(expectedBlockHash, expectedDrHash, expectedResHash, {
+      blockRelay.postNewBlock(expectedBlockHash, epoch, expectedDrHash, expectedResHash, {
         from: accounts[0],
       })
 
