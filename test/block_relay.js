@@ -22,7 +22,7 @@ contract("Block relay", accounts => {
       let expectedId = "0x" + sha.sha256("first id")
       await truffleAssert.reverts(blockRelayInstance.postNewBlock(expectedId, 1, 1, {
         from: accounts[0],
-      }), "Existing block")
+      }), "The block already existed.")
     })
     it("should insert another block", async () => {
       let expectedId = "0x" + sha.sha256("second id")

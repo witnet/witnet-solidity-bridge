@@ -37,33 +37,28 @@ contract BlockRelay {
     _;
   }
    // Ensures block does not exist
-  modifier blockNotExists(uint256 _id){
-    require(blocks[_id].drHashMerkleRoot==0, "Existing block");
+  modifier blockDoesNotExist(uint256 _id){
+    require(blocks[_id].drHashMerkleRoot==0, "The block already existed");
     _;
   }
 
-  /// @dev Post new block in the block relay
+  /// @dev Post new block into the block relay
   /// @param _blockHash Hash of the block header
-  /// @param _drMerkleRoot Merkle root belonging to the data requests
-  /// @param _tallyMerkleRoot Merkle root belonging to the tallies
+  /// @param _drMerkleRoot The root hash of the requests-only merkle tree as contained in the block header.
+  /// @param _tallyMerkleRoot The root hash of the tallies-only merkle tree as contained in the block header.
   function postNewBlock(uint256 _blockHash, uint256 _drMerkleRoot, uint256 _tallyMerkleRoot)
     public
     isOwner
-    blockNotExists(_blockHash)
+    blockDoesNotExist(_blockHash)
   {
     uint256 id = _blockHash;
-    if(blocks[id].drHashMerkleRoot!=0) {
-      revert("Existing block");
-    }
-    else{
-      blocks[id].drHashMerkleRoot = _drMerkleRoot;
-      blocks[id].tallyHashMerkleRoot = _tallyMerkleRoot;
-    }
+    blocks[id].drHashMerkleRoot = _drMerkleRoot;
+    blocks[id].tallyHashMerkleRoot = _tallyMerkleRoot;
   }
 
-  /// @dev Read the DR merkle root
+  /// @dev Retrieve the requests-only merkle root hash that was reported for a specific block header.
   /// @param _blockHash Hash of the block header
-  /// @return merkle root for the DR in the block header
+  /// @return Requests-only merkle root hash in the block header.
   function readDrMerkleRoot(uint256 _blockHash)
     public
     view
@@ -73,9 +68,9 @@ contract BlockRelay {
     drMerkleRoot = blocks[_blockHash].drHashMerkleRoot;
   }
 
-  /// @dev Read the tally merkle root
+  /// @dev Retrieve the tallies-only merkle root hash that was reported for a specific block header.
   /// @param _blockHash Hash of the block header
-  /// merkle root for the tallies in the block header
+  /// tallies-only merkle root hash in the block header.
   function readTallyMerkleRoot(uint256 _blockHash)
     public
     view

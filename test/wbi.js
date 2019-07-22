@@ -185,7 +185,7 @@ contract("WBI", accounts => {
       const hash = sha.sha256("This is a DR")
       const expectedResultId = web3.utils.hexToNumberString(hash)
       const tx = await wbiInstance.postDataRequest(drBytes, 0)
-      truffleAssert.eventEmitted(tx, "PostDataRequest", (ev) => {
+      truffleAssert.eventEmitted(tx, "PostedRequest", (ev) => {
         return ev[1].toString() === expectedResultId
       })
       let readDrBytes = await wbiInstance.readDataRequest.call(expectedResultId)
@@ -208,7 +208,7 @@ contract("WBI", accounts => {
       let data1 = txReceipt1.logs[0].data
       assert.equal(web3.utils.hexToNumberString(data1), web3.utils.hexToNumberString(sha.sha256("This is a DR")))
       // Subscribe to reportResult event
-      wbiInstance.PostResult({}, async (_error, event) => {
+      wbiInstance.PostedResult({}, async (_error, event) => {
         let readresBytes1 = await wbiInstance.readResult.call(data1)
         assert.equal(resBytes, readresBytes1)
       })
@@ -226,7 +226,7 @@ contract("WBI", accounts => {
       const tx4 = await wbiInstance.reportResult(data1, [], 0, blockHeader, resBytes)
       // wait for the async method to finish
       await wait(500)
-      truffleAssert.eventEmitted(tx4, "PostResult", (ev) => {
+      truffleAssert.eventEmitted(tx4, "PostedResult", (ev) => {
         return ev[1].eq(web3.utils.toBN(data1))
       })
     })
@@ -246,7 +246,7 @@ contract("WBI", accounts => {
       let data1 = txReceipt1.logs[0].data
       assert.equal(web3.utils.hexToNumberString(data1), web3.utils.hexToNumberString(sha.sha256("This is a DR")))
       // Subscribe to reportResult event
-      wbiInstance.PostResult({}, async (_error, event) => {
+      wbiInstance.PostedResult({}, async (_error, event) => {
         let readresBytes1 = await wbiInstance.readResult.call(data1)
         assert.equal(resBytes, readresBytes1)
       })
@@ -266,7 +266,7 @@ contract("WBI", accounts => {
       await truffleAssert.reverts(wbiInstance.postDataRequest(drBytes, web3.utils.toWei("2", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
-      }), "You should send a greater amount than the one sent as tally")
+      }), "Transaction value needs to be equal or greater than tally reward")
     })
     it("should revert not enough value in upgrade", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
@@ -282,7 +282,7 @@ contract("WBI", accounts => {
       await truffleAssert.reverts(wbiInstance.upgradeDataRequest(data1, web3.utils.toWei("2", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
-      }), "You should send a greater amount than the one sent as tally")
+      }), "Transaction value needs to be equal or greater than tally reward")
     })
     it("should revert because DR was already claimed", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR4")
@@ -302,7 +302,7 @@ contract("WBI", accounts => {
 
       await truffleAssert.reverts(wbiInstance.claimDataRequests([data1], resBytes, {
         from: accounts[1],
-      }), "One of the DR was already claimed")
+      }), "One of the listed data requests was already claimed")
     })
     it("should revert because DR was already reported", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
@@ -356,7 +356,7 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       await truffleAssert.reverts(wbiInstance.reportResult(data1, [dummySybling], 1, blockHeader, resBytes, {
-        from: accounts[1] }), "DR not yet Included")
+        from: accounts[1] }), "DR not yet included")
     })
     it("should revert because of reporting a result for which the result was already reported", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR7")
