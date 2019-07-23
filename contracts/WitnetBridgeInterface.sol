@@ -1,7 +1,9 @@
 pragma solidity ^0.5.0;
 
-import "./BlockRelay.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "vrf-solidity/contracts/VRF.sol";
+
+import "./BlockRelay.sol";
 
 
 /**
@@ -11,7 +13,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
   * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
-contract WitnetBridgeInterface {
+contract WitnetBridgeInterface is VRF {
 
   using SafeMath for uint256;
 
@@ -221,8 +223,20 @@ contract WitnetBridgeInterface {
   /// @param _publicKey The public key as an array composed of `[pubKey-x, pubKey-y]`
   /// @param _uPoint uPoint coordinates as [uPointX, uPointY] corresponding to U = s*B - c*Y
   /// @param _vPointHelpers helpers for calculating the V point as [(s*H)X, (s*H)Y, cGammaX, cGammaY]. V = s*H + cGamma
-  function verifyPoe(uint256[4] memory _poe, uint256[2] memory _publicKey, uint256[2] memory _uPoint, uint256[4] memory _vPointHelpers) internal pure returns(bool){
-    return true;
+  function verifyPoe(
+    uint256[4] memory _poe,
+    uint256[2] memory _publicKey,
+    uint256[2] memory _uPoint,
+    uint256[4] memory _vPointHelpers)
+  internal view returns(bool) {
+    bytes memory message = getLastBeacon();
+
+    return fastVerify(
+      _publicKey,
+      _poe,
+      message,
+      _uPoint,
+      _vPointHelpers);
   }
 
   /// @dev Verifies the validity of a PoI
