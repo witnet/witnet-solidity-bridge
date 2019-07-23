@@ -1,6 +1,6 @@
-const UsingWitnet = artifacts.require("UsingWitnet")
 const WBI = artifacts.require("WitnetBridgeInterface")
 const BlockRelay = artifacts.require("BlockRelay")
+const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
 const sha = require("js-sha256")
 
 contract("Using witnet", accounts => {
@@ -13,13 +13,13 @@ contract("Using witnet", accounts => {
         from: accounts[0],
       })
       wbi = await WBI.deployed(blockRelay.address)
-      usingWitnet = await UsingWitnet.deployed()
+      usingWitnet = await UsingWitnetTestHelper.new(wbi.address)
     })
 
     it("create a data request and post it in the wbi (call)", async () => {
       let stringDr = "DataRequest Example"
       let expectedId = "0x" + sha.sha256(stringDr)
-      let id0 = await usingWitnet.witnetPostDataRequest.call(web3.utils.utf8ToHex(stringDr), 30, {
+      let id0 = await usingWitnet._witnetPostDataRequest.call(web3.utils.utf8ToHex(stringDr), 30, {
         from: accounts[0],
         value: 100,
       })
@@ -31,7 +31,7 @@ contract("Using witnet", accounts => {
       let expectedId = "0x" + sha.sha256(stringDr)
       let actualBalance = await web3.eth.getBalance(accounts[0])
 
-      let tx0 = usingWitnet.witnetPostDataRequest(web3.utils.utf8ToHex(stringDr), 30, {
+      let tx0 = usingWitnet._witnetPostDataRequest(web3.utils.utf8ToHex(stringDr), 30, {
         from: accounts[0],
         value: 100,
       })
@@ -65,7 +65,7 @@ contract("Using witnet", accounts => {
       let actualBalance = await web3.eth.getBalance(accounts[0])
       let readDrBytes = await wbi.readDataRequest.call(expectedId)
       assert.equal(readDrBytes, web3.utils.utf8ToHex(stringDr))
-      let tx1 = usingWitnet.witnetUpgradeDataRequest(expectedId, 30, {
+      let tx1 = usingWitnet._witnetUpgradeDataRequest(expectedId, 30, {
         from: accounts[0],
         value: 100,
       })
@@ -92,8 +92,6 @@ contract("Using witnet", accounts => {
       let stringRes = "Result"
       let expectedId = "0x" + sha.sha256(stringDr)
       let expectedBlockHash = 0x123456
-      let tallyRootHash = 0x112233
-      let dummySybling = 1
       let drHashRoot = web3.utils.hexToBytes("0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8")
       var hash = sha.sha256.create()
       hash.update(web3.utils.hexToBytes(expectedId))
@@ -137,7 +135,7 @@ contract("Using witnet", accounts => {
       let result = drInfo4.result
       assert.equal(web3.utils.utf8ToHex("Result"), result)
 
-      let resultObtained = await usingWitnet.witnetReadResult.call(expectedId)
+      let resultObtained = await usingWitnet._witnetReadResult.call(expectedId)
       assert.equal(result, resultObtained)
     })
   })

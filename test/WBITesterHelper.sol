@@ -4,10 +4,9 @@ import "../contracts/./WitnetBridgeInterface.sol";
 
 
 /**
- * @title Test Helper for the VRF contract
- * @dev The aim of this contract is twofold:
- * 1. Raise the visibility modifier of VRF contract functions for testing purposes
- * 2. Removal of the `pure` modifier to allow gas consumption analysis
+ * @title Test Helper for the WBI contract
+ * @dev The aim of this contract is:
+ * 1. Raise the visibility modifier of wbi contract functions for testing purposes
  * @author Witnet Foundation
  */
 contract WBITestHelper is WitnetBridgeInterface{

@@ -100,9 +100,6 @@ contract("WBI", accounts => {
       var account1 = accounts[0]
       var account2 = accounts[1]
       var blockHeader = 1
-      var drHash = 1
-      var tallyHash = 1
-      var dummySybling = 1
       let actualBalance1 = await web3.eth.getBalance(account1)
       let actualBalance2 = await web3.eth.getBalance(account2)
 
@@ -197,7 +194,6 @@ contract("WBI", accounts => {
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
       var blockHeader = 1
-      var dummySybling = 1
 
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
         from: accounts[0],
@@ -376,7 +372,7 @@ contract("WBI", accounts => {
         from: accounts[1],
       })
       await waitForHash(tx2)
-      
+
       const txRelay = blockRelay.postNewBlock(blockHeader, roots[0], roots[1], {
         from: accounts[0],
       })

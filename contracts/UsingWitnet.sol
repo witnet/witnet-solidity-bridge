@@ -26,7 +26,7 @@ contract UsingWitnet{
   * @param _tallyReward Reward specified for the user which post the Data Request result
   * @return Identifier for the Data Request included in the WitnetBridgeInterface
   */
-  function witnetPostDataRequest(bytes memory _dr, uint256 _tallyReward) public payable returns(uint256 id){
+  function witnetPostDataRequest(bytes memory _dr, uint256 _tallyReward) internal returns(uint256 id){
     return wbi.postDataRequest.value(msg.value)(_dr, _tallyReward);
   }
 
@@ -36,7 +36,7 @@ contract UsingWitnet{
   * @param _id Identifier for the Data Request included in the WitnetBridgeInterface
   * @param _tallyReward Reward specified for the user which post the Data Request result
   */
-  function witnetUpgradeDataRequest(uint256 _id, uint256 _tallyReward) public payable {
+  function witnetUpgradeDataRequest(uint256 _id, uint256 _tallyReward) internal {
     wbi.upgradeDataRequest.value(msg.value)(_id, _tallyReward);
   }
 
@@ -46,7 +46,7 @@ contract UsingWitnet{
   * @param _id Identifier for the Data Request included in the WitnetBridgeInterface
   * @return Data Request result
   */
-  function witnetReadResult (uint256 _id) public view returns(bytes memory){
+  function witnetReadResult (uint256 _id) internal view returns(bytes memory){
     return wbi.readResult(_id);
   }
 }
