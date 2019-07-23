@@ -33,6 +33,7 @@ contract WitnetBridgeInterface is VRF {
 
   // Event emitted when a new DR is posted
   event PostedRequest(address indexed _from, uint256 _id);
+
   // Event emitted when a DR inclusion proof is posted
   event IncludedRequest(address indexed _from, uint256 _id);
   // Event emitted when a result proof is posted
@@ -52,6 +53,15 @@ contract WitnetBridgeInterface is VRF {
     require(verifyPoe(_poe, _publicKey, _uPoint, _vPointHelpers) == true, "Not a valid PoE");
     _;
   }
+
+  // Ensures the poe is valid
+  modifier validSignature(
+    uint256[2] memory _publicKey,
+    bytes memory addrSignature) {
+    require(verifySig(abi.encodePacked(msg.sender), _publicKey, addrSignature) == true, "Not a valid Signature");
+    _;
+  }
+
   // Ensures the DR inclusion proof has not been reported yet
   modifier drNotIncluded(uint256 _id) {
     require(requests[_id].drHash == 0, "DR already included");
@@ -263,6 +273,37 @@ contract WitnetBridgeInterface is VRF {
       index = index>>1;
     }
     return _root==tree;
+  }
+
+  function verifySig(
+    bytes memory message,
+    uint256[2] memory _publicKey,
+    bytes memory addrSignature
+    )
+  internal returns(bool){
+    bytes32 r;
+    bytes32 s;
+    uint8 v;
+    assembly {
+            r := mload(add(addrSignature, 0x20))
+            s := mload(add(addrSignature, 0x40))
+            v := byte(0, mload(add(addrSignature, 0x60)))
+    }
+
+    if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+      return false;
+    }
+
+    if (v != 0 && v != 1) {
+      return false;
+    }
+    v = 27 + v;
+
+
+    bytes32 msg_hash = sha256(message);
+    address hashed_key = address(uint256(keccak256(abi.encodePacked(_publicKey[0],  _publicKey[1]))) & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+    
+    return ecrecover(msg_hash, v, r, s) == hashed_key;
   }
 
   /// @dev Read the beacon of the last block inserted

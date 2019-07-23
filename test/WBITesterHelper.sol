@@ -9,11 +9,13 @@ import "../contracts/./WitnetBridgeInterface.sol";
  * 1. Raise the visibility modifier of wbi contract functions for testing purposes
  * @author Witnet Foundation
  */
+
+
 contract WBITestHelper is WitnetBridgeInterface{
   WitnetBridgeInterface wbi;
 
   constructor (address _wbiRelayAddress) WitnetBridgeInterface(_wbiRelayAddress) public { }
-  
+
   function _verifyPoi(
     uint256[] memory _poi,
     uint256 _root,
@@ -25,5 +27,17 @@ contract WBITestHelper is WitnetBridgeInterface{
       _root,
       _index,
       element);
+  }
+
+  function _verifySig(
+    bytes memory message,
+    uint256[2] memory _publicKey,
+    bytes memory _addrSignature
+  )
+  public returns(bool){
+    return verifySig(
+      message,
+      _publicKey,
+      _addrSignature);
   }
 }
