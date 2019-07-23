@@ -3,6 +3,8 @@ const BlockRelay = artifacts.require("BlockRelay")
 const truffleAssert = require("truffle-assertions")
 const sha = require("js-sha256")
 
+const data = require("./data.json")
+
 var wait = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 
 function calculateRoots (drBytes, resBytes) {
@@ -25,7 +27,7 @@ contract("WBI", accounts => {
     let wbiInstance
     let blockRelay
     beforeEach(async () => {
-      blockRelay = await BlockRelay.deployed()
+      blockRelay = await BlockRelay.new()
       wbiInstance = await WBI.new(blockRelay.address)
     })
 
@@ -120,13 +122,15 @@ contract("WBI", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
       const epoch = 2
 
-      // Post data request
-      const fakePoe = [1, 1, 1, 1]
-      const fakePubKey = [1, 1]
-      const fakeuHelpers = [1, 1]
-      const fakevHelpers = [1, 1, 2, 2]
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[0].proof
+      const proof = await wbiInstance.decodeProof(proofBytes)
+      const message = data.poe[0].lastBeacon
+      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
       const fakeSig = web3.utils.fromAscii("This is a signature")
 
+      // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
         from: account1,
         value: web3.utils.toWei("1", "ether"),
@@ -136,9 +140,15 @@ contract("WBI", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // claim data request
-      const tx2 = wbiInstance.claimDataRequests([id1], fakePoe, fakePubKey, fakeuHelpers, fakevHelpers, fakeSig, {
-        from: account2,
-      })
+      const tx2 = wbiInstance.claimDataRequests(
+        [id1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        fakeSig, {
+          from: account2,
+        })
       await waitForHash(tx2)
 
       // post new block
@@ -245,13 +255,14 @@ contract("WBI", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
-      const fakePoe = [1, 1, 1, 1]
-      const fakePubKey = [1, 1]
-      const fakeuHelpers = [1, 1]
-      const fakevHelpers = [1, 1, 2, 2]
-      const fakeSig = web3.utils.fromAscii("This is a signature")
 
-      var blockHeader = "0x" + sha.sha256("block header")
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[1].proof
+      const proof = await wbiInstance.decodeProof(proofBytes)
+      const message = data.poe[1].lastBeacon
+      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+      const fakeSig = web3.utils.fromAscii("This is a signature")
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
@@ -269,10 +280,24 @@ contract("WBI", accounts => {
         assert.equal(resBytes, readresBytes1)
       })
 
-      // claim data request
-      const tx2 = wbiInstance.claimDataRequests([data1], fakePoe, fakePubKey, fakeuHelpers, fakevHelpers, fakeSig, {
-        from: accounts[1],
+      var blockHeader = "0x" + sha.sha256("block header")
+      const roots = calculateRoots(drBytes, resBytes)
+      const epoch = 2
+      const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
+        from: accounts[0],
       })
+      await waitForHash(txRelay)
+
+      // claim data request
+      const tx2 = wbiInstance.claimDataRequests(
+        [data1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        fakeSig, {
+          from: accounts[1],
+        })
       await waitForHash(tx2)
 
       // report data request inclusion
@@ -292,6 +317,7 @@ contract("WBI", accounts => {
         return ev[1].eq(web3.utils.toBN(data1))
       })
     })
+
     it("should revert the transacation when trying to read from a non-existent block", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
@@ -299,13 +325,15 @@ contract("WBI", accounts => {
       var fakeBlockHeader = "0x" + sha.sha256("fake block header")
       var dummySybling = 1
 
-      // post data request
-      const fakePoe = [1, 1, 1, 1]
-      const fakePubKey = [1, 1]
-      const fakeuHelpers = [1, 1]
-      const fakevHelpers = [1, 1, 2, 2]
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[1].proof
+      const proof = await wbiInstance.decodeProof(proofBytes)
+      const message = data.poe[1].lastBeacon
+      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
       const fakeSig = web3.utils.fromAscii("This is a signature")
 
+      // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
@@ -315,10 +343,24 @@ contract("WBI", accounts => {
       let data1 = txReceipt1.logs[0].data
       assert.equal(web3.utils.hexToNumberString(data1), web3.utils.hexToNumberString(sha.sha256("This is a DR")))
 
-      // claim data request
-      const tx2 = wbiInstance.claimDataRequests([data1], fakePoe, fakePubKey, fakeuHelpers, fakevHelpers, fakeSig, {
-        from: accounts[1],
+      var blockHeader = "0x" + sha.sha256("block header")
+      const roots = calculateRoots(drBytes, resBytes)
+      const epoch = 2
+      const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
+        from: accounts[0],
       })
+      await waitForHash(txRelay)
+
+      // claim data request
+      const tx2 = wbiInstance.claimDataRequests(
+        [data1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        fakeSig, {
+          from: accounts[1],
+        })
       await waitForHash(tx2)
 
       // should fail to read blockhash from a non-existing block
@@ -357,17 +399,20 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       }), "Transaction value needs to be equal or greater than tally reward")
     })
+
     it("should revert when trying to claim a DR that was already claimed", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR4")
       const resBytes = web3.utils.fromAscii("This is a result")
-      
-      // post data request
-      const fakePoe = [1, 1, 1, 1]
-      const fakePubKey = [1, 1]
-      const fakeuHelpers = [1, 1]
-      const fakevHelpers = [1, 1, 2, 2]
+
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[1].proof
+      const proof = await wbiInstance.decodeProof(proofBytes)
+      const message = data.poe[1].lastBeacon
+      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
       const fakeSig = web3.utils.fromAscii("This is a signature")
 
+      // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
@@ -376,55 +421,94 @@ contract("WBI", accounts => {
       let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       let data1 = txReceipt1.logs[0].data
 
-      // claim data request
-      const tx2 = wbiInstance.claimDataRequests([data1], fakePoe, fakePubKey, fakeuHelpers, fakevHelpers, fakeSig, {
-        from: accounts[1],
-      })
-      await waitForHash(tx2)
-
-      // should revert when trying to claim it again
-      await truffleAssert.reverts(wbiInstance.claimDataRequests([data1], fakePoe, fakePubKey, fakeuHelpers, fakevHelpers, fakeSig, {
-        from: accounts[1],
-      }), "One of the listed data requests was already claimed")
-    })
-    it("should revert when trying to report a dr inclusion that was already reported", async () => {
-      const drBytes = web3.utils.fromAscii("This is a DR5")
-      const resBytes = web3.utils.fromAscii("This is a result")
+      var blockHeader = "0x" + sha.sha256("block header")
       const roots = calculateRoots(drBytes, resBytes)
-      const epoch = 3
-      var blockHeader = "0x" + sha.sha256("block header 2")
-      var dummySybling = 1
-
-      // post data request
-      const fakePoe = [1, 1, 1, 1]
-      const fakePubKey = [1, 1]
-      const fakeuHelpers = [1, 1]
-      const fakevHelpers = [1, 1, 2, 2]
-      const fakeSig = web3.utils.fromAscii("This is a signature")
-
-      const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
-      const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-      let data1 = txReceipt1.logs[0].data
-
-      // claim data request
-      const tx2 = wbiInstance.claimDataRequests([data1], fakePoe, fakePubKey, fakeuHelpers, fakevHelpers, fakeSig, {
-        from: accounts[1],
-      })
-      await waitForHash(tx2)
-
+      const epoch = 2
       const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
         from: accounts[0],
       })
       await waitForHash(txRelay)
 
-      let concatenated = web3.utils.hexToBytes(blockHeader).concat(
+      // claim data request
+      const tx2 = wbiInstance.claimDataRequests(
+        [data1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        fakeSig, {
+          from: accounts[1],
+        })
+      await waitForHash(tx2)
+
+      // should revert when trying to claim it again
+      await truffleAssert.reverts(
+        wbiInstance.claimDataRequests(
+          [data1],
+          proof,
+          publicKey,
+          fastVerifyParams[0],
+          fastVerifyParams[1],
+          fakeSig, {
+            from: accounts[1],
+          }),
+        "One of the listed data requests was already claimed")
+    })
+
+    it("should revert when trying to report a dr inclusion that was already reported", async () => {
+      const drBytes = web3.utils.fromAscii("This is a DR5")
+      const resBytes = web3.utils.fromAscii("This is a result")
+      var dummySybling = 1
+
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[1].proof
+      const proof = await wbiInstance.decodeProof(proofBytes)
+      const message = data.poe[1].lastBeacon
+      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+      const fakeSig = web3.utils.fromAscii("This is a signature")
+
+      // post data request
+      const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      const txHash1 = await waitForHash(tx1)
+      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      let data1 = txReceipt1.logs[0].data
+
+      var blockHeader1 = "0x" + sha.sha256("block header")
+      const roots1 = calculateRoots(drBytes, resBytes)
+      const epoch1 = 2
+      const txRelay1 = blockRelay.postNewBlock(blockHeader1, epoch1, roots1[0], roots1[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay1)
+
+      // claim data request
+      const tx2 = wbiInstance.claimDataRequests(
+        [data1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        fakeSig, {
+          from: accounts[1],
+        })
+      await waitForHash(tx2)
+
+      var blockHeader2 = "0x" + sha.sha256("block header 2")
+      const roots2 = calculateRoots(drBytes, resBytes)
+      const epoch2 = 3
+      const txRelay2 = blockRelay.postNewBlock(blockHeader2, epoch2, roots2[0], roots2[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay2)
+
+      let concatenated = web3.utils.hexToBytes(blockHeader2).concat(
         web3.utils.hexToBytes(
           web3.utils.padLeft(
-            web3.utils.toHex(epoch), 64
+            web3.utils.toHex(epoch2), 64
           )
         )
       )
@@ -432,29 +516,31 @@ contract("WBI", accounts => {
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
       // post data request inclusion
-      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [data1], 0, blockHeader, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [data1], 0, blockHeader2, {
         from: accounts[0],
       })
       await waitForHash(tx3)
 
       // assert it fails when trying to report the dr inclusion again
-      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(data1, [dummySybling], 1, blockHeader, {
+      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(data1, [dummySybling], 1, blockHeader2, {
         from: accounts[1],
       }), "DR already included")
     })
+
     it("should revert when reporting a result for a dr for which its inclusion was not reported yet", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR6")
       const resBytes = web3.utils.fromAscii("This is a result")
-      var blockHeader = 1
       var dummySybling = 1
 
-      // post data request
-      const fakePoe = [1, 1, 1, 1]
-      const fakePubKey = [1, 1]
-      const fakeuHelpers = [1, 1]
-      const fakevHelpers = [1, 1, 2, 2]
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[1].proof
+      const proof = await wbiInstance.decodeProof(proofBytes)
+      const message = data.poe[1].lastBeacon
+      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
       const fakeSig = web3.utils.fromAscii("This is a signature")
 
+      // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
@@ -463,10 +549,24 @@ contract("WBI", accounts => {
       let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       let data1 = txReceipt1.logs[0].data
 
-      // claim data request
-      const tx2 = wbiInstance.claimDataRequests([data1], fakePoe, fakePubKey, fakeuHelpers, fakevHelpers, fakeSig, {
-        from: accounts[1],
+      var blockHeader = "0x" + sha.sha256("block header")
+      const roots = calculateRoots(drBytes, resBytes)
+      const epoch = 2
+      const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
+        from: accounts[0],
       })
+      await waitForHash(txRelay)
+
+      // claim data request
+      const tx2 = wbiInstance.claimDataRequests(
+        [data1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        fakeSig, {
+          from: accounts[1],
+        })
       await waitForHash(tx2)
 
       // assert reporting a result when inclusion has not been proved fails
@@ -478,16 +578,14 @@ contract("WBI", accounts => {
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR7")
       const resBytes = web3.utils.fromAscii("This is a result")
-      const roots = calculateRoots(drBytes, resBytes)
-      const epoch = 4
 
-      const fakePoe = [1, 1, 1, 1]
-      const fakePubKey = [1, 1]
-      const fakeuHelpers = [1, 1]
-      const fakevHelpers = [1, 1, 2, 2]
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[0].proof
+      const proof = await wbiInstance.decodeProof(proofBytes)
+      const message = data.poe[0].lastBeacon
+      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
       const fakeSig = web3.utils.fromAscii("This is a signature")
-
-      var blockHeader = "0x" + sha.sha256("block header 3")
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
@@ -499,41 +597,50 @@ contract("WBI", accounts => {
       let data1 = txReceipt1.logs[0].data
 
       // claim data request
-      const tx2 = wbiInstance.claimDataRequests([data1], fakePoe, fakePubKey, fakeuHelpers, fakevHelpers, fakeSig, {
-        from: accounts[1],
-      })
+      const tx2 = wbiInstance.claimDataRequests(
+        [data1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        fakeSig, {
+          from: accounts[1],
+        })
       await waitForHash(tx2)
 
-      // post new block
+      var blockHeader2 = "0x" + sha.sha256("block header")
+      const roots2 = calculateRoots(drBytes, resBytes)
+      const epoch2 = 2
 
-      const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
+      // post new block
+      const txRelay2 = blockRelay.postNewBlock(blockHeader2, epoch2, roots2[0], roots2[1], {
         from: accounts[0],
       })
-      await waitForHash(txRelay)
+      await waitForHash(txRelay2)
 
-      // report data request inclusion
-      let concatenated = web3.utils.hexToBytes(blockHeader).concat(
+      let concatenated = web3.utils.hexToBytes(blockHeader2).concat(
         web3.utils.hexToBytes(
           web3.utils.padLeft(
-            web3.utils.toHex(epoch), 64
+            web3.utils.toHex(epoch2), 64
           )
         )
       )
       let beacon = await wbiInstance.getLastBeacon.call()
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [data1], 0, blockHeader, {
+      // report data request inclusion
+      const tx3 = wbiInstance.reportDataRequestInclusion(data1, [data1], 0, blockHeader2, {
         from: accounts[0],
       })
       await waitForHash(tx3)
 
       // report result
-      const tx4 = wbiInstance.reportResult(data1, [], 0, blockHeader, resBytes, {
+      const tx4 = wbiInstance.reportResult(data1, [], 0, blockHeader2, resBytes, {
         from: accounts[1] })
       await waitForHash(tx4)
 
       // revert when reporting the same result
-      await truffleAssert.reverts(wbiInstance.reportResult(data1, [], 1, blockHeader, resBytes, {
+      await truffleAssert.reverts(wbiInstance.reportResult(data1, [], 1, blockHeader2, resBytes, {
         from: accounts[1] }), "Result already included")
     })
   })

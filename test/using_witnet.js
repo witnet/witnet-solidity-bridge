@@ -3,6 +3,8 @@ const BlockRelay = artifacts.require("BlockRelay")
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
 const sha = require("js-sha256")
 
+const data = require("./data.json")
+
 contract("Using witnet", accounts => {
   describe("Using witnet test suite", () => {
     let usingWitnet
@@ -114,14 +116,16 @@ contract("Using witnet", accounts => {
       var expectedResHash = "0x" + hash.hex()
       const epoch = 1
 
-      const fakePoe = [1, 1, 1, 1]
-      const fakePubKey = [1, 1]
-      const fakeuHelpers = [1, 1]
-      const fakevHelpers = [1, 1, 2, 2]
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[0].proof
+      const proof = await wbi.decodeProof(proofBytes)
+      const message = data.poe[0].lastBeacon
+      const fastVerifyParams = await wbi.computeFastVerifyParams(publicKey, proof, message)
       const fakeSig = web3.utils.fromAscii("This is a signature")
 
       // Claim Data Request Inclusion
-      let tx2 = wbi.claimDataRequests([expectedId], fakePoe, fakePubKey, fakeuHelpers, fakevHelpers, fakeSig)
+      let tx2 = wbi.claimDataRequests([expectedId], proof, publicKey, fastVerifyParams[0], fastVerifyParams[1], fakeSig)
       await waitForHash(tx2)
 
       let drInfo2 = await wbi.requests(expectedId)
