@@ -128,7 +128,7 @@ contract("WBI", accounts => {
       const proof = await wbiInstance.decodeProof(proofBytes)
       const message = data.poe[0].lastBeacon
       const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
-      const fakeSig = web3.utils.fromAscii("This is a signature")
+      const signature = data.signature
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
@@ -146,7 +146,7 @@ contract("WBI", accounts => {
         publicKey,
         fastVerifyParams[0],
         fastVerifyParams[1],
-        fakeSig, {
+        signature, {
           from: account2,
         })
       await waitForHash(tx2)
@@ -262,7 +262,7 @@ contract("WBI", accounts => {
       const proof = await wbiInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
       const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
-      const fakeSig = web3.utils.fromAscii("This is a signature")
+      const signature = data.signature
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
@@ -295,7 +295,7 @@ contract("WBI", accounts => {
         publicKey,
         fastVerifyParams[0],
         fastVerifyParams[1],
-        fakeSig, {
+        signature, {
           from: accounts[1],
         })
       await waitForHash(tx2)
@@ -331,7 +331,7 @@ contract("WBI", accounts => {
       const proof = await wbiInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
       const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
-      const fakeSig = web3.utils.fromAscii("This is a signature")
+      const signature = data.signature
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
@@ -358,7 +358,7 @@ contract("WBI", accounts => {
         publicKey,
         fastVerifyParams[0],
         fastVerifyParams[1],
-        fakeSig, {
+        signature, {
           from: accounts[1],
         })
       await waitForHash(tx2)
@@ -410,7 +410,7 @@ contract("WBI", accounts => {
       const proof = await wbiInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
       const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
-      const fakeSig = web3.utils.fromAscii("This is a signature")
+      const signature = data.signature
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
@@ -436,7 +436,7 @@ contract("WBI", accounts => {
         publicKey,
         fastVerifyParams[0],
         fastVerifyParams[1],
-        fakeSig, {
+        signature, {
           from: accounts[1],
         })
       await waitForHash(tx2)
@@ -449,7 +449,7 @@ contract("WBI", accounts => {
           publicKey,
           fastVerifyParams[0],
           fastVerifyParams[1],
-          fakeSig, {
+          signature, {
             from: accounts[1],
           }),
         "One of the listed data requests was already claimed")
@@ -466,7 +466,7 @@ contract("WBI", accounts => {
       const proof = await wbiInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
       const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
-      const fakeSig = web3.utils.fromAscii("This is a signature")
+      const signature = data.signature
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
@@ -492,7 +492,7 @@ contract("WBI", accounts => {
         publicKey,
         fastVerifyParams[0],
         fastVerifyParams[1],
-        fakeSig, {
+        signature, {
           from: accounts[1],
         })
       await waitForHash(tx2)
@@ -538,7 +538,7 @@ contract("WBI", accounts => {
       const proof = await wbiInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
       const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
-      const fakeSig = web3.utils.fromAscii("This is a signature")
+      const signature = data.signature
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
@@ -564,7 +564,7 @@ contract("WBI", accounts => {
         publicKey,
         fastVerifyParams[0],
         fastVerifyParams[1],
-        fakeSig, {
+        signature, {
           from: accounts[1],
         })
       await waitForHash(tx2)
@@ -585,7 +585,7 @@ contract("WBI", accounts => {
       const proof = await wbiInstance.decodeProof(proofBytes)
       const message = data.poe[0].lastBeacon
       const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
-      const fakeSig = web3.utils.fromAscii("This is a signature")
+      const signature = data.signature
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
@@ -603,7 +603,7 @@ contract("WBI", accounts => {
         publicKey,
         fastVerifyParams[0],
         fastVerifyParams[1],
-        fakeSig, {
+        signature, {
           from: accounts[1],
         })
       await waitForHash(tx2)

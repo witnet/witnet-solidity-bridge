@@ -134,6 +134,7 @@ contract WitnetBridgeInterface is VRF {
     uint256[4] memory _vPointHelpers,
     bytes memory addrSignature)
     public
+    validSignature(_publicKey, addrSignature)
     poeValid(_poe,_publicKey, _uPoint,_vPointHelpers)
   {
     uint256 currentEpoch = block.number;
@@ -301,8 +302,8 @@ contract WitnetBridgeInterface is VRF {
 
 
     bytes32 msg_hash = sha256(message);
-    address hashed_key = address(uint256(keccak256(abi.encodePacked(_publicKey[0],  _publicKey[1]))) & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
-    
+    //address hashed_key = address(uint256(keccak256(abi.encodePacked(_publicKey[0],  _publicKey[1]))) & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+    address hashed_key = pointToAddress(_publicKey[0], _publicKey[1]);
     return ecrecover(msg_hash, v, r, s) == hashed_key;
   }
 

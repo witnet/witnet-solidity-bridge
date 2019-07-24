@@ -122,17 +122,19 @@ contract("Using witnet", accounts => {
       const proof = await wbi.decodeProof(proofBytes)
       const message = data.poe[0].lastBeacon
       const fastVerifyParams = await wbi.computeFastVerifyParams(publicKey, proof, message)
-      const fakeSig = web3.utils.fromAscii("This is a signature")
+      const signature = data.signature
 
       // Claim Data Request Inclusion
-      let tx2 = wbi.claimDataRequests([expectedId], proof, publicKey, fastVerifyParams[0], fastVerifyParams[1], fakeSig)
+      let tx2 = wbi.claimDataRequests([expectedId], proof, publicKey, fastVerifyParams[0], fastVerifyParams[1], signature, {
+        from: accounts[1],
+      })
       await waitForHash(tx2)
 
       let drInfo2 = await wbi.requests(expectedId)
       let pkh = drInfo2.pkhClaim
       let timestamp = drInfo2.timestamp
       assert(timestamp)
-      assert.equal(pkh, accounts[0])
+      assert.equal(pkh, accounts[1])
 
       // Report block
       blockRelay.postNewBlock(expectedBlockHash, epoch, expectedDrHash, expectedResHash, {
