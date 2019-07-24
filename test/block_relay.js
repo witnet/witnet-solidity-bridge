@@ -10,7 +10,7 @@ contract("Block relay", accounts => {
         from: accounts[0],
       })
     })
-    it("should post a new block", async () => {
+    it("should post a new block in the block relay", async () => {
       let expectedId = "0x" + sha.sha256("first id")
       let tx1 = blockRelayInstance.postNewBlock(expectedId, 1, 1, {
         from: accounts[0],
@@ -18,7 +18,7 @@ contract("Block relay", accounts => {
 
       await waitForHash(tx1)
     })
-    it("should revert inserting the same block", async () => {
+    it("should revert when inserting the same block", async () => {
       let expectedId = "0x" + sha.sha256("first id")
       await truffleAssert.reverts(blockRelayInstance.postNewBlock(expectedId, 1, 1, {
         from: accounts[0],
@@ -31,13 +31,13 @@ contract("Block relay", accounts => {
       })
       await waitForHash(tx1)
     })
-    it("should revert because another address is trying to insert", async () => {
+    it("should revert because an invalid address is trying to insert", async () => {
       let expectedId = "0x" + sha.sha256("third id")
       await truffleAssert.reverts(blockRelayInstance.postNewBlock(expectedId, 1, 1, {
         from: accounts[1],
       }), "Sender not authorized")
     })
-    it("should read the first blocks merkle root", async () => {
+    it("should read the first blocks merkle roots", async () => {
       let expectedId = "0x" + sha.sha256("first id")
       let drRoot = await blockRelayInstance.readDrMerkleRoot.call(expectedId, {
         from: accounts[0],
@@ -48,7 +48,7 @@ contract("Block relay", accounts => {
       assert.equal(drRoot, 1)
       assert.equal(tallyRoot, 1)
     })
-    it("should read the second blocks merkle root", async () => {
+    it("should read the second blocks merkle roots", async () => {
       let expectedId = "0x" + sha.sha256("second id")
       let drRoot = await blockRelayInstance.readDrMerkleRoot.call(expectedId, {
         from: accounts[0],
@@ -59,7 +59,7 @@ contract("Block relay", accounts => {
       assert.equal(drRoot, 2)
       assert.equal(tallyRoot, 3)
     })
-    it("should revert for trying to read a non-existent block", async () => {
+    it("should revert for trying to read from a non-existent block", async () => {
       let expectedId = "0x" + sha.sha256("forth id")
       await truffleAssert.reverts(blockRelayInstance.readDrMerkleRoot(expectedId, {
         from: accounts[1],

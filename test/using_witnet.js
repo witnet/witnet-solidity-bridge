@@ -26,7 +26,8 @@ contract("Using witnet", accounts => {
       assert.equal(web3.utils.toHex(id0), expectedId)
     })
 
-    it("create a data request and post it in the wbi", async () => {
+    it("should create a data request, post it in the wbi and check balances afterwards", async () => {
+      // Create the data request
       let stringDr = "DataRequest Example"
       let expectedId = "0x" + sha.sha256(stringDr)
       let actualBalance = await web3.eth.getBalance(accounts[0])
@@ -36,6 +37,7 @@ contract("Using witnet", accounts => {
         value: 100,
       })
 
+      // Read the data request
       const txHash0 = await waitForHash(tx0)
       let txReceipt0 = await web3.eth.getTransactionReceipt(txHash0)
       let id0 = txReceipt0.logs[0].data
@@ -43,12 +45,14 @@ contract("Using witnet", accounts => {
       let readDrBytes = await wbi.readDataRequest.call(id0)
       assert.equal(readDrBytes, web3.utils.utf8ToHex(stringDr))
 
+      // Retrieve rewards
       let drInfo = await wbi.requests(expectedId)
       let inclusionReward = drInfo.inclusionReward
       let tallyReward = drInfo.tallyReward
       assert.equal("70", inclusionReward.toString())
       assert.equal("30", tallyReward.toString())
 
+      // Assert correct balances
       let afterBalance = await web3.eth.getBalance(accounts[0])
       assert(afterBalance < actualBalance)
 
@@ -59,7 +63,8 @@ contract("Using witnet", accounts => {
       assert.equal(100, wbiBalance)
     })
 
-    it("upgrade Data Request", async () => {
+    it("should upgrade previos drs reward and check the balances", async () => {
+      // Create the data request
       let stringDr = "DataRequest Example"
       let expectedId = "0x" + sha.sha256(stringDr)
       let actualBalance = await web3.eth.getBalance(accounts[0])
@@ -70,6 +75,7 @@ contract("Using witnet", accounts => {
         value: 100,
       })
 
+      // Get rewards
       await waitForHash(tx1)
       let drInfo = await wbi.requests(expectedId)
       let inclusionReward = drInfo.inclusionReward
@@ -77,6 +83,7 @@ contract("Using witnet", accounts => {
       assert.equal("140", inclusionReward.toString())
       assert.equal("60", tallyReward.toString())
 
+      // Assert correct balances
       let afterBalance = await web3.eth.getBalance(accounts[0])
       assert(afterBalance < actualBalance)
 
@@ -87,7 +94,11 @@ contract("Using witnet", accounts => {
       assert.equal(200, wbiBalance)
     })
 
-    it("read Data Request result", async () => {
+    it("should post data request, claim a data request," +
+       "report a block return inclusion of data request and result (valid PoIs)" +
+       "and read the result",
+    async () => {
+      // Generate necessary hashes
       let stringDr = "DataRequest Example"
       let stringRes = "Result"
       let expectedId = "0x" + sha.sha256(stringDr)
