@@ -93,7 +93,7 @@ contract BlockRelay {
   }
 
   /// @dev Read the beacon of the last block inserted
-  /// @return bytes to be signed by the node
+  /// @return bytes to be signed by bridge nodes
   function getLastBeacon()
     public
     view

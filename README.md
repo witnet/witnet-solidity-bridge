@@ -8,6 +8,8 @@ functionality to relay data requests and their results from Ethereum to Witnet a
 - `UsingWitnet`, an inheritable client contract that injects methods for interacting with the WBI in the most convenient way.
 - `BlockRelay`, a contract that incentivizes secure relaying of Witnet blocks into Ethereum so that Witnet transactions can be verified by the EVM.
 
+## WitnetBridgeInterface
+
 The `WitnetBridgeInterface` contract provides the following methods:
 
 - **postDataRequest**:
@@ -36,8 +38,8 @@ The `WitnetBridgeInterface` contract provides the following methods:
     data requests.
 
 - **reportDataRequestInclusion**:
-  - _description_: presents a proof of inclusion to prove that the request was posted into Witnet so as to unlock the 
-  inclusion reward that was put aside for the claiming identity (public key hash).
+  - _description_: presents a proof of inclusion, proof of eligibility and a valid signature of the msg.sender to prove that the request was posted into Witnet so as to unlock the 
+  inclusion reward that was put aside for the claiming identity (public key hash). The reward is only unlocked if the all proof verifications (inclusion, eligibility and signature) succeed.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
     - *_poi*: a proof of inclusion proving that the data request appears listed in one recent block 
@@ -45,6 +47,7 @@ The `WitnetBridgeInterface` contract provides the following methods:
     - *_index*: index in the merkle tree.
     - *_blockHash*: the hash of the block in which the data request 
     was inserted.
+
 - **reportResult**:
   - _description_: reports the result of a data request in Witnet.
   - _inputs_:
@@ -54,18 +57,41 @@ The `WitnetBridgeInterface` contract provides the following methods:
     - *_blockHash*: the hash of the block in which the result (tally) 
     was inserted.
     - *_result*: the result itself as `bytes`.
+
 - **readDataRequest**:
   - _description_: retrieves the bytes of the serialization of one data request from the WBI.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
   - _output_:
     - the data request bytes.
+
 - **readResult**:
   - _description_: retrieves the result (if already available) of one data request from the WBI.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
   - _output_:
     - the result of the data request as `bytes`.
+
+- **readDrHash**:
+  - _description_: retrieves the data request transaction hash in Witnet (if it has already been included and presented) of one data request from the WBI.
+  - _inputs_:
+    - *_id*: the unique identifier of the data request.
+  - _output_:
+    - the data request transaction hash.
+
+- **getLastBeacon**:
+  - _description_: queries the block relay contract to get knowledge of the last beacon inserted.
+  - _output_:
+    - the last beacon as byte concatenation of (block_hash||epoch).
+
+In addition, `WitnetBridgeInterface` inherits the `VRF` contract from https://github.com/witnet/vrf-solidity, and as such, all its public methods are also available to be queried. This is extremely important as the proof of eligibility is verified with the `fastVerify` method, which requires some auxiliary data points in addition to the proof itself. These can be calculated using the following methods:
+
+- *computeFastVerifyParams*: which computes the necessary auxiliary points to perform the fast (and cheaper) verification in the WBI.
+- *decodeProof*: if the proof is serialized and needs to be decomposed, this function decodes a VRF proof into the parameters [Gamma_x, Gamma_y c, s].
+- *decodePoint*: if the point is in compressed format, this function decodes a compressed secp256k1 point into its uncompressed representation [P_x, P_y].
+
+
+## BlockRelay
 
 The `BlockRelay` contract has the following methods:
 
@@ -75,19 +101,28 @@ The `BlockRelay` contract has the following methods:
     - *_blockHash*: Hash of the block header.
     - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
     - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
+
 - **readDrMerkleRoot**:
   - _description_: retrieve the requests-only merkle root hash that was reported for a specific block header.
   - _inputs_:
     - *_blockHash*: hash of the block header.
   - _output_:
     - requests-only merkle root hash in the block header.
+
 - **readTallyMerkleRoot**:
   - _description_: retrieve the tallies-only merkle root hash that was reported for a specific block header.
   - _inputs_:
     - *_blockHash*: hash of the block header.
   - _output_:
     - tallies-only merkle root hash in the block header.
-  
+
+  **getLastBeacon**:
+  - _description_: retrieve the last beacon that was inserted in the block relay.
+  - _output_:
+    - the last beacon as byte concatenation of (block_hash||epoch).
+
+## UsingWitnet
+
 The `UsingWitnet` contract injects the following methods into the contracts inheriting from it:
 
 - **witnetPostDataRequest**:
@@ -118,12 +153,11 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
 
 ## Known limitations:
 
-- `block relay` is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to decentralize block header reporting.
-- `verify_poe` is still empty. Proof of eligibility verification trough VRF should be implemented.
+- `BlockRelay` is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to decentralize block header reporting.
 
 ## Usage
 
-The `UsingWitnet.sol` contract can be used directly by inheritance or by instantiating it:
+The `UsingWitnet.sol` contract can be used directly by inheritance:
 
 ```solidity
 pragma solidity ^0.5.0;

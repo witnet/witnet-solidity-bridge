@@ -36,6 +36,7 @@ contract WitnetBridgeInterface is VRF {
 
   // Event emitted when a DR inclusion proof is posted
   event IncludedRequest(address indexed _from, uint256 _id);
+
   // Event emitted when a result proof is posted
   event PostedResult(address indexed _from, uint256 _id);
 
@@ -44,6 +45,7 @@ contract WitnetBridgeInterface is VRF {
     require(_value >= _tally, "Transaction value needs to be equal or greater than tally reward");
     _;
   }
+
   // Ensures the poe is valid
   modifier poeValid(
     uint256[4] memory _poe,
@@ -54,11 +56,11 @@ contract WitnetBridgeInterface is VRF {
     _;
   }
 
-  // Ensures the poe is valid
+  // Ensures signature (sign(msg.sender)) is valid
   modifier validSignature(
     uint256[2] memory _publicKey,
     bytes memory addrSignature) {
-    require(verifySig(abi.encodePacked(msg.sender), _publicKey, addrSignature) == true, "Not a valid Signature");
+    require(verifySig(abi.encodePacked(msg.sender), _publicKey, addrSignature) == true, "Not a valid signature");
     _;
   }
 
@@ -67,6 +69,7 @@ contract WitnetBridgeInterface is VRF {
     require(requests[_id].drHash == 0, "DR already included");
     _;
   }
+
   // Ensures the DR inclusion has been already reported
   modifier drIncluded(uint256 _id) {
     require(requests[_id].drHash != 0, "DR not yet included");
@@ -229,6 +232,16 @@ contract WitnetBridgeInterface is VRF {
     return requests[_id].drHash;
   }
 
+  /// @dev Read the beacon of the last block inserted
+  /// @return bytes to be signed by the node as PoE
+  function getLastBeacon()
+    public
+    view
+  returns(bytes memory)
+  {
+    return blockRelay.getLastBeacon();
+  }
+
   /// @dev Claim drs to be posted to Witnet by the node
   /// @param _poe PoE claiming eligibility
   /// @param _publicKey The public key as an array composed of `[pubKey-x, pubKey-y]`
@@ -261,7 +274,7 @@ contract WitnetBridgeInterface is VRF {
     uint256 _root,
     uint256 _index,
     uint256 _element)
-  public pure returns(bool){
+  internal pure returns(bool){
     uint256 tree = _element;
     uint256 index = _index;
     for (uint i = 0; i<_poi.length; i++){
@@ -276,19 +289,24 @@ contract WitnetBridgeInterface is VRF {
     return _root==tree;
   }
 
+  /// @dev Verifies the validity of a signature
+  /// @param _message message to be verified
+  /// @param _publicKey public key of the signer as `[pubKey-x, pubKey-y]`
+  /// @param _addrSignature the signature to verify asas r||s||v
+  /// @return true or false depending the validity
   function verifySig(
-    bytes memory message,
+    bytes memory _message,
     uint256[2] memory _publicKey,
-    bytes memory addrSignature
+    bytes memory _addrSignature
     )
   internal returns(bool){
     bytes32 r;
     bytes32 s;
     uint8 v;
     assembly {
-            r := mload(add(addrSignature, 0x20))
-            s := mload(add(addrSignature, 0x40))
-            v := byte(0, mload(add(addrSignature, 0x60)))
+            r := mload(add(_addrSignature, 0x20))
+            s := mload(add(_addrSignature, 0x40))
+            v := byte(0, mload(add(_addrSignature, 0x60)))
     }
 
     if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
@@ -301,19 +319,8 @@ contract WitnetBridgeInterface is VRF {
     v = 27 + v;
 
 
-    bytes32 msg_hash = sha256(message);
-    //address hashed_key = address(uint256(keccak256(abi.encodePacked(_publicKey[0],  _publicKey[1]))) & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+    bytes32 msg_hash = sha256(_message);
     address hashed_key = pointToAddress(_publicKey[0], _publicKey[1]);
     return ecrecover(msg_hash, v, r, s) == hashed_key;
-  }
-
-  /// @dev Read the beacon of the last block inserted
-  /// @return bytes to be signed by the node as PoE
-  function getLastBeacon()
-    public
-    view
-  returns(bytes memory)
-  {
-    return blockRelay.getLastBeacon();
   }
 }
