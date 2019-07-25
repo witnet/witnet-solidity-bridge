@@ -643,6 +643,37 @@ contract("WBI", accounts => {
       await truffleAssert.reverts(wbiInstance.reportResult(data1, [], 1, blockHeader2, resBytes, {
         from: accounts[1] }), "Result already included")
     })
+    it("should revert because of trying to claim with an invalid signature",
+      async () => {
+        const drBytes = web3.utils.fromAscii("This is a DR7")
+
+        // VRF params
+        const publicKey = [data.publicKey.x, data.publicKey.y]
+        const proofBytes = data.poe[0].proof
+        const proof = await wbiInstance.decodeProof(proofBytes)
+        const message = data.poe[0].lastBeacon
+        const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+        const signature = web3.utils.fromAscii("this is a fake sig")
+
+        // post data request
+        const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        })
+        const txHash1 = await waitForHash(tx1)
+        let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+        let data1 = txReceipt1.logs[0].data
+
+        // revert when reporting the same result
+        await truffleAssert.reverts(wbiInstance.claimDataRequests(
+          [data1],
+          proof,
+          publicKey,
+          fastVerifyParams[0],
+          fastVerifyParams[1],
+          signature, {
+            from: accounts[1] }), "Not a valid signature")
+      })
   })
 })
 
