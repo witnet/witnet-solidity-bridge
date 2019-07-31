@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "../contracts/./UsingWitnet.sol";
+import "../contracts/./UsingWitnetBytes.sol";
 
 
 /**
@@ -9,9 +9,9 @@ import "../contracts/./UsingWitnet.sol";
  * 1. Raise the visibility modifier of UsingWitnet contract functions for testing purposes
  * @author Witnet Foundation
  */
-contract UsingWitnetTestHelper is UsingWitnet{
+contract UsingWitnetTestHelper is UsingWitnetBytes {
 
-  constructor (address _wbiAddress) UsingWitnet (_wbiAddress) public {}
+  constructor (address _wbiAddress) UsingWitnetBytes(_wbiAddress) public {}
 
   function _witnetPostDataRequest(bytes memory _dr, uint256 _tallyReward) public payable returns(uint256 id){
     return witnetPostDataRequest(_dr, _tallyReward);

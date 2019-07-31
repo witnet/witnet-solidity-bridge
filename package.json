@@ -28,7 +28,11 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
+    "@ensdomains/buffer": "0.0.10",
     "openzeppelin-solidity": "2.3.0",
+    "solidity-cborutils": "^1.0.5",
+    "solium": "^1.2.4",
+    "solium-plugin-security": "^0.1.1",
     "truffle-hdwallet-provider": "^1.0.7",
     "truffle-plugin-verify": "^0.3.2",
     "vrf-solidity": "0.1.0"
@@ -42,7 +46,7 @@
     "eslint-plugin-promise": "^4.1.1",
     "eslint-plugin-standard": "^4.0.0",
     "ethlint": "^1.2.4",
-    "ganache-cli": "^6.4.3",
+    "ganache-cli": "^6.5.0",
     "js-sha256": "^0.9.0",
     "solidity-coverage": "^0.5.11",
     "truffle": "^5.0.20",
