@@ -139,6 +139,7 @@ contract WitnetBridgeInterface is VRF {
     public
     validSignature(_publicKey, addrSignature)
     poeValid(_poe,_publicKey, _uPoint,_vPointHelpers)
+    returns(bool)
   {
     uint256 currentEpoch = block.number;
     uint256 index;
@@ -154,6 +155,7 @@ contract WitnetBridgeInterface is VRF {
         revert("One of the listed data requests was already claimed");
       }
     }
+    return true;
   }
 
   /// @dev Presents a proof of inclusion to prove that the request was posted into Witnet so as to unlock the inclusion reward that was put aside for the claiming identity (public key hash).
