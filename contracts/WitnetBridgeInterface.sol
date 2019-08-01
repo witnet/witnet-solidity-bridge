@@ -318,8 +318,7 @@ contract WitnetBridgeInterface is VRF {
     if (v != 0 && v != 1) {
       return false;
     }
-    v = 27 + v;
-
+    v = 28 - v;
 
     bytes32 msg_hash = sha256(_message);
     address hashed_key = pointToAddress(_publicKey[0], _publicKey[1]);
