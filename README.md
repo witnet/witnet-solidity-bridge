@@ -176,6 +176,12 @@ contract Example is UsingWitnet {
 }
 ```
 
+## Contract Addresses Ropsten
+
+WBI: 0xc3d5ef25fc7c33ba7556617fb433cab5448f97ac
+
+Block Relay: 0x9a253dca7d3e2a8bfb57b1316d661f2ea05ade4a
+
 ## License
 
 `witnet-ethereum-bridge` is published under the [MIT license][license].
