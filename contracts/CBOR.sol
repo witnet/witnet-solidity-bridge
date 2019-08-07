@@ -40,14 +40,11 @@ library CBOR {
             majorType = initialByte >> 5;
             additionalInformation = initialByte & 0x1f;
 
-            // Item length calculation and validation
-            length = readLength(buffer, additionalInformation);
-            require(length < UINT64_MAX || (majorType > 1 && majorType < 7), "Invalid length of serialized input");
-
             // Early CBOR tag parsing.
             // This does not interrupt the decoding, it only intercepts the tag and restarts the
             if (majorType == 6) {
-                cbor.setTag(length);
+                uint64 tag = readLength(buffer, additionalInformation);
+                cbor.setTag(tag);
             } else {
                 isTagged = false;
             }
@@ -68,6 +65,10 @@ library CBOR {
             //    return readFloat64();
             //}
         }
+
+        // Item length calculation and validation
+        length = readLength(buffer, additionalInformation);
+        require(length < UINT64_MAX || (majorType > 1 && majorType < 7), "Invalid length of serialized input");
 
         // Specific parsers for each CBOR major type
         // Major type 0: natural numbers
