@@ -5,7 +5,7 @@ pragma solidity ^0.5.0;
  */
 contract Request {
     bytes public serialized;
-    bytes32 public id;
+    uint256 public id;
 
     // A `Request` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized
     // using Protocol Buffers. However, we cannot verify its validity at this point. This implies that contracts using
@@ -15,6 +15,6 @@ contract Request {
     // mismatch and a data request could be resolved with the result of another.
     constructor(bytes memory _serialized) public {
         serialized = _serialized;
-        id = sha256(_serialized);
+        id = uint256(sha256(_serialized));
     }
 }
