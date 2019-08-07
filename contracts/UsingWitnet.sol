@@ -23,6 +23,21 @@ contract UsingWitnet is UsingWitnetBytes {
     }
 
     /**
+    * @notice Check if a request has been accepted into Witnet
+    * @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third
+    * parties) before this method returns `true`.
+    * @param _dr A request that has been previously sent to the WitnetBridgeInterface.
+    * @return A boolean telling if the request has been already accepted or not. `false` do not mean rejection, though.
+    */
+    function witnetCheckRequestAccepted(Request _dr) public view returns(bool){
+        // Find the request in the
+        (,,,,,uint256 drHash,) = wbi.requests(uint256(_dr.id()));
+        // If the hash of the data request transaction in Witnet is not the default, then it means that inclusion of the
+        // request has been proven to the WBI.
+        return drHash != 0;
+    }
+
+    /**
     * @notice Upgrade the rewards for a request previously included
     * @dev Call to `upgrade_dr` function in the WitnetBridgeInterface contract
     * @param _dr The request included in the WitnetBridgeInterface
