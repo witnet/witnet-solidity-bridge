@@ -11,6 +11,12 @@ import "./WitnetBridgeInterface.sol";
  * Witnet network
  */
 contract UsingWitnet is UsingWitnetBytes {
+    // Provides a convenient way for client contracts extending this to block the execution of the main logic of the
+    // contract until a particular request has been successfully accepted into Witnet.
+    modifier witnetRequestAccepted(Request _request) {
+        require(witnetCheckRequestAccepted(_request));  // Revert if the data request is not accepted yet.
+        _;
+    }
     /**
     * @notice Send a new request to the Witnet network
     * @dev Call to `post_dr` function in the WitnetBridgeInterface contract
