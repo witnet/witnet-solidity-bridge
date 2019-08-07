@@ -1,9 +1,18 @@
 pragma solidity ^0.5.0;
 
+/**
+ * @title The serialized form of a Witnet data request.
+ */
 contract Request {
     bytes public serialized;
     bytes32 public id;
 
+    // A `Request` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized
+    // using Protocol Buffers. However, we cannot verify its validity at this point. This implies that contracts using
+    // the WBI should not be considered trustless before a valid Proof-of-Inclusion has been posted for the requests.
+    //
+    // The hash of the request is computed in the constructor to guarantee consistency. Otherwise there could be a
+    // mismatch and a data request could be resolved with the result of another.
     constructor(bytes memory _serialized) public {
         serialized = _serialized;
         id = sha256(_serialized);
