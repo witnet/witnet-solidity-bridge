@@ -46,7 +46,7 @@ library Buffer {
     * buffer (`true`).
     * @return The final position of the cursor (will equal `_offset` if `_relative` is `false`).
     */
-    function seek(Buffer.buffer memory self, uint64 _offset, bool _relative) internal returns(uint64) {
+    function seek(Buffer.buffer memory self, uint64 _offset, bool _relative) internal pure returns(uint64) {
         uint64 newCursor = _offset;
         // Deal with relative offsets
         if (_relative == true){
@@ -65,7 +65,7 @@ library Buffer {
     * @param _relativeOffset How many bytes to move the cursor forward.
     * @return The final position of the cursor.
     */
-    function seek(Buffer.buffer memory self, uint64 _relativeOffset) internal returns(uint64) {
+    function seek(Buffer.buffer memory self, uint64 _relativeOffset) internal pure returns(uint64) {
         return seek(self, _relativeOffset, true);
     }
 
@@ -73,7 +73,7 @@ library Buffer {
     * @notice Move the inner cursor back to the first byte in the buffer.
     * @param self An instance of `Buffer.buffer`.
     */
-    function rewind(Buffer.buffer memory self) internal {
+    function rewind(Buffer.buffer memory self) internal pure {
         self.cursor = 0;
     }
 

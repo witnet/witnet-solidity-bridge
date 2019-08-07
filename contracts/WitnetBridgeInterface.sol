@@ -318,7 +318,7 @@ contract WitnetBridgeInterface is VRF {
     uint256[2] memory _publicKey,
     bytes memory _addrSignature
     )
-  internal returns(bool){
+  internal pure returns(bool){
     bytes32 r;
     bytes32 s;
     uint8 v;
