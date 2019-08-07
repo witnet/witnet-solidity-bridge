@@ -28,10 +28,30 @@ library CBOR {
         Buffer.buffer memory buffer = Buffer.buffer(_input, 0);
         CBORValue cbor = new CBORValue();
 
-        // Extract basic CBOR properties from input bytes
-        uint8 initialByte = buffer.readUint8();
-        uint8 majorType = initialByte >> 5;
-        uint8 additionalInformation = initialByte & 0x1f;
+        uint8 initialByte;
+        uint8 majorType;
+        uint8 additionalInformation;
+        uint64 length;
+
+        bool isTagged = true;
+        while (isTagged) {
+            // Extract basic CBOR properties from input bytes
+            initialByte = buffer.readUint8();
+            majorType = initialByte >> 5;
+            additionalInformation = initialByte & 0x1f;
+
+            // Item length calculation and validation
+            length = readLength(buffer, additionalInformation);
+            require(length < UINT64_MAX || (majorType > 1 && majorType < 7), "Invalid length of serialized input");
+
+            // Early CBOR tag parsing.
+            // This does not interrupt the decoding, it only intercepts the tag and restarts the
+            if (majorType == 6) {
+                cbor.setTag(length);
+            } else {
+                isTagged = false;
+            }
+        }
 
         // Early float parsing.
         // This returns early, but all other `NoContent` values and the rest of major types need additional processing.
@@ -48,10 +68,6 @@ library CBOR {
             //    return readFloat64();
             //}
         }
-
-        // Item length calculation and validation
-        uint64 length = readLength(buffer, additionalInformation);
-        require(length < UINT64_MAX || (majorType > 1 && majorType < 7), "Invalid length of serialized input");
 
         // Specific parsers for each CBOR major type
         // Major type 0: natural numbers
@@ -102,9 +118,6 @@ library CBOR {
         // Major type 5: maps
         } else if (majorType == 5) {
             // TODO: add support for Map
-        // Major type 6: tags
-        } else if (majorType == 6) {
-            // TODO: add support for Tag
         // Major type 7: "NoContent" values
         } else if (majorType == 7) {
             // TODO: add support for NoContent
@@ -197,8 +210,18 @@ contract CBORValue {
     // Intermediate types are a user-friendly abstraction that sits half-way between
     enum CBORTypes { Null, Bool, Integer, Fixed, Bytes, Text, Array, Map }
 
+    // Generic wrapper for an error
+    struct Error {
+        uint16 code;
+        bytes extra;
+    }
+
     CBORTypes discriminant = CBORTypes.Null;
+    uint64 tag = ~uint64(0); // UINT64_MAX
+    bool isTagged = false;
+
     bytes bytesValue;
+    Error errorValue;
     int32 int32Value;
     int128 int128Value;
     uint64 uint64Value;
@@ -206,7 +229,7 @@ contract CBORValue {
 
     /**
      * @notice Make this contract contain a raw bytes value.
-     * @param memory _value The `bytes` value to wrap into this contract.
+     * @param _value The `bytes` value to wrap into this contract.
      */
     function setBytes(bytes memory _value) public {
         discriminant = CBORTypes.Bytes;
@@ -233,11 +256,19 @@ contract CBORValue {
 
     /**
      * @notice Make this contract contain a text string value.
-     * @param memory _value The `string` value to wrap into this contract.
+     * @param _value The `string` value to wrap into this contract.
      */
     function setString(string memory _value) public {
         discriminant = CBORTypes.Text;
         stringValue = _value;
+    }
+
+    /**
+     * @notice Tag the value of this contract.
+     * @param _tag The `uint64` value to use as CBOR tag.
+     */
+    function setTag(uint64 _tag) public {
+        tag = _tag;
     }
 
     /**
@@ -255,6 +286,14 @@ contract CBORValue {
      */
     function asBytes () public view instanceOf(CBORTypes.Bytes) returns(bytes memory) {
         return bytesValue;
+    }
+
+    /**
+     * @notice Get the error value of this contract as a `CBORValue.Error memory` value
+     * @return The `CBORValue.Error memory` contained in this contract.
+     */
+    function asError () public view instanceOf(CBORTypes.Bytes) returns(Error memory) {
+        return errorValue;
     }
 
     /**
@@ -289,7 +328,18 @@ contract CBORValue {
         return uint64Value;
     }
 
-    // Tell which kind of value is stored in this contract
+    /**
+     * @notice Get any CBOR tag that may be associated to this contract
+     * @return The currently set CBOR tag (UINT64_MAX by default)
+     */
+    function getTag () public view returns(uint64) {
+        return tag;
+    }
+
+    /**
+     * @notice Tell which kind of value is stored in this contract
+     * @return One of the member of the CBORTypes enums
+     */
     function getType () public view returns(CBORTypes) {
         return discriminant;
     }
