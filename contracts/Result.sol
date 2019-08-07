@@ -69,11 +69,11 @@ contract Result {
     }
 
     /**
-     * @notice Get the error code of this result as an `uint16` value
+     * @notice Get the error code of this result as a member of `ErrorCodes`
      * @return The `CBORValue.Error memory` contained in this result.
      */
-    function asError () public view onlyIfError returns(uint16) {
-        return value.asError().code;
+    function asError () public view onlyIfError returns(ErrorCodes) {
+        return ErrorCodes(value.asUint64());
     }
 
     /**

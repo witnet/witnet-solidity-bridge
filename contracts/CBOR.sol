@@ -210,18 +210,11 @@ contract CBORValue {
     // Intermediate types are a user-friendly abstraction that sits half-way between
     enum CBORTypes { Null, Bool, Integer, Fixed, Bytes, Text, Array, Map }
 
-    // Generic wrapper for an error
-    struct Error {
-        uint16 code;
-        bytes extra;
-    }
-
     CBORTypes discriminant = CBORTypes.Null;
     uint64 tag = ~uint64(0); // UINT64_MAX
     bool isTagged = false;
 
     bytes bytesValue;
-    Error errorValue;
     int32 int32Value;
     int128 int128Value;
     uint64 uint64Value;
@@ -286,14 +279,6 @@ contract CBORValue {
      */
     function asBytes () public view instanceOf(CBORTypes.Bytes) returns(bytes memory) {
         return bytesValue;
-    }
-
-    /**
-     * @notice Get the error value of this contract as a `CBORValue.Error memory` value
-     * @return The `CBORValue.Error memory` contained in this contract.
-     */
-    function asError () public view instanceOf(CBORTypes.Bytes) returns(Error memory) {
-        return errorValue;
     }
 
     /**
