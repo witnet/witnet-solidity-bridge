@@ -56,7 +56,7 @@ contract UsingWitnet is UsingWitnetBytes {
   * @param _request A request that was posted to Witnet
   * @return The result of the request as an instance of `Result`
   */
-  function witnetReadResult (Request _request) internal view returns(Result){
+  function witnetReadResult (Request _request) internal returns(Result){
       return new Result(witnetReadResult(_request.id()));
   }
 }
