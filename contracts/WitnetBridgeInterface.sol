@@ -112,20 +112,33 @@ contract WitnetBridgeInterface {
     public
     poeValid(_poe)
   {
-    uint256 currentEpoch = block.number;
-    uint256 index;
     for (uint i = 0; i < _ids.length; i++) {
-      index = _ids[i];
-      if((requests[index].timestamp == 0 || currentEpoch-requests[index].timestamp > 13) &&
+      uint256 index = _ids[i];
+      if((requests[index].timestamp == 0 || block.number - requests[index].timestamp > 13) &&
       requests[index].drHash == 0 &&
       requests[index].result.length == 0){
         requests[index].pkhClaim = msg.sender;
-        requests[index].timestamp = currentEpoch;
+        requests[index].timestamp = block.number;
       }
       else{
         revert("One of the listed data requests was already claimed");
       }
     }
+  }
+
+  /// @dev Checks if the data requests from a list are claimable or not.
+  /// @param _ids The list of data request identifiers to be checked.
+  /// @return An array of booleans indicating if data request are claimable or not.
+  function checkDataRequestsClaimability(uint256[] memory _ids) public view returns (bool[] memory) {
+    bool[] memory validIds = new bool[](_ids.length);
+    for (uint i = 0; i < _ids.length; i++) {
+      uint256 index = _ids[i];
+      validIds[i] = (requests[index].timestamp == 0 || block.number - requests[index].timestamp > 13) &&
+        requests[index].drHash == 0 &&
+        requests[index].result.length == 0;
+    }
+
+    return validIds;
   }
 
   /// @dev Presents a proof of inclusion to prove that the request was posted into Witnet so as to unlock the inclusion reward that was put aside for the claiming identity (public key hash).
