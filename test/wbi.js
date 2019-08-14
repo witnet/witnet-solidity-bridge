@@ -29,7 +29,7 @@ contract("WBI", accounts => {
       wbiInstance = await WBI.new(blockRelay.address)
     })
 
-    it("should post 2 data requests, read them succesfully and check balances afterwards", async () => {
+    it("should post 2 data requests, read them successfully and check balances afterwards", async () => {
       // Take current balance
       var account1 = accounts[0]
       let actualBalance1 = await web3.eth.getBalance(account1)
@@ -104,7 +104,7 @@ contract("WBI", accounts => {
       assert.equal(web3.utils.toWei("2", "ether"), contractBalanceAfter)
     })
 
-    it("should post a data request, claim it, post a new block to block relay" +
+    it("should post a data request, claim it, post a new block to block relay, " +
        "verify inclusion and result reporting with PoIs and read the result",
     async () => {
       var account1 = accounts[0]
@@ -127,6 +127,10 @@ contract("WBI", accounts => {
       const txHash1 = await waitForHash(tx1)
       let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
+
+      // check if data request is claimable
+      let claimCheck = await wbiInstance.checkDataRequestsClaimability.call([id1])
+      assert.deepEqual([true], claimCheck)
 
       // claim data request
       const tx2 = wbiInstance.claimDataRequests([id1], resBytes, {
@@ -204,7 +208,7 @@ contract("WBI", accounts => {
       assert.equal(drBytes2, readDrBytes2)
     })
 
-    it("should check the emision of the PostedRequest event with correct id", async () => {
+    it("should check the emission of the PostedRequest event with correct id", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const hash = sha.sha256("This is a DR")
       const expectedResultId = web3.utils.hexToNumberString(hash)
@@ -222,9 +226,9 @@ contract("WBI", accounts => {
       assert.equal(drBytes, readDrBytes)
     })
 
-    it("should insert a data request, subscribe to the PostedResult event, wait for its emission" +
-       " perform the claim, post new block, report dr inclusion and the result" +
-       " and only then read result", async () => {
+    it("should insert a data request, subscribe to the PostedResult event, wait for its emission, " +
+       "perform the claim, post new block, report dr inclusion and the result " +
+       "and only then read result", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
@@ -264,17 +268,17 @@ contract("WBI", accounts => {
       // wait for the async method to finish
       await wait(500)
 
-      // asert event was emited
+      // assert event was emitted
       truffleAssert.eventEmitted(tx4, "PostedResult", (ev) => {
         return ev[1].eq(web3.utils.toBN(data1))
       })
     })
-    it("should revert the transacation when trying to read from a non-existent block", async () => {
+    it("should revert the transaction when trying to read from a non-existent block", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
       var fakeBlockHeader = 2
-      var dummySybling = 1
+      var dummySibling = 1
 
       // post data request
       const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
@@ -293,7 +297,7 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       // should fail to read blockhash from a non-existing block
-      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(data1, [dummySybling], 2, fakeBlockHeader, {
+      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(data1, [dummySibling], 2, fakeBlockHeader, {
         from: accounts[1],
       }), "Non-existing block")
     })
@@ -308,7 +312,7 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       }), "Transaction value needs to be equal or greater than tally reward")
     })
-    it("should revert because the rewards are higher than the values sent." +
+    it("should revert because the rewards are higher than the values sent. " +
        "Checks the upgrade data request transaction",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
@@ -346,6 +350,10 @@ contract("WBI", accounts => {
         from: accounts[1],
       })
       await waitForHash(tx2)
+
+      // check if data request is not claimable
+      let claimCheck = await wbiInstance.checkDataRequestsClaimability.call([data1])
+      assert.deepEqual([false], claimCheck)
 
       // should revert when trying to claim it again
       await truffleAssert.reverts(wbiInstance.claimDataRequests([data1], resBytes, {
