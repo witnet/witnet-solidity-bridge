@@ -20,7 +20,7 @@ contract("Using witnet", accounts => {
 
     it("create a data request and post it in the wbi (call)", async () => {
       let stringDr = "DataRequest Example"
-      let expectedId = "0x" + sha.sha256(stringDr)
+      let expectedId = "0x0"
       let id0 = await usingWitnet._witnetPostDataRequest.call(web3.utils.utf8ToHex(stringDr), 30, {
         from: accounts[0],
         value: 100,
@@ -31,7 +31,7 @@ contract("Using witnet", accounts => {
     it("should create a data request, post it in the wbi and check balances afterwards", async () => {
       // Create the data request
       let stringDr = "DataRequest Example"
-      let expectedId = "0x" + sha.sha256(stringDr)
+      let expectedId = "0x0000000000000000000000000000000000000000000000000000000000000000"
       let actualBalance = await web3.eth.getBalance(accounts[0])
 
       let tx0 = usingWitnet._witnetPostDataRequest(web3.utils.utf8ToHex(stringDr), 30, {
@@ -65,10 +65,10 @@ contract("Using witnet", accounts => {
       assert.equal(100, wbiBalance)
     })
 
-    it("should upgrade previos drs reward and check the balances", async () => {
+    it("should upgrade previous drs reward and check the balances", async () => {
       // Create the data request
       let stringDr = "DataRequest Example"
-      let expectedId = "0x" + sha.sha256(stringDr)
+      let expectedId = "0x0"
       let actualBalance = await web3.eth.getBalance(accounts[0])
       let readDrBytes = await wbi.readDataRequest.call(expectedId)
       assert.equal(readDrBytes, web3.utils.utf8ToHex(stringDr))
@@ -103,11 +103,12 @@ contract("Using witnet", accounts => {
       // Generate necessary hashes
       let stringDr = "DataRequest Example"
       let stringRes = "Result"
-      let expectedId = "0x" + sha.sha256(stringDr)
+      let expectedId = "0x0"
+      let drOutputHash = "0x" + sha.sha256(stringDr)
       let expectedBlockHash = 0x123456
       let drHashRoot = web3.utils.hexToBytes("0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8")
       var hash = sha.sha256.create()
-      hash.update(web3.utils.hexToBytes(expectedId))
+      hash.update(web3.utils.hexToBytes(drOutputHash))
       hash.update(drHashRoot)
       let expectedDrHash = "0x" + hash.hex()
       hash = sha.sha256.create()

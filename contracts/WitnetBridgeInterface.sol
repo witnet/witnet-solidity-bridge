@@ -29,7 +29,7 @@ contract WitnetBridgeInterface is VRF {
 
   BlockRelay blockRelay;
 
-  mapping (uint256 => DataRequest) public requests;
+  DataRequest[] public requests;
 
   // Event emitted when a new DR is posted
   event PostedRequest(address indexed _from, uint256 _id);
@@ -94,12 +94,9 @@ contract WitnetBridgeInterface is VRF {
     payable
     payingEnough(msg.value, _tallyReward)
   returns(uint256 _id) {
-    _id = uint256(sha256(_dr));
-    if(requests[_id].dr.length != 0) {
-      requests[_id].tallyReward += _tallyReward;
-      requests[_id].inclusionReward += msg.value - _tallyReward;
-      return _id;
-    }
+    _id = requests.length;
+    DataRequest memory dr;
+    requests.push(dr);
 
     requests[_id].dr = _dr;
     requests[_id].inclusionReward = msg.value - _tallyReward;
@@ -186,8 +183,9 @@ contract WitnetBridgeInterface is VRF {
     drNotIncluded(_id)
  {
     uint256 drRoot = blockRelay.readDrMerkleRoot(_blockHash);
-    uint256 drHash = uint256(sha256(abi.encodePacked(_id, _poi[0])));
-    if (verifyPoi(_poi, drRoot, _index, _id)) {
+    uint256 drOutputHash = uint256(sha256(requests[_id].dr));
+    uint256 drHash = uint256(sha256(abi.encodePacked(drOutputHash, _poi[0])));
+    if (verifyPoi(_poi, drRoot, _index, drOutputHash)) {
       requests[_id].drHash = drHash;
       requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
       emit IncludedRequest(msg.sender, _id);
@@ -245,6 +243,12 @@ contract WitnetBridgeInterface is VRF {
   /// @return The hash of the DataRequest transaction in Witnet
   function readDrHash (uint256 _id) public view returns(uint256){
     return requests[_id].drHash;
+  }
+
+  /// @dev Number of data requests in the WBI.
+  /// @return Returns the number of data requests in the WBI.
+  function numRequests() public view returns(uint256){
+    return requests.length;
   }
 
   /// @dev Read the beacon of the last block inserted
