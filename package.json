@@ -30,9 +30,11 @@
   "dependencies": {
     "openzeppelin-solidity": "2.3.0",
     "truffle-hdwallet-provider": "^1.0.7",
+    "truffle-plugin-verify": "^0.3.2",
     "vrf-solidity": "0.1.0"
   },
   "devDependencies": {
+    "dotenv": "^8.1.0",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.16.0",

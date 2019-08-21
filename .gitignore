@@ -3,5 +3,7 @@ build/
 coverage/
 coverage.json
 
+.env
 .idea
 .vscode
+
