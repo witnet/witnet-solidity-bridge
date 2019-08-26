@@ -247,7 +247,7 @@ contract WitnetBridgeInterface is VRF {
 
   /// @dev Number of data requests in the WBI.
   /// @return Returns the number of data requests in the WBI.
-  function numRequests() public view returns(uint256){
+  function requestsCount() public view returns(uint256){
     return requests.length;
   }
 
