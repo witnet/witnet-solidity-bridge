@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "./Request.sol";
-import "./Result.sol";
+import "./Witnet.sol";
 import "./WitnetBridgeInterface.sol";
 
 /**
@@ -36,7 +36,7 @@ contract UsingWitnet {
   * @return Sequencial identifier for the request included in the WitnetBridgeInterface
   */
   function witnetPostRequest(Request _request, uint256 _tallyReward) internal returns (uint256 id) {
-    return wbi.postDataRequest.value(msg.value)(_request.serialized(), _tallyReward);
+    return wbi.postDataRequest.value(msg.value)(_request.bytecode(), _tallyReward);
   }
 
   /**
@@ -70,7 +70,7 @@ contract UsingWitnet {
   * @param _id The sequential identifier of a request that was posted to Witnet
   * @return The result of the request as an instance of `Result`
   */
-  function witnetReadResult(uint256 _id) internal returns (Result){
-    return new Result(wbi.readResult(_id));
+  function witnetReadResult(uint256 _id) internal view returns (Witnet.Result memory){
+    return Witnet.resultFromCborBytes(wbi.readResult(_id));
   }
 }

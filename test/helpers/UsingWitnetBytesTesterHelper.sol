@@ -1,15 +1,15 @@
 pragma solidity ^0.5.0;
 
-import "../contracts/./UsingWitnetBytes.sol";
+import "../../contracts/UsingWitnetBytes.sol";
 
 
 /**
- * @title Test Helper for the UsingWitnet contract
+ * @title Test Helper for the UsingWitnetBytes contract
  * @dev The aim of this contract is:
- * 1. Raise the visibility modifier of UsingWitnet contract functions for testing purposes
+ * 1. Raise the visibility modifier of UsingWitnetBytes contract functions for testing purposes
  * @author Witnet Foundation
  */
-contract UsingWitnetTestHelper is UsingWitnetBytes {
+contract UsingWitnetBytesTestHelper is UsingWitnetBytes {
 
   constructor (address _wbiAddress) UsingWitnetBytes(_wbiAddress) public {}
 

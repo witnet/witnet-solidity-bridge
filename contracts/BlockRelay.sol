@@ -23,7 +23,7 @@ contract BlockRelay {
   // Address of the block pusher
   address witnet;
   // Last block reported
-  Beacon lastBlock;
+  Beacon public lastBlock;
 
   mapping (uint256 => MerkleRoots) public blocks;
 

@@ -4,7 +4,7 @@ pragma solidity ^0.5.0;
  * @title The serialized form of a Witnet data request.
  */
 contract Request {
-    bytes public serialized;
+    bytes public bytecode;
     uint256 public id;
 
     // A `Request` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized
@@ -13,8 +13,8 @@ contract Request {
     //
     // The hash of the request is computed in the constructor to guarantee consistency. Otherwise there could be a
     // mismatch and a data request could be resolved with the result of another.
-    constructor(bytes memory _serialized) public {
-        serialized = _serialized;
-        id = uint256(sha256(_serialized));
+    constructor(bytes memory _bytecode) public {
+        bytecode = _bytecode;
+        id = uint256(sha256(_bytecode));
     }
 }

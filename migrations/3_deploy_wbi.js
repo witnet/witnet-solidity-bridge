@@ -1,7 +1,7 @@
-var WBI = artifacts.require("./WitnetBridgeInterface.sol")
-var BlockRelay = artifacts.require("./BlockRelay.sol")
+var WBI = artifacts.require("WitnetBridgeInterface")
+var BlockRelay = artifacts.require("BlockRelay")
 
 module.exports = function (deployer, network, accounts) {
-  console.log("Network:", network)
+  console.log(`> Migrating WBI into ${network} network`)
   deployer.deploy(WBI, BlockRelay.address)
 }
