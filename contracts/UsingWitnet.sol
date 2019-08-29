@@ -11,6 +11,7 @@ import "./WitnetBridgeInterface.sol";
  * Witnet network
  */
 contract UsingWitnet {
+  using Witnet for Witnet.Result;
 
   WitnetBridgeInterface wbi;
 

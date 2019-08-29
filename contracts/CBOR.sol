@@ -51,7 +51,7 @@ library CBOR {
   /**
    * @notice Decode a `CBOR.Value` structure into a `fixed16` value
    * @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
-   * by 10 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`
+   * by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`
    * use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
    * @param _cborValue An instance of `CBOR.Value`
    * @return The value represented by the input, as an `int128` value

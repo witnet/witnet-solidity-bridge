@@ -7,7 +7,6 @@ import "./CBOR.sol";
 
 library Witnet {
   using CBOR for CBOR.Value;
-  using BufferLib for BufferLib.Buffer;
 
   /*
     STRUCTS
@@ -60,19 +59,19 @@ library Witnet {
   }
 
   /**
-   * @notice Get the raw bytes value of a Result as a `bytes memory` value
+   * @notice Decode a bytes value from a Result as a `bytes` value
    * @param _result An instance of Result
-   * @return The `bytes memory` contained in the Result.
+   * @return The `bytes` decoded from the Result.
    */
   function asBytes(Result memory _result) public pure returns(bytes memory) {
     require(_result.success, "Tried to read bytes value from errored Result");
-    return _result.cborValue.buffer.data;
+    return _result.cborValue.decodeBytes();
   }
 
   /**
-   * @notice Get the error code of this result as a member of `ErrorCodes`
+   * @notice Decode an error code from a Result as a member of `ErrorCodes`
    * @param _result An instance of Result
-   * @return The `CBORValue.Error memory` contained in this result.
+   * @return The `CBORValue.Error memory` decoded from the Result
    */
   function asError(Result memory _result) public pure returns(ErrorCodes) {
     require(!_result.success, "Tried to read error code from successful Result");
@@ -81,12 +80,45 @@ library Witnet {
   }
 
   /**
-   * @notice Get the natural numeric value of this result as a `uint64` value
+   * @notice Decode a fixed16 numeric value from a Result as an `int32` value
+   * @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
+   * by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`
+   * use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
    * @param _result An instance of Result
-   * @return The `uint64` contained in this result.
+   * @return The `int128` decoded from the Result
+   */
+  function asFixed16(Result memory _result) public pure returns(int32) {
+    require(_result.success, "Tried to read `fixed16` value from errored Result");
+    return _result.cborValue.decodeFixed16();
+  }
+
+  /**
+   * @notice Decode a integer numeric value from a Result as an `int128` value
+   * @param _result An instance of Result
+   * @return The `int128` decoded from the Result
+   */
+  function asInt128(Result memory _result) public pure returns(int128) {
+    require(_result.success, "Tried to read `int128` value from errored Result");
+    return _result.cborValue.decodeInt128();
+  }
+
+  /**
+   * @notice Decode a string value from a Result as a `string` value
+   * @param _result An instance of Result
+   * @return The `string` decoded from the Result
+   */
+  function asString(Result memory _result) public pure returns(string memory) {
+    require(_result.success, "Tried to read `string` value from errored Result");
+    return _result.cborValue.decodeString();
+  }
+
+  /**
+   * @notice Decode a natural numeric value from a Result as a `uint64` value
+   * @param _result An instance of Result
+   * @return The `uint64` decoded from the Result
    */
   function asUint64(Result memory _result) public pure returns(uint64) {
-    require(_result.success, "Tried to read Uint64 value from errored Result");
+    require(_result.success, "Tried to read `uint64` value from errored Result");
     return _result.cborValue.decodeUint64();
   }
 

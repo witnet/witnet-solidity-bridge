@@ -132,7 +132,7 @@ library BufferLib {
   * @notice Read and consume the next 2 bytes from the buffer as an IEEE 754-2008 floating point number enclosed in an
   * `int32`.
   * @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
-  * by 10 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `float16`
+  * by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `float16`
   * use cases. In other words, the integer output of this method is 10,000 times the actual value. The input bytes are
   * expected to follow the 16-bit base-2 format (a.k.a. `binary16`) in the IEEE 754-2008 standard.
   * @param _buffer An instance of `BufferLib.Buffer`.
