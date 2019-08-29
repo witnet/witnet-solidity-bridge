@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./WitnetBridgeInterface.sol";
 
+
 /**
  * @title The UsingWitnet contract
  * @notice Contract writers can inherit this contract in order to create requests for the
@@ -26,7 +27,7 @@ contract UsingWitnetBytes {
   * @param _tallyReward Reward specified for the user which post the Data Request result
   * @return Identifier for the Data Request included in the WitnetBridgeInterface
   */
-  function witnetPostRequest(bytes memory _requestBytes, uint256 _tallyReward) internal returns(uint256 id){
+  function witnetPostRequest(bytes memory _requestBytes, uint256 _tallyReward) internal returns(uint256 id) {
     return wbi.postDataRequest.value(msg.value)(_requestBytes, _tallyReward);
   }
 
@@ -37,7 +38,7 @@ contract UsingWitnetBytes {
   * @param _id The id of a request that has been previously sent to the WitnetBridgeInterface.
   * @return A boolean telling if the request has been already accepted or not. `false` do not mean rejection, though.
   */
-  function witnetCheckRequestAccepted(uint256 _id) internal view returns(bool){
+  function witnetCheckRequestAccepted(uint256 _id) internal view returns(bool) {
     // Find the request in the
     (,,,,,uint256 drHash,) = wbi.requests(_id);
     // If the hash of the data request transaction in Witnet is not the default, then it means that inclusion of the
@@ -61,7 +62,7 @@ contract UsingWitnetBytes {
   * @param _id Identifier for the Data Request included in the WitnetBridgeInterface
   * @return Data Request result
   */
-  function witnetReadResult (uint256 _id) internal view returns(bytes memory){
+  function witnetReadResult (uint256 _id) internal view returns(bytes memory) {
     return wbi.readResult(_id);
   }
 }

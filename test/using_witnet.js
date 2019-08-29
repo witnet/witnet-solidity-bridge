@@ -187,7 +187,7 @@ contract("UsingWitnet", accounts => {
       resultHash.update(web3.utils.hexToBytes(resultHex))
       resultHash = `0x${resultHash.hex()}`
 
-      await blockRelay.postNewBlock(block2Hash, epoch, nullHash, resultHash, {from: accounts[0]})
+      await blockRelay.postNewBlock(block2Hash, epoch, nullHash, resultHash, { from: accounts[0] })
     })
 
     it("should post the result of the request into the WBI", async () => {
@@ -197,7 +197,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should pull the result from the WBI back into the client contract", async () => {
-      await clientContract._witnetReadResult(requestId, {from: accounts[0]})
+      await clientContract._witnetReadResult(requestId, { from: accounts[0] })
       result = await clientContract.result()
       assert.equal(result.success, true)
       assert.equal(result.cborValue.buffer.data, resultHex)

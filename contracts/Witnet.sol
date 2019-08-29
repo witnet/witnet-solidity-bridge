@@ -4,9 +4,10 @@ pragma experimental ABIEncoderV2;
 import "./Buffer.sol";
 import "./CBOR.sol";
 
+
 library Witnet {
   using CBOR for CBOR.Value;
-  using Buffer for Buffer.buffer;
+  using BufferLib for BufferLib.Buffer;
 
   /*
     STRUCTS

@@ -4,6 +4,7 @@ import "./Request.sol";
 import "./Witnet.sol";
 import "./WitnetBridgeInterface.sol";
 
+
 /**
  * @title The UsingWitnet contract
  * @notice Contract writers can inherit this contract in order to create requests for the
@@ -24,7 +25,7 @@ contract UsingWitnet {
   // Provides a convenient way for client contracts extending this to block the execution of the main logic of the
   // contract until a particular request has been successfully accepted into Witnet
   modifier witnetRequestAccepted(uint256 _id) {
-    require(witnetCheckRequestAccepted(_id));
+    require(witnetCheckRequestAccepted(_id), "Witnet request is not yet accepted into the Witnet network");
     _;
   }
 
@@ -70,7 +71,7 @@ contract UsingWitnet {
   * @param _id The sequential identifier of a request that was posted to Witnet
   * @return The result of the request as an instance of `Result`
   */
-  function witnetReadResult(uint256 _id) internal view returns (Witnet.Result memory){
+  function witnetReadResult(uint256 _id) internal view returns (Witnet.Result memory) {
     return Witnet.resultFromCborBytes(wbi.readResult(_id));
   }
 }

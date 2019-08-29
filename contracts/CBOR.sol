@@ -3,17 +3,18 @@ pragma experimental ABIEncoderV2;
 
 import "./Buffer.sol";
 
+
 // TODO: add support for Array (majorType = 4)
 // TODO: add support for Map (majorType = 5)
 // TODO: add support for Float32 (majorType = 7, additionalInformation = 26)
 // TODO: add support for Float64 (majorType = 7, additionalInformation = 27)
 library CBOR {
-  using Buffer for Buffer.buffer;
+  using BufferLib for BufferLib.Buffer;
 
   uint64 constant UINT64_MAX = ~uint64(0);
 
   struct Value {
-    Buffer.buffer buffer;
+    BufferLib.Buffer buffer;
     uint8 initialByte;
     uint8 majorType;
     uint8 additionalInformation;
@@ -32,7 +33,7 @@ library CBOR {
       bytes memory bytesData;
       bool done;
       uint8 limit = 0;
-      while(!done && limit < 2) {
+      while (!done && limit < 2) {
         uint64 itemLength = readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType);
         if (itemLength >= 0) {
           bytesData = abi.encodePacked(bytesData, _cborValue.buffer.read(itemLength));
@@ -88,7 +89,7 @@ library CBOR {
     if (_cborValue.length == UINT64_MAX) {
       bytes memory textData;
       bool done;
-      while(!done) {
+      while (!done) {
         uint64 itemLength = readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType);
         if (itemLength >= 0) {
           textData = abi.encodePacked(textData, readText(_cborValue.buffer, itemLength / 4));
@@ -119,7 +120,7 @@ library CBOR {
    * @return A `CBOR.Value` instance containing a partially decoded value
    */
   function valueFromBytes(bytes memory _cborBytes) public pure returns(Value memory) {
-    Buffer.buffer memory buffer = Buffer.buffer(_cborBytes, 0);
+    BufferLib.Buffer memory buffer = BufferLib.Buffer(_cborBytes, 0);
     uint8 initialByte;
     uint8 majorType = 255;
     uint8 additionalInformation;
@@ -143,12 +144,18 @@ library CBOR {
 
     require(majorType >= 0 && majorType <= 7, "Invalid CBOR major type");
 
-    return CBOR.Value(buffer, initialByte, majorType, additionalInformation, length, tag);
+    return CBOR.Value(
+      buffer,
+      initialByte,
+      majorType,
+      additionalInformation,
+      length,
+      tag);
   }
 
   // Reads the length of the next CBOR item from a buffer, consuming a different number of bytes depending on the
   // value of the `additionalInformation` argument.
-  function readLength(Buffer.buffer memory _buffer, uint8 additionalInformation) private pure returns(uint64) {
+  function readLength(BufferLib.Buffer memory _buffer, uint8 additionalInformation) private pure returns(uint64) {
     if (additionalInformation < 24) {
       return additionalInformation;
     }
@@ -172,7 +179,7 @@ library CBOR {
 
   // Read the length of a CBOR indifinite-length item (arrays, maps, byte strings and text) from a buffer, consuming
   // as many bytes as specified by the first byte.
-  function readIndefiniteStringLength(Buffer.buffer memory _buffer, uint8 majorType) private pure returns(uint64)  {
+  function readIndefiniteStringLength(BufferLib.Buffer memory _buffer, uint8 majorType) private pure returns(uint64) {
     uint8 initialByte = _buffer.readUint8();
     if (initialByte == 0xff) {
       return UINT64_MAX;
@@ -184,26 +191,27 @@ library CBOR {
 
   // Read a text string of a given length from a buffer. Returns a `bytes memory` value for the sake of genericness,
   // but it can be easily casted into a string with `string(result)`.
-  function readText(Buffer.buffer memory _buffer, uint64 _length) private pure returns(bytes memory) {
+  function readText(BufferLib.Buffer memory _buffer, uint64 _length) private pure returns(bytes memory) {
     bytes memory result;
-    for (uint64 index = 0; index < _length; index++) {
+    uint64 length = _length;
+    for (uint64 index = 0; index < length; index++) {
       uint8 value = _buffer.readUint8();
       if (value & 0x80 != 0) {
         if (value < 0xe0) {
-          value = (value & 0x1f) <<  6
-          | (_buffer.readUint8() & 0x3f);
-          _length -= 1;
+          value = (value & 0x1f) << 6 |
+            (_buffer.readUint8() & 0x3f);
+          length -= 1;
         } else if (value < 0xf0) {
-          value = (value & 0x0f) << 12
-          | (_buffer.readUint8() & 0x3f) << 6
-          | (_buffer.readUint8() & 0x3f);
-          _length -= 2;
+          value = (value & 0x0f) << 12 |
+            (_buffer.readUint8() & 0x3f) << 6 |
+            (_buffer.readUint8() & 0x3f);
+          length -= 2;
         } else {
-          value = (value & 0x0f) << 18
-          | (_buffer.readUint8() & 0x3f) << 12
-          | (_buffer.readUint8() & 0x3f) << 6
-          | (_buffer.readUint8() & 0x3f);
-          _length -= 3;
+          value = (value & 0x0f) << 18 |
+            (_buffer.readUint8() & 0x3f) << 12 |
+            (_buffer.readUint8() & 0x3f) << 6  |
+            (_buffer.readUint8() & 0x3f);
+          length -= 3;
         }
       }
       result = abi.encodePacked(result, value);

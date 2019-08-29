@@ -1,5 +1,6 @@
 pragma solidity ^0.5.0;
 
+
 /**
  * @title Block relay contract
  * @notice Contract to store/read block headers from the Witnet network
@@ -56,7 +57,11 @@ contract BlockRelay {
   /// @param _epoch Witnet epoch to which the block belongs to
   /// @param _drMerkleRoot Merkle root belonging to the data requests
   /// @param _tallyMerkleRoot Merkle root belonging to the tallies
-  function postNewBlock(uint256 _blockHash, uint256 _epoch, uint256 _drMerkleRoot, uint256 _tallyMerkleRoot)
+  function postNewBlock(
+    uint256 _blockHash,
+    uint256 _epoch,
+    uint256 _drMerkleRoot,
+    uint256 _tallyMerkleRoot)
     public
     isOwner
     blockDoesNotExist(_blockHash)

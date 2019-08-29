@@ -1,10 +1,11 @@
 {
-    "extends": "solium:recommended",
-    "plugins": ["security"],
-    "rules": {
-      "quotes": ["error", "double"],
-      "indentation": ["error", 2],
-      "linebreak-style": ["error", "unix"],
-      "error-reason": "off"
-    }
+  "extends": "solium:all",
+  "plugins": ["security"],
+  "rules": {
+    "quotes": ["error", "double"],
+    "indentation": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "security/no-inline-assembly": "off",
+    "no-experimental": "off"
   }
+}

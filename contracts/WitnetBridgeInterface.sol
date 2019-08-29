@@ -52,7 +52,13 @@ contract WitnetBridgeInterface is VRF {
     uint256[2] memory _publicKey,
     uint256[2] memory _uPoint,
     uint256[4] memory _vPointHelpers) {
-    require(verifyPoe(_poe, _publicKey, _uPoint, _vPointHelpers) == true, "Not a valid PoE");
+    require(
+      verifyPoe(
+        _poe,
+        _publicKey,
+        _uPoint,
+        _vPointHelpers) == true,
+      "Not a valid PoE");
     _;
   }
 
@@ -93,8 +99,9 @@ contract WitnetBridgeInterface is VRF {
     public
     payable
     payingEnough(msg.value, _tallyReward)
-  returns(uint256 _id) {
-    _id = requests.length;
+    returns(uint256)
+  {
+    uint256 _id = requests.length;
     DataRequest memory dr;
     requests.push(dr);
 
@@ -140,13 +147,12 @@ contract WitnetBridgeInterface is VRF {
   {
     for (uint i = 0; i < _ids.length; i++) {
       uint256 index = _ids[i];
-      if((requests[index].timestamp == 0 || block.number - requests[index].timestamp > 13) &&
+      if ((requests[index].timestamp == 0 || block.number - requests[index].timestamp > 13) &&
       requests[index].drHash == 0 &&
       requests[index].result.length == 0){
         requests[index].pkhClaim = msg.sender;
         requests[index].timestamp = block.number;
-      }
-      else{
+      } else {
         revert("One of the listed data requests was already claimed");
       }
     }
@@ -185,7 +191,11 @@ contract WitnetBridgeInterface is VRF {
     uint256 drRoot = blockRelay.readDrMerkleRoot(_blockHash);
     uint256 drOutputHash = uint256(sha256(requests[_id].dr));
     uint256 drHash = uint256(sha256(abi.encodePacked(drOutputHash, _poi[0])));
-    if (verifyPoi(_poi, drRoot, _index, drOutputHash)) {
+    if (verifyPoi(
+      _poi,
+      drRoot,
+      _index,
+      drOutputHash)) {
       requests[_id].drHash = drHash;
       requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
       emit IncludedRequest(msg.sender, _id);
@@ -214,12 +224,15 @@ contract WitnetBridgeInterface is VRF {
     uint256 tallyRoot = blockRelay.readTallyMerkleRoot(_blockHash);
     // this should leave it ready for PoI
     uint256 resHash = uint256(sha256(abi.encodePacked(requests[_id].drHash, _result)));
-    if (verifyPoi(_poi, tallyRoot, _index, resHash)){
+    if (verifyPoi(
+      _poi,
+      tallyRoot,
+      _index,
+      resHash)){
       requests[_id].result = _result;
       msg.sender.transfer(requests[_id].tallyReward);
       emit PostedResult(msg.sender, _id);
-    }
-    else{
+    } else {
       revert("Invalid PoI");
     }
   }
@@ -227,27 +240,27 @@ contract WitnetBridgeInterface is VRF {
   /// @dev Retrieves the bytes of the serialization of one data request from the WBI.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the data request as bytes.
-  function readDataRequest (uint256 _id) public view returns(bytes memory){
+  function readDataRequest (uint256 _id) public view returns(bytes memory) {
     return requests[_id].dr;
   }
 
   /// @dev Retrieves the result (if already available) of one data request from the WBI.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
-  function readResult (uint256 _id) public view returns(bytes memory){
+  function readResult (uint256 _id) public view returns(bytes memory) {
     return requests[_id].result;
   }
 
   /// @dev Retrieves hash of the data request transaction in Witnet
   /// @param _id The unique identifier of the data request.
   /// @return The hash of the DataRequest transaction in Witnet
-  function readDrHash (uint256 _id) public view returns(uint256){
+  function readDrHash (uint256 _id) public view returns(uint256) {
     return requests[_id].drHash;
   }
 
   /// @dev Number of data requests in the WBI.
   /// @return Returns the number of data requests in the WBI.
-  function requestsCount() public view returns(uint256){
+  function requestsCount() public view returns(uint256) {
     return requests.length;
   }
 
@@ -271,7 +284,8 @@ contract WitnetBridgeInterface is VRF {
     uint256[2] memory _publicKey,
     uint256[2] memory _uPoint,
     uint256[4] memory _vPointHelpers)
-  internal view returns(bool) {
+  internal view returns(bool)
+  {
     bytes memory message = getLastBeacon();
 
     return fastVerify(
@@ -293,14 +307,14 @@ contract WitnetBridgeInterface is VRF {
     uint256 _root,
     uint256 _index,
     uint256 _element)
-  internal pure returns(bool){
+  internal pure returns(bool)
+  {
     uint256 tree = _element;
     uint256 index = _index;
-    for (uint i = 0; i<_poi.length; i++){
-      if(index%2 == 0){
+    for (uint i = 0; i<_poi.length; i++) {
+      if (index%2 == 0) {
         tree = uint256(sha256(abi.encodePacked(tree, _poi[i])));
-      }
-      else{
+      } else {
         tree = uint256(sha256(abi.encodePacked(_poi[i], tree)));
       }
       index = index>>1;
@@ -318,7 +332,8 @@ contract WitnetBridgeInterface is VRF {
     uint256[2] memory _publicKey,
     bytes memory _addrSignature
     )
-  internal pure returns(bool){
+  internal pure returns(bool)
+  {
     bytes32 r;
     bytes32 s;
     uint8 v;
@@ -337,8 +352,12 @@ contract WitnetBridgeInterface is VRF {
     }
     v = 28 - v;
 
-    bytes32 msg_hash = sha256(_message);
-    address hashed_key = pointToAddress(_publicKey[0], _publicKey[1]);
-    return ecrecover(msg_hash, v, r, s) == hashed_key;
+    bytes32 msgHash = sha256(_message);
+    address hashedKey = pointToAddress(_publicKey[0], _publicKey[1]);
+    return ecrecover(
+      msgHash,
+      v,
+      r,
+      s) == hashedKey;
   }
 }
