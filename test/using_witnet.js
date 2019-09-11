@@ -17,8 +17,8 @@ contract("UsingWitnet", accounts => {
     const block2Hash = 0xabcdef
     const nullHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
-    const inclusionReward = 7000000000000000
-    const tallyReward = 3000000000000000
+    const requestReward = 7000000000000000
+    const resultReward = 3000000000000000
 
     let witnet, clientContract, wbi, blockRelay, request, requestId, requestHash, result
     let lastAccount0Balance, lastAccount1Balance
@@ -47,9 +47,9 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should post a Witnet request into the wbi", async () => {
-      requestId = await returnData(clientContract._witnetPostRequest(request.address, tallyReward, {
+      requestId = await returnData(clientContract._witnetPostRequest(request.address, requestReward, resultReward, {
         from: accounts[0],
-        value: inclusionReward + tallyReward,
+        value: requestReward + resultReward,
       }))
       const expectedId = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
@@ -66,8 +66,8 @@ contract("UsingWitnet", accounts => {
       const drInfo = await wbi.requests(requestId)
       const actualInclusionReward = drInfo.inclusionReward.toString()
       const actualTallyReward = drInfo.tallyReward.toString()
-      assert.equal(actualInclusionReward, inclusionReward)
-      assert.equal(actualTallyReward, tallyReward)
+      assert.equal(actualInclusionReward, requestReward)
+      assert.equal(actualTallyReward, resultReward)
     })
 
     it("requester balance should decrease", async () => {
@@ -83,13 +83,13 @@ contract("UsingWitnet", accounts => {
 
     it("WBI balance should increase", async () => {
       let wbiBalance = await web3.eth.getBalance(wbi.address)
-      assert.equal(wbiBalance, inclusionReward + tallyReward)
+      assert.equal(wbiBalance, requestReward + resultReward)
     })
 
     it("should upgrade the rewards of a existing Witnet request", async () => {
-      await returnData(clientContract._witnetUpgradeRequest(requestId, tallyReward, {
+      await returnData(clientContract._witnetUpgradeRequest(requestId, resultReward, {
         from: accounts[0],
-        value: inclusionReward + tallyReward,
+        value: requestReward + resultReward,
       }))
     })
 
@@ -98,13 +98,13 @@ contract("UsingWitnet", accounts => {
       const drInfo = await wbi.requests(requestId)
       const actualInclusionReward = drInfo.inclusionReward.toString()
       const actualTallyReward = drInfo.tallyReward.toString()
-      assert.equal(actualInclusionReward, inclusionReward * 2)
-      assert.equal(actualTallyReward, tallyReward * 2)
+      assert.equal(actualInclusionReward, requestReward * 2)
+      assert.equal(actualTallyReward, resultReward * 2)
     })
 
     it("requester balance should decrease after rewards upgrade", async () => {
       const afterBalance = await web3.eth.getBalance(accounts[0])
-      assert(afterBalance < lastAccount0Balance - inclusionReward - tallyReward)
+      assert(afterBalance < lastAccount0Balance - requestReward - resultReward)
       lastAccount0Balance = afterBalance
     })
 
@@ -115,7 +115,7 @@ contract("UsingWitnet", accounts => {
 
     it("WBI balance should increase after rewards upgrade", async () => {
       let wbiBalance = await web3.eth.getBalance(wbi.address)
-      assert.equal(wbiBalance, (inclusionReward + tallyReward) * 2)
+      assert.equal(wbiBalance, (requestReward + resultReward) * 2)
     })
 
     it("should claim eligibility for relaying the request into Witnet", async () => {
@@ -176,7 +176,7 @@ contract("UsingWitnet", accounts => {
 
     it("should pay inclusion reward to the relayer", async () => {
       const afterBalance = await web3.eth.getBalance(accounts[1])
-      assert(afterBalance > lastAccount1Balance + inclusionReward)
+      assert(afterBalance > lastAccount1Balance + requestReward)
       lastAccount1Balance = afterBalance
     })
 
