@@ -63,6 +63,27 @@ library CBOR {
   }
 
   /**
+ * @notice Decode a `CBOR.Value` structure into a native `int128[]` value whose inner values follow the same convention
+ * as explained in `decodeFixed16`
+ * @param _cborValue An instance of `CBOR.Value`
+ * @return The value represented by the input, as an `int128[]` value
+ */
+  function decodeFixed16Array(Value memory _cborValue) public pure returns(int128[] memory) {
+    require(_cborValue.majorType == 4, "Tried to read `int128[]` from a `CBOR.Value` with majorType != 4");
+
+    uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
+    require(length < UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
+
+    int128[] memory array = new int128[](length);
+    for (uint64 i = 0; i < length; i++) {
+      Value memory item = valueFromBuffer(_cborValue.buffer);
+      array[i] = decodeFixed16(item);
+    }
+
+    return array;
+  }
+
+  /**
    * @notice Decode a `CBOR.Value` structure into a native `int128` value
    * @param _cborValue An instance of `CBOR.Value`
    * @return The value represented by the input, as an `int128` value
@@ -77,6 +98,26 @@ library CBOR {
       return int128(decodeUint64(_cborValue));
     }
     revert("Tried to read `int128` from a `CBOR.Value` with majorType not 0 or 1");
+  }
+
+  /**
+   * @notice Decode a `CBOR.Value` structure into a native `int128[]` value
+   * @param _cborValue An instance of `CBOR.Value`
+   * @return The value represented by the input, as an `int128[]` value
+   */
+  function decodeInt128Array(Value memory _cborValue) public pure returns(int128[] memory) {
+    require(_cborValue.majorType == 4, "Tried to read `int128[]` from a `CBOR.Value` with majorType != 4");
+
+    uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
+    require(length < UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
+
+    int128[] memory array = new int128[](length);
+    for (uint64 i = 0; i < length; i++) {
+      Value memory item = valueFromBuffer(_cborValue.buffer);
+      array[i] = decodeInt128(item);
+    }
+
+    return array;
   }
 
   /**
@@ -104,6 +145,26 @@ library CBOR {
   }
 
   /**
+   * @notice Decode a `CBOR.Value` structure into a native `string[]` value
+   * @param _cborValue An instance of `CBOR.Value`
+   * @return The value represented by the input, as an `string[]` value
+   */
+  function decodeStringArray(Value memory _cborValue) public pure returns(string[] memory) {
+    require(_cborValue.majorType == 4, "Tried to read `string[]` from a `CBOR.Value` with majorType != 4");
+
+    uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
+    require(length < UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
+
+    string[] memory array = new string[](length);
+    for (uint64 i = 0; i < length; i++) {
+      Value memory item = valueFromBuffer(_cborValue.buffer);
+      array[i] = decodeString(item);
+    }
+
+    return array;
+  }
+
+  /**
    * @notice Decode a `CBOR.Value` structure into a native `uint64` value
    * @param _cborValue An instance of `CBOR.Value`
    * @return The value represented by the input, as an `uint64` value
@@ -114,6 +175,26 @@ library CBOR {
   }
 
   /**
+   * @notice Decode a `CBOR.Value` structure into a native `uint64[]` value
+   * @param _cborValue An instance of `CBOR.Value`
+   * @return The value represented by the input, as an `uint64[]` value
+   */
+  function decodeUint64Array(Value memory _cborValue) public pure returns(uint64[] memory) {
+    require(_cborValue.majorType == 4, "Tried to read `uint64[]` from a `CBOR.Value` with majorType != 4");
+
+    uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
+    require(length < UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
+
+    uint64[] memory array = new uint64[](length);
+    for (uint64 i = 0; i < length; i++) {
+      Value memory item = valueFromBuffer(_cborValue.buffer);
+      array[i] = decodeUint64(item);
+    }
+
+    return array;
+  }
+
+  /**
    * @notice Decode a CBOR.Value structure from raw bytes
    * @dev This is the main factory for CBOR.Value instances, which can be later decoded into native EVM types
    * @param _cborBytes Raw bytes representing a CBOR-encoded value
@@ -121,6 +202,17 @@ library CBOR {
    */
   function valueFromBytes(bytes memory _cborBytes) public pure returns(Value memory) {
     BufferLib.Buffer memory buffer = BufferLib.Buffer(_cborBytes, 0);
+
+    return valueFromBuffer(buffer);
+  }
+
+  /**
+   * @notice Decode a CBOR.Value structure from raw bytes
+   * @dev This is an alternate factory for CBOR.Value instances, which can be later decoded into native EVM types
+   * @param _buffer A Buffer structure representing a CBOR-encoded value
+   * @return A `CBOR.Value` instance containing a partially decoded value
+   */
+  function valueFromBuffer(BufferLib.Buffer memory _buffer) public pure returns(Value memory) {
     uint8 initialByte;
     uint8 majorType = 255;
     uint8 additionalInformation;
@@ -130,13 +222,13 @@ library CBOR {
     bool isTagged = true;
     while (isTagged) {
       // Extract basic CBOR properties from input bytes
-      initialByte = buffer.readUint8();
+      initialByte = _buffer.readUint8();
       majorType = initialByte >> 5;
       additionalInformation = initialByte & 0x1f;
 
       // Early CBOR tag parsing.
       if (majorType == 6) {
-        tag = readLength(buffer, additionalInformation);
+        tag = readLength(_buffer, additionalInformation);
       } else {
         isTagged = false;
       }
@@ -145,7 +237,7 @@ library CBOR {
     require(majorType >= 0 && majorType <= 7, "Invalid CBOR major type");
 
     return CBOR.Value(
-      buffer,
+      _buffer,
       initialByte,
       majorType,
       additionalInformation,
@@ -217,5 +309,10 @@ library CBOR {
       result = abi.encodePacked(result, value);
     }
     return result;
+  }
+
+  // This simply seeks a buffer's internal pointer until a break is found.
+  function readBreak(BufferLib.Buffer memory _buffer) private pure returns(bool) {
+    return _buffer.next() == 0xff;
   }
 }
