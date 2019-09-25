@@ -45,6 +45,24 @@ contract TestBuffer {
         Assert.equal(uint(actual), uint(expected), "Read Uint64 from a Buffer");
     }
 
+    function testReadUint128() public {
+        uint128 expected = 314159265358979323846264338327950288419;
+        bytes memory data = abi.encodePacked(expected);
+        BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
+
+        uint128 actual = buf.readUint128();
+        Assert.equal(uint(actual), uint(expected), "Read Uint128 from a Buffer");
+    }
+
+    function testReadUint256() public {
+        uint256 expected = 31415926535897932384626433832795028841971693993751058209749445923078164062862;
+        bytes memory data = abi.encodePacked(expected);
+        BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
+
+        uint256 actual = buf.readUint256();
+        Assert.equal(uint(actual), uint(expected), "Read Uint64 from a Buffer");
+    }
+
     function testMultipleReadHead() public {
         uint8 small = 31;
         uint64 big = 3141592653589793238;

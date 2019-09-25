@@ -26,6 +26,7 @@ library BufferLib {
     for (uint64 index = 0; index < _length; index++) {
       value[index] = next(_buffer);
     }
+
     return value;
   }
 
@@ -84,7 +85,15 @@ library BufferLib {
   * @return The `uint8` value of the next byte in the buffer counting from the cursor position.
   */
   function readUint8(Buffer memory _buffer) internal pure returns (uint8) {
-    return uint8(read(_buffer, 1)[0]);
+    bytes memory bytesValue = _buffer.data;
+    uint64 offset = _buffer.cursor;
+    uint8 value;
+    assembly {
+      value := mload(add(add(bytesValue, 1), offset))
+    }
+    _buffer.cursor++;
+
+    return value;
   }
 
   /**
@@ -93,9 +102,15 @@ library BufferLib {
   * @return The `uint16` value of the next 2 bytes in the buffer counting from the cursor position.
   */
   function readUint16(Buffer memory _buffer) internal pure returns (uint16) {
-    bytes memory bytesValue = read(_buffer, 2);
-    return (uint16(uint8(bytesValue[0])) << 8) |
-      uint8(bytesValue[1]);
+    bytes memory bytesValue = _buffer.data;
+    uint64 offset = _buffer.cursor;
+    uint16 value;
+    assembly {
+      value := mload(add(add(bytesValue, 2), offset))
+    }
+    _buffer.cursor += 2;
+
+    return value;
   }
 
   /**
@@ -104,28 +119,66 @@ library BufferLib {
   * @return The `uint32` value of the next 4 bytes in the buffer counting from the cursor position.
   */
   function readUint32(Buffer memory _buffer) internal pure returns (uint32) {
-    bytes memory bytesValue = read(_buffer, 4);
-    return (uint32(uint8(bytesValue[0])) << 24) |
-      (uint32(uint8(bytesValue[1])) << 16) |
-      (uint16(uint8(bytesValue[2])) << 8) |
-      uint8(bytesValue[3]);
+    bytes memory bytesValue = _buffer.data;
+    uint64 offset = _buffer.cursor;
+    uint32 value;
+    assembly {
+      value := mload(add(add(bytesValue, 4), offset))
+    }
+    _buffer.cursor += 4;
+
+    return value;
   }
 
   /**
   * @notice Read and consume the next 8 bytes from the buffer as an `uint64`.
   * @param _buffer An instance of `BufferLib.Buffer`.
-  * @return The `uint64` value of the next 4 bytes in the buffer counting from the cursor position.
+  * @return The `uint64` value of the next 8 bytes in the buffer counting from the cursor position.
   */
   function readUint64(Buffer memory _buffer) internal pure returns (uint64) {
-    bytes memory bytesValue = read(_buffer, 8);
-    return (uint64(uint8(bytesValue[0])) << 56) |
-      (uint64(uint8(bytesValue[1])) << 48) |
-      (uint64(uint8(bytesValue[2])) << 40) |
-      (uint64(uint8(bytesValue[3])) << 32) |
-      (uint32(uint8(bytesValue[4])) << 24) |
-      (uint32(uint8(bytesValue[5])) << 16) |
-      (uint16(uint8(bytesValue[6])) << 8) |
-      uint8(bytesValue[7]);
+    bytes memory bytesValue = _buffer.data;
+    uint64 offset = _buffer.cursor;
+    uint64 value;
+    assembly {
+      value := mload(add(add(bytesValue, 8), offset))
+    }
+    _buffer.cursor += 8;
+
+    return value;
+  }
+
+  /**
+  * @notice Read and consume the next 16 bytes from the buffer as an `uint128`.
+  * @param _buffer An instance of `BufferLib.Buffer`.
+  * @return The `uint128` value of the next 16 bytes in the buffer counting from the cursor position.
+  */
+  function readUint128(Buffer memory _buffer) internal pure returns (uint128) {
+    bytes memory bytesValue = _buffer.data;
+    uint64 offset = _buffer.cursor;
+    uint128 value;
+    assembly {
+      value := mload(add(add(bytesValue, 16), offset))
+    }
+    _buffer.cursor += 16;
+
+    return value;
+  }
+
+  /**
+  * @notice Read and consume the next 32 bytes from the buffer as an `uint256`.
+  * @param _buffer An instance of `BufferLib.Buffer`.
+  * @return The `uint256` value of the next 32 bytes in the buffer counting from the cursor position.
+  */
+  function readUint256(Buffer memory _buffer) internal pure returns (uint256) {
+    bytes memory bytesValue = _buffer.data;
+    uint64 offset = _buffer.cursor;
+    uint256 value;
+    assembly {
+      value := mload(add(add(bytesValue, 32), offset))
+    }
+    _buffer.cursor += 32;
+
+    return value;
   }
 
   /**
