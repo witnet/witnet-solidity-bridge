@@ -80,7 +80,7 @@ library Witnet {
   }
 
   /**
-   * @notice Decode a fixed16 numeric value from a Result as an `int32` value
+   * @notice Decode a fixed16 (half-precision) numeric value from a Result as an `int32` value
    * @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
    * by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`
    * use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
@@ -90,6 +90,16 @@ library Witnet {
   function asFixed16(Result memory _result) public pure returns(int32) {
     require(_result.success, "Tried to read `fixed16` value from errored Result");
     return _result.cborValue.decodeFixed16();
+  }
+
+  /**
+   * @notice Decode an array of fixed16 values from a Result as an `int128[]` value
+   * @param _result An instance of Result
+   * @return The `int128[]` decoded from the Result
+   */
+  function asFixed16Array(Result memory _result) public pure returns(int128[] memory) {
+    require(_result.success, "Tried to read `fixed16[]` value from errored Result");
+    return _result.cborValue.decodeFixed16Array();
   }
 
   /**
@@ -103,6 +113,16 @@ library Witnet {
   }
 
   /**
+   * @notice Decode an array of integer numeric values from a Result as an `int128[]` value
+   * @param _result An instance of Result
+   * @return The `int128[]` decoded from the Result
+   */
+  function asInt128Array(Result memory _result) public pure returns(int128[] memory) {
+    require(_result.success, "Tried to read `int128[]` value from errored Result");
+    return _result.cborValue.decodeInt128Array();
+  }
+
+  /**
    * @notice Decode a string value from a Result as a `string` value
    * @param _result An instance of Result
    * @return The `string` decoded from the Result
@@ -113,6 +133,16 @@ library Witnet {
   }
 
   /**
+  * @notice Decode an array of string values from a Result as a `string[]` value
+  * @param _result An instance of Result
+  * @return The `string[]` decoded from the Result
+  */
+  function asStringArray(Result memory _result) public pure returns(string[] memory) {
+    require(_result.success, "Tried to read `string[]` value from errored Result");
+    return _result.cborValue.decodeStringArray();
+  }
+
+  /**
    * @notice Decode a natural numeric value from a Result as a `uint64` value
    * @param _result An instance of Result
    * @return The `uint64` decoded from the Result
@@ -120,6 +150,16 @@ library Witnet {
   function asUint64(Result memory _result) public pure returns(uint64) {
     require(_result.success, "Tried to read `uint64` value from errored Result");
     return _result.cborValue.decodeUint64();
+  }
+
+  /**
+ * @notice Decode an array of natural numeric values from a Result as a `uint64[]` value
+ * @param _result An instance of Result
+ * @return The `uint64[]` decoded from the Result
+ */
+  function asUint64Array(Result memory _result) public pure returns(uint64[] memory) {
+    require(_result.success, "Tried to read `uint64[]` value from errored Result");
+    return _result.cborValue.decodeUint64Array();
   }
 
 }
