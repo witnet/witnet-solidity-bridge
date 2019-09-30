@@ -213,6 +213,8 @@ library CBOR {
    * @return A `CBOR.Value` instance containing a partially decoded value
    */
   function valueFromBuffer(BufferLib.Buffer memory _buffer) public pure returns(Value memory) {
+    require(_buffer.data.length > 0, "Found empty buffer when parsing CBOR value");
+
     uint8 initialByte;
     uint8 majorType = 255;
     uint8 additionalInformation;
