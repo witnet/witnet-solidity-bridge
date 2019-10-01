@@ -89,6 +89,10 @@ contract WitnetBridgeInterface is VRF {
 
   constructor (address _blockRelayAddress) public {
     blockRelay = BlockRelay(_blockRelayAddress);
+
+    // Insert an empty request so as to initialize the requests array with length > 0
+    DataRequest memory request;
+    requests.push(request);
   }
 
   /// @dev Posts a data request into the WBI in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.

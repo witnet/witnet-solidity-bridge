@@ -10,7 +10,7 @@ const data = require("./data.json")
 contract("UsingWitnet", accounts => {
   describe("UsingWitnet \"happy path\" test case. " +
     "This covers pretty much all the life cycle of a Witnet request.", () => {
-    const requestHex = "0x00"
+    const requestHex = "0x01"
     const resultHex = "0x1a002fefd8"
     const resultDecimal = 3141592
     const block1Hash = 0x123456
@@ -51,7 +51,7 @@ contract("UsingWitnet", accounts => {
         from: accounts[0],
         value: requestReward + resultReward,
       }))
-      const expectedId = "0x0000000000000000000000000000000000000000000000000000000000000000"
+      const expectedId = "0x0000000000000000000000000000000000000000000000000000000000000001"
 
       assert.equal(requestId.toString(16), expectedId)
     })

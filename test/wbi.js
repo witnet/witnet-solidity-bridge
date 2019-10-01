@@ -218,7 +218,7 @@ contract("WBI", accounts => {
 
       // retrieve the id of the first data request posted
       const id1 = txReceipt1.logs[0].data
-      assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x0"))
+      assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       // post the second data request
       const tx2 = wbiInstance.postDataRequest(drBytes2, 0)
@@ -227,7 +227,7 @@ contract("WBI", accounts => {
 
       // retrieve the id of the second data request posted
       let id2 = txReceipt2.logs[0].data
-      assert.equal(web3.utils.hexToNumberString(id2), web3.utils.hexToNumberString("0x1"))
+      assert.equal(web3.utils.hexToNumberString(id2), web3.utils.hexToNumberString("0x2"))
 
       // read the bytes of both
       let readDrBytes1 = await wbiInstance.readDataRequest.call(id1)
@@ -238,7 +238,7 @@ contract("WBI", accounts => {
 
     it("should check the emission of the PostedRequest event with correct id", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
-      const hash = "0x0"
+      const hash = "0x1"
       const expectedResultId = web3.utils.hexToNumberString(hash)
 
       // post data request
@@ -278,7 +278,7 @@ contract("WBI", accounts => {
       const txHash1 = await waitForHash(tx1)
       let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       let id1 = txReceipt1.logs[0].data
-      assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x0"))
+      assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       // subscribe to PostedResult event
       wbiInstance.PostedResult({}, async (_error, event) => {
@@ -348,7 +348,7 @@ contract("WBI", accounts => {
       const txHash1 = await waitForHash(tx1)
       let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       let id1 = txReceipt1.logs[0].data
-      assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x0"))
+      assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       var blockHeader = "0x" + sha.sha256("block header")
       const roots = calculateRoots(drBytes, resBytes)
