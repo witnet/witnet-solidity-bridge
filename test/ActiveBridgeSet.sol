@@ -15,15 +15,14 @@ contract TestABS {
 
   ActiveBridgeSetLib.ActiveBridgeSet buf;
 
-  function beforeEach() public{
-    //buf = ActiveBridgeSetLib.ActiveBridgeSet(0, 0, 0);
-    buf.updateABS(2, 2);
+  function beforeEach() public {
+    buf.lastBlockNumber = 0;
+    buf.updateActivity(CLAIM_BLOCK_PERIOD * ACTIVITY_LENGTH);
     buf.lastBlockNumber = 0;
   }
 
   function testGetABSEmpty() public {
     verifyABSStatus(0, 0, 0);
-    // emit ABS("1 ABS", buf.lastBlockNumber, buf.activeIdentities, buf.nextActiveIdentities);
   }
 
   function testPushActivityNextEpoch() public {
@@ -32,7 +31,6 @@ contract TestABS {
 
     buf.pushActivity(msg.sender, CLAIM_BLOCK_PERIOD);
     verifyABSStatus(1, 1, CLAIM_BLOCK_PERIOD);
-    // emit ABS("2 ABS", buf.lastBlockNumber, buf.activeIdentities, buf.nextActiveIdentities);
   }
 
   function testPushActivityTwice() public {
@@ -47,7 +45,6 @@ contract TestABS {
     buf.pushActivity(msg.sender, CLAIM_BLOCK_PERIOD);
     verifyABSStatus(1, 1, CLAIM_BLOCK_PERIOD);
     verifyIdentityCount(msg.sender, 2);
-    // emit ABS("2 ABS", buf.lastBlockNumber, buf.activeIdentities, buf.nextActiveIdentities);
 
     buf.pushActivity(msg.sender, CLAIM_BLOCK_PERIOD * 2);
     verifyABSStatus(1, 1, CLAIM_BLOCK_PERIOD * 2);
@@ -56,18 +53,14 @@ contract TestABS {
 
   function testPushActivityOverflow() public {
     buf.pushActivity(msg.sender, 0);
-    // Assert.equal(uint(buf.getABS()), 0, "Should not yet count for ABS");
     verifyABSStatus(0, 1, 0);
     verifyIdentityCount(msg.sender, 1);
 
     buf.pushActivity(msg.sender, CLAIM_BLOCK_PERIOD);
-    // Assert.equal(uint(buf.getABS()), 1, "ABS should be updated");
     verifyABSStatus(1, 1, CLAIM_BLOCK_PERIOD);
     verifyIdentityCount(msg.sender, 2);
 
     buf.pushActivity(msg.sender, CLAIM_BLOCK_PERIOD*(ACTIVITY_LENGTH + 1));
-    // emit ABS("3 ABS", buf.lastBlockNumber, buf.activeIdentities, buf.nextActiveIdentities);
-    // Assert.equal(uint(buf.getABS()), uint(expected), "ABS should be overflown");
     verifyABSStatus(0, 1, CLAIM_BLOCK_PERIOD*(ACTIVITY_LENGTH + 1));
     verifyIdentityCount(msg.sender, 1);
   }
@@ -106,8 +99,22 @@ contract TestABS {
     verifyIdentityCount(addresses[3], 2);
   }
 
+  function testUpdateActivity() public {
+    buf.pushActivity(addresses[0], 0);
+    verifyABSStatus(0, 1, 0);
+
+    buf.pushActivity(addresses[1], 0);
+    verifyABSStatus(0, 2, 0);
+
+    buf.updateActivity(CLAIM_BLOCK_PERIOD);
+    verifyABSStatus(2, 2, CLAIM_BLOCK_PERIOD);
+
+    buf.updateActivity(CLAIM_BLOCK_PERIOD * ACTIVITY_LENGTH);
+    verifyABSStatus(0, 0, CLAIM_BLOCK_PERIOD * ACTIVITY_LENGTH);
+  }
+
   function verifyABSStatus(uint32 _activeIdentities, uint32 _nextActiveIdentities, uint256 _lastBlockNumber) internal {
-    Assert.equal(uint(buf.getABS()), uint(_activeIdentities), "ABS active identities do not match");
+    Assert.equal(uint(buf.activeIdentities), uint(_activeIdentities), "ABS active identities do not match");
     Assert.equal(uint(buf.nextActiveIdentities), uint(_nextActiveIdentities), "ABS next active identities do not match");
     Assert.equal(uint(buf.lastBlockNumber), uint(_lastBlockNumber), "ABS block number do not match");
   }
