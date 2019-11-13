@@ -7,20 +7,20 @@ pragma solidity ^0.5.0;
  */
 library ActiveBridgeSetLib {
 
-  uint8 constant CLAIM_BLOCK_PERIOD = 8;
-  uint16 constant ACTIVITY_LENGTH = 2000;
+  uint8 public constant CLAIM_BLOCK_PERIOD = 8;
+  uint16 public constant ACTIVITY_LENGTH = 100;
 
   struct ActiveBridgeSet {
     // Mapping of activity slots with appeared identities
     mapping (uint16 => address[]) epochIdentities;
     // Mapping of identities with their appereance count
     mapping (address => uint16) identityCount;
-    // Last computed blockNumber
-    uint256 lastBlockNumber;
     // Number of identities in Active Bridge Set (consolidated)
     uint32 activeIdentities;
     // Number of identities for the next activity slot (not yet consolidated)
     uint32 nextActiveIdentities;
+    // Last computed blockNumber
+    uint256 lastBlockNumber;
   }
 
   function pushActivity(ActiveBridgeSet storage _abs, address _address, uint256 _blockNumber) internal returns (bool success) {
@@ -32,7 +32,7 @@ library ActiveBridgeSetLib {
     uint16 currentSlot = uint16((_blockNumber / CLAIM_BLOCK_PERIOD) % ACTIVITY_LENGTH);
 
     // If there are more than 2000 activity slots empty => remove completely the ABS
-    if ((_blockNumber - _abs.lastBlockNumber) > CLAIM_BLOCK_PERIOD * ACTIVITY_LENGTH) {
+    if ((_blockNumber - _abs.lastBlockNumber) >= CLAIM_BLOCK_PERIOD * ACTIVITY_LENGTH) {
       // call updateABS(_abs, lastSlot, lastSlot) to remove everything
       updateABS(_abs, lastSlot, lastSlot);
       _abs.lastBlockNumber = _blockNumber;
@@ -56,17 +56,21 @@ library ActiveBridgeSetLib {
     //  2. Increment by 1 address to `identities`
     //  3. Increment by 1 `activeIdentities`
     _abs.epochIdentities[currentSlot].push(_address);
+    if (_abs.identityCount[_address] == 0) {
+      _abs.nextActiveIdentities++;
+    }
     _abs.identityCount[_address]++;
-    _abs.nextActiveIdentities++;
 
     return true;
   }
 
   function updateABS(ActiveBridgeSet storage _abs, uint16 _currentSlot, uint16 _lastSlot) internal {
     // for each slot elapsed, remove identities and update the current ABS
-    for (uint16 slot = _lastSlot + 1; slot <= _currentSlot ; slot = ((slot + 1) % ACTIVITY_LENGTH)) {
+    for (uint16 slot = (_lastSlot + 1) % ACTIVITY_LENGTH ; slot != _currentSlot ; slot = (slot + 1) % ACTIVITY_LENGTH) {
       flushSlot(_abs, slot);
     }
+    flushSlot(_abs, _currentSlot);
+
     _abs.activeIdentities = _abs.nextActiveIdentities;
   }
 
