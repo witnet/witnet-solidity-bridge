@@ -1,6 +1,7 @@
 const WBITestHelper = artifacts.require("WBITestHelper")
 const WBI = artifacts.require("WitnetBridgeInterface")
 const BlockRelay = artifacts.require("BlockRelay")
+const data = require("./data.json")
 const testdata = require("./internals.json")
 
 contract("WBITestHelper - internals", accounts => {
@@ -49,6 +50,25 @@ contract("WBITestHelper - internals", accounts => {
         const sig = test.signature
         const result = await helper._verifySig.call(message, pubKey, sig)
         assert.notEqual(result, true)
+      })
+    }
+    for (let [index, test] of testdata.poe.valid.entries()) {
+      it(`valid poe (${index + 1})`, async () => {
+        helper.lastBeacon = testdata.poe.lastBeacon
+        const publicKey = [testdata.poe.publicKey.x, testdata.poe.publicKey.y]
+        const proofBytes = testdata.poe.proof
+        const proof = await helper.decodeProof(proofBytes)
+        const fastVerifyParams = await helper.computeFastVerifyParams(publicKey, proof, testdata.poe.lastBeacon)
+        await helper.setActiveIdentities(test.abs)
+        console.log(helper.gammaToHash(_poe[0], _poe[1]))
+
+
+        const result = await helper._verifyPoe.call(
+          proof,
+          publicKey,
+          fastVerifyParams[0],
+          fastVerifyParams[1])
+        assert.equal(result, true)
       })
     }
   })

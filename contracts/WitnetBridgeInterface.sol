@@ -3,6 +3,7 @@ pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "vrf-solidity/contracts/VRF.sol";
 import "./BlockRelay.sol";
+import "./ActiveBridgeSetLib.sol";
 
 
 /**
@@ -15,6 +16,7 @@ import "./BlockRelay.sol";
 contract WitnetBridgeInterface is VRF {
 
   using SafeMath for uint256;
+  using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
 
   struct DataRequest {
     bytes dr;
@@ -29,6 +31,11 @@ contract WitnetBridgeInterface is VRF {
   BlockRelay blockRelay;
 
   DataRequest[] public requests;
+
+  ActiveBridgeSetLib.ActiveBridgeSet abs;
+
+  // Replication factor for Active Bridge Set identities
+  uint8 repFactor;
 
   // Event emitted when a new DR is posted
   event PostedRequest(address indexed _from, uint256 _id);
@@ -60,7 +67,6 @@ contract WitnetBridgeInterface is VRF {
       "Not a valid PoE");
     _;
   }
-
   // Ensures signature (sign(msg.sender)) is valid
   modifier validSignature(
     uint256[2] memory _publicKey,
@@ -85,13 +91,31 @@ contract WitnetBridgeInterface is VRF {
     require(requests[_id].result.length == 0, "Result already included");
     _;
   }
+// Ensures the VRF is valid
+  modifier vrfValid(
+    uint256[4] memory _poe,
+    uint256[2] memory _publicKey,
+    uint256[2] memory _uPoint,
+    uint256[4] memory _vPointHelpers) {
+    require(
+      fastVerify(
+        _publicKey,
+        _poe,
+        getLastBeacon(),
+        _uPoint,
+        _vPointHelpers) == true,
+      "Not a valid VRF");
+    _;
+  }
 
-  constructor (address _blockRelayAddress) public {
+
+  constructor (address _blockRelayAddress, uint8 _repFactor) public {
     blockRelay = BlockRelay(_blockRelayAddress);
 
     // Insert an empty request so as to initialize the requests array with length > 0
     DataRequest memory request;
     requests.push(request);
+    repFactor = _repFactor;
   }
 
   /// @dev Posts a data request into the WBI in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
@@ -149,12 +173,11 @@ contract WitnetBridgeInterface is VRF {
     returns(bool)
   {
     for (uint i = 0; i < _ids.length; i++) {
-      uint256 index = _ids[i];
-      if ((requests[index].timestamp == 0 || block.number - requests[index].timestamp > 13) &&
-      requests[index].drHash == 0 &&
-      requests[index].result.length == 0){
-        requests[index].pkhClaim = msg.sender;
-        requests[index].timestamp = block.number;
+      if ((requests[_ids[i]].timestamp == 0 || block.number - requests[_ids[i]].timestamp > 13) &&
+      requests[_ids[i]].drHash == 0 &&
+      requests[_ids[i]].result.length == 0){
+        requests[_ids[i]].pkhClaim = msg.sender;
+        requests[_ids[i]].timestamp = block.number;
       } else {
         revert("One of the listed data requests was already claimed");
       }
@@ -201,6 +224,7 @@ contract WitnetBridgeInterface is VRF {
       drOutputHash)) {
       requests[_id].drHash = drHash;
       requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
+      abs.pushActivity(requests[_id].pkhClaim, block.number);
       emit IncludedRequest(msg.sender, _id);
     } else {
       revert("Invalid PoI");
@@ -234,6 +258,7 @@ contract WitnetBridgeInterface is VRF {
       resHash)){
       requests[_id].result = _result;
       msg.sender.transfer(requests[_id].tallyReward);
+      abs.pushActivity(msg.sender, block.number);
       emit PostedResult(msg.sender, _id);
     } else {
       revert("Invalid PoI");
@@ -277,7 +302,14 @@ contract WitnetBridgeInterface is VRF {
     return blockRelay.getLastBeacon();
   }
 
-  /// @dev Claim drs to be posted to Witnet by the node
+  /// @dev Updates the ABS activity with the block number provided
+  /// @param _blockNumber update the ABS until this block number
+  function updateAbsActivity(uint256 _blockNumber) public {
+    require (_blockNumber < block.number, "The block number provided has not been reached");
+    abs.updateActivity(block.number);
+  }
+
+/// @dev Claim drs to be posted to Witnet by the node
   /// @param _poe PoE claiming eligibility
   /// @param _publicKey The public key as an array composed of `[pubKey-x, pubKey-y]`
   /// @param _uPoint uPoint coordinates as [uPointX, uPointY] corresponding to U = s*B - c*Y
@@ -287,16 +319,20 @@ contract WitnetBridgeInterface is VRF {
     uint256[2] memory _publicKey,
     uint256[2] memory _uPoint,
     uint256[4] memory _vPointHelpers)
-  internal view returns(bool)
+  internal view vrfValid(_poe,_publicKey, _uPoint,_vPointHelpers) returns(bool)
   {
-    bytes memory message = getLastBeacon();
+    uint256 vrf = uint256(gammaToHash(_poe[0], _poe[1]));
+    if (abs.activeIdentities < repFactor) {
+      return true;
+    }
+    /* True if_vrf/(2^{256} -1) <= repFactor/abs.activeIdentities
+    we rewrote it as vrf <= ((2^{256} -1)/abs.activeIdentities)*repFactor to gain efficiency*/
 
-    return fastVerify(
-      _publicKey,
-      _poe,
-      message,
-      _uPoint,
-      _vPointHelpers);
+    if (vrf <= ((~uint256(0)/abs.activeIdentities)*repFactor)) {
+      return true;
+    }
+
+    return false;
   }
 
   /// @dev Verifies the validity of a PoI
