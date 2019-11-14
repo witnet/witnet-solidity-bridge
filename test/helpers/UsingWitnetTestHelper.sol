@@ -5,6 +5,7 @@ import "../../contracts/Request.sol";
 import "../../contracts/Witnet.sol";
 import "../../contracts/UsingWitnet.sol";
 
+
 /**
  * @title Test Helper for the UsingWitnet contract
  * @dev The aim of this contract is:

@@ -13,7 +13,7 @@ contract("WBITestHelper - internals", accounts => {
       wbiInstance = await WBI.new(blockRelay.address)
       helper = await WBITestHelper.new(wbiInstance.address)
     })
-    for (let [index, test] of testdata.poi.valid.entries()) {
+    for (const [index, test] of testdata.poi.valid.entries()) {
       it(`poi (${index + 1})`, async () => {
         const poi = test.poi
         const root = test.root
@@ -23,7 +23,7 @@ contract("WBITestHelper - internals", accounts => {
         assert(result)
       })
     }
-    for (let [index, test] of testdata.poi.invalid.entries()) {
+    for (const [index, test] of testdata.poi.invalid.entries()) {
       it(`invalid poi (${index + 1})`, async () => {
         const poi = test.poi
         const root = test.root
@@ -33,7 +33,7 @@ contract("WBITestHelper - internals", accounts => {
         assert.notEqual(result, true)
       })
     }
-    for (let [index, test] of testdata.sig.valid.entries()) {
+    for (const [index, test] of testdata.sig.valid.entries()) {
       it(`sig (${index + 1})`, async () => {
         const message = web3.utils.fromAscii(test.message)
         const pubKey = test.public_key
@@ -42,7 +42,7 @@ contract("WBITestHelper - internals", accounts => {
         assert.equal(result, true)
       })
     }
-    for (let [index, test] of testdata.sig.invalid.entries()) {
+    for (const [index, test] of testdata.sig.invalid.entries()) {
       it(`invalid sig (${index + 1})`, async () => {
         const message = web3.utils.fromAscii(test.message)
         const pubKey = test.public_key

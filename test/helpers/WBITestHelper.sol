@@ -11,7 +11,7 @@ import "../../contracts/WitnetBridgeInterface.sol";
  */
 
 
-contract WBITestHelper is WitnetBridgeInterface{
+contract WBITestHelper is WitnetBridgeInterface {
   WitnetBridgeInterface wbi;
 
   constructor (address _wbiRelayAddress) WitnetBridgeInterface(_wbiRelayAddress) public { }
@@ -20,8 +20,10 @@ contract WBITestHelper is WitnetBridgeInterface{
     uint256[] memory _poi,
     uint256 _root,
     uint256 _index,
-    uint256 element)
-  public pure returns(bool){
+    uint256 element
+  )
+  public pure returns(bool)
+  {
     return verifyPoi(
       _poi,
       _root,
@@ -34,7 +36,8 @@ contract WBITestHelper is WitnetBridgeInterface{
     uint256[2] memory _publicKey,
     bytes memory _addrSignature
   )
-  public returns(bool){
+  public returns(bool)
+  {
     return verifySig(
       message,
       _publicKey,

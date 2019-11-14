@@ -14,11 +14,11 @@ function calculateRoots (drBytes, resBytes) {
   hash = sha.sha256.create()
   hash.update(web3.utils.hexToBytes(drHash))
   hash.update(web3.utils.hexToBytes(drHash))
-  let expectedDrHash = "0x" + hash.hex()
+  const expectedDrHash = "0x" + hash.hex()
   hash = sha.sha256.create()
   hash.update(web3.utils.hexToBytes(expectedDrHash))
   hash.update(web3.utils.hexToBytes(resBytes))
-  let expectedResHash = "0x" + hash.hex()
+  const expectedResHash = "0x" + hash.hex()
   return [expectedDrHash, expectedResHash]
 }
 
@@ -34,7 +34,7 @@ contract("WBI", accounts => {
     it("should post 2 data requests, read them successfully and check balances afterwards", async () => {
       // Take current balance
       var account1 = accounts[0]
-      let actualBalance1 = await web3.eth.getBalance(account1)
+      const actualBalance1 = await web3.eth.getBalance(account1)
 
       const drBytes = web3.utils.fromAscii("This is a DR")
       const drBytes2 = web3.utils.fromAscii("This is a second DR")
@@ -47,22 +47,22 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
 
       // Post second data request
       const tx2 = wbiInstance.postDataRequest(drBytes2, 0)
       const txHash2 = await waitForHash(tx2)
-      let txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
+      const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
       const id2 = txReceipt2.logs[0].data
 
       // Read both
-      let readDrBytes = await wbiInstance.readDataRequest.call(id1)
-      let readDrBytes2 = await wbiInstance.readDataRequest.call(id2)
+      const readDrBytes = await wbiInstance.readDataRequest.call(id1)
+      const readDrBytes2 = await wbiInstance.readDataRequest.call(id2)
 
       // Assert correct balances
-      let afterBalance1 = await web3.eth.getBalance(account1)
-      let contractBalanceAfter = await web3.eth.getBalance(
+      const afterBalance1 = await web3.eth.getBalance(account1)
+      const contractBalanceAfter = await web3.eth.getBalance(
         wbiInstance.address
       )
 
@@ -82,11 +82,11 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
 
       // assert correct balance
-      let contractBalanceBefore = await web3.eth.getBalance(
+      const contractBalanceBefore = await web3.eth.getBalance(
         wbiInstance.address
       )
       assert.equal(web3.utils.toWei("1", "ether"), contractBalanceBefore)
@@ -99,7 +99,7 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       // assert correct balance
-      let contractBalanceAfter = await web3.eth.getBalance(
+      const contractBalanceAfter = await web3.eth.getBalance(
         wbiInstance.address
       )
 
@@ -112,8 +112,8 @@ contract("WBI", accounts => {
       var account1 = accounts[0]
       var account2 = accounts[1]
       var blockHeader = "0x" + sha.sha256("block header")
-      let actualBalance1 = await web3.eth.getBalance(account1)
-      let actualBalance2 = await web3.eth.getBalance(account2)
+      const actualBalance1 = await web3.eth.getBalance(account1)
+      const actualBalance2 = await web3.eth.getBalance(account2)
 
       // Create data requests and roots
       const drBytes = web3.utils.fromAscii("This is a DR")
@@ -137,11 +137,11 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
 
       // check if data request is claimable
-      let claimCheck = await wbiInstance.checkDataRequestsClaimability.call([id1])
+      const claimCheck = await wbiInstance.checkDataRequestsClaimability.call([id1])
       assert.deepEqual([true], claimCheck)
 
       // claim data request
@@ -163,14 +163,14 @@ contract("WBI", accounts => {
       await waitForHash(txRelay)
 
       // report DR inclusion (with PoI)
-      let concatenated = web3.utils.hexToBytes(blockHeader).concat(
+      const concatenated = web3.utils.hexToBytes(blockHeader).concat(
         web3.utils.hexToBytes(
           web3.utils.padLeft(
             web3.utils.toHex(epoch), 64
           )
         )
       )
-      let beacon = await wbiInstance.getLastBeacon.call()
+      const beacon = await wbiInstance.getLastBeacon.call()
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
       const tx3 = wbiInstance.reportDataRequestInclusion(id1, [drOutputHash], 0, blockHeader, {
@@ -183,13 +183,13 @@ contract("WBI", accounts => {
       assert(parseInt(afterBalance2, 10) > parseInt(actualBalance2, 10))
 
       // report result
-      let restx = wbiInstance.reportResult(id1, [], 0, blockHeader, resBytes, { from: account2 })
+      const restx = wbiInstance.reportResult(id1, [], 0, blockHeader, resBytes, { from: account2 })
       await waitForHash(restx)
 
       // check payment of result reporting
-      let afterBalance1 = await web3.eth.getBalance(account1)
-      let balanceFinal = await web3.eth.getBalance(account2)
-      let contractBalanceAfter = await web3.eth.getBalance(
+      const afterBalance1 = await web3.eth.getBalance(account1)
+      const balanceFinal = await web3.eth.getBalance(account2)
+      const contractBalanceAfter = await web3.eth.getBalance(
         wbiInstance.address
       )
 
@@ -199,7 +199,7 @@ contract("WBI", accounts => {
       assert.equal(0, contractBalanceAfter)
 
       // read result bytes
-      let readResBytes = await wbiInstance.readResult.call(id1)
+      const readResBytes = await wbiInstance.readResult.call(id1)
       assert.equal(resBytes, readResBytes)
     })
 
@@ -214,7 +214,7 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
 
       // retrieve the id of the first data request posted
       const id1 = txReceipt1.logs[0].data
@@ -223,15 +223,15 @@ contract("WBI", accounts => {
       // post the second data request
       const tx2 = wbiInstance.postDataRequest(drBytes2, 0)
       const txHash2 = await waitForHash(tx2)
-      let txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
+      const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
 
       // retrieve the id of the second data request posted
-      let id2 = txReceipt2.logs[0].data
+      const id2 = txReceipt2.logs[0].data
       assert.equal(web3.utils.hexToNumberString(id2), web3.utils.hexToNumberString("0x2"))
 
       // read the bytes of both
-      let readDrBytes1 = await wbiInstance.readDataRequest.call(id1)
-      let readDrBytes2 = await wbiInstance.readDataRequest.call(id2)
+      const readDrBytes1 = await wbiInstance.readDataRequest.call(id1)
+      const readDrBytes2 = await wbiInstance.readDataRequest.call(id2)
       assert.equal(drBytes1, readDrBytes1)
       assert.equal(drBytes2, readDrBytes2)
     })
@@ -250,7 +250,7 @@ contract("WBI", accounts => {
       })
 
       // Finally read the bytes
-      let readDrBytes = await wbiInstance.readDataRequest.call(expectedResultId)
+      const readDrBytes = await wbiInstance.readDataRequest.call(expectedResultId)
       assert.equal(drBytes, readDrBytes)
     })
 
@@ -276,13 +276,13 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-      let id1 = txReceipt1.logs[0].data
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
       assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       // subscribe to PostedResult event
       wbiInstance.PostedResult({}, async (_error, event) => {
-        let readresBytes1 = await wbiInstance.readResult.call(id1)
+        const readresBytes1 = await wbiInstance.readResult.call(id1)
         assert.equal(resBytes, readresBytes1)
       })
 
@@ -346,8 +346,8 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-      let id1 = txReceipt1.logs[0].data
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
       assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       var blockHeader = "0x" + sha.sha256("block header")
@@ -397,8 +397,8 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-      let id1 = txReceipt1.logs[0].data
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
 
       // assert it reverts when rewards are higher than values sent
       await truffleAssert.reverts(wbiInstance.upgradeDataRequest(id1, web3.utils.toWei("2", "ether"), {
@@ -425,8 +425,8 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-      let id1 = txReceipt1.logs[0].data
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
 
       var blockHeader = "0x" + sha.sha256("block header")
       const roots = calculateRoots(drBytes, resBytes)
@@ -449,7 +449,7 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       // check if data request is not claimable
-      let claimCheck = await wbiInstance.checkDataRequestsClaimability.call([id1])
+      const claimCheck = await wbiInstance.checkDataRequestsClaimability.call([id1])
       assert.deepEqual([false], claimCheck)
 
       // should revert when trying to claim it again
@@ -486,8 +486,8 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-      let id1 = txReceipt1.logs[0].data
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
 
       var blockHeader1 = "0x" + sha.sha256("block header")
       const roots1 = calculateRoots(drBytes, resBytes)
@@ -517,14 +517,14 @@ contract("WBI", accounts => {
       })
       await waitForHash(txRelay2)
 
-      let concatenated = web3.utils.hexToBytes(blockHeader2).concat(
+      const concatenated = web3.utils.hexToBytes(blockHeader2).concat(
         web3.utils.hexToBytes(
           web3.utils.padLeft(
             web3.utils.toHex(epoch2), 64
           )
         )
       )
-      let beacon = await wbiInstance.getLastBeacon.call()
+      const beacon = await wbiInstance.getLastBeacon.call()
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
       // post data request inclusion
@@ -558,8 +558,8 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-      let id1 = txReceipt1.logs[0].data
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
 
       var blockHeader = "0x" + sha.sha256("block header")
       const roots = calculateRoots(drBytes, resBytes)
@@ -582,8 +582,10 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       // assert reporting a result when inclusion has not been proved fails
-      await truffleAssert.reverts(wbiInstance.reportResult(id1, [dummySybling], 1, blockHeader, resBytes, {
-        from: accounts[1] }), "DR not yet included")
+      await truffleAssert.reverts(
+        wbiInstance.reportResult(id1, [dummySybling], 1, blockHeader, resBytes, { from: accounts[1] }),
+        "DR not yet included"
+      )
     })
     it("should revert because of reporting a result for a data request " +
        "for which a result has been already reported",
@@ -606,8 +608,8 @@ contract("WBI", accounts => {
         value: web3.utils.toWei("1", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
-      let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-      let id1 = txReceipt1.logs[0].data
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
 
       // claim data request
       const tx2 = wbiInstance.claimDataRequests(
@@ -631,14 +633,14 @@ contract("WBI", accounts => {
       })
       await waitForHash(txRelay2)
 
-      let concatenated = web3.utils.hexToBytes(blockHeader2).concat(
+      const concatenated = web3.utils.hexToBytes(blockHeader2).concat(
         web3.utils.hexToBytes(
           web3.utils.padLeft(
             web3.utils.toHex(epoch2), 64
           )
         )
       )
-      let beacon = await wbiInstance.getLastBeacon.call()
+      const beacon = await wbiInstance.getLastBeacon.call()
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
       // report data request inclusion
@@ -648,13 +650,14 @@ contract("WBI", accounts => {
       await waitForHash(tx3)
 
       // report result
-      const tx4 = wbiInstance.reportResult(id1, [], 0, blockHeader2, resBytes, {
-        from: accounts[1] })
+      const tx4 = wbiInstance.reportResult(id1, [], 0, blockHeader2, resBytes, { from: accounts[1] })
       await waitForHash(tx4)
 
       // revert when reporting the same result
-      await truffleAssert.reverts(wbiInstance.reportResult(id1, [], 1, blockHeader2, resBytes, {
-        from: accounts[1] }), "Result already included")
+      await truffleAssert.reverts(
+        wbiInstance.reportResult(id1, [], 1, blockHeader2, resBytes, { from: accounts[1] }),
+        "Result already included"
+      )
     })
     it("should revert because of trying to claim with an invalid signature",
       async () => {
@@ -674,8 +677,8 @@ contract("WBI", accounts => {
           value: web3.utils.toWei("1", "ether"),
         })
         const txHash1 = await waitForHash(tx1)
-        let txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-        let id1 = txReceipt1.logs[0].data
+        const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+        const id1 = txReceipt1.logs[0].data
 
         // revert when reporting the same result
         await truffleAssert.reverts(wbiInstance.claimDataRequests(
@@ -684,8 +687,7 @@ contract("WBI", accounts => {
           publicKey,
           fastVerifyParams[0],
           fastVerifyParams[1],
-          signature, {
-            from: accounts[1] }), "Not a valid signature")
+          signature, { from: accounts[1] }), "Not a valid signature")
       })
   })
 })

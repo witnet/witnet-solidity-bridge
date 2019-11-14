@@ -1,17 +1,22 @@
 pragma solidity ^0.5.0;
 
 import "truffle/Assert.sol";
-import "../contracts/ActiveBridgeSet.sol";
+import "../contracts/ActiveBridgeSetLib.sol";
 
 
-contract TestABS {
+contract TestActiveBridgeSet {
 
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
 
   uint8 constant CLAIM_BLOCK_PERIOD = 8;
   uint16 constant ACTIVITY_LENGTH = 100;
 
-  address[] addresses = [address(0x01), address(0x02), address(0x03), address(0x04)];
+  address[] addresses = [
+    address(0x01),
+    address(0x02),
+    address(0x03),
+    address(0x04)
+  ];
 
   ActiveBridgeSetLib.ActiveBridgeSet buf;
 

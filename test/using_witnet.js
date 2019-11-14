@@ -57,7 +57,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should have posted and read the same bytes", async () => {
-      let internalBytes = await wbi.readDataRequest(requestId)
+      const internalBytes = await wbi.readDataRequest(requestId)
       assert.equal(internalBytes, requestHex)
     })
 
@@ -77,12 +77,12 @@ contract("UsingWitnet", accounts => {
     })
 
     it("client contract balance should remain stable", async () => {
-      let usingWitnetBalance = await web3.eth.getBalance(clientContract.address)
+      const usingWitnetBalance = await web3.eth.getBalance(clientContract.address)
       assert.equal(usingWitnetBalance, 0)
     })
 
     it("WBI balance should increase", async () => {
-      let wbiBalance = await web3.eth.getBalance(wbi.address)
+      const wbiBalance = await web3.eth.getBalance(wbi.address)
       assert.equal(wbiBalance, requestReward + resultReward)
     })
 
@@ -109,12 +109,12 @@ contract("UsingWitnet", accounts => {
     })
 
     it("client contract balance should remain stable after rewards upgrade", async () => {
-      let usingWitnetBalance = await web3.eth.getBalance(clientContract.address)
+      const usingWitnetBalance = await web3.eth.getBalance(clientContract.address)
       assert.equal(usingWitnetBalance, 0)
     })
 
     it("WBI balance should increase after rewards upgrade", async () => {
-      let wbiBalance = await web3.eth.getBalance(wbi.address)
+      const wbiBalance = await web3.eth.getBalance(wbi.address)
       assert.equal(wbiBalance, (requestReward + resultReward) * 2)
     })
 

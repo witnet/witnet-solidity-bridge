@@ -13,7 +13,7 @@ contract UsingWitnetBytesTestHelper is UsingWitnetBytes {
 
   constructor (address _wbiAddress) UsingWitnetBytes(_wbiAddress) public {}
 
-  function _witnetPostDataRequest(bytes memory _dr, uint256 _tallyReward) public payable returns(uint256 id){
+  function _witnetPostDataRequest(bytes memory _dr, uint256 _tallyReward) public payable returns(uint256 id) {
     return witnetPostRequest(_dr, _tallyReward);
   }
 
@@ -21,7 +21,7 @@ contract UsingWitnetBytesTestHelper is UsingWitnetBytes {
     witnetUpgradeRequest(_id, _tallyReward);
   }
 
-  function _witnetReadResult (uint256 _id) public view returns(bytes memory){
+  function _witnetReadResult (uint256 _id) public view returns(bytes memory) {
     return witnetReadResult(_id);
   }
 }
