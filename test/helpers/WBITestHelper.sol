@@ -13,6 +13,10 @@ import "../../contracts/WitnetBridgeInterface.sol";
 
 contract WBITestHelper is WitnetBridgeInterface {
   WitnetBridgeInterface wbi;
+  //uint256 blockHash;
+  // epoch of the last block
+  //uint256 epoch;
+  bytes lastBeacon;
 
   constructor (address _wbiRelayAddress) WitnetBridgeInterface(_wbiRelayAddress) public { }
 
@@ -31,16 +35,47 @@ contract WBITestHelper is WitnetBridgeInterface {
       element);
   }
 
+  function verifyPoe(
+    uint256[4] memory _poe,
+    uint256[2] memory _publicKey,
+    uint256[2] memory _uPoint,
+    uint256[4] memory _vPointHelpers)
+  public pure returns(bool)
+  {
+    return verifyPoe(
+      _poe,
+      _publicKey,
+      _uPoint,
+      _vPointHelpers);
+  }
+
+
   function _verifySig(
-    bytes memory message,
+    bytes memory _message,
     uint256[2] memory _publicKey,
     bytes memory _addrSignature
   )
   public returns(bool)
   {
     return verifySig(
-      message,
+      _message,
       _publicKey,
       _addrSignature);
+  }
+
+  function getLastBeacon()
+    public
+    view
+  returns(bytes memory)
+  {
+    //return abi.encodePacked(blockHash, epoch);ç
+    return lastBeacon;
+  }
+
+  function setActiveIdentities(uint32 _abs)
+    public
+    view
+  {
+    ABS.activeIdentities = _abs;
   }
 }
