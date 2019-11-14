@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
-import "./Buffer.sol";
+import "./BufferLib.sol";
 
 
 // TODO: add support for Array (majorType = 4)
