@@ -28,7 +28,7 @@ contract("WBI", accounts => {
     let blockRelay
     beforeEach(async () => {
       blockRelay = await BlockRelay.new()
-      wbiInstance = await WBI.new(blockRelay.address)
+      wbiInstance = await WBI.new(blockRelay.address, 2)
     })
 
     it("should post 2 data requests, read them successfully and check balances afterwards", async () => {
@@ -689,8 +689,37 @@ contract("WBI", accounts => {
           fastVerifyParams[1],
           signature, { from: accounts[1] }), "Not a valid signature")
       })
+    it("should update ABS activity",
+      async () => {
+        const block = await web3.eth.getBlock("latest")
+
+        // update activity
+        const tx1 = wbiInstance.updateAbsActivity(block.number)
+        await waitForHash(tx1)
+      })
+    it("should revert updating ABS activity with a future block",
+      async () => {
+        const block = await web3.eth.getBlock("latest")
+        await truffleAssert.reverts(
+          wbiInstance.updateAbsActivity(block.number+100),
+          "The block number provided has not been reached"
+        )
+      })
+    it("should revert updating ABS activity with a past block",
+      async () => {
+        const block = await web3.eth.getBlock("latest")
+        console.log(block.number)
+        const newBlock = 49;
+        const tx1 = wbiInstance.updateAbsActivity(block.number)
+        await waitForHash(tx1)
+        await truffleAssert.reverts(
+          wbiInstance.updateAbsActivity(newBlock),
+          "The last block number updated was higher than the one provided"
+        )
+      })
   })
 })
+
 
 const waitForHash = txQ =>
   new Promise((resolve, reject) =>

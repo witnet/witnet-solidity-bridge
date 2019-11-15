@@ -16,9 +16,13 @@ contract WBITestHelper is WitnetBridgeInterface {
   //uint256 blockHash;
   // epoch of the last block
   //uint256 epoch;
-  bytes lastBeacon;
+  uint256 blockHash;
+  uint256 epoch;
 
-  constructor (address _wbiRelayAddress) WitnetBridgeInterface(_wbiRelayAddress) public { }
+  constructor (
+    address _wbiRelayAddress,
+    uint8 _repFactor)
+  WitnetBridgeInterface(_wbiRelayAddress, _repFactor) public { }
 
   function _verifyPoi(
     uint256[] memory _poi,
@@ -35,12 +39,12 @@ contract WBITestHelper is WitnetBridgeInterface {
       element);
   }
 
-  function verifyPoe(
+  function _verifyPoe(
     uint256[4] memory _poe,
     uint256[2] memory _publicKey,
     uint256[2] memory _uPoint,
     uint256[4] memory _vPointHelpers)
-  public pure returns(bool)
+  public view returns(bool)
   {
     return verifyPoe(
       _poe,
@@ -48,7 +52,6 @@ contract WBITestHelper is WitnetBridgeInterface {
       _uPoint,
       _vPointHelpers);
   }
-
 
   function _verifySig(
     bytes memory _message,
@@ -68,14 +71,28 @@ contract WBITestHelper is WitnetBridgeInterface {
     view
   returns(bytes memory)
   {
-    //return abi.encodePacked(blockHash, epoch);ç
-    return lastBeacon;
+    return abi.encodePacked(blockHash, epoch);
   }
 
   function setActiveIdentities(uint32 _abs)
     public
-    view
   {
-    ABS.activeIdentities = _abs;
+    abs.activeIdentities = _abs;
   }
+
+  function fastVerify(
+    uint256[2] memory _publicKey,
+    uint256[4] memory _proof,
+    bytes memory _message,
+    uint256[2] memory _uPoint,
+    uint256[4] memory _vComponents)
+  public pure returns (bool)
+  {
+    return true;
+  }
+
+  function gammaToHash(uint256 _gammaX, uint256 _gammaY) public pure returns (bytes32) {
+    return bytes32(_gammaX);
+  }
+
 }

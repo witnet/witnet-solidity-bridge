@@ -224,6 +224,7 @@ contract WitnetBridgeInterface is VRF {
       drOutputHash)) {
       requests[_id].drHash = drHash;
       requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
+      // Push requests[_id].pkhClaim to abs
       abs.pushActivity(requests[_id].pkhClaim, block.number);
       emit IncludedRequest(msg.sender, _id);
     } else {
@@ -258,6 +259,7 @@ contract WitnetBridgeInterface is VRF {
       resHash)){
       requests[_id].result = _result;
       msg.sender.transfer(requests[_id].tallyReward);
+      // Push msg.sender to abs
       abs.pushActivity(msg.sender, block.number);
       emit PostedResult(msg.sender, _id);
     } else {

@@ -1,8 +1,8 @@
 const WBITestHelper = artifacts.require("WBITestHelper")
 const WBI = artifacts.require("WitnetBridgeInterface")
 const BlockRelay = artifacts.require("BlockRelay")
-const data = require("./data.json")
 const testdata = require("./internals.json")
+const sha = require("js-sha256")
 
 contract("WBITestHelper - internals", accounts => {
   describe("WBI underlying algorithms: ", () => {
@@ -11,8 +11,8 @@ contract("WBITestHelper - internals", accounts => {
     let helper
     before(async () => {
       blockRelay = await BlockRelay.deployed()
-      wbiInstance = await WBI.new(blockRelay.address)
-      helper = await WBITestHelper.new(wbiInstance.address)
+      wbiInstance = await WBI.new(blockRelay.address, 2)
+      helper = await WBITestHelper.new(wbiInstance.address, 2)
     })
     for (const [index, test] of testdata.poi.valid.entries()) {
       it(`poi (${index + 1})`, async () => {
@@ -52,23 +52,30 @@ contract("WBITestHelper - internals", accounts => {
         assert.notEqual(result, true)
       })
     }
-    for (let [index, test] of testdata.poe.valid.entries()) {
+    for (const [index, test] of testdata.poe.valid.entries()) {
       it(`valid poe (${index + 1})`, async () => {
-        helper.lastBeacon = testdata.poe.lastBeacon
-        const publicKey = [testdata.poe.publicKey.x, testdata.poe.publicKey.y]
-        const proofBytes = testdata.poe.proof
-        const proof = await helper.decodeProof(proofBytes)
-        const fastVerifyParams = await helper.computeFastVerifyParams(publicKey, proof, testdata.poe.lastBeacon)
+        const publicKey = testdata.poe.publicKey
         await helper.setActiveIdentities(test.abs)
-        console.log(helper.gammaToHash(_poe[0], _poe[1]))
-
 
         const result = await helper._verifyPoe.call(
-          proof,
+          [test.vrf, 0, 0, 0],
           publicKey,
-          fastVerifyParams[0],
-          fastVerifyParams[1])
+          [0,0],
+          [0,0,0,0])
         assert.equal(result, true)
+      })
+    }
+    for (const [index, test] of testdata.poe.invalid.entries()) {
+      it(`invalid poe (${index + 1})`, async () => {
+        const publicKey = testdata.poe.publicKey
+        await helper.setActiveIdentities(test.abs)
+
+        const result = await helper._verifyPoe.call(
+          [test.vrf, 0, 0, 0],
+          publicKey,
+          [0,0],
+          [0,0,0,0])
+        assert.equal(result, false)
       })
     }
   })
