@@ -1,8 +1,8 @@
 const WBI = artifacts.require("WitnetBridgeInterface")
 const BlockRelay = artifacts.require("BlockRelay")
 const UsingWitnetBytesTestHelper = artifacts.require("UsingWitnetBytesTestHelper")
-const sha = require("js-sha256")
 
+const sha = require("js-sha256")
 const data = require("./data.json")
 
 contract("UsingWitnetBytes", accounts => {

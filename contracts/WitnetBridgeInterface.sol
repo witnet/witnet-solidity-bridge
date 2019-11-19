@@ -13,7 +13,7 @@ import "./ActiveBridgeSetLib.sol";
   * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
-contract WitnetBridgeInterface is VRF {
+contract WitnetBridgeInterface {
 
   using SafeMath for uint256;
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
@@ -98,7 +98,7 @@ contract WitnetBridgeInterface is VRF {
     uint256[2] memory _uPoint,
     uint256[4] memory _vPointHelpers) {
     require(
-      fastVerify(
+      VRF.fastVerify(
         _publicKey,
         _poe,
         getLastBeacon(),
@@ -303,6 +303,34 @@ contract WitnetBridgeInterface is VRF {
     return blockRelay.getLastBeacon();
   }
 
+  /// @dev Wrapper around the decodeProof from VRF library
+  /// @dev Decode VRF proof from bytes
+  /// @param _proof The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`
+  /// @return The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`
+  function decodeProof(bytes memory _proof) public pure returns (uint[4] memory) {
+    return VRF.decodeProof(_proof);
+  }
+
+  /// @dev Wrapper around the decodePoint from VRF library
+  /// @dev Decode EC point from bytes
+  /// @param _point The EC point as bytes
+  /// @return The point as `[point-x, point-y]`
+  function decodePoint(bytes memory _point) public pure returns (uint[2] memory) {
+    return VRF.decodePoint(_point);
+  }
+
+  /// @dev Wrapper around the computeFastVerifyParams from VRF library
+  /// @dev Compute the parameters (EC points) required for the VRF fast verification function.
+  /// @param _publicKey The public key as an array composed of `[pubKey-x, pubKey-y]`
+  /// @param _proof The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`
+  /// @param _message The message (in bytes) used for computing the VRF
+  /// @return The fast verify required parameters as the tuple `([uPointX, uPointY], [sHX, sHY, cGammaX, cGammaY])`
+  function computeFastVerifyParams(uint256[2] memory _publicKey, uint256[4] memory _proof, bytes memory _message)
+    public pure returns (uint256[2] memory, uint256[4] memory)
+  {
+    return VRF.computeFastVerifyParams(_publicKey, _proof, _message);
+  }
+
   /// @dev Updates the ABS activity with the block number provided
   /// @param _blockNumber update the ABS until this block number
   function updateAbsActivity(uint256 _blockNumber) public {
@@ -324,8 +352,8 @@ contract WitnetBridgeInterface is VRF {
     uint256[4] memory _vPointHelpers)
   internal view vrfValid(_poe,_publicKey, _uPoint,_vPointHelpers) returns(bool)
   {
-    uint256 vrf = uint256(gammaToHash(_poe[0], _poe[1]));
-    // True if_vrf/(2^{256} -1) <= repFactor/abs.activeIdentities
+    uint256 vrf = uint256(VRF.gammaToHash(_poe[0], _poe[1]));
+    // True if vrf/(2^{256} -1) <= repFactor/abs.activeIdentities
     if (abs.activeIdentities < repFactor) {
       return true;
     }
@@ -394,7 +422,7 @@ contract WitnetBridgeInterface is VRF {
     v = 28 - v;
 
     bytes32 msgHash = sha256(_message);
-    address hashedKey = pointToAddress(_publicKey[0], _publicKey[1]);
+    address hashedKey = VRF.pointToAddress(_publicKey[0], _publicKey[1]);
     return ecrecover(
       msgHash,
       v,

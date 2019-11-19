@@ -5,9 +5,7 @@ const testdata = require("./internals.json")
 
 contract("WBITestHelper - internals", accounts => {
   describe("WBI underlying algorithms: ", () => {
-    let wbiInstance
-    let blockRelay
-    let helper
+    let wbiInstance, blockRelay, helper
     before(async () => {
       blockRelay = await BlockRelay.deployed()
       wbiInstance = await WBI.new(blockRelay.address, 2)

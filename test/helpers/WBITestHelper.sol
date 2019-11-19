@@ -24,6 +24,17 @@ contract WBITestHelper is WitnetBridgeInterface {
     uint8 _repFactor)
   WitnetBridgeInterface(_wbiRelayAddress, _repFactor) public { }
 
+  modifier vrfValid(
+    uint256[4] memory _poe,
+    uint256[2] memory _publicKey,
+    uint256[2] memory _uPoint,
+    uint256[4] memory _vPointHelpers) {
+    require(
+      true,
+      "Not a valid VRF");
+    _;
+  }
+
   function _verifyPoi(
     uint256[] memory _poi,
     uint256 _root,
@@ -78,21 +89,6 @@ contract WBITestHelper is WitnetBridgeInterface {
     public
   {
     abs.activeIdentities = _abs;
-  }
-
-  function fastVerify(
-    uint256[2] memory _publicKey,
-    uint256[4] memory _proof,
-    bytes memory _message,
-    uint256[2] memory _uPoint,
-    uint256[4] memory _vComponents)
-  public pure returns (bool)
-  {
-    return true;
-  }
-
-  function gammaToHash(uint256 _gammaX, uint256 _gammaY) public pure returns (bytes32) {
-    return bytes32(_gammaX);
   }
 
 }

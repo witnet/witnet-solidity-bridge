@@ -29,7 +29,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "openzeppelin-solidity": "2.4.0",
-    "vrf-solidity": "git+https://github.com/witnet/vrf-solidity.git#master"
+    "vrf-solidity": "^0.2.1"
   },
   "devDependencies": {
     "dotenv": "^8.1.0",
