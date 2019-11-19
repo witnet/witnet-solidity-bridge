@@ -689,7 +689,7 @@ contract("WBI", accounts => {
           fastVerifyParams[1],
           signature, { from: accounts[1] }), "Not a valid signature")
       })
-      it("should update ABS activity",
+    it("should update ABS activity",
       async () => {
         const block = await web3.eth.getBlock("latest")
 
@@ -697,17 +697,16 @@ contract("WBI", accounts => {
         const tx1 = wbiInstance.updateAbsActivity(block.number)
         await waitForHash(tx1)
       })
-      it("should revert updating ABS activity with a future block",
+    it("should revert updating ABS activity with a future block",
       async () => {
         const block = await web3.eth.getBlock("latest")
         await truffleAssert.reverts(
-          wbiInstance.updateAbsActivity(block.number+100),
+          wbiInstance.updateAbsActivity(block.number + 100),
           "The block number provided has not been reached"
         )
       })
   })
 })
-
 
 const waitForHash = txQ =>
   new Promise((resolve, reject) =>
