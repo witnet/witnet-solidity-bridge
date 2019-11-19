@@ -108,7 +108,6 @@ contract WitnetBridgeInterface is VRF {
     _;
   }
 
-
   constructor (address _blockRelayAddress, uint8 _repFactor) public {
     blockRelay = BlockRelay(_blockRelayAddress);
 
@@ -175,7 +174,7 @@ contract WitnetBridgeInterface is VRF {
     for (uint i = 0; i < _ids.length; i++) {
       if ((requests[_ids[i]].timestamp == 0 || block.number - requests[_ids[i]].timestamp > 13) &&
       requests[_ids[i]].drHash == 0 &&
-      requests[_ids[i]].result.length == 0){
+      requests[_ids[i]].result.length == 0) {
         requests[_ids[i]].pkhClaim = msg.sender;
         requests[_ids[i]].timestamp = block.number;
       } else {
@@ -313,7 +312,7 @@ contract WitnetBridgeInterface is VRF {
     abs.updateActivity(_blockNumber);
   }
 
-/// @dev Claim drs to be posted to Witnet by the node
+  /// @dev Claim drs to be posted to Witnet by the node
   /// @param _poe PoE claiming eligibility
   /// @param _publicKey The public key as an array composed of `[pubKey-x, pubKey-y]`
   /// @param _uPoint uPoint coordinates as [uPointX, uPointY] corresponding to U = s*B - c*Y
@@ -326,12 +325,11 @@ contract WitnetBridgeInterface is VRF {
   internal view vrfValid(_poe,_publicKey, _uPoint,_vPointHelpers) returns(bool)
   {
     uint256 vrf = uint256(gammaToHash(_poe[0], _poe[1]));
+    // True if_vrf/(2^{256} -1) <= repFactor/abs.activeIdentities
     if (abs.activeIdentities < repFactor) {
       return true;
     }
-    /* True if_vrf/(2^{256} -1) <= repFactor/abs.activeIdentities
-    we rewrote it as vrf <= ((2^{256} -1)/abs.activeIdentities)*repFactor to gain efficiency*/
-
+    // We rewrote it as vrf <= ((2^{256} -1)/abs.activeIdentities)*repFactor to gain efficiency
     if (vrf <= ((~uint256(0)/abs.activeIdentities)*repFactor)) {
       return true;
     }

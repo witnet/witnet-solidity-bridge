@@ -2,7 +2,6 @@ const WBITestHelper = artifacts.require("WBITestHelper")
 const WBI = artifacts.require("WitnetBridgeInterface")
 const BlockRelay = artifacts.require("BlockRelay")
 const testdata = require("./internals.json")
-const sha = require("js-sha256")
 
 contract("WBITestHelper - internals", accounts => {
   describe("WBI underlying algorithms: ", () => {
@@ -60,8 +59,8 @@ contract("WBITestHelper - internals", accounts => {
         const result = await helper._verifyPoe.call(
           [test.vrf, 0, 0, 0],
           publicKey,
-          [0,0],
-          [0,0,0,0])
+          [0, 0],
+          [0, 0, 0, 0])
         assert.equal(result, true)
       })
     }
@@ -73,8 +72,8 @@ contract("WBITestHelper - internals", accounts => {
         const result = await helper._verifyPoe.call(
           [test.vrf, 0, 0, 0],
           publicKey,
-          [0,0],
-          [0,0,0,0])
+          [0, 0],
+          [0, 0, 0, 0])
         assert.equal(result, false)
       })
     }

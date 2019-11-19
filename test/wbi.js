@@ -701,7 +701,7 @@ contract("WBI", accounts => {
       async () => {
         const block = await web3.eth.getBlock("latest")
         await truffleAssert.reverts(
-          wbiInstance.updateAbsActivity(block.number+100),
+          wbiInstance.updateAbsActivity(block.number + 100),
           "The block number provided has not been reached"
         )
       })
@@ -719,7 +719,6 @@ contract("WBI", accounts => {
       })
   })
 })
-
 
 const waitForHash = txQ =>
   new Promise((resolve, reject) =>
