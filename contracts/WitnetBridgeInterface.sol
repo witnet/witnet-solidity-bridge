@@ -365,11 +365,11 @@ contract WitnetBridgeInterface {
     return false;
   }
 
-  /// @dev Verifies the validity of a PoI
+  /// @dev Verifies the validity of a PoI of a DR
   /// @param _poi the proof of inclusion as [leaf1, leaf2,..]
   /// @param _root the merkle root
   /// @param _index the index in the merkle tree of the element to verify
-  /// @param _element the element
+  /// @param _element the element to hash together with the _poi, usually will be the hash of the result
   /// @return true or false depending the validity
   function verifyPoi(
     uint256[] memory _poi,
@@ -380,6 +380,8 @@ contract WitnetBridgeInterface {
   {
     uint256 tree = _element;
     uint256 index = _index;
+    // We want to prove that the hash of the _poi and the _element is equal to _root
+    // For knowing if concatenate to the left or the right we check the parity of the the index
     for (uint i = 0; i<_poi.length; i++) {
       if (index%2 == 0) {
         tree = uint256(sha256(abi.encodePacked(tree, _poi[i])));
