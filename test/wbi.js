@@ -325,7 +325,7 @@ contract("WBI", accounts => {
       })
     })
 
-    it("should revert the transacation when trying to read from a non-existent block", async () => {
+    it("should revert the transaction when trying to read from a non-existent block", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
@@ -375,7 +375,7 @@ contract("WBI", accounts => {
         from: accounts[1],
       }), "Non-existing block")
     })
-    it("should revert because the rewards are higher than the values sent." +
+    it("should revert because the rewards are higher than the values sent. " +
        "Checks the post data request transaction",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
