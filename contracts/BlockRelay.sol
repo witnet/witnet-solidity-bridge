@@ -43,12 +43,12 @@ contract BlockRelay {
   }
   // Ensures block exists
   modifier blockExists(uint256 _id){
-    require(blocks[_id].drHashMerkleRoot!=0, "Non-existing block");
+    require(blocks[_id].drHashMerkleRoot!=0, "The block already existed");
     _;
   }
    // Ensures block does not exist
   modifier blockDoesNotExist(uint256 _id){
-    require(blocks[_id].drHashMerkleRoot==0, "The block already existed");
+    require(blocks[_id].drHashMerkleRoot==0, "Non-existing block");
     _;
   }
 
@@ -71,6 +71,7 @@ contract BlockRelay {
     lastBlock.epoch = _epoch;
     blocks[id].drHashMerkleRoot = _drMerkleRoot;
     blocks[id].tallyHashMerkleRoot = _tallyMerkleRoot;
+    emit NewBlock(witnet, id);
   }
 
   /// @dev Retrieve the requests-only merkle root hash that was reported for a specific block header.
