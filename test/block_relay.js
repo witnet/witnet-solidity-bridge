@@ -38,7 +38,7 @@ contract("Block relay", accounts => {
       const merkleRoot = 1
       await truffleAssert.reverts(blockRelayInstance.postNewBlock(expectedId, epoch, drRoot, merkleRoot, {
         from: accounts[0],
-      }), "The block already existed.")
+      }), "Non-existing block")
     })
     it("should insert another block", async () => {
       const expectedId = "0x" + sha.sha256("second id")
@@ -95,10 +95,10 @@ contract("Block relay", accounts => {
       const expectedId = "0x" + sha.sha256("forth id")
       await truffleAssert.reverts(blockRelayInstance.readDrMerkleRoot(expectedId, {
         from: accounts[1],
-      }), "Non-existing block")
+      }), "The block already existed")
       await truffleAssert.reverts(blockRelayInstance.readTallyMerkleRoot(expectedId, {
         from: accounts[1],
-      }), "Non-existing block")
+      }), "The block already existed")
     })
   })
 })
