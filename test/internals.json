@@ -7,7 +7,8 @@
         ],
         "root": "0xdf4134923214d75b480b4c6e94c29bc2550da9748c913437a8f63ee914da3958",
         "index": 0,
-        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"
+        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8",
+        "epoch" : 0
       },
       {
         "poi": [
@@ -16,7 +17,8 @@
         ],
         "root": "0x8a273d202a005a1d478713d956284e07498b6edc4eb01fe91f5f9eade9580315",
         "index": 0,
-        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"
+        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8",
+        "epoch" : 1
       },
       {
         "poi": [
@@ -26,7 +28,8 @@
         ],
         "root": "0x613923965c28c0a10a115fefb3d700679bf8c46d4a30329ad4b495513fd8986c",
         "index": 0,
-        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"
+        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8",
+        "epoch" : 2
       },
       {
         "poi": [
@@ -37,7 +40,8 @@
         ],
         "root": "0xb79f5941eae3bdba696483adcb0bf5362df04b9f6e0d827bbc3daec0826ed07a",
         "index": 0,
-        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"
+        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8",
+        "epoch" : 3
       },
       {
         "poi": [
@@ -45,7 +49,8 @@
         ],
         "root": "0xdf4134923214d75b480b4c6e94c29bc2550da9748c913437a8f63ee914da3958",
         "index": 1,
-        "element": "0xf9eab74a29f117fbdb8afa10342ec92844cbc4c36f326317989bcf4b06eca5b3"
+        "element": "0xf9eab74a29f117fbdb8afa10342ec92844cbc4c36f326317989bcf4b06eca5b3",
+        "epoch" : 4
       },
       {
         "poi": [
@@ -54,7 +59,8 @@
         ],
         "root": "0x8a273d202a005a1d478713d956284e07498b6edc4eb01fe91f5f9eade9580315",
         "index": 1,
-        "element": "0xf9eab74a29f117fbdb8afa10342ec92844cbc4c36f326317989bcf4b06eca5b3"
+        "element": "0xf9eab74a29f117fbdb8afa10342ec92844cbc4c36f326317989bcf4b06eca5b3",
+        "epoch" : 5
       },
       {
         "poi": [
@@ -65,7 +71,8 @@
         ],
         "root": "0xb79f5941eae3bdba696483adcb0bf5362df04b9f6e0d827bbc3daec0826ed07a",
         "index": 6,
-        "element": "0xd590c3a09d72dcf005e393b2af7191c2b9644db60d417dbd00ec20456e0f0b73"
+        "element": "0xd590c3a09d72dcf005e393b2af7191c2b9644db60d417dbd00ec20456e0f0b73",
+        "epoch" : 6
       },
       {
         "poi": [
@@ -74,7 +81,8 @@
         ],
         "root": "0xb79f5941eae3bdba696483adcb0bf5362df04b9f6e0d827bbc3daec0826ed07a",
         "index": 2,
-        "element": "0x8c72815a513a5ee7c193afc3218b3b8c23cfbd6f8fa211cd4380e43d2a9c744f"
+        "element": "0x8c72815a513a5ee7c193afc3218b3b8c23cfbd6f8fa211cd4380e43d2a9c744f",
+        "epoch" : 7
       },
       {
         "poi": [
@@ -83,7 +91,8 @@
         ],
         "root": "0xd7163db9a1ba8f1083586b3d7e328b0034d25f3a1ba491582362c01712080ec9",
         "index": 3,
-        "element": "0x0909090909090909090909090909090909090909090909090909090909090909"
+        "element": "0x0909090909090909090909090909090909090909090909090909090909090909",
+        "epoch" : 8
       }
     ],
     "invalid": [
@@ -93,7 +102,8 @@
         ],
         "root": "0xdf4134923214d75b480b4c6e94c29bc2550da9748c913437a8f63ee914da3958",
         "index": 1,
-        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"
+        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8",
+        "epoch" : 9
       },
       {
         "poi": [
@@ -102,7 +112,8 @@
         ],
         "root": "0x8a273d202a005a1d478713d956284e07498b6edc4eb01fe91f5f9eade9580315",
         "index": 1,
-        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"
+        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8",
+        "epoch" : 10
       },
       {
         "poi": [
@@ -112,7 +123,8 @@
         ],
         "root": "0x613923965c28c0a10a115fefb3d700679bf8c46d4a30329ad4b495513fd8986c",
         "index": 1,
-        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"
+        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8",
+        "epoch" : 11
       },
       {
         "poi": [
@@ -123,7 +135,8 @@
         ],
         "root": "0xb79f5941eae3bdba696483adcb0bf5362df04b9f6e0d827bbc3daec0826ed07a",
         "index": 1,
-        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"
+        "element": "0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8",
+        "epoch" : 12
       },
       {
         "poi": [
@@ -131,7 +144,8 @@
         ],
         "root": "0xdf4134923214d75b480b4c6e94c29bc2550da9748c913437a8f63ee914da3958",
         "index": 0,
-        "element": "0xf9eab74a29f117fbdb8afa10342ec92844cbc4c36f326317989bcf4b06eca5b3"
+        "element": "0xf9eab74a29f117fbdb8afa10342ec92844cbc4c36f326317989bcf4b06eca5b3",
+        "epoch" : 13
       },
       {
         "poi": [
@@ -140,7 +154,8 @@
         ],
         "root": "0x8a273d202a005a1d478713d956284e07498b6edc4eb01fe91f5f9eade9580315",
         "index": 0,
-        "element": "0xf9eab74a29f117fbdb8afa10342ec92844cbc4c36f326317989bcf4b06eca5b3"
+        "element": "0xf9eab74a29f117fbdb8afa10342ec92844cbc4c36f326317989bcf4b06eca5b3",
+        "epoch" : 14
       }
     ]
   },

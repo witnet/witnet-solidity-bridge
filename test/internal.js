@@ -5,11 +5,13 @@ const testdata = require("./internals.json")
 
 contract("WBITestHelper - internals", accounts => {
   describe("WBI underlying algorithms: ", () => {
-    let wbiInstance, blockRelay, helper
+    let wbiInstance
+    let blockRelay
+    let wbiHelper
     before(async () => {
       blockRelay = await BlockRelay.deployed()
       wbiInstance = await WBI.new(blockRelay.address, 2)
-      helper = await WBITestHelper.new(wbiInstance.address, 2)
+      wbiHelper = await WBITestHelper.new(wbiInstance.address, 2)
     })
     for (const [index, test] of testdata.poi.valid.entries()) {
       it(`poi (${index + 1})`, async () => {
@@ -17,7 +19,9 @@ contract("WBITestHelper - internals", accounts => {
         const root = test.root
         const index = test.index
         const element = test.element
-        const result = await helper._verifyPoi.call(poi, root, index, element)
+        const epoch = test.epoch
+        await blockRelay.postNewBlock(epoch, epoch, root, root)
+        const result = await blockRelay.verifyDrPoi.call(poi, epoch, index, element)
         assert(result)
       })
     }
@@ -27,7 +31,9 @@ contract("WBITestHelper - internals", accounts => {
         const root = test.root
         const index = test.index
         const element = test.element
-        const result = await helper._verifyPoi.call(poi, root, index, element)
+        const epoch = test.epoch
+        await blockRelay.postNewBlock(epoch, epoch, root, root)
+        const result = await blockRelay.verifyDrPoi.call(poi, epoch, index, element)
         assert.notEqual(result, true)
       })
     }
@@ -36,7 +42,7 @@ contract("WBITestHelper - internals", accounts => {
         const message = web3.utils.fromAscii(test.message)
         const pubKey = test.public_key
         const sig = test.signature
-        const result = await helper._verifySig.call(message, pubKey, sig)
+        const result = await wbiHelper._verifySig.call(message, pubKey, sig)
         assert.equal(result, true)
       })
     }
@@ -45,16 +51,16 @@ contract("WBITestHelper - internals", accounts => {
         const message = web3.utils.fromAscii(test.message)
         const pubKey = test.public_key
         const sig = test.signature
-        const result = await helper._verifySig.call(message, pubKey, sig)
+        const result = await wbiHelper._verifySig.call(message, pubKey, sig)
         assert.notEqual(result, true)
       })
     }
     for (const [index, test] of testdata.poe.valid.entries()) {
       it(`valid poe (${index + 1})`, async () => {
         const publicKey = testdata.poe.publicKey
-        await helper.setActiveIdentities(test.abs)
+        await wbiHelper.setActiveIdentities(test.abs)
 
-        const result = await helper._verifyPoe.call(
+        const result = await wbiHelper._verifyPoe.call(
           [test.vrf, 0, 0, 0],
           publicKey,
           [0, 0],
@@ -65,9 +71,9 @@ contract("WBITestHelper - internals", accounts => {
     for (const [index, test] of testdata.poe.invalid.entries()) {
       it(`invalid poe (${index + 1})`, async () => {
         const publicKey = testdata.poe.publicKey
-        await helper.setActiveIdentities(test.abs)
+        await wbiHelper.setActiveIdentities(test.abs)
 
-        const result = await helper._verifyPoe.call(
+        const result = await wbiHelper._verifyPoe.call(
           [test.vrf, 0, 0, 0],
           publicKey,
           [0, 0],

@@ -35,21 +35,6 @@ contract WBITestHelper is WitnetBridgeInterface {
     _;
   }
 
-  function _verifyPoi(
-    uint256[] memory _poi,
-    uint256 _root,
-    uint256 _index,
-    uint256 element
-  )
-  public pure returns(bool)
-  {
-    return verifyPoi(
-      _poi,
-      _root,
-      _index,
-      element);
-  }
-
   function _verifyPoe(
     uint256[4] memory _poe,
     uint256[2] memory _publicKey,
