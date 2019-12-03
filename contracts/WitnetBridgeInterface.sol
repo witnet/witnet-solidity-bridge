@@ -213,12 +213,11 @@ contract WitnetBridgeInterface {
     public
     drNotIncluded(_id)
  {
-    uint256 drRoot = blockRelay.readDrMerkleRoot(_blockHash);
     uint256 drOutputHash = uint256(sha256(requests[_id].dr));
     uint256 drHash = uint256(sha256(abi.encodePacked(drOutputHash, _poi[0])));
-    if (verifyPoi(
+    if (blockRelay.verifyDrPoi(
       _poi,
-      drRoot,
+      _blockHash,
       _index,
       drOutputHash)) {
       requests[_id].drHash = drHash;
@@ -248,12 +247,11 @@ contract WitnetBridgeInterface {
     drIncluded(_id)
     resultNotIncluded(_id)
  {
-    uint256 tallyRoot = blockRelay.readTallyMerkleRoot(_blockHash);
     // this should leave it ready for PoI
     uint256 resHash = uint256(sha256(abi.encodePacked(requests[_id].drHash, _result)));
-    if (verifyPoi(
+    if (blockRelay.verifyTallyPoi(
       _poi,
-      tallyRoot,
+      _blockHash,
       _index,
       resHash)){
       requests[_id].result = _result;
@@ -363,34 +361,6 @@ contract WitnetBridgeInterface {
     }
 
     return false;
-  }
-
-  /// @dev Verifies the validity of a PoI of a DR
-  /// @param _poi the proof of inclusion as [leaf1, leaf2,..]
-  /// @param _root the merkle root
-  /// @param _index the index in the merkle tree of the element to verify
-  /// @param _element the element to hash together with the _poi, usually will be the hash of the result
-  /// @return true or false depending the validity
-  function verifyPoi(
-    uint256[] memory _poi,
-    uint256 _root,
-    uint256 _index,
-    uint256 _element)
-  internal pure returns(bool)
-  {
-    uint256 tree = _element;
-    uint256 index = _index;
-    // We want to prove that the hash of the _poi and the _element is equal to _root
-    // For knowing if concatenate to the left or the right we check the parity of the the index
-    for (uint i = 0; i<_poi.length; i++) {
-      if (index%2 == 0) {
-        tree = uint256(sha256(abi.encodePacked(tree, _poi[i])));
-      } else {
-        tree = uint256(sha256(abi.encodePacked(_poi[i], tree)));
-      }
-      index = index>>1;
-    }
-    return _root==tree;
   }
 
   /// @dev Verifies the validity of a signature

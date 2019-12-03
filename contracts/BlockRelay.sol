@@ -107,4 +107,78 @@ contract BlockRelay {
   {
     return abi.encodePacked(lastBlock.blockHash, lastBlock.epoch);
   }
+
+  /// @dev Verifies the validity of a PoI against the DR merkle root
+  /// @param _poi the proof of inclusion as [leaf1, leaf2,..]
+  /// @param _blockHash the blockHash
+  /// @param _index the index in the merkle tree of the element to verify
+  /// @param _element the element
+  /// @return true or false depending the validity
+  function verifyDrPoi(
+    uint256[] memory _poi,
+    uint256 _blockHash,
+    uint256 _index,
+    uint256 _element)
+  public
+  view
+  blockExists(_blockHash)
+  returns(bool)
+  {
+    uint256 drMerkleRoot = blocks[_blockHash].drHashMerkleRoot;
+    return(verifyPoi(
+      _poi,
+      drMerkleRoot,
+      _index,
+      _element));
+  }
+
+  /// @dev Verifies the validity of a PoI against the tally merkle root
+  /// @param _poi the proof of inclusion as [leaf1, leaf2,..]
+  /// @param _blockHash the blockHash
+  /// @param _index the index in the merkle tree of the element to verify
+  /// @param _element the element
+  /// @return true or false depending the validity
+  function verifyTallyPoi(
+    uint256[] memory _poi,
+    uint256 _blockHash,
+    uint256 _index,
+    uint256 _element)
+  public
+  view
+  blockExists(_blockHash)
+  returns(bool)
+  {
+    uint256 tallyMerkleRoot = blocks[_blockHash].tallyHashMerkleRoot;
+    return(verifyPoi(
+      _poi,
+      tallyMerkleRoot,
+      _index,
+      _element));
+  }
+
+  /// @dev Verifies the validity of a PoI
+  /// @param _poi the proof of inclusion as [leaf1, leaf2,..]
+  /// @param _root the merkle root
+  /// @param _index the index in the merkle tree of the element to verify
+  /// @param _element the element
+  /// @return true or false depending the validity
+  function verifyPoi(
+    uint256[] memory _poi,
+    uint256 _root,
+    uint256 _index,
+    uint256 _element)
+  private pure returns(bool)
+  {
+    uint256 tree = _element;
+    uint256 index = _index;
+    for (uint i = 0; i<_poi.length; i++) {
+      if (index%2 == 0) {
+        tree = uint256(sha256(abi.encodePacked(tree, _poi[i])));
+      } else {
+        tree = uint256(sha256(abi.encodePacked(_poi[i], tree)));
+      }
+      index = index>>1;
+    }
+    return _root==tree;
+  }
 }
