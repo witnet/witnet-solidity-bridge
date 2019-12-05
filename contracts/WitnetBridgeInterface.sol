@@ -32,7 +32,7 @@ contract WitnetBridgeInterface {
 
   DataRequest[] public requests;
 
-  ActiveBridgeSetLib.ActiveBridgeSet abs;
+  ActiveBridgeSetLib.ActiveBridgeSet public abs;
 
   // Replication factor for Active Bridge Set identities
   uint8 repFactor;
@@ -115,6 +115,10 @@ contract WitnetBridgeInterface {
     DataRequest memory request;
     requests.push(request);
     repFactor = _repFactor;
+  }
+
+  function getABS(uint256 _epoch) public payable returns( address[] memory) {
+    return abs.epochIdentities[uint16(_epoch)];
   }
 
   /// @dev Posts a data request into the WBI in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
@@ -351,7 +355,7 @@ contract WitnetBridgeInterface {
   internal view vrfValid(_poe,_publicKey, _uPoint,_vPointHelpers) returns(bool)
   {
     uint256 vrf = uint256(VRF.gammaToHash(_poe[0], _poe[1]));
-    // True if vrf/(2^{256} -1) <= repFactor/abs.activeIdentities
+    // True if vrf/(2^{256} -1) <= repFactor/validpoe.activeIdentities
     if (abs.activeIdentities < repFactor) {
       return true;
     }
