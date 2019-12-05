@@ -83,6 +83,25 @@ library ActiveBridgeSetLib {
     return true;
   }
 
+  /// @dev Checks if an address is a memeber of the ABS
+  /// @param _abs The Active Bridge Set structure containing the last block.
+  /// @param _address The address to check.
+  /// @return true or false
+  function absMembership(ActiveBridgeSet storage _abs, address _address) internal returns (bool) {
+    uint256 blockNumber = block.number;
+    (uint16 currentSlot, uint16 lastSlot, bool overflow) = getSlots(_abs, blockNumber);
+    updateABS(
+      _abs,
+      currentSlot,
+      lastSlot,
+      overflow);
+    for (uint i; i < _abs.epochIdentities[lastSlot].length;) {
+      if (_abs.epochIdentities[lastSlot][i] == _address) {
+        return true;
+        }
+      }
+  }
+
   /// @dev Gets the slots of the last block seen by the ABS provided and the block number provided.
   /// @param _abs The Active Bridge Set structure containing the last block.
   /// @param _blockNumber The block number from which to get the current slot.

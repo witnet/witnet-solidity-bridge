@@ -121,6 +121,32 @@ The `BlockRelay` contract has the following methods:
   - _output_:
     - the last beacon as byte concatenation of (block_hash||epoch).
 
+## NewBlockRelay
+
+The `NewBlockRelay` contract is similar to the `BlockRelay` but adds the following methods:
+
+- **proposeBlock**:
+  - _description_: proposes a new block to eventually be added to the block relay.
+  - _inputs_:
+    - *_blockHash*: Hash of the block header.
+    - *_epoch*: the epoch the block is prposed to, it has to be one epoch previous to the current epoch.
+    - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
+    - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
+    - *_previousBlock*: the previousVote is considered to be the valid block for the previous epoch.
+  - _modifiers_: Conditions  to be satiesfied before proposing a block:
+    - _validEpoch_: A block can be proposed just for one epoch before the current epoch.
+    - _absMembership_: Only members of the ABS (Active Bridge Set) can propose blocks.
+
+- **postNewBlock**:
+  - _description_: post a new block into the block relay.
+  - _inputs_:
+    - *_vote*: the vote to be posted .
+    - *_blockHash*: Hash of the block header.
+    - *_epoch*: the epoch for which the block was proposed.
+    - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
+    - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
+    - *_previousVote*: the previousVote is considered to be the valid block for the previous epoch.
+
 ## UsingWitnet
 
 The `UsingWitnet` contract injects the following methods into the contracts inheriting from it:
@@ -154,6 +180,7 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
 ## Known limitations:
 
 - `BlockRelay` is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to decentralize block header reporting.
+- `NewBlockRelay`: The ABS for an epoch can finalize a block and previous epochs blocks if the consensus was not achieved even if they were not part of the ABS at that moment.
 
 ## Usage
 
