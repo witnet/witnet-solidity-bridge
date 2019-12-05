@@ -709,7 +709,7 @@ contract("WBI", accounts => {
       async () => {
         const block = await web3.eth.getBlock("latest")
         console.log(block.number)
-        const newBlock = 49;
+        const newBlock = 49
         const tx1 = wbiInstance.updateAbsActivity(block.number)
         await waitForHash(tx1)
         await truffleAssert.reverts(

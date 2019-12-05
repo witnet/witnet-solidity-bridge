@@ -121,6 +121,21 @@ The `BlockRelay` contract has the following methods:
   - _output_:
     - the last beacon as byte concatenation of (block_hash||epoch).
 
+## NewBlockRelay
+
+The `NewBlockRelay` contract is similar to the `BlockRelay` but adds the following methods:
+
+- **proposetNewBlock**:
+  - _description_: proposes a new block to eventually be added to the block relay.
+  - _inputs_:
+    - *_blockHash*: Hash of the block header.
+    - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
+    - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
+    - *_epoch*: the epoch th block is prposed to, it has to be one epoch previous to the current epoch.
+
+- **finalResult**:
+  - _description_: post the final block after selectig the most voted block. It reverts if there is been a tie.
+
 ## UsingWitnet
 
 The `UsingWitnet` contract injects the following methods into the contracts inheriting from it:
@@ -154,6 +169,7 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
 ## Known limitations:
 
 - `BlockRelay` is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to decentralize block header reporting.
+- `NewBlockRelay` the blocks can be proposed just for the previous epoch, meaning that if during at epoch there are no votes, the empty block will be post as final.
 
 ## Usage
 
