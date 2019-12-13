@@ -373,7 +373,7 @@ contract("WBI", accounts => {
       // should fail to read blockhash from a non-existing block
       await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(id1, [dummySibling], 2, fakeBlockHeader, {
         from: accounts[1],
-      }), "The block already existed")
+      }), "Non-existing block")
     })
     it("should revert because the rewards are higher than the values sent. " +
        "Checks the post data request transaction",

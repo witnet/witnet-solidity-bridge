@@ -43,12 +43,12 @@ contract BlockRelay {
   }
   // Ensures block exists
   modifier blockExists(uint256 _id){
-    require(blocks[_id].drHashMerkleRoot!=0, "The block already existed");
+    require(blocks[_id].drHashMerkleRoot!=0, "Non-existing block");
     _;
   }
    // Ensures block does not exist
   modifier blockDoesNotExist(uint256 _id){
-    require(blocks[_id].drHashMerkleRoot==0, "Non-existing block");
+    require(blocks[_id].drHashMerkleRoot==0, "The block already existed");
     _;
   }
 
@@ -109,7 +109,7 @@ contract BlockRelay {
   }
 
   /// @dev Verifies the validity of a PoI against the DR merkle root
-  /// @param _poi the proof of inclusion as [leaf1, leaf2,..]
+  /// @param _poi the proof of inclusion as [sibling1, sibling2,..]
   /// @param _blockHash the blockHash
   /// @param _index the index in the merkle tree of the element to verify
   /// @param _element the leaf to be verified
@@ -133,7 +133,7 @@ contract BlockRelay {
   }
 
   /// @dev Verifies the validity of a PoI against the tally merkle root
-  /// @param _poi the proof of inclusion as [leaf1, leaf2,..]
+  /// @param _poi the proof of inclusion as [sibling1, sibling2,..]
   /// @param _blockHash the blockHash
   /// @param _index the index in the merkle tree of the element to verify
   /// @param _element the element
@@ -157,10 +157,10 @@ contract BlockRelay {
   }
 
   /// @dev Verifies the validity of a PoI
-  /// @param _poi the proof of inclusion as [leaf1, leaf2,..]
+  /// @param _poi the proof of inclusion as [sibling1, sibling2,..]
   /// @param _root the merkle root
   /// @param _index the index in the merkle tree of the element to verify
-  /// @param _element the element
+  /// @param _element the leaf to be verified
   /// @return true or false depending the validity
   function verifyPoi(
     uint256[] memory _poi,
