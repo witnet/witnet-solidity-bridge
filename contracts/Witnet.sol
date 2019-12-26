@@ -141,21 +141,91 @@ library Witnet {
     } else if (errorCode == ErrorCodes.RequestTooManySources) {
       errorMessage = abi.encodePacked("The request contained too many sources (", utoa(error[1]), ")");
     } else if (errorCode == ErrorCodes.ScriptTooManyCalls) {
-      errorMessage = abi.encodePacked("Script #", utoa(error[2]), " from the ", stageName(error[1]), " stage contained too many calls (", utoa(error[3]), ")");
+      errorMessage = abi.encodePacked(
+        "Script #",
+        utoa(error[2]),
+        " from the ",
+        stageName(error[1]),
+        " stage contained too many calls (",
+        utoa(error[3]),
+        ")"
+      );
     } else if (errorCode == ErrorCodes.UnsupportedOperator) {
-      errorMessage = abi.encodePacked("Operator code ", utoa(error[4]), " found at call #", utoa(error[3]), " in script #", utoa(error[2]), " from ", stageName(error[1]), " stage is not supported");
+      errorMessage = abi.encodePacked(
+      "Operator code ",
+        utoa(error[4]),
+        " found at call #",
+        utoa(error[3]),
+        " in script #",
+        utoa(error[2]),
+        " from ",
+        stageName(error[1]),
+        " stage is not supported"
+      );
     } else if (errorCode == ErrorCodes.HTTP) {
-      errorMessage = abi.encodePacked("Source #", utoa(error[1]), " could not be retrieved. Failed with HTTP error code: ", utoa(error[2] / 100), utoa(error[2] % 100 / 10), utoa(error[2] % 10));
+      errorMessage = abi.encodePacked(
+        "Source #",
+        utoa(error[1]),
+        " could not be retrieved. Failed with HTTP error code: ",
+        utoa(error[2] / 100),
+        utoa(error[2] % 100 / 10),
+        utoa(error[2] % 10)
+      );
     } else if (errorCode == ErrorCodes.Underflow) {
-      errorMessage = abi.encodePacked("Underflow at operator code ", utoa(error[4]), " found at call #", utoa(error[3]), " in script #", utoa(error[2]), " from ", stageName(error[1]), " stage");
+      errorMessage = abi.encodePacked(
+        "Underflow at operator code ",
+        utoa(error[4]),
+        " found at call #",
+        utoa(error[3]),
+        " in script #",
+        utoa(error[2]),
+        " from ",
+        stageName(error[1]),
+        " stage"
+      );
     } else if (errorCode == ErrorCodes.Overflow) {
-      errorMessage = abi.encodePacked("Overflow at operator code ", utoa(error[4]), " found at call #", utoa(error[3]), " in script #", utoa(error[2]), " from ", stageName(error[1]), " stage");
+      errorMessage = abi.encodePacked(
+        "Overflow at operator code ",
+        utoa(error[4]),
+        " found at call #",
+        utoa(error[3]),
+        " in script #",
+        utoa(error[2]),
+        " from ",
+        stageName(error[1]),
+        " stage"
+      );
     } else if (errorCode == ErrorCodes.DivisionByZero) {
-      errorMessage = abi.encodePacked("Division by zero at operator code ", utoa(error[4]), " found at call #", utoa(error[3]), " in script #", utoa(error[2]), " from ", stageName(error[1]), " stage");
+      errorMessage = abi.encodePacked(
+        "Division by zero at operator code ",
+        utoa(error[4]),
+        " found at call #",
+        utoa(error[3]),
+        " in script #",
+        utoa(error[2]),
+        " from ",
+        stageName(error[1]),
+        " stage"
+      );
     } else if (errorCode == ErrorCodes.RuntimeError) {
-      errorMessage = abi.encodePacked("Unspecified runtime error at operator code ", utoa(error[4]), " found at call #", utoa(error[3]), " in script #", utoa(error[2]), " from ", stageName(error[1]), " stage");
+      errorMessage = abi.encodePacked(
+        "Unspecified runtime error at operator code ",
+        utoa(error[4]),
+        " found at call #",
+        utoa(error[3]),
+        " in script #",
+        utoa(error[2]),
+        " from ",
+        stageName(error[1]),
+        " stage"
+      );
     } else if (errorCode == ErrorCodes.InsufficientConsensusError) {
-      errorMessage = abi.encodePacked("Insufficient consensus. Required: ", utoa(error[1]), ". Achieved: ", utoa(error[2]));
+      errorMessage = abi.encodePacked(
+        "Insufficient consensus. Required: ",
+        utoa(error[1]),
+        ". Achieved: ",
+        utoa(error[2])
+      );
     } else {
       errorMessage = abi.encodePacked("Unknown error (", utoa(error[0]), ")");
     }
