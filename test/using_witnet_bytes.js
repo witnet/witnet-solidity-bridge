@@ -11,10 +11,10 @@ contract("UsingWitnetBytes", accounts => {
     let wbi
     let blockRelay
     before(async () => {
-      blockRelay = await BlockRelay.deployed({
+      blockRelay = await BlockRelay.new({
         from: accounts[0],
       })
-      wbi = await WBI.deployed(blockRelay.address)
+      wbi = await WBI.new(blockRelay.address, 2)
       usingWitnet = await UsingWitnetBytesTestHelper.new(wbi.address)
     })
 
