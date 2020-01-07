@@ -25,10 +25,10 @@ contract("UsingWitnet", accounts => {
 
     before(async () => {
       witnet = await Witnet.deployed()
-      blockRelay = await BlockRelay.deployed({
+      blockRelay = await BlockRelay.new({
         from: accounts[0],
       })
-      wbi = await WBI.deployed(blockRelay.address)
+      wbi = await WBI.new(blockRelay.address, 2)
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(wbi.address)
       lastAccount0Balance = await web3.eth.getBalance(accounts[0])
@@ -176,7 +176,7 @@ contract("UsingWitnet", accounts => {
 
     it("should pay inclusion reward to the relayer", async () => {
       const afterBalance = await web3.eth.getBalance(accounts[1])
-      assert(afterBalance > lastAccount1Balance + requestReward)
+      assert(parseInt(afterBalance) > parseInt(lastAccount1Balance) + parseInt(requestReward))
       lastAccount1Balance = afterBalance
     })
 
@@ -223,10 +223,10 @@ contract("UsingWitnet", accounts => {
 
     before(async () => {
       witnet = await Witnet.deployed()
-      blockRelay = await BlockRelay.deployed({
+      blockRelay = await BlockRelay.new({
         from: accounts[0],
       })
-      wbi = await WBI.deployed(blockRelay.address)
+      wbi = await WBI.new(blockRelay.address, 2)
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(wbi.address)
     })
@@ -247,7 +247,7 @@ contract("UsingWitnet", accounts => {
         from: accounts[0],
         value: requestReward + resultReward,
       }))
-      assert.equal(requestId.toString(16), "0x0000000000000000000000000000000000000000000000000000000000000002")
+      assert.equal(requestId.toString(16), "0x0000000000000000000000000000000000000000000000000000000000000001")
     })
 
     it("should report a Witnet block containing the request into the WBI", async () => {
