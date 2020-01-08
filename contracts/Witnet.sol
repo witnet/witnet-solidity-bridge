@@ -20,38 +20,93 @@ library Witnet {
     ENUMS
   */
   enum ErrorCodes {
-    // Unknown error. Something went really bad!
+    // 0x00: Unknown error. Something went really bad!
     Unknown,
     // Script format errors
-    /// At least one of the source scripts is not a valid CBOR-encoded value.
+    /// 0x01: At least one of the source scripts is not a valid CBOR-encoded value.
     SourceScriptNotCBOR,
-    /// The CBOR value decoded from a source script is not an Array.
+    /// 0x02: The CBOR value decoded from a source script is not an Array.
     SourceScriptNotArray,
-    /// The Array value decoded form a source script is not a valid RADON script.
+    /// 0x03: The Array value decoded form a source script is not a valid RADON script.
     SourceScriptNotRADON,
+    /// Unallocated
+    ScriptFormat0x04,
+    ScriptFormat0x05,
+    ScriptFormat0x06,
+    ScriptFormat0x07,
+    ScriptFormat0x08,
+    ScriptFormat0x09,
+    ScriptFormat0x0A,
+    ScriptFormat0x0B,
+    ScriptFormat0x0C,
+    ScriptFormat0x0D,
+    ScriptFormat0x0E,
+    ScriptFormat0x0F,
     // Complexity errors
-    /// The request contains too many sources.
+    /// 0x10: The request contains too many sources.
     RequestTooManySources,
-    /// The script contains too many calls.
+    /// 0x11: The script contains too many calls.
     ScriptTooManyCalls,
+    /// Unallocated
+    Complexity0x12,
+    Complexity0x13,
+    Complexity0x14,
+    Complexity0x15,
+    Complexity0x16,
+    Complexity0x17,
+    Complexity0x18,
+    Complexity0x19,
+    Complexity0x1A,
+    Complexity0x1B,
+    Complexity0x1C,
+    Complexity0x1D,
+    Complexity0x1E,
+    Complexity0x1F,
     // Operator errors
-    /// The operator does not exist.
+    /// 0x20: The operator does not exist.
     UnsupportedOperator,
+    /// Unallocated
+    Operator0x21,
+    Operator0x22,
+    Operator0x23,
+    Operator0x24,
+    Operator0x25,
+    Operator0x26,
+    Operator0x27,
+    Operator0x28,
+    Operator0x29,
+    Operator0x2A,
+    Operator0x2B,
+    Operator0x2C,
+    Operator0x2D,
+    Operator0x2E,
+    Operator0x2F,
     // Retrieval-specific errors
-    /// At least one of the sources could not be retrieved, but returned HTTP error.
+    /// 0x30: At least one of the sources could not be retrieved, but returned HTTP error.
     HTTP,
+    /// Unallocated
+    Retrieval0x31,
+    Retrieval0x32,
+    Retrieval0x33,
+    Retrieval0x34,
+    Retrieval0x35,
+    Retrieval0x36,
+    Retrieval0x37,
+    Retrieval0x38,
+    Retrieval0x39,
+    Retrieval0x3A,
+    Retrieval0x3B,
+    Retrieval0x3C,
+    Retrieval0x3D,
+    Retrieval0x3E,
+    Retrieval0x3F,
     // Math errors
-    /// Math operator caused an underflow.
+    /// 0x40: Math operator caused an underflow.
     Underflow,
-    /// Math operator caused an overflow.
+    /// 0x41: Math operator caused an overflow.
     Overflow,
-    /// Tried to divide by zero.
+    /// 0x42: Tried to divide by zero.
     DivisionByZero,
-    // The tally script failed during runtime.
-    RuntimeError,
-    // The tally did not fulfill the consensus requirement of the request.
-    InsufficientConsensusError,
-    // This is not a real error but a way to mark the size of the `enum`
     Size
   }
 
@@ -152,8 +207,8 @@ library Witnet {
       );
     } else if (errorCode == ErrorCodes.UnsupportedOperator) {
       errorMessage = abi.encodePacked(
-      "Operator code ",
-        utoa(error[4]),
+      "Operator code 0x",
+        utohex(error[4]),
         " found at call #",
         utoa(error[3]),
         " in script #",
@@ -173,8 +228,8 @@ library Witnet {
       );
     } else if (errorCode == ErrorCodes.Underflow) {
       errorMessage = abi.encodePacked(
-        "Underflow at operator code ",
-        utoa(error[4]),
+        "Underflow at operator code 0x",
+        utohex(error[4]),
         " found at call #",
         utoa(error[3]),
         " in script #",
@@ -185,8 +240,8 @@ library Witnet {
       );
     } else if (errorCode == ErrorCodes.Overflow) {
       errorMessage = abi.encodePacked(
-        "Overflow at operator code ",
-        utoa(error[4]),
+        "Overflow at operator code 0x",
+        utohex(error[4]),
         " found at call #",
         utoa(error[3]),
         " in script #",
@@ -197,8 +252,8 @@ library Witnet {
       );
     } else if (errorCode == ErrorCodes.DivisionByZero) {
       errorMessage = abi.encodePacked(
-        "Division by zero at operator code ",
-        utoa(error[4]),
+        "Division by zero at operator code 0x",
+        utohex(error[4]),
         " found at call #",
         utoa(error[3]),
         " in script #",
@@ -206,28 +261,9 @@ library Witnet {
         " from ",
         stageName(error[1]),
         " stage"
-      );
-    } else if (errorCode == ErrorCodes.RuntimeError) {
-      errorMessage = abi.encodePacked(
-        "Unspecified runtime error at operator code ",
-        utoa(error[4]),
-        " found at call #",
-        utoa(error[3]),
-        " in script #",
-        utoa(error[2]),
-        " from ",
-        stageName(error[1]),
-        " stage"
-      );
-    } else if (errorCode == ErrorCodes.InsufficientConsensusError) {
-      errorMessage = abi.encodePacked(
-        "Insufficient consensus. Required: ",
-        utoa(error[1]),
-        ". Achieved: ",
-        utoa(error[2])
       );
     } else {
-      errorMessage = abi.encodePacked("Unknown error (", utoa(error[0]), ")");
+      errorMessage = abi.encodePacked("Unknown error (0x", utohex(error[0]), ")");
     }
 
     return (errorCode, string(errorMessage));
@@ -366,5 +402,23 @@ library Witnet {
       b3[2] = byte(uint8(_u % 10) + 48);
       return string(b3);
     }
+  }
+
+  /**
+ * @notice Convert a `uint64` into a 2 characters long `string` representing its two less significant hexadecimal values
+ * @param _u A `uint64` value
+ * @return The `string` representing its hexadecimal value
+ */
+  function utohex(uint64 _u) private pure returns(string memory) {
+    bytes memory b2 = new bytes(2);
+    uint8 d0 = uint8(_u / 16) + 48;
+    uint8 d1 = uint8(_u % 16) + 48;
+    if (d0 > 57)
+      d0 += 7;
+    if (d1 > 57)
+      d1 += 7;
+    b2[0] = byte(d0);
+    b2[1] = byte(d1);
+    return string(b2);
   }
 }
