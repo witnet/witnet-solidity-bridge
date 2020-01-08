@@ -31,6 +31,7 @@ contract WitnetTest {
     Witnet.ErrorCodes errorCode0x11 = Witnet.resultFromCborBytes(hex"D8278111").asErrorCode();
     Witnet.ErrorCodes errorCode0x20 = Witnet.resultFromCborBytes(hex"D827811820").asErrorCode();
     Witnet.ErrorCodes errorCode0x30 = Witnet.resultFromCborBytes(hex"D827811830").asErrorCode();
+    Witnet.ErrorCodes errorCode0x31 = Witnet.resultFromCborBytes(hex"D827811831").asErrorCode();
     Witnet.ErrorCodes errorCode0x40 = Witnet.resultFromCborBytes(hex"D827811840").asErrorCode();
     Witnet.ErrorCodes errorCode0x41 = Witnet.resultFromCborBytes(hex"D827811841").asErrorCode();
     Witnet.ErrorCodes errorCode0x42 = Witnet.resultFromCborBytes(hex"D827811842").asErrorCode();
@@ -75,6 +76,11 @@ contract WitnetTest {
       "error code `0x30` should be `Witnet.ErrorCodes.HTTP`"
     );
     Assert.equal(
+      uint(errorCode0x31),
+      uint(Witnet.ErrorCodes.RetrievalTimeout),
+      "Error code 0x31 should be `Witnet.ErrorCodes.RetrievalTimeout`"
+    );
+    Assert.equal(
       uint(errorCode0x40),
       uint(Witnet.ErrorCodes.Underflow),
       "error code `0x40` should be `Witnet.ErrorCodes.Underflow`"
@@ -101,10 +107,11 @@ contract WitnetTest {
     (, string memory errorMessage0x11) = Witnet.resultFromCborBytes(hex"D8278411000708").asErrorMessage();
     (, string memory errorMessage0x20) = Witnet.resultFromCborBytes(hex"D8278518200108090A").asErrorMessage();
     (, string memory errorMessage0x30) = Witnet.resultFromCborBytes(hex"D82783183008190141").asErrorMessage();
+    (, string memory errorMessage0x31) = Witnet.resultFromCborBytes(hex"D82782183109").asErrorMessage();
     (, string memory errorMessage0x40) = Witnet.resultFromCborBytes(hex"D82785184002090A0B").asErrorMessage();
     (, string memory errorMessage0x41) = Witnet.resultFromCborBytes(hex"D827851841000A0B0C").asErrorMessage();
     (, string memory errorMessage0x42) = Witnet.resultFromCborBytes(hex"D827851842010B0C0D").asErrorMessage();
-    (, string memory errorMessage255) = Witnet.resultFromCborBytes(hex"D8278118FF").asErrorMessage();
+    (, string memory errorMessage0xFF) = Witnet.resultFromCborBytes(hex"D8278118FF").asErrorMessage();
     Assert.equal(
       errorMessage0x00,
       "Unknown error (0x00)",
@@ -146,6 +153,11 @@ contract WitnetTest {
       "Error message for error code `0x30` (`Witnet.ErrorCodes.HTTP`) should be properly formatted"
     );
     Assert.equal(
+      errorMessage0x31,
+      "Source #9 could not be retrieved because of a timeout.",
+      "Error message for error code `0x31` (`Witnet.ErrorCodes.HTTP`) should be properly formatted"
+    );
+    Assert.equal(
       errorMessage0x40,
       "Underflow at operator code 0x0B found at call #10 in script #9 from tally stage",
       "Error message for error code `0x40` (`Witnet.ErrorCodes.Underflow`) should be properly formatted"
@@ -161,7 +173,7 @@ contract WitnetTest {
       "Error message for error code `0x42` (`Witnet.ErrorCodes.DivisionByZero`) should be properly formatted"
     );
     Assert.equal(
-      errorMessage255,
+      errorMessage0xFF,
       "Unknown error (0xFF)",
       "Error message for an unknown error should be properly formatted"
     );

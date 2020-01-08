@@ -84,8 +84,9 @@ library Witnet {
     // Retrieval-specific errors
     /// 0x30: At least one of the sources could not be retrieved, but returned HTTP error.
     HTTP,
+    /// 0x31: Retrieval of at least one of the sources timed out.
+    RetrievalTimeout,
     /// Unallocated
-    Retrieval0x31,
     Retrieval0x32,
     Retrieval0x33,
     Retrieval0x34,
@@ -225,6 +226,12 @@ library Witnet {
         utoa(error[2] / 100),
         utoa(error[2] % 100 / 10),
         utoa(error[2] % 10)
+      );
+    } else if (errorCode == ErrorCodes.RetrievalTimeout) {
+      errorMessage = abi.encodePacked(
+        "Source #",
+        utoa(error[1]),
+        " could not be retrieved because of a timeout."
       );
     } else if (errorCode == ErrorCodes.Underflow) {
       errorMessage = abi.encodePacked(
