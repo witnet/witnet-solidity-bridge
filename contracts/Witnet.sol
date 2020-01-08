@@ -344,8 +344,9 @@ library Witnet {
   }
 
   /**
-   * @notice Convert a `uint8` into a 1, 2 or 3 characters long `string` representing its decimal value
-   * @param _u A `uint8` value
+   * @notice Convert a `uint64` into a 1, 2 or 3 characters long `string` representing its
+   * three less significant decimal values
+   * @param _u A `uint64` value
    * @return The `string` representing its decimal value
    */
   function utoa(uint64 _u) private pure returns(string memory) {
