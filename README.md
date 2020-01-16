@@ -123,7 +123,11 @@ The `BlockRelay` contract has the following methods:
 
 ## NewBlockRelay
 
-The `NewBlockRelay` contract is similar to the `BlockRelay` but adds the following methods:
+The `NewBlockRelay` contract is similar to the `BlockRelay` but adds some properties:
+
+- Before posted, the blocks are proposed by members of the ABS.
+- When a block is proposed by 2/3 of the members of the ABS, it is posted and that epoch is set as finalized.
+- Each block when proposed is connected to block in the previous epoch. This way when a block is posted, in case the previous epochs were not finalized, the previous blocks are posted as well.
 
 - **proposeBlock**:
   - _description_: proposes a new block to eventually be added to the block relay.
@@ -140,12 +144,12 @@ The `NewBlockRelay` contract is similar to the `BlockRelay` but adds the followi
 - **postNewBlock**:
   - _description_: post a new block into the block relay.
   - _inputs_:
-    - *_vote*: the vote to be posted .
+    - *_vote*: the vote to be posted, this is the hash of the concatenation of the inputs of ´propopseBlock´.
     - *_blockHash*: Hash of the block header.
     - *_epoch*: the epoch for which the block was proposed.
     - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
     - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
-    - *_previousVote*: the previousVote is considered to be the valid block for the previous epoch.
+    - *_previousVote*: the previousVote includes the valid block for the previous epoch.
 
 ## UsingWitnet
 
@@ -180,7 +184,7 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
 ## Known limitations:
 
 - `BlockRelay` is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to decentralize block header reporting.
-- `NewBlockRelay`: The ABS for an epoch can finalize a block and previous epochs blocks if the consensus was not achieved even if they were not part of the ABS at that moment.
+- `NewBlockRelay`: The ABS for an epoch can finalize a block and previous epochs blocks if the consensus was not achieved even if they were not part of the ABS at that moment. At the moment, it is only allowed to propose blocks for one epoch before the current epoch in Witnet.
 
 ## Usage
 

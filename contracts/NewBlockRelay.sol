@@ -147,6 +147,7 @@ contract NewBlockRelay is WitnetBridgeInterface {
   /// @param _epoch Epoch for which the block is proposed
   /// @param _drMerkleRoot Merkle root belonging to the data requests
   /// @param _tallyMerkleRoot Merkle root belonging to the tallies
+  /// @param _previousVote Hash of block's hashes proposed in the previous epoch
   function proposeBlock(
     uint256 _blockHash,
     uint256 _epoch,
@@ -300,10 +301,12 @@ contract NewBlockRelay is WitnetBridgeInterface {
   }
 
   /// @dev Post new block into the block relay
+  /// @param _vote Vote created when the block was proposed
   /// @param _blockHash Hash of the block headerPost
   /// @param _epoch Witnet epoch to which the block belongs to
   /// @param _drMerkleRoot Merkle root belonging to the data requests
   /// @param _tallyMerkleRoot Merkle root belonging to the tallies
+  /// @param _previousVote Hash of block's hashes proposed in the previous epoch
   function postNewBlock(
     uint256 _vote,
     uint256 _blockHash,
