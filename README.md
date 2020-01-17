@@ -130,13 +130,13 @@ The `NewBlockRelay` contract is similar to the `BlockRelay` but adds some proper
 - Each block when proposed is connected to block in the previous epoch. This way when a block is posted, in case the previous epochs were not finalized, the previous blocks are posted as well.
 
 - **proposeBlock**:
-  - _description_: proposes a new block to eventually be added to the block relay.
+  - _description_: proposes a new block candidate to be considered be added to the block relay.
   - _inputs_:
     - *_blockHash*: Hash of the block header.
-    - *_epoch*: the epoch the block is prposed to, it has to be one epoch previous to the current epoch.
+    - *_epoch*: the epoch the block is prposed for, it has to be one epoch previous to the current epoch.
     - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
     - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
-    - *_previousBlock*: the previousVote is considered to be the valid block for the previous epoch.
+    - *_previousBlock*: the previousVote that this proposed block vote extends.
   - _modifiers_: Conditions  to be satiesfied before proposing a block:
     - _validEpoch_: A block can be proposed just for one epoch before the current epoch.
     - _absMembership_: Only members of the ABS (Active Bridge Set) can propose blocks.
@@ -149,7 +149,7 @@ The `NewBlockRelay` contract is similar to the `BlockRelay` but adds some proper
     - *_epoch*: the epoch for which the block was proposed.
     - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
     - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
-    - *_previousVote*: the previousVote includes the valid block for the previous epoch.
+    - *_previousVote*: the previousVote that this posted block vote extends.
 
 ## UsingWitnet
 
@@ -184,7 +184,11 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
 ## Known limitations:
 
 - `BlockRelay` is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to decentralize block header reporting.
-- `NewBlockRelay`: The ABS for an epoch can finalize a block and previous epochs blocks if the consensus was not achieved even if they were not part of the ABS at that moment. At the moment, it is only allowed to propose blocks for one epoch before the current epoch in Witnet.
+- `NewBlockRelay`:
+
+      - The ABS for an epoch can finalize a block and previous epochs blocks if the consensus was not achieved even if they were not part of the ABS at that moment.
+      - At the moment, it is only allowed to propose blocks for one epoch before the current epoch in Witnet.
+      - `proposeBlock` can be called more than once.
 
 ## Usage
 

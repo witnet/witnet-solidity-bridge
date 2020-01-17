@@ -49,11 +49,6 @@ contract NewBRTestHelper is NewBlockRelay {
     activeIdentities = _identitiesNumber;
   }
 
-  // Sets the previous epoch as finalized
-  function setPreviousEpochFinalized() public {
-    epochFinalizedBlock[currentEpoch - 2].status = "Finalized";
-  }
-
   // Gets the vote with the poposeBlock inputs
   function getVote(
     uint256 _blockHash,
@@ -77,7 +72,7 @@ contract NewBRTestHelper is NewBlockRelay {
 
   // Gets the blockHash of a vote finalized in a specific epoch
   function getBlockHash(uint256 _epoch) public  returns (uint256) {
-    uint256 blockHash = epochFinalizedBlock[_epoch].blockHash;
+    uint256 blockHash = epochFinalizedBlock[_epoch];
     return blockHash;
   }
 
@@ -87,19 +82,8 @@ contract NewBRTestHelper is NewBlockRelay {
   }
 
   // Checks if the cuurentEpoch - 2 in pending
-  function checkStatusPending() public returns (bool) {
-    string memory pending = "Pending";
-    //emit EpochStatus(epochStatus[currentEpoch-2])
-    if (keccak256(abi.encodePacked((epochFinalizedBlock[currentEpoch - 2].status))) == keccak256(abi.encodePacked((pending)))) {
-      return true;
-    }
-  }
-
-  // Checks if the cuurentEpoch - 2 in pending
-  function checkStatusFinalized() public returns (bool) {
-    string memory finalized = "Finalized";
-    //emit EpochStatus(epochStatus[currentEpoch-2])
-    if (keccak256(abi.encodePacked((epochFinalizedBlock[currentEpoch - 2].status))) == keccak256(abi.encodePacked((finalized)))) {
+  function checkEpochFinalized(uint256 _epoch) public returns (bool) {
+    if (epochFinalizedBlock[_epoch] != 0) {
       return true;
     }
   }
