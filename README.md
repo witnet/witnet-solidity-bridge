@@ -127,7 +127,7 @@ The `NewBlockRelay` contract is similar to the `BlockRelay` but adds some proper
 
 - Before posted, the blocks are proposed by members of the ABS.
 - When a block is proposed by 2/3 of the members of the ABS, it is posted and that epoch is set as finalized.
-- Each block when proposed is connected to block in the previous epoch. This way when a block is posted, in case the previous epochs were not finalized, the previous blocks are posted as well.
+- Each block when proposed is connected to a block in the previous epoch. This way, when a block is posted, in case the previous epochs were not finalized, the previous blocks are posted as well.
 
 - **proposeBlock**:
   - _description_: proposes a new block candidate to be considered be added to the block relay.
@@ -137,9 +137,6 @@ The `NewBlockRelay` contract is similar to the `BlockRelay` but adds some proper
     - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
     - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
     - *_previousBlock*: the previousVote that this proposed block vote extends.
-  - _modifiers_: Conditions  to be satiesfied before proposing a block:
-    - _validEpoch_: A block can be proposed just for one epoch before the current epoch.
-    - _absMembership_: Only members of the ABS (Active Bridge Set) can propose blocks.
 
 - **postNewBlock**:
   - _description_: post a new block into the block relay.

@@ -16,7 +16,7 @@ contract NewBlockRelay is WitnetBridgeInterface {
     uint256 drHashMerkleRoot;
     // hash of the merkle root of the tallies in Witnet
     uint256 tallyHashMerkleRoot;
-    // Vote for the previous block hash
+    // Hash of the vote that this block extends
     uint256 previousVote;
   }
 
@@ -37,6 +37,7 @@ contract NewBlockRelay is WitnetBridgeInterface {
   }
 
   struct VoteInfo {
+    // Information of Block Candidate
     uint256 numberOfVotes;
     Hashes voteHashes;
   }
@@ -46,10 +47,10 @@ contract NewBlockRelay is WitnetBridgeInterface {
 
   // Initializes the block with the maximum number of votes
   uint256 winnerVote;
-  uint256 winnerId = 0;
-  uint256 winnerDrMerkleRoot = 0;
-  uint256 winnerTallyMerkleRoot = 0;
-  uint256 winnerEpoch = 0;
+  uint256 winnerId;
+  uint256 winnerDrMerkleRoot;
+  uint256 winnerTallyMerkleRoot;
+  uint256 winnerEpoch;
 
   // Needed for the constructor
   uint256 witnetGenesis;
@@ -94,7 +95,7 @@ contract NewBlockRelay is WitnetBridgeInterface {
   }
 
    //  Ensures that neither Poi nor PoE are allowed if the epoch is pending
-  modifier finalizedEpoch2(uint256 _epoch){
+  modifier finalizedEpoch(uint256 _epoch){
     require(
       (epochFinalizedBlock[_epoch] != 0),
       "The block has not been finalized");
@@ -171,7 +172,7 @@ contract NewBlockRelay is WitnetBridgeInterface {
   public
   view
   blockExists(_blockHash)
-  finalizedEpoch2(currentEpoch)
+  finalizedEpoch(currentEpoch)
   returns(bool)
   {
     uint256 drMerkleRoot = blocks[_blockHash].drHashMerkleRoot;
@@ -338,6 +339,9 @@ contract NewBlockRelay is WitnetBridgeInterface {
     // Post the last block
     lastBlock.blockHash = _blockHash;
     lastBlock.epoch = _epoch;
+
+    // Update the ABS activity once finalized
+    uint256 activeIdentities = uint256(abs.activeIdentities);
 
     // Delete the condidates array so its empty for next epoch
     for (uint i = 0; i <= candidates.length - 1; i++) {
