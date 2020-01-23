@@ -180,12 +180,8 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
 
 ## Known limitations:
 
-- `BlockRelay` is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to decentralize block header reporting.
-- `NewBlockRelay`:
-
-      - The ABS for an epoch can finalize a block and previous epochs blocks if the consensus was not achieved even if they were not part of the ABS at that moment.
-      - At the moment, it is only allowed to propose blocks for one epoch before the current epoch in Witnet.
-      - `proposeBlock` can be called more than once.
+- `BlockRelay`: is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to decentralize block header reporting.
+- `NewBlockRelay`: the ABS stays the same until a block is finalized. A block can be proposed more than once by the same ABS member and olny for one epoch before the current epoch.
 
 ## Usage
 

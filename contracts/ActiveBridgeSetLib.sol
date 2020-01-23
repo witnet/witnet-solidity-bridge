@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 
 /**
  * @title Active Bridge Set (ABS) library
- * @notice This library counts the number of bridges that were active recently.
+ * @notice This library counts the number of bridges that were active recently
  */
 library ActiveBridgeSetLib {
 
@@ -83,7 +83,7 @@ library ActiveBridgeSetLib {
     return true;
   }
 
-  /// @dev Checks if an address is a memeber of the ABS
+  /// @dev Checks if an address is a member of the ABS
   /// @param _abs The Active Bridge Set structure from the Witnet Bridge Interface.
   /// @param _address The address to check.
   /// @return true or false

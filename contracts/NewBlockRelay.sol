@@ -6,24 +6,26 @@ import "./WitnetBridgeInterface.sol";
 
 /**
  * @title New Block relay contract
- * @notice Contract to store/read block headers from the Witnet network
+ * @notice Contract to store/read block headers from the Witnet network, implements BFT Finality
+ * @dev More information can be found here https://github.com/witnet/research/blob/master/bridge/docs/BFT_finality.md
+ * DISCLAIMER: this is a work in progress, meaning the contract could be voulnerable to attacks
  * @author Witnet Foundation
  */
 contract NewBlockRelay is WitnetBridgeInterface {
 
   struct MerkleRoots {
-    // hash of the merkle root of the DRs in Witnet
+    // Hash of the merkle root of the DRs in Witnet
     uint256 drHashMerkleRoot;
-    // hash of the merkle root of the tallies in Witnet
+    // Hash of the merkle root of the tallies in Witnet
     uint256 tallyHashMerkleRoot;
     // Hash of the vote that this block extends
     uint256 previousVote;
   }
 
   struct Beacon {
-    // hash of the last block
+    // Hash of the last block
     uint256 blockHash;
-    // epoch of the last block
+    // Epoch of the last block
     uint256 epoch;
   }
 
@@ -37,7 +39,7 @@ contract NewBlockRelay is WitnetBridgeInterface {
   }
 
   struct VoteInfo {
-    // Information of Block Candidate
+    // Information of a Block Candidate
     uint256 numberOfVotes;
     Hashes voteHashes;
   }
@@ -66,11 +68,10 @@ contract NewBlockRelay is WitnetBridgeInterface {
   // Last block reported
   Beacon public lastBlock;
 
-  // Map a vote proposed to the number of votes recieved and its hashes
+  // Map a vote proposed to the number of votes received and its hashes
   mapping(uint256=> VoteInfo) internal voteInfo;
 
-  /* Map the hash of the block to the merkle roots.
-  It is used as an easy way to check if a blockHash already exists*/
+  // Map the hash of the block to the merkle roots and the previousVote it extends
   mapping (uint256 => MerkleRoots) public blocks;
 
   // Map an epoch to the finalized blockHash
@@ -83,34 +84,34 @@ contract NewBlockRelay is WitnetBridgeInterface {
     firstBlock = _firstBlock;
   }
 
-  // Ensures block exists
+  // Ensure block exists
   modifier blockExists(uint256 _id){
     require(blocks[_id].drHashMerkleRoot!=0, "Non-existing block");
     _;
   }
-   // Ensures block does not exist
+  // Ensure block does not exist
   modifier blockDoesNotExist(uint256 _id){
     require(blocks[_id].drHashMerkleRoot==0, "The block already existed");
     _;
   }
 
-   //  Ensures that neither Poi nor PoE are allowed if the epoch is pending
-  modifier finalizedEpoch(uint256 _epoch){
+  // Ensure that neither Poi nor PoE are allowed if the epoch is pending
+  modifier epochIsFinalized(uint256 _epoch){
     require(
       (epochFinalizedBlock[_epoch] != 0),
       "The block has not been finalized");
     _;
   }
 
-   //  Ensures that the msg.sender is in the abs
-  modifier absMembership(address _address){
+  // Ensure that the msg.sender is in the abs
+  modifier isAbsMember(address _address){
     require(abs.absMembership(_address) == true, "Not a member of the abs");
     _;
   }
 
-/* Ensures the epoch for which the block is been proposed is valid
-   Valid if it is one epoch before the current epoch */
-  modifier validEpoch(uint256 _epoch){
+  // Ensure the epoch for which the block is been proposed is valid
+  // Valid if it is one epoch before the current epoch
+  modifier epochValid(uint256 _epoch){
     currentEpoch = updateEpoch();
     if (proposalEpoch == 0) {
       proposalEpoch = currentEpoch;
@@ -121,6 +122,7 @@ contract NewBlockRelay is WitnetBridgeInterface {
 
   /// @dev Updates the epoch
   function updateEpoch() public view returns(uint256) {
+    // solium-disable-next-line security/no-block-members
     return (block.timestamp - witnetGenesis)/epochSeconds;
   }
 
@@ -158,7 +160,7 @@ contract NewBlockRelay is WitnetBridgeInterface {
     return abi.encodePacked(lastBlock.blockHash, lastBlock.epoch);
   }
 
-/// @dev Verifies the validity of a PoI against the DR merkle root
+  /// @dev Verifies the validity of a PoI against the DR merkle root
   /// @param _poi the proof of inclusion as [sibling1, sibling2,..]
   /// @param _blockHash the blockHash
   /// @param _index the index in the merkle tree of the element to verify
@@ -172,7 +174,7 @@ contract NewBlockRelay is WitnetBridgeInterface {
   public
   view
   blockExists(_blockHash)
-  finalizedEpoch(currentEpoch)
+  epochIsFinalized(currentEpoch)
   returns(bool)
   {
     uint256 drMerkleRoot = blocks[_blockHash].drHashMerkleRoot;
@@ -208,12 +210,12 @@ contract NewBlockRelay is WitnetBridgeInterface {
 
   }
 
-   /// @dev Proposes a block into the block relay
+  /// @dev Proposes a block into the block relay
   /// @param _blockHash Hash of the block header
   /// @param _epoch Epoch for which the block is proposed
   /// @param _drMerkleRoot Merkle root belonging to the data requests
   /// @param _tallyMerkleRoot Merkle root belonging to the tallies
-  /// @param _previousVote Hash of block's hashes proposed in the previous epoch
+  /// @param _previousVote Hash of block's hashes proposed in a previous epoch
   function proposeBlock(
     uint256 _blockHash,
     uint256 _epoch,
@@ -222,15 +224,16 @@ contract NewBlockRelay is WitnetBridgeInterface {
     uint256 _previousVote
     )
     public
-    validEpoch(_epoch)
-    absMembership(msg.sender)
+    epochValid(_epoch)
+    isAbsMember(msg.sender)
+    blockDoesNotExist(_blockHash)
     returns(bytes32)
   {
     // If the porposal epoch chancges try to post the block with more votes
     if (currentEpoch > proposalEpoch) {
       // If it has not, the set the epoch to pending
       if (3*voteInfo[winnerVote].numberOfVotes >= 2*activeIdentities) {
-      // If it has achieved consensus, post the block
+        // If it has achieved consensus, post the block
         postNewBlock(
           winnerVote,
           winnerId,
@@ -280,7 +283,6 @@ contract NewBlockRelay is WitnetBridgeInterface {
         winnerEpoch = _epoch;
         winnerDrMerkleRoot = _drMerkleRoot;
         winnerTallyMerkleRoot = _tallyMerkleRoot;
-        //epochFinalizedBlock[_epoch].finalized = false;
     }
 
     }
@@ -312,41 +314,43 @@ contract NewBlockRelay is WitnetBridgeInterface {
     blocks[_blockHash].tallyHashMerkleRoot = _tallyMerkleRoot;
     blocks[_blockHash].previousVote = _previousVote;
 
-    // Select previous vote and corresponding epoch
+    // Select previous vote and corresponding epoch and blockHash
     uint256 previousVote = blocks[epochFinalizedBlock[_epoch]].previousVote;
-    uint256 epoch = voteInfo[previousVote].voteHashes.epoch;
+    uint256 epoch = voteInfo[_previousVote].voteHashes.epoch;
+    uint256 previousBlockHash = voteInfo[previousVote].voteHashes.blockHash;
 
     // Finalize the previous votes when the corresponding epochs are bigger than the last finalized epoch
     while (epoch > lastBlock.epoch) {
-      uint256 previousBlockHash = voteInfo[previousVote].voteHashes.blockHash;
-      // Finalize the epoch
       epochFinalizedBlock[epoch] = previousBlockHash;
       // Map the block hash to its hashes
       blocks[previousBlockHash].drHashMerkleRoot = voteInfo[previousVote].voteHashes.drMerkleRoot;
       blocks[previousBlockHash].tallyHashMerkleRoot = voteInfo[previousVote].voteHashes.tallyMerkleRoot;
       blocks[previousBlockHash].previousVote = voteInfo[previousVote].voteHashes.previousVote;
-      // Update previousVote and epoch
-      previousVote = blocks[previousBlockHash].previousVote;
+      // Update previousVote, epoch and previousBlockHash
+      previousVote = voteInfo[previousVote].voteHashes.previousVote;
       epoch = voteInfo[previousVote].voteHashes.epoch;
+      previousBlockHash = voteInfo[previousVote].voteHashes.blockHash;
     }
-    if (epoch == lastBlock.epoch) {
-      // Revert if the previousvote is not equal the last beacon
-      if (voteInfo[previousVote].voteHashes.blockHash != lastBlock.blockHash) {
-        revert("NOT valid previous block proposed");
-        }
-      }
+
+    // Assert the concatenation of blocks ends in the right epoch with the right blockHash
+    assert(epoch == lastBlock.epoch && previousBlockHash == lastBlock.blockHash);
 
     // Post the last block
     lastBlock.blockHash = _blockHash;
     lastBlock.epoch = _epoch;
 
-    // Update the ABS activity once finalized
-    uint256 activeIdentities = uint256(abs.activeIdentities);
-
     // Delete the condidates array so its empty for next epoch
     for (uint i = 0; i <= candidates.length - 1; i++) {
-      delete voteInfo[candidates[i]].voteHashes;}
+      delete voteInfo[candidates[i]].voteHashes;
+    }
     delete candidates;
+
+    // Redefine the blockHash and the epoch so it is not deleted when fanalized
+    voteInfo[_vote].voteHashes.blockHash = _blockHash;
+    voteInfo[_vote].voteHashes.epoch = _epoch;
+
+    // Update the ABS activity once finalized
+    uint256 activeIdentities = uint256(abs.activeIdentities);
   }
 
   /// @dev Verifies the validity of a PoI
