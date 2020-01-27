@@ -6,7 +6,6 @@ from Ethereum to Witnet. This repository provides several contracts:
 - The `Witnet Bridge Interface`(WBI), which includes all the needed 
 functionality to relay data requests and their results from Ethereum to Witnet and the other way round.
 - `UsingWitnet`, an inheritable client contract that injects methods for interacting with the WBI in the most convenient way.
-- `BlockRelay`, a contract that incentivizes secure relaying of Witnet blocks into Ethereum so that Witnet transactions can be verified by the EVM.
 
 ## WitnetBridgeInterface
 
@@ -84,69 +83,20 @@ The `WitnetBridgeInterface` contract provides the following methods:
   - _output_:
     - the last beacon as byte concatenation of (block_hash||epoch).
 
+- **absCount**:
+  - _description_: retrieves the number of distinct identities in the Active Bridge Set.
+  - _output_:
+    - the number of active identities.
+
+- **isABSMember**:
+  - _description_: checks whether an identity is part of the Active Bridge Set.
+  - _output_: true if the identity is member of the ABS. 
+
 In addition, `WitnetBridgeInterface` inherits the `VRF` contract from https://github.com/witnet/vrf-solidity, and as such, all its public methods are also available to be queried. This is extremely important as the proof of eligibility is verified with the `fastVerify` method, which requires some auxiliary data points in addition to the proof itself. These can be calculated using the following methods:
 
 - *computeFastVerifyParams*: which computes the necessary auxiliary points to perform the fast (and cheaper) verification in the WBI.
 - *decodeProof*: if the proof is serialized and needs to be decomposed, this function decodes a VRF proof into the parameters [Gamma_x, Gamma_y c, s].
 - *decodePoint*: if the point is in compressed format, this function decodes a compressed secp256k1 point into its uncompressed representation [P_x, P_y].
-
-
-## BlockRelay
-
-The `BlockRelay` contract has the following methods:
-
-- **postNewBlock**:
-  - _description_: post a new block into the block relay.
-  - _inputs_:
-    - *_blockHash*: Hash of the block header.
-    - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
-    - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
-
-- **readDrMerkleRoot**:
-  - _description_: retrieve the requests-only merkle root hash that was reported for a specific block header.
-  - _inputs_:
-    - *_blockHash*: hash of the block header.
-  - _output_:
-    - requests-only merkle root hash in the block header.
-
-- **readTallyMerkleRoot**:
-  - _description_: retrieve the tallies-only merkle root hash that was reported for a specific block header.
-  - _inputs_:
-    - *_blockHash*: hash of the block header.
-  - _output_:
-    - tallies-only merkle root hash in the block header.
-
-  **getLastBeacon**:
-  - _description_: retrieve the last beacon that was inserted in the block relay.
-  - _output_:
-    - the last beacon as byte concatenation of (block_hash||epoch).
-
-## NewBlockRelay
-
-The `NewBlockRelay` contract is similar to the `BlockRelay` but adds some properties:
-
-- Before posted, the blocks are proposed by members of the ABS.
-- When a block is proposed by 2/3 of the members of the ABS, it is posted and that epoch is set as finalized.
-- Each block when proposed is connected to a block in the previous epoch. This way, when a block is posted, in case the previous epochs were not finalized, the previous blocks are posted as well.
-
-- **proposeBlock**:
-  - _description_: proposes a new block candidate to be considered be added to the block relay.
-  - _inputs_:
-    - *_blockHash*: Hash of the block header.
-    - *_epoch*: the epoch the block is prposed for, it has to be one epoch previous to the current epoch.
-    - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
-    - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
-    - *_previousBlock*: the previousVote that this proposed block vote extends.
-
-- **postNewBlock**:
-  - _description_: post a new block into the block relay.
-  - _inputs_:
-    - *_vote*: the vote to be posted, this is the hash of the concatenation of the inputs of ´propopseBlock´.
-    - *_blockHash*: Hash of the block header.
-    - *_epoch*: the epoch for which the block was proposed.
-    - *_drMerkleRoot*: the root hash of the requests-only merkle tree as contained in the block header.
-    - *_tallyMerkleRoot*: the root hash of the tallies-only merkle tree as contained in the block header.
-    - *_previousVote*: the previousVote that this posted block vote extends.
 
 ## UsingWitnet
 
@@ -178,11 +128,6 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
   - _output_:
     - the result of the data request as `bytes`.
 
-## Known limitations:
-
-- `BlockRelay`: is centralized at the moment (only the deployer of the contract is able to push blocks). In the future incentives will be established to decentralize block header reporting.
-- `NewBlockRelay`: the ABS stays the same until a block is finalized. A block can be proposed more than once by the same ABS member and olny for one epoch before the current epoch.
-
 ## Usage
 
 The `UsingWitnet.sol` contract can be used directly by inheritance:
@@ -203,12 +148,6 @@ contract Example is UsingWitnet {
   }
 }
 ```
-
-## Contract Addresses Ropsten
-
-WBI: 0xc3d5ef25fc7c33ba7556617fb433cab5448f97ac
-
-Block Relay: 0x9a253dca7d3e2a8bfb57b1316d661f2ea05ade4a
 
 ## License
 

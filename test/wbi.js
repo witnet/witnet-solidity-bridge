@@ -1,5 +1,6 @@
 const WBI = artifacts.require("WitnetBridgeInterface")
-const BlockRelay = artifacts.require("BlockRelay")
+const MockBlockRelay = artifacts.require("MockBlockRelay")
+const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const truffleAssert = require("truffle-assertions")
 const sha = require("js-sha256")
 
@@ -26,9 +27,15 @@ contract("WBI", accounts => {
   describe("WBI test suite", () => {
     let wbiInstance
     let blockRelay
+    let blockRelayProxy
     beforeEach(async () => {
-      blockRelay = await BlockRelay.new()
-      wbiInstance = await WBI.new(blockRelay.address, 2)
+      blockRelay = await MockBlockRelay.new({
+        from: accounts[0],
+      })
+      blockRelayProxy = await BlockRelayProxy.new(blockRelay.address, {
+        from: accounts[0],
+      })
+      wbiInstance = await WBI.new(blockRelayProxy.address, 2)
     })
 
     it("should post 2 data requests, read them successfully and check balances afterwards", async () => {

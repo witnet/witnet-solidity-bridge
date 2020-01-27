@@ -32,6 +32,7 @@
     "vrf-solidity": "^0.2.1"
   },
   "devDependencies": {
+    "block-relay": "witnet/witnet-ethereum-block-relay#master",
     "dotenv": "^8.1.0",
     "eslint": "^6.6.0",
     "eslint-config-standard": "^14.1.0",

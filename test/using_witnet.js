@@ -1,5 +1,6 @@
 const WBI = artifacts.require("WitnetBridgeInterface")
-const BlockRelay = artifacts.require("BlockRelay")
+const MockBlockRelay = artifacts.require("MockBlockRelay")
+const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
 const Request = artifacts.require("Request")
 const Witnet = artifacts.require("Witnet")
@@ -20,15 +21,18 @@ contract("UsingWitnet", accounts => {
     const requestReward = 7000000000000000
     const resultReward = 3000000000000000
 
-    let witnet, clientContract, wbi, blockRelay, request, requestId, requestHash, result
+    let witnet, clientContract, wbi, blockRelay, request, requestId, requestHash, result, blockRelayProxy
     let lastAccount0Balance, lastAccount1Balance
 
     before(async () => {
       witnet = await Witnet.deployed()
-      blockRelay = await BlockRelay.new({
+      blockRelay = await MockBlockRelay.new({
         from: accounts[0],
       })
-      wbi = await WBI.new(blockRelay.address, 2)
+      blockRelayProxy = await BlockRelayProxy.new(blockRelay.address, {
+        from: accounts[0],
+      })
+      wbi = await WBI.new(blockRelayProxy.address, 2)
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(wbi.address)
       lastAccount0Balance = await web3.eth.getBalance(accounts[0])
@@ -219,14 +223,17 @@ contract("UsingWitnet", accounts => {
     const requestReward = 7000000000000000
     const resultReward = 3000000000000000
 
-    let witnet, clientContract, wbi, blockRelay, request, requestId, requestHash, result
+    let witnet, clientContract, wbi, blockRelay, blockRelayProxy, request, requestId, requestHash, result
 
     before(async () => {
       witnet = await Witnet.deployed()
-      blockRelay = await BlockRelay.new({
+      blockRelay = await MockBlockRelay.new({
         from: accounts[0],
       })
-      wbi = await WBI.new(blockRelay.address, 2)
+      blockRelayProxy = await BlockRelayProxy.new(blockRelay.address, {
+        from: accounts[0],
+      })
+      wbi = await WBI.new(blockRelayProxy.address, 2)
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(wbi.address)
     })

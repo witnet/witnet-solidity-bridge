@@ -87,19 +87,8 @@ library ActiveBridgeSetLib {
   /// @param _abs The Active Bridge Set structure from the Witnet Bridge Interface.
   /// @param _address The address to check.
   /// @return true or false
-  function absMembership(ActiveBridgeSet storage _abs, address _address) internal returns (bool) {
-    uint256 blockNumber = block.number;
-    (uint16 currentSlot, uint16 lastSlot, bool overflow) = getSlots(_abs, blockNumber);
-    updateABS(
-      _abs,
-      currentSlot,
-      lastSlot,
-      overflow);
-    for (uint i; i < _abs.epochIdentities[lastSlot].length;) {
-      if (_abs.epochIdentities[lastSlot][i] == _address) {
-        return true;
-        }
-      }
+  function absMembership(ActiveBridgeSet storage _abs, address _address) internal view returns (bool) {
+    return _abs.identityCount[_address] > 0;
   }
 
   /// @dev Gets the slots of the last block seen by the ABS provided and the block number provided.

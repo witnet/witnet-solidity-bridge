@@ -1,5 +1,6 @@
 const WBI = artifacts.require("WitnetBridgeInterface")
-const BlockRelay = artifacts.require("BlockRelay")
+const MockBlockRelay = artifacts.require("MockBlockRelay")
+const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const UsingWitnetBytesTestHelper = artifacts.require("UsingWitnetBytesTestHelper")
 
 const sha = require("js-sha256")
@@ -10,11 +11,15 @@ contract("UsingWitnetBytes", accounts => {
     let usingWitnet
     let wbi
     let blockRelay
+    let blockRelayProxy
     before(async () => {
-      blockRelay = await BlockRelay.new({
+      blockRelay = await MockBlockRelay.new({
         from: accounts[0],
       })
-      wbi = await WBI.new(blockRelay.address, 2)
+      blockRelayProxy = await BlockRelayProxy.new(blockRelay.address, {
+        from: accounts[0],
+      })
+      wbi = await WBI.new(blockRelayProxy.address, 2)
       usingWitnet = await UsingWitnetBytesTestHelper.new(wbi.address)
     })
 
@@ -139,7 +144,7 @@ contract("UsingWitnetBytes", accounts => {
       assert.equal(pkh, accounts[1])
 
       // Report block
-      blockRelay.postNewBlock(expectedBlockHash, epoch, expectedDrHash, expectedResHash, {
+      await blockRelay.postNewBlock(expectedBlockHash, epoch, expectedDrHash, expectedResHash, {
         from: accounts[0],
       })
 

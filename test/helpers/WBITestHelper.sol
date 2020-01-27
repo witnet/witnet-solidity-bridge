@@ -20,9 +20,9 @@ contract WBITestHelper is WitnetBridgeInterface {
   uint256 epoch;
 
   constructor (
-    address _wbiRelayAddress,
+    address _blockRelayAddress,
     uint8 _repFactor)
-  WitnetBridgeInterface(_wbiRelayAddress, _repFactor) public { }
+  WitnetBridgeInterface(_blockRelayAddress, _repFactor) public { }
 
   modifier vrfValid(
     uint256[4] memory _poe,
