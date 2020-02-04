@@ -1,7 +1,6 @@
 // In order to load environment variables (e.g. API keys)
-require('dotenv').config();
-
 module.exports = {
+  contracts_directory: "./contracts/flattened/",
   networks: {
     test: {
       provider: require("ganache-cli").provider({ gasLimit: 100000000, seed: 1234 }),
@@ -41,19 +40,19 @@ module.exports = {
     solc: {
       // version: "0.5.1",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
-      settings: {          // See the solidity docs for advice about optimization and evmVersion
+      settings: { // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
-          runs: 200
+          runs: 200,
         },
       //  evmVersion: "byzantium"
-      }
+      },
     },
   },
   plugins: [
-    'truffle-verify',
+    "truffle-verify",
   ],
   api_keys: {
     etherscan: process.env.ETHERSCAN_API_KEY,
-  }
+  },
 }

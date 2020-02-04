@@ -8,13 +8,17 @@
     "console": "truffle console",
     "postinstall": "npm run compile-contracts",
     "compile-contracts": "truffle compile --all",
+    "compile-flattened": "npx truffle compile --all --config flattened-config.js ",
+    "flatten": " mkdir contracts/flattened/ 2>/dev/null; npx truffle-flattener contracts/*.sol > contracts/flattened/Flattened.sol",   
     "fmt": "solium -d contracts && eslint ./test && solium -d test",
     "fmt!": "solium -d contracts --fix && eslint ./test --fix && solium -d test --fix",
     "solium": "solium -d contracts",
     "solium:fix": "solium -d contracts --fix",
     "lint": "eslint ./test",
     "lint:fix": "eslint ./test --fix",
-    "coverage": "solidity-coverage"
+    "migrate-flattened": "npm run flatten && npx truffle migrate --config flattened-config.js",
+    "coverage": "solidity-coverage",
+    "verify-flattened": "npx truffle run verify"
   },
   "author": "Witnet Foundation <info@witnet.foundation>",
   "repository": {
@@ -28,11 +32,11 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
+    "block-relay": "witnet/witnet-ethereum-block-relay#master",
     "openzeppelin-solidity": "2.4.0",
     "vrf-solidity": "^0.2.1"
   },
   "devDependencies": {
-    "block-relay": "witnet/witnet-ethereum-block-relay#master",
     "dotenv": "^8.1.0",
     "eslint": "^6.6.0",
     "eslint-config-standard": "^14.1.0",
@@ -47,6 +51,8 @@
     "solium": "^1.2.5",
     "solium-plugin-security": "^0.1.1",
     "truffle-hdwallet-provider": "^1.0.13",
+    "truffle-flattener": "git+https://github.com/witnet/truffle-flattener.git#single-experimental",
+    "truffle-verify": "^1.0.8",
     "truffle-plugin-verify": "^0.3.8",
     "truffle": "^5.1.0",
     "truffle-assertions": "^0.9.2"
