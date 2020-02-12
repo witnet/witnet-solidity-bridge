@@ -46,10 +46,6 @@ contract MockWitnetBridgeInterface is WBIInterface {
     requests[_id].dr = _dr;
     requests[_id].inclusionReward = msg.value - _tallyReward;
     requests[_id].tallyReward = _tallyReward;
-    requests[_id].result = "";
-    requests[_id].timestamp = 0;
-    requests[_id].drHash = 0;
-    requests[_id].pkhClaim = address(0);
     return _id;
   }
 
