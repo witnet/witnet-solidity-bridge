@@ -11,7 +11,7 @@ import "../../contracts/UsingWitnetBytes.sol";
  */
 contract UsingWitnetBytesTestHelper is UsingWitnetBytes {
 
-  constructor (address _wbiAddress) UsingWitnetBytes(_wbiAddress) public {}
+  constructor (address _wrbAddress) UsingWitnetBytes(_wrbAddress) public {}
 
   function _witnetPostDataRequest(bytes memory _dr, uint256 _tallyReward) public payable returns(uint256 id) {
     return witnetPostRequest(_dr, _tallyReward);

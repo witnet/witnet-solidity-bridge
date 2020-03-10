@@ -1,4 +1,4 @@
-const WBI = artifacts.require("WitnetBridgeInterface")
+const WRB = artifacts.require("WitnetRequestsBoard")
 const MockBlockRelay = artifacts.require("MockBlockRelay")
 const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const UsingWitnetBytesTestHelper = artifacts.require("UsingWitnetBytesTestHelper")
@@ -9,7 +9,7 @@ const data = require("./data.json")
 contract("UsingWitnetBytes", accounts => {
   describe("UsingWitnetBytes test suite", () => {
     let usingWitnet
-    let wbi
+    let wrb
     let blockRelay
     let blockRelayProxy
     before(async () => {
@@ -19,11 +19,11 @@ contract("UsingWitnetBytes", accounts => {
       blockRelayProxy = await BlockRelayProxy.new(blockRelay.address, {
         from: accounts[0],
       })
-      wbi = await WBI.new(blockRelayProxy.address, 2)
-      usingWitnet = await UsingWitnetBytesTestHelper.new(wbi.address)
+      wrb = await WRB.new(blockRelayProxy.address, 2)
+      usingWitnet = await UsingWitnetBytesTestHelper.new(wrb.address)
     })
 
-    it("create a data request and post it in the wbi (call)", async () => {
+    it("create a data request and post it in the wrb (call)", async () => {
       const stringDr = "DataRequest Example"
       const expectedId = "0x1"
       const id0 = await usingWitnet._witnetPostDataRequest.call(web3.utils.utf8ToHex(stringDr), 30, {
@@ -33,7 +33,7 @@ contract("UsingWitnetBytes", accounts => {
       assert.equal(web3.utils.toHex(id0), expectedId)
     })
 
-    it("should create a data request, post it in the wbi and check balances afterwards", async () => {
+    it("should create a data request, post it in the wrb and check balances afterwards", async () => {
       // Create the data request
       const stringDr = "DataRequest Example"
       const expectedId = "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -49,11 +49,11 @@ contract("UsingWitnetBytes", accounts => {
       const txReceipt0 = await web3.eth.getTransactionReceipt(txHash0)
       const id0 = txReceipt0.logs[0].data
       assert.equal(id0, expectedId)
-      const readDrBytes = await wbi.readDataRequest.call(id0)
+      const readDrBytes = await wrb.readDataRequest.call(id0)
       assert.equal(readDrBytes, web3.utils.utf8ToHex(stringDr))
 
       // Retrieve rewards
-      const drInfo = await wbi.requests(expectedId)
+      const drInfo = await wrb.requests(expectedId)
       const inclusionReward = drInfo.inclusionReward
       const tallyReward = drInfo.tallyReward
       assert.equal("70", inclusionReward.toString())
@@ -66,8 +66,8 @@ contract("UsingWitnetBytes", accounts => {
       const usingWitnetBalance = await web3.eth.getBalance(usingWitnet.address)
       assert.equal(0, usingWitnetBalance)
 
-      const wbiBalance = await web3.eth.getBalance(wbi.address)
-      assert.equal(100, wbiBalance)
+      const wrbBalance = await web3.eth.getBalance(wrb.address)
+      assert.equal(100, wrbBalance)
     })
 
     it("should upgrade previous drs reward and check the balances", async () => {
@@ -75,7 +75,7 @@ contract("UsingWitnetBytes", accounts => {
       const stringDr = "DataRequest Example"
       const expectedId = "0x1"
       const actualBalance = await web3.eth.getBalance(accounts[0])
-      const readDrBytes = await wbi.readDataRequest.call(expectedId)
+      const readDrBytes = await wrb.readDataRequest.call(expectedId)
       assert.equal(readDrBytes, web3.utils.utf8ToHex(stringDr))
       const tx1 = usingWitnet._witnetUpgradeDataRequest(expectedId, 30, {
         from: accounts[0],
@@ -84,7 +84,7 @@ contract("UsingWitnetBytes", accounts => {
 
       // Get rewards
       await waitForHash(tx1)
-      const drInfo = await wbi.requests(expectedId)
+      const drInfo = await wrb.requests(expectedId)
       const inclusionReward = drInfo.inclusionReward
       const tallyReward = drInfo.tallyReward
       assert.equal("140", inclusionReward.toString())
@@ -97,8 +97,8 @@ contract("UsingWitnetBytes", accounts => {
       const usingWitnetBalance = await web3.eth.getBalance(usingWitnet.address)
       assert.equal(0, usingWitnetBalance)
 
-      const wbiBalance = await web3.eth.getBalance(wbi.address)
-      assert.equal(200, wbiBalance)
+      const wrbBalance = await web3.eth.getBalance(wrb.address)
+      assert.equal(200, wrbBalance)
     })
 
     it("should post data request, claim a data request," +
@@ -125,19 +125,19 @@ contract("UsingWitnetBytes", accounts => {
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
       const proofBytes = data.poe[0].proof
-      const proof = await wbi.decodeProof(proofBytes)
+      const proof = await wrb.decodeProof(proofBytes)
       const message = data.poe[0].lastBeacon
-      const fastVerifyParams = await wbi.computeFastVerifyParams(publicKey, proof, message)
+      const fastVerifyParams = await wrb.computeFastVerifyParams(publicKey, proof, message)
       const signature = data.signature
 
       // Claim Data Request Inclusion
       const tx2 =
-        wbi.claimDataRequests([expectedId], proof, publicKey, fastVerifyParams[0], fastVerifyParams[1], signature, {
+        wrb.claimDataRequests([expectedId], proof, publicKey, fastVerifyParams[0], fastVerifyParams[1], signature, {
           from: accounts[1],
         })
       await waitForHash(tx2)
 
-      const drInfo2 = await wbi.requests(expectedId)
+      const drInfo2 = await wrb.requests(expectedId)
       const pkh = drInfo2.pkhClaim
       const timestamp = drInfo2.timestamp
       assert(timestamp)
@@ -149,20 +149,20 @@ contract("UsingWitnetBytes", accounts => {
       })
 
       // Show PoI of Data Request Inclusion
-      const tx3 = wbi.reportDataRequestInclusion(expectedId,
+      const tx3 = wrb.reportDataRequestInclusion(expectedId,
         ["0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"],
         0,
         expectedBlockHash)
       await waitForHash(tx3)
-      const drInfo3 = await wbi.requests(expectedId)
+      const drInfo3 = await wrb.requests(expectedId)
       const DrHash = drInfo3.drHash
       assert.equal(expectedDrHash, web3.utils.toHex(DrHash))
       // Report result
-      const tx4 = wbi.reportResult(expectedId, [], 0,
+      const tx4 = wrb.reportResult(expectedId, [], 0,
         expectedBlockHash, web3.utils.utf8ToHex(stringRes))
       await waitForHash(tx4)
 
-      const drInfo4 = await wbi.requests(expectedId)
+      const drInfo4 = await wrb.requests(expectedId)
       const result = drInfo4.result
       assert.equal(web3.utils.utf8ToHex("Result"), result)
 
