@@ -1,4 +1,4 @@
-const WBI = artifacts.require("WitnetBridgeInterface")
+const WRB = artifacts.require("WitnetRequestsBoard")
 const MockBlockRelay = artifacts.require("MockBlockRelay")
 const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const truffleAssert = require("truffle-assertions")
@@ -23,9 +23,9 @@ function calculateRoots (drBytes, resBytes) {
   return [expectedDrHash, expectedResHash]
 }
 
-contract("WBI", accounts => {
-  describe("WBI test suite", () => {
-    let wbiInstance
+contract("WRB", accounts => {
+  describe("WRB test suite", () => {
+    let wrbInstance
     let blockRelay
     let blockRelayProxy
     beforeEach(async () => {
@@ -35,7 +35,7 @@ contract("WBI", accounts => {
       blockRelayProxy = await BlockRelayProxy.new(blockRelay.address, {
         from: accounts[0],
       })
-      wbiInstance = await WBI.new(blockRelayProxy.address, 2)
+      wrbInstance = await WRB.new(blockRelayProxy.address, 2)
     })
 
     it("should post 2 data requests, read them successfully and check balances afterwards", async () => {
@@ -49,7 +49,7 @@ contract("WBI", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // Post first data request
-      const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -58,19 +58,19 @@ contract("WBI", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // Post second data request
-      const tx2 = wbiInstance.postDataRequest(drBytes2, 0)
+      const tx2 = wrbInstance.postDataRequest(drBytes2, 0)
       const txHash2 = await waitForHash(tx2)
       const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
       const id2 = txReceipt2.logs[0].data
 
       // Read both
-      const readDrBytes = await wbiInstance.readDataRequest.call(id1)
-      const readDrBytes2 = await wbiInstance.readDataRequest.call(id2)
+      const readDrBytes = await wrbInstance.readDataRequest.call(id1)
+      const readDrBytes2 = await wrbInstance.readDataRequest.call(id2)
 
       // Assert correct balances
       const afterBalance1 = await web3.eth.getBalance(account1)
       const contractBalanceAfter = await web3.eth.getBalance(
-        wbiInstance.address
+        wrbInstance.address
       )
 
       assert(parseInt(afterBalance1, 10) < parseInt(actualBalance1, 10))
@@ -84,7 +84,7 @@ contract("WBI", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // post data request
-      const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -94,12 +94,12 @@ contract("WBI", accounts => {
 
       // assert correct balance
       const contractBalanceBefore = await web3.eth.getBalance(
-        wbiInstance.address
+        wrbInstance.address
       )
       assert.equal(web3.utils.toWei("1", "ether"), contractBalanceBefore)
 
-      // upgrade reward (and thus balance of WBI)
-      const tx2 = wbiInstance.upgradeDataRequest(id1, halfEther, {
+      // upgrade reward (and thus balance of WRB)
+      const tx2 = wrbInstance.upgradeDataRequest(id1, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -107,7 +107,7 @@ contract("WBI", accounts => {
 
       // assert correct balance
       const contractBalanceAfter = await web3.eth.getBalance(
-        wbiInstance.address
+        wrbInstance.address
       )
 
       assert.equal(web3.utils.toWei("2", "ether"), contractBalanceAfter)
@@ -133,13 +133,13 @@ contract("WBI", accounts => {
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
       const proofBytes = data.poe[0].proof
-      const proof = await wbiInstance.decodeProof(proofBytes)
+      const proof = await wrbInstance.decodeProof(proofBytes)
       const message = data.poe[0].lastBeacon
-      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
       const signature = data.signature
 
       // post data request
-      const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
         from: account1,
         value: web3.utils.toWei("1", "ether"),
       })
@@ -148,11 +148,11 @@ contract("WBI", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // check if data request is claimable
-      const claimCheck = await wbiInstance.checkDataRequestsClaimability.call([id1])
+      const claimCheck = await wrbInstance.checkDataRequestsClaimability.call([id1])
       assert.deepEqual([true], claimCheck)
 
       // claim data request
-      const tx2 = wbiInstance.claimDataRequests(
+      const tx2 = wrbInstance.claimDataRequests(
         [id1],
         proof,
         publicKey,
@@ -177,10 +177,10 @@ contract("WBI", accounts => {
           )
         )
       )
-      const beacon = await wbiInstance.getLastBeacon.call()
+      const beacon = await wrbInstance.getLastBeacon.call()
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [drOutputHash], 0, blockHeader, {
+      const tx3 = wrbInstance.reportDataRequestInclusion(id1, [drOutputHash], 0, blockHeader, {
         from: account2,
       })
 
@@ -190,14 +190,14 @@ contract("WBI", accounts => {
       assert(parseInt(afterBalance2, 10) > parseInt(actualBalance2, 10))
 
       // report result
-      const restx = wbiInstance.reportResult(id1, [], 0, blockHeader, resBytes, { from: account2 })
+      const restx = wrbInstance.reportResult(id1, [], 0, blockHeader, resBytes, { from: account2 })
       await waitForHash(restx)
 
       // check payment of result reporting
       const afterBalance1 = await web3.eth.getBalance(account1)
       const balanceFinal = await web3.eth.getBalance(account2)
       const contractBalanceAfter = await web3.eth.getBalance(
-        wbiInstance.address
+        wrbInstance.address
       )
 
       assert(parseInt(afterBalance1, 10) < parseInt(actualBalance1, 10))
@@ -206,7 +206,7 @@ contract("WBI", accounts => {
       assert.equal(0, contractBalanceAfter)
 
       // read result bytes
-      const readResBytes = await wbiInstance.readResult.call(id1)
+      const readResBytes = await wrbInstance.readResult.call(id1)
       assert.equal(resBytes, readResBytes)
     })
 
@@ -216,7 +216,7 @@ contract("WBI", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // post the first data request
-      const tx1 = wbiInstance.postDataRequest(drBytes1, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(drBytes1, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -228,7 +228,7 @@ contract("WBI", accounts => {
       assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       // post the second data request
-      const tx2 = wbiInstance.postDataRequest(drBytes2, 0)
+      const tx2 = wrbInstance.postDataRequest(drBytes2, 0)
       const txHash2 = await waitForHash(tx2)
       const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
 
@@ -237,8 +237,8 @@ contract("WBI", accounts => {
       assert.equal(web3.utils.hexToNumberString(id2), web3.utils.hexToNumberString("0x2"))
 
       // read the bytes of both
-      const readDrBytes1 = await wbiInstance.readDataRequest.call(id1)
-      const readDrBytes2 = await wbiInstance.readDataRequest.call(id2)
+      const readDrBytes1 = await wrbInstance.readDataRequest.call(id1)
+      const readDrBytes2 = await wrbInstance.readDataRequest.call(id2)
       assert.equal(drBytes1, readDrBytes1)
       assert.equal(drBytes2, readDrBytes2)
     })
@@ -249,7 +249,7 @@ contract("WBI", accounts => {
       const expectedResultId = web3.utils.hexToNumberString(hash)
 
       // post data request
-      const tx = await wbiInstance.postDataRequest(drBytes, 0)
+      const tx = await wrbInstance.postDataRequest(drBytes, 0)
 
       // check emission of the event and its id correctness
       truffleAssert.eventEmitted(tx, "PostedRequest", (ev) => {
@@ -257,7 +257,7 @@ contract("WBI", accounts => {
       })
 
       // Finally read the bytes
-      const readDrBytes = await wbiInstance.readDataRequest.call(expectedResultId)
+      const readDrBytes = await wrbInstance.readDataRequest.call(expectedResultId)
       assert.equal(drBytes, readDrBytes)
     })
 
@@ -272,13 +272,13 @@ contract("WBI", accounts => {
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
       const proofBytes = data.poe[1].proof
-      const proof = await wbiInstance.decodeProof(proofBytes)
+      const proof = await wrbInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
-      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
       const signature = data.signature
 
       // post data request
-      const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -288,8 +288,8 @@ contract("WBI", accounts => {
       assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       // subscribe to PostedResult event
-      wbiInstance.PostedResult({}, async (_error, event) => {
-        const readresBytes1 = await wbiInstance.readResult.call(id1)
+      wrbInstance.PostedResult({}, async (_error, event) => {
+        const readresBytes1 = await wrbInstance.readResult.call(id1)
         assert.equal(resBytes, readresBytes1)
       })
 
@@ -302,7 +302,7 @@ contract("WBI", accounts => {
       await waitForHash(txRelay)
 
       // claim data request
-      const tx2 = wbiInstance.claimDataRequests(
+      const tx2 = wrbInstance.claimDataRequests(
         [id1],
         proof,
         publicKey,
@@ -314,13 +314,13 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       // report data request inclusion
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader, {
+      const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader, {
         from: accounts[1],
       })
       await waitForHash(tx3)
 
       // report result
-      const tx4 = await wbiInstance.reportResult(id1, [], 0, blockHeader, resBytes, {
+      const tx4 = await wrbInstance.reportResult(id1, [], 0, blockHeader, resBytes, {
         from: accounts[2],
       })
 
@@ -342,13 +342,13 @@ contract("WBI", accounts => {
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
       const proofBytes = data.poe[1].proof
-      const proof = await wbiInstance.decodeProof(proofBytes)
+      const proof = await wrbInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
-      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
       const signature = data.signature
 
       // post data request
-      const tx1 = wbiInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -366,7 +366,7 @@ contract("WBI", accounts => {
       await waitForHash(txRelay)
 
       // claim data request
-      const tx2 = wbiInstance.claimDataRequests(
+      const tx2 = wrbInstance.claimDataRequests(
         [id1],
         proof,
         publicKey,
@@ -378,7 +378,7 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       // should fail to read blockhash from a non-existing block
-      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(id1, [dummySibling], 2, fakeBlockHeader, {
+      await truffleAssert.reverts(wrbInstance.reportDataRequestInclusion(id1, [dummySibling], 2, fakeBlockHeader, {
         from: accounts[1],
       }), "Non-existing block")
     })
@@ -388,7 +388,7 @@ contract("WBI", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR")
 
       // assert it reverts when rewards are higher than values sent
-      await truffleAssert.reverts(wbiInstance.postDataRequest(drBytes, web3.utils.toWei("2", "ether"), {
+      await truffleAssert.reverts(wrbInstance.postDataRequest(drBytes, web3.utils.toWei("2", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       }), "Transaction value needs to be equal or greater than tally reward")
@@ -399,7 +399,7 @@ contract("WBI", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR")
 
       // this should pass
-      const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -408,7 +408,7 @@ contract("WBI", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // assert it reverts when rewards are higher than values sent
-      await truffleAssert.reverts(wbiInstance.upgradeDataRequest(id1, web3.utils.toWei("2", "ether"), {
+      await truffleAssert.reverts(wrbInstance.upgradeDataRequest(id1, web3.utils.toWei("2", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       }), "Transaction value needs to be equal or greater than tally reward")
@@ -421,13 +421,13 @@ contract("WBI", accounts => {
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
       const proofBytes = data.poe[1].proof
-      const proof = await wbiInstance.decodeProof(proofBytes)
+      const proof = await wrbInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
-      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
       const signature = data.signature
 
       // post data request
-      const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -444,7 +444,7 @@ contract("WBI", accounts => {
       await waitForHash(txRelay)
 
       // claim data request
-      const tx2 = wbiInstance.claimDataRequests(
+      const tx2 = wrbInstance.claimDataRequests(
         [id1],
         proof,
         publicKey,
@@ -456,12 +456,12 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       // check if data request is not claimable
-      const claimCheck = await wbiInstance.checkDataRequestsClaimability.call([id1])
+      const claimCheck = await wrbInstance.checkDataRequestsClaimability.call([id1])
       assert.deepEqual([false], claimCheck)
 
       // should revert when trying to claim it again
       await truffleAssert.reverts(
-        wbiInstance.claimDataRequests(
+        wrbInstance.claimDataRequests(
           [id1],
           proof,
           publicKey,
@@ -482,13 +482,13 @@ contract("WBI", accounts => {
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
       const proofBytes = data.poe[1].proof
-      const proof = await wbiInstance.decodeProof(proofBytes)
+      const proof = await wrbInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
-      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
       const signature = data.signature
 
       // post data request
-      const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -505,7 +505,7 @@ contract("WBI", accounts => {
       await waitForHash(txRelay1)
 
       // claim data request
-      const tx2 = wbiInstance.claimDataRequests(
+      const tx2 = wrbInstance.claimDataRequests(
         [id1],
         proof,
         publicKey,
@@ -531,17 +531,17 @@ contract("WBI", accounts => {
           )
         )
       )
-      const beacon = await wbiInstance.getLastBeacon.call()
+      const beacon = await wrbInstance.getLastBeacon.call()
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
       // post data request inclusion
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, {
+      const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, {
         from: accounts[0],
       })
       await waitForHash(tx3)
 
       // assert it fails when trying to report the dr inclusion again
-      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader2, {
+      await truffleAssert.reverts(wrbInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader2, {
         from: accounts[1],
       }), "DR already included")
     })
@@ -554,13 +554,13 @@ contract("WBI", accounts => {
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
       const proofBytes = data.poe[1].proof
-      const proof = await wbiInstance.decodeProof(proofBytes)
+      const proof = await wrbInstance.decodeProof(proofBytes)
       const message = data.poe[1].lastBeacon
-      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
       const signature = data.signature
 
       // post data request
-      const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -577,7 +577,7 @@ contract("WBI", accounts => {
       await waitForHash(txRelay)
 
       // claim data request
-      const tx2 = wbiInstance.claimDataRequests(
+      const tx2 = wrbInstance.claimDataRequests(
         [id1],
         proof,
         publicKey,
@@ -590,7 +590,7 @@ contract("WBI", accounts => {
 
       // assert reporting a result when inclusion has not been proved fails
       await truffleAssert.reverts(
-        wbiInstance.reportResult(id1, [dummySybling], 1, blockHeader, resBytes, { from: accounts[1] }),
+        wrbInstance.reportResult(id1, [dummySybling], 1, blockHeader, resBytes, { from: accounts[1] }),
         "DR not yet included"
       )
     })
@@ -604,13 +604,13 @@ contract("WBI", accounts => {
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
       const proofBytes = data.poe[0].proof
-      const proof = await wbiInstance.decodeProof(proofBytes)
+      const proof = await wrbInstance.decodeProof(proofBytes)
       const message = data.poe[0].lastBeacon
-      const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
       const signature = data.signature
 
       // post data request
-      const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -619,7 +619,7 @@ contract("WBI", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // claim data request
-      const tx2 = wbiInstance.claimDataRequests(
+      const tx2 = wrbInstance.claimDataRequests(
         [id1],
         proof,
         publicKey,
@@ -647,22 +647,22 @@ contract("WBI", accounts => {
           )
         )
       )
-      const beacon = await wbiInstance.getLastBeacon.call()
+      const beacon = await wrbInstance.getLastBeacon.call()
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
       // report data request inclusion
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, {
+      const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, {
         from: accounts[0],
       })
       await waitForHash(tx3)
 
       // report result
-      const tx4 = wbiInstance.reportResult(id1, [], 0, blockHeader2, resBytes, { from: accounts[1] })
+      const tx4 = wrbInstance.reportResult(id1, [], 0, blockHeader2, resBytes, { from: accounts[1] })
       await waitForHash(tx4)
 
       // revert when reporting the same result
       await truffleAssert.reverts(
-        wbiInstance.reportResult(id1, [], 1, blockHeader2, resBytes, { from: accounts[1] }),
+        wrbInstance.reportResult(id1, [], 1, blockHeader2, resBytes, { from: accounts[1] }),
         "Result already included"
       )
     })
@@ -673,13 +673,13 @@ contract("WBI", accounts => {
         // VRF params
         const publicKey = [data.publicKey.x, data.publicKey.y]
         const proofBytes = data.poe[0].proof
-        const proof = await wbiInstance.decodeProof(proofBytes)
+        const proof = await wrbInstance.decodeProof(proofBytes)
         const message = data.poe[0].lastBeacon
-        const fastVerifyParams = await wbiInstance.computeFastVerifyParams(publicKey, proof, message)
+        const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
         const signature = web3.utils.fromAscii("this is a fake sig")
 
         // post data request
-        const tx1 = wbiInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+        const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
           from: accounts[0],
           value: web3.utils.toWei("1", "ether"),
         })
@@ -688,7 +688,7 @@ contract("WBI", accounts => {
         const id1 = txReceipt1.logs[0].data
 
         // revert when reporting the same result
-        await truffleAssert.reverts(wbiInstance.claimDataRequests(
+        await truffleAssert.reverts(wrbInstance.claimDataRequests(
           [id1],
           proof,
           publicKey,
@@ -701,14 +701,14 @@ contract("WBI", accounts => {
         const block = await web3.eth.getBlock("latest")
 
         // update activity
-        const tx1 = wbiInstance.updateAbsActivity(block.number)
+        const tx1 = wrbInstance.updateAbsActivity(block.number)
         await waitForHash(tx1)
       })
     it("should revert updating ABS activity with a future block",
       async () => {
         const block = await web3.eth.getBlock("latest")
         await truffleAssert.reverts(
-          wbiInstance.updateAbsActivity(block.number + 100),
+          wrbInstance.updateAbsActivity(block.number + 100),
           "The block number provided has not been reached"
         )
       })
@@ -717,10 +717,10 @@ contract("WBI", accounts => {
         const block = await web3.eth.getBlock("latest")
         console.log(block.number)
         const newBlock = 49
-        const tx1 = wbiInstance.updateAbsActivity(block.number)
+        const tx1 = wrbInstance.updateAbsActivity(block.number)
         await waitForHash(tx1)
         await truffleAssert.reverts(
-          wbiInstance.updateAbsActivity(newBlock),
+          wrbInstance.updateAbsActivity(newBlock),
           "The last block number updated was higher than the one provided"
         )
       })

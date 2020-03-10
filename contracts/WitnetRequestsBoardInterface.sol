@@ -1,15 +1,15 @@
 pragma solidity ^0.5.0;
 /**
- * @title WBI Interface
- * @notice Interface of a WBI
- * It defines how to interact with the WBI in order to support:
+ * @title Witnet Requests Board Interface
+ * @notice Interface of a Witnet Request Board (WRB)
+ * It defines how to interact with the WRB in order to support:
  *  - Post and upgrade a data request
  *  - Read the result of a dr
  * @author Witnet Foundation
  */
-interface WBIInterface {
+interface WitnetRequestsBoardInterface {
 
-  /// @dev Posts a data request into the WBI in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
+  /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _dr The bytes corresponding to the Protocol Buffers serialization of the data request output.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
@@ -25,7 +25,7 @@ interface WBIInterface {
     external
     payable;
 
-  /// @dev Retrieves the result (if already available) of one data request from the WBI.
+  /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
   function readResult (uint256 _id) external view returns(bytes memory);

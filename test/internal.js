@@ -1,26 +1,26 @@
-const WBITestHelper = artifacts.require("WBITestHelper")
+const WitnetRequestsBoardTestHelper = artifacts.require("WitnetRequestsBoardTestHelper")
 const MockBlockRelay = artifacts.require("MockBlockRelay")
 const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const testdata = require("./internals.json")
 
-contract("WBITestHelper - internals", accounts => {
-  describe("WBI underlying algorithms: ", () => {
+contract("WitnetRequestsBoardTestHelper - internals", accounts => {
+  describe("WRB underlying algorithms: ", () => {
     let blockRelay
     let blockRelayProxy
-    let wbiHelper
+    let wrbHelper
     before(async () => {
       blockRelay = await MockBlockRelay.new()
       blockRelayProxy = await BlockRelayProxy.new(blockRelay.address, {
         from: accounts[0],
       })
-      wbiHelper = await WBITestHelper.new(blockRelayProxy.address, 2)
+      wrbHelper = await WitnetRequestsBoardTestHelper.new(blockRelayProxy.address, 2)
     })
     for (const [index, test] of testdata.sig.valid.entries()) {
       it(`sig (${index + 1})`, async () => {
         const message = web3.utils.fromAscii(test.message)
         const pubKey = test.public_key
         const sig = test.signature
-        const result = await wbiHelper._verifySig.call(message, pubKey, sig)
+        const result = await wrbHelper._verifySig.call(message, pubKey, sig)
         assert.equal(result, true)
       })
     }
@@ -29,16 +29,16 @@ contract("WBITestHelper - internals", accounts => {
         const message = web3.utils.fromAscii(test.message)
         const pubKey = test.public_key
         const sig = test.signature
-        const result = await wbiHelper._verifySig.call(message, pubKey, sig)
+        const result = await wrbHelper._verifySig.call(message, pubKey, sig)
         assert.notEqual(result, true)
       })
     }
     for (const [index, test] of testdata.poe.valid.entries()) {
       it(`valid poe (${index + 1})`, async () => {
         const publicKey = testdata.poe.publicKey
-        await wbiHelper.setActiveIdentities(test.abs)
+        await wrbHelper.setActiveIdentities(test.abs)
 
-        const result = await wbiHelper._verifyPoe.call(
+        const result = await wrbHelper._verifyPoe.call(
           [test.vrf, 0, 0, 0],
           publicKey,
           [0, 0],
@@ -49,9 +49,9 @@ contract("WBITestHelper - internals", accounts => {
     for (const [index, test] of testdata.poe.invalid.entries()) {
       it(`invalid poe (${index + 1})`, async () => {
         const publicKey = testdata.poe.publicKey
-        await wbiHelper.setActiveIdentities(test.abs)
+        await wrbHelper.setActiveIdentities(test.abs)
 
-        const result = await wbiHelper._verifyPoe.call(
+        const result = await wrbHelper._verifyPoe.call(
           [test.vrf, 0, 0, 0],
           publicKey,
           [0, 0],

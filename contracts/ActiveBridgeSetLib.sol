@@ -84,7 +84,7 @@ library ActiveBridgeSetLib {
   }
 
   /// @dev Checks if an address is a member of the ABS
-  /// @param _abs The Active Bridge Set structure from the Witnet Bridge Interface.
+  /// @param _abs The Active Bridge Set structure from the Witnet Requests Board.
   /// @param _address The address to check.
   /// @return true or false
   function absMembership(ActiveBridgeSet storage _abs, address _address) internal view returns (bool) {

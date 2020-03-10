@@ -4,17 +4,17 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "vrf-solidity/contracts/VRF.sol";
 import "./ActiveBridgeSetLib.sol";
 import "block-relay/contracts/BlockRelayProxy.sol";
-import "./WBIInterface.sol";
+import "./WitnetRequestsBoardInterface.sol";
 
 
 /**
- * @title Witnet Bridge Interface
+ * @title Witnet Requests Board
  * @notice Contract to bridge requests to Witnet
  * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network
   * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
-contract WitnetBridgeInterface is WBIInterface {
+contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   using SafeMath for uint256;
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
@@ -119,7 +119,7 @@ contract WitnetBridgeInterface is WBIInterface {
     repFactor = _repFactor;
   }
 
-  /// @dev Posts a data request into the WBI in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
+  /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _dr The bytes corresponding to the Protocol Buffers serialization of the data request output.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
@@ -236,14 +236,14 @@ contract WitnetBridgeInterface is WBIInterface {
     }
   }
 
-  /// @dev Retrieves the bytes of the serialization of one data request from the WBI.
+  /// @dev Retrieves the bytes of the serialization of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the data request as bytes.
   function readDataRequest (uint256 _id) external view returns(bytes memory) {
     return requests[_id].dr;
   }
 
-  /// @dev Retrieves the result (if already available) of one data request from the WBI.
+  /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
   function readResult (uint256 _id) external view returns(bytes memory) {
@@ -257,8 +257,8 @@ contract WitnetBridgeInterface is WBIInterface {
     return requests[_id].drHash;
   }
 
-  /// @dev Number of data requests in the WBI.
-  /// @return Returns the number of data requests in the WBI.
+  /// @dev Number of data requests in the WRB.
+  /// @return Returns the number of data requests in the WRB.
   function requestsCount() external view returns(uint256) {
     return requests.length;
   }

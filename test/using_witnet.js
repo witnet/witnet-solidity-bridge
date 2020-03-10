@@ -1,4 +1,4 @@
-const WBI = artifacts.require("WitnetBridgeInterface")
+const WRB = artifacts.require("WitnetRequestsBoard")
 const MockBlockRelay = artifacts.require("MockBlockRelay")
 const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
@@ -21,7 +21,7 @@ contract("UsingWitnet", accounts => {
     const requestReward = 7000000000000000
     const resultReward = 3000000000000000
 
-    let witnet, clientContract, wbi, blockRelay, request, requestId, requestHash, result, blockRelayProxy
+    let witnet, clientContract, wrb, blockRelay, request, requestId, requestHash, result, blockRelayProxy
     let lastAccount0Balance, lastAccount1Balance
 
     before(async () => {
@@ -32,9 +32,9 @@ contract("UsingWitnet", accounts => {
       blockRelayProxy = await BlockRelayProxy.new(blockRelay.address, {
         from: accounts[0],
       })
-      wbi = await WBI.new(blockRelayProxy.address, 2)
+      wrb = await WRB.new(blockRelayProxy.address, 2)
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
-      clientContract = await UsingWitnetTestHelper.new(wbi.address)
+      clientContract = await UsingWitnetTestHelper.new(wrb.address)
       lastAccount0Balance = await web3.eth.getBalance(accounts[0])
       lastAccount1Balance = await web3.eth.getBalance(accounts[1])
     })
@@ -50,7 +50,7 @@ contract("UsingWitnet", accounts => {
       assert.equal(internalDroid, expectedDroid)
     })
 
-    it("should post a Witnet request into the wbi", async () => {
+    it("should post a Witnet request into the wrb", async () => {
       requestId = await returnData(clientContract._witnetPostRequest(request.address, requestReward, resultReward, {
         from: accounts[0],
         value: requestReward + resultReward,
@@ -61,13 +61,13 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should have posted and read the same bytes", async () => {
-      const internalBytes = await wbi.readDataRequest(requestId)
+      const internalBytes = await wrb.readDataRequest(requestId)
       assert.equal(internalBytes, requestHex)
     })
 
     it("should have set the correct rewards", async () => {
       // Retrieve rewards
-      const drInfo = await wbi.requests(requestId)
+      const drInfo = await wrb.requests(requestId)
       const actualInclusionReward = drInfo.inclusionReward.toString()
       const actualTallyReward = drInfo.tallyReward.toString()
       assert.equal(actualInclusionReward, requestReward)
@@ -85,9 +85,9 @@ contract("UsingWitnet", accounts => {
       assert.equal(usingWitnetBalance, 0)
     })
 
-    it("WBI balance should increase", async () => {
-      const wbiBalance = await web3.eth.getBalance(wbi.address)
-      assert.equal(wbiBalance, requestReward + resultReward)
+    it("WRB balance should increase", async () => {
+      const wrbBalance = await web3.eth.getBalance(wrb.address)
+      assert.equal(wrbBalance, requestReward + resultReward)
     })
 
     it("should upgrade the rewards of a existing Witnet request", async () => {
@@ -99,7 +99,7 @@ contract("UsingWitnet", accounts => {
 
     it("should have upgraded the rewards correctly", async () => {
       // Retrieve rewards
-      const drInfo = await wbi.requests(requestId)
+      const drInfo = await wrb.requests(requestId)
       const actualInclusionReward = drInfo.inclusionReward.toString()
       const actualTallyReward = drInfo.tallyReward.toString()
       assert.equal(actualInclusionReward, requestReward * 2)
@@ -117,38 +117,38 @@ contract("UsingWitnet", accounts => {
       assert.equal(usingWitnetBalance, 0)
     })
 
-    it("WBI balance should increase after rewards upgrade", async () => {
-      const wbiBalance = await web3.eth.getBalance(wbi.address)
-      assert.equal(wbiBalance, (requestReward + resultReward) * 2)
+    it("WRB balance should increase after rewards upgrade", async () => {
+      const wrbBalance = await web3.eth.getBalance(wrb.address)
+      assert.equal(wrbBalance, (requestReward + resultReward) * 2)
     })
 
     it("should claim eligibility for relaying the request into Witnet", async () => {
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
       const proofBytes = data.poe[0].proof
-      const proof = await wbi.decodeProof(proofBytes)
+      const proof = await wrb.decodeProof(proofBytes)
       const message = data.poe[0].lastBeacon
-      const fastVerifyParams = await wbi.computeFastVerifyParams(publicKey, proof, message)
+      const fastVerifyParams = await wrb.computeFastVerifyParams(publicKey, proof, message)
       const signature = data.signature
 
       await returnData(
-        wbi.claimDataRequests([requestId], proof, publicKey, fastVerifyParams[0], fastVerifyParams[1], signature, {
+        wrb.claimDataRequests([requestId], proof, publicKey, fastVerifyParams[0], fastVerifyParams[1], signature, {
           from: accounts[1],
         })
       )
     })
 
     it("should set a timestamp upon claiming", async () => {
-      const requestInfo = await wbi.requests(requestId)
+      const requestInfo = await wrb.requests(requestId)
       assert(requestInfo.timestamp)
     })
 
     it("should set a the PKH of the claimer upon claiming", async () => {
-      const requestInfo = await wbi.requests(requestId)
+      const requestInfo = await wrb.requests(requestId)
       assert.equal(requestInfo.pkhClaim, accounts[1])
     })
 
-    it("should report a Witnet block containing the request into the WBI", async () => {
+    it("should report a Witnet block containing the request into the WRB", async () => {
       const epoch = 1
 
       // "droid" here stands for "data request output identifier"
@@ -167,14 +167,14 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should prove inclusion of the request into Witnet", async () => {
-      await returnData(wbi.reportDataRequestInclusion(requestId,
+      await returnData(wrb.reportDataRequestInclusion(requestId,
         ["0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"],
         0,
         block1Hash), {
         from: accounts[1],
       })
 
-      const requestInfo = await wbi.requests(requestId)
+      const requestInfo = await wrb.requests(requestId)
       assert.equal(`0x${requestInfo.drHash.toString(16)}`, requestHash)
     })
 
@@ -184,7 +184,7 @@ contract("UsingWitnet", accounts => {
       lastAccount1Balance = afterBalance
     })
 
-    it("should report a block containing the result into the WBI", async () => {
+    it("should report a block containing the result into the WRB", async () => {
       const epoch = 2
       let resultHash = sha.sha256.create()
       resultHash.update(web3.utils.hexToBytes(requestHash))
@@ -194,13 +194,13 @@ contract("UsingWitnet", accounts => {
       await blockRelay.postNewBlock(block2Hash, epoch, nullHash, resultHash, { from: accounts[0] })
     })
 
-    it("should post the result of the request into the WBI", async () => {
-      await returnData(wbi.reportResult(requestId, [], 0, block2Hash, resultHex))
-      const requestInfo = await wbi.requests(requestId)
+    it("should post the result of the request into the WRB", async () => {
+      await returnData(wrb.reportResult(requestId, [], 0, block2Hash, resultHex))
+      const requestInfo = await wrb.requests(requestId)
       assert.equal(requestInfo.result, resultHex)
     })
 
-    it("should pull the result from the WBI back into the client contract", async () => {
+    it("should pull the result from the WRB back into the client contract", async () => {
       await clientContract._witnetReadResult(requestId, { from: accounts[0] })
       result = await clientContract.result()
       assert.equal(result.success, true)
@@ -223,7 +223,7 @@ contract("UsingWitnet", accounts => {
     const requestReward = 7000000000000000
     const resultReward = 3000000000000000
 
-    let witnet, clientContract, wbi, blockRelay, blockRelayProxy, request, requestId, requestHash, result
+    let witnet, clientContract, wrb, blockRelay, blockRelayProxy, request, requestId, requestHash, result
 
     before(async () => {
       witnet = await Witnet.deployed()
@@ -233,9 +233,9 @@ contract("UsingWitnet", accounts => {
       blockRelayProxy = await BlockRelayProxy.new(blockRelay.address, {
         from: accounts[0],
       })
-      wbi = await WBI.new(blockRelayProxy.address, 2)
+      wrb = await WRB.new(blockRelayProxy.address, 2)
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
-      clientContract = await UsingWitnetTestHelper.new(wbi.address)
+      clientContract = await UsingWitnetTestHelper.new(wrb.address)
     })
 
     it("should create a Witnet request", async () => {
@@ -249,7 +249,7 @@ contract("UsingWitnet", accounts => {
       assert.equal(internalDroid, expectedDroid)
     })
 
-    it("should pass the data request to the wbi", async () => {
+    it("should pass the data request to the wrb", async () => {
       requestId = await returnData(clientContract._witnetPostRequest(request.address, requestReward, resultReward, {
         from: accounts[0],
         value: requestReward + resultReward,
@@ -257,7 +257,7 @@ contract("UsingWitnet", accounts => {
       assert.equal(requestId.toString(16), "0x0000000000000000000000000000000000000000000000000000000000000001")
     })
 
-    it("should report a Witnet block containing the request into the WBI", async () => {
+    it("should report a Witnet block containing the request into the WRB", async () => {
       const epoch = 3
 
       // "droid" here stands for "data request output identifier"
@@ -276,18 +276,18 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should prove inclusion of the request into Witnet", async () => {
-      await returnData(wbi.reportDataRequestInclusion(requestId,
+      await returnData(wrb.reportDataRequestInclusion(requestId,
         ["0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"],
         0,
         block3Hash), {
         from: accounts[1],
       })
 
-      const requestInfo = await wbi.requests(requestId)
+      const requestInfo = await wrb.requests(requestId)
       assert.equal(`0x${requestInfo.drHash.toString(16)}`, requestHash)
     })
 
-    it("should report a block containing the result into the WBI", async () => {
+    it("should report a block containing the result into the WRB", async () => {
       const epoch = 4
       let resultHash = sha.sha256.create()
       resultHash.update(web3.utils.hexToBytes(requestHash))
@@ -297,13 +297,13 @@ contract("UsingWitnet", accounts => {
       await blockRelay.postNewBlock(block4Hash, epoch, nullHash, resultHash, { from: accounts[0] })
     })
 
-    it("Should report the result in the WBI", async () => {
-      await returnData(wbi.reportResult(requestId, [], 0, block4Hash, resultHex))
-      const requestinfo = await wbi.requests(requestId)
+    it("Should report the result in the WRB", async () => {
+      await returnData(wrb.reportResult(requestId, [], 0, block4Hash, resultHex))
+      const requestinfo = await wrb.requests(requestId)
       assert.equal(requestinfo.result, resultHex)
     })
 
-    it("Should pull the result from the WBI back to the client contract", async () => {
+    it("Should pull the result from the WRB back to the client contract", async () => {
       await clientContract._witnetReadResult(requestId, { from: accounts[0] })
       result = await clientContract.result()
       assert.equal(result.cborValue.buffer.data, resultHex)

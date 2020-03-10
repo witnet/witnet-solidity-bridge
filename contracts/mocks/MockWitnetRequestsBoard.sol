@@ -1,16 +1,16 @@
 pragma solidity ^0.5.0;
 
-import "../WBIInterface.sol";
+import "../WitnetRequestsBoardInterface.sol";
 
 
 /**
- * @title Witnet Bridge Interface mocked
+ * @title Witnet Requests Board mocked
  * @notice Contract to bridge requests to Witnet for testing purposes.
  * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
   * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
-contract MockWitnetBridgeInterface is WBIInterface {
+contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   struct DataRequest {
     bytes dr;
@@ -30,7 +30,7 @@ contract MockWitnetBridgeInterface is WBIInterface {
     requests.push(request);
   }
 
-  /// @dev Posts a data request into the WBI in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
+  /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _dr The bytes corresponding to the Protocol Buffers serialization of the data request output.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
@@ -73,7 +73,7 @@ contract MockWitnetBridgeInterface is WBIInterface {
     msg.sender.transfer(requests[_id].tallyReward);
   }
 
-  /// @dev Retrieves the result (if already available) of one data request from the WBI.
+  /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR.
   function readResult (uint256 _id) external view returns(bytes memory) {

@@ -1,18 +1,18 @@
 # witnet-ethereum-bridge [![](https://travis-ci.com/witnet/witnet-ethereum-bridge.svg?branch=master)](https://travis-ci.com/witnet/witnet-ethereum-brdige)
 
-`witnet-ethereum-bridge` is an open source implementation of a bridge 
+`witnet-ethereum-bridge` is an open source implementation of a bridge
 from Ethereum to Witnet. This repository provides several contracts:
 
-- The `Witnet Bridge Interface`(WBI), which includes all the needed 
+- The `Witnet Requests Board` (WRB), which includes all the needed
 functionality to relay data requests and their results from Ethereum to Witnet and the other way round.
-- `UsingWitnet`, an inheritable client contract that injects methods for interacting with the WBI in the most convenient way.
+- `UsingWitnet`, an inheritable client contract that injects methods for interacting with the WRB in the most convenient way.
 
-## WitnetBridgeInterface
+## WitnetRequestsBoard
 
-The `WitnetBridgeInterface` contract provides the following methods:
+The `WitnetRequestsBoard` contract provides the following methods:
 
 - **postDataRequest**:
-  - _description_: posts a data request into the WBI in expectation that it will be relayed and resolved 
+  - _description_: posts a data request into the WRB in expectation that it will be relayed and resolved 
   in Witnet with a total reward that equals to msg.value.
   - _inputs_:
     - *_dr*: the bytes corresponding to the Protocol Buffers serialization of the data request output.
@@ -58,21 +58,21 @@ The `WitnetBridgeInterface` contract provides the following methods:
     - *_result*: the result itself as `bytes`.
 
 - **readDataRequest**:
-  - _description_: retrieves the bytes of the serialization of one data request from the WBI.
+  - _description_: retrieves the bytes of the serialization of one data request from the WRB.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
   - _output_:
     - the data request bytes.
 
 - **readResult**:
-  - _description_: retrieves the result (if already available) of one data request from the WBI.
+  - _description_: retrieves the result (if already available) of one data request from the WRB.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
   - _output_:
     - the result of the data request as `bytes`.
 
 - **readDrHash**:
-  - _description_: retrieves the data request transaction hash in Witnet (if it has already been included and presented) of one data request from the WBI.
+  - _description_: retrieves the data request transaction hash in Witnet (if it has already been included and presented) of one data request from the WRB.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
   - _output_:
@@ -92,9 +92,9 @@ The `WitnetBridgeInterface` contract provides the following methods:
   - _description_: checks whether an identity is part of the Active Bridge Set.
   - _output_: true if the identity is member of the ABS. 
 
-In addition, `WitnetBridgeInterface` inherits the `VRF` contract from https://github.com/witnet/vrf-solidity, and as such, all its public methods are also available to be queried. This is extremely important as the proof of eligibility is verified with the `fastVerify` method, which requires some auxiliary data points in addition to the proof itself. These can be calculated using the following methods:
+In addition, `WitnetRequestsBoard` inherits the `VRF` contract from https://github.com/witnet/vrf-solidity, and as such, all its public methods are also available to be queried. This is extremely important as the proof of eligibility is verified with the `fastVerify` method, which requires some auxiliary data points in addition to the proof itself. These can be calculated using the following methods:
 
-- *computeFastVerifyParams*: which computes the necessary auxiliary points to perform the fast (and cheaper) verification in the WBI.
+- *computeFastVerifyParams*: which computes the necessary auxiliary points to perform the fast (and cheaper) verification in the WRB.
 - *decodeProof*: if the proof is serialized and needs to be decomposed, this function decodes a VRF proof into the parameters [Gamma_x, Gamma_y c, s].
 - *decodePoint*: if the point is in compressed format, this function decodes a compressed secp256k1 point into its uncompressed representation [P_x, P_y].
 
@@ -103,8 +103,8 @@ In addition, `WitnetBridgeInterface` inherits the `VRF` contract from https://gi
 The `UsingWitnet` contract injects the following methods into the contracts inheriting from it:
 
 - **witnetPostDataRequest**:
-  - _description_: call to the WBI's `postDataRequest` method to post a 
-  data request into the WBI so its is resolved in Witnet with total reward 
+  - _description_: call to the WRB's `postDataRequest` method to post a 
+  data request into the WRB so its is resolved in Witnet with total reward 
   specified in `msg.value`.
   - _inputs_:
     - *_dr*: the bytes corresponding to the Protocol Buffers serialization of the data request output.
@@ -114,15 +114,15 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
     - *_id*: the unique identifier of the data request.
 
 - **witnetUpgradeDataRequest**:
-  - _description_: call to the WBI's `upgradeDataRequest` method to increment 
+  - _description_: call to the WRB's `upgradeDataRequest` method to increment 
   the total reward of the data request by adding more value to it. The new request reward will be increased by `msg.value` minus the difference between the former tally reward and the new tally reward.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
     - *_tallyReward*: the new tally reward. Needs to be equal or greater than the former tally reward.
 
 - **witnetReadResult**:
-  - _description_: call to the WBI's `readResult` method to retrieve
-   the result of one data request from the WBI.
+  - _description_: call to the WRB's `readResult` method to retrieve
+   the result of one data request from the WRB.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
   - _output_:

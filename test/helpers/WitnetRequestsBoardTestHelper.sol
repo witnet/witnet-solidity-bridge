@@ -1,18 +1,18 @@
 pragma solidity ^0.5.0;
 
-import "../../contracts/WitnetBridgeInterface.sol";
+import "../../contracts/WitnetRequestsBoard.sol";
 
 
 /**
- * @title Test Helper for the WBI contract
+ * @title Test Helper for the WRB contract
  * @dev The aim of this contract is:
- * 1. Raise the visibility modifier of wbi contract functions for testing purposes
+ * 1. Raise the visibility modifier of wrb contract functions for testing purposes
  * @author Witnet Foundation
  */
 
 
-contract WBITestHelper is WitnetBridgeInterface {
-  WitnetBridgeInterface wbi;
+contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
+  WitnetRequestsBoard wrb;
   //uint256 blockHash;
   // epoch of the last block
   //uint256 epoch;
@@ -22,7 +22,7 @@ contract WBITestHelper is WitnetBridgeInterface {
   constructor (
     address _blockRelayAddress,
     uint8 _repFactor)
-  WitnetBridgeInterface(_blockRelayAddress, _repFactor) public { }
+  WitnetRequestsBoard(_blockRelayAddress, _repFactor) public { }
 
   modifier vrfValid(
     uint256[4] memory _poe,
