@@ -22,12 +22,15 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     address payable pkhClaim;
   }
 
+  address witnet;
+
   DataRequest[] requests;
 
   constructor () public {
     // Insert an empty request so as to initialize the requests array with length > 0
     DataRequest memory request;
     requests.push(request);
+    witnet = msg.sender;
   }
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
@@ -80,4 +83,12 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     return requests[_id].result;
   }
 
+  /// @dev Verifies if the contract is upgradable
+  /// @return true if the contract upgradable
+  function isUpgradable(address _address) external view returns(bool) {
+    if (_address == witnet) {
+      return true;
+    }
+    return false;
+  }
 }
