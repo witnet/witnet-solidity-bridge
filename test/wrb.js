@@ -79,6 +79,7 @@ contract("WRB", accounts => {
       assert.equal(drBytes, readDrBytes)
       assert.equal(drBytes2, readDrBytes2)
     })
+
     it("should upgrade the reward of a data request after posting it in the contract", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const halfEther = web3.utils.toWei("0.5", "ether")
