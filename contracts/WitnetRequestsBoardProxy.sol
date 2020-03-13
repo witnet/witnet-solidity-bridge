@@ -15,6 +15,10 @@ contract WitnetRequestsBoardProxy {
   address public witnetRequestsBoardAddress;
   WitnetRequestsBoardInterface witnetRequestsBoardInstance;
 
+  uint256 lastDrId;
+  mapping(uint256 => address)  idWrb;
+  uint256[] lastIds;
+
   modifier notIdentical(address _newAddress) {
     require(_newAddress != witnetRequestsBoardAddress, "The provided Witnet Requests Board instance address is already in use");
     _;
@@ -34,6 +38,7 @@ contract WitnetRequestsBoardProxy {
     payable
     returns(uint256)
   {
+    lastDrId = witnetRequestsBoardInstance.postDataRequest(_dr, _tallyReward);
     return witnetRequestsBoardInstance.postDataRequest(_dr, _tallyReward);
   }
 
@@ -55,15 +60,32 @@ contract WitnetRequestsBoardProxy {
     view
     returns(bytes memory)
   {
+    uint256 n = lastIds.length;
+    if (_id > lastIds[n]) {
+      return witnetRequestsBoardInstance.readResult(_id);
+    }
+
+    else {
+      for (uint i = 0; i <= n - 1; i++) {
+        if (_id > lastIds[n - 1 - i]){
+          WitnetRequestsBoardInterface wrbWithResult;
+          wrbWithResult = WitnetRequestsBoardInterface(idWrb[lastIds[n - 1 - i]]);
+        } else{
+          continue;
+        }
+      }
+    }
     return witnetRequestsBoardInstance.readResult(_id);
   }
 
-//   /// @notice Upgrades the block relay if the current one is upgradeable
-//   /// @param _newAddress address of the new block relay to upgrade
-//   function upgradeBlockRelay(address _newAddress) public notIdentical(_newAddress) {
-//     require(blockRelayInstance.isUpgradable(msg.sender), "The upgrade has been rejected by the current implementation");
-//     blockRelayAddress = _newAddress;
-//     blockRelayInstance = BlockRelayInterface(_newAddress);
-//   }
+  /// @notice Upgrades the Witnet Requests Board if the current one is upgradeable
+  /// @param _newAddress address of the new block relay to upgrade
+  function upgradeWitnetRequestsBoard(address _newAddress) public notIdentical(_newAddress) {
+    require(witnetRequestsBoardInstance.isUpgradable(msg.sender), "The upgrade has been rejected by the current implementation");
+    idWrb[lastDrId] = witnetRequestsBoardAddress;
+    lastIds.push(lastDrId);
+    witnetRequestsBoardAddress = _newAddress;
+    witnetRequestsBoardInstance = WitnetRequestsBoardInterface(_newAddress);
+  }
 
 }
