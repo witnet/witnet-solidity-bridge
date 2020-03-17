@@ -1,5 +1,5 @@
 pragma solidity ^0.5.0;
-import "block-relay/contracts/BlockRelayInterface.sol";
+import "witnet-ethereum-block-relay/contracts/BlockRelayInterface.sol";
 
 /**
  * @title Block relay contract
