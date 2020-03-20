@@ -180,7 +180,7 @@ contract("WBI", accounts => {
       const beacon = await wbiInstance.getLastBeacon.call()
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [drOutputHash], 0, blockHeader, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [drOutputHash], 0, blockHeader, epoch, {
         from: account2,
       })
 
@@ -190,7 +190,7 @@ contract("WBI", accounts => {
       assert(parseInt(afterBalance2, 10) > parseInt(actualBalance2, 10))
 
       // report result
-      const restx = wbiInstance.reportResult(id1, [], 0, blockHeader, resBytes, { from: account2 })
+      const restx = wbiInstance.reportResult(id1, [], 0, blockHeader, epoch, resBytes, { from: account2 })
       await waitForHash(restx)
 
       // check payment of result reporting
@@ -314,13 +314,13 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       // report data request inclusion
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader, epoch, {
         from: accounts[1],
       })
       await waitForHash(tx3)
 
       // report result
-      const tx4 = await wbiInstance.reportResult(id1, [], 0, blockHeader, resBytes, {
+      const tx4 = await wbiInstance.reportResult(id1, [], 0, blockHeader, epoch, resBytes, {
         from: accounts[2],
       })
 
@@ -378,7 +378,7 @@ contract("WBI", accounts => {
       await waitForHash(tx2)
 
       // should fail to read blockhash from a non-existing block
-      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(id1, [dummySibling], 2, fakeBlockHeader, {
+      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(id1, [dummySibling], 2, fakeBlockHeader, epoch, {
         from: accounts[1],
       }), "Non-existing block")
     })
@@ -478,6 +478,7 @@ contract("WBI", accounts => {
       const resBytes = web3.utils.fromAscii("This is a result")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
       var dummySybling = 1
+      const epoch = 0
 
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
@@ -535,13 +536,13 @@ contract("WBI", accounts => {
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
       // post data request inclusion
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, epoch, {
         from: accounts[0],
       })
       await waitForHash(tx3)
 
       // assert it fails when trying to report the dr inclusion again
-      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader2, {
+      await truffleAssert.reverts(wbiInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader2, epoch, {
         from: accounts[1],
       }), "DR already included")
     })
@@ -590,7 +591,7 @@ contract("WBI", accounts => {
 
       // assert reporting a result when inclusion has not been proved fails
       await truffleAssert.reverts(
-        wbiInstance.reportResult(id1, [dummySybling], 1, blockHeader, resBytes, { from: accounts[1] }),
+        wbiInstance.reportResult(id1, [dummySybling], 1, blockHeader, epoch, resBytes, { from: accounts[1] }),
         "DR not yet included"
       )
     })
@@ -651,18 +652,18 @@ contract("WBI", accounts => {
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
       // report data request inclusion
-      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, {
+      const tx3 = wbiInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, epoch2, {
         from: accounts[0],
       })
       await waitForHash(tx3)
 
       // report result
-      const tx4 = wbiInstance.reportResult(id1, [], 0, blockHeader2, resBytes, { from: accounts[1] })
+      const tx4 = wbiInstance.reportResult(id1, [], 0, blockHeader2, epoch2, resBytes, { from: accounts[1] })
       await waitForHash(tx4)
 
       // revert when reporting the same result
       await truffleAssert.reverts(
-        wbiInstance.reportResult(id1, [], 1, blockHeader2, resBytes, { from: accounts[1] }),
+        wbiInstance.reportResult(id1, [], 1, blockHeader2, epoch2, resBytes, { from: accounts[1] }),
         "Result already included"
       )
     })

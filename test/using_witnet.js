@@ -167,10 +167,11 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should prove inclusion of the request into Witnet", async () => {
+      const epoch = 1
       await returnData(wbi.reportDataRequestInclusion(requestId,
         ["0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"],
         0,
-        block1Hash), {
+        block1Hash, epoch), {
         from: accounts[1],
       })
 
@@ -195,7 +196,8 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should post the result of the request into the WBI", async () => {
-      await returnData(wbi.reportResult(requestId, [], 0, block2Hash, resultHex))
+      const epoch = 0
+      await returnData(wbi.reportResult(requestId, [], 0, block2Hash, epoch, resultHex))
       const requestInfo = await wbi.requests(requestId)
       assert.equal(requestInfo.result, resultHex)
     })
@@ -276,10 +278,11 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should prove inclusion of the request into Witnet", async () => {
+      const epoch = 3
       await returnData(wbi.reportDataRequestInclusion(requestId,
         ["0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"],
         0,
-        block3Hash), {
+        block3Hash, epoch), {
         from: accounts[1],
       })
 
@@ -298,7 +301,8 @@ contract("UsingWitnet", accounts => {
     })
 
     it("Should report the result in the WBI", async () => {
-      await returnData(wbi.reportResult(requestId, [], 0, block4Hash, resultHex))
+      const epoch = 0
+      await returnData(wbi.reportResult(requestId, [], 0, block4Hash, epoch, resultHex))
       const requestinfo = await wbi.requests(requestId)
       assert.equal(requestinfo.result, resultHex)
     })
