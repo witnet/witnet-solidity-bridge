@@ -14,14 +14,18 @@ contract WitnetRequestsBoardProxy {
 
   address public witnetRequestsBoardAddress;
   WitnetRequestsBoardInterface witnetRequestsBoardInstance;
-  // Last id of the previous WRB controller
-  uint256 lastId;
-  // Map the lastIds with the corresponding WRB controllers
-  mapping(uint256 => address)  idWrb;
-  // Array of the lastIds of the controllers
-  uint256[] lastIdsControllers;
-  // OffSet for having unique ids in the Proxy
-  uint256 offSet;
+  // Last id of the WRB controller
+  uint256 currentLastId;
+
+  // Struct if the information of each controller
+  struct ControllerInfo {
+    address controllerAddress;
+    uint256 lastId;
+    uint256 offset;
+  }
+
+  // Array with the controllers that have been used in the Proxy
+  ControllerInfo[] controllers;
 
   modifier notIdentical(address _newAddress) {
     require(_newAddress != witnetRequestsBoardAddress, "The provided Witnet Requests Board instance address is already in use");
@@ -29,10 +33,10 @@ contract WitnetRequestsBoardProxy {
   }
 
   constructor(address _witnetRequestsBoardAddress) public {
+    // Initialize the first epoch pointing to the first controller
+    controllers.push(ControllerInfo({controllerAddress: _witnetRequestsBoardAddress, lastId: 0, offset: 0}));
     witnetRequestsBoardAddress = _witnetRequestsBoardAddress;
     witnetRequestsBoardInstance = WitnetRequestsBoardInterface(_witnetRequestsBoardAddress);
-    // Set the first possition of the lastIdsControllers to zero
-    lastIdsControllers = [0];
   }
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
@@ -44,9 +48,11 @@ contract WitnetRequestsBoardProxy {
     payable
     returns(uint256)
   {
-    //Update the lastId with the id in the controller plus the offSet
-    lastId = witnetRequestsBoardInstance.postDataRequest(_dr, _tallyReward) + offSet;
-    return lastId;
+    uint256 n = controllers.length;
+    uint256 offset = controllers[n - 1].offset;
+    //Update the currentLastId with the id in the controller plus the offSet
+    currentLastId = witnetRequestsBoardInstance.postDataRequest(_dr, _tallyReward) + offset;
+    return currentLastId;
   }
 
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
@@ -56,7 +62,10 @@ contract WitnetRequestsBoardProxy {
     external
     payable
   {
-    return witnetRequestsBoardInstance.upgradeDataRequest(_id, _tallyReward);
+    address wrbAddress;
+    uint256 offSetWrb;
+    (wrbAddress, offSetWrb) = getController(_id);
+    return witnetRequestsBoardInstance.upgradeDataRequest(_id - offSetWrb, _tallyReward);
   }
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
@@ -81,13 +90,10 @@ contract WitnetRequestsBoardProxy {
   function upgradeWitnetRequestsBoard(address _newAddress) public notIdentical(_newAddress) {
     // Require the WRB is upgradable
     require(witnetRequestsBoardInstance.isUpgradable(msg.sender), "The upgrade has been rejected by the current implementation");
-    // Map the lastId to the corresponding witnetRequestsBoardAddress
-    idWrb[lastId] = witnetRequestsBoardAddress;
-    // Push the lastId
-    lastIdsControllers.push(lastId);
     // Set the offSet for the next WRB
-    uint256 n = lastIdsControllers.length;
-    offSet = lastIdsControllers[n - 1];
+    uint256 n = controllers.length;
+    // Map the currentLastId to the corresponding witnetRequestsBoardAddress and add it to controllers
+    controllers.push(ControllerInfo({controllerAddress: _newAddress, lastId: currentLastId, offset: controllers[n - 1].lastId}));
     // Upgrade the WRB
     witnetRequestsBoardAddress = _newAddress;
     witnetRequestsBoardInstance = WitnetRequestsBoardInterface(_newAddress);
@@ -95,28 +101,15 @@ contract WitnetRequestsBoardProxy {
 
   /// @notice Gets the controller from an Id
   /// @param _id id of a Data Request from which we get the controller
-  function getController(uint256 _id) internal returns(address, uint256) {
-    uint256 n = lastIdsControllers.length;
-    uint256 offSetWrb;
-    address wrbAddress;
+  function getController(uint256 _id) internal returns(address _controllerAddress, uint256 _offset) {
+    uint256 n = controllers.length;
     // If the id is bigger than the lastId of the previous Controller, read the result in the current Controller
-    if (_id > lastIdsControllers[n - 1]) {
-      return (witnetRequestsBoardAddress, lastIdsControllers[n - 1]);
-    } else {
-      // Else check the first lastId so that is bigger
-      for (uint i = 0; i <= n - 1; i++) {
-        if (_id > lastIdsControllers[n - 1 - i]) {
-          WitnetRequestsBoardInterface wrbWithResult;
-          wrbWithResult = WitnetRequestsBoardInterface(idWrb[lastIdsControllers[n - i]]);
-          // Get the offset that had the Controller of that id
-          offSetWrb = lastIdsControllers[n - 1 - i];
-          wrbAddress = idWrb[n - i];
-          return (wrbAddress, offSetWrb);
-        } else {
-          continue;
-        }
+    for (uint i = n; i > 0; i--) {
+      if (_id >= controllers[i-1].lastId) {
+        return (controllers[i-1].controllerAddress, controllers[i-1].offset);
       }
     }
   }
 
 }
+
