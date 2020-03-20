@@ -2,8 +2,9 @@ const truffleAssert = require("truffle-assertions")
 const WitnetRequestsBoardV1 = artifacts.require("WitnetRequestsBoardV1")
 const WitnetRequestsBoardV2 = artifacts.require("WitnetRequestsBoardV2")
 const WitnetRequestsBoardProxy = artifacts.require("WitnetRequestsBoardProxy")
+const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
 const MockBlockRelay = artifacts.require("MockBlockRelay")
-
+const sha = require("js-sha256")
 contract("Witnet Requests Board Proxy", accounts => {
   describe("Witnet Requests Board Proxy test suite", () => {
     let blockRelay
@@ -21,7 +22,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       wrbInstance2 = await WitnetRequestsBoardV2.new(blockRelay.address, 1, {
         from: accounts[0],
       })
-      wrbProxy = await WitnetRequestsBoardProxy.new(wrbInstance1.address, {
+      wrbProxy = await WrbProxyHelper.new(wrbInstance1.address, {
         from: accounts[0],
       })
     })
@@ -39,12 +40,19 @@ contract("Witnet Requests Board Proxy", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // Post first data request
-      const tx1 = wrbProxy.postDataRequest(drBytes, halfEther, {
+      const tx1 = await wrbProxy.postDataRequest.call(drBytes, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
 
-      assert.equal(tx1, tx1)
+      //await waitForHash(tx1)
+      console.log(tx1)
+
+      const lastId = await wrbProxy.getLastId.call()
+      console.log(lastId)
+      const check = await wrbProxy.checkLastId.call(tx1)
+      //assert.equal(tx1, lastId)
+      //assert.equal(true, check)
     })
 
     it("should revert when trying to verify dr in blockRelayInstance", async () => {
@@ -56,3 +64,8 @@ contract("Witnet Requests Board Proxy", accounts => {
     })
   })
 })
+
+const waitForHash = txQ =>
+  new Promise((resolve, reject) =>
+    txQ.on("transactionHash", resolve).catch(reject)
+  )
