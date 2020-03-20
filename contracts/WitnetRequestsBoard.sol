@@ -176,11 +176,13 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @param _poi A proof of inclusion proving that the data request appears listed in one recent block in Witnet.
   /// @param _index The index in the merkle tree.
   /// @param _blockHash The hash of the block in which the data request was inserted.
+  /// @param _epoch The epoch in which the blockHash was created.
   function reportDataRequestInclusion (
     uint256 _id,
     uint256[] calldata _poi,
     uint256 _index,
-    uint256 _blockHash
+    uint256 _blockHash,
+    uint256 _epoch
     )
     external
     drNotIncluded(_id)
@@ -190,6 +192,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     if (blockRelay.verifyDrPoi(
       _poi,
       _blockHash,
+      _epoch,
       _index,
       drOutputHash)) {
       requests[_id].drHash = drHash;
@@ -207,12 +210,14 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @param _poi A proof of inclusion proving that the data in _result has been acknowledged by the Witnet network as being the final result for the data request by putting in a tally transaction inside a Witnet block.
   /// @param _index The position of the tally transaction in the tallies-only merkle tree in the Witnet block.
   /// @param _blockHash The hash of the block in which the result (tally) was inserted.
+  /// @param _epoch The epoch in which the blockHash was created.
   /// @param _result The result itself as bytes.
   function reportResult (
     uint256 _id,
     uint256[] calldata _poi,
     uint256 _index,
     uint256 _blockHash,
+    uint256 _epoch,
     bytes calldata _result
     )
     external
@@ -224,6 +229,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     if (blockRelay.verifyTallyPoi(
       _poi,
       _blockHash,
+      _epoch,
       _index,
       resHash)){
       requests[_id].result = _result;
