@@ -152,14 +152,14 @@ contract("UsingWitnetBytes", accounts => {
       const tx3 = wrb.reportDataRequestInclusion(expectedId,
         ["0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"],
         0,
-        expectedBlockHash)
+        expectedBlockHash, epoch)
       await waitForHash(tx3)
       const drInfo3 = await wrb.requests(expectedId)
       const DrHash = drInfo3.drHash
       assert.equal(expectedDrHash, web3.utils.toHex(DrHash))
       // Report result
       const tx4 = wrb.reportResult(expectedId, [], 0,
-        expectedBlockHash, web3.utils.utf8ToHex(stringRes))
+        expectedBlockHash, epoch, web3.utils.utf8ToHex(stringRes))
       await waitForHash(tx4)
 
       const drInfo4 = await wrb.requests(expectedId)

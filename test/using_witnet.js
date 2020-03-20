@@ -167,10 +167,11 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should prove inclusion of the request into Witnet", async () => {
+      const epoch = 1
       await returnData(wrb.reportDataRequestInclusion(requestId,
         ["0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"],
         0,
-        block1Hash), {
+        block1Hash, epoch), {
         from: accounts[1],
       })
 
@@ -194,8 +195,9 @@ contract("UsingWitnet", accounts => {
       await blockRelay.postNewBlock(block2Hash, epoch, nullHash, resultHash, { from: accounts[0] })
     })
 
-    it("should post the result of the request into the WRB", async () => {
-      await returnData(wrb.reportResult(requestId, [], 0, block2Hash, resultHex))
+    it("should post the result of the request into the WBI", async () => {
+      const epoch = 0
+      await returnData(wrb.reportResult(requestId, [], 0, block2Hash, epoch, resultHex))
       const requestInfo = await wrb.requests(requestId)
       assert.equal(requestInfo.result, resultHex)
     })
@@ -276,10 +278,11 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should prove inclusion of the request into Witnet", async () => {
+      const epoch = 3
       await returnData(wrb.reportDataRequestInclusion(requestId,
         ["0xe1504f07d07c513c7cd919caec111b900c893a5f9ba82c4243893132aaf087f8"],
         0,
-        block3Hash), {
+        block3Hash, epoch), {
         from: accounts[1],
       })
 
@@ -297,8 +300,9 @@ contract("UsingWitnet", accounts => {
       await blockRelay.postNewBlock(block4Hash, epoch, nullHash, resultHash, { from: accounts[0] })
     })
 
-    it("Should report the result in the WRB", async () => {
-      await returnData(wrb.reportResult(requestId, [], 0, block4Hash, resultHex))
+    it("Should report the result in the WBI", async () => {
+      const epoch = 0
+      await returnData(wrb.reportResult(requestId, [], 0, block4Hash, epoch, resultHex))
       const requestinfo = await wrb.requests(requestId)
       assert.equal(requestinfo.result, resultHex)
     })
