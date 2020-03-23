@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "vrf-solidity/contracts/VRF.sol";
 import "../../contracts/ActiveBridgeSetLib.sol";
-import "block-relay/contracts/BlockRelayProxy.sol";
+import "witnet-ethereum-block-relay/contracts/BlockRelayProxy.sol";
 import "../../contracts/WitnetRequestsBoardInterface.sol";
 
 
