@@ -75,7 +75,7 @@ contract MockBlockRelay is BlockRelayInterface {
 
   /// @notice Returns the latest hash reported to the block relay
   /// @return blockhash
-  function getLastHash() external view returns(uint256){
+  function getLastHash() external view returns(uint256) {
     return lastBlock.blockHash;
   }
 
