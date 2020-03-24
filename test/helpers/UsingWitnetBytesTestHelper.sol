@@ -21,7 +21,7 @@ contract UsingWitnetBytesTestHelper is UsingWitnetBytes {
     witnetUpgradeRequest(_id, _tallyReward);
   }
 
-  function _witnetReadResult (uint256 _id) public view returns(bytes memory) {
+  function _witnetReadResult (uint256 _id) public returns(bytes memory) {
     return witnetReadResult(_id);
   }
 }

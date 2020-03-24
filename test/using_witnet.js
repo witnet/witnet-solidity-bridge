@@ -1,4 +1,5 @@
 const WRB = artifacts.require("WitnetRequestsBoard")
+const WRBProxy = artifacts.require("WitnetRequestsBoardProxy")
 const MockBlockRelay = artifacts.require("MockBlockRelay")
 const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
@@ -21,7 +22,7 @@ contract("UsingWitnet", accounts => {
     const requestReward = 7000000000000000
     const resultReward = 3000000000000000
 
-    let witnet, clientContract, wrb, blockRelay, request, requestId, requestHash, result, blockRelayProxy
+    let witnet, clientContract, wrb, wrbProxy, blockRelay, request, requestId, requestHash, result, blockRelayProxy
     let lastAccount0Balance, lastAccount1Balance
 
     before(async () => {
@@ -33,8 +34,9 @@ contract("UsingWitnet", accounts => {
         from: accounts[0],
       })
       wrb = await WRB.new(blockRelayProxy.address, 2)
+      wrbProxy = await WRBProxy.new(wrb.address)
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
-      clientContract = await UsingWitnetTestHelper.new(wrb.address)
+      clientContract = await UsingWitnetTestHelper.new(wrbProxy.address)
       lastAccount0Balance = await web3.eth.getBalance(accounts[0])
       lastAccount1Balance = await web3.eth.getBalance(accounts[1])
     })

@@ -25,6 +25,15 @@ interface WitnetRequestsBoardInterface {
     external
     payable;
 
+  /// @dev Retrieves the DR hash of the id from the WRB.
+  /// @param _id The unique identifier of the data request.
+  /// @return The hash of the DR
+  function readDrHash (uint256 _id)
+    external
+    view
+    returns(uint256);
+
+
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR

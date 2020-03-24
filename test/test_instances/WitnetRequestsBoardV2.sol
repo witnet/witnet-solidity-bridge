@@ -94,6 +94,13 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
     requests[_id].tallyReward += _tallyReward;
   }
 
+  /// @dev Retrieves hash of the data request transaction in Witnet
+  /// @param _id The unique identifier of the data request.
+  /// @return The hash of the DataRequest transaction in Witnet
+  function readDrHash (uint256 _id) external view returns(uint256) {
+    return requests[_id].drHash;
+  }
+
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR

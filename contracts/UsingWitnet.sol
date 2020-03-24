@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./Request.sol";
 import "./Witnet.sol";
-import "./WitnetRequestsBoard.sol";
+import "./WitnetRequestsBoardProxy.sol";
 
 
 /**
@@ -13,14 +13,14 @@ import "./WitnetRequestsBoard.sol";
 contract UsingWitnet {
   using Witnet for Witnet.Result;
 
-  WitnetRequestsBoard wrb;
+  WitnetRequestsBoardProxy wrb;
 
   /**
   * @notice Include an address to specify the WitnetRequestsBoard
   * @param _wrb WitnetRequestsBoard address
   */
   constructor (address _wrb) public {
-    wrb = WitnetRequestsBoard(_wrb);
+    wrb = WitnetRequestsBoardProxy(_wrb);
   }
 
   // Provides a convenient way for client contracts extending this to block the execution of the main logic of the
@@ -51,7 +51,7 @@ contract UsingWitnet {
   */
   function witnetCheckRequestAccepted(uint256 _id) internal view returns (bool) {
     // Find the request in the
-    (,,,,,uint256 drHash,) = wrb.requests(_id);
+    uint256 drHash = wrb.readDrHash(_id);
     // If the hash of the data request transaction in Witnet is not the default, then it means that inclusion of the
     // request has been proven to the WRB.
     return drHash != 0;

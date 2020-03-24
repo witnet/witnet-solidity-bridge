@@ -101,7 +101,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       // Read the result
       // const result = await wrbProxy.readResult.call(id1)
       await wrbProxy.readResult.call(id1)
-      // assert.equal("hello", result)
+      // assert.equal("hello", web3.utils.bytesToHex(result))
     })
 
     it("should upgrade the wrb address", async () => {

@@ -51,7 +51,7 @@ contract WitnetRequestsBoardProxy {
     uint256 n = controllers.length;
     uint256 offset = controllers[n - 1].offset;
     //Update the currentLastId with the id in the controller plus the offSet
-    currentLastId = witnetRequestsBoardInstance.postDataRequest(_dr, _tallyReward) + offset;
+    currentLastId = witnetRequestsBoardInstance.postDataRequest.value(msg.value)(_dr, _tallyReward) + offset;
     return currentLastId;
   }
 
@@ -65,7 +65,26 @@ contract WitnetRequestsBoardProxy {
     address wrbAddress;
     uint256 offSetWrb;
     (wrbAddress, offSetWrb) = getController(_id);
-    return witnetRequestsBoardInstance.upgradeDataRequest(_id - offSetWrb, _tallyReward);
+    return witnetRequestsBoardInstance.upgradeDataRequest.value(msg.value)(_id - offSetWrb, _tallyReward);
+  }
+
+  /// @dev Retrieves the DR hash of the id from the WRB.
+  /// @param _id The unique identifier of the data request.
+  /// @return The hash of the DR
+  function readDrHash (uint256 _id)
+    external
+    view
+    returns(uint256)
+  {
+    // Get the address and the offset of the corresponding to id
+    address wrbAddress;
+    uint256 offsetWrb;
+    (wrbAddress, offsetWrb) = getController(_id);
+    // Return the result of the DR readed in the corresponding Controller with its own id
+    WitnetRequestsBoardInterface wrbWithDrHash;
+    wrbWithDrHash = WitnetRequestsBoardInterface(wrbAddress);
+    uint256 drHash = wrbWithDrHash.readDrHash(_id - offsetWrb);
+    return drHash;
   }
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
@@ -73,6 +92,7 @@ contract WitnetRequestsBoardProxy {
   /// @return The result of the DR
   function readResult (uint256 _id)
     external
+    view
     returns(bytes memory)
   {
     // Get the address and the offset of the corresponding to id
@@ -102,7 +122,7 @@ contract WitnetRequestsBoardProxy {
 
   /// @notice Gets the controller from an Id
   /// @param _id id of a Data Request from which we get the controller
-  function getController(uint256 _id) internal returns(address _controllerAddress, uint256 _offset) {
+  function getController(uint256 _id) internal view returns(address _controllerAddress, uint256 _offset) {
     uint256 n = controllers.length;
     // If the id is bigger than the lastId of the previous Controller, read the result in the current Controller
     for (uint i = n; i > 0; i--) {

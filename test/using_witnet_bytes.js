@@ -1,4 +1,5 @@
 const WRB = artifacts.require("WitnetRequestsBoard")
+const WRBProxy = artifacts.require("WitnetRequestsBoardProxy")
 const MockBlockRelay = artifacts.require("MockBlockRelay")
 const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const UsingWitnetBytesTestHelper = artifacts.require("UsingWitnetBytesTestHelper")
@@ -10,6 +11,7 @@ contract("UsingWitnetBytes", accounts => {
   describe("UsingWitnetBytes test suite", () => {
     let usingWitnet
     let wrb
+    let wrbProxy
     let blockRelay
     let blockRelayProxy
     before(async () => {
@@ -20,7 +22,8 @@ contract("UsingWitnetBytes", accounts => {
         from: accounts[0],
       })
       wrb = await WRB.new(blockRelayProxy.address, 2)
-      usingWitnet = await UsingWitnetBytesTestHelper.new(wrb.address)
+      wrbProxy = await WRBProxy.new(wrb.address)
+      usingWitnet = await UsingWitnetBytesTestHelper.new(wrbProxy.address)
     })
 
     it("create a data request and post it in the wrb (call)", async () => {
@@ -28,7 +31,7 @@ contract("UsingWitnetBytes", accounts => {
       const expectedId = "0x1"
       const id0 = await usingWitnet._witnetPostDataRequest.call(web3.utils.utf8ToHex(stringDr), 30, {
         from: accounts[0],
-        value: 100,
+        value: 1000,
       })
       assert.equal(web3.utils.toHex(id0), expectedId)
     })
