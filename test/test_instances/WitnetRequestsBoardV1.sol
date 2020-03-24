@@ -8,10 +8,11 @@ import "../../contracts/WitnetRequestsBoardInterface.sol";
 
 
 /**
- * @title Witnet Requests Board
+ * @title Witnet Requests Board Version 1
  * @notice Contract to bridge requests to Witnet
  * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network
   * The result of the requests will be posted back to this contract by the bridge nodes too.
+  * The contract has been created for testing purposes
  * @author Witnet Foundation
  */
 contract WitnetRequestsBoardV1 is WitnetRequestsBoardInterface {

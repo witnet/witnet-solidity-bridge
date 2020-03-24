@@ -8,10 +8,11 @@ import "../../contracts/WitnetRequestsBoardInterface.sol";
 
 
 /**
- * @title Witnet Requests Board
+ * @title Witnet Requests Board Version 2
  * @notice Contract to bridge requests to Witnet
  * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network
   * The result of the requests will be posted back to this contract by the bridge nodes too.
+  * The contract has been created for testing purposes.
  * @author Witnet Foundation
  */
 contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
@@ -75,7 +76,7 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
     requests[_id].dr = _dr;
     requests[_id].inclusionReward = msg.value - _tallyReward;
     requests[_id].tallyReward = _tallyReward;
-    requests[_id].result = "";
+    requests[_id].result = "hello";
     requests[_id].timestamp = 0;
     requests[_id].drHash = 0;
     requests[_id].pkhClaim = address(0);
@@ -111,7 +112,7 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
    /// @dev Verifies if the contract is upgradable
   /// @return true if the contract upgradable
   function isUpgradable(address _address) external view returns(bool) {
-    return false;
+    return true;
   }
 
 }

@@ -16,12 +16,12 @@ contract WitnetRequestsBoardProxy {
   WitnetRequestsBoardInterface witnetRequestsBoardInstance;
   // Last id of the WRB controller
   uint256 currentLastId;
-
   // Struct if the information of each controller
   struct ControllerInfo {
+    // Address of the Controller
     address controllerAddress;
+    // The lastId of the previous Controller
     uint256 lastId;
-    uint256 offset;
   }
 
   // Array with the controllers that have been used in the Proxy
@@ -34,7 +34,7 @@ contract WitnetRequestsBoardProxy {
 
   constructor(address _witnetRequestsBoardAddress) public {
     // Initialize the first epoch pointing to the first controller
-    controllers.push(ControllerInfo({controllerAddress: _witnetRequestsBoardAddress, lastId: 0, offset: 0}));
+    controllers.push(ControllerInfo({controllerAddress: _witnetRequestsBoardAddress, lastId: 0}));
     witnetRequestsBoardAddress = _witnetRequestsBoardAddress;
     witnetRequestsBoardInstance = WitnetRequestsBoardInterface(_witnetRequestsBoardAddress);
   }
@@ -49,8 +49,8 @@ contract WitnetRequestsBoardProxy {
     returns(uint256)
   {
     uint256 n = controllers.length;
-    uint256 offset = controllers[n - 1].offset;
-    //Update the currentLastId with the id in the controller plus the offSet
+    uint256 offset = controllers[n - 1].lastId;
+    // Update the currentLastId with the id in the controller plus the offSet
     currentLastId = witnetRequestsBoardInstance.postDataRequest.value(msg.value)(_dr, _tallyReward) + offset;
     return currentLastId;
   }
@@ -63,9 +63,9 @@ contract WitnetRequestsBoardProxy {
     payable
   {
     address wrbAddress;
-    uint256 offSetWrb;
-    (wrbAddress, offSetWrb) = getController(_id);
-    return witnetRequestsBoardInstance.upgradeDataRequest.value(msg.value)(_id - offSetWrb, _tallyReward);
+    uint256 wrbOffset;
+    (wrbAddress, wrbOffset) = getController(_id);
+    return witnetRequestsBoardInstance.upgradeDataRequest.value(msg.value)(_id - wrbOffset, _tallyReward);
   }
 
   /// @dev Retrieves the DR hash of the id from the WRB.
@@ -99,7 +99,7 @@ contract WitnetRequestsBoardProxy {
     address wrbAddress;
     uint256 offSetWrb;
     (wrbAddress, offSetWrb) = getController(_id);
-    // Return the result of the DR readed in the corresponding Controller with its own id
+    // Return the result of the DR in the corresponding Controller with its own id
     WitnetRequestsBoardInterface wrbWithResult;
     wrbWithResult = WitnetRequestsBoardInterface(wrbAddress);
     return wrbWithResult.readResult(_id - offSetWrb);
@@ -113,8 +113,7 @@ contract WitnetRequestsBoardProxy {
     // Set the offSet for the next WRB
     uint256 n = controllers.length;
     // Map the currentLastId to the corresponding witnetRequestsBoardAddress and add it to controllers
-    // controllers.push(ControllerInfo({controllerAddress: _newAddress, lastId: currentLastId, offset: controllers[n - 1].lastId}));
-    controllers.push(ControllerInfo({controllerAddress: witnetRequestsBoardAddress, lastId: currentLastId, offset: controllers[n - 1].lastId}));
+    controllers.push(ControllerInfo({controllerAddress: _newAddress, lastId: currentLastId}));
     // Upgrade the WRB
     witnetRequestsBoardAddress = _newAddress;
     witnetRequestsBoardInstance = WitnetRequestsBoardInterface(_newAddress);
@@ -124,10 +123,10 @@ contract WitnetRequestsBoardProxy {
   /// @param _id id of a Data Request from which we get the controller
   function getController(uint256 _id) internal view returns(address _controllerAddress, uint256 _offset) {
     uint256 n = controllers.length;
-    // If the id is bigger than the lastId of the previous Controller, read the result in the current Controller
+    // If the id is bigger than the lastId of a Controller, read the result in that Controller
     for (uint i = n; i > 0; i--) {
-      if (_id >= controllers[i-1].lastId) {
-        return (controllers[i-1].controllerAddress, controllers[i-1].offset);
+      if (_id > controllers[i - 1].lastId) {
+        return (controllers[i - 1].controllerAddress, controllers[i - 1].lastId);
       }
     }
   }
