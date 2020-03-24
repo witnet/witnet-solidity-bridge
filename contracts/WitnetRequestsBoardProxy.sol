@@ -93,7 +93,8 @@ contract WitnetRequestsBoardProxy {
     // Set the offSet for the next WRB
     uint256 n = controllers.length;
     // Map the currentLastId to the corresponding witnetRequestsBoardAddress and add it to controllers
-    controllers.push(ControllerInfo({controllerAddress: _newAddress, lastId: currentLastId, offset: controllers[n - 1].lastId}));
+    // controllers.push(ControllerInfo({controllerAddress: _newAddress, lastId: currentLastId, offset: controllers[n - 1].lastId}));
+    controllers.push(ControllerInfo({controllerAddress: witnetRequestsBoardAddress, lastId: currentLastId, offset: controllers[n - 1].lastId}));
     // Upgrade the WRB
     witnetRequestsBoardAddress = _newAddress;
     witnetRequestsBoardInstance = WitnetRequestsBoardInterface(_newAddress);

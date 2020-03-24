@@ -13,9 +13,7 @@ contract WrbProxyTestHelper is WitnetRequestsBoardProxy {
 
   constructor (address _witnetRequestsBoardAddress) WitnetRequestsBoardProxy(_witnetRequestsBoardAddress) public {}
 
-  function getLastId() public returns(uint256) {
-    // uint256 n = lastIdsControllers.length;
-    // return lastIdsControllers[n - 1];
+  function updateCurrentLastId() public view returns(uint256) {
     return currentLastId;
   }
 
@@ -25,6 +23,17 @@ contract WrbProxyTestHelper is WitnetRequestsBoardProxy {
     } else {
       false;
     }
+  }
+
+  function getWrbAddress() public view returns(address) {
+    return witnetRequestsBoardAddress;
+  }
+
+  function getControllerAddress(uint256 _id) public returns(address) {
+    address wrb;
+    uint256 offset;
+    (wrb, offset) = getController(_id);
+    return wrb;
   }
 
 //   function _witnetUpgradeDataRequest(uint256 _id, uint256 _tallyReward) public payable {
