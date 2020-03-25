@@ -6,3 +6,5 @@ coverage.json
 .env
 .idea
 .vscode
+
+yarn.lock
