@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.6.4;
 
 import "truffle/Assert.sol";
 import "../contracts/BufferLib.sol";
@@ -10,7 +10,7 @@ contract TestBuffer {
 
   event Log(string _topic, uint256 _value);
 
-  function testReadUint8() public {
+  function testReadUint8() external {
     uint8 expected = 31;
     bytes memory data = abi.encodePacked(expected);
     BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
@@ -19,7 +19,7 @@ contract TestBuffer {
     Assert.equal(uint(actual), uint(expected), "Read Uint8 from a Buffer");
   }
 
-  function testReadUint16() public {
+  function testReadUint16() external {
     uint16 expected = 31415;
     bytes memory data = abi.encodePacked(expected);
     BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
@@ -28,7 +28,7 @@ contract TestBuffer {
     Assert.equal(uint(actual), uint(expected), "Read Uint16 from a Buffer");
   }
 
-  function testReadUint32() public {
+  function testReadUint32() external {
     uint32 expected = 3141592653;
     bytes memory data = abi.encodePacked(expected);
     BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
@@ -37,7 +37,7 @@ contract TestBuffer {
     Assert.equal(uint(actual), uint(expected), "Read Uint32 from a Buffer");
   }
 
-  function testReadUint64() public {
+  function testReadUint64() external {
     uint64 expected = 3141592653589793238;
     bytes memory data = abi.encodePacked(expected);
     BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
@@ -46,7 +46,7 @@ contract TestBuffer {
     Assert.equal(uint(actual), uint(expected), "Read Uint64 from a Buffer");
   }
 
-  function testReadUint128() public {
+  function testReadUint128() external {
     uint128 expected = 314159265358979323846264338327950288419;
     bytes memory data = abi.encodePacked(expected);
     BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
@@ -55,7 +55,7 @@ contract TestBuffer {
     Assert.equal(uint(actual), uint(expected), "Read Uint128 from a Buffer");
   }
 
-  function testReadUint256() public {
+  function testReadUint256() external {
     uint256 expected = 31415926535897932384626433832795028841971693993751058209749445923078164062862;
     bytes memory data = abi.encodePacked(expected);
     BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
@@ -64,7 +64,7 @@ contract TestBuffer {
     Assert.equal(uint(actual), uint(expected), "Read Uint64 from a Buffer");
   }
 
-  function testMultipleReadHead() public {
+  function testMultipleReadHead() external {
     uint8 small = 31;
     uint64 big = 3141592653589793238;
     bytes memory data = abi.encodePacked(small, big);

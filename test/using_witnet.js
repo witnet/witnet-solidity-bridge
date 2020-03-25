@@ -53,7 +53,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should post a Witnet request into the wrb", async () => {
-      requestId = await returnData(clientContract._witnetPostRequest(request.address, requestReward, resultReward, {
+      requestId = await returnData(clientContract._witnetPostRequest(request.address, resultReward, {
         from: accounts[0],
         value: requestReward + resultReward,
       }))
@@ -254,7 +254,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should pass the data request to the wrb", async () => {
-      requestId = await returnData(clientContract._witnetPostRequest(request.address, requestReward, resultReward, {
+      requestId = await returnData(clientContract._witnetPostRequest(request.address, resultReward, {
         from: accounts[0],
         value: requestReward + resultReward,
       }))

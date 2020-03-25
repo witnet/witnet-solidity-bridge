@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.6.4;
 
 import "truffle/Assert.sol";
 import "../contracts/ActiveBridgeSetLib.sol";
@@ -8,29 +8,29 @@ contract TestActiveBridgeSet {
 
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
 
-  uint8 constant CLAIM_BLOCK_PERIOD = 8;
-  uint16 constant ACTIVITY_LENGTH = 100;
+  uint8 constant private CLAIM_BLOCK_PERIOD = 8;
+  uint16 constant private ACTIVITY_LENGTH = 100;
 
-  address[] addresses = [
+  address[] private addresses = [
     address(0x01),
     address(0x02),
     address(0x03),
     address(0x04)
   ];
 
-  ActiveBridgeSetLib.ActiveBridgeSet abs;
+  ActiveBridgeSetLib.ActiveBridgeSet private abs;
 
-  function beforeEach() public {
+  function beforeEach() external {
     abs.lastBlockNumber = 0;
     abs.updateActivity(CLAIM_BLOCK_PERIOD * ACTIVITY_LENGTH);
     abs.lastBlockNumber = 0;
   }
 
-  function testGetABSEmpty() public {
+  function testGetABSEmpty() external {
     verifyABSStatus(0, 0, 0);
   }
 
-  function testPushActivityNextEpoch() public {
+  function testPushActivityNextEpoch() external {
     abs.pushActivity(msg.sender, 0);
     verifyABSStatus(0, 1, 0);
 
@@ -38,7 +38,7 @@ contract TestActiveBridgeSet {
     verifyABSStatus(1, 1, CLAIM_BLOCK_PERIOD);
   }
 
-  function testPushActivityTwice() public {
+  function testPushActivityTwice() external {
     abs.pushActivity(msg.sender, 0);
     verifyABSStatus(0, 1, 0);
     verifyIdentityCount(msg.sender, 1);
@@ -56,7 +56,7 @@ contract TestActiveBridgeSet {
     verifyIdentityCount(msg.sender, 3);
   }
 
-  function testPushActivityOverflow() public {
+  function testPushActivityOverflow() external {
     abs.pushActivity(msg.sender, 0);
     verifyABSStatus(0, 1, 0);
     verifyIdentityCount(msg.sender, 1);
@@ -70,7 +70,7 @@ contract TestActiveBridgeSet {
     verifyIdentityCount(msg.sender, 1);
   }
 
-  function testPushActivityMultipleIdentities() public {
+  function testPushActivityMultipleIdentities() external {
     abs.pushActivity(addresses[0], 0);
     abs.pushActivity(addresses[1], 0);
     verifyABSStatus(0, 2, 0);
@@ -104,7 +104,7 @@ contract TestActiveBridgeSet {
     verifyIdentityCount(addresses[3], 2);
   }
 
-  function testUpdateActivity() public {
+  function testUpdateActivity() external {
     abs.pushActivity(addresses[0], 0);
     verifyABSStatus(0, 1, 0);
 

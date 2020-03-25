@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.6.4;
 
 import "../../contracts/WitnetRequestsBoard.sol";
 
@@ -12,23 +12,18 @@ import "../../contracts/WitnetRequestsBoard.sol";
 
 
 contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
-  WitnetRequestsBoard wrb;
-  //uint256 blockHash;
-  // epoch of the last block
-  //uint256 epoch;
-  uint256 blockHash;
-  uint256 epoch;
 
-  constructor (
-    address _blockRelayAddress,
-    uint8 _repFactor)
-  WitnetRequestsBoard(_blockRelayAddress, _repFactor) public { }
+  WitnetRequestsBoard private wrb;
+  uint256 private blockHash;
+  uint256 private epoch;
 
-  modifier vrfValid(
+  constructor(address _blockRelayAddress, uint8 _repFactor) WitnetRequestsBoard(_blockRelayAddress, _repFactor) public { }
+
+  modifier vrfValid (
     uint256[4] memory _poe,
     uint256[2] memory _publicKey,
     uint256[2] memory _uPoint,
-    uint256[4] memory _vPointHelpers) {
+    uint256[4] memory _vPointHelpers) override {
     require(
       true,
       "Not a valid VRF");
@@ -36,11 +31,11 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
   }
 
   function _verifyPoe(
-    uint256[4] memory _poe,
-    uint256[2] memory _publicKey,
-    uint256[2] memory _uPoint,
-    uint256[4] memory _vPointHelpers)
-  public view returns(bool)
+    uint256[4] calldata _poe,
+    uint256[2] calldata _publicKey,
+    uint256[2] calldata _uPoint,
+    uint256[4] calldata _vPointHelpers)
+  external view returns(bool)
   {
     return verifyPoe(
       _poe,
@@ -50,11 +45,11 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
   }
 
   function _verifySig(
-    bytes memory _message,
-    uint256[2] memory _publicKey,
-    bytes memory _addrSignature
+    bytes calldata _message,
+    uint256[2] calldata _publicKey,
+    bytes calldata _addrSignature
   )
-  public returns(bool)
+  external returns(bool)
   {
     return verifySig(
       _message,
@@ -62,18 +57,14 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
       _addrSignature);
   }
 
-  function getLastBeacon()
-    public
-    view
-  returns(bytes memory)
-  {
-    return abi.encodePacked(blockHash, epoch);
-  }
-
   function setActiveIdentities(uint32 _abs)
-    public
+    external
   {
     abs.activeIdentities = _abs;
+  }
+
+  function getLastBeacon() public view override returns(bytes memory) {
+    return abi.encodePacked(blockHash, epoch);
   }
 
 }

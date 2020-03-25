@@ -1,6 +1,5 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.6.4;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "vrf-solidity/contracts/VRF.sol";
 import "../../contracts/ActiveBridgeSetLib.sol";
 import "witnet-ethereum-block-relay/contracts/BlockRelayProxy.sol";
@@ -17,7 +16,6 @@ import "../../contracts/WitnetRequestsBoardInterface.sol";
  */
 contract WitnetRequestsBoardV3 is WitnetRequestsBoardInterface {
 
-  using SafeMath for uint256;
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
 
   struct DataRequest {
@@ -67,6 +65,7 @@ contract WitnetRequestsBoardV3 is WitnetRequestsBoardInterface {
   function postDataRequest(bytes calldata _dr, uint256 _tallyReward)
     external
     payable
+    override
     returns(uint256)
   {
     uint256 _id = requests.length;
@@ -90,6 +89,7 @@ contract WitnetRequestsBoardV3 is WitnetRequestsBoardInterface {
   function upgradeDataRequest(uint256 _id, uint256 _tallyReward)
     external
     payable
+    override
   {
     requests[_id].inclusionReward += msg.value - _tallyReward;
     requests[_id].tallyReward += _tallyReward;
@@ -98,20 +98,20 @@ contract WitnetRequestsBoardV3 is WitnetRequestsBoardInterface {
   /// @dev Retrieves hash of the data request transaction in Witnet
   /// @param _id The unique identifier of the data request.
   /// @return The hash of the DataRequest transaction in Witnet
-  function readDrHash (uint256 _id) external view returns(uint256) {
+  function readDrHash (uint256 _id) external view override returns(uint256) {
     return requests[_id].drHash;
   }
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
-  function readResult (uint256 _id) external view returns(bytes memory) {
+  function readResult (uint256 _id) external view override returns(bytes memory) {
     return requests[_id].result;
   }
 
    /// @dev Verifies if the contract is upgradable
   /// @return true if the contract upgradable
-  function isUpgradable(address _address) external view returns(bool) {
+  function isUpgradable(address _address) external view override returns(bool) {
     return false;
   }
 

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.6.4;
 pragma experimental ABIEncoderV2;
 
 import "truffle/Assert.sol";
@@ -10,19 +10,19 @@ contract WitnetTest {
 
   // Test the `Witnet.stageNames` pure method, which gives strings with the names for the different Witnet request
   // stages
-  function testStageNames() public {
+  function testStageNames() external {
     Assert.equal(Witnet.stageName(0), "retrieval", "Stage name for stage #1 should be \"retrieval\"");
     Assert.equal(Witnet.stageName(1), "aggregation", "Stage name for stage #1 should be \"aggregation\"");
     Assert.equal(Witnet.stageName(2), "tally", "Stage name for stage #1 should be \"tally\"");
   }
 
   // Check that all the RADON errors are supported
-  function testErrorCodesSize() public {
+  function testErrorCodesSize() external {
     Assert.equal(uint(Witnet.ErrorCodes.Size), uint(67), "Not every RADON error is supported in `Witnet.ErrorCodes`");
   }
 
   // Test decoding of `RadonError` error codes
-  function testErrorCodes() public {
+  function testErrorCodes() external {
     Witnet.ErrorCodes errorCode0x00 = Witnet.resultFromCborBytes(hex"D8278100").asErrorCode();
     Witnet.ErrorCodes errorCode0x01 = Witnet.resultFromCborBytes(hex"D8278101").asErrorCode();
     Witnet.ErrorCodes errorCode0x02 = Witnet.resultFromCborBytes(hex"D8278102").asErrorCode();
@@ -98,7 +98,7 @@ contract WitnetTest {
   }
 
   // Test decoding of `RadonError` error messages
-  function testErrorMessages() public {
+  function testErrorMessages() external {
     (, string memory errorMessage0x00) = Witnet.resultFromCborBytes(hex"D8278100").asErrorMessage();
     (, string memory errorMessage0x01) = Witnet.resultFromCborBytes(hex"D827820102").asErrorMessage();
     (, string memory errorMessage0x02) = Witnet.resultFromCborBytes(hex"D827820203").asErrorMessage();
