@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.3 <0.7.0;
 
 import "./WitnetRequestsBoardProxy.sol";
 
@@ -10,7 +10,7 @@ import "./WitnetRequestsBoardProxy.sol";
  */
 contract UsingWitnetBytes {
 
-  WitnetRequestsBoardProxy wrb;
+  WitnetRequestsBoardProxy private wrb;
 
   /**
   * @notice Include an address to specify the WitnetRequestsBoard
@@ -27,7 +27,7 @@ contract UsingWitnetBytes {
   * @param _tallyReward Reward specified for the user which post the Data Request result
   * @return Identifier for the Data Request included in the WitnetRequestsBoard
   */
-  function witnetPostRequest(bytes memory _requestBytes, uint256 _tallyReward) internal returns(uint256 id) {
+  function witnetPostRequest(bytes memory _requestBytes, uint256 _tallyReward) internal returns(uint256) {
     return wrb.postDataRequest.value(msg.value)(_requestBytes, _tallyReward);
   }
 

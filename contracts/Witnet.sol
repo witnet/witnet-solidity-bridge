@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.3 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./BufferLib.sol";
@@ -115,16 +115,16 @@ library Witnet {
   Result impl's
   */
 
+  function resultFromCborBytes(bytes calldata _cborBytes) external pure returns(Result memory) {
+    CBOR.Value memory cborValue = CBOR.valueFromBytes(_cborBytes);
+    return resultFromCborValue(cborValue);
+  }
+
   function resultFromCborValue(CBOR.Value memory _cborValue) public pure returns(Result memory) {
     // Witnet uses CBOR tag 39 to represent RADON error code identifiers.
     // [CBOR tag 39] Identifiers for CBOR: https://github.com/lucas-clemente/cbor-specs/blob/master/id.md
     bool success = _cborValue.tag != 39;
     return Result(success, _cborValue);
-  }
-
-  function resultFromCborBytes(bytes memory _cborBytes) public pure returns(Result memory) {
-    CBOR.Value memory cborValue = CBOR.valueFromBytes(_cborBytes);
-    return resultFromCborValue(cborValue);
   }
 
   /**

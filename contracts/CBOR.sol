@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity >=0.5.3 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./BufferLib.sol";
@@ -11,14 +11,14 @@ import "./BufferLib.sol";
 library CBOR {
   using BufferLib for BufferLib.Buffer;
 
-  uint64 constant UINT64_MAX = ~uint64(0);
+  uint64 constant private UINT64_MAX = ~uint64(0);
 
   struct Value {
     BufferLib.Buffer buffer;
     uint8 initialByte;
     uint8 majorType;
     uint8 additionalInformation;
-    uint64 length;
+    uint64 len;
     uint64 tag;
   }
 
@@ -28,14 +28,14 @@ library CBOR {
    * @return The value represented by the input, as a `bytes` value
    */
   function decodeBytes(Value memory _cborValue) public pure returns(bytes memory) {
-    _cborValue.length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    if (_cborValue.length == UINT64_MAX) {
+    _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
+    if (_cborValue.len == UINT64_MAX) {
       bytes memory bytesData;
       bool done;
       uint8 limit = 0;
       while (!done && limit < 2) {
         uint64 itemLength = readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType);
-        if (itemLength >= 0) {
+        if (itemLength < UINT64_MAX) {
           bytesData = abi.encodePacked(bytesData, _cborValue.buffer.read(itemLength));
         } else {
           done = true;
@@ -44,7 +44,7 @@ library CBOR {
       }
       return bytesData;
     } else {
-      return _cborValue.buffer.read(_cborValue.length);
+      return _cborValue.buffer.read(_cborValue.len);
     }
   }
 
@@ -126,13 +126,13 @@ library CBOR {
    * @return The value represented by the input, as a `string` value
    */
   function decodeString(Value memory _cborValue) public pure returns(string memory) {
-    _cborValue.length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    if (_cborValue.length == UINT64_MAX) {
+    _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
+    if (_cborValue.len == UINT64_MAX) {
       bytes memory textData;
       bool done;
       while (!done) {
         uint64 itemLength = readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType);
-        if (itemLength >= 0) {
+        if (itemLength < UINT64_MAX) {
           textData = abi.encodePacked(textData, readText(_cborValue.buffer, itemLength / 4));
         } else {
           done = true;
@@ -140,7 +140,7 @@ library CBOR {
       }
       return string(textData);
     } else {
-      return string(readText(_cborValue.buffer, _cborValue.length));
+      return string(readText(_cborValue.buffer, _cborValue.len));
     }
   }
 
@@ -236,7 +236,7 @@ library CBOR {
       }
     }
 
-    require(majorType >= 0 && majorType <= 7, "Invalid CBOR major type");
+    require(majorType <= 7, "Invalid CBOR major type");
 
     return CBOR.Value(
       _buffer,

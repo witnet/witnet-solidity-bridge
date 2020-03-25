@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.6.4;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "vrf-solidity/contracts/VRF.sol";
@@ -11,12 +11,14 @@ import "./WitnetRequestsBoardInterface.sol";
  * @title Witnet Requests Board
  * @notice Contract to bridge requests to Witnet
  * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network
-  * The result of the requests will be posted back to this contract by the bridge nodes too.
+ * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
 contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
-  using SafeMath for uint256;
+  uint256 public constant CLAIM_EXPIRATION = 13;
+
+  // using SafeMath for uint256;
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
 
   struct DataRequest {
@@ -29,16 +31,16 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     address payable pkhClaim;
   }
 
-  BlockRelayProxy blockRelay;
+  BlockRelayProxy public blockRelay;
 
   DataRequest[] public requests;
 
-  ActiveBridgeSetLib.ActiveBridgeSet abs;
+  ActiveBridgeSetLib.ActiveBridgeSet public abs;
 
   address witnet;
 
   // Replication factor for Active Bridge Set identities
-  uint8 repFactor;
+  uint8 public repFactor;
 
   // Event emitted when a new DR is posted
   event PostedRequest(address indexed _from, uint256 _id);
@@ -100,7 +102,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256[4] memory _poe,
     uint256[2] memory _publicKey,
     uint256[2] memory _uPoint,
-    uint256[4] memory _vPointHelpers) {
+    uint256[4] memory _vPointHelpers) virtual {
     require(
       VRF.fastVerify(
         _publicKey,
@@ -130,6 +132,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     external
     payable
     payingEnough(msg.value, _tallyReward)
+    override
     returns(uint256)
   {
     uint256 _id = requests.length;
@@ -137,7 +140,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     requests.push(dr);
 
     requests[_id].dr = _dr;
-    requests[_id].inclusionReward = msg.value - _tallyReward;
+    requests[_id].inclusionReward = SafeMath.sub(msg.value, _tallyReward);
     requests[_id].tallyReward = _tallyReward;
     requests[_id].result = "";
     requests[_id].timestamp = 0;
@@ -154,19 +157,21 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     external
     payable
     payingEnough(msg.value, _tallyReward)
+    override
   {
-    requests[_id].inclusionReward += msg.value - _tallyReward;
-    requests[_id].tallyReward += _tallyReward;
+    requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, SafeMath.sub(msg.value, _tallyReward));
+    requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
   }
 
   /// @dev Checks if the data requests from a list are claimable or not.
   /// @param _ids The list of data request identifiers to be checked.
   /// @return An array of booleans indicating if data request are claimable or not.
   function checkDataRequestsClaimability(uint256[] calldata _ids) external view returns (bool[] memory) {
-    bool[] memory validIds = new bool[](_ids.length);
-    for (uint i = 0; i < _ids.length; i++) {
+    uint256 idsLength = _ids.length;
+    bool[] memory validIds = new bool[](idsLength);
+    for (uint i = 0; i < idsLength; i++) {
       uint256 index = _ids[i];
-      validIds[i] = (requests[index].timestamp == 0 || block.number - requests[index].timestamp > 13) &&
+      validIds[i] = (requests[index].timestamp == 0 || block.number - requests[index].timestamp > CLAIM_EXPIRATION) &&
         requests[index].drHash == 0 &&
         requests[index].result.length == 0;
     }
@@ -192,20 +197,18 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
  {
     uint256 drOutputHash = uint256(sha256(requests[_id].dr));
     uint256 drHash = uint256(sha256(abi.encodePacked(drOutputHash, _poi[0])));
-    if (blockRelay.verifyDrPoi(
+    require(
+      blockRelay.verifyDrPoi(
       _poi,
       _blockHash,
       _epoch,
       _index,
-      drOutputHash)) {
-      requests[_id].drHash = drHash;
-      requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
-      // Push requests[_id].pkhClaim to abs
-      abs.pushActivity(requests[_id].pkhClaim, block.number);
-      emit IncludedRequest(msg.sender, _id);
-    } else {
-      revert("Invalid PoI");
-    }
+      drOutputHash), "Invalid PoI");
+    requests[_id].drHash = drHash;
+    requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
+    // Push requests[_id].pkhClaim to abs
+    abs.pushActivity(requests[_id].pkhClaim, block.number);
+    emit IncludedRequest(msg.sender, _id);
   }
 
   /// @dev Reports the result of a data request in Witnet.
@@ -229,20 +232,18 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
  {
     // this should leave it ready for PoI
     uint256 resHash = uint256(sha256(abi.encodePacked(requests[_id].drHash, _result)));
-    if (blockRelay.verifyTallyPoi(
+    require(
+      blockRelay.verifyTallyPoi(
       _poi,
       _blockHash,
       _epoch,
       _index,
-      resHash)){
-      requests[_id].result = _result;
-      msg.sender.transfer(requests[_id].tallyReward);
+      resHash), "Invalid PoI");
+    requests[_id].result = _result;
+    msg.sender.transfer(requests[_id].tallyReward);
       // Push msg.sender to abs
-      abs.pushActivity(msg.sender, block.number);
-      emit PostedResult(msg.sender, _id);
-    } else {
-      revert("Invalid PoI");
-    }
+    abs.pushActivity(msg.sender, block.number);
+    emit PostedResult(msg.sender, _id);
   }
 
   /// @dev Retrieves the bytes of the serialization of one data request from the WRB.
@@ -255,14 +256,14 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
-  function readResult (uint256 _id) external view returns(bytes memory) {
+  function readResult (uint256 _id) external view override returns(bytes memory) {
     return requests[_id].result;
   }
 
   /// @dev Retrieves hash of the data request transaction in Witnet
   /// @param _id The unique identifier of the data request.
   /// @return The hash of the DataRequest transaction in Witnet
-  function readDrHash (uint256 _id) external view returns(uint256) {
+  function readDrHash (uint256 _id) external view override returns(uint256) {
     return requests[_id].drHash;
   }
 
@@ -323,7 +324,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   /// @dev Verifies if the contract is upgradable
   /// @return true if the contract upgradable
-  function isUpgradable(address _address) external view returns(bool) {
+  function isUpgradable(address _address) external view override returns(bool) {
     if (_address == witnet) {
       return true;
     }
@@ -348,25 +349,19 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     returns(bool)
   {
     for (uint i = 0; i < _ids.length; i++) {
-      if ((requests[_ids[i]].timestamp == 0 || block.number - requests[_ids[i]].timestamp > 13) &&
-      requests[_ids[i]].drHash == 0 &&
-      requests[_ids[i]].result.length == 0) {
-        requests[_ids[i]].pkhClaim = msg.sender;
-        requests[_ids[i]].timestamp = block.number;
-      } else {
-        revert("One of the listed data requests was already claimed");
-      }
+      require(
+        dataRequestCanBeClaimed(requests[_ids[i]]),
+        "One of the listed data requests was already claimed"
+      );
+      requests[_ids[i]].pkhClaim = msg.sender;
+      requests[_ids[i]].timestamp = block.number;
     }
     return true;
   }
 
   /// @dev Read the beacon of the last block inserted
   /// @return bytes to be signed by the node as PoE
-  function getLastBeacon()
-    public
-    view
-  returns(bytes memory)
-  {
+  function getLastBeacon() public view virtual returns(bytes memory) {
     return blockRelay.getLastBeacon();
   }
 
@@ -432,6 +427,13 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       v,
       r,
       s) == hashedKey;
+  }
+
+  function dataRequestCanBeClaimed(DataRequest memory _request) private view returns (bool) {
+    return
+      (_request.timestamp == 0 || block.number - _request.timestamp > CLAIM_EXPIRATION) &&
+      _request.drHash == 0 &&
+      _request.result.length == 0;
   }
 
 }

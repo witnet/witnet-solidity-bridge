@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.6.4;
 
 import "./WitnetRequestsBoardInterface.sol";
 
@@ -110,8 +110,6 @@ contract WitnetRequestsBoardProxy {
   function upgradeWitnetRequestsBoard(address _newAddress) public notIdentical(_newAddress) {
     // Require the WRB is upgradable
     require(witnetRequestsBoardInstance.isUpgradable(msg.sender), "The upgrade has been rejected by the current implementation");
-    // Set the offSet for the next WRB
-    uint256 n = controllers.length;
     // Map the currentLastId to the corresponding witnetRequestsBoardAddress and add it to controllers
     controllers.push(ControllerInfo({controllerAddress: _newAddress, lastId: currentLastId}));
     // Upgrade the WRB

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.6.4;
 
 import "../WitnetRequestsBoardInterface.sol";
 
@@ -22,9 +22,9 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     address payable pkhClaim;
   }
 
-  address witnet;
+  address public witnet;
 
-  DataRequest[] requests;
+  DataRequest[] public requests;
 
   constructor () public {
     // Insert an empty request so as to initialize the requests array with length > 0
@@ -40,6 +40,7 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
   function postDataRequest(bytes calldata _dr, uint256 _tallyReward)
     external
     payable
+    override
     returns(uint256)
   {
     uint256 _id = requests.length;
@@ -58,6 +59,7 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
   function upgradeDataRequest(uint256 _id, uint256 _tallyReward)
     external
     payable
+    override
   {
     requests[_id].inclusionReward += msg.value - _tallyReward;
     requests[_id].tallyReward += _tallyReward;
@@ -66,12 +68,7 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Reports the result of a data request in Witnet.
   /// @param _id The unique identifier of the data request.
   /// @param _result The result itself as bytes.
-  function reportResult (
-    uint256 _id,
-    bytes calldata _result
-    )
-    external
- {
+  function reportResult (uint256 _id, bytes calldata _result) external {
     requests[_id].result = _result;
     msg.sender.transfer(requests[_id].tallyReward);
   }
@@ -79,16 +76,23 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR.
-  function readResult (uint256 _id) external view returns(bytes memory) {
+  function readResult (uint256 _id) external view override returns(bytes memory) {
     return requests[_id].result;
   }
 
   /// @dev Verifies if the contract is upgradable
   /// @return true if the contract upgradable
-  function isUpgradable(address _address) external view returns(bool) {
+  function isUpgradable(address _address) external view override returns(bool) {
     if (_address == witnet) {
       return true;
     }
     return false;
+  }
+
+  /// @dev Retrieves hash of the data request transaction in Witnet
+  /// @param _id The unique identifier of the data request.
+  /// @return The hash of the DataRequest transaction in Witnet
+  function readDrHash (uint256 _id) external view override returns(uint256) {
+    return requests[_id].drHash;
   }
 }
