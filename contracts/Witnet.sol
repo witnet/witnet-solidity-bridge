@@ -1,7 +1,6 @@
 pragma solidity >=0.5.3 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "./BufferLib.sol";
 import "./CBOR.sol";
 
 
