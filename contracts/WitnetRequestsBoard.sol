@@ -276,18 +276,6 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     return requests.length;
   }
 
-  /// @dev Get the current ABS count.
-  /// @return number of distinct identities on the ABS.
-  function absCount() external view returns (uint32) {
-    return abs.activeIdentities;
-  }
-
-  /// @dev Checks if an identity is member of the ABS.
-  /// @return true if the identity is part of the ABS.
-  function isABSMember(address _address) external view returns (bool) {
-    return abs.absMembership(_address);
-  }
-
   /// @notice Wrapper around the decodeProof from VRF library.
   /// @dev Decode VRF proof from bytes.
   /// @param _proof The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`.
