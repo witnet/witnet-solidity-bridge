@@ -8,3 +8,4 @@ coverage.json
 .vscode
 
 yarn.lock
+package-lock.json

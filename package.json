@@ -32,7 +32,6 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
-    "openzeppelin-solidity": "OpenZeppelin/openzeppelin-contracts#release-v3.0.0",
     "vrf-solidity": "girazoki/vrf-solidity#chore/versions",
     "witnet-ethereum-block-relay": "girazoki/witnet-ethereum-block-relay#chore/version"
   },

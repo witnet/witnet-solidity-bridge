@@ -1,6 +1,6 @@
 pragma solidity 0.6.4;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./SafeMath.sol";
 import "vrf-solidity/contracts/VRF.sol";
 import "./ActiveBridgeSetLib.sol";
 import "witnet-ethereum-block-relay/contracts/BlockRelayProxy.sol";
