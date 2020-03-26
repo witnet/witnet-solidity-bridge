@@ -2,7 +2,7 @@ pragma solidity >=0.5.3 <0.7.0;
 
 
 /**
- * @title The serialized form of a Witnet data request.
+ * @title The serialized form of a Witnet data request
  */
 contract Request {
   bytes public bytecode;
@@ -14,7 +14,7 @@ contract Request {
   * the WRB should not be considered trustless before a valid Proof-of-Inclusion has been posted for the requests.
   * The hash of the request is computed in the constructor to guarantee consistency. Otherwise there could be a
   * mismatch and a data request could be resolved with the result of another.
-  * @param _bytecode Witnet request in bytes
+  * @param _bytecode Witnet request in bytes.
   */
   constructor(bytes memory _bytecode) public {
     bytecode = _bytecode;

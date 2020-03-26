@@ -80,8 +80,8 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     return requests[_id].result;
   }
 
-  /// @dev Verifies if the contract is upgradable
-  /// @return true if the contract upgradable
+  /// @dev Verifies if the contract is upgradable.
+  /// @return true if the contract upgradable.
   function isUpgradable(address _address) external view override returns(bool) {
     if (_address == witnet) {
       return true;
@@ -89,9 +89,9 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     return false;
   }
 
-  /// @dev Retrieves hash of the data request transaction in Witnet
+  /// @dev Retrieves hash of the data request transaction in Witnet.
   /// @param _id The unique identifier of the data request.
-  /// @return The hash of the DataRequest transaction in Witnet
+  /// @return The hash of the DataRequest transaction in Witnet.
   function readDrHash (uint256 _id) external view override returns(uint256) {
     return requests[_id].drHash;
   }

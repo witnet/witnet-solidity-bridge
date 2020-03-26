@@ -5,7 +5,7 @@ import "witnet-ethereum-block-relay/contracts/BlockRelayInterface.sol";
 
 /**
  * @title Block relay contract
- * @notice Contract to store/read block headers from the Witnet network
+ * @notice Contract to store/read block headers from the Witnet network.
  * @author Witnet Foundation
  */
 contract MockBlockRelay is BlockRelayInterface {
@@ -46,7 +46,7 @@ contract MockBlockRelay is BlockRelayInterface {
     _;
   }
 
-   // Ensures block does not exist
+  // Ensures block does not exist
   modifier blockDoesNotExist(uint256 _id){
     require(blocks[_id].drHashMerkleRoot==0, "The block already existed");
     _;
@@ -57,8 +57,8 @@ contract MockBlockRelay is BlockRelayInterface {
     witnet = msg.sender;
   }
 
-  /// @dev Read the beacon of the last block inserted
-  /// @return bytes to be signed by bridge nodes
+  /// @dev Read the beacon of the last block inserted.
+  /// @return bytes to be signed by bridge nodes.
   function getLastBeacon()
     external
     view
@@ -69,23 +69,23 @@ contract MockBlockRelay is BlockRelayInterface {
   }
 
   /// @notice Returns the lastest epoch reported to the block relay.
-  /// @return epoch
+  /// @return the last epoch.
   function getLastEpoch() external view override returns(uint256) {
     return lastBlock.epoch;
   }
 
-  /// @notice Returns the latest hash reported to the block relay
-  /// @return blockhash
+  /// @notice Returns the latest hash reported to the block relay.
+  /// @return the last block hash.
   function getLastHash() external view override returns(uint256) {
     return lastBlock.blockHash;
   }
 
-  /// @dev Verifies the validity of a PoI against the DR merkle root
-  /// @param _poi the proof of inclusion as [sibling1, sibling2,..]
-  /// @param _blockHash the blockHash
-  /// @param _index the index in the merkle tree of the element to verify
-  /// @param _element the leaf to be verified
-  /// @return true or false depending the validity
+  /// @dev Verifies the validity of a PoI against the DR merkle root.
+  /// @param _poi the proof of inclusion as [sibling1, sibling2,..].
+  /// @param _blockHash the blockHash.
+  /// @param _index the index in the merkle tree of the element to verify.
+  /// @param _element the leaf to be verified.
+  /// @return true or false depending the validity.
   function verifyDrPoi(
     uint256[] calldata _poi,
     uint256 _blockHash,
@@ -105,12 +105,12 @@ contract MockBlockRelay is BlockRelayInterface {
       _element));
   }
 
-  /// @dev Verifies the validity of a PoI against the tally merkle root
-  /// @param _poi the proof of inclusion as [sibling1, sibling2,..]
-  /// @param _blockHash the blockHash
-  /// @param _index the index in the merkle tree of the element to verify
-  /// @param _element the element
-  /// @return true or false depending the validity
+  /// @dev Verifies the validity of a PoI against the tally merkle root.
+  /// @param _poi the proof of inclusion as [sibling1, sibling2,..].
+  /// @param _blockHash the blockHash.
+  /// @param _index the index in the merkle tree of the element to verify.
+  /// @param _element the element.
+  /// @return true or false depending the validity.
   function verifyTallyPoi(
     uint256[] calldata _poi,
     uint256 _blockHash,
@@ -130,17 +130,17 @@ contract MockBlockRelay is BlockRelayInterface {
       _element));
   }
 
-  /// @dev Determines if the contract is upgradable
-  /// @return true
+  /// @dev Determines if the contract is upgradable.
+  /// @return true if the contract is upgradable.
   function isUpgradable(address) external view override returns(bool) {
     return true;
   }
 
-  /// @dev Post new block into the block relay
-  /// @param _blockHash Hash of the block header
-  /// @param _epoch Witnet epoch to which the block belongs to
-  /// @param _drMerkleRoot Merkle root belonging to the data requests
-  /// @param _tallyMerkleRoot Merkle root belonging to the tallies
+  /// @dev Post new block into the block relay.
+  /// @param _blockHash Hash of the block header.
+  /// @param _epoch Witnet epoch to which the block belongs to.
+  /// @param _drMerkleRoot Merkle root belonging to the data requests.
+  /// @param _tallyMerkleRoot Merkle root belonging to the tallies.
   function postNewBlock(
     uint256 _blockHash,
     uint256 _epoch,
@@ -159,7 +159,7 @@ contract MockBlockRelay is BlockRelayInterface {
   }
 
   /// @dev Retrieve the requests-only merkle root hash that was reported for a specific block header.
-  /// @param _blockHash Hash of the block header
+  /// @param _blockHash Hash of the block header.
   /// @return Requests-only merkle root hash in the block header.
   function readDrMerkleRoot(uint256 _blockHash)
     external
@@ -171,7 +171,7 @@ contract MockBlockRelay is BlockRelayInterface {
   }
 
   /// @dev Retrieve the tallies-only merkle root hash that was reported for a specific block header.
-  /// @param _blockHash Hash of the block header
+  /// @param _blockHash Hash of the block header.
   /// tallies-only merkle root hash in the block header.
   function readTallyMerkleRoot(uint256 _blockHash)
     external
@@ -182,12 +182,12 @@ contract MockBlockRelay is BlockRelayInterface {
     return blocks[_blockHash].tallyHashMerkleRoot;
   }
 
-  /// @dev Verifies the validity of a PoI
-  /// @param _poi the proof of inclusion as [sibling1, sibling2,..]
-  /// @param _root the merkle root
-  /// @param _index the index in the merkle tree of the element to verify
-  /// @param _element the leaf to be verified
-  /// @return true or false depending the validity
+  /// @dev Verifies the validity of a PoI.
+  /// @param _poi the proof of inclusion as [sibling1, sibling2,..].
+  /// @param _root the merkle root.
+  /// @param _index the index in the merkle tree of the element to verify.
+  /// @param _element the leaf to be verified.
+  /// @return true or false depending the validity.
   function verifyPoi(
     uint256[] memory _poi,
     uint256 _root,
@@ -197,8 +197,8 @@ contract MockBlockRelay is BlockRelayInterface {
   {
     uint256 tree = _element;
     uint256 index = _index;
-    // We want to prove that the hash of the _poi and the _element is equal to _root
-    // For knowing if concatenate to the left or the right we check the parity of the the index
+    // We want to prove that the hash of the _poi and the _element is equal to _root.
+    // For knowing if concatenate to the left or the right we check the parity of the the index.
     for (uint i = 0; i < _poi.length; i++) {
       if (index%2 == 0) {
         tree = uint256(sha256(abi.encodePacked(tree, _poi[i])));

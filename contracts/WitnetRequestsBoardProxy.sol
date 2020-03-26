@@ -5,7 +5,7 @@ import "./WitnetRequestsBoardInterface.sol";
 
 /**
  * @title Block Relay Proxy
- * @notice Contract to act as a proxy between the Witnet Bridge Interface and the Block Relay
+ * @notice Contract to act as a proxy between the Witnet Bridge Interface and the Block Relay.
  * @author Witnet Foundation
  */
 contract WitnetRequestsBoardProxy {
@@ -36,8 +36,8 @@ contract WitnetRequestsBoardProxy {
   }
 
  /**
-  * @notice Include an address to specify the Witnet Request Board
-  * @param _witnetRequestsBoardAddress WitnetRequestBoard address
+  * @notice Include an address to specify the Witnet Request Board.
+  * @param _witnetRequestsBoardAddress WitnetRequestBoard address.
   */
   constructor(address _witnetRequestsBoardAddress) public {
     // Initialize the first epoch pointing to the first controller
@@ -70,7 +70,7 @@ contract WitnetRequestsBoardProxy {
 
   /// @dev Retrieves the DR hash of the id from the WRB.
   /// @param _id The unique identifier of the data request.
-  /// @return The hash of the DR
+  /// @return The hash of the DR.
   function readDrHash (uint256 _id)
     external
     view
@@ -89,7 +89,7 @@ contract WitnetRequestsBoardProxy {
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
-  /// @return The result of the DR
+  /// @return The result of the DR.
   function readResult(uint256 _id) external view returns(bytes memory) {
     // Get the address and the offset of the corresponding to id
     address wrbAddress;
@@ -101,8 +101,8 @@ contract WitnetRequestsBoardProxy {
     return wrbWithResult.readResult(_id - offSetWrb);
   }
 
-  /// @notice Upgrades the Witnet Requests Board if the current one is upgradeable
-  /// @param _newAddress address of the new block relay to upgrade
+  /// @notice Upgrades the Witnet Requests Board if the current one is upgradeable.
+  /// @param _newAddress address of the new block relay to upgrade.
   function upgradeWitnetRequestsBoard(address _newAddress) public notIdentical(_newAddress) {
     // Require the WRB is upgradable
     require(witnetRequestsBoardInstance.isUpgradable(msg.sender), "The upgrade has been rejected by the current implementation");
@@ -113,8 +113,8 @@ contract WitnetRequestsBoardProxy {
     witnetRequestsBoardInstance = WitnetRequestsBoardInterface(_newAddress);
   }
 
-  /// @notice Gets the controller from an Id
-  /// @param _id id of a Data Request from which we get the controller
+  /// @notice Gets the controller from an Id.
+  /// @param _id id of a Data Request from which we get the controller.
   function getController(uint256 _id) internal view returns(address _controllerAddress, uint256 _offset) {
     uint256 n = controllers.length;
     // If the id is bigger than the lastId of a Controller, read the result in that Controller

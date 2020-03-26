@@ -7,7 +7,7 @@ import "./CBOR.sol";
 
 /**
  * @title A library for decoding Witnet request results
- * @notice The library exposes functions to check the Witnet request success
+ * @notice The library exposes functions to check the Witnet request success.
  * and retrieve Witnet results from CBOR values into solidity types.
  */
 library Witnet {
@@ -121,9 +121,9 @@ library Witnet {
   */
 
  /**
-   * @notice Decode raw CBOR bytes into a Result instance
-   * @param _cborBytes Raw bytes representing a CBOR-encoded value
-   * @return A `Result` instance
+   * @notice Decode raw CBOR bytes into a Result instance.
+   * @param _cborBytes Raw bytes representing a CBOR-encoded value.
+   * @return A `Result` instance.
    */
   function resultFromCborBytes(bytes calldata _cborBytes) external pure returns(Result memory) {
     CBOR.Value memory cborValue = CBOR.valueFromBytes(_cborBytes);
@@ -131,9 +131,9 @@ library Witnet {
   }
 
  /**
-   * @notice Decode a CBOR value into a Result instance
-   * @param _cborValue An instance of `CBOR.Value`
-   * @return A `Result` instance
+   * @notice Decode a CBOR value into a Result instance.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return A `Result` instance.
    */
   function resultFromCborValue(CBOR.Value memory _cborValue) public pure returns(Result memory) {
     // Witnet uses CBOR tag 39 to represent RADON error code identifiers.
@@ -143,26 +143,26 @@ library Witnet {
   }
 
   /**
-   * @notice Tell if a Result is successful
-   * @param _result An instance of Result
-   * @return `true` if successful, `false` if errored
+   * @notice Tell if a Result is successful.
+   * @param _result An instance of Result.
+   * @return `true` if successful, `false` if errored.
    */
   function isOk(Result memory _result) public pure returns(bool) {
     return _result.success;
   }
 
   /**
-   * @notice Tell if a Result is errored
-   * @param _result An instance of Result
-   * @return `true` if errored, `false` if successful
+   * @notice Tell if a Result is errored.
+   * @param _result An instance of Result.
+   * @return `true` if errored, `false` if successful.
    */
   function isError(Result memory _result) public pure returns(bool) {
     return !_result.success;
   }
 
   /**
-   * @notice Decode a bytes value from a Result as a `bytes` value
-   * @param _result An instance of Result
+   * @notice Decode a bytes value from a Result as a `bytes` value.
+   * @param _result An instance of Result.
    * @return The `bytes` decoded from the Result.
    */
   function asBytes(Result memory _result) public pure returns(bytes memory) {
@@ -171,9 +171,9 @@ library Witnet {
   }
 
   /**
-   * @notice Decode an error code from a Result as a member of `ErrorCodes`
-   * @param _result An instance of `Result`
-   * @return The `CBORValue.Error memory` decoded from the Result
+   * @notice Decode an error code from a Result as a member of `ErrorCodes`.
+   * @param _result An instance of `Result`.
+   * @return The `CBORValue.Error memory` decoded from the Result.
    */
   function asErrorCode(Result memory _result) public pure returns(ErrorCodes) {
     uint64[] memory error = asRawError(_result);
@@ -187,8 +187,8 @@ library Witnet {
   }
 
   /**
-   * @notice Generate a suitable error message for a member of `ErrorCodes` and its corresponding arguments
-   * @param _result An instance of `Result`
+   * @notice Generate a suitable error message for a member of `ErrorCodes` and its corresponding arguments.
+   * @param _result An instance of `Result`.
    * @return A tuple containing the `CBORValue.Error memory` decoded from the `Result`, plus a loggable error message.
    */
   function asErrorMessage(Result memory _result) public pure returns(ErrorCodes, string memory) {
@@ -292,9 +292,9 @@ library Witnet {
   }
 
   /**
-   * @notice Decode a raw error from a `Result` as a `uint64[]`
-   * @param _result An instance of `Result`
-   * @return The `uint64[]` raw error as decoded from the `Result`
+   * @notice Decode a raw error from a `Result` as a `uint64[]`.
+   * @param _result An instance of `Result`.
+   * @return The `uint64[]` raw error as decoded from the `Result`.
    */
   function asRawError(Result memory _result) public pure returns(uint64[] memory) {
     require(!_result.success, "Tried to read error code from successful Result");
@@ -302,12 +302,12 @@ library Witnet {
   }
 
   /**
-   * @notice Decode a fixed16 (half-precision) numeric value from a Result as an `int32` value
-   * @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
-   * by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`
+   * @notice Decode a fixed16 (half-precision) numeric value from a Result as an `int32` value.
+   * @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values.
+   * by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`.
    * use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
-   * @param _result An instance of Result
-   * @return The `int128` decoded from the Result
+   * @param _result An instance of Result.
+   * @return The `int128` decoded from the Result.
    */
   function asFixed16(Result memory _result) public pure returns(int32) {
     require(_result.success, "Tried to read `fixed16` value from errored Result");
@@ -315,9 +315,9 @@ library Witnet {
   }
 
   /**
-   * @notice Decode an array of fixed16 values from a Result as an `int128[]` value
-   * @param _result An instance of Result
-   * @return The `int128[]` decoded from the Result
+   * @notice Decode an array of fixed16 values from a Result as an `int128[]` value.
+   * @param _result An instance of Result.
+   * @return The `int128[]` decoded from the Result.
    */
   function asFixed16Array(Result memory _result) public pure returns(int128[] memory) {
     require(_result.success, "Tried to read `fixed16[]` value from errored Result");
@@ -325,9 +325,9 @@ library Witnet {
   }
 
   /**
-   * @notice Decode a integer numeric value from a Result as an `int128` value
-   * @param _result An instance of Result
-   * @return The `int128` decoded from the Result
+   * @notice Decode a integer numeric value from a Result as an `int128` value.
+   * @param _result An instance of Result.
+   * @return The `int128` decoded from the Result.
    */
   function asInt128(Result memory _result) public pure returns(int128) {
     require(_result.success, "Tried to read `int128` value from errored Result");
@@ -335,9 +335,9 @@ library Witnet {
   }
 
   /**
-   * @notice Decode an array of integer numeric values from a Result as an `int128[]` value
-   * @param _result An instance of Result
-   * @return The `int128[]` decoded from the Result
+   * @notice Decode an array of integer numeric values from a Result as an `int128[]` value.
+   * @param _result An instance of Result.
+   * @return The `int128[]` decoded from the Result.
    */
   function asInt128Array(Result memory _result) public pure returns(int128[] memory) {
     require(_result.success, "Tried to read `int128[]` value from errored Result");
@@ -345,9 +345,9 @@ library Witnet {
   }
 
   /**
-   * @notice Decode a string value from a Result as a `string` value
-   * @param _result An instance of Result
-   * @return The `string` decoded from the Result
+   * @notice Decode a string value from a Result as a `string` value.
+   * @param _result An instance of Result.
+   * @return The `string` decoded from the Result.
    */
   function asString(Result memory _result) public pure returns(string memory) {
     require(_result.success, "Tried to read `string` value from errored Result");
@@ -355,9 +355,9 @@ library Witnet {
   }
 
   /**
-   * @notice Decode an array of string values from a Result as a `string[]` value
-   * @param _result An instance of Result
-   * @return The `string[]` decoded from the Result
+   * @notice Decode an array of string values from a Result as a `string[]` value.
+   * @param _result An instance of Result.
+   * @return The `string[]` decoded from the Result.
    */
   function asStringArray(Result memory _result) public pure returns(string[] memory) {
     require(_result.success, "Tried to read `string[]` value from errored Result");
@@ -365,9 +365,9 @@ library Witnet {
   }
 
   /**
-   * @notice Decode a natural numeric value from a Result as a `uint64` value
-   * @param _result An instance of Result
-   * @return The `uint64` decoded from the Result
+   * @notice Decode a natural numeric value from a Result as a `uint64` value.
+   * @param _result An instance of Result.
+   * @return The `uint64` decoded from the Result.
    */
   function asUint64(Result memory _result) public pure returns(uint64) {
     require(_result.success, "Tried to read `uint64` value from errored Result");
@@ -375,9 +375,9 @@ library Witnet {
   }
 
   /**
-   * @notice Decode an array of natural numeric values from a Result as a `uint64[]` value
-   * @param _result An instance of Result
-   * @return The `uint64[]` decoded from the Result
+   * @notice Decode an array of natural numeric values from a Result as a `uint64[]` value.
+   * @param _result An instance of Result.
+   * @return The `uint64[]` decoded from the Result.
    */
   function asUint64Array(Result memory _result) public pure returns(uint64[] memory) {
     require(_result.success, "Tried to read `uint64[]` value from errored Result");
@@ -385,9 +385,9 @@ library Witnet {
   }
 
   /**
-   * @notice Convert a stage index number into the name of the matching Witnet request stage
-   * @param _stageIndex A `uint64` identifying the index of one of the Witnet request stages
-   * @return The name of the matching stage
+   * @notice Convert a stage index number into the name of the matching Witnet request stage.
+   * @param _stageIndex A `uint64` identifying the index of one of the Witnet request stages.
+   * @return The name of the matching stage.
    */
   function stageName(uint64 _stageIndex) public pure returns(string memory) {
     if (_stageIndex == 0) {
@@ -402,10 +402,10 @@ library Witnet {
   }
 
   /**
-   * @notice Convert a `uint64` into a 1, 2 or 3 characters long `string` representing its
-   * three less significant decimal values
-   * @param _u A `uint64` value
-   * @return The `string` representing its decimal value
+   * @notice Convert a `uint64` into a 1, 2 or 3 characters long `string` representing its.
+   * three less significant decimal values.
+   * @param _u A `uint64` value.
+   * @return The `string` representing its decimal value.
    */
   function utoa(uint64 _u) private pure returns(string memory) {
     if (_u < 10) {
@@ -427,9 +427,9 @@ library Witnet {
   }
 
   /**
- * @notice Convert a `uint64` into a 2 characters long `string` representing its two less significant hexadecimal values
- * @param _u A `uint64` value
- * @return The `string` representing its hexadecimal value
+ * @notice Convert a `uint64` into a 2 characters long `string` representing its two less significant hexadecimal values.
+ * @param _u A `uint64` value.
+ * @return The `string` representing its hexadecimal value.
  */
   function utohex(uint64 _u) private pure returns(string memory) {
     bytes memory b2 = new bytes(2);

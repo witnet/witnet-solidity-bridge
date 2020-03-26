@@ -84,10 +84,10 @@ library ActiveBridgeSetLib {
     return true;
   }
 
-  /// @dev Checks if an address is a member of the ABS
+  /// @dev Checks if an address is a member of the ABS.
   /// @param _abs The Active Bridge Set structure from the Witnet Requests Board.
   /// @param _address The address to check.
-  /// @return true or false
+  /// @return true if address is member of ABS.
   function absMembership(ActiveBridgeSet storage _abs, address _address) internal view returns (bool) {
     return _abs.identityCount[_address] > 0;
   }
@@ -95,7 +95,7 @@ library ActiveBridgeSetLib {
   /// @dev Gets the slots of the last block seen by the ABS provided and the block number provided.
   /// @param _abs The Active Bridge Set structure containing the last block.
   /// @param _blockNumber The block number from which to get the current slot.
-  /// @return (currentSlot, lastSlot, overflow), where overflow implies the block difference &gt; CLAIM_BLOCK_PERIOD* ACTIVITY_LENGTH
+  /// @return (currentSlot, lastSlot, overflow), where overflow implies the block difference &gt; CLAIM_BLOCK_PERIOD* ACTIVITY_LENGTH.
   function getSlots(ActiveBridgeSet storage _abs, uint256 _blockNumber) private view returns (uint16, uint16, bool) {
     // Get current activity slot number
     uint16 currentSlot = uint16((_blockNumber / CLAIM_BLOCK_PERIOD) % ACTIVITY_LENGTH);

@@ -29,9 +29,9 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a `CBOR.Value` structure into a native `bytes` value
-   * @param _cborValue An instance of `CBOR.Value`
-   * @return The value represented by the input, as a `bytes` value
+   * @notice Decode a `CBOR.Value` structure into a native `bytes` value.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as a `bytes` value.
    */
   function decodeBytes(Value memory _cborValue) public pure returns(bytes memory) {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
@@ -55,12 +55,12 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a `CBOR.Value` structure into a `fixed16` value
+   * @notice Decode a `CBOR.Value` structure into a `fixed16` value.
    * @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
    * by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`
    * use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
-   * @param _cborValue An instance of `CBOR.Value`
-   * @return The value represented by the input, as an `int128` value
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as an `int128` value.
    */
   function decodeFixed16(Value memory _cborValue) public pure returns(int32) {
     require(_cborValue.majorType == 7, "Tried to read a `fixed` value from a `CBOR.Value` with majorType != 7");
@@ -69,10 +69,10 @@ library CBOR {
   }
 
   /**
- * @notice Decode a `CBOR.Value` structure into a native `int128[]` value whose inner values follow the same convention
- * as explained in `decodeFixed16`
- * @param _cborValue An instance of `CBOR.Value`
- * @return The value represented by the input, as an `int128[]` value
+ * @notice Decode a `CBOR.Value` structure into a native `int128[]` value whose inner values follow the same convention.
+ * as explained in `decodeFixed16`.
+ * @param _cborValue An instance of `CBOR.Value`.
+ * @return The value represented by the input, as an `int128[]` value.
  */
   function decodeFixed16Array(Value memory _cborValue) public pure returns(int128[] memory) {
     require(_cborValue.majorType == 4, "Tried to read `int128[]` from a `CBOR.Value` with majorType != 4");
@@ -90,9 +90,9 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a `CBOR.Value` structure into a native `int128` value
-   * @param _cborValue An instance of `CBOR.Value`
-   * @return The value represented by the input, as an `int128` value
+   * @notice Decode a `CBOR.Value` structure into a native `int128` value.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as an `int128` value.
    */
   function decodeInt128(Value memory _cborValue) public pure returns(int128) {
     if (_cborValue.majorType == 1) {
@@ -107,9 +107,9 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a `CBOR.Value` structure into a native `int128[]` value
-   * @param _cborValue An instance of `CBOR.Value`
-   * @return The value represented by the input, as an `int128[]` value
+   * @notice Decode a `CBOR.Value` structure into a native `int128[]` value.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as an `int128[]` value.
    */
   function decodeInt128Array(Value memory _cborValue) public pure returns(int128[] memory) {
     require(_cborValue.majorType == 4, "Tried to read `int128[]` from a `CBOR.Value` with majorType != 4");
@@ -127,9 +127,9 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a `CBOR.Value` structure into a native `string` value
-   * @param _cborValue An instance of `CBOR.Value`
-   * @return The value represented by the input, as a `string` value
+   * @notice Decode a `CBOR.Value` structure into a native `string` value.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as a `string` value.
    */
   function decodeString(Value memory _cborValue) public pure returns(string memory) {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
@@ -151,9 +151,9 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a `CBOR.Value` structure into a native `string[]` value
-   * @param _cborValue An instance of `CBOR.Value`
-   * @return The value represented by the input, as an `string[]` value
+   * @notice Decode a `CBOR.Value` structure into a native `string[]` value.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as an `string[]` value.
    */
   function decodeStringArray(Value memory _cborValue) public pure returns(string[] memory) {
     require(_cborValue.majorType == 4, "Tried to read `string[]` from a `CBOR.Value` with majorType != 4");
@@ -171,9 +171,9 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a `CBOR.Value` structure into a native `uint64` value
-   * @param _cborValue An instance of `CBOR.Value`
-   * @return The value represented by the input, as an `uint64` value
+   * @notice Decode a `CBOR.Value` structure into a native `uint64` value.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as an `uint64` value.
    */
   function decodeUint64(Value memory _cborValue) public pure returns(uint64) {
     require(_cborValue.majorType == 0, "Tried to read `uint64` from a `CBOR.Value` with majorType != 0");
@@ -181,9 +181,9 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a `CBOR.Value` structure into a native `uint64[]` value
-   * @param _cborValue An instance of `CBOR.Value`
-   * @return The value represented by the input, as an `uint64[]` value
+   * @notice Decode a `CBOR.Value` structure into a native `uint64[]` value.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as an `uint64[]` value.
    */
   function decodeUint64Array(Value memory _cborValue) public pure returns(uint64[] memory) {
     require(_cborValue.majorType == 4, "Tried to read `uint64[]` from a `CBOR.Value` with majorType != 4");
@@ -201,10 +201,10 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a CBOR.Value structure from raw bytes
-   * @dev This is the main factory for CBOR.Value instances, which can be later decoded into native EVM types
-   * @param _cborBytes Raw bytes representing a CBOR-encoded value
-   * @return A `CBOR.Value` instance containing a partially decoded value
+   * @notice Decode a CBOR.Value structure from raw bytes.
+   * @dev This is the main factory for CBOR.Value instances, which can be later decoded into native EVM types.
+   * @param _cborBytes Raw bytes representing a CBOR-encoded value.
+   * @return A `CBOR.Value` instance containing a partially decoded value.
    */
   function valueFromBytes(bytes memory _cborBytes) public pure returns(Value memory) {
     BufferLib.Buffer memory buffer = BufferLib.Buffer(_cborBytes, 0);
@@ -213,10 +213,10 @@ library CBOR {
   }
 
   /**
-   * @notice Decode a CBOR.Value structure from raw bytes
-   * @dev This is an alternate factory for CBOR.Value instances, which can be later decoded into native EVM types
-   * @param _buffer A Buffer structure representing a CBOR-encoded value
-   * @return A `CBOR.Value` instance containing a partially decoded value
+   * @notice Decode a CBOR.Value structure from raw bytes.
+   * @dev This is an alternate factory for CBOR.Value instances, which can be later decoded into native EVM types.
+   * @param _buffer A Buffer structure representing a CBOR-encoded value.
+   * @return A `CBOR.Value` instance containing a partially decoded value.
    */
   function valueFromBuffer(BufferLib.Buffer memory _buffer) public pure returns(Value memory) {
     require(_buffer.data.length > 0, "Found empty buffer when parsing CBOR value");

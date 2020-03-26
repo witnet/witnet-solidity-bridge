@@ -9,7 +9,7 @@ import "./WitnetRequestsBoardInterface.sol";
 
 /**
  * @title Witnet Requests Board
- * @notice Contract to bridge requests to Witnet
+ * @notice Contract to bridge requests to Witnet.
  * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
  * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
@@ -119,9 +119,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   }
 
  /**
-  * @notice Include an address to specify the Witnet Block Relay and a replication factor
-  * @param _blockRelayAddress BlockRelayProxy address
-  * @param _repFactor replication factor
+  * @notice Include an address to specify the Witnet Block Relay and a replication factor.
+  * @param _blockRelayAddress BlockRelayProxy address.
+  * @param _repFactor replication factor.
   */
   constructor(address _blockRelayAddress, uint8 _repFactor) public {
     blockRelay = BlockRelayProxy(_blockRelayAddress);
@@ -263,9 +263,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     return requests[_id].result;
   }
 
-  /// @dev Retrieves hash of the data request transaction in Witnet
+  /// @dev Retrieves hash of the data request transaction in Witnet.
   /// @param _id The unique identifier of the data request.
-  /// @return The hash of the DataRequest transaction in Witnet
+  /// @return The hash of the DataRequest transaction in Witnet.
   function readDrHash(uint256 _id) external view override returns(uint256) {
     return requests[_id].drHash;
   }
@@ -276,48 +276,48 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     return requests.length;
   }
 
-  /// @dev Get the current ABS count
-  /// @return number of distinct identities on the ABS
+  /// @dev Get the current ABS count.
+  /// @return number of distinct identities on the ABS.
   function absCount() external view returns (uint32) {
     return abs.activeIdentities;
   }
 
-  /// @dev Checks if an identity is member of the ABS
-  /// @return true if the identity is part of the ABS
+  /// @dev Checks if an identity is member of the ABS.
+  /// @return true if the identity is part of the ABS.
   function isABSMember(address _address) external view returns (bool) {
     return abs.absMembership(_address);
   }
 
-  /// @dev Wrapper around the decodeProof from VRF library
-  /// @dev Decode VRF proof from bytes
-  /// @param _proof The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`
-  /// @return The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`
+  /// @notice Wrapper around the decodeProof from VRF library.
+  /// @dev Decode VRF proof from bytes.
+  /// @param _proof The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`.
+  /// @return The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`.
   function decodeProof(bytes calldata _proof) external pure returns (uint[4] memory) {
     return VRF.decodeProof(_proof);
   }
 
-  /// @dev Wrapper around the decodePoint from VRF library
-  /// @dev Decode EC point from bytes
-  /// @param _point The EC point as bytes
-  /// @return The point as `[point-x, point-y]`
+  /// @notice Wrapper around the decodePoint from VRF library.
+  /// @dev Decode EC point from bytes.
+  /// @param _point The EC point as bytes.
+  /// @return The point as `[point-x, point-y]`.
   function decodePoint(bytes calldata _point) external pure returns (uint[2] memory) {
     return VRF.decodePoint(_point);
   }
 
-  /// @dev Wrapper around the computeFastVerifyParams from VRF library
-  /// @dev Compute the parameters (EC points) required for the VRF fast verification function.
-  /// @param _publicKey The public key as an array composed of `[pubKey-x, pubKey-y]`
-  /// @param _proof The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`
-  /// @param _message The message (in bytes) used for computing the VRF
-  /// @return The fast verify required parameters as the tuple `([uPointX, uPointY], [sHX, sHY, cGammaX, cGammaY])`
+  /// @dev Wrapper around the computeFastVerifyParams from VRF library.
+  /// @dev Compute the parameters (EC points) required for the VRF fast verification function..
+  /// @param _publicKey The public key as an array composed of `[pubKey-x, pubKey-y]`.
+  /// @param _proof The VRF proof as an array composed of `[gamma-x, gamma-y, c, s]`.
+  /// @param _message The message (in bytes) used for computing the VRF.
+  /// @return The fast verify required parameters as the tuple `([uPointX, uPointY], [sHX, sHY, cGammaX, cGammaY])`.
   function computeFastVerifyParams(uint256[2] calldata _publicKey, uint256[4] calldata _proof, bytes calldata _message)
     external pure returns (uint256[2] memory, uint256[4] memory)
   {
     return VRF.computeFastVerifyParams(_publicKey, _proof, _message);
   }
 
-  /// @dev Updates the ABS activity with the block number provided
-  /// @param _blockNumber update the ABS until this block number
+  /// @dev Updates the ABS activity with the block number provided.
+  /// @param _blockNumber update the ABS until this block number.
   function updateAbsActivity(uint256 _blockNumber) external {
     require (_blockNumber >= abs.lastBlockNumber, "The last block number updated was higher than the one provided");
     require (_blockNumber <= block.number, "The block number provided has not been reached");
@@ -325,8 +325,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     abs.updateActivity(_blockNumber);
   }
 
-  /// @dev Verifies if the contract is upgradable
-  /// @return true if the contract upgradable
+  /// @dev Verifies if the contract is upgradable.
+  /// @return true if the contract upgradable.
   function isUpgradable(address _address) external view override returns(bool) {
     if (_address == witnet) {
       return true;
@@ -334,11 +334,11 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     return false;
   }
 
-  /// @dev Claim drs to be posted to Witnet by the node
-  /// @param _ids Data request ids to be claimed
-  /// @param _poe PoE claiming eligibility
-  /// @param _uPoint uPoint coordinates as [uPointX, uPointY] corresponding to U = s*B - c*Y
-  /// @param _vPointHelpers helpers for calculating the V point as [(s*H)X, (s*H)Y, cGammaX, cGammaY]. V = s*H + cGamma
+  /// @dev Claim drs to be posted to Witnet by the node.
+  /// @param _ids Data request ids to be claimed.
+  /// @param _poe PoE claiming eligibility.
+  /// @param _uPoint uPoint coordinates as [uPointX, uPointY] corresponding to U = s*B - c*Y.
+  /// @param _vPointHelpers helpers for calculating the V point as [(s*H)X, (s*H)Y, cGammaX, cGammaY]. V = s*H + cGamma.
   function claimDataRequests(
     uint256[] memory _ids,
     uint256[4] memory _poe,
@@ -362,17 +362,17 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     return true;
   }
 
-  /// @dev Read the beacon of the last block inserted
-  /// @return bytes to be signed by the node as PoE
+  /// @dev Read the beacon of the last block inserted.
+  /// @return bytes to be signed by the node as PoE.
   function getLastBeacon() public view virtual returns(bytes memory) {
     return blockRelay.getLastBeacon();
   }
 
-  /// @dev Claim drs to be posted to Witnet by the node
-  /// @param _poe PoE claiming eligibility
-  /// @param _publicKey The public key as an array composed of `[pubKey-x, pubKey-y]`
-  /// @param _uPoint uPoint coordinates as [uPointX, uPointY] corresponding to U = s*B - c*Y
-  /// @param _vPointHelpers helpers for calculating the V point as [(s*H)X, (s*H)Y, cGammaX, cGammaY]. V = s*H + cGamma
+  /// @dev Claim drs to be posted to Witnet by the node.
+  /// @param _poe PoE claiming eligibility.
+  /// @param _publicKey The public key as an array composed of `[pubKey-x, pubKey-y]`.
+  /// @param _uPoint uPoint coordinates as [uPointX, uPointY] corresponding to U = s*B - c*Y.
+  /// @param _vPointHelpers helpers for calculating the V point as [(s*H)X, (s*H)Y, cGammaX, cGammaY]. V = s*H + cGamma.
   function verifyPoe(
     uint256[4] memory _poe,
     uint256[2] memory _publicKey,
@@ -396,11 +396,11 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     return false;
   }
 
-  /// @dev Verifies the validity of a signature
-  /// @param _message message to be verified
-  /// @param _publicKey public key of the signer as `[pubKey-x, pubKey-y]`
-  /// @param _addrSignature the signature to verify asas r||s||v
-  /// @return true or false depending the validity
+  /// @dev Verifies the validity of a signature.
+  /// @param _message message to be verified.
+  /// @param _publicKey public key of the signer as `[pubKey-x, pubKey-y]`.
+  /// @param _addrSignature the signature to verify asas r||s||v.
+  /// @return true or false depending the validity.
   function verifySig(
     bytes memory _message,
     uint256[2] memory _publicKey,

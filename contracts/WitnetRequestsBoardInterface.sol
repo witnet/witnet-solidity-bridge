@@ -33,8 +33,8 @@ interface WitnetRequestsBoardInterface {
   /// @return The result of the DR
   function readResult (uint256 _id) external view returns(bytes memory);
 
-  /// @notice Verifies if the block relay can be upgraded
-  /// @return true if contract is upgradable
+  /// @notice Verifies if the block relay can be upgraded.
+  /// @return true if contract is upgradable.
   function isUpgradable(address _address) external view returns(bool);
 
 }
