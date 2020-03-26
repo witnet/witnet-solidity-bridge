@@ -3,9 +3,13 @@
 `witnet-ethereum-bridge` is an open source implementation of a bridge
 from Ethereum to Witnet. This repository provides several contracts:
 
-- The `Witnet Requests Board` (WRB), which includes all the needed
-functionality to relay data requests and their results from Ethereum to Witnet and the other way round.
+- The `WitnetRequestsBoard` (WRB), which includes all the needed functionality to relay data requests and their results from Ethereum to Witnet and the other way round.
+- `WitnetRequestsBoardProxy`, that routes Witnet data requests from smart contracts to the appropriate `WitnetRequestsBoard` controller.
 - `UsingWitnet`, an inheritable client contract that injects methods for interacting with the WRB in the most convenient way.
+
+## WitnetRequestsBoardProxy
+
+`WitnetRequestsBoardProxy.sol` is a proxy contract that routes Witnet data requests coming from the `UsingWitnet` contract to the appropriate `WitnetRequestBoard` controller. `WitnetRequestBoard` controllers are indexed by the last data request indentifier that each controller had stored before the controller was upgraded. Thus, if controller _a_ was replaced by controller _b_ at id _i_, petitions from _0_ to _i_ will be routed to _a_, while controller _b_ will handle petitions from _i_ onwards.
 
 ## WitnetRequestsBoard
 
