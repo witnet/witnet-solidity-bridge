@@ -37,5 +37,4 @@ interface WitnetRequestsBoardInterface {
   /// @return true if contract is upgradable
   function isUpgradable(address _address) external view returns(bool);
 
-
 }

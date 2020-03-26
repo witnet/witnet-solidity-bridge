@@ -8,12 +8,14 @@ contract Request {
   bytes public bytecode;
   uint256 public id;
 
-  // A `Request` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized
-  // using Protocol Buffers. However, we cannot verify its validity at this point. This implies that contracts using
-  // the WRB should not be considered trustless before a valid Proof-of-Inclusion has been posted for the requests.
-  //
-  // The hash of the request is computed in the constructor to guarantee consistency. Otherwise there could be a
-  // mismatch and a data request could be resolved with the result of another.
+ /**
+  * @dev A `Request` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized
+  * using Protocol Buffers. However, we cannot verify its validity at this point. This implies that contracts using
+  * the WRB should not be considered trustless before a valid Proof-of-Inclusion has been posted for the requests.
+  * The hash of the request is computed in the constructor to guarantee consistency. Otherwise there could be a
+  * mismatch and a data request could be resolved with the result of another.
+  * @param _bytecode Witnet request in bytes
+  */
   constructor(bytes memory _bytecode) public {
     bytecode = _bytecode;
     id = uint256(sha256(_bytecode));

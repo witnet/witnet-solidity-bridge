@@ -16,7 +16,7 @@ contract UsingWitnetBytes {
   * @notice Include an address to specify the WitnetRequestsBoard
   * @param _wrb WitnetRequestsBoard address
   */
-  constructor (address _wrb) public {
+  constructor(address _wrb) public {
     wrb = WitnetRequestsBoardProxy(_wrb);
   }
 

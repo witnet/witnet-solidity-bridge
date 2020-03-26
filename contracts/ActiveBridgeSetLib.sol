@@ -3,7 +3,7 @@ pragma solidity >=0.5.3 <0.7.0;
 
 /**
  * @title Active Bridge Set (ABS) library
- * @notice This library counts the number of bridges that were active recently
+ * @notice This library counts the number of bridges that were active recently.
  */
 library ActiveBridgeSetLib {
 
@@ -117,7 +117,9 @@ library ActiveBridgeSetLib {
     ActiveBridgeSet storage _abs,
     uint16 _currentSlot,
     uint16 _lastSlot,
-    bool _overflow) private returns (bool)
+    bool _overflow)
+    private
+  returns (bool)
   {
     // If there are more than `ACTIVITY_LENGTH` slots empty => remove entirely the ABS
     if (_overflow) {

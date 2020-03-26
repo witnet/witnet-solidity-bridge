@@ -41,7 +41,7 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     external
     payable
     override
-    returns(uint256)
+  returns(uint256)
   {
     uint256 _id = requests.length;
     DataRequest memory dr;

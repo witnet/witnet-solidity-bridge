@@ -35,7 +35,9 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
     uint256[2] calldata _publicKey,
     uint256[2] calldata _uPoint,
     uint256[4] calldata _vPointHelpers)
-  external view returns(bool)
+    external
+    view
+  returns(bool)
   {
     return verifyPoe(
       _poe,
@@ -47,9 +49,9 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
   function _verifySig(
     bytes calldata _message,
     uint256[2] calldata _publicKey,
-    bytes calldata _addrSignature
-  )
-  external returns(bool)
+    bytes calldata _addrSignature)
+    external
+  returns(bool)
   {
     return verifySig(
       _message,

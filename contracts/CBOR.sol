@@ -4,10 +4,16 @@ pragma experimental ABIEncoderV2;
 import "./BufferLib.sol";
 
 
-// TODO: add support for Array (majorType = 4)
-// TODO: add support for Map (majorType = 5)
-// TODO: add support for Float32 (majorType = 7, additionalInformation = 26)
-// TODO: add support for Float64 (majorType = 7, additionalInformation = 27)
+/**
+ * @title A minimalistic implementation of “RFC 7049 Concise Binary Object Representation”
+ * @notice This library leverages a buffer-like structure for step-by-step decoding of bytes so as to minimize
+ * the gas cost of decoding them into a useful native type.
+ * @dev Most of the logic has been borrowed from Patrick Gansterer’s cbor.js library: https://github.com/paroga/cbor-js
+ * TODO: add support for Array (majorType = 4)
+ * TODO: add support for Map (majorType = 5)
+ * TODO: add support for Float32 (majorType = 7, additionalInformation = 26)
+ * TODO: add support for Float64 (majorType = 7, additionalInformation = 27)
+ */
 library CBOR {
   using BufferLib for BufferLib.Buffer;
 

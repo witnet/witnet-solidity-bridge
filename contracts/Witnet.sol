@@ -5,6 +5,11 @@ import "./BufferLib.sol";
 import "./CBOR.sol";
 
 
+/**
+ * @title A library for decoding Witnet request results
+ * @notice The library exposes functions to check the Witnet request success
+ * and retrieve Witnet results from CBOR values into solidity types.
+ */
 library Witnet {
   using CBOR for CBOR.Value;
 
@@ -115,11 +120,21 @@ library Witnet {
   Result impl's
   */
 
+ /**
+   * @notice Decode raw CBOR bytes into a Result instance
+   * @param _cborBytes Raw bytes representing a CBOR-encoded value
+   * @return A `Result` instance
+   */
   function resultFromCborBytes(bytes calldata _cborBytes) external pure returns(Result memory) {
     CBOR.Value memory cborValue = CBOR.valueFromBytes(_cborBytes);
     return resultFromCborValue(cborValue);
   }
 
+ /**
+   * @notice Decode a CBOR value into a Result instance
+   * @param _cborValue An instance of `CBOR.Value`
+   * @return A `Result` instance
+   */
   function resultFromCborValue(CBOR.Value memory _cborValue) public pure returns(Result memory) {
     // Witnet uses CBOR tag 39 to represent RADON error code identifiers.
     // [CBOR tag 39] Identifiers for CBOR: https://github.com/lucas-clemente/cbor-specs/blob/master/id.md

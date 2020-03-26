@@ -62,12 +62,7 @@ contract WitnetRequestsBoardV1 is WitnetRequestsBoardInterface {
   /// @param _dr The bytes corresponding to the Protocol Buffers serialization of the data request output.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(bytes calldata _dr, uint256 _tallyReward)
-    external
-    payable
-    override
-    returns(uint256)
-  {
+  function postDataRequest(bytes calldata _dr, uint256 _tallyReward) external payable override returns(uint256) {
     uint256 _id = requests.length;
     DataRequest memory dr;
     requests.push(dr);

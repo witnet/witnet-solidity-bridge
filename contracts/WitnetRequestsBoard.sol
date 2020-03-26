@@ -10,16 +10,16 @@ import "./WitnetRequestsBoardInterface.sol";
 /**
  * @title Witnet Requests Board
  * @notice Contract to bridge requests to Witnet
- * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network
+ * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
  * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
 contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
-  uint256 public constant CLAIM_EXPIRATION = 13;
-
-  // using SafeMath for uint256;
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
+
+  // Expiration period after which a Witnet Request can be claimed again
+  uint256 public constant CLAIM_EXPIRATION = 13;
 
   struct DataRequest {
     bytes dr;
@@ -31,13 +31,17 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     address payable pkhClaim;
   }
 
+  // Owner of the Witnet Request Board
+  address public witnet;
+
+  // Block Relay proxy prividing verification functions
   BlockRelayProxy public blockRelay;
 
+  // Witnet Requests within the board
   DataRequest[] public requests;
 
+  // Set of recently active bridges
   ActiveBridgeSetLib.ActiveBridgeSet public abs;
-
-  address witnet;
 
   // Replication factor for Active Bridge Set identities
   uint8 public repFactor;
@@ -114,7 +118,12 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     _;
   }
 
-  constructor (address _blockRelayAddress, uint8 _repFactor) public {
+ /**
+  * @notice Include an address to specify the Witnet Block Relay and a replication factor
+  * @param _blockRelayAddress BlockRelayProxy address
+  * @param _repFactor replication factor
+  */
+  constructor(address _blockRelayAddress, uint8 _repFactor) public {
     blockRelay = BlockRelayProxy(_blockRelayAddress);
     witnet = msg.sender;
 
@@ -133,7 +142,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     payable
     payingEnough(msg.value, _tallyReward)
     override
-    returns(uint256)
+  returns(uint256)
   {
     uint256 _id = requests.length;
     DataRequest memory dr;
@@ -153,12 +162,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.
   /// @param _tallyReward The new tally reward. Needs to be equal or greater than the former tally reward.
-  function upgradeDataRequest(uint256 _id, uint256 _tallyReward)
-    external
-    payable
-    payingEnough(msg.value, _tallyReward)
-    override
-  {
+  function upgradeDataRequest(uint256 _id, uint256 _tallyReward) external payable payingEnough(msg.value, _tallyReward) override {
     requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, SafeMath.sub(msg.value, _tallyReward));
     requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
   }
@@ -185,13 +189,12 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @param _index The index in the merkle tree.
   /// @param _blockHash The hash of the block in which the data request was inserted.
   /// @param _epoch The epoch in which the blockHash was created.
-  function reportDataRequestInclusion (
+  function reportDataRequestInclusion(
     uint256 _id,
     uint256[] calldata _poi,
     uint256 _index,
     uint256 _blockHash,
-    uint256 _epoch
-    )
+    uint256 _epoch)
     external
     drNotIncluded(_id)
  {
@@ -218,14 +221,13 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @param _blockHash The hash of the block in which the result (tally) was inserted.
   /// @param _epoch The epoch in which the blockHash was created.
   /// @param _result The result itself as bytes.
-  function reportResult (
+  function reportResult(
     uint256 _id,
     uint256[] calldata _poi,
     uint256 _index,
     uint256 _blockHash,
     uint256 _epoch,
-    bytes calldata _result
-    )
+    bytes calldata _result)
     external
     drIncluded(_id)
     resultNotIncluded(_id)
@@ -241,7 +243,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       resHash), "Invalid PoI");
     requests[_id].result = _result;
     msg.sender.transfer(requests[_id].tallyReward);
-      // Push msg.sender to abs
+
+    // Push msg.sender to abs
     abs.pushActivity(msg.sender, block.number);
     emit PostedResult(msg.sender, _id);
   }
@@ -249,21 +252,21 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Retrieves the bytes of the serialization of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the data request as bytes.
-  function readDataRequest (uint256 _id) external view returns(bytes memory) {
+  function readDataRequest(uint256 _id) external view returns(bytes memory) {
     return requests[_id].dr;
   }
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
-  function readResult (uint256 _id) external view override returns(bytes memory) {
+  function readResult(uint256 _id) external view override returns(bytes memory) {
     return requests[_id].result;
   }
 
   /// @dev Retrieves hash of the data request transaction in Witnet
   /// @param _id The unique identifier of the data request.
   /// @return The hash of the DataRequest transaction in Witnet
-  function readDrHash (uint256 _id) external view override returns(uint256) {
+  function readDrHash(uint256 _id) external view override returns(uint256) {
     return requests[_id].drHash;
   }
 
@@ -346,7 +349,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     public
     validSignature(_publicKey, addrSignature)
     poeValid(_poe,_publicKey, _uPoint,_vPointHelpers)
-    returns(bool)
+  returns(bool)
   {
     for (uint i = 0; i < _ids.length; i++) {
       require(
@@ -375,7 +378,10 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256[2] memory _publicKey,
     uint256[2] memory _uPoint,
     uint256[4] memory _vPointHelpers)
-  internal view vrfValid(_poe,_publicKey, _uPoint,_vPointHelpers) returns(bool)
+    internal
+    view
+    vrfValid(_poe,_publicKey, _uPoint,_vPointHelpers)
+  returns(bool)
   {
     uint256 vrf = uint256(VRF.gammaToHash(_poe[0], _poe[1]));
     // True if vrf/(2^{256} -1) <= repFactor/abs.activeIdentities
@@ -398,9 +404,10 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   function verifySig(
     bytes memory _message,
     uint256[2] memory _publicKey,
-    bytes memory _addrSignature
-    )
-  internal pure returns(bool)
+    bytes memory _addrSignature)
+    internal
+    pure
+  returns(bool)
   {
     bytes32 r;
     bytes32 s;

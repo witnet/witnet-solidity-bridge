@@ -91,10 +91,10 @@ contract MockBlockRelay is BlockRelayInterface {
     uint256 _blockHash,
     uint256 _index,
     uint256 _element)
-  external
-  view
-  blockExists(_blockHash)
-  override
+    external
+    view
+    blockExists(_blockHash)
+    override
   returns(bool)
   {
     uint256 drMerkleRoot = blocks[_blockHash].drHashMerkleRoot;
@@ -116,10 +116,10 @@ contract MockBlockRelay is BlockRelayInterface {
     uint256 _blockHash,
     uint256 _index,
     uint256 _element)
-  external
-  view
-  blockExists(_blockHash)
-  override
+    external
+    view
+    blockExists(_blockHash)
+    override
   returns(bool)
   {
     uint256 tallyMerkleRoot = blocks[_blockHash].tallyHashMerkleRoot;
