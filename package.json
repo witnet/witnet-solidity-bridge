@@ -1,6 +1,6 @@
 {
   "name": "witnet-ethereum-bridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Witnet-Ethereum Bridge Interface",
   "main": "",
   "scripts": {
@@ -32,8 +32,8 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
-    "vrf-solidity": "girazoki/vrf-solidity#chore/versions",
-    "witnet-ethereum-block-relay": "girazoki/witnet-ethereum-block-relay#chore/version"
+    "vrf-solidity": "0.2.2",
+    "witnet-ethereum-block-relay": "witnet/witnet-ethereum-block-relay"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
