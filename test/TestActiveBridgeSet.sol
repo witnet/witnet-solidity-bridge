@@ -8,17 +8,17 @@ contract TestActiveBridgeSet {
 
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
 
-  uint8 constant private CLAIM_BLOCK_PERIOD = 8;
-  uint16 constant private ACTIVITY_LENGTH = 100;
+  uint8 constant internal CLAIM_BLOCK_PERIOD = 8;
+  uint16 constant internal ACTIVITY_LENGTH = 100;
 
-  address[] private addresses = [
+  address[] internal addresses = [
     address(0x01),
     address(0x02),
     address(0x03),
     address(0x04)
   ];
 
-  ActiveBridgeSetLib.ActiveBridgeSet private abs;
+  ActiveBridgeSetLib.ActiveBridgeSet internal abs;
 
   function beforeEach() external {
     abs.lastBlockNumber = 0;

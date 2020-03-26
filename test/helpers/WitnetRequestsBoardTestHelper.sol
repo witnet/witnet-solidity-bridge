@@ -13,9 +13,9 @@ import "../../contracts/WitnetRequestsBoard.sol";
 
 contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
 
-  WitnetRequestsBoard private wrb;
-  uint256 private blockHash;
-  uint256 private epoch;
+  WitnetRequestsBoard internal wrb;
+  uint256 internal blockHash;
+  uint256 internal epoch;
 
   constructor(address _blockRelayAddress, uint8 _repFactor) WitnetRequestsBoard(_blockRelayAddress, _repFactor) public { }
 

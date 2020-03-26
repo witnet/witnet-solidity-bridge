@@ -17,7 +17,7 @@ import "./BufferLib.sol";
 library CBOR {
   using BufferLib for BufferLib.Buffer;
 
-  uint64 constant private UINT64_MAX = ~uint64(0);
+  uint64 constant internal UINT64_MAX = ~uint64(0);
 
   struct Value {
     BufferLib.Buffer buffer;

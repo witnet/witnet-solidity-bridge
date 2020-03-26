@@ -25,10 +25,10 @@ contract WitnetRequestsBoardProxy {
   uint256 internal currentLastId;
 
   // Instance of the current WitnetRequestBoard
-  WitnetRequestsBoardInterface private witnetRequestsBoardInstance;
+  WitnetRequestsBoardInterface internal witnetRequestsBoardInstance;
 
   // Array with the controllers that have been used in the Proxy
-  ControllerInfo[] private controllers;
+  ControllerInfo[] internal controllers;
 
   modifier notIdentical(address _newAddress) {
     require(_newAddress != witnetRequestsBoardAddress, "The provided Witnet Requests Board instance address is already in use");
