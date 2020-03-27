@@ -1,8 +1,10 @@
 {
   "rinkeby" : {
-    "BlockRelayProxy" : "0xCD835FB8B7359550Cd378f6b048374cE6Da423A8"
+    "BlockRelayProxy" : "0x21FC161EB3b958f256bF303dEb32755cFe33bbbd",
+    "WitnetRequestsBoardProxy": "0x996Be500EBF09537EDde024f70fFdFA55089E939"
   },
   "goerli" : {
-  "BlockRelayProxy" : "0xab55369585B03398fDf359D1bAA0D48995C1832A"
+    "BlockRelayProxy" : "0xbF36475B8245a51B6f5F4ABeF852725ED302DD9b",
+    "WitnetRequestsBoardProxy": "0xFBd67d672C12B130b61320026E5B681f9040bCd3"
   }
 }
