@@ -7,7 +7,7 @@ module.exports = function (deployer, network) {
   if (network in addresses) {
     BlockRelayProxy.address = addresses[network].BlockRelayProxy
   } else {
-    var MockBlockRelay = artifacts.require("MockBlockRelay")
+    const MockBlockRelay = artifacts.require("MockBlockRelay")
     console.log(`> Migrating BlockRelay and BlockRelayProxy into ${network} network`)
     deployer.deploy(MockBlockRelay).then(function () {
       return deployer.deploy(BlockRelayProxy, MockBlockRelay.address)
