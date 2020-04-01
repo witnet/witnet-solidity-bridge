@@ -61,6 +61,13 @@ The `WitnetRequestsBoard` contract provides the following methods:
     was inserted.
     - *_result*: the result itself as `bytes`.
 
+- **checkDataRequestsClaimability**:
+  - _description_: checks if data requests specified by the listed IDs are claimable or not.
+  - _inputs_:
+    - *_ids*: the list of data request identifiers to be claimed.
+  - _output_:
+    - an array of booleans indicating if data requests are claimable or not.
+
 - **readDataRequest**:
   - _description_: retrieves the bytes of the serialization of one data request from the WRB.
   - _inputs_:
@@ -87,14 +94,10 @@ The `WitnetRequestsBoard` contract provides the following methods:
   - _output_:
     - the last beacon as byte concatenation of (block_hash||epoch).
 
-- **absCount**:
-  - _description_: retrieves the number of distinct identities in the Active Bridge Set.
+- **requestsCount**:
+  - _description_: returns the number of data requests in the WRB.
   - _output_:
-    - the number of active identities.
-
-- **isABSMember**:
-  - _description_: checks whether an identity is part of the Active Bridge Set.
-  - _output_: true if the identity is member of the ABS. 
+    - the number of data requests in the WRB.
 
 In addition, `WitnetRequestsBoard` inherits the `VRF` contract from https://github.com/witnet/vrf-solidity, and as such, all its public methods are also available to be queried. This is extremely important as the proof of eligibility is verified with the `fastVerify` method, which requires some auxiliary data points in addition to the proof itself. These can be calculated using the following methods:
 
@@ -106,7 +109,7 @@ In addition, `WitnetRequestsBoard` inherits the `VRF` contract from https://gith
 
 The `UsingWitnet` contract injects the following methods into the contracts inheriting from it:
 
-- **witnetPostDataRequest**:
+- **witnetPostRequest**:
   - _description_: call to the WRB's `postDataRequest` method to post a 
   data request into the WRB so its is resolved in Witnet with total reward 
   specified in `msg.value`.
@@ -117,9 +120,8 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
   - _output_:
     - *_id*: the unique identifier of the data request.
 
-- **witnetUpgradeDataRequest**:
-  - _description_: call to the WRB's `upgradeDataRequest` method to increment 
-  the total reward of the data request by adding more value to it. The new request reward will be increased by `msg.value` minus the difference between the former tally reward and the new tally reward.
+- **witnetUpgradeRequest**:
+  - _description_: call to the WRB's `upgradeDataRequest` method to increment the total reward of the data request by adding more value to it. The new request reward will be increased by `msg.value` minus the difference between the former tally reward and the new tally reward.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
     - *_tallyReward*: the new tally reward. Needs to be equal or greater than the former tally reward.
@@ -131,6 +133,14 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
     - *_id*: the unique identifier of the data request.
   - _output_:
     - the result of the data request as `bytes`.
+
+- **witnetCheckRequestAccepted**:
+  - _description_: check if a request has been accepted into Witnet.
+  Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third parties) before this method returns `true`.
+  - _inputs_:
+    - *_id*: the unique identifier of the data request.
+  - _output_:
+    - boolean telling if the request has been already accepted or not.
 
 ## Usage
 

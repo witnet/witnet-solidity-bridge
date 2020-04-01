@@ -45,7 +45,7 @@ contract UsingWitnet {
   /**
   * @notice Check if a request has been accepted into Witnet.
   * @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
-  * parties) before this method returns `true`
+  * parties) before this method returns `true`.
   * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestsBoard.
   * @return A boolean telling if the request has been already accepted or not. `false` do not mean rejection, though.
   */

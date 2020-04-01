@@ -169,7 +169,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   /// @dev Checks if the data requests from a list are claimable or not.
   /// @param _ids The list of data request identifiers to be checked.
-  /// @return An array of booleans indicating if data request are claimable or not.
+  /// @return An array of booleans indicating if data requests are claimable or not.
   function checkDataRequestsClaimability(uint256[] calldata _ids) external view returns (bool[] memory) {
     uint256 idsLength = _ids.length;
     bool[] memory validIds = new bool[](idsLength);
@@ -270,8 +270,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     return requests[_id].drHash;
   }
 
-  /// @dev Number of data requests in the WRB.
-  /// @return Returns the number of data requests in the WRB.
+  /// @dev Returns the number of data requests in the WRB.
+  /// @return the number of data requests in the WRB.
   function requestsCount() external view returns(uint256) {
     return requests.length;
   }
