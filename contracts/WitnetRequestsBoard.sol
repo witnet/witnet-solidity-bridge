@@ -118,6 +118,11 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       "Not a valid VRF");
     _;
   }
+  // Ensures the address is from a member of the active bridge set
+  modifier absMember(address _address) {
+    require(abs.absMembership(_address) == true, "Not a member of the ABS");
+    _;
+  }
 
  /**
   * @notice Include an address to specify the Witnet Block Relay and a replication factor.
