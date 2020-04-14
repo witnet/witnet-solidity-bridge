@@ -235,6 +235,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 _epoch,
     bytes calldata _result)
     external
+    absMember(msg.sender)
     drIncluded(_id)
     resultNotIncluded(_id)
  {
@@ -256,7 +257,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     msg.sender.transfer(requests[_id].tallyReward);
 
     // Push msg.sender to abs
-    abs.pushActivity(msg.sender, block.number);
+    //abs.pushActivity(msg.sender, block.number);
     emit PostedResult(msg.sender, _id);
   }
 
