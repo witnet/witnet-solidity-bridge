@@ -322,7 +322,7 @@ contract("WRB", accounts => {
 
       // report result
       const tx4 = await wrbInstance.reportResult(id1, [], 0, blockHeader, epoch, resBytes, {
-        from: accounts[2],
+        from: accounts[1],
       })
 
       // wait for the async method to finish
@@ -384,6 +384,7 @@ contract("WRB", accounts => {
           from: accounts[1],
         }), "Non-existing block")
     })
+
     it("should revert because the rewards are higher than the values sent. " +
        "Checks the post data request transaction",
     async () => {
@@ -395,6 +396,7 @@ contract("WRB", accounts => {
         value: web3.utils.toWei("1", "ether"),
       }), "Transaction value needs to be equal or greater than tally reward")
     })
+
     it("should revert because the rewards are higher than the values sent. " +
        "Checks the upgrade data request transaction",
     async () => {
@@ -597,6 +599,7 @@ contract("WRB", accounts => {
         "DR not yet included"
       )
     })
+
     it("should revert because of reporting a result for a data request " +
        "for which a result has been already reported",
     async () => {
@@ -655,88 +658,92 @@ contract("WRB", accounts => {
 
       // report data request inclusion
       const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, epoch2, {
-        from: accounts[0],
+        from: accounts[1],
       })
       await waitForHash(tx3)
 
       // report result
-      const tx4 = wrbInstance.reportResult(id1, [], 0, blockHeader2, epoch2, resBytes, { from: accounts[1] })
+      const tx4 = wrbInstance.reportResult(id1, [], 0, blockHeader2, epoch2, resBytes, {
+        from: accounts[1],
+      })
       await waitForHash(tx4)
 
       // revert when reporting the same result
       await truffleAssert.reverts(
-        wrbInstance.reportResult(id1, [], 1, blockHeader2, epoch2, resBytes, { from: accounts[1] }),
+        wrbInstance.reportResult(id1, [], 1, blockHeader2, epoch2, resBytes, { from: accounts[0] }),
         "Result already included"
       )
     })
-    it("should revert because of insertion of empty result",
-      async () => {
-        const drBytes = web3.utils.fromAscii("This is a DR")
-        const resBytes = web3.utils.fromAscii("This is a result")
-        const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
 
-        // VRF params
-        const publicKey = [data.publicKey.x, data.publicKey.y]
-        const proofBytes = data.poe[0].proof
-        const proof = await wrbInstance.decodeProof(proofBytes)
-        const message = data.poe[0].lastBeacon
-        const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
-        const signature = data.signature
+    it("should revert because trying to report a result from an address " +
+       "that does not belong to the ABS",
+    async () => {
+      const drBytes = web3.utils.fromAscii("This is a DR7")
+      const resBytes = web3.utils.fromAscii("This is a result")
+      const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
 
-        // post data request
-        const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
-          from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[0].proof
+      const proof = await wrbInstance.decodeProof(proofBytes)
+      const message = data.poe[0].lastBeacon
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
+      const signature = data.signature
+
+      // post data request
+      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      const txHash1 = await waitForHash(tx1)
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
+
+      // claim data request
+      const tx2 = wrbInstance.claimDataRequests(
+        [id1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        signature, {
+          from: accounts[1],
         })
-        const txHash1 = await waitForHash(tx1)
-        const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
-        const id1 = txReceipt1.logs[0].data
+      await waitForHash(tx2)
 
-        // claim data request
-        const tx2 = wrbInstance.claimDataRequests(
-          [id1],
-          proof,
-          publicKey,
-          fastVerifyParams[0],
-          fastVerifyParams[1],
-          signature, {
-            from: accounts[1],
-          })
-        await waitForHash(tx2)
+      var blockHeader2 = "0x" + sha.sha256("block header")
+      const roots2 = calculateRoots(drBytes, resBytes)
+      const epoch2 = 2
 
-        var blockHeader = "0x" + sha.sha256("block header")
-        const roots = calculateRoots(drBytes, resBytes)
-        const epoch = 2
+      // post new block
+      const txRelay2 = blockRelay.postNewBlock(blockHeader2, epoch2, roots2[0], roots2[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay2)
 
-        // post new block
-        const txRelay2 = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
-          from: accounts[0],
-        })
-        await waitForHash(txRelay2)
-        const concatenated = web3.utils.hexToBytes(blockHeader).concat(
-          web3.utils.hexToBytes(
-            web3.utils.padLeft(
-              web3.utils.toHex(epoch), 64
-            )
+      const concatenated = web3.utils.hexToBytes(blockHeader2).concat(
+        web3.utils.hexToBytes(
+          web3.utils.padLeft(
+            web3.utils.toHex(epoch2), 64
           )
         )
+      )
+      const beacon = await wrbInstance.getLastBeacon.call()
+      assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
-        const beacon = await wrbInstance.getLastBeacon.call()
-        assert.equal(beacon, web3.utils.bytesToHex(concatenated))
+      // report data request inclusion
+      const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, epoch2, {
+        from: accounts[1],
+      })
+      await waitForHash(tx3)
 
-        // report data request inclusion
-        const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader, epoch, {
-          from: accounts[0],
-        })
-        await waitForHash(tx3)
+      // revert when reporting the result beacouse accounts[0] is not a member of the ABS
+      await truffleAssert.reverts(
+        wrbInstance.reportResult(id1, [], 1, blockHeader2, epoch2, resBytes, { from: accounts[0] }),
+        "Not a member of the ABS"
+      )
+    })
 
-        // revert when reporting empty result
-        await truffleAssert.reverts(
-          wrbInstance.reportResult(id1, [], 1, blockHeader, epoch, [], { from: accounts[1] }),
-          "Result has zero length"
-        )
-      }
-    )
     it("should revert because of trying to claim with an invalid signature",
       async () => {
         const drBytes = web3.utils.fromAscii("This is a DR7")
@@ -767,6 +774,7 @@ contract("WRB", accounts => {
           fastVerifyParams[1],
           signature, { from: accounts[1] }), "Not a valid signature")
       })
+
     it("should update ABS activity",
       async () => {
         const block = await web3.eth.getBlock("latest")
@@ -775,6 +783,7 @@ contract("WRB", accounts => {
         const tx1 = wrbInstance.updateAbsActivity(block.number)
         await waitForHash(tx1)
       })
+
     it("should revert updating ABS activity with a future block",
       async () => {
         const block = await web3.eth.getBlock("latest")
@@ -783,6 +792,7 @@ contract("WRB", accounts => {
           "The block number provided has not been reached"
         )
       })
+
     it("should revert updating ABS activity with a past block",
       async () => {
         const block = await web3.eth.getBlock("latest")

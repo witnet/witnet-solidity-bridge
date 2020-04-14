@@ -199,7 +199,9 @@ contract("UsingWitnet", accounts => {
 
     it("should post the result of the request into the WBI", async () => {
       const epoch = 0
-      await returnData(wrb.reportResult(requestId, [], 0, block2Hash, epoch, resultHex))
+      await returnData(wrb.reportResult(requestId, [], 0, block2Hash, epoch, resultHex, {
+        from: accounts[1],
+      }))
       const requestInfo = await wrb.requests(requestId)
       assert.equal(requestInfo.result, resultHex)
     })
@@ -261,6 +263,22 @@ contract("UsingWitnet", accounts => {
       assert.equal(requestId.toString(16), "0x0000000000000000000000000000000000000000000000000000000000000001")
     })
 
+    it("should claim eligibility for relaying the request into Witnet", async () => {
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[0].proof
+      const proof = await wrb.decodeProof(proofBytes)
+      const message = data.poe[0].lastBeacon
+      const fastVerifyParams = await wrb.computeFastVerifyParams(publicKey, proof, message)
+      const signature = data.signature
+
+      await returnData(
+        wrb.claimDataRequests([requestId], proof, publicKey, fastVerifyParams[0], fastVerifyParams[1], signature, {
+          from: accounts[1],
+        })
+      )
+    })
+
     it("should report a Witnet block containing the request into the WRB", async () => {
       const epoch = 3
 
@@ -302,9 +320,11 @@ contract("UsingWitnet", accounts => {
       await blockRelay.postNewBlock(block4Hash, epoch, nullHash, resultHash, { from: accounts[0] })
     })
 
-    it("Should report the result in the WBI", async () => {
-      const epoch = 0
-      await returnData(wrb.reportResult(requestId, [], 0, block4Hash, epoch, resultHex))
+    it("Should report the result in the WRB", async () => {
+      const epoch = 3
+      await returnData(wrb.reportResult(requestId, [], 0, block4Hash, epoch, resultHex, {
+        from: accounts[1],
+      }))
       const requestinfo = await wrb.requests(requestId)
       assert.equal(requestinfo.result, resultHex)
     })

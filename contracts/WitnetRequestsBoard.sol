@@ -118,7 +118,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       "Not a valid VRF");
     _;
   }
-  // Ensures the address is from a member of the active bridge set
+  // Ensures the address belongs to the active bridge set
   modifier absMember(address _address) {
     require(abs.absMembership(_address) == true, "Not a member of the ABS");
     _;
@@ -235,9 +235,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 _epoch,
     bytes calldata _result)
     external
-    absMember(msg.sender)
     drIncluded(_id)
     resultNotIncluded(_id)
+    absMember(msg.sender)
  {
 
     // Ensures the result byes do not have zero length
@@ -256,8 +256,6 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     requests[_id].result = _result;
     msg.sender.transfer(requests[_id].tallyReward);
 
-    // Push msg.sender to abs
-    //abs.pushActivity(msg.sender, block.number);
     emit PostedResult(msg.sender, _id);
   }
 
