@@ -101,6 +101,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     require(requests[_id].result.length == 0, "Result already included");
     _;
   }
+
 // Ensures the VRF is valid
   modifier vrfValid(
     uint256[4] memory _poe,
@@ -232,6 +233,11 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     drIncluded(_id)
     resultNotIncluded(_id)
  {
+
+    // Ensures the result byes do not have zero length
+    // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
+    require(_result.length != 0, "Result has zero length");
+
     // this should leave it ready for PoI
     uint256 resHash = uint256(sha256(abi.encodePacked(requests[_id].drHash, _result)));
     require(
