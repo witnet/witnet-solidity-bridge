@@ -65,6 +65,14 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     requests[_id].tallyReward += _tallyReward;
   }
 
+  /// @dev Reports the hash of a data request in Witnet.
+  /// @param _id The unique identifier of the data request.
+  /// @param _drHash The hash itself.
+  function reportDrHash (uint256 _id, uint256 _drHash) external {
+    requests[_id].drHash = _drHash;
+    msg.sender.transfer(requests[_id].tallyReward);
+  }
+
   /// @dev Reports the result of a data request in Witnet.
   /// @param _id The unique identifier of the data request.
   /// @param _result The result itself as bytes.
