@@ -6,6 +6,8 @@ const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
 const Request = artifacts.require("Request")
 const Witnet = artifacts.require("Witnet")
 
+const truffleAssert = require("truffle-assertions")
+
 const sha = require("js-sha256")
 const data = require("./data.json")
 
@@ -93,7 +95,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should upgrade the rewards of a existing Witnet request", async () => {
-      await returnData(clientContract._witnetUpgradeRequest(requestId, resultReward, {
+      await returnData(clientContract._witnetUpgradeRequest(requestId, requestReward, resultReward, {
         from: accounts[0],
         value: requestReward + resultReward,
       }))
@@ -339,6 +341,32 @@ contract("UsingWitnet", accounts => {
       await clientContract._witnetReadResult(requestId, { from: accounts[0] })
       result = await clientContract.result()
       assert.equal(result.success, false)
+    })
+
+    it("Should revert if reward amounts are smaller than transaction value", async () => {
+      const requestReward = web3.utils.toWei("1", "ether")
+      const resultReward = web3.utils.toWei("1", "ether")
+      const transactionValue = web3.utils.toWei("3", "ether")
+
+      await truffleAssert.reverts(
+        clientContract._witnetPostRequest(request.address, requestReward, resultReward, {
+          from: accounts[0],
+          value: transactionValue,
+        }),
+        "The sum of rewards should be equal to transaction value"
+      )
+    })
+
+    it("Should revert if reward amounts sum overflows", async () => {
+      const resultReward = web3.utils.toBN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+
+      await truffleAssert.reverts(
+        clientContract._witnetPostRequest(request.address, resultReward, 1, {
+          from: accounts[0],
+          value: 0,
+        }),
+        "The sum of rewards overflows"
+      )
     })
   })
 })
