@@ -168,9 +168,23 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.
   /// @param _tallyReward The new tally reward. Needs to be equal or greater than the former tally reward.
-  function upgradeDataRequest(uint256 _id, uint256 _tallyReward) external payable payingEnough(msg.value, _tallyReward) override {
-    requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, SafeMath.sub(msg.value, _tallyReward));
-    requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
+  function upgradeDataRequest(uint256 _id, uint256 _tallyReward)
+    external
+    payable
+    payingEnough(msg.value, _tallyReward)
+    resultNotIncluded(_id)
+    override
+  {
+    if (requests[_id].drHash != 0) {
+      require(
+        msg.value == _tallyReward,
+        "Result reward should be equal to txn value (data request was included)"
+      );
+      requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
+    } else {
+      requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, SafeMath.sub(msg.value, _tallyReward));
+      requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
+    }
   }
 
   /// @dev Checks if the data requests from a list are claimable or not.

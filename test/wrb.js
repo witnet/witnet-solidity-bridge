@@ -805,6 +805,82 @@ contract("WRB", accounts => {
           "The last block number updated was higher than the one provided"
         )
       })
+    it("should revert while upgrading the rewards with wrong values or if the result was reported",
+      async () => {
+        const drBytes = web3.utils.fromAscii("This is a DR7")
+        const resBytes = web3.utils.fromAscii("This is a result")
+        const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
+
+        // VRF params
+        const publicKey = [data.publicKey.x, data.publicKey.y]
+        const proofBytes = data.poe[0].proof
+        const proof = await wrbInstance.decodeProof(proofBytes)
+        const message = data.poe[0].lastBeacon
+        const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
+        const signature = data.signature
+
+        // post data request
+        const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        })
+        const txHash1 = await waitForHash(tx1)
+        const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+        const id1 = txReceipt1.logs[0].data
+
+        // claim data request
+        const tx2 = wrbInstance.claimDataRequests(
+          [id1],
+          proof,
+          publicKey,
+          fastVerifyParams[0],
+          fastVerifyParams[1],
+          signature, {
+            from: accounts[1],
+          })
+        await waitForHash(tx2)
+
+        var blockHeader2 = "0x" + sha.sha256("block header")
+        const roots2 = calculateRoots(drBytes, resBytes)
+        const epoch2 = 2
+
+        // post new block
+        const txRelay2 = blockRelay.postNewBlock(blockHeader2, epoch2, roots2[0], roots2[1], {
+          from: accounts[0],
+        })
+        await waitForHash(txRelay2)
+
+        // report data request inclusion
+        const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, epoch2, {
+          from: accounts[0],
+        })
+        await waitForHash(tx3)
+
+        // revert when upgrading data request with wrong rewards and the DR is already included
+        await truffleAssert.reverts(
+          wrbInstance.upgradeDataRequest(
+            id1,
+            web3.utils.toWei("1", "ether"),
+            { from: accounts[1], value: web3.utils.toWei("2", "ether") }
+          ),
+          "Result reward should be equal to txn value (data request was included)"
+        )
+
+        // report result
+        const tx4 = wrbInstance.reportResult(id1, [], 0, blockHeader2, epoch2, resBytes, { from: accounts[1] })
+        await waitForHash(tx4)
+
+        // revert when upgrading data request but the DR result was already reported
+        await truffleAssert.reverts(
+          wrbInstance.upgradeDataRequest(
+            id1,
+            web3.utils.toWei("1", "ether"),
+            { from: accounts[1], value: web3.utils.toWei("1", "ether") }
+          ),
+          "Result already included"
+        )
+      }
+    )
   })
 })
 
