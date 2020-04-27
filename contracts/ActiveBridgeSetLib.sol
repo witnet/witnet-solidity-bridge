@@ -64,7 +64,7 @@ library ActiveBridgeSetLib {
     } else {
       // Check if address was already counted as active identity in this current activity slot
       uint256 epochIdsLength = _abs.epochIdentities[currentSlot].length;
-      for (uint i; i < epochIdsLength; i++) {
+      for (uint256 i; i < epochIdsLength; i++) {
         if (_abs.epochIdentities[currentSlot][i] == _address) {
           return false;
         }
@@ -153,7 +153,7 @@ library ActiveBridgeSetLib {
   function flushSlot(ActiveBridgeSet storage _abs, uint16 _slot) private {
     // For a given slot, go through all identities to flush them
     uint256 epochIdsLength = _abs.epochIdentities[_slot].length;
-    for (uint16 id = 0; id < epochIdsLength; id++) {
+    for (uint256 id = 0; id < epochIdsLength; id++) {
       flushIdentity(_abs, _abs.epochIdentities[_slot][id]);
     }
     delete _abs.epochIdentities[_slot];
