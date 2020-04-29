@@ -182,7 +182,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       );
       requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
     } else {
-      requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, SafeMath.sub(msg.value, _tallyReward));
+      requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, msg.value - _tallyReward);
       requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
     }
   }
