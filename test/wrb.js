@@ -115,7 +115,7 @@ contract("WRB", accounts => {
     })
 
     it("should post a data request, claim it, post a new block to block relay, " +
-       "verify inclusion and result reporting with PoIs and read the result",
+      "verify inclusion and result reporting with PoIs and read the result",
     async () => {
       var account1 = accounts[0]
       var account2 = accounts[1]
@@ -263,8 +263,8 @@ contract("WRB", accounts => {
     })
 
     it("should insert a data request, subscribe to the PostedResult event, wait for its emission, " +
-       "perform the claim, post new block, report dr inclusion and the result " +
-       "and only then read result", async () => {
+      "perform the claim, post new block, report dr inclusion and the result " +
+      "and only then read result", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
       const resBytes = web3.utils.fromAscii("This is a result")
@@ -386,7 +386,7 @@ contract("WRB", accounts => {
     })
 
     it("should revert because the rewards are higher than the values sent. " +
-       "Checks the post data request transaction",
+      "Checks the post data request transaction",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
 
@@ -398,7 +398,7 @@ contract("WRB", accounts => {
     })
 
     it("should revert because the rewards are higher than the values sent. " +
-       "Checks the upgrade data request transaction",
+      "Checks the upgrade data request transaction",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
 
@@ -601,7 +601,7 @@ contract("WRB", accounts => {
     })
 
     it("should revert because of reporting a result for a data request " +
-       "for which a result has been already reported",
+      "for which a result has been already reported",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR7")
       const resBytes = web3.utils.fromAscii("This is a result")
@@ -850,6 +850,16 @@ contract("WRB", accounts => {
         })
         await waitForHash(txRelay2)
 
+        // revert when upgrading data request with wrong rewards and the DR is not yet included
+        await truffleAssert.reverts(
+          wrbInstance.upgradeDataRequest(
+            id1,
+            web3.utils.toWei("2", "ether"),
+            { from: accounts[1], value: web3.utils.toWei("1", "ether") }
+          ),
+          "Transaction value needs to be equal or greater than tally reward"
+        )
+
         // report data request inclusion
         const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, epoch2, {
           from: accounts[0],
@@ -863,12 +873,19 @@ contract("WRB", accounts => {
             web3.utils.toWei("1", "ether"),
             { from: accounts[1], value: web3.utils.toWei("2", "ether") }
           ),
-          "Result reward should be equal to txn value (data request was included)"
+          "Result reward should equal txn value (request reward already given)"
         )
 
-        // report result
-        const tx4 = wrbInstance.reportResult(id1, [], 0, blockHeader2, epoch2, resBytes, { from: accounts[1] })
+        // upgrade data request with valid rewards with DR already included
+        const tx4 = wrbInstance.upgradeDataRequest(id1,
+          web3.utils.toWei("1", "ether"),
+          { from: accounts[0], value: web3.utils.toWei("1", "ether") }
+        )
         await waitForHash(tx4)
+
+        // report result
+        const tx5 = wrbInstance.reportResult(id1, [], 0, blockHeader2, epoch2, resBytes, { from: accounts[1] })
+        await waitForHash(tx5)
 
         // revert when upgrading data request but the DR result was already reported
         await truffleAssert.reverts(
