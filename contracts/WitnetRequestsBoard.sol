@@ -30,6 +30,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     bytes result;
     // Block number at which the DR was claimed for the last time
     uint256 blockNumber;
+    // The epoch of the blockHash in which the last transaction related to the dr has been included
+    uint256 epoch;
     uint256 drHash;
     address payable pkhClaim;
   }
@@ -162,6 +164,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     request.dr = _serialized;
     request.inclusionReward = SafeMath.sub(msg.value, _tallyReward);
     request.tallyReward = _tallyReward;
+    request.epoch = blockRelay.getLastEpoch();
 
     // Push the new request into the contract state
     requests.push(request);
@@ -228,6 +231,14 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
  {
     // Check the data request has been claimed
     require(dataRequestCanBeClaimed(requests[_id]) == false, "Data Request has not yet been claimed");
+
+    // Ensures the request inclusion is reported after the epoch in which the request was posted
+    require(
+      requests[_id].epoch < _epoch,
+      "the dr inclusion must be reported after the dr is posted into the WRB");
+    // Update the dr epoch
+    requests[_id].epoch = _epoch;
+
     uint256 drOutputHash = uint256(sha256(requests[_id].dr));
     uint256 drHash = uint256(sha256(abi.encodePacked(drOutputHash, _poi[0])));
 
@@ -265,6 +276,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     resultNotIncluded(_id)
     absMember(msg.sender)
  {
+    // Ensures the result was published in a later block than the request
+    require(requests[_id].epoch <= _epoch, "the result must be reported after the request is included");
 
     // Ensures the result byes do not have zero length
     // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
