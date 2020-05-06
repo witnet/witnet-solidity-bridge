@@ -97,6 +97,13 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     require(requests[_id].drHash != 0, "DR not yet included");
     _;
   }
+
+  // Ensures the DR inclusion has been already reported
+  modifier drClaimed(uint256 _id) {
+    require(requests[_id].timestamp != 0, "DR not yet claimed");
+    _;
+  }
+
   // Ensures the result has not been reported yet
   modifier resultNotIncluded(uint256 _id) {
     require(requests[_id].result.length == 0, "Result already included");
@@ -220,6 +227,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 _blockHash,
     uint256 _epoch)
     external
+    drClaimed(_id)
     drNotIncluded(_id)
  {
     uint256 drOutputHash = uint256(sha256(requests[_id].dr));
