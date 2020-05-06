@@ -199,8 +199,8 @@ contract("UsingWitnet", accounts => {
       await blockRelay.postNewBlock(block2Hash, epoch, nullHash, resultHash, { from: accounts[0] })
     })
 
-    it("should post the result of the request into the WBI", async () => {
-      const epoch = 0
+    it("should post the result of the request into the WRB", async () => {
+      const epoch = 1
       await returnData(wrb.reportResult(requestId, [], 0, block2Hash, epoch, resultHex, {
         from: accounts[1],
       }))

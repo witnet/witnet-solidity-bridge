@@ -569,15 +569,82 @@ contract("WRB", accounts => {
       assert.equal(beacon, web3.utils.bytesToHex(concatenated))
 
       // post data request inclusion
-      const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, epoch, {
+      const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, epoch1, {
         from: accounts[0],
       })
       await waitForHash(tx3)
 
       // assert it fails when trying to report the dr inclusion again
-      await truffleAssert.reverts(wrbInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader2, epoch, {
+      await truffleAssert.reverts(wrbInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader2, epoch1, {
         from: accounts[1],
       }), "DR already included")
+    })
+
+    it("should revert when trying to prove inclusion of a DR in an epoch inferior than the one in which DR was posted", async () => {
+      const drBytes = web3.utils.fromAscii("This is a DR5")
+      const resBytes = web3.utils.fromAscii("This is a result")
+      const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
+      var dummySybling = 1
+
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[1].proof
+      const proof = await wrbInstance.decodeProof(proofBytes)
+      const message = data.poe[1].lastBeacon
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
+      const signature = data.signature
+
+      // when posting this block, the lastBlock.epoch in the blockRelay will be 1
+      var blockHeader0 = "0x" + sha.sha256("block header 0")
+      const roots0 = calculateRoots(drBytes, resBytes)
+      const epoch0 = 1
+      const txRelay0 = blockRelay.postNewBlock(blockHeader0, epoch0, roots0[0], roots0[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay0)
+
+      // post data request
+      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      const txHash1 = await waitForHash(tx1)
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
+
+      var blockHeader1 = "0x" + sha.sha256("block header")
+      const roots1 = calculateRoots(drBytes, resBytes)
+      const epoch1 = 2
+      const txRelay1 = blockRelay.postNewBlock(blockHeader1, epoch1, roots1[0], roots1[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay1)
+
+      // claim data request
+      const tx2 = wrbInstance.claimDataRequests(
+        [id1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        signature, {
+          from: accounts[1],
+        })
+      await waitForHash(tx2)
+      
+      var blockHeader2 = "0x" + sha.sha256("block header 2")
+      const roots2 = calculateRoots(drBytes, resBytes)
+      const epoch2 = 3
+      const txRelay2 = blockRelay.postNewBlock(blockHeader2, epoch2, roots2[0], roots2[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay2)
+
+      // assert it fails when trying to report the dr inclusion for an epoch not
+      // later than the epoch for which the dr was posted
+      await truffleAssert.reverts(wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader1, 0, {
+        from: accounts[0],
+      }), "the dr inclusion must be reported after the dr is posted into the WRB")
     })
 
     it("should revert when reporting a result for a dr for which its inclusion was not reported yet", async () => {
@@ -701,6 +768,75 @@ contract("WRB", accounts => {
       await truffleAssert.reverts(
         wrbInstance.reportResult(id1, [], 1, blockHeader2, epoch2, resBytes, { from: accounts[0] }),
         "Result already included"
+      )
+    })
+
+    it("should revert when trying to report the result of a DR in an epoch" +
+       " inferior than the one in which DR inclusion was reported ",
+    async () => {
+      const drBytes = web3.utils.fromAscii("This is a DR7")
+      const resBytes = web3.utils.fromAscii("This is a result")
+      const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
+
+      // VRF params
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[0].proof
+      const proof = await wrbInstance.decodeProof(proofBytes)
+      const message = data.poe[0].lastBeacon
+      const fastVerifyParams = await wrbInstance.computeFastVerifyParams(publicKey, proof, message)
+      const signature = data.signature
+
+      // post data request
+      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      const txHash1 = await waitForHash(tx1)
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
+
+      // claim data request
+      const tx2 = wrbInstance.claimDataRequests(
+        [id1],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        signature, {
+          from: accounts[1],
+        })
+      await waitForHash(tx2)
+
+      var blockHeader2 = "0x" + sha.sha256("block header")
+      const roots2 = calculateRoots(drBytes, resBytes)
+      const epoch2 = 2
+
+      // post new block
+      const txRelay2 = blockRelay.postNewBlock(blockHeader2, epoch2, roots2[0], roots2[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay2)
+
+      const concatenated = web3.utils.hexToBytes(blockHeader2).concat(
+        web3.utils.hexToBytes(
+          web3.utils.padLeft(
+            web3.utils.toHex(epoch2), 64
+          )
+        )
+      )
+      const beacon = await wrbInstance.getLastBeacon.call()
+      assert.equal(beacon, web3.utils.bytesToHex(concatenated))
+
+      // report data request inclusion
+      const tx3 = wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader2, epoch2, {
+        from: accounts[1],
+      })
+      await waitForHash(tx3)
+
+      // revert when reporting the result for an epoch inferior than the one of the dr inclusion
+      await truffleAssert.reverts(
+        wrbInstance.reportResult(id1, [], 1, blockHeader2, 0, resBytes, { from: accounts[1] }),
+        "the result must be reported after the request is included"
       )
     })
 
