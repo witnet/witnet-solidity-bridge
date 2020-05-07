@@ -477,6 +477,35 @@ contract("WRB", accounts => {
         "One of the listed data requests was already claimed")
     })
 
+    it("should revert when trying to report a dr inclusion that has not been claimed", async () => {
+      const drBytes = web3.utils.fromAscii("This is a DR5")
+      const resBytes = web3.utils.fromAscii("This is a result")
+      var dummySybling = 1
+      const epoch = 0
+
+      // post data request
+      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
+      const txHash1 = await waitForHash(tx1)
+      const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+      const id1 = txReceipt1.logs[0].data
+
+      var blockHeader1 = "0x" + sha.sha256("block header")
+      const roots1 = calculateRoots(drBytes, resBytes)
+      const epoch1 = 2
+      const txRelay1 = blockRelay.postNewBlock(blockHeader1, epoch1, roots1[0], roots1[1], {
+        from: accounts[0],
+      })
+      await waitForHash(txRelay1)
+
+      // Should revert when reporting the inclusion since the dr has not been claimed
+      await truffleAssert.reverts(wrbInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader1, epoch, {
+        from: accounts[1],
+      }), "DR not yet claimed")
+    })
+
     it("should revert when trying to report a dr inclusion that was already reported", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
       const resBytes = web3.utils.fromAscii("This is a result")
