@@ -353,7 +353,7 @@ contract("UsingWitnet", accounts => {
           from: accounts[0],
           value: transactionValue,
         }),
-        "The sum of rewards should be equal to transaction value"
+        "Transaction value should equal the sum of rewards"
       )
     })
 

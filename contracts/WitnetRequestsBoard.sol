@@ -178,7 +178,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     if (requests[_id].drHash != 0) {
       require(
         msg.value == _tallyReward,
-        "Result reward should equal txn value (request reward already given)"
+        "Txn value should equal result reward argument (request reward already paid)"
       );
       requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
     } else {

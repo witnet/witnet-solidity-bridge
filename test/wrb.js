@@ -873,7 +873,7 @@ contract("WRB", accounts => {
             web3.utils.toWei("1", "ether"),
             { from: accounts[1], value: web3.utils.toWei("2", "ether") }
           ),
-          "Result reward should equal txn value (request reward already given)"
+          "Txn value should equal result reward argument (request reward already paid)"
         )
 
         // upgrade data request with valid rewards with DR already included
