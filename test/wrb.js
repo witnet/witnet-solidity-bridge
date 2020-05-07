@@ -511,7 +511,6 @@ contract("WRB", accounts => {
       const resBytes = web3.utils.fromAscii("This is a result")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
       var dummySybling = 1
-      const epoch = 0
 
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
@@ -580,11 +579,11 @@ contract("WRB", accounts => {
       }), "DR already included")
     })
 
-    it("should revert when trying to prove inclusion of a DR in an epoch inferior than the one in which DR was posted", async () => {
+    it("should revert when trying to prove inclusion of a DR in an epoch inferior than" +
+      "the one in which DR was posted", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
       const resBytes = web3.utils.fromAscii("This is a result")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
-      var dummySybling = 1
 
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
@@ -631,7 +630,7 @@ contract("WRB", accounts => {
           from: accounts[1],
         })
       await waitForHash(tx2)
-      
+
       var blockHeader2 = "0x" + sha.sha256("block header 2")
       const roots2 = calculateRoots(drBytes, resBytes)
       const epoch2 = 3
