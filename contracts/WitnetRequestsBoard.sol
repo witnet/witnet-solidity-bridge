@@ -224,6 +224,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
  {
     uint256 drOutputHash = uint256(sha256(requests[_id].dr));
     uint256 drHash = uint256(sha256(abi.encodePacked(drOutputHash, _poi[0])));
+
+    // Update the state upon which this function depends before the external call
+    requests[_id].drHash = drHash;
     require(
       blockRelay.verifyDrPoi(
       _poi,
@@ -231,7 +234,6 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _epoch,
       _index,
       drOutputHash), "Invalid PoI");
-    requests[_id].drHash = drHash;
     requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
     // Push requests[_id].pkhClaim to abs
     abs.pushActivity(requests[_id].pkhClaim, block.number);
@@ -262,7 +264,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
     require(_result.length != 0, "Result has zero length");
 
-    // this should leave it ready for PoI
+    // Update the state upon which this function depends before the external call
+    requests[_id].result = _result;
+
     uint256 resHash = uint256(sha256(abi.encodePacked(requests[_id].drHash, _result)));
     require(
       blockRelay.verifyTallyPoi(
@@ -271,7 +275,6 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _epoch,
       _index,
       resHash), "Invalid PoI");
-    requests[_id].result = _result;
     msg.sender.transfer(requests[_id].tallyReward);
 
     emit PostedResult(msg.sender, _id);
