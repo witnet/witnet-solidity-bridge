@@ -202,6 +202,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       uint256 index = _ids[i];
       validIds[i] = (dataRequestCanBeClaimed(requests[index])) &&
         requests[index].drHash == 0 &&
+        index < requests.length &&
         requests[index].result.length == 0;
     }
 
@@ -287,6 +288,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @param _id The unique identifier of the data request.
   /// @return The result of the data request as bytes.
   function readDataRequest(uint256 _id) external view returns(bytes memory) {
+    require(requests.length > _id, "Id not found");
     return requests[_id].dr;
   }
 
@@ -294,6 +296,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
   function readResult(uint256 _id) external view override returns(bytes memory) {
+    require(requests.length > _id, "Id not found");
     return requests[_id].result;
   }
 
@@ -301,6 +304,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @param _id The unique identifier of the data request.
   /// @return The hash of the DataRequest transaction in Witnet.
   function readDrHash(uint256 _id) external view override returns(uint256) {
+    require(requests.length > _id, "Id not found");
     return requests[_id].drHash;
   }
 

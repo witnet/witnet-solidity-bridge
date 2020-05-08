@@ -14,6 +14,12 @@ library BufferLib {
     uint32 cursor;
   }
 
+  // Ensures we access an existing index in an array
+  modifier notOutOfBounds(uint32 index, uint256 length) {
+    require(index < length, "Tried to read from a consumed Buffer (must rewind it first)");
+    _;
+  }
+
   /**
   * @notice Read and consume a certain amount of bytes from the buffer.
   * @param _buffer An instance of `BufferLib.Buffer`.
@@ -51,7 +57,7 @@ library BufferLib {
   * @param _buffer An instance of `BufferLib.Buffer`.
   * @return The next byte in the buffer counting from the cursor position.
   */
-  function next(Buffer memory _buffer) internal pure returns (byte) {
+  function next(Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor, _buffer.data.length) returns (byte) {
     // Return the byte at the position marked by the cursor and advance the cursor all at once
     return _buffer.data[_buffer.cursor++];
   }
@@ -100,7 +106,7 @@ library BufferLib {
   * @param _buffer An instance of `BufferLib.Buffer`.
   * @return The `uint8` value of the next byte in the buffer counting from the cursor position.
   */
-  function readUint8(Buffer memory _buffer) internal pure returns (uint8) {
+  function readUint8(Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor, _buffer.data.length) returns (uint8) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint8 value;
@@ -117,7 +123,7 @@ library BufferLib {
   * @param _buffer An instance of `BufferLib.Buffer`.
   * @return The `uint16` value of the next 2 bytes in the buffer counting from the cursor position.
   */
-  function readUint16(Buffer memory _buffer) internal pure returns (uint16) {
+  function readUint16(Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 1, _buffer.data.length) returns (uint16) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint16 value;
@@ -134,7 +140,7 @@ library BufferLib {
   * @param _buffer An instance of `BufferLib.Buffer`.
   * @return The `uint32` value of the next 4 bytes in the buffer counting from the cursor position.
   */
-  function readUint32(Buffer memory _buffer) internal pure returns (uint32) {
+  function readUint32(Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 3, _buffer.data.length) returns (uint32) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint32 value;
@@ -151,7 +157,7 @@ library BufferLib {
   * @param _buffer An instance of `BufferLib.Buffer`.
   * @return The `uint64` value of the next 8 bytes in the buffer counting from the cursor position.
   */
-  function readUint64(Buffer memory _buffer) internal pure returns (uint64) {
+  function readUint64(Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 7, _buffer.data.length) returns (uint64) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint64 value;
@@ -168,7 +174,7 @@ library BufferLib {
   * @param _buffer An instance of `BufferLib.Buffer`.
   * @return The `uint128` value of the next 16 bytes in the buffer counting from the cursor position.
   */
-  function readUint128(Buffer memory _buffer) internal pure returns (uint128) {
+  function readUint128(Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 15, _buffer.data.length) returns (uint128) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint128 value;
@@ -182,10 +188,10 @@ library BufferLib {
 
   /**
   * @notice Read and consume the next 32 bytes from the buffer as an `uint256`.
-  * @param _buffer An instance of `BufferLib.Buffer`.
   * @return The `uint256` value of the next 32 bytes in the buffer counting from the cursor position.
+  * @param _buffer An instance of `BufferLib.Buffer`.
   */
-  function readUint256(Buffer memory _buffer) internal pure returns (uint256) {
+  function readUint256(Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 31, _buffer.data.length) returns (uint256) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint256 value;

@@ -834,6 +834,7 @@ contract("WRB", accounts => {
           "The last block number updated was higher than the one provided"
         )
       })
+
     it("should revert while upgrading the rewards with wrong values or if the result was reported",
       async () => {
         const drBytes = web3.utils.fromAscii("This is a DR7")
@@ -927,6 +928,14 @@ contract("WRB", accounts => {
         )
       }
     )
+
+    it("should revert reading data for non-existent Ids",
+      async () => {
+        // revert when reporting the same result
+        await truffleAssert.reverts(wrbInstance.readDataRequest(2000), "Id not found")
+        await truffleAssert.reverts(wrbInstance.readDrHash(2000), "Id not found")
+        await truffleAssert.reverts(wrbInstance.readResult(2000), "Id not found")
+      })
   })
 })
 

@@ -1,4 +1,5 @@
 pragma solidity 0.6.4;
+pragma experimental ABIEncoderV2;
 
 import "truffle/Assert.sol";
 import "../contracts/BufferLib.sol";
@@ -73,5 +74,127 @@ contract TestBuffer {
     buf.readUint8();
     uint64 actualBig = buf.readUint64();
     Assert.equal(uint(actualBig), uint(big), "Read multiple data chunks from the same Buffer (inner cursor works as expected)");
+  }
+
+  function testReadUint8asUint16() external {
+    ThrowProxy throwProxy = new ThrowProxy(address(this));
+    bool r;
+    bytes memory error;
+    uint8 input = 0xAA;
+    bytes memory data = abi.encodePacked(input);
+
+    TestBuffer(address(throwProxy)).errorReadAsUint16(data);
+    (r, error) = throwProxy.execute.gas(100000)();
+    Assert.isFalse(r, "Reading uint8 as uint16 should fail");
+  }
+
+  function testReadUint16asUint32() external {
+    ThrowProxy throwProxy = new ThrowProxy(address(this));
+    bool r;
+    bytes memory error;
+    uint16 input = 0xAAAA;
+    bytes memory data = abi.encodePacked(input);
+
+    TestBuffer(address(throwProxy)).errorReadAsUint32(data);
+    (r, error) = throwProxy.execute.gas(100000)();
+    Assert.isFalse(r, "Reading uint16 as uint32 should fail");
+  }
+
+  function testReadUint32asUint64() external {
+    ThrowProxy throwProxy = new ThrowProxy(address(this));
+    bool r;
+    bytes memory error;
+    uint32 input = 0xAAAAAAAA;
+    bytes memory data = abi.encodePacked(input);
+
+    TestBuffer(address(throwProxy)).errorReadAsUint64(data);
+    (r, error) = throwProxy.execute.gas(100000)();
+    Assert.isFalse(r, "Reading uint32 as uint64 should fail");
+  }
+
+  function testReadUint64asUint128() external {
+    ThrowProxy throwProxy = new ThrowProxy(address(this));
+    bool r;
+    bytes memory error;
+    uint64 input = 0xAAAAAAAAAAAAAAAA;
+    bytes memory data = abi.encodePacked(input);
+
+    TestBuffer(address(throwProxy)).errorReadAsUint128(data);
+    (r, error) = throwProxy.execute.gas(100000)();
+    Assert.isFalse(r, "Reading uint64 as uint128 should fail");
+  }
+
+  function testReadUint128asUint256() external {
+    ThrowProxy throwProxy = new ThrowProxy(address(this));
+    bool r;
+    bytes memory error;
+    uint128 input = 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;
+    bytes memory data = abi.encodePacked(input);
+
+    TestBuffer(address(throwProxy)).errorReadAsUint256(data);
+    (r, error) = throwProxy.execute.gas(100000)();
+    Assert.isFalse(r, "Reading uint128 as uint256 should fail");
+  }
+
+  function testNextOutOfBounds() external {
+    ThrowProxy throwProxy = new ThrowProxy(address(this));
+    bool r;
+    bytes memory error;
+    uint8 input = 0xAA;
+    bytes memory data = abi.encodePacked(input);
+    BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
+    buf.next();
+
+    TestBuffer(address(throwProxy)).errorReadNext(buf);
+    (r, error) = throwProxy.execute.gas(100000)();
+    Assert.isFalse(r, "Next for out of bounds fail");
+  }
+
+  function errorReadAsUint16(bytes memory data) public {
+    BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
+    buf.readUint16();
+  }
+
+  function errorReadAsUint32(bytes memory data) public {
+    BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
+    buf.readUint32();
+  }
+
+  function errorReadAsUint64(bytes memory data) public {
+    BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
+    buf.readUint64();
+  }
+
+  function errorReadAsUint128(bytes memory data) public {
+    BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
+    buf.readUint128();
+  }
+
+  function errorReadAsUint256(bytes memory data) public {
+    BufferLib.Buffer memory buf = BufferLib.Buffer(data, 0);
+    buf.readUint256();
+  }
+
+  function errorReadNext(BufferLib.Buffer memory buf) public {
+    buf.next();
+  }
+
+}
+
+// Proxy contract for testing throws
+contract ThrowProxy {
+  address public target;
+  bytes data;
+
+  constructor (address _target) public {
+    target = _target;
+  }
+
+  fallback () external {
+    data = msg.data;
+  }
+
+  function execute() public returns (bool, bytes memory) {
+    return target.call(data);
   }
 }
