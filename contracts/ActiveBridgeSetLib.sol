@@ -164,6 +164,7 @@ library ActiveBridgeSetLib {
   /// @param _abs The Active Bridge Set to be flushed.
   /// @param _address The address to be flushed.
   function flushIdentity(ActiveBridgeSet storage _abs, address _address) private {
+    require(absMembership(_abs, _address) == true, "The address already out of the ARS");
     // Decrement the count of an identity, and if it reaches 0, delete it and update `nextActiveIdentities`count
     _abs.identityCount[_address]--;
     if (_abs.identityCount[_address] == 0) {
