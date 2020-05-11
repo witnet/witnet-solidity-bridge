@@ -64,7 +64,7 @@ library BufferLib {
   */
   function seek(Buffer memory _buffer, uint32 _offset, bool _relative) internal pure returns (uint32) {
     // Deal with relative offsets
-    if (_relative == true) {
+    if (_relative) {
       _offset += _buffer.cursor;
     }
     // Make sure not to read out of the bounds of the original bytes

@@ -73,7 +73,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
         _poe,
         _publicKey,
         _uPoint,
-        _vPointHelpers) == true,
+        _vPointHelpers),
       "Not a valid PoE");
     _;
   }
@@ -82,7 +82,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   modifier validSignature(
     uint256[2] memory _publicKey,
     bytes memory addrSignature) {
-    require(verifySig(abi.encodePacked(msg.sender), _publicKey, addrSignature) == true, "Not a valid signature");
+    require(verifySig(abi.encodePacked(msg.sender), _publicKey, addrSignature), "Not a valid signature");
     _;
   }
 
@@ -115,13 +115,13 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
         _poe,
         getLastBeacon(),
         _uPoint,
-        _vPointHelpers) == true,
+        _vPointHelpers),
       "Not a valid VRF");
     _;
   }
   // Ensures the address belongs to the active bridge set
   modifier absMember(address _address) {
-    require(abs.absMembership(_address) == true, "Not a member of the ABS");
+    require(abs.absMembership(_address), "Not a member of the ABS");
     _;
   }
 
