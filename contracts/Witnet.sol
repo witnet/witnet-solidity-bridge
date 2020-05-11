@@ -176,13 +176,7 @@ library Witnet {
    */
   function asErrorCode(Result memory _result) public pure returns(ErrorCodes) {
     uint64[] memory error = asRawError(_result);
-
-    // Decode the error code only if it belongs to the `ErrorCodes` enum — otherwise, default to `ErrorCodes.Unknown`
-    if (error[0] <= uint8(ErrorCodes.Size)) {
-      return ErrorCodes(error[0]);
-    } else {
-      return ErrorCodes.Unknown;
-    }
+    return supportedErrorOrElseUnknown(error[0]);
   }
 
   /**
@@ -192,15 +186,8 @@ library Witnet {
    */
   function asErrorMessage(Result memory _result) public pure returns(ErrorCodes, string memory) {
     uint64[] memory error = asRawError(_result);
-    ErrorCodes errorCode;
+    ErrorCodes errorCode = supportedErrorOrElseUnknown(error[0]);
     bytes memory errorMessage;
-
-    // Decode the error code only if it belongs to the `ErrorCodes` enum — otherwise, default to `ErrorCodes.Unknown`
-    if (error[0] <= uint8(ErrorCodes.Size)) {
-      errorCode = ErrorCodes(error[0]);
-    } else {
-      errorCode = ErrorCodes.Unknown;
-    }
 
     if (errorCode == ErrorCodes.SourceScriptNotCBOR) {
       errorMessage = abi.encodePacked("Source script #", utoa(error[1]), " was not a valid CBOR value");
@@ -397,6 +384,20 @@ library Witnet {
       return "tally";
     } else {
       return "unknown";
+    }
+  }
+
+  /**
+  * @notice Get an `ErrorCodes` item from its `uint64` discriminant, or default to `ErrorCodes.Unknown` if it doesn't
+  * exist.
+  * @param _discriminant The numeric identifier of an error.
+  * @return A member of `ErrorCodes`.
+  */
+  function supportedErrorOrElseUnknown(uint64 _discriminant) private pure returns(ErrorCodes) {
+    if (_discriminant < uint8(ErrorCodes.Size)) {
+      return ErrorCodes(_discriminant);
+    } else {
+      return ErrorCodes.Unknown;
     }
   }
 
