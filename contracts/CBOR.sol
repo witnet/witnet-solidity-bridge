@@ -274,7 +274,7 @@ library CBOR {
     if (additionalInformation == 31) {
       return UINT64_MAX;
     }
-    revert("Invalid length encoding (additionalInformation > 31)");
+    revert("Invalid length encoding (non-existent additionalInformation value)");
   }
 
   // Read the length of a CBOR indifinite-length item (arrays, maps, byte strings and text) from a buffer, consuming
