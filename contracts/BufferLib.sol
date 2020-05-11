@@ -21,13 +21,27 @@ library BufferLib {
   function read(Buffer memory _buffer, uint32 _length) internal pure returns (bytes memory) {
     // Make sure not to read out of the bounds of the original bytes
     require(_buffer.cursor + _length <= _buffer.data.length, "Not enough bytes in buffer when reading");
-    // Create a new `bytes memory` value and copy the desired bytes into it
-    bytes memory value = new bytes(_length);
-    for (uint32 index = 0; index < _length; index++) {
-      value[index] = next(_buffer);
+
+    // Create a new `bytes memory destination` value
+    bytes memory destination = new bytes(_length);
+    bytes memory source = _buffer.data;
+    uint32 offset = _buffer.cursor;
+
+    // Get raw pointers for source and destination
+    uint source_pointer;
+    uint destination_pointer;
+    assembly {
+      source_pointer := add(add(source, 32), offset)
+      destination_pointer := add(destination, 32)
     }
 
-    return value;
+    // Copy `_length` bytes from source to destination
+    memcpy(destination_pointer, source_pointer, uint(_length));
+
+    // Move the cursor forward by `_length` bytes
+    seek(_buffer, _length, true);
+
+    return destination;
   }
 
   /**
@@ -54,7 +68,7 @@ library BufferLib {
       _offset += _buffer.cursor;
     }
     // Make sure not to read out of the bounds of the original bytes
-    require(_offset < _buffer.data.length, "Not enough bytes in buffer when seeking");
+    require(_offset <= _buffer.data.length, "Not enough bytes in buffer when seeking");
     _buffer.cursor = _offset;
     return _buffer.cursor;
   }
@@ -218,4 +232,32 @@ library BufferLib {
     }
     return result;
   }
+
+  /**
+  * @notice Copy bytes from one memory address into another.
+  * @dev This function was borrowed from Nick Johnson's `solidity-stringutils` lib, and reproduced here under the terms
+  * of [Apache License 2.0](https://github.com/Arachnid/solidity-stringutils/blob/master/LICENSE).
+  * @param _dest Address of the destination memory.
+  * @param _src Address to the source memory.
+  * @param _len How many bytes to copy.
+  */
+  function memcpy(uint _dest, uint _src, uint _len) private pure {
+    // Copy word-length chunks while possible
+    for(; _len >= 32; _len -= 32) {
+      assembly {
+        mstore(_dest, mload(_src))
+      }
+      _dest += 32;
+      _src += 32;
+    }
+
+    // Copy remaining bytes
+    uint mask = 256 ** (32 - _len) - 1;
+    assembly {
+      let srcpart := and(mload(_src), not(mask))
+      let destpart := and(mload(_dest), mask)
+      mstore(_dest, or(destpart, srcpart))
+    }
+  }
+
 }
