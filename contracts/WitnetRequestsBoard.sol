@@ -141,29 +141,36 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   }
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
-  /// @param _dr The bytes corresponding to the Protocol Buffers serialization of the data request output.
+  /// @param _serialized The bytes corresponding to the Protocol Buffers serialization of the data request output.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(bytes calldata _dr, uint256 _tallyReward)
+  function postDataRequest(bytes calldata _serialized, uint256 _tallyReward)
     external
     payable
     payingEnough(msg.value, _tallyReward)
     override
   returns(uint256)
   {
-    uint256 _id = requests.length;
-    DataRequest memory dr;
-    requests.push(dr);
+    // The initial length of the `requests` array will become the ID of the request for everything related to the WRB
+    uint256 id = requests.length;
 
-    requests[_id].dr = _dr;
-    requests[_id].inclusionReward = SafeMath.sub(msg.value, _tallyReward);
-    requests[_id].tallyReward = _tallyReward;
-    requests[_id].result = "";
-    requests[_id].blockNumber = 0;
-    requests[_id].drHash = 0;
-    requests[_id].pkhClaim = address(0);
-    emit PostedRequest(msg.sender, _id);
-    return _id;
+    // Create a new `DataRequest` object and initialize all the fields
+    DataRequest memory request;
+    request.dr = _serialized;
+    request.inclusionReward = SafeMath.sub(msg.value, _tallyReward);
+    request.tallyReward = _tallyReward;
+    request.result = "";
+    request.timestamp = 0;
+    request.drHash = 0;
+    request.pkhClaim = address(0);
+
+    // Push the new request into the contract state
+    requests.push(request);
+
+    // Let observers know that a new request has been posted
+    emit PostedRequest(msg.sender, id);
+
+    return id;
   }
 
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
