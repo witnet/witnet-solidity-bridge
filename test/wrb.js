@@ -503,7 +503,7 @@ contract("WRB", accounts => {
       // Should revert when reporting the inclusion since the dr has not been claimed
       await truffleAssert.reverts(wrbInstance.reportDataRequestInclusion(id1, [dummySybling], 1, blockHeader1, epoch, {
         from: accounts[1],
-      }), "DR not yet claimed")
+      }), "Data Request has not yet been claimed")
     })
 
     it("should revert when trying to report a dr inclusion that was already reported", async () => {

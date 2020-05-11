@@ -98,12 +98,6 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     _;
   }
 
-  // Ensures the DR inclusion has been already reported
-  modifier drClaimed(uint256 _id) {
-    require(requests[_id].timestamp != 0, "DR not yet claimed");
-    _;
-  }
-
   // Ensures the result has not been reported yet
   modifier resultNotIncluded(uint256 _id) {
     require(requests[_id].result.length == 0, "Result already included");
@@ -206,7 +200,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     bool[] memory validIds = new bool[](idsLength);
     for (uint i = 0; i < idsLength; i++) {
       uint256 index = _ids[i];
-      validIds[i] = (requests[index].blockNumber == 0 || block.number - requests[index].blockNumber > CLAIM_EXPIRATION) &&
+      validIds[i] = (dataRequestCanBeClaimed(requests[index])) &&
         requests[index].drHash == 0 &&
         requests[index].result.length == 0;
     }
@@ -227,9 +221,10 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 _blockHash,
     uint256 _epoch)
     external
-    drClaimed(_id)
     drNotIncluded(_id)
  {
+    // Check the data request has been claimed
+    require(dataRequestCanBeClaimed(requests[_id]) == false, "Data Request has not yet been claimed");
     uint256 drOutputHash = uint256(sha256(requests[_id].dr));
     uint256 drHash = uint256(sha256(abi.encodePacked(drOutputHash, _poi[0])));
 
