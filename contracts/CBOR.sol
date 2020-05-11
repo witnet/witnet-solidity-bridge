@@ -37,16 +37,15 @@ library CBOR {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
     if (_cborValue.len == UINT64_MAX) {
       bytes memory bytesData;
-      bool done;
-      uint8 limit = 0;
-      while (!done && limit < 2) {
-        uint64 itemLength = readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType);
+
+      // These checks look repetitive but the equivalent loop would be more expensive.
+      uint64 itemLength = readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType);
+      if (itemLength < UINT64_MAX) {
+        bytesData = abi.encodePacked(bytesData, _cborValue.buffer.read(itemLength));
+        itemLength = readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType);
         if (itemLength < UINT64_MAX) {
           bytesData = abi.encodePacked(bytesData, _cborValue.buffer.read(itemLength));
-        } else {
-          done = true;
         }
-        limit++;
       }
       return bytesData;
     } else {
