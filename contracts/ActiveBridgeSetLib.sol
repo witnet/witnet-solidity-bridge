@@ -11,7 +11,7 @@ library ActiveBridgeSetLib {
   uint8 public constant CLAIM_BLOCK_PERIOD = 8;
 
   // Number of activity slots in the ABS
-  uint16 public constant ACTIVITY_LENGTH = 100;
+  uint8 public constant ACTIVITY_LENGTH = 100;
 
   struct ActiveBridgeSet {
     // Mapping of activity slots with participating identities
@@ -96,13 +96,14 @@ library ActiveBridgeSetLib {
   /// @param _abs The Active Bridge Set structure containing the last block.
   /// @param _blockNumber The block number from which to get the current slot.
   /// @return (currentSlot, lastSlot, overflow), where overflow implies the block difference &gt; CLAIM_BLOCK_PERIOD* ACTIVITY_LENGTH.
-  function getSlots(ActiveBridgeSet storage _abs, uint256 _blockNumber) private view returns (uint16, uint16, bool) {
+  function getSlots(ActiveBridgeSet storage _abs, uint256 _blockNumber) private view returns (uint8, uint8, bool) {
     // Get current activity slot number
-    uint16 currentSlot = uint16((_blockNumber / CLAIM_BLOCK_PERIOD) % ACTIVITY_LENGTH);
+    uint8 currentSlot = uint8((_blockNumber / CLAIM_BLOCK_PERIOD) % ACTIVITY_LENGTH);
     // Get last actitivy slot number
-    uint16 lastSlot = uint16((_abs.lastBlockNumber / CLAIM_BLOCK_PERIOD) % ACTIVITY_LENGTH);
+    uint8 lastSlot = uint8((_abs.lastBlockNumber / CLAIM_BLOCK_PERIOD) % ACTIVITY_LENGTH);
     // Check if there was an activity slot overflow
-    bool overflow = (_blockNumber - _abs.lastBlockNumber) >= CLAIM_BLOCK_PERIOD * ACTIVITY_LENGTH;
+    // `ACTIVITY_LENGTH` is changed to `uint16` here to ensure the multiplication doesn't overflow silently
+    bool overflow = (_blockNumber - _abs.lastBlockNumber) >= CLAIM_BLOCK_PERIOD * uint16(ACTIVITY_LENGTH);
 
     return (currentSlot, lastSlot, overflow);
   }
