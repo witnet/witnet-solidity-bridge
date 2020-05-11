@@ -154,15 +154,11 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     // The initial length of the `requests` array will become the ID of the request for everything related to the WRB
     uint256 id = requests.length;
 
-    // Create a new `DataRequest` object and initialize all the fields
+    // Create a new `DataRequest` object and initialize all the non-default fields
     DataRequest memory request;
     request.dr = _serialized;
     request.inclusionReward = SafeMath.sub(msg.value, _tallyReward);
     request.tallyReward = _tallyReward;
-    request.result = "";
-    request.timestamp = 0;
-    request.drHash = 0;
-    request.pkhClaim = address(0);
 
     // Push the new request into the contract state
     requests.push(request);
