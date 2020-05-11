@@ -290,6 +290,7 @@ library CBOR {
 
   // Read a text string of a given length from a buffer. Returns a `bytes memory` value for the sake of genericness,
   // but it can be easily casted into a string with `string(result)`.
+  // solium-disable-next-line security/no-assign-params
   function readText(BufferLib.Buffer memory _buffer, uint64 _length) private pure returns(bytes memory) {
     bytes memory result;
     for (uint64 index = 0; index < _length; index++) {

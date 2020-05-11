@@ -28,15 +28,15 @@ library BufferLib {
     uint32 offset = _buffer.cursor;
 
     // Get raw pointers for source and destination
-    uint source_pointer;
-    uint destination_pointer;
+    uint sourcePointer;
+    uint destinationPointer;
     assembly {
-      source_pointer := add(add(source, 32), offset)
-      destination_pointer := add(destination, 32)
+      sourcePointer := add(add(source, 32), offset)
+      destinationPointer := add(destination, 32)
     }
 
     // Copy `_length` bytes from source to destination
-    memcpy(destination_pointer, source_pointer, uint(_length));
+    memcpy(destinationPointer, sourcePointer, uint(_length));
 
     // Move the cursor forward by `_length` bytes
     seek(_buffer, _length, true);
@@ -62,6 +62,7 @@ library BufferLib {
   * buffer (`true`).
   * @return The final position of the cursor (will equal `_offset` if `_relative` is `false`).
   */
+  // solium-disable-next-line security/no-assign-params
   function seek(Buffer memory _buffer, uint32 _offset, bool _relative) internal pure returns (uint32) {
     // Deal with relative offsets
     if (_relative) {
@@ -241,9 +242,10 @@ library BufferLib {
   * @param _src Address to the source memory.
   * @param _len How many bytes to copy.
   */
+  // solium-disable-next-line security/no-assign-params
   function memcpy(uint _dest, uint _src, uint _len) private pure {
     // Copy word-length chunks while possible
-    for(; _len >= 32; _len -= 32) {
+    for (; _len >= 32; _len -= 32) {
       assembly {
         mstore(_dest, mload(_src))
       }
