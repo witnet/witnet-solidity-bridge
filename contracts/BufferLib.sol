@@ -9,7 +9,7 @@ pragma solidity >=0.5.3 <0.7.0;
 library BufferLib {
   struct Buffer {
     bytes data;
-    uint64 cursor;
+    uint32 cursor;
   }
 
   /**
@@ -18,12 +18,12 @@ library BufferLib {
   * @param _length How many bytes to read and consume from the buffer.
   * @return A `bytes memory` containing the first `_length` bytes from the buffer, counting from the cursor position.
   */
-  function read(Buffer memory _buffer, uint64 _length) internal pure returns (bytes memory) {
+  function read(Buffer memory _buffer, uint32 _length) internal pure returns (bytes memory) {
     // Make sure not to read out of the bounds of the original bytes
     require(_buffer.cursor + _length <= _buffer.data.length, "Not enough bytes in buffer when reading");
     // Create a new `bytes memory` value and copy the desired bytes into it
     bytes memory value = new bytes(_length);
-    for (uint64 index = 0; index < _length; index++) {
+    for (uint32 index = 0; index < _length; index++) {
       value[index] = next(_buffer);
     }
 
@@ -48,15 +48,14 @@ library BufferLib {
   * buffer (`true`).
   * @return The final position of the cursor (will equal `_offset` if `_relative` is `false`).
   */
-  function seek(Buffer memory _buffer, uint64 _offset, bool _relative) internal pure returns (uint64) {
-    uint64 newCursor = _offset;
+  function seek(Buffer memory _buffer, uint32 _offset, bool _relative) internal pure returns (uint32) {
     // Deal with relative offsets
     if (_relative == true) {
-      newCursor += _buffer.cursor;
+      _offset += _buffer.cursor;
     }
     // Make sure not to read out of the bounds of the original bytes
-    require(newCursor < _buffer.data.length, "Not enough bytes in buffer when seeking");
-    _buffer.cursor = newCursor;
+    require(_offset < _buffer.data.length, "Not enough bytes in buffer when seeking");
+    _buffer.cursor = _offset;
     return _buffer.cursor;
   }
 
@@ -67,7 +66,7 @@ library BufferLib {
   * @param _relativeOffset How many bytes to move the cursor forward.
   * @return The final position of the cursor.
   */
-  function seek(Buffer memory _buffer, uint64 _relativeOffset) internal pure returns (uint64) {
+  function seek(Buffer memory _buffer, uint32 _relativeOffset) internal pure returns (uint32) {
     return seek(_buffer, _relativeOffset, true);
   }
 
@@ -86,7 +85,7 @@ library BufferLib {
   */
   function readUint8(Buffer memory _buffer) internal pure returns (uint8) {
     bytes memory bytesValue = _buffer.data;
-    uint64 offset = _buffer.cursor;
+    uint32 offset = _buffer.cursor;
     uint8 value;
     assembly {
       value := mload(add(add(bytesValue, 1), offset))
@@ -103,7 +102,7 @@ library BufferLib {
   */
   function readUint16(Buffer memory _buffer) internal pure returns (uint16) {
     bytes memory bytesValue = _buffer.data;
-    uint64 offset = _buffer.cursor;
+    uint32 offset = _buffer.cursor;
     uint16 value;
     assembly {
       value := mload(add(add(bytesValue, 2), offset))
@@ -120,7 +119,7 @@ library BufferLib {
   */
   function readUint32(Buffer memory _buffer) internal pure returns (uint32) {
     bytes memory bytesValue = _buffer.data;
-    uint64 offset = _buffer.cursor;
+    uint32 offset = _buffer.cursor;
     uint32 value;
     assembly {
       value := mload(add(add(bytesValue, 4), offset))
@@ -137,7 +136,7 @@ library BufferLib {
   */
   function readUint64(Buffer memory _buffer) internal pure returns (uint64) {
     bytes memory bytesValue = _buffer.data;
-    uint64 offset = _buffer.cursor;
+    uint32 offset = _buffer.cursor;
     uint64 value;
     assembly {
       value := mload(add(add(bytesValue, 8), offset))
@@ -154,7 +153,7 @@ library BufferLib {
   */
   function readUint128(Buffer memory _buffer) internal pure returns (uint128) {
     bytes memory bytesValue = _buffer.data;
-    uint64 offset = _buffer.cursor;
+    uint32 offset = _buffer.cursor;
     uint128 value;
     assembly {
       value := mload(add(add(bytesValue, 16), offset))
@@ -171,7 +170,7 @@ library BufferLib {
   */
   function readUint256(Buffer memory _buffer) internal pure returns (uint256) {
     bytes memory bytesValue = _buffer.data;
-    uint64 offset = _buffer.cursor;
+    uint32 offset = _buffer.cursor;
     uint256 value;
     assembly {
       value := mload(add(add(bytesValue, 32), offset))
