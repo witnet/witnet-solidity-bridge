@@ -293,25 +293,24 @@ library CBOR {
   // but it can be easily casted into a string with `string(result)`.
   function readText(BufferLib.Buffer memory _buffer, uint64 _length) private pure returns(bytes memory) {
     bytes memory result;
-    uint64 length = _length;
-    for (uint64 index = 0; index < length; index++) {
+    for (uint64 index = 0; index < _length; index++) {
       uint8 value = _buffer.readUint8();
       if (value & 0x80 != 0) {
         if (value < 0xe0) {
           value = (value & 0x1f) << 6 |
             (_buffer.readUint8() & 0x3f);
-          length -= 1;
+          _length -= 1;
         } else if (value < 0xf0) {
           value = (value & 0x0f) << 12 |
             (_buffer.readUint8() & 0x3f) << 6 |
             (_buffer.readUint8() & 0x3f);
-          length -= 2;
+          _length -= 2;
         } else {
           value = (value & 0x0f) << 18 |
             (_buffer.readUint8() & 0x3f) << 12 |
             (_buffer.readUint8() & 0x3f) << 6  |
             (_buffer.readUint8() & 0x3f);
-          length -= 3;
+          _length -= 3;
         }
       }
       result = abi.encodePacked(result, value);
