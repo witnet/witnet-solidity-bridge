@@ -317,9 +317,4 @@ library CBOR {
     }
     return result;
   }
-
-  // This simply seeks a buffer's internal pointer until a break is found.
-  function readBreak(BufferLib.Buffer memory _buffer) private pure returns(bool) {
-    return _buffer.next() == 0xff;
-  }
 }
