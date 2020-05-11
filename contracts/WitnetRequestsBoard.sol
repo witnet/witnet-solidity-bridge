@@ -26,7 +26,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 inclusionReward;
     uint256 tallyReward;
     bytes result;
-    uint256 timestamp;
+    // Block number at which the DR was claimed for the last time
+    uint256 blockNumber;
     uint256 drHash;
     address payable pkhClaim;
   }
@@ -158,7 +159,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     requests[_id].inclusionReward = SafeMath.sub(msg.value, _tallyReward);
     requests[_id].tallyReward = _tallyReward;
     requests[_id].result = "";
-    requests[_id].timestamp = 0;
+    requests[_id].blockNumber = 0;
     requests[_id].drHash = 0;
     requests[_id].pkhClaim = address(0);
     emit PostedRequest(msg.sender, _id);
@@ -195,7 +196,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     bool[] memory validIds = new bool[](idsLength);
     for (uint i = 0; i < idsLength; i++) {
       uint256 index = _ids[i];
-      validIds[i] = (requests[index].timestamp == 0 || block.number - requests[index].timestamp > CLAIM_EXPIRATION) &&
+      validIds[i] = (requests[index].blockNumber == 0 || block.number - requests[index].blockNumber > CLAIM_EXPIRATION) &&
         requests[index].drHash == 0 &&
         requests[index].result.length == 0;
     }
@@ -369,7 +370,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
         "One of the listed data requests was already claimed"
       );
       requests[_ids[i]].pkhClaim = msg.sender;
-      requests[_ids[i]].timestamp = block.number;
+      requests[_ids[i]].blockNumber = block.number;
     }
     return true;
   }
@@ -450,7 +451,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   function dataRequestCanBeClaimed(DataRequest memory _request) private view returns (bool) {
     return
-      (_request.timestamp == 0 || block.number - _request.timestamp > CLAIM_EXPIRATION) &&
+      (_request.blockNumber == 0 || block.number - _request.blockNumber > CLAIM_EXPIRATION) &&
       _request.drHash == 0 &&
       _request.result.length == 0;
   }

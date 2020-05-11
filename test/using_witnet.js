@@ -144,7 +144,7 @@ contract("UsingWitnet", accounts => {
 
     it("should set a timestamp upon claiming", async () => {
       const requestInfo = await wrb.requests(requestId)
-      assert(requestInfo.timestamp)
+      assert(requestInfo.blockNumber)
     })
 
     it("should set a the PKH of the claimer upon claiming", async () => {
