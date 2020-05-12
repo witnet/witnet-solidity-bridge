@@ -5,6 +5,8 @@ pragma solidity >=0.5.3 <0.7.0;
  * @title A convenient wrapper around the `bytes memory` type that exposes a buffer-like interface
  * @notice The buffer has an inner cursor that tracks the final offset of every read, i.e. any subsequent read will
  * start with the byte that goes right after the last one in the previous read.
+ * @dev `uint32` is used here for `cursor` because `uint16` would only enable seeking up to 8KB, which could in some
+ * theoretical use cases be exceeded. Conversely, `uint32` supports up to 512MB, which cannot credibly be exceeded.
  */
 library BufferLib {
   struct Buffer {
