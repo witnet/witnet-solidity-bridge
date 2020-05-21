@@ -347,8 +347,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Updates the ABS activity with the block number provided.
   /// @param _blockNumber update the ABS until this block number.
   function updateAbsActivity(uint256 _blockNumber) external {
-    require (_blockNumber >= abs.lastBlockNumber, "The last block number updated was higher than the one provided");
-    require (_blockNumber <= block.number, "The block number provided has not been reached");
+    require (_blockNumber <= block.number, "The provided block number has not been reached");
 
     abs.updateActivity(_blockNumber);
   }

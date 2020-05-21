@@ -21,6 +21,7 @@ contract TestActiveBridgeSet {
   ];
 
   ActiveBridgeSetLib.ActiveBridgeSet internal abs;
+  ActiveBridgeSetLib.ActiveBridgeSet internal fakeAbs;
 
   function beforeEach() external {
     abs.lastBlockNumber = 0;
@@ -130,4 +131,51 @@ contract TestActiveBridgeSet {
     Assert.equal(uint(abs.identityCount[_address]), uint(_count), "ABS identity count does not match");
   }
 
+  function testNotValidUpdateBlockNumber() external {
+    ThrowProxy throwProxy = new ThrowProxy(address(this));
+    bool r;
+    bytes memory error;
+    fakeAbs.lastBlockNumber = 1;
+    TestActiveBridgeSet(address(throwProxy)).errorUpdateABS(0);
+    (r, error) = throwProxy.execute.gas(100000)();
+    Assert.isFalse(r, "The last updated block was higher than the one provided");
+  }
+
+  function testNotValidPushBlockNumber() external {
+    ThrowProxy throwProxy = new ThrowProxy(address(this));
+    bool r;
+    bytes memory error;
+    fakeAbs.lastBlockNumber = 1;
+    TestActiveBridgeSet(address(throwProxy)).errorPushABS(address(0), 0);
+    (r, error) = throwProxy.execute.gas(100000)();
+    Assert.isFalse(r, "The last updated block was higher than the one provided");
+  }
+
+  function errorUpdateABS(uint256 _blockNumber) public {
+    fakeAbs.updateActivity(_blockNumber);
+  }
+
+  function errorPushABS(address a, uint256 _blockNumber) public {
+    fakeAbs.pushActivity(a, _blockNumber);
+  }
+
+}
+
+
+// Proxy contract for testing throws
+contract ThrowProxy {
+  address public target;
+  bytes data;
+
+  constructor (address _target) public {
+    target = _target;
+  }
+
+  fallback () external {
+    data = msg.data;
+  }
+
+  function execute() public returns (bool, bytes memory) {
+    return target.call(data);
+  }
 }

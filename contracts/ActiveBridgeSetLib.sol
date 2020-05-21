@@ -28,10 +28,18 @@ library ActiveBridgeSetLib {
     uint256 lastBlockNumber;
   }
 
+  modifier validBlockNumber(uint256 _currentBlock, uint256 _lastBlock) {
+    require (_currentBlock >= _lastBlock, "The last updated block was higher than the one provided");
+    _;
+  }
+
   /// @dev Updates activity in Witnet without requiring protocol participation.
   /// @param _abs The Active Bridge Set structure to be updated.
   /// @param _blockNumber The block number up to which the activity should be updated.
-  function updateActivity(ActiveBridgeSet storage _abs, uint256 _blockNumber) internal {
+  function updateActivity(ActiveBridgeSet storage _abs, uint256 _blockNumber)
+    internal
+    validBlockNumber(_blockNumber, _abs.lastBlockNumber)
+  {
     (uint16 currentSlot, uint16 lastSlot, bool overflow) = getSlots(_abs, _blockNumber);
 
     // Avoid gas cost if ABS is up to date
@@ -50,7 +58,11 @@ library ActiveBridgeSetLib {
   /// @param _abs The Active Bridge Set structure to be updated.
   /// @param _address The address pushing the activity.
   /// @param _blockNumber The block number up to which the activity should be updated.
-  function pushActivity(ActiveBridgeSet storage _abs, address _address, uint256 _blockNumber) internal returns (bool success) {
+  function pushActivity(ActiveBridgeSet storage _abs, address _address, uint256 _blockNumber)
+    internal
+    validBlockNumber(_blockNumber, _abs.lastBlockNumber)
+  returns (bool success)
+  {
     (uint16 currentSlot, uint16 lastSlot, bool overflow) = getSlots(_abs, _blockNumber);
 
     // Update ABS and if it was already up to date, check if identities already counted

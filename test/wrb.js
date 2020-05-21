@@ -818,7 +818,7 @@ contract("WRB", accounts => {
         const block = await web3.eth.getBlock("latest")
         await truffleAssert.reverts(
           wrbInstance.updateAbsActivity(block.number + 100),
-          "The block number provided has not been reached"
+          "The provided block number has not been reached"
         )
       })
 
@@ -831,7 +831,7 @@ contract("WRB", accounts => {
         await waitForHash(tx1)
         await truffleAssert.reverts(
           wrbInstance.updateAbsActivity(newBlock),
-          "The last block number updated was higher than the one provided"
+          "The last updated block was higher than the one provided"
         )
       })
 
