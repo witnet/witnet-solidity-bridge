@@ -4,20 +4,19 @@ group: beta
 language: node_js
 node_js:
   - "8"
+  - "10"
+  - "12"
 
 cache:
   directories:
     - node_modules
 
 jobs:
-  # XXX fast_finish doesn't work with stages yet. See
-  # https://github.com/travis-ci/travis-ci/issues/8425
-  # --elopio - 20180531
   fast_finish: true
   include:
     - stage: tests
       name: "Linter"
-      script: npm run lint
+      script: npm run fmt
 
     - stage: tests
       name: "Unit tests"
