@@ -138,7 +138,7 @@ contract TestActiveBridgeSet {
     fakeAbs.lastBlockNumber = 1;
     TestActiveBridgeSet(address(throwProxy)).errorUpdateABS(0);
     (r, error) = throwProxy.execute.gas(100000)();
-    Assert.isFalse(r, "The last updated block was higher than the one provided");
+    Assert.isFalse(r, "The provided block is older than the last updated block");
   }
 
   function testNotValidPushBlockNumber() external {
@@ -148,7 +148,7 @@ contract TestActiveBridgeSet {
     fakeAbs.lastBlockNumber = 1;
     TestActiveBridgeSet(address(throwProxy)).errorPushABS(address(0), 0);
     (r, error) = throwProxy.execute.gas(100000)();
-    Assert.isFalse(r, "The last updated block was higher than the one provided");
+    Assert.isFalse(r, "The provided block is older than the last updated block");
   }
 
   function errorUpdateABS(uint256 _blockNumber) public {

@@ -831,7 +831,7 @@ contract("WRB", accounts => {
         await waitForHash(tx1)
         await truffleAssert.reverts(
           wrbInstance.updateAbsActivity(newBlock),
-          "The last updated block was higher than the one provided"
+          "The provided block is older than the last updated block"
         )
       })
 

@@ -28,8 +28,8 @@ library ActiveBridgeSetLib {
     uint256 lastBlockNumber;
   }
 
-  modifier validBlockNumber(uint256 _currentBlock, uint256 _lastBlock) {
-    require (_currentBlock >= _lastBlock, "The last updated block was higher than the one provided");
+  modifier validBlockNumber(uint256 _blockFromArguments, uint256 _blockFromContractState) {
+    require (_blockFromArguments >= _blockFromContractState, "The provided block is older than the last updated block");
     _;
   }
 
