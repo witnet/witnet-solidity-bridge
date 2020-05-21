@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.6.8;
 
 import "./WitnetRequestsBoardInterface.sol";
@@ -54,7 +56,7 @@ contract WitnetRequestsBoardProxy {
     uint256 n = controllers.length;
     uint256 offset = controllers[n - 1].lastId;
     // Update the currentLastId with the id in the controller plus the offSet
-    currentLastId = witnetRequestsBoardInstance.postDataRequest.value(msg.value)(_dr, _tallyReward) + offset;
+    currentLastId = witnetRequestsBoardInstance.postDataRequest{value: msg.value}(_dr, _tallyReward) + offset;
     return currentLastId;
   }
 
@@ -65,7 +67,7 @@ contract WitnetRequestsBoardProxy {
     address wrbAddress;
     uint256 wrbOffset;
     (wrbAddress, wrbOffset) = getController(_id);
-    return witnetRequestsBoardInstance.upgradeDataRequest.value(msg.value)(_id - wrbOffset, _tallyReward);
+    return witnetRequestsBoardInstance.upgradeDataRequest{value: msg.value}(_id - wrbOffset, _tallyReward);
   }
 
   /// @dev Retrieves the DR hash of the id from the WRB.
