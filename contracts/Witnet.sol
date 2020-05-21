@@ -183,6 +183,7 @@ library Witnet {
 
   /**
    * @notice Generate a suitable error message for a member of `ErrorCodes` and its corresponding arguments.
+   * @dev WARN: Note that client contracts should wrap this function into a try-catch foreseing potential errors generated in this function
    * @param _result An instance of `Result`.
    * @return A tuple containing the `CBORValue.Error memory` decoded from the `Result`, plus a loggable error message.
    */
