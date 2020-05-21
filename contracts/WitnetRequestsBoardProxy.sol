@@ -116,6 +116,9 @@ contract WitnetRequestsBoardProxy {
   /// @notice Gets the controller from an Id.
   /// @param _id id of a Data Request from which we get the controller.
   function getController(uint256 _id) internal view returns(address _controllerAddress, uint256 _offset) {
+    // Check id is bigger than 0
+    require(_id > 0, "Non-existent controller for id 0");
+
     uint256 n = controllers.length;
     // If the id is bigger than the lastId of a Controller, read the result in that Controller
     for (uint i = n; i > 0; i--) {

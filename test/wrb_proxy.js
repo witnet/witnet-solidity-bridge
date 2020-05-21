@@ -37,6 +37,12 @@ contract("Witnet Requests Board Proxy", accounts => {
         "The provided Witnet Requests Board instance address is already in use")
     })
 
+    it("should revert when inserting id 0", async () => {
+      // It should revert because of non-existent id 0
+      await truffleAssert.reverts(wrbProxy.upgradeDataRequest(0, 1),
+        "Non-existent controller for id 0")
+    })
+
     it("should post a data request and update the currentLastId", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
