@@ -1,4 +1,4 @@
-pragma solidity 0.6.4;
+pragma solidity 0.6.8;
 
 import "witnet-ethereum-block-relay/contracts/BlockRelayInterface.sol";
 

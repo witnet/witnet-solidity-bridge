@@ -1,4 +1,4 @@
-pragma solidity 0.6.4;
+pragma solidity 0.6.8;
 
 import "vrf-solidity/contracts/VRF.sol";
 import "../../contracts/ActiveBridgeSetLib.sol";
