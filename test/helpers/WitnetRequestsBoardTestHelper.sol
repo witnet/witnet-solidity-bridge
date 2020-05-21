@@ -19,7 +19,7 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
   uint256 internal blockHash;
   uint256 internal epoch;
 
-  constructor(address _blockRelayAddress, uint8 _repFactor) WitnetRequestsBoard(_blockRelayAddress, _repFactor) public { }
+  constructor(address _blockRelayAddress, uint8 _repFactor) public WitnetRequestsBoard(_blockRelayAddress, _repFactor) { }
 
   modifier vrfValid (
     uint256[4] memory _poe,

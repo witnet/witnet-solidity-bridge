@@ -30,16 +30,16 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
     address payable pkhClaim;
   }
 
-  BlockRelayProxy blockRelay;
+  BlockRelayProxy public blockRelay;
 
   DataRequest[] public requests;
 
-  ActiveBridgeSetLib.ActiveBridgeSet abs;
+  ActiveBridgeSetLib.ActiveBridgeSet public abs;
 
-  address witnet;
+  address public witnet;
 
   // Replication factor for Active Bridge Set identities
-  uint8 repFactor;
+  uint8 public repFactor;
 
   // Event emitted when a new DR is posted
   event PostedRequest(address indexed _from, uint256 _id);
@@ -106,8 +106,9 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
     return requests[_id].result;
   }
 
-   /// @dev Verifies if the contract is upgradable
+  /// @dev Verifies if the contract is upgradable
   /// @return true if the contract upgradable
+  /* solhint-disable-next-line no-unused-vars*/
   function isUpgradable(address _address) external view override returns(bool) {
     return true;
   }
