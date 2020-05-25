@@ -178,6 +178,10 @@ library Witnet {
    */
   function asErrorCode(Result memory _result) public pure returns(ErrorCodes) {
     uint64[] memory error = asRawError(_result);
+    if (error.length == 0) {
+      return ErrorCodes.Unknown;
+    }
+
     return supportedErrorOrElseUnknown(error[0]);
   }
 
@@ -189,18 +193,21 @@ library Witnet {
    */
   function asErrorMessage(Result memory _result) public pure returns(ErrorCodes, string memory) {
     uint64[] memory error = asRawError(_result);
+    if (error.length == 0) {
+      return (ErrorCodes.Unknown, "Unknown error (no error code)");
+    }
     ErrorCodes errorCode = supportedErrorOrElseUnknown(error[0]);
     bytes memory errorMessage;
 
-    if (errorCode == ErrorCodes.SourceScriptNotCBOR) {
+    if (errorCode == ErrorCodes.SourceScriptNotCBOR && error.length >= 2) {
       errorMessage = abi.encodePacked("Source script #", utoa(error[1]), " was not a valid CBOR value");
-    } else if (errorCode == ErrorCodes.SourceScriptNotArray) {
+    } else if (errorCode == ErrorCodes.SourceScriptNotArray && error.length >= 2) {
       errorMessage = abi.encodePacked("The CBOR value in script #", utoa(error[1]), " was not an Array of calls");
-    } else if (errorCode == ErrorCodes.SourceScriptNotRADON) {
+    } else if (errorCode == ErrorCodes.SourceScriptNotRADON && error.length >= 2) {
       errorMessage = abi.encodePacked("The CBOR value in script #", utoa(error[1]), " was not a valid RADON script");
-    } else if (errorCode == ErrorCodes.RequestTooManySources) {
+    } else if (errorCode == ErrorCodes.RequestTooManySources && error.length >= 2) {
       errorMessage = abi.encodePacked("The request contained too many sources (", utoa(error[1]), ")");
-    } else if (errorCode == ErrorCodes.ScriptTooManyCalls) {
+    } else if (errorCode == ErrorCodes.ScriptTooManyCalls && error.length >= 4) {
       errorMessage = abi.encodePacked(
         "Script #",
         utoa(error[2]),
@@ -210,7 +217,7 @@ library Witnet {
         utoa(error[3]),
         ")"
       );
-    } else if (errorCode == ErrorCodes.UnsupportedOperator) {
+    } else if (errorCode == ErrorCodes.UnsupportedOperator && error.length >= 5) {
       errorMessage = abi.encodePacked(
       "Operator code 0x",
         utohex(error[4]),
@@ -222,7 +229,7 @@ library Witnet {
         stageName(error[1]),
         " stage is not supported"
       );
-    } else if (errorCode == ErrorCodes.HTTP) {
+    } else if (errorCode == ErrorCodes.HTTP && error.length >= 3) {
       errorMessage = abi.encodePacked(
         "Source #",
         utoa(error[1]),
@@ -231,13 +238,13 @@ library Witnet {
         utoa(error[2] % 100 / 10),
         utoa(error[2] % 10)
       );
-    } else if (errorCode == ErrorCodes.RetrievalTimeout) {
+    } else if (errorCode == ErrorCodes.RetrievalTimeout && error.length >= 2) {
       errorMessage = abi.encodePacked(
         "Source #",
         utoa(error[1]),
         " could not be retrieved because of a timeout."
       );
-    } else if (errorCode == ErrorCodes.Underflow) {
+    } else if (errorCode == ErrorCodes.Underflow && error.length >= 5) {
       errorMessage = abi.encodePacked(
         "Underflow at operator code 0x",
         utohex(error[4]),
@@ -249,7 +256,7 @@ library Witnet {
         stageName(error[1]),
         " stage"
       );
-    } else if (errorCode == ErrorCodes.Overflow) {
+    } else if (errorCode == ErrorCodes.Overflow && error.length >= 5) {
       errorMessage = abi.encodePacked(
         "Overflow at operator code 0x",
         utohex(error[4]),
@@ -261,7 +268,7 @@ library Witnet {
         stageName(error[1]),
         " stage"
       );
-    } else if (errorCode == ErrorCodes.DivisionByZero) {
+    } else if (errorCode == ErrorCodes.DivisionByZero && error.length >= 5) {
       errorMessage = abi.encodePacked(
         "Division by zero at operator code 0x",
         utohex(error[4]),
