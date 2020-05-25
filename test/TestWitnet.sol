@@ -23,6 +23,7 @@ contract WitnetTest {
 
   // Test decoding of `RadonError` error codes
   function testErrorCodes() external {
+    Witnet.ErrorCodes errorCodeEmpty = Witnet.resultFromCborBytes(hex"D82780").asErrorCode();
     Witnet.ErrorCodes errorCode0x00 = Witnet.resultFromCborBytes(hex"D8278100").asErrorCode();
     Witnet.ErrorCodes errorCode0x01 = Witnet.resultFromCborBytes(hex"D8278101").asErrorCode();
     Witnet.ErrorCodes errorCode0x02 = Witnet.resultFromCborBytes(hex"D8278102").asErrorCode();
@@ -35,6 +36,11 @@ contract WitnetTest {
     Witnet.ErrorCodes errorCode0x40 = Witnet.resultFromCborBytes(hex"D827811840").asErrorCode();
     Witnet.ErrorCodes errorCode0x41 = Witnet.resultFromCborBytes(hex"D827811841").asErrorCode();
     Witnet.ErrorCodes errorCode0x42 = Witnet.resultFromCborBytes(hex"D827811842").asErrorCode();
+    Assert.equal(
+      uint(errorCodeEmpty),
+      uint(Witnet.ErrorCodes.Unknown),
+      "empty error code `[]` should be `Witnet.ErrorCodes.Unknown`"
+    );
     Assert.equal(
       uint(errorCode0x00),
       uint(Witnet.ErrorCodes.Unknown),
@@ -99,6 +105,7 @@ contract WitnetTest {
 
   // Test decoding of `RadonError` error messages
   function testErrorMessages() external {
+    (, string memory errorMessageEmpty) = Witnet.resultFromCborBytes(hex"D82780").asErrorMessage();
     (, string memory errorMessage0x00) = Witnet.resultFromCborBytes(hex"D8278100").asErrorMessage();
     (, string memory errorMessage0x01) = Witnet.resultFromCborBytes(hex"D827820102").asErrorMessage();
     (, string memory errorMessage0x02) = Witnet.resultFromCborBytes(hex"D827820203").asErrorMessage();
@@ -112,6 +119,11 @@ contract WitnetTest {
     (, string memory errorMessage0x41) = Witnet.resultFromCborBytes(hex"D827851841000A0B0C").asErrorMessage();
     (, string memory errorMessage0x42) = Witnet.resultFromCborBytes(hex"D827851842010B0C0D").asErrorMessage();
     (, string memory errorMessage0xFF) = Witnet.resultFromCborBytes(hex"D8278118FF").asErrorMessage();
+    Assert.equal(
+      errorMessageEmpty,
+      "Unknown error (no error code)",
+      "Empty error message `[]` should be properly formatted"
+    );
     Assert.equal(
       errorMessage0x00,
       "Unknown error (0x00)",
