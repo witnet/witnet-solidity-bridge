@@ -236,7 +236,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     // Ensures the request inclusion is reported after the epoch in which the request was posted
     require(
       requests[_id].epoch < _epoch,
-      "the dr inclusion must be reported after the dr is posted into the WRB");
+      "The request inclusion must be reported after it is posted into the WRB");
     // Update the dr epoch
     requests[_id].epoch = _epoch;
 
@@ -278,7 +278,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     absMember(msg.sender)
  {
     // Ensures the result was published in a later block than the request
-    require(requests[_id].epoch <= _epoch, "the result must be reported after the request is included");
+    require(requests[_id].epoch <= _epoch, "The result cannot be reported before the request is included");
     // Update epoch of the request
     requests[_id].epoch = _epoch;
 

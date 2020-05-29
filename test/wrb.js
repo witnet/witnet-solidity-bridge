@@ -643,7 +643,7 @@ contract("WRB", accounts => {
       // later than the epoch for which the dr was posted
       await truffleAssert.reverts(wrbInstance.reportDataRequestInclusion(id1, [data1], 0, blockHeader1, 0, {
         from: accounts[0],
-      }), "the dr inclusion must be reported after the dr is posted into the WRB")
+      }), "The request inclusion must be reported after it is posted into the WRB")
     })
 
     it("should revert when reporting a result for a dr for which its inclusion was not reported yet", async () => {
@@ -835,7 +835,7 @@ contract("WRB", accounts => {
       // revert when reporting the result for an epoch inferior than the one of the dr inclusion
       await truffleAssert.reverts(
         wrbInstance.reportResult(id1, [], 1, blockHeader2, 0, resBytes, { from: accounts[1] }),
-        "the result must be reported after the request is included"
+        "The result cannot be reported before the request is included"
       )
     })
 
