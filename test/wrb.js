@@ -164,6 +164,10 @@ contract("WRB", accounts => {
         })
       await waitForHash(tx2)
 
+      // get data request pkhClaim
+      const pkhClaim = await wrbInstance.getDataRequestPkhClaim(id1)
+      assert.equal(pkhClaim, account2)
+
       // post new block
       const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
         from: accounts[0],

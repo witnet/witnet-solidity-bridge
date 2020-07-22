@@ -215,6 +215,14 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     return validIds;
   }
 
+  /// @dev Returns data request claimer pkh.
+  /// @param _id Id of data request identifiers to be checked.
+  /// @return A pkh of the data request claimer.
+  function getDataRequestPkhClaim(uint256 _id) external view returns (address) {
+      return requests[_id].pkhClaim;
+  }
+
+
   /// @dev Presents a proof of inclusion to prove that the request was posted into Witnet so as to unlock the inclusion reward that was put aside for the claiming identity (public key hash).
   /// @param _id The unique identifier of the data request.
   /// @param _poi A proof of inclusion proving that the data request appears listed in one recent block in Witnet.
