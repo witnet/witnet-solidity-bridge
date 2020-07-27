@@ -1,8 +1,17 @@
 {
   "extends": "solhint:recommended",
   "rules": {
-    "compiler-version": ["error", "0.6.8"],
+    "compiler-version": [
+      "error",
+      "0.6.8"
+    ],
     "no-empty-blocks": "off",
-    "no-inline-assembly": "off"
+    "no-inline-assembly": "off",
+    "reason-string": [
+      "warn",
+      {
+        "maxLength": 80
+      }
+    ]
   }
 }
