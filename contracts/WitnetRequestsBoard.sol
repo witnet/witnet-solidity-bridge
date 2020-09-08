@@ -21,7 +21,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
 
   // Expiration period after which a Witnet Request can be claimed again
-  uint256 public constant CLAIM_EXPIRATION = 13;
+  // This should be at least superblock_period*2*checkpoint_period/ethereum_block_time
+  // This yields 60
+  uint256 public constant CLAIM_EXPIRATION = 60;
 
   struct DataRequest {
     bytes dr;
