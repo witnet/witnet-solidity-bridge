@@ -38,7 +38,6 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
     uint256[2] calldata _uPoint,
     uint256[4] calldata _vPointHelpers)
     external
-    view
   returns(bool)
   {
     return verifyPoe(
@@ -59,6 +58,13 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
       _message,
       _publicKey,
       _addrSignature);
+  }
+
+  // solhint-disable-next-line no-unused-vars
+  function gammaToHash(uint256 _gammaX, uint256 _gammaY)
+    internal pure override returns (uint256)
+  {
+    return _gammaX; 
   }
 
   function setActiveIdentities(uint32 _abs)

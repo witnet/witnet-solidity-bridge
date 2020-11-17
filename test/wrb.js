@@ -6,12 +6,12 @@ const sha = require("js-sha256")
 
 const data = require("./data.json")
 
-var wait = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
+const wait = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 
 function calculateRoots (drBytes, resBytes) {
   var hash = sha.sha256.create()
   hash.update(web3.utils.hexToBytes(drBytes))
-  var drHash = "0x" + hash.hex()
+  const drHash = "0x" + hash.hex()
   hash = sha.sha256.create()
   hash.update(web3.utils.hexToBytes(drHash))
   hash.update(web3.utils.hexToBytes(drHash))
@@ -40,7 +40,7 @@ contract("WRB", accounts => {
 
     it("should post 2 data requests, read them successfully and check balances afterwards", async () => {
       // Take current balance
-      var account1 = accounts[0]
+      const account1 = accounts[0]
       const actualBalance1 = await web3.eth.getBalance(account1)
 
       const drBytes = web3.utils.fromAscii("This is a DR")
@@ -117,9 +117,9 @@ contract("WRB", accounts => {
     it("should post a data request, claim it, post a new block to block relay, " +
       "verify inclusion and result reporting with PoIs and read the result",
     async () => {
-      var account1 = accounts[0]
-      var account2 = accounts[1]
-      var blockHeader = "0x" + sha.sha256("block header")
+      const account1 = accounts[0]
+      const account2 = accounts[1]
+      const blockHeader = "0x" + sha.sha256("block header")
       const actualBalance1 = await web3.eth.getBalance(account1)
       const actualBalance2 = await web3.eth.getBalance(account2)
 
@@ -298,7 +298,7 @@ contract("WRB", accounts => {
         assert.equal(resBytes, readresBytes1)
       })
 
-      var blockHeader = "0x" + sha.sha256("block header")
+      const blockHeader = "0x" + sha.sha256("block header")
       const roots = calculateRoots(drBytes, resBytes)
       const epoch = 2
       const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
@@ -341,8 +341,8 @@ contract("WRB", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
-      var fakeBlockHeader = "0x" + sha.sha256("fake block header")
-      var dummySibling = 1
+      const fakeBlockHeader = "0x" + sha.sha256("fake block header")
+      const dummySibling = 1
 
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]

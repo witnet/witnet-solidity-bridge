@@ -52,7 +52,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   ActiveBridgeSetLib.ActiveBridgeSet public abs;
 
   // Replication factor for Active Bridge Set identities
-  uint8 public repFactor;
+  uint256 public repFactor;
 
   // Event emitted when a new DR is posted
   event PostedRequest(address indexed _from, uint256 _id);
@@ -369,6 +369,17 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     return VRF.computeFastVerifyParams(_publicKey, _proof, _message);
   }
 
+  /// @dev Wrapper around the gammaToHash from VRF library.
+  /// @dev Convert proof to hash
+  /// @param _gammaX The x coordinate of the gamma proof.
+  /// @param _gammaY The y coordinate of the gamma proof.
+  /// @return The resulting hash.
+  function gammaToHash(uint256 _gammaX, uint256 _gammaY)
+    internal pure virtual returns (uint256)
+  {
+    return uint256(VRF.gammaToHash(_gammaX, _gammaY));
+  }
+
   /// @dev Updates the ABS activity with the block number provided.
   /// @param _blockNumber update the ABS until this block number.
   function updateAbsActivity(uint256 _blockNumber) external {
@@ -435,13 +446,13 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     vrfValid(_poe,_publicKey, _uPoint,_vPointHelpers)
   returns(bool)
   {
-    uint256 vrf = uint256(VRF.gammaToHash(_poe[0], _poe[1]));
+    uint256 vrf = gammaToHash(_poe[0], _poe[1]);
     // True if vrf/(2^{256} -1) <= repFactor/abs.activeIdentities
-    if (abs.activeIdentities < repFactor) {
+    if (uint256(abs.activeIdentities) < repFactor) {
       return true;
     }
     // We rewrote it as vrf <= ((2^{256} -1)/abs.activeIdentities)*repFactor to gain efficiency
-    if (vrf <= ((~uint256(0)/abs.activeIdentities)*repFactor)) {
+    if (vrf <= ((~uint256(0)/uint256(abs.activeIdentities))*repFactor)) {
       return true;
     }
 
