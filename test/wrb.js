@@ -9,7 +9,7 @@ const data = require("./data.json")
 const wait = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 
 function calculateRoots (drBytes, resBytes) {
-  var hash = sha.sha256.create()
+  let hash = sha.sha256.create()
   hash.update(web3.utils.hexToBytes(drBytes))
   const drHash = "0x" + hash.hex()
   hash = sha.sha256.create()
@@ -362,7 +362,7 @@ contract("WRB", accounts => {
       const id1 = txReceipt1.logs[0].data
       assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
-      var blockHeader = "0x" + sha.sha256("block header")
+      const blockHeader = "0x" + sha.sha256("block header")
       const roots = calculateRoots(drBytes, resBytes)
       const epoch = 2
       const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
@@ -443,7 +443,7 @@ contract("WRB", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
 
-      var blockHeader = "0x" + sha.sha256("block header")
+      const blockHeader = "0x" + sha.sha256("block header")
       const roots = calculateRoots(drBytes, resBytes)
       const epoch = 2
       const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
@@ -484,7 +484,7 @@ contract("WRB", accounts => {
     it("should revert when trying to report a dr inclusion that has not been claimed", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
       const resBytes = web3.utils.fromAscii("This is a result")
-      var dummySybling = 1
+      const dummySybling = 1
       const epoch = 0
 
       // post data request
@@ -496,7 +496,7 @@ contract("WRB", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
 
-      var blockHeader1 = "0x" + sha.sha256("block header")
+      const blockHeader1 = "0x" + sha.sha256("block header")
       const roots1 = calculateRoots(drBytes, resBytes)
       const epoch1 = 2
       const txRelay1 = blockRelay.postNewBlock(blockHeader1, epoch1, roots1[0], roots1[1], {
@@ -514,7 +514,7 @@ contract("WRB", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
       const resBytes = web3.utils.fromAscii("This is a result")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
-      var dummySybling = 1
+      const dummySybling = 1
 
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
@@ -533,7 +533,7 @@ contract("WRB", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
 
-      var blockHeader1 = "0x" + sha.sha256("block header")
+      const blockHeader1 = "0x" + sha.sha256("block header")
       const roots1 = calculateRoots(drBytes, resBytes)
       const epoch1 = 2
       const txRelay1 = blockRelay.postNewBlock(blockHeader1, epoch1, roots1[0], roots1[1], {
@@ -553,7 +553,7 @@ contract("WRB", accounts => {
         })
       await waitForHash(tx2)
 
-      var blockHeader2 = "0x" + sha.sha256("block header 2")
+      const blockHeader2 = "0x" + sha.sha256("block header 2")
       const roots2 = calculateRoots(drBytes, resBytes)
       const epoch2 = 3
       const txRelay2 = blockRelay.postNewBlock(blockHeader2, epoch2, roots2[0], roots2[1], {
@@ -598,7 +598,7 @@ contract("WRB", accounts => {
       const signature = data.signature
 
       // when posting this block, the lastBlock.epoch in the blockRelay will be 1
-      var blockHeader0 = "0x" + sha.sha256("block header 0")
+      const blockHeader0 = "0x" + sha.sha256("block header 0")
       const roots0 = calculateRoots(drBytes, resBytes)
       const epoch0 = 1
       const txRelay0 = blockRelay.postNewBlock(blockHeader0, epoch0, roots0[0], roots0[1], {
@@ -615,7 +615,7 @@ contract("WRB", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
 
-      var blockHeader1 = "0x" + sha.sha256("block header")
+      const blockHeader1 = "0x" + sha.sha256("block header")
       const roots1 = calculateRoots(drBytes, resBytes)
       const epoch1 = 2
       const txRelay1 = blockRelay.postNewBlock(blockHeader1, epoch1, roots1[0], roots1[1], {
@@ -635,7 +635,7 @@ contract("WRB", accounts => {
         })
       await waitForHash(tx2)
 
-      var blockHeader2 = "0x" + sha.sha256("block header 2")
+      const blockHeader2 = "0x" + sha.sha256("block header 2")
       const roots2 = calculateRoots(drBytes, resBytes)
       const epoch2 = 3
       const txRelay2 = blockRelay.postNewBlock(blockHeader2, epoch2, roots2[0], roots2[1], {
@@ -653,7 +653,7 @@ contract("WRB", accounts => {
     it("should revert when reporting a result for a dr for which its inclusion was not reported yet", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR6")
       const resBytes = web3.utils.fromAscii("This is a result")
-      var dummySybling = 1
+      const dummySybling = 1
 
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
@@ -672,7 +672,7 @@ contract("WRB", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
 
-      var blockHeader = "0x" + sha.sha256("block header")
+      const blockHeader = "0x" + sha.sha256("block header")
       const roots = calculateRoots(drBytes, resBytes)
       const epoch = 2
       const txRelay = blockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
@@ -735,7 +735,7 @@ contract("WRB", accounts => {
         })
       await waitForHash(tx2)
 
-      var blockHeader2 = "0x" + sha.sha256("block header")
+      const blockHeader2 = "0x" + sha.sha256("block header")
       const roots2 = calculateRoots(drBytes, resBytes)
       const epoch2 = 2
 
@@ -810,7 +810,7 @@ contract("WRB", accounts => {
         })
       await waitForHash(tx2)
 
-      var blockHeader2 = "0x" + sha.sha256("block header")
+      const blockHeader2 = "0x" + sha.sha256("block header")
       const roots2 = calculateRoots(drBytes, resBytes)
       const epoch2 = 2
 
@@ -879,7 +879,7 @@ contract("WRB", accounts => {
         })
       await waitForHash(tx2)
 
-      var blockHeader2 = "0x" + sha.sha256("block header")
+      const blockHeader2 = "0x" + sha.sha256("block header")
       const roots2 = calculateRoots(drBytes, resBytes)
       const epoch2 = 2
 
@@ -1009,7 +1009,7 @@ contract("WRB", accounts => {
           })
         await waitForHash(tx2)
 
-        var blockHeader2 = "0x" + sha.sha256("block header")
+        const blockHeader2 = "0x" + sha.sha256("block header")
         const roots2 = calculateRoots(drBytes, resBytes)
         const epoch2 = 2
 
