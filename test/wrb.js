@@ -1,6 +1,7 @@
 const WRB = artifacts.require("WitnetRequestsBoard")
 const MockBlockRelay = artifacts.require("MockBlockRelay")
 const BlockRelayProxy = artifacts.require("BlockRelayProxy")
+const Request = artifacts.require("Request")
 const truffleAssert = require("truffle-assertions")
 const sha = require("js-sha256")
 
@@ -43,12 +44,15 @@ contract("WitnetRequestBoard", accounts => {
       const actualBalance1 = await web3.eth.getBalance(account1)
 
       const drBytes = web3.utils.fromAscii("This is a DR")
+      const request = await Request.new(drBytes)
+
       const drBytes2 = web3.utils.fromAscii("This is a second DR")
+      const request2 = await Request.new(drBytes2)
 
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // Post first data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -57,7 +61,7 @@ contract("WitnetRequestBoard", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // Post second data request
-      const tx2 = wrbInstance.postDataRequest(drBytes2, 0)
+      const tx2 = wrbInstance.postDataRequest(request2.address, 0)
       const txHash2 = await waitForHash(tx2)
       const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
       const id2 = txReceipt2.logs[0].data
@@ -81,10 +85,11 @@ contract("WitnetRequestBoard", accounts => {
 
     it("should upgrade the reward of a data request after posting it in the contract", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
+      const request = await Request.new(drBytes)
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -124,6 +129,7 @@ contract("WitnetRequestBoard", accounts => {
 
       // Create data requests and roots
       const drBytes = web3.utils.fromAscii("This is a DR")
+      const request = await Request.new(drBytes)
       const drOutputHash = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
       const resBytes = web3.utils.fromAscii("This is a result")
       const roots = calculateRoots(drBytes, resBytes)
@@ -139,7 +145,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
         from: account1,
         value: web3.utils.toWei("1", "ether"),
       })
@@ -216,11 +222,13 @@ contract("WitnetRequestBoard", accounts => {
 
     it("should post two data requests and ensure Ids are as expected", async () => {
       const drBytes1 = web3.utils.fromAscii("This is a DR")
+      const request1 = await Request.new(drBytes1)
       const drBytes2 = web3.utils.fromAscii("This is a second DR")
+      const request2 = await Request.new(drBytes2)
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // post the first data request
-      const tx1 = wrbInstance.postDataRequest(drBytes1, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request1.address, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -232,7 +240,7 @@ contract("WitnetRequestBoard", accounts => {
       assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       // post the second data request
-      const tx2 = wrbInstance.postDataRequest(drBytes2, 0)
+      const tx2 = wrbInstance.postDataRequest(request2.address, 0)
       const txHash2 = await waitForHash(tx2)
       const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
 
@@ -249,11 +257,12 @@ contract("WitnetRequestBoard", accounts => {
 
     it("should check the emission of the PostedRequest event with correct id", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
+      const request = await Request.new(drBytes)
       const hash = "0x1"
       const expectedResultId = web3.utils.hexToNumberString(hash)
 
       // post data request
-      const tx = await wrbInstance.postDataRequest(drBytes, 0)
+      const tx = await wrbInstance.postDataRequest(request.address, 0)
 
       // check emission of the event and its id correctness
       truffleAssert.eventEmitted(tx, "PostedRequest", (ev) => {
@@ -269,6 +278,7 @@ contract("WitnetRequestBoard", accounts => {
       "perform the claim, post new block, report dr inclusion and the result " +
       "and only then read result", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
+      const request = await Request.new(drBytes)
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
@@ -282,7 +292,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -329,6 +339,7 @@ contract("WitnetRequestBoard", accounts => {
 
     it("should revert the transaction when trying to read from a non-existent block", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
+      const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
       const fakeBlockHeader = "0x" + sha.sha256("fake block header")
@@ -343,7 +354,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -383,9 +394,10 @@ contract("WitnetRequestBoard", accounts => {
       "Checks the post data request transaction",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
+      const request = await Request.new(drBytes)
 
       // assert it reverts when rewards are higher than values sent
-      await truffleAssert.reverts(wrbInstance.postDataRequest(drBytes, web3.utils.toWei("2", "ether"), {
+      await truffleAssert.reverts(wrbInstance.postDataRequest(request.address, web3.utils.toWei("2", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       }), "Transaction value needs to be equal or greater than tally reward")
@@ -395,9 +407,10 @@ contract("WitnetRequestBoard", accounts => {
       "Checks the upgrade data request transaction",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR")
+      const request = await Request.new(drBytes)
 
       // this should pass
-      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -414,6 +427,7 @@ contract("WitnetRequestBoard", accounts => {
 
     it("should revert when trying to claim a DR that was already claimed", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR4")
+      const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
 
       // VRF params
@@ -425,7 +439,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -473,12 +487,13 @@ contract("WitnetRequestBoard", accounts => {
 
     it("should revert when trying to report a dr inclusion that has not been claimed", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
+      const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
       const dummySybling = 1
       const epoch = 0
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -502,6 +517,7 @@ contract("WitnetRequestBoard", accounts => {
 
     it("should revert when trying to report a dr inclusion that was already reported", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
+      const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
       const dummySybling = 1
@@ -515,7 +531,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -576,6 +592,7 @@ contract("WitnetRequestBoard", accounts => {
     it("should revert when trying to prove inclusion of a DR in an epoch inferior than" +
       "the one in which DR was posted", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR5")
+      const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
 
@@ -597,7 +614,7 @@ contract("WitnetRequestBoard", accounts => {
       await waitForHash(txRelay0)
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -642,6 +659,7 @@ contract("WitnetRequestBoard", accounts => {
 
     it("should revert when reporting a result for a dr for which its inclusion was not reported yet", async () => {
       const drBytes = web3.utils.fromAscii("This is a DR6")
+      const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
       const dummySybling = 1
 
@@ -654,7 +672,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -693,6 +711,7 @@ contract("WitnetRequestBoard", accounts => {
       "for which a result has been already reported",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR7")
+      const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
 
@@ -705,7 +724,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -768,6 +787,7 @@ contract("WitnetRequestBoard", accounts => {
        " inferior than the one in which DR inclusion was reported ",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR7")
+      const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
 
@@ -780,7 +800,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -837,6 +857,7 @@ contract("WitnetRequestBoard", accounts => {
        "that does not belong to the ABS",
     async () => {
       const drBytes = web3.utils.fromAscii("This is a DR7")
+      const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
 
@@ -849,7 +870,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -905,6 +926,7 @@ contract("WitnetRequestBoard", accounts => {
     it("should revert because of trying to claim with an invalid signature",
       async () => {
         const drBytes = web3.utils.fromAscii("This is a DR7")
+        const request = await Request.new(drBytes)
 
         // VRF params
         const publicKey = [data.publicKey.x, data.publicKey.y]
@@ -915,7 +937,7 @@ contract("WitnetRequestBoard", accounts => {
         const signature = web3.utils.fromAscii("this is a fake sig")
 
         // post data request
-        const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+        const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
           from: accounts[0],
           value: web3.utils.toWei("1", "ether"),
         })
@@ -966,6 +988,7 @@ contract("WitnetRequestBoard", accounts => {
     it("should revert while upgrading the rewards with wrong values or if the result was reported",
       async () => {
         const drBytes = web3.utils.fromAscii("This is a DR7")
+        const request = await Request.new(drBytes)
         const resBytes = web3.utils.fromAscii("This is a result")
         const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
 
@@ -978,7 +1001,7 @@ contract("WitnetRequestBoard", accounts => {
         const signature = data.signature
 
         // post data request
-        const tx1 = wrbInstance.postDataRequest(drBytes, web3.utils.toWei("1", "ether"), {
+        const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
           from: accounts[0],
           value: web3.utils.toWei("1", "ether"),
         })
