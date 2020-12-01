@@ -49,14 +49,14 @@ contract WitnetRequestsBoardProxy {
   }
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
-  /// @param _dr The bytes corresponding to the Protocol Buffers serialization of the data request output.
+  /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(bytes calldata _dr, uint256 _tallyReward) external payable returns(uint256) {
+  function postDataRequest(address _requestAddress, uint256 _tallyReward) external payable returns(uint256) {
     uint256 n = controllers.length;
     uint256 offset = controllers[n - 1].lastId;
     // Update the currentLastId with the id in the controller plus the offSet
-    currentLastId = witnetRequestsBoardInstance.postDataRequest{value: msg.value}(_dr, _tallyReward) + offset;
+    currentLastId = witnetRequestsBoardInstance.postDataRequest{value: msg.value}(_requestAddress, _tallyReward) + offset;
     return currentLastId;
   }
 

@@ -15,7 +15,7 @@ import "../WitnetRequestsBoardInterface.sol";
 contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   struct DataRequest {
-    bytes dr;
+    address requestAddress;
     uint256 inclusionReward;
     uint256 tallyReward;
     bytes result;
@@ -36,10 +36,10 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
   }
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
-  /// @param _dr The bytes corresponding to the Protocol Buffers serialization of the data request output.
+  /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(bytes calldata _dr, uint256 _tallyReward)
+  function postDataRequest(address _requestAddress, uint256 _tallyReward)
     external
     payable
     override
@@ -49,7 +49,7 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     DataRequest memory dr;
     requests.push(dr);
 
-    requests[_id].dr = _dr;
+    requests[_id].requestAddress = _requestAddress;
     requests[_id].inclusionReward = msg.value - _tallyReward;
     requests[_id].tallyReward = _tallyReward;
     return _id;

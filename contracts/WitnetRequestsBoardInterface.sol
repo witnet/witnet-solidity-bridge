@@ -14,10 +14,10 @@ pragma solidity >=0.6.0 <0.7.0;
 interface WitnetRequestsBoardInterface {
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
-  /// @param _dr The bytes corresponding to the Protocol Buffers serialization of the data request output.
+  /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(bytes calldata _dr, uint256 _tallyReward) external payable returns(uint256);
+  function postDataRequest(address _requestAddress, uint256 _tallyReward) external payable returns(uint256);
 
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.

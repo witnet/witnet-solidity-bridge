@@ -3,6 +3,7 @@
 pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "./Request.sol";
 import "vrf-solidity/contracts/VRF.sol";
 import "./ActiveBridgeSetLib.sol";
 import "witnet-ethereum-block-relay/contracts/BlockRelayProxy.sol";
@@ -26,7 +27,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   uint256 public constant CLAIM_EXPIRATION = 120;
 
   struct DataRequest {
-    bytes dr;
+    address requestAddress;
     uint256 inclusionReward;
     uint256 tallyReward;
     bytes result;
@@ -149,10 +150,10 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   }
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
-  /// @param _serialized The bytes corresponding to the Protocol Buffers serialization of the data request output.
+  /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(bytes calldata _serialized, uint256 _tallyReward)
+  function postDataRequest(address _requestAddress, uint256 _tallyReward)
     external
     payable
     payingEnough(msg.value, _tallyReward)
@@ -164,7 +165,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
     // Create a new `DataRequest` object and initialize all the non-default fields
     DataRequest memory request;
-    request.dr = _serialized;
+    request.requestAddress = _requestAddress;
     request.inclusionReward = SafeMath.sub(msg.value, _tallyReward);
     request.tallyReward = _tallyReward;
     request.epoch = blockRelay.getLastEpoch();
@@ -248,8 +249,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       "The request inclusion must be reported after it is posted into the WRB");
     // Update the dr epoch
     requests[_id].epoch = _epoch;
-
-    uint256 drOutputHash = uint256(sha256(requests[_id].dr));
+    Request requestContract = Request(requests[_id].requestAddress);
+    uint256 drOutputHash = uint256(sha256(requestContract.bytecode()));
     uint256 drHash = uint256(sha256(abi.encodePacked(drOutputHash, _poi[0])));
 
     // Update the state upon which this function depends before the external call
@@ -316,7 +317,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @return The result of the data request as bytes.
   function readDataRequest(uint256 _id) external view returns(bytes memory) {
     require(requests.length > _id, "Id not found");
-    return requests[_id].dr;
+    Request requestContract = Request(requests[_id].requestAddress);
+    return requestContract.bytecode();
   }
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
