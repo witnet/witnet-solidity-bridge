@@ -137,7 +137,7 @@ contract TestActiveBridgeSet {
     bytes memory error;
     fakeAbs.lastBlockNumber = 1;
     TestActiveBridgeSet(address(throwProxy)).errorUpdateABS(0);
-    (r, error) = throwProxy.execute.gas(100000)();
+    (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "The provided block is older than the last updated block");
   }
 
@@ -147,7 +147,7 @@ contract TestActiveBridgeSet {
     bytes memory error;
     fakeAbs.lastBlockNumber = 1;
     TestActiveBridgeSet(address(throwProxy)).errorPushABS(address(0), 0);
-    (r, error) = throwProxy.execute.gas(100000)();
+    (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "The provided block is older than the last updated block");
   }
 

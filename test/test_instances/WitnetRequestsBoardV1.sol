@@ -109,7 +109,7 @@ contract WitnetRequestsBoardV1 is WitnetRequestsBoardInterface {
   /// @dev Verifies if the contract is upgradable
   /// @return true if the contract upgradable
   /* solhint-disable-next-line no-unused-vars*/
-  function isUpgradable(address _address) external view override returns(bool) {
+  function isUpgradable(address) external view override returns(bool) {
     return true;
   }
 

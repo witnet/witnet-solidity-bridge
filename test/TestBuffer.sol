@@ -86,7 +86,7 @@ contract TestBuffer {
     bytes memory data = abi.encodePacked(input);
 
     TestBuffer(address(throwProxy)).errorReadAsUint16(data);
-    (r, error) = throwProxy.execute.gas(100000)();
+    (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint8 as uint16 should fail");
   }
 
@@ -98,7 +98,7 @@ contract TestBuffer {
     bytes memory data = abi.encodePacked(input);
 
     TestBuffer(address(throwProxy)).errorReadAsUint32(data);
-    (r, error) = throwProxy.execute.gas(100000)();
+    (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint16 as uint32 should fail");
   }
 
@@ -110,7 +110,7 @@ contract TestBuffer {
     bytes memory data = abi.encodePacked(input);
 
     TestBuffer(address(throwProxy)).errorReadAsUint64(data);
-    (r, error) = throwProxy.execute.gas(100000)();
+    (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint32 as uint64 should fail");
   }
 
@@ -122,7 +122,7 @@ contract TestBuffer {
     bytes memory data = abi.encodePacked(input);
 
     TestBuffer(address(throwProxy)).errorReadAsUint128(data);
-    (r, error) = throwProxy.execute.gas(100000)();
+    (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint64 as uint128 should fail");
   }
 
@@ -134,7 +134,7 @@ contract TestBuffer {
     bytes memory data = abi.encodePacked(input);
 
     TestBuffer(address(throwProxy)).errorReadAsUint256(data);
-    (r, error) = throwProxy.execute.gas(100000)();
+    (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint128 as uint256 should fail");
   }
 
@@ -148,7 +148,7 @@ contract TestBuffer {
     buf.next();
 
     TestBuffer(address(throwProxy)).errorReadNext(buf);
-    (r, error) = throwProxy.execute.gas(100000)();
+    (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Next for out of bounds fail");
   }
 
