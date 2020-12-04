@@ -1,6 +1,6 @@
 {
   "name": "witnet-ethereum-bridge",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Witnet-Ethereum Bridge Interface",
   "main": "",
   "scripts": {

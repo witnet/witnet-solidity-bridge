@@ -1,7 +1,7 @@
 const WRB = artifacts.require("WitnetRequestsBoard")
 const MockBlockRelay = artifacts.require("MockBlockRelay")
 const BlockRelayProxy = artifacts.require("BlockRelayProxy")
-const Request = artifacts.require("Request")
+const Request = artifacts.require("RequestTestHelper")
 const truffleAssert = require("truffle-assertions")
 const sha = require("js-sha256")
 
@@ -782,6 +782,31 @@ contract("WitnetRequestBoard", accounts => {
         "Result already included"
       )
     })
+
+    it("should revert when reading a data request that has a diffrent bytcode from the original",
+      async () => {
+        const drBytes = web3.utils.fromAscii("This is a DR")
+        const request = await Request.new(drBytes)
+
+        const halfEther = web3.utils.toWei("0.5", "ether")
+
+        // Post data request
+        const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        })
+        const txHash1 = await waitForHash(tx1)
+        const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
+        const id1 = txReceipt1.logs[0].data
+
+        // Change the bytecode of the request already posted
+        const newDrBytes = web3.utils.fromAscii("This is a different DR")
+        await request.modifyBytecode(newDrBytes)
+
+        // Should revert when reading the request since the bytecode has changed
+        await truffleAssert.reverts(wrbInstance.readDataRequest(id1),
+          "The dr has been manipulated and the bytecode has changed")
+      })
 
     it("should revert when trying to report the result of a DR in an epoch" +
        " inferior than the one in which DR inclusion was reported ",

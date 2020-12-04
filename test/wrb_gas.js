@@ -84,7 +84,7 @@ contract("WitnetRequestBoard", ([
       const contractInitialBalance = await contractBalanceTracker.get()
 
       // Post Data Request
-      const postDataRequestTx = await this.WitnetRequestBoard.postDataRequest(requestHex, ether("0.5"), {
+      const postDataRequestTx = await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.5"), {
         from: requestor,
         value: ether("1"),
       })
@@ -114,7 +114,7 @@ contract("WitnetRequestBoard", ([
 
   describe("upgrade data request", async () => {
     beforeEach(async () => {
-      await this.WitnetRequestBoard.postDataRequest(requestHex, ether("0.5"), {
+      await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.5"), {
         from: requestor,
         value: ether("1"),
       })
@@ -143,7 +143,7 @@ contract("WitnetRequestBoard", ([
 
   describe("claim data request", async () => {
     beforeEach(async () => {
-      await this.WitnetRequestBoard.postDataRequest(requestHex, ether("0.5"), {
+      await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.5"), {
         from: requestor,
         value: ether("1"),
       })
@@ -225,7 +225,7 @@ contract("WitnetRequestBoard", ([
   describe("report data request inclusion", async () => {
     beforeEach(async () => {
       // Post data request
-      await this.WitnetRequestBoard.postDataRequest(requestHex, ether("0.5"), {
+      await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.5"), {
         from: requestor,
         value: ether("1"),
       })
@@ -295,7 +295,7 @@ contract("WitnetRequestBoard", ([
   describe("report data request result", async () => {
     beforeEach(async () => {
       // Post data request
-      await this.WitnetRequestBoard.postDataRequest(requestHex, ether("0.5"), {
+      await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.5"), {
         from: requestor,
         value: ether("1"),
       })
@@ -378,7 +378,7 @@ contract("WitnetRequestBoard", ([
   describe("read data request result", async () => {
     beforeEach(async () => {
       // Post data request
-      await this.WitnetRequestBoard.postDataRequest(requestHex, ether("0.5"), {
+      await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.5"), {
         from: requestor,
         value: ether("1"),
       })
