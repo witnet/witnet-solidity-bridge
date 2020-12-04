@@ -28,7 +28,7 @@ module.exports = {
     reporter: 'eth-gas-reporter',
     reporterOptions: {
         currency: "USD",
-        gasPrice: 100,
+        gasPrice: 50,
         excludeContracts: ['Migrations'],
         src: "contracts"
     },
