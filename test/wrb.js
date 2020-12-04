@@ -4,9 +4,8 @@ const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const truffleAssert = require("truffle-assertions")
 const sha = require("js-sha256")
 
+// Data generated using Witnet ful4n0 identity
 const data = require("./data.json")
-
-const wait = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 
 function calculateRoots (drBytes, resBytes) {
   let hash = sha.sha256.create()
@@ -292,12 +291,6 @@ contract("WRB", accounts => {
       const id1 = txReceipt1.logs[0].data
       assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
-      // subscribe to PostedResult event
-      wrbInstance.PostedResult({}, async (_error, event) => {
-        const readresBytes1 = await wrbInstance.readResult.call(id1)
-        assert.equal(resBytes, readresBytes1)
-      })
-
       const blockHeader = "0x" + sha.sha256("block header")
       const roots = calculateRoots(drBytes, resBytes)
       const epoch = 2
@@ -328,9 +321,6 @@ contract("WRB", accounts => {
       const tx4 = await wrbInstance.reportResult(id1, [], 0, blockHeader, epoch, resBytes, {
         from: accounts[1],
       })
-
-      // wait for the async method to finish
-      await wait(500)
 
       truffleAssert.eventEmitted(tx4, "PostedResult", (ev) => {
         return ev[1].eq(web3.utils.toBN(id1))
@@ -964,7 +954,6 @@ contract("WRB", accounts => {
     it("should revert updating ABS activity with a past block",
       async () => {
         const block = await web3.eth.getBlock("latest")
-        console.log(block.number)
         const newBlock = 49
         const tx1 = wrbInstance.updateAbsActivity(block.number)
         await waitForHash(tx1)
