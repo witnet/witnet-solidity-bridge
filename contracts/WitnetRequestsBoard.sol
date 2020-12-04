@@ -28,6 +28,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   struct DataRequest {
     address requestAddress;
+    uint256 drOutputHash;
     uint256 inclusionReward;
     uint256 tallyReward;
     bytes result;
@@ -112,6 +113,18 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     _;
   }
 
+  // Ensures the request has not been manipulated
+  modifier validDrOutputHash(uint256 _id) {
+    require(requests[_id].drOutputHash == uint256(sha256(Request(requests[_id].requestAddress).bytecode())),
+    "The dr has been manipulated and the bytecode has changed");
+    _;
+  }
+
+  // Ensures the request id exists
+  modifier validId(uint256 _id) {
+    require(requests.length > _id, "Id not found"); 
+    _;
+  }
 // Ensures the VRF is valid
   modifier vrfValid(
     uint256[4] memory _poe,
@@ -169,6 +182,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     request.inclusionReward = SafeMath.sub(msg.value, _tallyReward);
     request.tallyReward = _tallyReward;
     request.epoch = blockRelay.getLastEpoch();
+    Request requestContract = Request(request.requestAddress);
+    uint256 _drOutputHash = uint256(sha256(requestContract.bytecode()));
+    request.drOutputHash = _drOutputHash;
 
     // Push the new request into the contract state
     requests.push(request);
@@ -249,19 +265,15 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       "The request inclusion must be reported after it is posted into the WRB");
     // Update the dr epoch
     requests[_id].epoch = _epoch;
-    Request requestContract = Request(requests[_id].requestAddress);
-    uint256 drOutputHash = uint256(sha256(requestContract.bytecode()));
-    uint256 drHash = uint256(sha256(abi.encodePacked(drOutputHash, _poi[0])));
-
     // Update the state upon which this function depends before the external call
-    requests[_id].drHash = drHash;
+    requests[_id].drHash = uint256(sha256(abi.encodePacked(requests[_id].drOutputHash, _poi[0])));
     require(
       blockRelay.verifyDrPoi(
       _poi,
       _blockHash,
       _epoch,
       _index,
-      drOutputHash), "Invalid PoI");
+      requests[_id].drOutputHash), "Invalid PoI");
     requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
     // Push requests[_id].pkhClaim to abs
     abs.pushActivity(requests[_id].pkhClaim, block.number);
@@ -315,8 +327,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Retrieves the bytes of the serialization of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the data request as bytes.
-  function readDataRequest(uint256 _id) external view returns(bytes memory) {
-    require(requests.length > _id, "Id not found");
+  function readDataRequest(uint256 _id) external view validId(_id) validDrOutputHash(_id) returns(bytes memory) {
     Request requestContract = Request(requests[_id].requestAddress);
     return requestContract.bytecode();
   }
@@ -324,16 +335,14 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
-  function readResult(uint256 _id) external view override returns(bytes memory) {
-    require(requests.length > _id, "Id not found");
+  function readResult(uint256 _id) external view override validId(_id) returns(bytes memory) {
     return requests[_id].result;
   }
 
   /// @dev Retrieves hash of the data request transaction in Witnet.
   /// @param _id The unique identifier of the data request.
   /// @return The hash of the DataRequest transaction in Witnet.
-  function readDrHash(uint256 _id) external view override returns(uint256) {
-    require(requests.length > _id, "Id not found");
+  function readDrHash(uint256 _id) external view override validId(_id) returns(uint256) {
     return requests[_id].drHash;
   }
 
