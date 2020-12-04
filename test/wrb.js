@@ -22,8 +22,8 @@ function calculateRoots (drBytes, resBytes) {
   return [expectedDrHash, expectedResHash]
 }
 
-contract("WRB", accounts => {
-  describe("WRB test suite", () => {
+contract("WitnetRequestBoard", accounts => {
+  describe("WitnetRequestBoard test suite", () => {
     let wrbInstance
     let blockRelay
     let blockRelayProxy
