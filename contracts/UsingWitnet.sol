@@ -52,7 +52,7 @@ contract UsingWitnet {
     validRewards(_requestReward, _resultReward)
   returns (uint256)
   {
-    return wrb.postDataRequest.value(_requestReward + _resultReward)(_request.bytecode(), _resultReward);
+    return wrb.postDataRequest{value: _requestReward + _resultReward}(_request.bytecode(), _resultReward);
   }
 
   /**
@@ -81,7 +81,7 @@ contract UsingWitnet {
     internal
     validRewards(_requestReward, _resultReward)
   {
-    wrb.upgradeDataRequest.value(msg.value)(_id, _resultReward);
+    wrb.upgradeDataRequest{value: msg.value}(_id, _resultReward);
   }
 
   /**
