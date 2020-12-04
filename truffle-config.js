@@ -24,9 +24,16 @@ module.exports = {
       port: 8542,
     },
   },
-  // Set default mocha options here, use special reporters etc.
   mocha: {
-    // timeout: 100000
+    reporter: 'eth-gas-reporter',
+    reporterOptions: {
+        currency: "USD",
+        gasPrice: 100,
+        excludeContracts: ['Migrations'],
+        src: "contracts"
+    },
+    timeout: 100000,
+    useColors: true
   },
   compilers: {
     solc: {

@@ -14,7 +14,8 @@
     "fmt!": "solhint --max-warnings 0 \"contracts/**/*.sol\" --fix && eslint ./test --fix && solhint \"test/**/*.sol\" --fix",
     "migrate-flattened": "npm run flatten && npx truffle migrate --config flattened-config.js",
     "coverage": "solidity-coverage",
-    "verify-flattened": "npx truffle run verify"
+    "verify-flattened": "npx truffle run verify",
+    "gas-analysis": "truffle test test/wrb_gas.js"
   },
   "author": "Witnet Foundation <info@witnet.foundation>",
   "repository": {
@@ -33,6 +34,8 @@
     "witnet-ethereum-block-relay": "witnet/witnet-ethereum-block-relay"
   },
   "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.5",
+    "chai": "^4.2.0",
     "dotenv": "8.2.0",
     "eslint": "7.13.0",
     "eslint-config-standard": "16.0.1",
@@ -40,7 +43,7 @@
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "4.2.1",
     "eslint-plugin-standard": "4.1.0",
-    "solhint": "3.3.2",
+    "eth-gas-reporter": "^0.2.18",
     "ganache-cli": "6.12.1",
     "js-sha256": "0.9.0",
     "solhint": "3.3.2",
