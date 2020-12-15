@@ -34,21 +34,36 @@ const drOutputHash = "0x" + sha256(web3.utils.hexToBytes(requestHex))
 // Request inclusion definition (Proof-of-Inclusion)
 const epoch = 2
 const blockHeader = "0x" + sha256("block header")
-const roots = calculateRoots(requestHex, resultHex)
+const roots = calculateRoots(0, requestHex, resultHex)
 
 // Function to calculate merkle roots for Proof-of-Inclusions (PoI)
-function calculateRoots (drBytes, resBytes) {
+function calculateRoots (levels, drBytes, resBytes) {
   let hash = sha256.create()
   hash.update(web3.utils.hexToBytes(drBytes))
   const drHash = "0x" + hash.hex()
   hash = sha256.create()
   hash.update(web3.utils.hexToBytes(drHash))
   hash.update(web3.utils.hexToBytes(drHash))
-  const expectedDrHash = "0x" + hash.hex()
+  const drTxHash = "0x" + hash.hex()
+  let temp = drTxHash
+  for (let i = 0; i < levels; i++) {
+    hash = sha256.create()
+    hash.update(web3.utils.hexToBytes(temp))
+    hash.update(web3.utils.hexToBytes(drHash))
+    temp = "0x" + hash.hex()
+  }
+  const expectedDrHash = temp
   hash = sha256.create()
-  hash.update(web3.utils.hexToBytes(expectedDrHash))
+  hash.update(web3.utils.hexToBytes(drTxHash))
   hash.update(web3.utils.hexToBytes(resBytes))
-  const expectedResHash = "0x" + hash.hex()
+  temp = "0x" + hash.hex()
+  for (let i = 0; i < levels; i++) {
+    hash = sha256.create()
+    hash.update(web3.utils.hexToBytes(temp))
+    hash.update(web3.utils.hexToBytes(drHash))
+    temp = "0x" + hash.hex()
+  }
+  const expectedResHash = temp
   return [expectedDrHash, expectedResHash]
 }
 
@@ -310,6 +325,39 @@ contract("WitnetRequestBoard", ([
         "Owner balance should have increased after reporting b lock by 0.125 eth",
       ).to.equal(true)
     })
+    it("Pushing the limits to 9 additional PoI levels (0.5 eth to claimer)", async () => {
+      // Initial balances
+      const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
+      const claimerBalanceTracker = await balance.tracker(claimer)
+      const contractInitialBalance = await contractBalanceTracker.get()
+      const claimerInitialBalance = await claimerBalanceTracker.get()
+      const roots = calculateRoots(9, requestHex, resultHex)
+      const proof = Array(10).fill(drOutputHash)
+
+      // Post new block and report data request inclusion
+      await this.BlockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
+        from: owner,
+      })
+      await this.WitnetRequestBoard.reportDataRequestInclusion(requestId, proof, 0, blockHeader, epoch, {
+        from: other,
+      })
+
+      // Check balances (contract decreased and claimer increased)
+      const contractFinalBalance = await contractBalanceTracker.get()
+      const claimerFinalBalance = await claimerBalanceTracker.get()
+      expect(
+        contractFinalBalance.eq(contractInitialBalance
+          .sub(ether("0.5"))
+        ),
+        "contract balance should have decreased after reporting dr request inclusion by 0.5 eth",
+      ).to.equal(true)
+      expect(
+        claimerFinalBalance.eq(claimerInitialBalance
+          .add(ether("0.5"))
+        ),
+        "claimer balance should have increased after reporting dr request inclusion by 0.5 eth",
+      ).to.equal(true)
+    })
   })
 
   describe("report data request result", async () => {
@@ -401,6 +449,87 @@ contract("WitnetRequestBoard", ([
           .add(ether("0.125"))
         ),
         "Owner balance should have increased after reporting b lock by 0.125 eth",
+      ).to.equal(true)
+    })
+  })
+
+  describe("Pushing PoI to 9 levels report data request result", async () => {
+    beforeEach(async () => {
+      // Post data request
+      await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.5"), {
+        from: requestor,
+        value: ether("1"),
+      })
+      // Claim data request
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[0].proof
+      const message = data.poe[0].lastBeacon
+      const signature = data.signature
+      const proof = await this.WitnetRequestBoard.decodeProof(proofBytes)
+      const fastVerifyParams = await this.WitnetRequestBoard.computeFastVerifyParams(publicKey, proof, message)
+      await this.WitnetRequestBoard.claimDataRequests(
+        [requestId],
+        proof,
+        publicKey,
+        fastVerifyParams[0],
+        fastVerifyParams[1],
+        signature, {
+          from: claimer,
+        })
+      const roots = calculateRoots(9, requestHex, resultHex)
+      const drInclusionProof = Array(10).fill(drOutputHash)
+
+      // Post new block
+      await this.BlockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
+        from: owner,
+      })
+      // Report data request inclusion from Witnet to WitnetRequestBoard
+      await this.WitnetRequestBoard.reportDataRequestInclusion(requestId, drInclusionProof, 0, blockHeader, epoch, {
+        from: claimer,
+      })
+    })
+    it("abs member (claimer) can report a data request result from Witnet (0.5 eth to claimer)", async () => {
+      // Initial balances
+      const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
+      const claimerBalanceTracker = await balance.tracker(claimer)
+      const contractInitialBalance = await contractBalanceTracker.get()
+      const claimerInitialBalance = await claimerBalanceTracker.get()
+      const proof = Array(9).fill(drOutputHash)
+
+      // Report data request result from Witnet to WitnetRequestBoard
+      const reportResultTx = await this.WitnetRequestBoard.reportResult(
+        requestId, proof, 0, blockHeader, epoch, resultHex,
+        { from: claimer, gasPrice: 1 }
+      )
+
+      // Check `PostedRequest` event
+      expectEvent(
+        reportResultTx,
+        "PostedResult",
+        {
+          _from: claimer,
+          _id: requestId,
+        },
+      )
+      expect(reportResultTx.logs[0].args._from, "match address of DR creator").to.be.equal(claimer)
+      expect(reportResultTx.logs[0].args._id, "match data request id").to.be.bignumber.equal(requestId)
+
+      // Check balances (contract decreased and claimer increased)
+      const contractFinalBalance = await contractBalanceTracker.get()
+      const claimerFinalBalance = await claimerBalanceTracker.get()
+
+      expect(
+        contractFinalBalance.eq(contractInitialBalance
+          .sub(ether("0.5"))
+        ),
+        "contract balance should have decreased after reporting dr request result by 0.5 eth",
+      ).to.equal(true)
+      expect(
+        claimerFinalBalance.eq(claimerInitialBalance
+          .add(ether("0.5"))
+          .sub(new BN(reportResultTx.receipt.gasUsed)),
+        ),
+        "claimer balance should have increased after reporting dr request result by 0.5 eth",
       ).to.equal(true)
     })
   })
