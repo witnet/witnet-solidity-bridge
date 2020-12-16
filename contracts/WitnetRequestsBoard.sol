@@ -25,6 +25,18 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   // This should be at least superblock_period*2*checkpoint_period/ethereum_block_time
   // This yields 60, we double it to be conservative
   uint256 public constant CLAIM_EXPIRATION = 120;
+  
+  // Max gas values as calculate with gas-analysis
+  // Claiming is not subject to substantial increases as it is only composed of a VRF verification 
+  uint256 public constant MAX_CLAIM_DR_GAS = 216095;
+  // DR inclusion is subject to increases due to number of merkle tree levels and activity slots to be removed
+  // The following value corresponds to 9 merkle tree levels and one full address removal for all slots
+  uint256 public constant MAX_DR_INCLUSION_GAS = 511098;
+  // Result reporting is subject to increases due to number of merkle tree levels
+  // The following value corresponds to 9 merkle tree levels
+  uint256 public constant MAX_REPORT_RESULT_GAS  = 102496;
+  // Block reporting is not subject to increases
+  uint256 public constant MAX_REPORT_BLOCK_GAS = 127963;
 
   struct DataRequest {
     address requestAddress;
@@ -291,8 +303,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     // Transfer the DR inclusion reward to the inclusion verifier
     requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
     // Push requests[_id].pkhClaim to abs
-    abs.pushActivity(requests[_id].pkhClaim, block.number);
-
+    abs.pushActivity(requests[_id].pkhClaim, getBlockNumber());
     emit IncludedRequest(msg.sender, _id);
   }
 
@@ -412,7 +423,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Updates the ABS activity with the block number provided.
   /// @param _blockNumber update the ABS until this block number.
   function updateAbsActivity(uint256 _blockNumber) external {
-    require (_blockNumber <= block.number, "The provided block number has not been reached");
+    require (_blockNumber <= getBlockNumber(), "The provided block number has not been reached");
 
     abs.updateActivity(_blockNumber);
   }
@@ -449,7 +460,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
         "One of the listed data requests was already claimed"
       );
       requests[_ids[i]].pkhClaim = msg.sender;
-      requests[_ids[i]].blockNumber = block.number;
+      requests[_ids[i]].blockNumber = getBlockNumber();
     }
     return true;
   }
@@ -530,9 +541,12 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   function dataRequestCanBeClaimed(DataRequest memory _request) private view returns (bool) {
     return
-      (_request.blockNumber == 0 || block.number - _request.blockNumber > CLAIM_EXPIRATION) &&
+      (_request.blockNumber == 0 || getBlockNumber() - _request.blockNumber > CLAIM_EXPIRATION) &&
       _request.drHash == 0 &&
       _request.result.length == 0;
   }
 
+  function getBlockNumber() internal view virtual returns (uint256) {
+    return block.number;
+  }
 }

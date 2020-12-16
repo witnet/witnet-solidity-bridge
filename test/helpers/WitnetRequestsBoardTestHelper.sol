@@ -18,6 +18,7 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
   WitnetRequestsBoard internal wrb;
   uint256 internal blockHash;
   uint256 internal epoch;
+  uint256 internal blockNumber;
 
   constructor(address _blockRelayAddress, uint8 _repFactor) public WitnetRequestsBoard(_blockRelayAddress, _repFactor) { }
 
@@ -74,8 +75,22 @@ contract WitnetRequestsBoardTestHelper is WitnetRequestsBoard {
     abs.activeIdentities = _abs;
   }
 
+  function pushActivity(address _address, uint256 _blockNumber)
+    external
+  {
+    abs.pushActivity(_address, _blockNumber);
+  }
+
   function getLastBeacon() public view override returns(bytes memory) {
     return abi.encodePacked(blockHash, epoch);
+  }
+
+  function setBlockNumber(uint256 _blockNumber) external {
+    blockNumber = _blockNumber;
+  }
+
+  function getBlockNumber() internal view override returns (uint256) {
+    return blockNumber;
   }
 
 }

@@ -13,6 +13,8 @@ const sha256 = require("js-sha256").sha256
 const MockBlockRelay = artifacts.require("MockBlockRelay")
 const BlockRelayProxy = artifacts.require("BlockRelayProxy")
 const WRB = artifacts.require("WitnetRequestsBoard")
+const WRBHelper = artifacts.require("WitnetRequestsBoardTestHelper")
+
 const Request = artifacts.require("Request")
 
 /*
@@ -77,6 +79,7 @@ contract("WitnetRequestBoard", ([
     this.BlockRelay = await MockBlockRelay.new({ from: owner })
     this.BlockRelayProxy = await BlockRelayProxy.new(this.BlockRelay.address, { from: owner })
     this.WitnetRequestBoard = await WRB.new(this.BlockRelayProxy.address, 2, { from: owner })
+    this.WitnetRequestBoardTestHelper = await WRBHelper.new(this.BlockRelayProxy.address, 2, { from: owner })
     this.Request = await Request.new(requestHex, { from: requestor })
   })
 
@@ -89,6 +92,9 @@ contract("WitnetRequestBoard", ([
     })
     it("deploys WitnetRequestBoard successfully", async () => {
       expect(this.WitnetRequestBoard.address != null)
+    })
+    it("deploys WitnetRequestBoard successfully", async () => {
+      expect(this.WitnetRequestBoardTestHelper.address != null)
     })
   })
 
@@ -325,20 +331,55 @@ contract("WitnetRequestBoard", ([
         "Owner balance should have increased after reporting b lock by 0.125 eth",
       ).to.equal(true)
     })
-    it("Pushing the limits to 9 additional PoI levels (0.5 eth to claimer)", async () => {
+  })
+
+  describe("report data request inclusion pushing the limtis (9 PoI levels and activity to be removed)", async () => {
+    beforeEach(async () => {
+      await this.WitnetRequestBoardTestHelper.setBlockNumber(0)
+      // Post data request
+      await this.WitnetRequestBoardTestHelper.postDataRequest(this.Request.address, ether("0.5"), ether("0.25"), {
+        from: requestor,
+        value: ether("1"),
+      })
+      // Claim data request
+      const publicKey = [data.publicKey.x, data.publicKey.y]
+      const proofBytes = data.poe[0].proof
+      const message = data.poe[0].lastBeacon
+      const signature = data.signature
+      const proof = await this.WitnetRequestBoardTestHelper.decodeProof(proofBytes)
+      const fastVerParams = await this.WitnetRequestBoardTestHelper.computeFastVerifyParams(publicKey, proof, message)
+
+      // We push activity for the 50 slots
+      for (let i = 0; i < (8 * 50) - 1; i += 8) {
+        await this.WitnetRequestBoardTestHelper.pushActivity(claimer, i)
+      }
+
+      // We set the block number so that a full acitivity removal needs to be performed
+      await this.WitnetRequestBoardTestHelper.setBlockNumber((8 * 50 * 2) - 1)
+
+      await this.WitnetRequestBoardTestHelper.claimDataRequests(
+        [requestId],
+        proof,
+        publicKey,
+        fastVerParams[0],
+        fastVerParams[1],
+        signature, {
+          from: claimer,
+        })
+    })
+    it("Pushing the limits to 9 additional PoI levels (0.5 eth to claimer) plus activity to be removed", async () => {
       // Initial balances
-      const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
+      const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoardTestHelper.address)
       const claimerBalanceTracker = await balance.tracker(claimer)
       const contractInitialBalance = await contractBalanceTracker.get()
       const claimerInitialBalance = await claimerBalanceTracker.get()
       const roots = calculateRoots(9, requestHex, resultHex)
       const proof = Array(10).fill(drOutputHash)
-
       // Post new block and report data request inclusion
       await this.BlockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
         from: owner,
       })
-      await this.WitnetRequestBoard.reportDataRequestInclusion(requestId, proof, 0, blockHeader, epoch, {
+      await this.WitnetRequestBoardTestHelper.reportDataRequestInclusion(requestId, proof, 0, blockHeader, epoch, {
         from: other,
       })
 
@@ -347,7 +388,7 @@ contract("WitnetRequestBoard", ([
       const claimerFinalBalance = await claimerBalanceTracker.get()
       expect(
         contractFinalBalance.eq(contractInitialBalance
-          .sub(ether("0.5"))
+          .sub(ether("0.625"))
         ),
         "contract balance should have decreased after reporting dr request inclusion by 0.5 eth",
       ).to.equal(true)
@@ -456,7 +497,7 @@ contract("WitnetRequestBoard", ([
   describe("Pushing PoI to 9 levels report data request result", async () => {
     beforeEach(async () => {
       // Post data request
-      await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.5"), {
+      await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.5"), ether("0.25"), {
         from: requestor,
         value: ether("1"),
       })
@@ -520,13 +561,13 @@ contract("WitnetRequestBoard", ([
 
       expect(
         contractFinalBalance.eq(contractInitialBalance
-          .sub(ether("0.5"))
+          .sub(ether("0.375"))
         ),
-        "contract balance should have decreased after reporting dr request result by 0.5 eth",
+        "contract balance should have decreased after reporting dr request result by 0.625 eth",
       ).to.equal(true)
       expect(
         claimerFinalBalance.eq(claimerInitialBalance
-          .add(ether("0.5"))
+          .add(ether("0.25"))
           .sub(new BN(reportResultTx.receipt.gasUsed)),
         ),
         "claimer balance should have increased after reporting dr request result by 0.5 eth",

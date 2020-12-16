@@ -13,7 +13,7 @@ library ActiveBridgeSetLib {
   uint8 public constant CLAIM_BLOCK_PERIOD = 8;
 
   // Number of activity slots in the ABS
-  uint8 public constant ACTIVITY_LENGTH = 100;
+  uint8 public constant ACTIVITY_LENGTH = 50;
 
   struct ActiveBridgeSet {
     // Mapping of activity slots with participating identities

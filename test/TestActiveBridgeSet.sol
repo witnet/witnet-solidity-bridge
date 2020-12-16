@@ -11,7 +11,7 @@ contract TestActiveBridgeSet {
   using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
 
   uint8 constant internal CLAIM_BLOCK_PERIOD = 8;
-  uint16 constant internal ACTIVITY_LENGTH = 100;
+  uint16 constant internal ACTIVITY_LENGTH = 50;
 
   address[] internal addresses = [
     address(0x01),
