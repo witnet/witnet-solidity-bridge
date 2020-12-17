@@ -31,6 +31,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 drOutputHash;
     uint256 inclusionReward;
     uint256 tallyReward;
+    uint256 blockReward;
     bytes result;
     // Block number at which the DR was claimed for the last time
     uint256 blockNumber;
@@ -166,10 +167,10 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(address _requestAddress, uint256 _tallyReward)
+  function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
-    payingEnough(msg.value, _tallyReward)
+    payingEnough(msg.value, SafeMath.add(_inclusionReward, _tallyReward))
     override
   returns(uint256)
   {
@@ -179,8 +180,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     // Create a new `DataRequest` object and initialize all the non-default fields
     DataRequest memory request;
     request.requestAddress = _requestAddress;
-    request.inclusionReward = SafeMath.sub(msg.value, _tallyReward);
+    request.inclusionReward = _inclusionReward; 
     request.tallyReward = _tallyReward;
+    request.blockReward =   SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward));
     request.epoch = blockRelay.getLastEpoch();
     Request requestContract = Request(request.requestAddress);
     uint256 _drOutputHash = uint256(sha256(requestContract.bytecode()));
@@ -198,7 +200,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.
   /// @param _tallyReward The new tally reward. Needs to be equal or greater than the former tally reward.
-  function upgradeDataRequest(uint256 _id, uint256 _tallyReward)
+  function upgradeDataRequest(uint256 _id,  uint256 _tallyReward)
     external
     payable
     payingEnough(msg.value, _tallyReward)

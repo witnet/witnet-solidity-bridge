@@ -52,11 +52,11 @@ contract WitnetRequestsBoardProxy {
   /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(address _requestAddress, uint256 _tallyReward) external payable returns(uint256) {
+  function postDataRequest(address _requestAddress,  uint256 _inclusionReward, uint256 _tallyReward) external payable returns(uint256) {
     uint256 n = controllers.length;
     uint256 offset = controllers[n - 1].lastId;
     // Update the currentLastId with the id in the controller plus the offSet
-    currentLastId = witnetRequestsBoardInstance.postDataRequest{value: msg.value}(_requestAddress, _tallyReward) + offset;
+    currentLastId = witnetRequestsBoardInstance.postDataRequest{value: msg.value}(_requestAddress, _inclusionReward, _tallyReward) + offset;
     return currentLastId;
   }
 

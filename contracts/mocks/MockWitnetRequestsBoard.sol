@@ -18,6 +18,7 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     address requestAddress;
     uint256 inclusionReward;
     uint256 tallyReward;
+    uint256 blockReward;
     bytes result;
     uint256 timestamp;
     uint256 drHash;
@@ -39,7 +40,7 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(address _requestAddress, uint256 _tallyReward)
+  function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
     override
@@ -50,8 +51,9 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
     requests.push(dr);
 
     requests[_id].requestAddress = _requestAddress;
-    requests[_id].inclusionReward = msg.value - _tallyReward;
+    requests[_id].inclusionReward = _inclusionReward;
     requests[_id].tallyReward = _tallyReward;
+    requests[_id].blockReward = msg.value - _inclusionReward - _tallyReward;
     return _id;
   }
 
