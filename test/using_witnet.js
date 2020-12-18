@@ -22,7 +22,8 @@ contract("UsingWitnet", accounts => {
     const nullHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
     const requestReward = 7000000000000000
-    const resultReward = 3000000000000000
+    const resultReward = 1500000000000000
+    const blockReward = 1500000000000000
 
     let witnet, clientContract, wrb, wrbProxy, blockRelay, request, requestId, requestHash, result, blockRelayProxy
     let lastAccount0Balance, lastAccount1Balance
@@ -55,10 +56,15 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should post a Witnet request into the wrb", async () => {
-      requestId = await returnData(clientContract._witnetPostRequest(request.address, requestReward, resultReward, {
-        from: accounts[0],
-        value: requestReward + resultReward,
-      }))
+      requestId = await returnData(clientContract._witnetPostRequest(
+        request.address,
+        requestReward,
+        resultReward,
+        blockReward, {
+          from: accounts[0],
+          value: requestReward + resultReward + blockReward,
+        }
+      ))
       const expectedId = "0x0000000000000000000000000000000000000000000000000000000000000001"
 
       assert.equal(requestId.toString(16), expectedId)
@@ -91,7 +97,7 @@ contract("UsingWitnet", accounts => {
 
     it("WRB balance should increase", async () => {
       const wrbBalance = await web3.eth.getBalance(wrb.address)
-      assert.equal(wrbBalance, requestReward + resultReward)
+      assert.equal(wrbBalance, requestReward + resultReward + blockReward)
     })
 
     it("should upgrade the rewards of a existing Witnet request", async () => {
@@ -123,7 +129,7 @@ contract("UsingWitnet", accounts => {
 
     it("WRB balance should increase after rewards upgrade", async () => {
       const wrbBalance = await web3.eth.getBalance(wrb.address)
-      assert.equal(wrbBalance, (requestReward + resultReward) * 2)
+      assert.equal(wrbBalance, (requestReward + resultReward) * 2 + blockReward)
     })
 
     it("should claim eligibility for relaying the request into Witnet", async () => {
@@ -229,7 +235,8 @@ contract("UsingWitnet", accounts => {
     const nullHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
     const requestReward = 7000000000000000
-    const resultReward = 3000000000000000
+    const resultReward = 1500000000000000
+    const blockReward = 1500000000000000
 
     let witnet, clientContract, wrb, blockRelay, blockRelayProxy, request, requestId, requestHash, result
 
@@ -258,10 +265,15 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should pass the data request to the wrb", async () => {
-      requestId = await returnData(clientContract._witnetPostRequest(request.address, requestReward, resultReward, {
-        from: accounts[0],
-        value: requestReward + resultReward,
-      }))
+      requestId = await returnData(clientContract._witnetPostRequest(
+        request.address,
+        requestReward,
+        resultReward,
+        blockReward, {
+          from: accounts[0],
+          value: requestReward + resultReward + blockReward,
+        }
+      ))
       assert.equal(requestId.toString(16), "0x0000000000000000000000000000000000000000000000000000000000000001")
     })
 
@@ -346,10 +358,11 @@ contract("UsingWitnet", accounts => {
     it("Should revert if reward amounts are smaller than transaction value", async () => {
       const requestReward = web3.utils.toWei("1", "ether")
       const resultReward = web3.utils.toWei("1", "ether")
+      const blockReward = web3.utils.toWei("0", "ether")
       const transactionValue = web3.utils.toWei("3", "ether")
 
       await truffleAssert.reverts(
-        clientContract._witnetPostRequest(request.address, requestReward, resultReward, {
+        clientContract._witnetPostRequest(request.address, requestReward, resultReward, blockReward, {
           from: accounts[0],
           value: transactionValue,
         }),
@@ -361,7 +374,7 @@ contract("UsingWitnet", accounts => {
       const resultReward = web3.utils.toBN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 
       await truffleAssert.reverts(
-        clientContract._witnetPostRequest(request.address, resultReward, 1, {
+        clientContract._witnetPostRequest(request.address, resultReward, 1, 1, {
           from: accounts[0],
           value: 0,
         }),

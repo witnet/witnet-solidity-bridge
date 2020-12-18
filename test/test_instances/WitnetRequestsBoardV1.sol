@@ -24,6 +24,7 @@ contract WitnetRequestsBoardV1 is WitnetRequestsBoardInterface {
     address requestAddress;
     uint256 inclusionReward;
     uint256 tallyReward;
+    uint256 blockReward;
     bytes result;
     uint256 timestamp;
     uint256 drHash;
@@ -64,13 +65,14 @@ contract WitnetRequestsBoardV1 is WitnetRequestsBoardInterface {
   /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(address _requestAddress, uint256 _tallyReward) external payable override returns(uint256) {
+  function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward) external payable override returns(uint256) {
     uint256 _id = requests.length;
     DataRequest memory dr;
     requests.push(dr);
 
     requests[_id].requestAddress = _requestAddress;
-    requests[_id].inclusionReward = msg.value - _tallyReward;
+    requests[_id].inclusionReward = _inclusionReward;
+    requests[_id].blockReward = msg.value - _tallyReward - _inclusionReward;
     requests[_id].tallyReward = _tallyReward;
     requests[_id].result = "";
     requests[_id].timestamp = 0;

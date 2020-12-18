@@ -51,9 +51,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // Post the data request through the Proxy
-      const tx1 = wrbProxy.postDataRequest(request.address, halfEther, {
+      const tx1 = wrbProxy.postDataRequest(request.address, halfEther, halfEther, {
         from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
+        value: web3.utils.toWei("1.5", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
@@ -72,7 +72,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // Post the data request through the Proxy
-      const tx1 = wrbProxy.postDataRequest(request.address, halfEther, {
+      const tx1 = wrbProxy.postDataRequest(request.address, halfEther, halfEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -101,17 +101,17 @@ contract("Witnet Requests Board Proxy", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // The id of the data request
-      const id2 = await wrbProxy.postDataRequest.call(request.address, halfEther, {
+      const id2 = await wrbProxy.postDataRequest.call(request.address, halfEther, halfEther, {
         from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
+        value: web3.utils.toWei("1.5", "ether"),
       })
       assert.equal(id2, 3)
 
       // Post the data request through the Proxy
       await waitForHash(
-        wrbProxy.postDataRequest(request.address, halfEther, {
+        wrbProxy.postDataRequest(request.address, halfEther, halfEther, {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.5", "ether"),
         })
       )
 
@@ -131,15 +131,15 @@ contract("Witnet Requests Board Proxy", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // The id of the data request with result "hello"
-      const id2 = await wrbProxy.postDataRequest.call(request.address, halfEther, {
+      const id2 = await wrbProxy.postDataRequest.call(request.address, halfEther, halfEther, {
         from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
+        value: web3.utils.toWei("1.5", "ether"),
       })
       assert.equal(id2, 4)
 
       // Post the data request through the Proxy
       await waitForHash(
-        wrbProxy.postDataRequest(request.address, halfEther, {
+        wrbProxy.postDataRequest(request.address, halfEther, halfEther, {
           from: accounts[0],
           value: web3.utils.toWei("1", "ether"),
         })

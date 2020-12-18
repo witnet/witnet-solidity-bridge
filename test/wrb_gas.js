@@ -84,12 +84,16 @@ contract("WitnetRequestBoard", ([
       const contractInitialBalance = await contractBalanceTracker.get()
 
       // Post Data Request
-      const postDataRequestTx = await this.WitnetRequestBoard.postDataRequest(this.Request.address,  ether("0.25"), ether("0.5"), {
-        from: requestor,
-        value: ether("1"),
-      })
-
+      const postDataRequestTx = await this.WitnetRequestBoard.postDataRequest(
+        this.Request.address,
+        ether("0.25"),
+        ether("0.5"), {
+          from: requestor,
+          value: ether("1"),
+        }
+      )
       // Check `PostedRequest` event
+
       expectEvent(
         postDataRequestTx,
         "PostedRequest",
@@ -114,10 +118,14 @@ contract("WitnetRequestBoard", ([
 
   describe("upgrade data request", async () => {
     beforeEach(async () => {
-      await this.WitnetRequestBoard.postDataRequest(this.Request.address,  ether("0.25"),ether("0.5"), {
-        from: requestor,
-        value: ether("1"),
-      })
+      await this.WitnetRequestBoard.postDataRequest(
+        this.Request.address,
+        ether("0.25"),
+        ether("0.5"), {
+          from: requestor,
+          value: ether("1"),
+        }
+      )
     })
     it("creator can upgrade existing data request (1 eth for rewards)", async () => {
       // Initial balance

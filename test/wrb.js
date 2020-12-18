@@ -50,9 +50,10 @@ contract("WitnetRequestBoard", accounts => {
       const request2 = await Request.new(drBytes2)
 
       const halfEther = web3.utils.toWei("0.5", "ether")
+      const quarterEther = web3.utils.toWei("0.25", "ether")
 
       // Post first data request
-      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, quarterEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -61,7 +62,7 @@ contract("WitnetRequestBoard", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // Post second data request
-      const tx2 = wrbInstance.postDataRequest(request2.address, 0)
+      const tx2 = wrbInstance.postDataRequest(request2.address, 0, 0)
       const txHash2 = await waitForHash(tx2)
       const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
       const id2 = txReceipt2.logs[0].data
@@ -87,9 +88,10 @@ contract("WitnetRequestBoard", accounts => {
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await Request.new(drBytes)
       const halfEther = web3.utils.toWei("0.5", "ether")
+      const quarterEther = web3.utils.toWei("0.25", "ether")
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, quarterEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -134,6 +136,7 @@ contract("WitnetRequestBoard", accounts => {
       const resBytes = web3.utils.fromAscii("This is a result")
       const roots = calculateRoots(drBytes, resBytes)
       const halfEther = web3.utils.toWei("0.5", "ether")
+      const quarterEther = web3.utils.toWei("0.25", "ether")
       const epoch = 2
 
       // VRF params
@@ -145,7 +148,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, quarterEther, {
         from: account1,
         value: web3.utils.toWei("1", "ether"),
       })
@@ -213,7 +216,7 @@ contract("WitnetRequestBoard", accounts => {
       assert(parseInt(afterBalance1, 10) < parseInt(actualBalance1, 10))
       assert(parseInt(balanceFinal, 10) > parseInt(afterBalance2, 10))
 
-      assert.equal(0, contractBalanceAfter)
+      assert.equal(quarterEther, contractBalanceAfter)
 
       // read result bytes
       const readResBytes = await wrbInstance.readResult.call(id1)
@@ -226,9 +229,10 @@ contract("WitnetRequestBoard", accounts => {
       const drBytes2 = web3.utils.fromAscii("This is a second DR")
       const request2 = await Request.new(drBytes2)
       const halfEther = web3.utils.toWei("0.5", "ether")
+      const quarterEther = web3.utils.toWei("0.25", "ether")
 
       // post the first data request
-      const tx1 = wrbInstance.postDataRequest(request1.address, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request1.address, halfEther, quarterEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -240,7 +244,7 @@ contract("WitnetRequestBoard", accounts => {
       assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       // post the second data request
-      const tx2 = wrbInstance.postDataRequest(request2.address, 0)
+      const tx2 = wrbInstance.postDataRequest(request2.address, 0, 0)
       const txHash2 = await waitForHash(tx2)
       const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
 
@@ -262,7 +266,7 @@ contract("WitnetRequestBoard", accounts => {
       const expectedResultId = web3.utils.hexToNumberString(hash)
 
       // post data request
-      const tx = await wrbInstance.postDataRequest(request.address, 0)
+      const tx = await wrbInstance.postDataRequest(request.address, 0, 0)
 
       // check emission of the event and its id correctness
       truffleAssert.eventEmitted(tx, "PostedRequest", (ev) => {
@@ -282,6 +286,7 @@ contract("WitnetRequestBoard", accounts => {
       const data1 = "0x" + sha.sha256(web3.utils.hexToBytes(drBytes))
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
+      const quarterEther = web3.utils.toWei("0.25", "ether")
 
       // VRF params
       const publicKey = [data.publicKey.x, data.publicKey.y]
@@ -292,7 +297,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, quarterEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -342,6 +347,7 @@ contract("WitnetRequestBoard", accounts => {
       const request = await Request.new(drBytes)
       const resBytes = web3.utils.fromAscii("This is a result")
       const halfEther = web3.utils.toWei("0.5", "ether")
+      const quarterEther = web3.utils.toWei("0.25", "ether")
       const fakeBlockHeader = "0x" + sha.sha256("fake block header")
       const dummySibling = 1
 
@@ -354,7 +360,7 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
+      const tx1 = wrbInstance.postDataRequest(request.address, halfEther, quarterEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -397,10 +403,14 @@ contract("WitnetRequestBoard", accounts => {
       const request = await Request.new(drBytes)
 
       // assert it reverts when rewards are higher than values sent
-      await truffleAssert.reverts(wrbInstance.postDataRequest(request.address, web3.utils.toWei("2", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      }), "Transaction value needs to be equal or greater than tally reward")
+      await truffleAssert.reverts(wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("1", "ether"),
+        web3.utils.toWei("1", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      ), "Transaction value needs to be equal or greater than tally reward")
     })
 
     it("should revert because the rewards are higher than the values sent. " +
@@ -410,10 +420,14 @@ contract("WitnetRequestBoard", accounts => {
       const request = await Request.new(drBytes)
 
       // this should pass
-      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
+      const tx1 = wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("0.5", "ether"),
+        web3.utils.toWei("0.5", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      )
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
@@ -439,10 +453,14 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
+      const tx1 = wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("0.5", "ether"),
+        web3.utils.toWei("0.5", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      )
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
@@ -493,10 +511,14 @@ contract("WitnetRequestBoard", accounts => {
       const epoch = 0
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
+      const tx1 = wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("0.5", "ether"),
+        web3.utils.toWei("0.5", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      )
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
@@ -531,10 +553,14 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
+      const tx1 = wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("0.5", "ether"),
+        web3.utils.toWei("0.5", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      )
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
@@ -614,10 +640,14 @@ contract("WitnetRequestBoard", accounts => {
       await waitForHash(txRelay0)
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
+      const tx1 = wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("0.5", "ether"),
+        web3.utils.toWei("0.5", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      )
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
@@ -672,10 +702,14 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
+      const tx1 = wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("0.5", "ether"),
+        web3.utils.toWei("0.5", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      )
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
@@ -724,10 +758,14 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
+      const tx1 = wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("0.5", "ether"),
+        web3.utils.toWei("0.5", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      )
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
@@ -789,9 +827,10 @@ contract("WitnetRequestBoard", accounts => {
         const request = await Request.new(drBytes)
 
         const halfEther = web3.utils.toWei("0.5", "ether")
+        const quarterEther = web3.utils.toWei("0.25", "ether")
 
         // Post data request
-        const tx1 = wrbInstance.postDataRequest(request.address, halfEther, {
+        const tx1 = wrbInstance.postDataRequest(request.address, halfEther, quarterEther, {
           from: accounts[0],
           value: web3.utils.toWei("1", "ether"),
         })
@@ -825,10 +864,14 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
+      const tx1 = wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("0.5", "ether"),
+        web3.utils.toWei("0.5", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      )
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
@@ -895,10 +938,14 @@ contract("WitnetRequestBoard", accounts => {
       const signature = data.signature
 
       // post data request
-      const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      })
+      const tx1 = wrbInstance.postDataRequest(
+        request.address,
+        web3.utils.toWei("0.5", "ether"),
+        web3.utils.toWei("0.5", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }
+      )
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
       const id1 = txReceipt1.logs[0].data
@@ -962,10 +1009,14 @@ contract("WitnetRequestBoard", accounts => {
         const signature = web3.utils.fromAscii("this is a fake sig")
 
         // post data request
-        const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-          from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
-        })
+        const tx1 = wrbInstance.postDataRequest(
+          request.address,
+          web3.utils.toWei("0.5", "ether"),
+          web3.utils.toWei("0.5", "ether"), {
+            from: accounts[0],
+            value: web3.utils.toWei("1", "ether"),
+          }
+        )
         const txHash1 = await waitForHash(tx1)
         const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
         const id1 = txReceipt1.logs[0].data
@@ -1026,10 +1077,14 @@ contract("WitnetRequestBoard", accounts => {
         const signature = data.signature
 
         // post data request
-        const tx1 = wrbInstance.postDataRequest(request.address, web3.utils.toWei("1", "ether"), {
-          from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
-        })
+        const tx1 = wrbInstance.postDataRequest(
+          request.address,
+          web3.utils.toWei("0.5", "ether"),
+          web3.utils.toWei("0.5", "ether"), {
+            from: accounts[0],
+            value: web3.utils.toWei("1", "ether"),
+          }
+        )
         const txHash1 = await waitForHash(tx1)
         const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
         const id1 = txReceipt1.logs[0].data
@@ -1056,8 +1111,8 @@ contract("WitnetRequestBoard", accounts => {
         })
         await waitForHash(txRelay2)
 
-        // revert when upgrading data request with wrong rewards and the DR is not yet included
         await truffleAssert.reverts(
+          // revert when upgrading data request with wrong rewards and the DR is not yet included
           wrbInstance.upgradeDataRequest(
             id1,
             web3.utils.toWei("2", "ether"),

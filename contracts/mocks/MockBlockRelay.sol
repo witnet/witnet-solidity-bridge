@@ -17,6 +17,8 @@ contract MockBlockRelay is BlockRelayInterface {
     uint256 drHashMerkleRoot;
     // hash of the merkle root of the tallies in Witnet
     uint256 tallyHashMerkleRoot;
+    // address of the relayer
+    address relayerAddress;
   }
 
   struct Beacon {
@@ -157,6 +159,8 @@ contract MockBlockRelay is BlockRelayInterface {
     lastBlock.epoch = _epoch;
     blocks[id].drHashMerkleRoot = _drMerkleRoot;
     blocks[id].tallyHashMerkleRoot = _tallyMerkleRoot;
+    blocks[id].relayerAddress = msg.sender;
+
     emit NewBlock(witnet, id);
   }
 
@@ -182,6 +186,18 @@ contract MockBlockRelay is BlockRelayInterface {
   returns(uint256)
   {
     return blocks[_blockHash].tallyHashMerkleRoot;
+  }
+
+  /// @dev Retrieve address of the relayer that relayed a specific block header.
+  /// @param _blockHash Hash of the block header.
+  /// @return address of the relayer.
+  function readRelayerAddress(uint256 _blockHash)
+    external
+    view
+    blockExists(_blockHash)
+  returns(address)
+  {
+    return blocks[_blockHash].relayerAddress;
   }
 
   /// @dev Verifies the validity of a PoI.

@@ -21,8 +21,8 @@ contract UsingWitnetTestHelper is UsingWitnet {
 
   constructor (address _wrbAddress) public UsingWitnet(_wrbAddress) { }
 
-  function _witnetPostRequest(Request _request, uint256 _requestReward, uint256 _tallyReward) external payable returns(uint256 id) {
-    return witnetPostRequest(_request, _requestReward, _tallyReward);
+  function _witnetPostRequest(Request _request, uint256 _requestReward, uint256 _tallyReward, uint256 _blockReward) external payable returns(uint256 id) {
+    return witnetPostRequest(_request, _requestReward, _tallyReward, _blockReward);
   }
 
   function _witnetUpgradeRequest(uint256 _id, uint256 _requestReward, uint256 _tallyReward) external payable {
