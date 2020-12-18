@@ -271,6 +271,7 @@ contract("WitnetRequestBoard", ([
       // Initial balances
       const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
       const claimerBalanceTracker = await balance.tracker(claimer)
+      const ownerBalanceTracker = await balance.tracker(owner)
       const contractInitialBalance = await contractBalanceTracker.get()
       const claimerInitialBalance = await claimerBalanceTracker.get()
 
@@ -278,24 +279,35 @@ contract("WitnetRequestBoard", ([
       await this.BlockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
         from: owner,
       })
+
+      // Get the owner balance after posting block
+      const ownerInitialBalance = await ownerBalanceTracker.get()
       await this.WitnetRequestBoard.reportDataRequestInclusion(requestId, [drOutputHash], 0, blockHeader, epoch, {
         from: other,
       })
 
-      // Check balances (contract decreased and claimer increased)
+      // Check balances (contract decreased and claimer and owner increased)
       const contractFinalBalance = await contractBalanceTracker.get()
       const claimerFinalBalance = await claimerBalanceTracker.get()
+      const ownerFinalBalance = await ownerBalanceTracker.get()
+
       expect(
         contractFinalBalance.eq(contractInitialBalance
-          .sub(ether("0.25"))
+          .sub(ether("0.375"))
         ),
-        "contract balance should have decreased after reporting dr request inclusion by 0.5 eth",
+        "contract balance should have decreased after reporting dr request inclusion by 0.375 eth",
       ).to.equal(true)
       expect(
         claimerFinalBalance.eq(claimerInitialBalance
           .add(ether("0.25"))
         ),
-        "claimer balance should have increased after reporting dr request inclusion by 0.5 eth",
+        "claimer balance should have increased after reporting dr request inclusion by 0.25 eth",
+      ).to.equal(true)
+      expect(
+        ownerFinalBalance.eq(ownerInitialBalance
+          .add(ether("0.125"))
+        ),
+        "Owner balance should have increased after reporting b lock by 0.125 eth",
       ).to.equal(true)
     })
   })
@@ -342,8 +354,11 @@ contract("WitnetRequestBoard", ([
       // Initial balances
       const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
       const claimerBalanceTracker = await balance.tracker(claimer)
+      const ownerBalanceTracker = await balance.tracker(owner)
       const contractInitialBalance = await contractBalanceTracker.get()
       const claimerInitialBalance = await claimerBalanceTracker.get()
+      // Get the owner balance after posting block
+      const ownerInitialBalance = await ownerBalanceTracker.get()
 
       // Report data request result from Witnet to WitnetRequestBoard
       const reportResultTx = await this.WitnetRequestBoard.reportResult(
@@ -366,12 +381,13 @@ contract("WitnetRequestBoard", ([
       // Check balances (contract decreased and claimer increased)
       const contractFinalBalance = await contractBalanceTracker.get()
       const claimerFinalBalance = await claimerBalanceTracker.get()
+      const ownerFinalBalance = await ownerBalanceTracker.get()
 
       expect(
         contractFinalBalance.eq(contractInitialBalance
-          .sub(ether("0.5"))
+          .sub(ether("0.625"))
         ),
-        "contract balance should have decreased after reporting dr request result by 0.5 eth",
+        "contract balance should have decreased after reporting dr request result by 0.625 eth",
       ).to.equal(true)
       expect(
         claimerFinalBalance.eq(claimerInitialBalance
@@ -379,6 +395,12 @@ contract("WitnetRequestBoard", ([
           .sub(new BN(reportResultTx.receipt.gasUsed)),
         ),
         "claimer balance should have increased after reporting dr request result by 0.5 eth",
+      ).to.equal(true)
+      expect(
+        ownerFinalBalance.eq(ownerInitialBalance
+          .add(ether("0.125"))
+        ),
+        "Owner balance should have increased after reporting b lock by 0.125 eth",
       ).to.equal(true)
     })
   })

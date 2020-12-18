@@ -276,6 +276,10 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _epoch,
       _index,
       requests[_id].drOutputHash), "Invalid PoI");
+    address payable relayer = payable(blockRelay.readRelayerAddress(_blockHash, _epoch));
+    uint256 relayerPayment = requests[_id].blockReward/2;
+    requests[_id].blockReward = requests[_id].blockReward - relayerPayment; 
+    relayer.transfer(relayerPayment);
     requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
     // Push requests[_id].pkhClaim to abs
     abs.pushActivity(requests[_id].pkhClaim, block.number);
@@ -321,6 +325,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _epoch,
       _index,
       resHash), "Invalid PoI");
+    address payable relayer = payable(blockRelay.readRelayerAddress(_blockHash, _epoch));
+    relayer.transfer(requests[_id].blockReward);
     msg.sender.transfer(requests[_id].tallyReward);
 
     emit PostedResult(msg.sender, _id);

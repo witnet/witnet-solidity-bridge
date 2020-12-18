@@ -216,7 +216,7 @@ contract("WitnetRequestBoard", accounts => {
       assert(parseInt(afterBalance1, 10) < parseInt(actualBalance1, 10))
       assert(parseInt(balanceFinal, 10) > parseInt(afterBalance2, 10))
 
-      assert.equal(quarterEther, contractBalanceAfter)
+      assert.equal(0, contractBalanceAfter)
 
       // read result bytes
       const readResBytes = await wrbInstance.readResult.call(id1)

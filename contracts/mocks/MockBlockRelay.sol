@@ -194,6 +194,7 @@ contract MockBlockRelay is BlockRelayInterface {
   function readRelayerAddress(uint256 _blockHash)
     external
     view
+    override
     blockExists(_blockHash)
   returns(address)
   {
