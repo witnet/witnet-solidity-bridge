@@ -47,6 +47,7 @@ contract UsingWitnet {
   * @param _request An instance of the `Request` contract
   * @param _requestReward Reward specified for the user which posts the request into Witnet
   * @param _resultReward Reward specified for the user which posts back the request result
+  * @param _blockReward Reward specified for the node which reports the block header for verification
   * @return Sequencial identifier for the request included in the WitnetRequestsBoard
   */
   function witnetPostRequest(Request _request, uint256 _requestReward, uint256 _resultReward, uint256 _blockReward)
@@ -78,6 +79,7 @@ contract UsingWitnet {
   * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestsBoard.
   * @param _requestReward Reward specified for the user which posts the request into Witnet
   * @param _resultReward Reward specified for the user which post the Data Request result.
+  * @param _blockReward Reward specified for the node which reports the block header for verification
   */
   function witnetUpgradeRequest(uint256 _id, uint256 _requestReward, uint256 _resultReward, uint256 _blockReward)
     internal

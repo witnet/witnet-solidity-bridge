@@ -129,7 +129,7 @@ contract("UsingWitnet", accounts => {
 
     it("WRB balance should increase after rewards upgrade", async () => {
       const wrbBalance = await web3.eth.getBalance(wrb.address)
-      assert.equal(wrbBalance, (requestReward + resultReward) * 2 + blockReward*2)
+      assert.equal(wrbBalance, (requestReward + resultReward) * 2 + blockReward * 2)
     })
 
     it("should claim eligibility for relaying the request into Witnet", async () => {

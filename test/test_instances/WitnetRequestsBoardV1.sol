@@ -63,6 +63,7 @@ contract WitnetRequestsBoardV1 is WitnetRequestsBoardInterface {
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _requestAddress The request contract address which includes the request bytecode.
+  /// @param _inclusionReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the inclusion of the data request.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
   function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward) external payable override returns(uint256) {
@@ -84,13 +85,14 @@ contract WitnetRequestsBoardV1 is WitnetRequestsBoardInterface {
 
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.
-  /// @param _tallyReward The new tally reward. Needs to be equal or greater than the former tally reward.
+  /// @param _inclusionReward The amount to be added to the inclusion reward.
+  /// @param _tallyReward The amount to be added to the tally reward. 
   function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
     override
   {
-    requests[_id].inclusionReward += msg.value - _tallyReward;
+    requests[_id].inclusionReward += _inclusionReward;
     requests[_id].tallyReward += _tallyReward;
   }
 

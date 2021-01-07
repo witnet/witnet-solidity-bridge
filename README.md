@@ -20,6 +20,7 @@ The `WitnetRequestsBoard` contract provides the following methods:
   in Witnet with a total reward that equals to msg.value.
   - _inputs_:
     - *_dr*: the bytes corresponding to the Protocol Buffers serialization of the data request output.
+    - *_inclusionReward*: the amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the data request inclusion.
     - *_tallyReward*: the amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka __tally__) of the data request.
   - output:
     - *_id*: the unique identifier of the data request.
@@ -29,6 +30,7 @@ The `WitnetRequestsBoard` contract provides the following methods:
   adding more value to it. The new request reward will be increased by `msg.value` minus the difference between the former tally reward and the new tally reward.
   - *_inputs*:
     - *_id*: the unique identifier of the data request.
+    - *_inclusionReward*: the amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the data request inclusion.
     - *_tallyReward*: the new tally reward. Needs to be equal or greater than the former tally reward.
 
 - **claimDataRequests**:
@@ -91,8 +93,15 @@ The `WitnetRequestsBoard` contract provides the following methods:
 
 - **getLastBeacon**:
   - _description_: queries the block relay contract to get knowledge of the last beacon inserted.
+  _inputs_:
+    - *_id*: the unique identifier of the data request.
   - _output_:
     - the last beacon as byte concatenation of (block_hash||epoch).
+  
+  **getDataRequestPkhClaim**:
+  - _description_: retrieves the last claimer address.
+  - _output_:
+    - the last claimer address of the data request.  
 
 - **requestsCount**:
   - _description_: returns the number of data requests in the WRB.
@@ -115,8 +124,10 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
   specified in `msg.value`.
   - _inputs_:
     - *_dr*: the bytes corresponding to the Protocol Buffers serialization of the data request output.
+    - *_inclusionReward*: the amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the data request inclusion.
     - *_tallyReward*: the amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka __tally__) of the data request.
      that is destinated to reward the result inclusion.
+    - *_blockReward*: the amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of block that includes the DR and the result.
   - _output_:
     - *_id*: the unique identifier of the data request.
 
@@ -124,8 +135,9 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
   - _description_: call to the WRB's `upgradeDataRequest` method to increment the total reward of the data request by adding more value to it. The new request reward will be increased by `msg.value` minus the difference between the former tally reward and the new tally reward.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
-    - *_tallyReward*: the new tally reward. Needs to be equal or greater than the former tally reward.
-
+    - *_inclusionReward*: the amount to be added to the DR inclusion reward.
+    - *_tallyReward*: the amount to be added to the tally reward.
+    - *_blockReward*: the amount to be added to the block reward.
 - **witnetReadResult**:
   - _description_: call to the WRB's `readResult` method to retrieve
    the result of one data request from the WRB.

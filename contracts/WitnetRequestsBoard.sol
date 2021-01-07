@@ -166,6 +166,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _requestAddress The request contract address which includes the request bytecode.
+  /// @param _inclusionReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the inclusion of the data request.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
   function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward)
@@ -200,7 +201,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.
-  /// @param _tallyReward The new tally reward. Needs to be equal or greater than the former tally reward.
+  /// @param _inclusionReward The amount to be added to the inclusion reward.
+  /// @param _tallyReward The amount to be added to the tally reward.
   function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
@@ -280,12 +282,17 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _index,
       requests[_id].drOutputHash), "Invalid PoI");
     address payable relayer = payable(blockRelay.readRelayerAddress(_blockHash, _epoch));
-    uint256 relayerPayment = requests[_id].blockReward/2;
-    requests[_id].blockReward = requests[_id].blockReward - relayerPayment; 
-    relayer.transfer(relayerPayment);
+    // This is the DR block inclusion reward, so we have to split it to reward the result block inclusion as well
+    uint256 drRelayerPayment = requests[_id].blockReward / 2;
+    // We subsctract this value from the reward that we will later pay for the inclusion of the reward block
+    requests[_id].blockReward = requests[_id].blockReward - drRelayerPayment; 
+    // Transfer the relayer payment to the block relayer
+    relayer.transfer(drRelayerPayment);
+    // Transfer the DR inclusion reward to the inclusion verifier
     requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
     // Push requests[_id].pkhClaim to abs
     abs.pushActivity(requests[_id].pkhClaim, block.number);
+
     emit IncludedRequest(msg.sender, _id);
   }
 

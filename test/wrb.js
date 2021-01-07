@@ -433,10 +433,13 @@ contract("WitnetRequestBoard", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // assert it reverts when rewards are higher than values sent
-      await truffleAssert.reverts(wrbInstance.upgradeDataRequest(id1, web3.utils.toWei("2", "ether"), web3.utils.toWei("1", "ether"), {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-      }), "Transaction value needs to be equal or greater than tally plus inclusion reward")
+      await truffleAssert.reverts(wrbInstance.upgradeDataRequest(
+        id1, web3.utils.toWei("2", "ether"),
+        web3.utils.toWei("1", "ether"), {
+          from: accounts[0],
+          value: web3.utils.toWei("1", "ether"),
+        }),
+      "Transaction value needs to be equal or greater than tally plus inclusion reward")
     })
 
     it("should revert when trying to claim a DR that was already claimed", async () => {
