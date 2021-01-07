@@ -101,9 +101,9 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should upgrade the rewards of a existing Witnet request", async () => {
-      await returnData(clientContract._witnetUpgradeRequest(requestId, requestReward, resultReward, {
+      await returnData(clientContract._witnetUpgradeRequest(requestId, requestReward, resultReward, blockReward, {
         from: accounts[0],
-        value: requestReward + resultReward,
+        value: requestReward + resultReward + blockReward,
       }))
     })
 
@@ -118,7 +118,7 @@ contract("UsingWitnet", accounts => {
 
     it("requester balance should decrease after rewards upgrade", async () => {
       const afterBalance = await web3.eth.getBalance(accounts[0])
-      assert(afterBalance < lastAccount0Balance - requestReward - resultReward)
+      assert(afterBalance < lastAccount0Balance - requestReward - resultReward - blockReward)
       lastAccount0Balance = afterBalance
     })
 
@@ -129,7 +129,7 @@ contract("UsingWitnet", accounts => {
 
     it("WRB balance should increase after rewards upgrade", async () => {
       const wrbBalance = await web3.eth.getBalance(wrb.address)
-      assert.equal(wrbBalance, (requestReward + resultReward) * 2 + blockReward)
+      assert.equal(wrbBalance, (requestReward + resultReward) * 2 + blockReward*2)
     })
 
     it("should claim eligibility for relaying the request into Witnet", async () => {
@@ -375,6 +375,18 @@ contract("UsingWitnet", accounts => {
 
       await truffleAssert.reverts(
         clientContract._witnetPostRequest(request.address, resultReward, 1, 1, {
+          from: accounts[0],
+          value: 0,
+        }),
+        "The sum of rewards overflows"
+      )
+    })
+    it("Should revert if reward amounts sum overflows 2", async () => {
+      const requestReward = web3.utils.toBN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+      const blockReward = web3.utils.toBN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+
+      await truffleAssert.reverts(
+        clientContract._witnetPostRequest(request.address, requestReward, 1, blockReward, {
           from: accounts[0],
           value: 0,
         }),

@@ -133,7 +133,7 @@ contract("WitnetRequestBoard", ([
       const contractInitialBalance = await contractBalanceTracker.get()
 
       // Update data request (increased rewards)
-      await this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0.5"), {
+      await this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0.5"), ether("0.25"), {
         from: requestor,
         value: ether("1"),
       })

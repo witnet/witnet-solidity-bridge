@@ -25,8 +25,8 @@ contract UsingWitnetTestHelper is UsingWitnet {
     return witnetPostRequest(_request, _requestReward, _tallyReward, _blockReward);
   }
 
-  function _witnetUpgradeRequest(uint256 _id, uint256 _requestReward, uint256 _tallyReward) external payable {
-    witnetUpgradeRequest(_id, _requestReward, _tallyReward);
+  function _witnetUpgradeRequest(uint256 _id, uint256 _requestReward, uint256 _tallyReward, uint256 _blockReward) external payable {
+    witnetUpgradeRequest(_id, _requestReward, _tallyReward, _blockReward);
   }
 
   function _witnetReadResult(uint256 _requestId) external returns(Witnet.Result memory) {

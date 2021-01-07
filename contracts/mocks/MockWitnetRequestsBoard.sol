@@ -60,7 +60,7 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.
   /// @param _tallyReward The new tally reward. Needs to be equal or greater than the former tally reward.
-  function upgradeDataRequest(uint256 _id, uint256 _tallyReward)
+  function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
     override

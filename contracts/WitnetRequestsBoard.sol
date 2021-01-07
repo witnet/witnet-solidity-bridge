@@ -67,8 +67,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   event PostedResult(address indexed _from, uint256 _id);
 
   // Ensures the reward is not greater than the value
-  modifier payingEnough(uint256 _value, uint256 _tally) {
-    require(_value >= _tally, "Transaction value needs to be equal or greater than tally reward");
+  modifier payingEnough(uint256 _value, uint256 _inclusionReward, uint256 _tallyReward) {
+
+    require(_value >= SafeMath.add(_inclusionReward, _tallyReward), "Transaction value needs to be equal or greater than tally plus inclusion reward");
     _;
   }
 
@@ -170,7 +171,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
-    payingEnough(msg.value, SafeMath.add(_inclusionReward, _tallyReward))
+    payingEnough(msg.value, _inclusionReward, _tallyReward)
     override
   returns(uint256)
   {
@@ -182,7 +183,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     request.requestAddress = _requestAddress;
     request.inclusionReward = _inclusionReward; 
     request.tallyReward = _tallyReward;
-    request.blockReward =   SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward));
+    request.blockReward =  SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward));
     request.epoch = blockRelay.getLastEpoch();
     Request requestContract = Request(request.requestAddress);
     uint256 _drOutputHash = uint256(sha256(requestContract.bytecode()));
@@ -200,22 +201,24 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.
   /// @param _tallyReward The new tally reward. Needs to be equal or greater than the former tally reward.
-  function upgradeDataRequest(uint256 _id,  uint256 _tallyReward)
+  function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
-    payingEnough(msg.value, _tallyReward)
+    payingEnough(msg.value, _inclusionReward, _tallyReward)
     resultNotIncluded(_id)
     override
   {
     if (requests[_id].drHash != 0) {
       require(
-        msg.value == _tallyReward,
-        "Txn value should equal result reward argument (request reward already paid)"
+        _inclusionReward == 0,
+        "Inclusion reward should be 0 (request reward already paid)"
       );
       requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
+      requests[_id].blockReward = SafeMath.add(requests[_id].blockReward, msg.value - _tallyReward);
     } else {
-      requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, msg.value - _tallyReward);
+      requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, _inclusionReward);
       requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
+      requests[_id].blockReward = SafeMath.add(requests[_id].blockReward,  SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward)));
     }
   }
 

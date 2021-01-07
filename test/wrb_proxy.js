@@ -40,7 +40,7 @@ contract("Witnet Requests Board Proxy", accounts => {
 
     it("should revert when inserting id 0", async () => {
       // It should revert because of non-existent id 0
-      await truffleAssert.reverts(wrbProxy.upgradeDataRequest(0, 1),
+      await truffleAssert.reverts(wrbProxy.upgradeDataRequest(0, 1, 1),
         "Non-existent controller for id 0")
     })
 
@@ -65,7 +65,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(true, await wrbProxy.checkLastId.call(id1))
     })
 
-    it("should return the correposding controller of an id", async () => {
+    it("should return the corresponding controller of an id", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await RequestContract.new(drBytes)

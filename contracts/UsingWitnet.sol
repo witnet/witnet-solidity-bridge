@@ -34,8 +34,9 @@ contract UsingWitnet {
 
   // Ensures that user-specified rewards are equal to the total transaction value to prevent users from burning any excess value
   modifier validRewards(uint256 _requestReward, uint256 _resultReward, uint256 _blockReward) {
-    require(_requestReward + _resultReward + _blockReward >= _requestReward, "The sum of rewards overflows");
-
+    uint256 reqResReward = _requestReward + _resultReward;
+    require(reqResReward >= _requestReward, "The sum of rewards overflows");
+    require(reqResReward + _blockReward >= reqResReward, "The sum of rewards overflows");
     require(msg.value == _requestReward + _resultReward + _blockReward, "Transaction value should equal the sum of rewards");
     _;
   }
@@ -78,11 +79,11 @@ contract UsingWitnet {
   * @param _requestReward Reward specified for the user which posts the request into Witnet
   * @param _resultReward Reward specified for the user which post the Data Request result.
   */
-  function witnetUpgradeRequest(uint256 _id, uint256 _requestReward, uint256 _resultReward)
+  function witnetUpgradeRequest(uint256 _id, uint256 _requestReward, uint256 _resultReward, uint256 _blockReward)
     internal
-    validRewards(_requestReward, _resultReward, 0)
+    validRewards(_requestReward, _resultReward, _blockReward)
   {
-    wrb.upgradeDataRequest{value: msg.value}(_id, _resultReward);
+    wrb.upgradeDataRequest{value: msg.value}(_id, _requestReward, _resultReward);
   }
 
   /**

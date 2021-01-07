@@ -106,7 +106,7 @@ contract("WitnetRequestBoard", accounts => {
       assert.equal(web3.utils.toWei("1", "ether"), contractBalanceBefore)
 
       // upgrade reward (and thus balance of WRB)
-      const tx2 = wrbInstance.upgradeDataRequest(id1, halfEther, {
+      const tx2 = wrbInstance.upgradeDataRequest(id1, halfEther, quarterEther, {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
       })
@@ -410,7 +410,7 @@ contract("WitnetRequestBoard", accounts => {
           from: accounts[0],
           value: web3.utils.toWei("1", "ether"),
         }
-      ), "Transaction value needs to be equal or greater than tally reward")
+      ), "Transaction value needs to be equal or greater than tally plus inclusion reward")
     })
 
     it("should revert because the rewards are higher than the values sent. " +
@@ -433,10 +433,10 @@ contract("WitnetRequestBoard", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // assert it reverts when rewards are higher than values sent
-      await truffleAssert.reverts(wrbInstance.upgradeDataRequest(id1, web3.utils.toWei("2", "ether"), {
+      await truffleAssert.reverts(wrbInstance.upgradeDataRequest(id1, web3.utils.toWei("2", "ether"), web3.utils.toWei("1", "ether"), {
         from: accounts[0],
         value: web3.utils.toWei("1", "ether"),
-      }), "Transaction value needs to be equal or greater than tally reward")
+      }), "Transaction value needs to be equal or greater than tally plus inclusion reward")
     })
 
     it("should revert when trying to claim a DR that was already claimed", async () => {
@@ -1116,9 +1116,10 @@ contract("WitnetRequestBoard", accounts => {
           wrbInstance.upgradeDataRequest(
             id1,
             web3.utils.toWei("2", "ether"),
+            web3.utils.toWei("2", "ether"),
             { from: accounts[1], value: web3.utils.toWei("1", "ether") }
           ),
-          "Transaction value needs to be equal or greater than tally reward"
+          "Transaction value needs to be equal or greater than tally plus inclusion reward"
         )
 
         // report data request inclusion
@@ -1132,15 +1133,17 @@ contract("WitnetRequestBoard", accounts => {
           wrbInstance.upgradeDataRequest(
             id1,
             web3.utils.toWei("1", "ether"),
+            web3.utils.toWei("0.5", "ether"),
             { from: accounts[1], value: web3.utils.toWei("2", "ether") }
           ),
-          "Txn value should equal result reward argument (request reward already paid)"
+          "Inclusion reward should be 0 (request reward already paid)"
         )
 
         // upgrade data request with valid rewards with DR already included
         const tx4 = wrbInstance.upgradeDataRequest(id1,
+          web3.utils.toWei("0", "ether"),
           web3.utils.toWei("1", "ether"),
-          { from: accounts[0], value: web3.utils.toWei("1", "ether") }
+          { from: accounts[0], value: web3.utils.toWei("3", "ether") }
         )
         await waitForHash(tx4)
 
@@ -1153,7 +1156,8 @@ contract("WitnetRequestBoard", accounts => {
           wrbInstance.upgradeDataRequest(
             id1,
             web3.utils.toWei("1", "ether"),
-            { from: accounts[1], value: web3.utils.toWei("1", "ether") }
+            web3.utils.toWei("1", "ether"),
+            { from: accounts[1], value: web3.utils.toWei("3", "ether") }
           ),
           "Result already included"
         )
