@@ -44,6 +44,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 inclusionReward;
     uint256 tallyReward;
     uint256 blockReward;
+    uint256 gasPrice;
     bytes result;
     // Block number at which the DR was claimed for the last time
     uint256 blockNumber;
@@ -201,6 +202,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     Request requestContract = Request(request.requestAddress);
     uint256 _drOutputHash = uint256(sha256(requestContract.bytecode()));
     request.drOutputHash = _drOutputHash;
+    request.gasPrice = tx.gasprice;
 
     // Push the new request into the contract state
     requests.push(request);
@@ -366,6 +368,13 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @return The result of the DR
   function readResult(uint256 _id) external view override validId(_id) returns(bytes memory) {
     return requests[_id].result;
+  }
+
+  /// @dev Retrieves the gas price set for a specific DR ID.
+  /// @param _id The unique identifier of the data request.
+  /// @return The gas price set by the request creator
+  function readGasPrice(uint256 _id) external view validId(_id) returns(uint256) {
+    return requests[_id].gasPrice;
   }
 
   /// @dev Retrieves hash of the data request transaction in Witnet.
