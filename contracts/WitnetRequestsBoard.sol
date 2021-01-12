@@ -81,8 +81,16 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   // Ensures the reward is not greater than the value
   modifier payingEnough(uint256 _value, uint256 _inclusionReward, uint256 _tallyReward) {
-
     require(_value >= SafeMath.add(_inclusionReward, _tallyReward), "Transaction value needs to be equal or greater than tally plus inclusion reward");
+    _;
+  }
+
+  // Ensures gas costs are covered
+  modifier gasCostsCovered(uint256 _value, uint256 _inclusionReward, uint256 _tallyReward) {
+    uint256 inclusionPlusTally = SafeMath.add(_inclusionReward, _tallyReward);
+    require(_inclusionReward >= SafeMath.mul(tx.gasprice, MAX_CLAIM_DR_GAS + MAX_DR_INCLUSION_GAS), "Inclusion reward should cover gas expenses");
+    require(_tallyReward >= SafeMath.mul(tx.gasprice, MAX_REPORT_RESULT_GAS), "Report result reward should cover gas expenses");
+    require(SafeMath.sub(msg.value, inclusionPlusTally) >= SafeMath.mul(tx.gasprice, MAX_REPORT_BLOCK_GAS*2), "Block reward should cover gas expenses");
     _;
   }
 
@@ -221,6 +229,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     external
     payable
     payingEnough(msg.value, _inclusionReward, _tallyReward)
+    gasCostsCovered(msg.value, _inclusionReward, _tallyReward)
     resultNotIncluded(_id)
     override
   {
