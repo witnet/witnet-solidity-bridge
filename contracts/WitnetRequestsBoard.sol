@@ -194,6 +194,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     external
     payable
     payingEnough(msg.value, _inclusionReward, _tallyReward)
+    gasCostsCovered(msg.value, _inclusionReward, _tallyReward)
     override
   returns(uint256)
   {
@@ -229,7 +230,6 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     external
     payable
     payingEnough(msg.value, _inclusionReward, _tallyReward)
-    gasCostsCovered(msg.value, _inclusionReward, _tallyReward)
     resultNotIncluded(_id)
     override
   {

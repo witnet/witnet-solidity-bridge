@@ -62,7 +62,10 @@ contract("WitnetRequestBoard", accounts => {
       const id1 = txReceipt1.logs[0].data
 
       // Post second data request
-      const tx2 = wrbInstance.postDataRequest(request2.address, 0, 0)
+      const tx2 = wrbInstance.postDataRequest(request2.address, halfEther, quarterEther, {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
       const txHash2 = await waitForHash(tx2)
       const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
       const id2 = txReceipt2.logs[0].data
@@ -78,7 +81,7 @@ contract("WitnetRequestBoard", accounts => {
       )
 
       assert(parseInt(afterBalance1, 10) < parseInt(actualBalance1, 10))
-      assert.equal(web3.utils.toWei("1", "ether"), contractBalanceAfter)
+      assert.equal(web3.utils.toWei("2", "ether"), contractBalanceAfter)
 
       assert.equal(drBytes, readDrBytes)
       assert.equal(drBytes2, readDrBytes2)
@@ -244,7 +247,10 @@ contract("WitnetRequestBoard", accounts => {
       assert.equal(web3.utils.hexToNumberString(id1), web3.utils.hexToNumberString("0x1"))
 
       // post the second data request
-      const tx2 = wrbInstance.postDataRequest(request2.address, 0, 0)
+      const tx2 = wrbInstance.postDataRequest(request2.address, halfEther, quarterEther, {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
       const txHash2 = await waitForHash(tx2)
       const txReceipt2 = await web3.eth.getTransactionReceipt(txHash2)
 
@@ -264,9 +270,14 @@ contract("WitnetRequestBoard", accounts => {
       const request = await Request.new(drBytes)
       const hash = "0x1"
       const expectedResultId = web3.utils.hexToNumberString(hash)
+      const halfEther = web3.utils.toWei("0.5", "ether")
+      const quarterEther = web3.utils.toWei("0.25", "ether")
 
       // post data request
-      const tx = await wrbInstance.postDataRequest(request.address, 0, 0)
+      const tx = await wrbInstance.postDataRequest(request.address, halfEther, quarterEther, {
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+      })
 
       // check emission of the event and its id correctness
       truffleAssert.eventEmitted(tx, "PostedRequest", (ev) => {
@@ -425,7 +436,7 @@ contract("WitnetRequestBoard", accounts => {
         web3.utils.toWei("0.5", "ether"),
         web3.utils.toWei("0.5", "ether"), {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.25", "ether"),
         }
       )
       const txHash1 = await waitForHash(tx1)
@@ -461,7 +472,7 @@ contract("WitnetRequestBoard", accounts => {
         web3.utils.toWei("0.5", "ether"),
         web3.utils.toWei("0.5", "ether"), {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.25", "ether"),
         }
       )
       const txHash1 = await waitForHash(tx1)
@@ -519,7 +530,7 @@ contract("WitnetRequestBoard", accounts => {
         web3.utils.toWei("0.5", "ether"),
         web3.utils.toWei("0.5", "ether"), {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.25", "ether"),
         }
       )
       const txHash1 = await waitForHash(tx1)
@@ -561,7 +572,7 @@ contract("WitnetRequestBoard", accounts => {
         web3.utils.toWei("0.5", "ether"),
         web3.utils.toWei("0.5", "ether"), {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.25", "ether"),
         }
       )
       const txHash1 = await waitForHash(tx1)
@@ -648,7 +659,7 @@ contract("WitnetRequestBoard", accounts => {
         web3.utils.toWei("0.5", "ether"),
         web3.utils.toWei("0.5", "ether"), {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.25", "ether"),
         }
       )
       const txHash1 = await waitForHash(tx1)
@@ -710,7 +721,7 @@ contract("WitnetRequestBoard", accounts => {
         web3.utils.toWei("0.5", "ether"),
         web3.utils.toWei("0.5", "ether"), {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.25", "ether"),
         }
       )
       const txHash1 = await waitForHash(tx1)
@@ -766,7 +777,7 @@ contract("WitnetRequestBoard", accounts => {
         web3.utils.toWei("0.5", "ether"),
         web3.utils.toWei("0.5", "ether"), {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.25", "ether"),
         }
       )
       const txHash1 = await waitForHash(tx1)
@@ -872,7 +883,7 @@ contract("WitnetRequestBoard", accounts => {
         web3.utils.toWei("0.5", "ether"),
         web3.utils.toWei("0.5", "ether"), {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.25", "ether"),
         }
       )
       const txHash1 = await waitForHash(tx1)
@@ -946,7 +957,7 @@ contract("WitnetRequestBoard", accounts => {
         web3.utils.toWei("0.5", "ether"),
         web3.utils.toWei("0.5", "ether"), {
           from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+          value: web3.utils.toWei("1.25", "ether"),
         }
       )
       const txHash1 = await waitForHash(tx1)
@@ -1017,7 +1028,7 @@ contract("WitnetRequestBoard", accounts => {
           web3.utils.toWei("0.5", "ether"),
           web3.utils.toWei("0.5", "ether"), {
             from: accounts[0],
-            value: web3.utils.toWei("1", "ether"),
+            value: web3.utils.toWei("1.25", "ether"),
           }
         )
         const txHash1 = await waitForHash(tx1)
@@ -1085,7 +1096,7 @@ contract("WitnetRequestBoard", accounts => {
           web3.utils.toWei("0.5", "ether"),
           web3.utils.toWei("0.5", "ether"), {
             from: accounts[0],
-            value: web3.utils.toWei("1", "ether"),
+            value: web3.utils.toWei("1.25", "ether"),
           }
         )
         const txHash1 = await waitForHash(tx1)

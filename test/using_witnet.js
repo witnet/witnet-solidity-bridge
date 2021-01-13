@@ -20,10 +20,10 @@ contract("UsingWitnet", accounts => {
     const block1Hash = 0x123456
     const block2Hash = 0xabcdef
     const nullHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-
-    const requestReward = 7000000000000000
-    const resultReward = 1500000000000000
-    const blockReward = 1500000000000000
+    const requestReward = web3.utils.toWei("0.5", "ether")
+    const resultReward = web3.utils.toWei("0.25", "ether")
+    const blockReward = web3.utils.toWei("0.25", "ether")
+    const overalReward = web3.utils.toWei("1", "ether")
 
     let witnet, clientContract, wrb, wrbProxy, blockRelay, request, requestId, requestHash, result, blockRelayProxy
     let lastAccount0Balance, lastAccount1Balance
@@ -62,7 +62,7 @@ contract("UsingWitnet", accounts => {
         resultReward,
         blockReward, {
           from: accounts[0],
-          value: requestReward + resultReward + blockReward,
+          value: overalReward,
         }
       ))
       const expectedId = "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -97,13 +97,13 @@ contract("UsingWitnet", accounts => {
 
     it("WRB balance should increase", async () => {
       const wrbBalance = await web3.eth.getBalance(wrb.address)
-      assert.equal(wrbBalance, requestReward + resultReward + blockReward)
+      assert.equal(wrbBalance, overalReward)
     })
 
     it("should upgrade the rewards of a existing Witnet request", async () => {
       await returnData(clientContract._witnetUpgradeRequest(requestId, requestReward, resultReward, blockReward, {
         from: accounts[0],
-        value: requestReward + resultReward + blockReward,
+        value: overalReward,
       }))
     })
 
@@ -129,7 +129,7 @@ contract("UsingWitnet", accounts => {
 
     it("WRB balance should increase after rewards upgrade", async () => {
       const wrbBalance = await web3.eth.getBalance(wrb.address)
-      assert.equal(wrbBalance, (requestReward + resultReward) * 2 + blockReward * 2)
+      assert.equal(wrbBalance, overalReward * 2)
     })
 
     it("should claim eligibility for relaying the request into Witnet", async () => {
@@ -234,9 +234,10 @@ contract("UsingWitnet", accounts => {
     const block4Hash = 0x000004
     const nullHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
-    const requestReward = 7000000000000000
-    const resultReward = 1500000000000000
-    const blockReward = 1500000000000000
+    const requestReward = web3.utils.toWei("0.5", "ether")
+    const resultReward = web3.utils.toWei("0.25", "ether")
+    const blockReward = web3.utils.toWei("0.25", "ether")
+    const overalReward = web3.utils.toWei("1", "ether")
 
     let witnet, clientContract, wrb, blockRelay, blockRelayProxy, request, requestId, requestHash, result
 
@@ -271,7 +272,7 @@ contract("UsingWitnet", accounts => {
         resultReward,
         blockReward, {
           from: accounts[0],
-          value: requestReward + resultReward + blockReward,
+          value: overalReward,
         }
       ))
       assert.equal(requestId.toString(16), "0x0000000000000000000000000000000000000000000000000000000000000001")
