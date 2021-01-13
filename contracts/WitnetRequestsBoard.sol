@@ -80,17 +80,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   event PostedResult(address indexed _from, uint256 _id);
 
   // Ensures the reward is not greater than the value
-  modifier payingEnough(uint256 _value, uint256 _inclusionReward, uint256 _tallyReward) {
+  modifier payingRewards(uint256 _value, uint256 _inclusionReward, uint256 _tallyReward) {
     require(_value >= SafeMath.add(_inclusionReward, _tallyReward), "Transaction value needs to be equal or greater than tally plus inclusion reward");
-    _;
-  }
-
-  // Ensures gas costs are covered
-  modifier gasCostsCovered(uint256 _value, uint256 _inclusionReward, uint256 _tallyReward) {
-    uint256 inclusionPlusTally = SafeMath.add(_inclusionReward, _tallyReward);
-    require(_inclusionReward >= SafeMath.mul(tx.gasprice, MAX_CLAIM_DR_GAS + MAX_DR_INCLUSION_GAS), "Inclusion reward should cover gas expenses");
-    require(_tallyReward >= SafeMath.mul(tx.gasprice, MAX_REPORT_RESULT_GAS), "Report result reward should cover gas expenses");
-    require(SafeMath.sub(msg.value, inclusionPlusTally) >= SafeMath.mul(tx.gasprice, MAX_REPORT_BLOCK_GAS*2), "Block reward should cover gas expenses");
     _;
   }
 
@@ -148,7 +139,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     require(requests.length > _id, "Id not found"); 
     _;
   }
-// Ensures the VRF is valid
+
+  // Ensures the VRF is valid
   modifier vrfValid(
     uint256[4] memory _poe,
     uint256[2] memory _publicKey,
@@ -164,6 +156,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       "Not a valid VRF");
     _;
   }
+
   // Ensures the address belongs to the active bridge set
   modifier absMember(address _address) {
     require(abs.absMembership(_address), "Not a member of the ABS");
@@ -193,11 +186,15 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
-    payingEnough(msg.value, _inclusionReward, _tallyReward)
-    gasCostsCovered(msg.value, _inclusionReward, _tallyReward)
+    payingRewards(msg.value, _inclusionReward, _tallyReward)
     override
   returns(uint256)
   {
+    uint256 blockReward = SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward));
+    
+    // Check if rewards are covering gas costs
+    isPayingGasCosts( _inclusionReward, _tallyReward, blockReward);
+
     // The initial length of the `requests` array will become the ID of the request for everything related to the WRB
     uint256 id = requests.length;
 
@@ -206,7 +203,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     request.requestAddress = _requestAddress;
     request.inclusionReward = _inclusionReward; 
     request.tallyReward = _tallyReward;
-    request.blockReward =  SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward));
+    request.blockReward =  blockReward;
     request.epoch = blockRelay.getLastEpoch();
     Request requestContract = Request(request.requestAddress);
     uint256 _drOutputHash = uint256(sha256(requestContract.bytecode()));
@@ -229,22 +226,33 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
-    payingEnough(msg.value, _inclusionReward, _tallyReward)
+    payingRewards(msg.value, _inclusionReward, _tallyReward)
     resultNotIncluded(_id)
     override
   {
+    // If DR included, inclusion reward should be zero
     if (requests[_id].drHash != 0) {
       require(
         _inclusionReward == 0,
         "Inclusion reward should be 0 (request reward already paid)"
       );
-      requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
-      requests[_id].blockReward = SafeMath.add(requests[_id].blockReward, msg.value - _tallyReward);
-    } else {
-      requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, _inclusionReward);
-      requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
-      requests[_id].blockReward = SafeMath.add(requests[_id].blockReward, SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward)));
     }
+
+    // Compute new rewards
+    uint256 newInclusionReward = SafeMath.add(requests[_id].inclusionReward, _inclusionReward);
+    uint256 newTallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
+    uint256 newBlockReward = SafeMath.add(requests[_id].blockReward, SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward)));
+    
+    // If gas price is increased, then check if new rewards cover gas costs
+    if (tx.gasprice > requests[_id].gasPrice) {
+      isPayingGasCosts(newInclusionReward, newTallyReward, newBlockReward);
+      requests[_id].gasPrice = tx.gasprice;
+    }
+
+    // Update data request rewards
+    requests[_id].inclusionReward = newInclusionReward;
+    requests[_id].tallyReward = newTallyReward;
+    requests[_id].blockReward = newBlockReward;
   }
 
   /// @dev Checks if the data requests from a list are claimable or not.
@@ -515,6 +523,16 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     }
 
     return false;
+  }
+
+  /// @dev Ensures that rewards cover at least the gas cost needed for the complete DR life cycle within the Witnet Request Board.
+  /// @param _inclusionReward The amount for rewarding the reporting of the inclusion of the data request.
+  /// @param _tallyReward The amount for rewarding the reporting of the final result (aka tally) of the data request.
+  /// @param _blockReward The amount for rewarding the reporting of the blocks containing the DR inclusion and the DR result.
+  function isPayingGasCosts(uint256 _inclusionReward, uint256 _tallyReward, uint256 _blockReward) internal {
+    require(_inclusionReward >= SafeMath.mul(tx.gasprice, MAX_CLAIM_DR_GAS + MAX_DR_INCLUSION_GAS), "Inclusion reward should cover gas expenses");
+    require(_tallyReward >= SafeMath.mul(tx.gasprice, MAX_REPORT_RESULT_GAS), "Report result reward should cover gas expenses");
+    require(_blockReward >= SafeMath.mul(tx.gasprice, MAX_REPORT_BLOCK_GAS * 2), "Block reward should cover gas expenses");
   }
 
   /// @dev Verifies the validity of a signature.
