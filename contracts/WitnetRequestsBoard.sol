@@ -243,7 +243,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     } else {
       requests[_id].inclusionReward = SafeMath.add(requests[_id].inclusionReward, _inclusionReward);
       requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward);
-      requests[_id].blockReward = SafeMath.add(requests[_id].blockReward,  SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward)));
+      requests[_id].blockReward = SafeMath.add(requests[_id].blockReward, SafeMath.sub(msg.value, SafeMath.add(_inclusionReward, _tallyReward)));
     }
   }
 

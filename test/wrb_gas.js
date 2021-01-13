@@ -39,7 +39,7 @@ const blockHeader = "0x" + sha256("block header")
 const roots = calculateRoots(0, requestHex, resultHex)
 
 // Function to calculate merkle roots for Proof-of-Inclusions (PoI)
-function calculateRoots (levels, drBytes, resBytes) {
+function calculateRoots(levels, drBytes, resBytes) {
   let hash = sha256.create()
   hash.update(web3.utils.hexToBytes(drBytes))
   const drHash = "0x" + hash.hex()
@@ -109,20 +109,18 @@ contract("WitnetRequestBoard", ([
         this.Request.address,
         ether("0.25"),
         ether("0.5"), {
-          from: requestor,
-          value: ether("1"),
-        }
-      )
-      // Check `PostedRequest` event
+        from: requestor,
+        value: ether("1"),
+      })
 
+      // Check `PostedRequest` event
       expectEvent(
         postDataRequestTx,
         "PostedRequest",
         {
           _from: requestor,
           _id: requestId,
-        },
-      )
+        })
       expect(postDataRequestTx.logs[0].args._from, "match address of DR creator").to.be.equal(requestor)
       expect(postDataRequestTx.logs[0].args._id, "match data request id").to.be.bignumber.equal(requestId)
 
@@ -135,6 +133,66 @@ contract("WitnetRequestBoard", ([
         "contract balance should have increase after the request creation by 1 eth",
       ).to.equal(true)
     })
+    it("fails if creator is not covering DR rewards", async () => {
+      // Transaction value < rewards
+      await expectRevert(
+        this.WitnetRequestBoard.postDataRequest(
+          this.Request.address,
+          ether("0.5"),
+          ether("0.5"), {
+          from: requestor,
+          value: ether("0"),
+          gasPrice: 1,
+        }
+        ),
+        "Transaction value needs to be equal or greater than tally plus inclusion reward"
+      )
+    })
+    it("fails if creator is not covering DR inclusion gas cost", async () => {
+      // Inclusion reward < MAX_CLAIM_DR_GAS + MAX_DR_INCLUSION_GAS
+      await expectRevert(
+        this.WitnetRequestBoard.postDataRequest(
+          this.Request.address,
+          new BN("1"),
+          ether("0.5"), {
+          from: requestor,
+          value: ether("0.5").add(new BN("1")),
+          gasPrice: 1,
+        }
+        ),
+        "Inclusion reward should cover gas expenses"
+      )
+    })
+    it("fails if creator is not covering DR result report gas cost", async () => {
+      // Tally reward < MAX_REPORT_RESULT_GAS
+      await expectRevert(
+        this.WitnetRequestBoard.postDataRequest(
+          this.Request.address,
+          ether("0.5"),
+          new BN("1"), {
+          from: requestor,
+          value: ether("0.5").add(new BN("1")),
+          gasPrice: 1,
+        }
+        ),
+        "Report result reward should cover gas expenses"
+      )
+    })
+    it("fails if creator is not covering block report gas cost", async () => {
+      // Tally reward < MAX_REPORT_BLOCK_GAS
+      await expectRevert(
+        this.WitnetRequestBoard.postDataRequest(
+          this.Request.address,
+          ether("0.5"),
+          ether("0.5"), {
+          from: requestor,
+          value: ether("1"),
+          gasPrice: 1,
+        }
+        ),
+        "Block reward should cover gas expenses"
+      )
+    })
   })
 
   describe("upgrade data request", async () => {
@@ -143,9 +201,9 @@ contract("WitnetRequestBoard", ([
         this.Request.address,
         ether("0.25"),
         ether("0.5"), {
-          from: requestor,
-          value: ether("1"),
-        }
+        from: requestor,
+        value: ether("1"),
+      }
       )
     })
     it("creator can upgrade existing data request (1 eth for rewards)", async () => {
@@ -246,8 +304,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-          from: claimer,
-        })
+        from: claimer,
+      })
     })
   })
 
@@ -272,8 +330,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-          from: claimer,
-        })
+        from: claimer,
+      })
     })
     it("fails if block is not posted", async () => {
       await expectRevert(
@@ -364,8 +422,8 @@ contract("WitnetRequestBoard", ([
         fastVerParams[0],
         fastVerParams[1],
         signature, {
-          from: claimer,
-        })
+        from: claimer,
+      })
     })
     it("Pushing the limits to 9 additional PoI levels (0.5 eth to claimer) plus activity to be removed", async () => {
       // Initial balances
@@ -422,8 +480,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-          from: claimer,
-        })
+        from: claimer,
+      })
       // Post new block
       await this.BlockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
         from: owner,
@@ -515,8 +573,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-          from: claimer,
-        })
+        from: claimer,
+      })
       const roots = calculateRoots(9, requestHex, resultHex)
       const drInclusionProof = Array(10).fill(drOutputHash)
 
@@ -596,8 +654,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-          from: claimer,
-        })
+        from: claimer,
+      })
       // Post new block
       await this.BlockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
         from: owner,
