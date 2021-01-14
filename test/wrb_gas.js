@@ -195,7 +195,7 @@ contract("WitnetRequestBoard", ([
     })
   })
 
-  describe("upgrade data request", async () => {
+  describe("upgrade data request", async () => {    
     beforeEach(async () => {
       await this.WitnetRequestBoard.postDataRequest(
         this.Request.address,
@@ -203,6 +203,7 @@ contract("WitnetRequestBoard", ([
         ether("0.5"), {
         from: requestor,
         value: ether("1"),
+        gasPrice: 1,
       }
       )
     })
@@ -215,6 +216,7 @@ contract("WitnetRequestBoard", ([
       await this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0.5"), ether("0.25"), {
         from: requestor,
         value: ether("1"),
+        gasPrice: 2,
       })
 
       // Check contract balance (increased by rewards)
@@ -225,6 +227,69 @@ contract("WitnetRequestBoard", ([
         ),
         "contract balance should have increased after request upgrade by 1 eth",
       ).to.equal(true)
+    })
+    it("fails if creator is not covering DR inclusion gas cost", async () => {
+      const gasPrice = ether("0.000001")
+      const claimDrGas =  await this.WitnetRequestBoard.MAX_CLAIM_DR_GAS.call()
+      const includeDrGas = await this.WitnetRequestBoard.MAX_DR_INCLUSION_GAS.call()
+      const inclusionGas = claimDrGas.add(includeDrGas)
+
+      // Multiply by gas price and substract the already existing value to the limit
+      const maxInclusionInvalidReward = (inclusionGas.mul(gasPrice)).sub(ether("0.25")).sub(new BN("1"))
+      
+      // Transaction value < rewards
+      await expectRevert(
+        this.WitnetRequestBoard.upgradeDataRequest(requestId, maxInclusionInvalidReward, ether("0"), {
+          from: requestor,
+          value: ether("10"),
+          gasPrice: gasPrice,
+        }),
+        "Inclusion reward should cover gas expenses"
+      )
+    })
+    it("fails if creator is not covering DR result report gas cost", async () => {
+      const gasPrice = ether("0.000005")
+      const claimDrGas =  await this.WitnetRequestBoard.MAX_CLAIM_DR_GAS.call()
+      const includeDrGas = await this.WitnetRequestBoard.MAX_DR_INCLUSION_GAS.call()
+      const inclusionGas = claimDrGas.add(includeDrGas)
+      const postResultGas = await this.WitnetRequestBoard.MAX_REPORT_RESULT_GAS.call()
+
+      // Multiply by gas price and substract the already existing value to the limit
+      const minInclusionValidReward = (inclusionGas.mul(gasPrice)).sub(ether("0.25"))
+      const maxResultInvalidReward = (postResultGas.mul(gasPrice)).sub(ether("0.5")).sub(new BN("1"))
+      
+      // Transaction value < rewards
+      await expectRevert(
+        this.WitnetRequestBoard.upgradeDataRequest(requestId, minInclusionValidReward, maxResultInvalidReward, {
+          from: requestor,
+          value: ether("10"),
+          gasPrice: gasPrice,
+        }),
+        "Report result reward should cover gas expenses"
+      )
+    })
+    it("fails if creator is not covering block report gas cost", async () => {
+      const gasPrice = ether("0.000005")
+      const claimDrGas =  await this.WitnetRequestBoard.MAX_CLAIM_DR_GAS.call()
+      const includeDrGas = await this.WitnetRequestBoard.MAX_DR_INCLUSION_GAS.call()
+      const inclusionGas = claimDrGas.add(includeDrGas)
+      const postResultGas = await this.WitnetRequestBoard.MAX_REPORT_RESULT_GAS.call()
+      const postBlockGas = await this.WitnetRequestBoard.MAX_REPORT_BLOCK_GAS.call()
+
+      // Multiply by gas price and substract the already existing value to the limit
+      const minInclusionValidReward = (inclusionGas.mul(gasPrice)).sub(ether("0.25"))
+      const minResultValidReward = (postResultGas.mul(gasPrice)).sub(ether("0.5"))
+      const maxBlockInvalidReward = (postBlockGas.mul(gasPrice)).sub(ether("0.25")).sub(new BN("1"))
+
+      // Transaction value < rewards
+      await expectRevert(
+        this.WitnetRequestBoard.upgradeDataRequest(requestId, minInclusionValidReward, minResultValidReward, {
+          from: requestor,
+          value: minResultValidReward.add(minInclusionValidReward).add(maxBlockInvalidReward),
+          gasPrice: gasPrice,
+        }),
+        "Block reward should cover gas expenses"
+      )
     })
   })
 
