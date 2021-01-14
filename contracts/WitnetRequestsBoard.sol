@@ -389,7 +389,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   /// @dev Retrieves the gas price set for a specific DR ID.
   /// @param _id The unique identifier of the data request.
-  /// @return The gas price set by the request creator
+  /// @return The gas price set by the request creator.
   function readGasPrice(uint256 _id) external view validId(_id) returns(uint256) {
     return requests[_id].gasPrice;
   }

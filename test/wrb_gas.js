@@ -39,7 +39,7 @@ const blockHeader = "0x" + sha256("block header")
 const roots = calculateRoots(0, requestHex, resultHex)
 
 // Function to calculate merkle roots for Proof-of-Inclusions (PoI)
-function calculateRoots(levels, drBytes, resBytes) {
+function calculateRoots (levels, drBytes, resBytes) {
   let hash = sha256.create()
   hash.update(web3.utils.hexToBytes(drBytes))
   const drHash = "0x" + hash.hex()
@@ -109,9 +109,9 @@ contract("WitnetRequestBoard", ([
         this.Request.address,
         ether("0.25"),
         ether("0.5"), {
-        from: requestor,
-        value: ether("1"),
-      })
+          from: requestor,
+          value: ether("1"),
+        })
 
       // Check `PostedRequest` event
       expectEvent(
@@ -140,10 +140,10 @@ contract("WitnetRequestBoard", ([
           this.Request.address,
           ether("0.5"),
           ether("0.5"), {
-          from: requestor,
-          value: ether("0"),
-          gasPrice: 1,
-        }
+            from: requestor,
+            value: ether("0"),
+            gasPrice: 1,
+          }
         ),
         "Transaction value needs to be equal or greater than tally plus inclusion reward"
       )
@@ -155,10 +155,10 @@ contract("WitnetRequestBoard", ([
           this.Request.address,
           new BN("1"),
           ether("0.5"), {
-          from: requestor,
-          value: ether("0.5").add(new BN("1")),
-          gasPrice: 1,
-        }
+            from: requestor,
+            value: ether("0.5").add(new BN("1")),
+            gasPrice: 1,
+          }
         ),
         "Inclusion reward should cover gas expenses"
       )
@@ -170,10 +170,10 @@ contract("WitnetRequestBoard", ([
           this.Request.address,
           ether("0.5"),
           new BN("1"), {
-          from: requestor,
-          value: ether("0.5").add(new BN("1")),
-          gasPrice: 1,
-        }
+            from: requestor,
+            value: ether("0.5").add(new BN("1")),
+            gasPrice: 1,
+          }
         ),
         "Report result reward should cover gas expenses"
       )
@@ -185,26 +185,48 @@ contract("WitnetRequestBoard", ([
           this.Request.address,
           ether("0.5"),
           ether("0.5"), {
-          from: requestor,
-          value: ether("1"),
-          gasPrice: 1,
-        }
+            from: requestor,
+            value: ether("1"),
+            gasPrice: 1,
+          }
         ),
         "Block reward should cover gas expenses"
       )
     })
   })
 
-  describe("upgrade data request", async () => {    
+  describe("read data request gas price", async () => {
     beforeEach(async () => {
       await this.WitnetRequestBoard.postDataRequest(
         this.Request.address,
         ether("0.25"),
         ether("0.5"), {
-        from: requestor,
-        value: ether("1"),
-        gasPrice: 1,
-      }
+          from: requestor,
+          value: ether("1"),
+          gasPrice: 1,
+        }
+      )
+    })
+    it("anyone can read data request gas price", async () => {
+      // Read data request gas price from WitnetRequestBoard by `requestId`
+      const gasPrice = await this.WitnetRequestBoard.readGasPrice.call(requestId, { from: other })
+      expect(
+        gasPrice.eq(new BN("1")),
+        "data request gas price should have been set to 1 wei",
+      ).to.equal(true)
+    })
+  })
+
+  describe("upgrade data request", async () => {
+    beforeEach(async () => {
+      await this.WitnetRequestBoard.postDataRequest(
+        this.Request.address,
+        ether("0.25"),
+        ether("0.5"), {
+          from: requestor,
+          value: ether("1"),
+          gasPrice: 2,
+        }
       )
     })
     it("creator can upgrade existing data request (1 eth for rewards)", async () => {
@@ -216,7 +238,7 @@ contract("WitnetRequestBoard", ([
       await this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0.5"), ether("0.25"), {
         from: requestor,
         value: ether("1"),
-        gasPrice: 2,
+        gasPrice: 3,
       })
 
       // Check contract balance (increased by rewards)
@@ -228,15 +250,49 @@ contract("WitnetRequestBoard", ([
         "contract balance should have increased after request upgrade by 1 eth",
       ).to.equal(true)
     })
+    it("creator can upgrade existing data request gas price", async () => {
+      // Update data request (increased rewards)
+      await this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0.5"), ether("0.25"), {
+        from: requestor,
+        value: ether("1"),
+        gasPrice: 3,
+      })
+
+      // Read data request gas price from WitnetRequestBoard by `requestId`
+      const gasPrice = await this.WitnetRequestBoard.readGasPrice.call(requestId, { from: other })
+
+      // Check that gas price has been updated to 3 wei
+      expect(
+        gasPrice.eq(new BN("3")),
+        "data request gas price should have been set to 3 wei",
+      ).to.equal(true)
+    })
+    it("creator cannot decrease existing data request gas price", async () => {
+      // Update data request (increased rewards)
+      await this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0.5"), ether("0.25"), {
+        from: requestor,
+        value: ether("1"),
+        gasPrice: 1,
+      })
+
+      // Read data request gas price from WitnetRequestBoard by `requestId`
+      const gasPrice = await this.WitnetRequestBoard.readGasPrice.call(requestId, { from: other })
+
+      // Check that gas price has not been updated to 1 wei
+      expect(
+        gasPrice.eq(new BN("2")),
+        "data request gas price should not have been set to 1 wei",
+      ).to.equal(true)
+    })
     it("fails if creator is not covering DR inclusion gas cost", async () => {
       const gasPrice = ether("0.000001")
-      const claimDrGas =  await this.WitnetRequestBoard.MAX_CLAIM_DR_GAS.call()
+      const claimDrGas = await this.WitnetRequestBoard.MAX_CLAIM_DR_GAS.call()
       const includeDrGas = await this.WitnetRequestBoard.MAX_DR_INCLUSION_GAS.call()
       const inclusionGas = claimDrGas.add(includeDrGas)
 
       // Multiply by gas price and substract the already existing value to the limit
       const maxInclusionInvalidReward = (inclusionGas.mul(gasPrice)).sub(ether("0.25")).sub(new BN("1"))
-      
+
       // Transaction value < rewards
       await expectRevert(
         this.WitnetRequestBoard.upgradeDataRequest(requestId, maxInclusionInvalidReward, ether("0"), {
@@ -249,7 +305,7 @@ contract("WitnetRequestBoard", ([
     })
     it("fails if creator is not covering DR result report gas cost", async () => {
       const gasPrice = ether("0.000005")
-      const claimDrGas =  await this.WitnetRequestBoard.MAX_CLAIM_DR_GAS.call()
+      const claimDrGas = await this.WitnetRequestBoard.MAX_CLAIM_DR_GAS.call()
       const includeDrGas = await this.WitnetRequestBoard.MAX_DR_INCLUSION_GAS.call()
       const inclusionGas = claimDrGas.add(includeDrGas)
       const postResultGas = await this.WitnetRequestBoard.MAX_REPORT_RESULT_GAS.call()
@@ -257,7 +313,7 @@ contract("WitnetRequestBoard", ([
       // Multiply by gas price and substract the already existing value to the limit
       const minInclusionValidReward = (inclusionGas.mul(gasPrice)).sub(ether("0.25"))
       const maxResultInvalidReward = (postResultGas.mul(gasPrice)).sub(ether("0.5")).sub(new BN("1"))
-      
+
       // Transaction value < rewards
       await expectRevert(
         this.WitnetRequestBoard.upgradeDataRequest(requestId, minInclusionValidReward, maxResultInvalidReward, {
@@ -270,7 +326,7 @@ contract("WitnetRequestBoard", ([
     })
     it("fails if creator is not covering block report gas cost", async () => {
       const gasPrice = ether("0.000005")
-      const claimDrGas =  await this.WitnetRequestBoard.MAX_CLAIM_DR_GAS.call()
+      const claimDrGas = await this.WitnetRequestBoard.MAX_CLAIM_DR_GAS.call()
       const includeDrGas = await this.WitnetRequestBoard.MAX_DR_INCLUSION_GAS.call()
       const inclusionGas = claimDrGas.add(includeDrGas)
       const postResultGas = await this.WitnetRequestBoard.MAX_REPORT_RESULT_GAS.call()
@@ -369,8 +425,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-        from: claimer,
-      })
+          from: claimer,
+        })
     })
   })
 
@@ -395,8 +451,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-        from: claimer,
-      })
+          from: claimer,
+        })
     })
     it("fails if block is not posted", async () => {
       await expectRevert(
@@ -487,8 +543,8 @@ contract("WitnetRequestBoard", ([
         fastVerParams[0],
         fastVerParams[1],
         signature, {
-        from: claimer,
-      })
+          from: claimer,
+        })
     })
     it("Pushing the limits to 9 additional PoI levels (0.5 eth to claimer) plus activity to be removed", async () => {
       // Initial balances
@@ -545,8 +601,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-        from: claimer,
-      })
+          from: claimer,
+        })
       // Post new block
       await this.BlockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
         from: owner,
@@ -638,8 +694,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-        from: claimer,
-      })
+          from: claimer,
+        })
       const roots = calculateRoots(9, requestHex, resultHex)
       const drInclusionProof = Array(10).fill(drOutputHash)
 
@@ -719,8 +775,8 @@ contract("WitnetRequestBoard", ([
         fastVerifyParams[0],
         fastVerifyParams[1],
         signature, {
-        from: claimer,
-      })
+          from: claimer,
+        })
       // Post new block
       await this.BlockRelay.postNewBlock(blockHeader, epoch, roots[0], roots[1], {
         from: owner,
