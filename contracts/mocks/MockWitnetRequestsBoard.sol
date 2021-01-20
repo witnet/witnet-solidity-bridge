@@ -14,6 +14,18 @@ import "../WitnetRequestsBoardInterface.sol";
  */
 contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
 
+  // Max gas values as calculate with gas-analysis
+  // Claiming is not subject to substantial increases as it is only composed of a VRF verification 
+  uint256 public constant MAX_CLAIM_DR_GAS = 216095;
+  // DR inclusion is subject to increases due to number of merkle tree levels and activity slots to be removed
+  // The following value corresponds to 9 merkle tree levels and one full address removal for all slots
+  uint256 public constant MAX_DR_INCLUSION_GAS = 511098;
+  // Result reporting is subject to increases due to number of merkle tree levels
+  // The following value corresponds to 9 merkle tree levels
+  uint256 public constant MAX_REPORT_RESULT_GAS  = 102496;
+  // Block reporting is not subject to increases
+  uint256 public constant MAX_REPORT_BLOCK_GAS = 127963;
+
   struct DataRequest {
     address requestAddress;
     uint256 inclusionReward;
@@ -108,5 +120,15 @@ contract MockWitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @return The hash of the DataRequest transaction in Witnet.
   function readDrHash (uint256 _id) external view override returns(uint256) {
     return requests[_id].drHash;
+  }
+
+  /// @dev Estimate the amount of reward we need to insert for a given gas price.
+  /// @param _gasPrice The gas price for which we need to calculate the rewards.
+  /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
+  function estimateGasCost(uint256 _gasPrice) external view override returns(uint256, uint256, uint256){
+    return (_gasPrice*(MAX_CLAIM_DR_GAS + MAX_DR_INCLUSION_GAS), 
+      _gasPrice*MAX_REPORT_RESULT_GAS,  
+      _gasPrice*MAX_REPORT_BLOCK_GAS * 2
+    );
   }
 }

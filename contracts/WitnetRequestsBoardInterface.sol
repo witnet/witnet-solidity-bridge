@@ -40,4 +40,8 @@ interface WitnetRequestsBoardInterface {
   /// @return true if contract is upgradable.
   function isUpgradable(address _address) external view returns(bool);
 
+  /// @dev Estimate the amount of reward we need to insert for a given gas price.
+  /// @param _gasPrice The gas price for which we need to calculate the rewards.
+  /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
+  function estimateGasCost(uint256 _gasPrice) external view returns(uint256, uint256, uint256);
 }

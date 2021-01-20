@@ -97,4 +97,14 @@ contract UsingWitnet {
   function witnetReadResult(uint256 _id) internal view returns (Witnet.Result memory) {
     return Witnet.resultFromCborBytes(wrb.readResult(_id));
   }
+
+   /**
+  * @notice Estimate the reward amount
+  * @dev Call to `estimate_gas_costt` function in the WitnetRequestsBoard contract.
+  * @param _gasPrice The gas price for which we want to retrieve the estimatee.
+  * @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
+  */
+  function witnetEstimateGasCost(uint256 _gasPrice) internal view returns (uint256, uint256, uint256) {
+    return wrb.estimateGasCost(_gasPrice);
+  }
 }

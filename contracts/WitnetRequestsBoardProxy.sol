@@ -105,6 +105,14 @@ contract WitnetRequestsBoardProxy {
     return wrbWithResult.readResult(_id - offSetWrb);
   }
 
+  /// @dev Estimate the amount of reward we need to insert for a given gas price.
+  /// @param _gasPrice The gas price for which we need to calculate the rewards.
+  /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
+  function estimateGasCost(uint256 _gasPrice) external view returns(uint256, uint256, uint256) {
+    return witnetRequestsBoardInstance.estimateGasCost(_gasPrice);
+
+  }
+
   /// @notice Upgrades the Witnet Requests Board if the current one is upgradeable.
   /// @param _newAddress address of the new block relay to upgrade.
   function upgradeWitnetRequestsBoard(address _newAddress) public notIdentical(_newAddress) {
