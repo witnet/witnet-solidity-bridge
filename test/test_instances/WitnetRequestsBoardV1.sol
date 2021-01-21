@@ -118,9 +118,8 @@ contract WitnetRequestsBoardV1 is WitnetRequestsBoardInterface {
   }
 
   /// @dev Estimate the amount of reward we need to insert for a given gas price.
-  /// @param _gasPrice The gas price for which we need to calculate the rewards.
   /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
-  function estimateGasCost(uint256 _gasPrice) external view override returns(uint256, uint256, uint256){
+  function estimateGasCost(uint256) external view override returns(uint256, uint256, uint256){
     return (0, 
       0,  
       0

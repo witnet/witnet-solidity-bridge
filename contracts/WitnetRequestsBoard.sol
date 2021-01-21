@@ -466,21 +466,12 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   /// @dev Estimate the amount of reward we need to insert for a given gas price.
   /// @param _gasPrice The gas price for which we need to calculate the rewards.
   /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
-  function estimateGasCost(uint256 _gasPrice) external view override returns(uint256, uint256, uint256){
-    return (SafeMath.mul(_gasPrice, MAX_CLAIM_DR_GAS + MAX_DR_INCLUSION_GAS), 
+  function estimateGasCost(uint256 _gasPrice) public view override returns(uint256, uint256, uint256){
+    return (
+      SafeMath.mul(_gasPrice, MAX_CLAIM_DR_GAS + MAX_DR_INCLUSION_GAS), 
       SafeMath.mul(_gasPrice, MAX_REPORT_RESULT_GAS),  
       SafeMath.mul(_gasPrice, MAX_REPORT_BLOCK_GAS * 2)
-      );
-  }
-
-  /// @dev Ensures that rewards cover at least the gas cost needed for the complete DR life cycle within the Witnet Request Board.
-  /// @param _inclusionReward The amount for rewarding the reporting of the inclusion of the data request.
-  /// @param _tallyReward The amount for rewarding the reporting of the final result (aka tally) of the data request.
-  /// @param _blockReward The amount for rewarding the reporting of the blocks containing the DR inclusion and the DR result.
-  function isPayingGasCosts(uint256 _inclusionReward, uint256 _tallyReward, uint256 _blockReward) public {
-    require(_inclusionReward >= SafeMath.mul(tx.gasprice, MAX_CLAIM_DR_GAS + MAX_DR_INCLUSION_GAS), "Inclusion reward should cover gas expenses");
-    require(_tallyReward >= SafeMath.mul(tx.gasprice, MAX_REPORT_RESULT_GAS), "Report result reward should cover gas expenses");
-    require(_blockReward >= SafeMath.mul(tx.gasprice, MAX_REPORT_BLOCK_GAS * 2), "Block reward should cover gas expenses");
+    );
   }
 
   /// @dev Claim drs to be posted to Witnet by the node.
@@ -590,6 +581,17 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       (_request.blockNumber == 0 || getBlockNumber() - _request.blockNumber > CLAIM_EXPIRATION) &&
       _request.drHash == 0 &&
       _request.result.length == 0;
+  }
+
+  /// @dev Ensures that rewards cover at least the gas cost needed for the complete DR life cycle within the Witnet Request Board.
+  /// @param _inclusionReward The amount for rewarding the reporting of the inclusion of the data request.
+  /// @param _tallyReward The amount for rewarding the reporting of the final result (aka tally) of the data request.
+  /// @param _blockReward The amount for rewarding the reporting of the blocks containing the DR inclusion and the DR result.
+  function isPayingGasCosts(uint256 _inclusionReward, uint256 _tallyReward, uint256 _blockReward) internal view {
+    (uint256 minInclusionReward, uint256 minResultReward, uint256 minBlockReward) =  estimateGasCost(tx.gasprice);
+    require(_inclusionReward >= minInclusionReward, "Inclusion reward should cover gas expenses. Check the estimateGasCost method.");
+    require(_tallyReward >= minResultReward, "Result reward should cover gas expenses. Check the estimateGasCost method.");
+    require(_blockReward >= minBlockReward, "Block reward should cover gas expenses. Check the estimateGasCost method.");
   }
 
   function getBlockNumber() internal view virtual returns (uint256) {

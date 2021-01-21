@@ -382,6 +382,7 @@ contract("UsingWitnet", accounts => {
         "The sum of rewards overflows"
       )
     })
+
     it("Should revert if reward amounts sum overflows 2", async () => {
       const requestReward = web3.utils.toBN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
       const blockReward = web3.utils.toBN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
@@ -392,6 +393,19 @@ contract("UsingWitnet", accounts => {
           value: 0,
         }),
         "The sum of rewards overflows"
+      )
+    })
+
+    it("Should be able to estimate gas cost and post the DR", async () => {
+      const gasPrice = 20000
+      const rewards = await clientContract._witnetEstimateGasCost.call(gasPrice)
+      await truffleAssert.passes(
+        clientContract._witnetPostRequest(request.address, rewards[0], rewards[1], rewards[2], {
+          from: accounts[0],
+          value: rewards[0].add(rewards[1].add(rewards[2])),
+          gasPrice: gasPrice,
+        }),
+        "Estimated rewards should cover the gas costs"
       )
     })
   })

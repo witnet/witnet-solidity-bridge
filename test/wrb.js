@@ -1184,7 +1184,26 @@ contract("WitnetRequestBoard", accounts => {
         await truffleAssert.reverts(wrbInstance.readDataRequest(2000), "Id not found")
         await truffleAssert.reverts(wrbInstance.readDrHash(2000), "Id not found")
         await truffleAssert.reverts(wrbInstance.readResult(2000), "Id not found")
-      })
+      }
+    )
+
+    it("should test the estimateGasCost function",
+      async () => {
+        let rewards = await wrbInstance.estimateGasCost.call(1)
+        const maxClaimRe = new web3.utils.BN(await wrbInstance.MAX_CLAIM_DR_GAS.call())
+        const maxIncRe = new web3.utils.BN(await wrbInstance.MAX_DR_INCLUSION_GAS.call())
+        const maxResRe = new web3.utils.BN(await wrbInstance.MAX_REPORT_RESULT_GAS.call())
+        const maxBlockRe = new web3.utils.BN(await wrbInstance.MAX_REPORT_BLOCK_GAS.call())
+        assert(rewards[0].eq(maxClaimRe.add(maxIncRe)))
+        assert(rewards[1].eq(maxResRe))
+        assert(rewards[2].eq(maxBlockRe.mul(new web3.utils.BN(2))))
+
+        rewards = await wrbInstance.estimateGasCost.call(20000)
+        assert(rewards[0].eq((maxClaimRe.add(maxIncRe)).mul(new web3.utils.BN(20000))))
+        assert(rewards[1].eq(maxResRe.mul(new web3.utils.BN(20000))))
+        assert(rewards[2].eq(maxBlockRe.mul(new web3.utils.BN(2 * 20000))))
+      }
+    )
   })
 })
 

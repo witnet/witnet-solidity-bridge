@@ -34,6 +34,10 @@ contract UsingWitnetTestHelper is UsingWitnet {
     return result;
   }
 
+  function _witnetEstimateGasCost(uint256 _gasPrice) external returns(uint256, uint256, uint256) {
+    return witnetEstimateGasCost(_gasPrice);
+  }
+
   function _witnetAsUint64() external view returns(uint64) {
     return result.asUint64();
   }

@@ -175,7 +175,7 @@ contract("WitnetRequestBoard", ([
             gasPrice: 1,
           }
         ),
-        "Report result reward should cover gas expenses"
+        "Result reward should cover gas expenses. Check the estimateGasCost"
       )
     })
     it("fails if creator is not covering block report gas cost", async () => {
@@ -321,7 +321,7 @@ contract("WitnetRequestBoard", ([
           value: ether("10"),
           gasPrice: gasPrice,
         }),
-        "Report result reward should cover gas expenses"
+        "Result reward should cover gas expenses. Check the estimateGasCost"
       )
     })
     it("fails if creator is not covering block report gas cost", async () => {

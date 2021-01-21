@@ -110,7 +110,6 @@ contract WitnetRequestsBoardProxy {
   /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
   function estimateGasCost(uint256 _gasPrice) external view returns(uint256, uint256, uint256) {
     return witnetRequestsBoardInstance.estimateGasCost(_gasPrice);
-
   }
 
   /// @notice Upgrades the Witnet Requests Board if the current one is upgradeable.
