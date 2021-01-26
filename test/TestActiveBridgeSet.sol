@@ -165,7 +165,7 @@ contract TestActiveBridgeSet {
 // Proxy contract for testing throws
 contract ThrowProxy {
   address public target;
-  bytes data;
+  bytes internal data;
 
   constructor (address _target) public {
     target = _target;
