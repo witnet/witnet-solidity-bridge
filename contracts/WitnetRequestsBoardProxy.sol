@@ -114,7 +114,7 @@ contract WitnetRequestsBoardProxy {
 
   /// @notice Upgrades the Witnet Requests Board if the current one is upgradeable.
   /// @param _newAddress address of the new block relay to upgrade.
-  function upgradeWitnetRequestsBoard(address _newAddress) public notIdentical(_newAddress) {
+  function upgradeWitnetRequestsBoard(address _newAddress) external notIdentical(_newAddress) {
     // Require the WRB is upgradable
     require(witnetRequestsBoardInstance.isUpgradable(msg.sender), "The upgrade has been rejected by the current implementation");
     // Map the currentLastId to the corresponding witnetRequestsBoardAddress and add it to controllers
