@@ -38,6 +38,9 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   // Block reporting is not subject to increases
   uint256 public constant MAX_REPORT_BLOCK_GAS = 127963;
 
+  // Maps a block hash into true if its relayer has already been paid
+  mapping (uint256 => bool) internal paidBlocks;
+
   struct DataRequest {
     address requestAddress;
     uint256 drOutputHash;
@@ -53,6 +56,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 epoch;
     uint256 drHash;
     address payable pkhClaim;
+    address payable requestor;
   }
 
   // Owner of the Witnet Request Board
@@ -209,6 +213,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 _drOutputHash = uint256(sha256(requestContract.bytecode()));
     request.drOutputHash = _drOutputHash;
     request.gasPrice = tx.gasprice;
+    request.requestor = msg.sender;
 
     // Push the new request into the contract state
     requests.push(request);
@@ -312,13 +317,13 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _epoch,
       _index,
       requests[_id].drOutputHash), "Invalid PoI");
-    address payable relayer = payable(blockRelay.readRelayerAddress(_blockHash, _epoch));
     // This is the DR block inclusion reward, so we have to split it to reward the result block inclusion as well
     uint256 drRelayerPayment = requests[_id].blockReward / 2;
     // We subsctract this value from the reward that we will later pay for the inclusion of the reward block
     requests[_id].blockReward = requests[_id].blockReward - drRelayerPayment; 
     // Transfer the relayer payment to the block relayer
-    relayer.transfer(drRelayerPayment);
+    address payable rewardedAddress = payable(getAddressBlockReward(_id, _blockHash));
+    rewardedAddress.transfer(drRelayerPayment);
     // Transfer the DR inclusion reward to the inclusion verifier
     requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
     // Push requests[_id].pkhClaim to abs
@@ -365,8 +370,8 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _epoch,
       _index,
       resHash), "Invalid PoI");
-    address payable relayer = payable(blockRelay.readRelayerAddress(_blockHash, _epoch));
-    relayer.transfer(requests[_id].blockReward);
+    address payable rewardedAddress = payable(getAddressBlockReward(_id, _blockHash));
+    rewardedAddress.transfer(requests[_id].blockReward);
     msg.sender.transfer(requests[_id].tallyReward);
 
     emit PostedResult(msg.sender, _id);
@@ -596,5 +601,17 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   function getBlockNumber() internal view virtual returns (uint256) {
     return block.number;
+  }
+
+  /// @dev Returns the relayer address or the requester address in case the block inclusion was already paid
+  /// @param _id The unique identifier of the data request.
+  /// @param _blockHash The hash of the block which inclusion has to be rewarded.
+  function getAddressBlockReward(uint256 _id, uint256 _blockHash) internal returns (address) {
+      if (paidBlocks[_blockHash] == true) {
+          return requests[_id].requestor;
+      } else {
+          paidBlocks[_blockHash] = true;
+          return blockRelay.readRelayerAddress(_blockHash, requests[_id].epoch);
+      }
   }
 }
