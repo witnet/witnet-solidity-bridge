@@ -503,11 +503,12 @@ contract("WitnetRequestBoard", ([
         ),
         "claimer balance should have increased after reporting dr request inclusion by 0.25 eth",
       ).to.equal(true)
+
       expect(
         ownerFinalBalance.eq(ownerInitialBalance
           .add(ether("0.125"))
         ),
-        "Owner balance should have increased after reporting b lock by 0.125 eth",
+        "Owner balance should have increased after reporting block by 0.125 eth",
       ).to.equal(true)
     })
   })
@@ -618,14 +619,15 @@ contract("WitnetRequestBoard", ([
         "Not a member of the ABS"
       )
     })
-    it("abs member (claimer) can report a data request result from Witnet (0.5 eth to claimer)", async () => {
+    it("abs member can report a request result from Witnet, but Requestor should receive the blockReward", async () => {
       // Initial balances
       const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
       const claimerBalanceTracker = await balance.tracker(claimer)
       const ownerBalanceTracker = await balance.tracker(owner)
+      const requestorBalanceTracker = await balance.tracker(requestor)
       const contractInitialBalance = await contractBalanceTracker.get()
       const claimerInitialBalance = await claimerBalanceTracker.get()
-      // Get the owner balance after posting block
+      const requestorInitialBalance = await requestorBalanceTracker.get()
       const ownerInitialBalance = await ownerBalanceTracker.get()
 
       // Report data request result from Witnet to WitnetRequestBoard
@@ -650,6 +652,7 @@ contract("WitnetRequestBoard", ([
       const contractFinalBalance = await contractBalanceTracker.get()
       const claimerFinalBalance = await claimerBalanceTracker.get()
       const ownerFinalBalance = await ownerBalanceTracker.get()
+      const requestorFinalBalance = await requestorBalanceTracker.get()
 
       expect(
         contractFinalBalance.eq(contractInitialBalance
@@ -665,10 +668,15 @@ contract("WitnetRequestBoard", ([
         "claimer balance should have increased after reporting dr request result by 0.5 eth",
       ).to.equal(true)
       expect(
-        ownerFinalBalance.eq(ownerInitialBalance
+        requestorFinalBalance.eq(requestorInitialBalance
           .add(ether("0.125"))
         ),
-        "Owner balance should have increased after reporting b lock by 0.125 eth",
+        // Since the block was already reported, the requestor should receive back the block reward
+        "Requestor balance should have increased after reporting block by 0.125 eth",
+      ).to.equal(true)
+      expect(
+        ownerFinalBalance.eq(ownerInitialBalance),
+        "Owner (block relayer) balance should have not increased after reporting block",
       ).to.equal(true)
     })
   })
