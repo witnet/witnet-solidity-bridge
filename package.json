@@ -31,7 +31,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "3.2.0",
     "vrf-solidity": "0.2.3",
-    "witnet-ethereum-block-relay": "witnet/witnet-ethereum-block-relay"
+    "witnet-ethereum-block-relay": "lrubiorod/witnet-ethereum-block-relay#pay_once"
   },
   "devDependencies": {
     "@openzeppelin/test-helpers": "^0.5.5",

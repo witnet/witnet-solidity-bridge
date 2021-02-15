@@ -484,6 +484,7 @@ contract("WitnetRequestBoard", ([
       const ownerInitialBalance = await ownerBalanceTracker.get()
       await this.WitnetRequestBoard.reportDataRequestInclusion(requestId, [drOutputHash], 0, blockHeader, epoch, {
         from: other,
+        gasPrice: 1,
       })
 
       // Check balances (contract decreased and claimer and owner increased)
@@ -561,6 +562,7 @@ contract("WitnetRequestBoard", ([
       })
       await this.WitnetRequestBoardTestHelper.reportDataRequestInclusion(requestId, proof, 0, blockHeader, epoch, {
         from: other,
+        gasPrice: 1,
       })
 
       // Check balances (contract decreased and claimer increased)
@@ -587,6 +589,7 @@ contract("WitnetRequestBoard", ([
       await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0.25"), ether("0.5"), {
         from: requestor,
         value: ether("1"),
+        gasPrice: 1,
       })
       // Claim data request
       const publicKey = [data.publicKey.x, data.publicKey.y]
@@ -611,11 +614,15 @@ contract("WitnetRequestBoard", ([
       // Report data request inclusion from Witnet to WitnetRequestBoard
       await this.WitnetRequestBoard.reportDataRequestInclusion(requestId, [drOutputHash], 0, blockHeader, epoch, {
         from: claimer,
+        gasPrice: 1,
       })
     })
     it("fails if reporter is not abs member", async () => {
       await expectRevert(
-        this.WitnetRequestBoard.reportResult(requestId, [], 0, blockHeader, epoch, resultHex, { from: other }),
+        this.WitnetRequestBoard.reportResult(requestId, [], 0, blockHeader, epoch, resultHex, {
+          from: other,
+          gasPrice: 1,
+        }),
         "Not a member of the ABS"
       )
     })
@@ -714,6 +721,7 @@ contract("WitnetRequestBoard", ([
       // Report data request inclusion from Witnet to WitnetRequestBoard
       await this.WitnetRequestBoard.reportDataRequestInclusion(requestId, drInclusionProof, 0, blockHeader, epoch, {
         from: claimer,
+        gasPrice: 1,
       })
     })
     it("abs member (claimer) can report a data request result from Witnet (0.5 eth to claimer)", async () => {
@@ -792,9 +800,13 @@ contract("WitnetRequestBoard", ([
       // Report data request inclusion from Witnet to WitnetRequestBoard
       await this.WitnetRequestBoard.reportDataRequestInclusion(requestId, [drOutputHash], 0, blockHeader, epoch, {
         from: claimer,
+        gasPrice: 1,
       })
       // Report data request result from Witnet to WitnetRequestBoard
-      await this.WitnetRequestBoard.reportResult(requestId, [], 0, blockHeader, epoch, resultHex, { from: claimer })
+      await this.WitnetRequestBoard.reportResult(requestId, [], 0, blockHeader, epoch, resultHex, {
+        from: claimer,
+        gasPrice: 1,
+      })
     })
     it("anyone can read the data request result", async () => {
       // Read data request result from WitnetRequestBoard by `requestId`

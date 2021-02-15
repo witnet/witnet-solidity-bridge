@@ -297,6 +297,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 _blockHash,
     uint256 _epoch)
     external
+    payable
     drNotIncluded(_id)
  {
     // Check the data request has been claimed
@@ -321,9 +322,12 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 drRelayerPayment = requests[_id].blockReward / 2;
     // We subsctract this value from the reward that we will later pay for the inclusion of the reward block
     requests[_id].blockReward = requests[_id].blockReward - drRelayerPayment; 
-    // Transfer the relayer payment to the block relayer
-    address payable rewardedAddress = payable(getAddressBlockReward(_id, _blockHash));
-    rewardedAddress.transfer(drRelayerPayment);
+    // Transfer the relayer payment to the block relayer or the requestor in case that the relayer has already been paid
+    bool result = blockRelay.payRelayer{value: drRelayerPayment}(_blockHash, requests[_id].epoch);
+    if (result == false) {
+      address payable requestor = payable(requests[_id].requestor);
+      requestor.transfer(drRelayerPayment);
+    }
     // Transfer the DR inclusion reward to the inclusion verifier
     requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
     // Push requests[_id].pkhClaim to abs
@@ -370,8 +374,12 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _epoch,
       _index,
       resHash), "Invalid PoI");
-    address payable rewardedAddress = payable(getAddressBlockReward(_id, _blockHash));
-    rewardedAddress.transfer(requests[_id].blockReward);
+    // Transfer the relayer payment to the block relayer or the requestor in case that the relayer has already been paid
+    uint256 blockReward =  requests[_id].blockReward;
+    if (blockRelay.payRelayer{value: blockReward}(_blockHash, _epoch) == false) {
+       address payable requestor = payable(requests[_id].requestor);
+       requestor.transfer(blockReward);
+    }
     msg.sender.transfer(requests[_id].tallyReward);
 
     emit PostedResult(msg.sender, _id);
@@ -601,17 +609,5 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   function getBlockNumber() internal view virtual returns (uint256) {
     return block.number;
-  }
-
-  /// @dev Returns the relayer address or the requester address in case the block inclusion was already paid
-  /// @param _id The unique identifier of the data request.
-  /// @param _blockHash The hash of the block which inclusion has to be rewarded.
-  function getAddressBlockReward(uint256 _id, uint256 _blockHash) internal returns (address) {
-      if (paidBlocks[_blockHash] == true) {
-          return requests[_id].requestor;
-      } else {
-          paidBlocks[_blockHash] = true;
-          return blockRelay.readRelayerAddress(_blockHash, requests[_id].epoch);
-      }
   }
 }
