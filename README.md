@@ -1,4 +1,4 @@
-# witnet-ethereum-bridge [![](https://travis-ci.com/witnet/witnet-ethereum-bridge.svg?branch=master)](https://travis-ci.com/witnet/witnet-ethereum-brdige)
+# witnet-ethereum-bridge [![](https://travis-ci.com/witnet/witnet-ethereum-bridge.svg?branch=master)](https://travis-ci.com/witnet/witnet-ethereum-bridge)
 
 `witnet-ethereum-bridge` is an open source implementation of a bridge
 from Ethereum to Witnet. This repository provides several contracts:
