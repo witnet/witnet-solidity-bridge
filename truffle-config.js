@@ -27,8 +27,9 @@ module.exports = {
   mocha: {
     reporter: 'eth-gas-reporter',
     reporterOptions: {
+        coinmarketcap: process.env.COINMARKETCAP_API_KEY,
         currency: "USD",
-        gasPrice: 50,
+        gasPrice: 100,
         excludeContracts: ['Migrations'],
         src: "contracts"
     },
@@ -37,8 +38,8 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.6.12",    // Fetch exact version from solc-bin (default: truffle's version)
-      settings: {          // See the solidity docs for advice about optimization and evmVersion
+      version: "0.6.12",
+      settings: {
         optimizer: {
           enabled: true,
           runs: 200
