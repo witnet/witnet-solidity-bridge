@@ -7,9 +7,11 @@ from Ethereum to Witnet. This repository provides several contracts:
 - `WitnetRequestsBoardProxy`, that routes Witnet data requests from smart contracts to the appropriate `WitnetRequestsBoard` controller.
 - `UsingWitnet`, an inheritable client contract that injects methods for interacting with the WRB in the most convenient way.
 
+
 ## WitnetRequestsBoardProxy
 
 `WitnetRequestsBoardProxy.sol` is a proxy contract that routes Witnet data requests coming from the `UsingWitnet` contract to the appropriate `WitnetRequestBoard` controller. `WitnetRequestBoard` controllers are indexed by the last data request indentifier that each controller had stored before the controller was upgraded. Thus, if controller _a_ was replaced by controller _b_ at id _i_, petitions from _0_ to _i_ will be routed to _a_, while controller _b_ will handle petitions from _i_ onwards.
+
 
 ## WitnetRequestsBoard
 
@@ -114,6 +116,7 @@ In addition, `WitnetRequestsBoard` inherits the `VRF` contract from https://gith
 - *decodeProof*: if the proof is serialized and needs to be decomposed, this function decodes a VRF proof into the parameters [Gamma_x, Gamma_y c, s].
 - *decodePoint*: if the point is in compressed format, this function decodes a compressed secp256k1 point into its uncompressed representation [P_x, P_y].
 
+
 ## UsingWitnet
 
 The `UsingWitnet` contract injects the following methods into the contracts inheriting from it:
@@ -154,6 +157,7 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
   - _output_:
     - boolean telling if the request has been already accepted or not.
 
+
 ## Usage
 
 The `UsingWitnet.sol` contract can be used directly by inheritance:
@@ -175,39 +179,39 @@ contract Example is UsingWitnet {
 }
 ```
 
+
 ## Benchmark
 
-Gas consumption and USD price estimation with gas price derived from [ETH Gas Station](https://ethgasstation.info/):
-
 ```bash
-·------------------------------------------------------|---------------------------|-------------|----------------------------·
-|         Solc version: 0.6.12+commit.27d51765         ·  Optimizer enabled: true  ·  Runs: 200  ·  Block limit: 6718946 gas  │
-·······················································|···························|·············|·····························
-|  Methods                                                             50 gwei/gas                       584.07 usd/eth       │
-························|······························|·············|·············|·············|··············|··············
-|  Contract             ·  Method                      ·  Min        ·  Max        ·  Avg        ·  # calls     ·  usd (avg)  │
-························|······························|·············|·············|·············|··············|··············
-|  MockBlockRelay       ·  postNewBlock                ·          -  ·          -  ·     127963  ·           6  ·          -  │
-························|······························|·············|·············|·············|··············|··············
-|  WitnetRequestsBoard  ·  claimDataRequests           ·      91218  ·     216095  ·     202220  ·           9  ·          -  │
-························|······························|·············|·············|·············|··············|··············
-|  WitnetRequestsBoard  ·  postDataRequest             ·          -  ·          -  ·     175697  ·          11  ·          -  │
-························|······························|·············|·············|·············|··············|··············
-|  WitnetRequestsBoard  ·  reportDataRequestInclusion  ·     270148  ·     511098  ·     348041  ·           8  ·          -  │
-························|······························|·············|·············|·············|··············|··············
-|  WitnetRequestsBoard  ·  reportResult                ·      84132  ·     102496  ·      91478  ·           5  ·          -  │
-························|······························|·············|·············|·············|··············|··············
-|  WitnetRequestsBoard  ·  upgradeDataRequest          ·          -  ·          -  ·      48767  ·           2  ·          -  │
-························|······························|·············|·············|·············|··············|··············
-|  Deployments                                         ·                                         ·  % of limit  ·             │
-·······················································|·············|·············|·············|··············|··············
-|  MockBlockRelay                                      ·          -  ·          -  ·     630532  ·       9.4 %  ·          -  │
-·······················································|·············|·············|·············|··············|··············
-|  Request                                             ·          -  ·          -  ·     338184  ·         5 %  ·          -  │
-·······················································|·············|·············|·············|··············|··············
-|  WitnetRequestsBoard                                 ·    4466162  ·    4466174  ·    4466172  ·      66.5 %  ·          -  │
-·------------------------------------------------------|-------------|-------------|-------------|--------------|-------------·
+·------------------------------------------------------|---------------------------|----------------------------·
+|        Solc version: 0.6.12+commit.27d51765          ·  Optimizer enabled: true  ·         Runs: 200          │
+·······················································|···························|·····························
+|  Methods                                                                                                      │
+························|······························|·············|·············|·············|···············
+|  Contract             ·  Method                      ·  Min        ·  Max        ·  Avg        ·  # calls     │
+························|······························|·············|·············|·············|···············
+|  MockBlockRelay       ·  postNewBlock                ·          -  ·          -  ·     127963  ·           6  │
+························|······························|·············|·············|·············|···············
+|  WitnetRequestsBoard  ·  claimDataRequests           ·      91218  ·     216095  ·     202220  ·           9  │
+························|······························|·············|·············|·············|···············
+|  WitnetRequestsBoard  ·  postDataRequest             ·          -  ·          -  ·     175697  ·          11  │
+························|······························|·············|·············|·············|···············
+|  WitnetRequestsBoard  ·  reportDataRequestInclusion  ·     270148  ·     511098  ·     348041  ·           8  │
+························|······························|·············|·············|·············|···············
+|  WitnetRequestsBoard  ·  reportResult                ·      84132  ·     102496  ·      91478  ·           5  │
+························|······························|·············|·············|·············|···············
+|  WitnetRequestsBoard  ·  upgradeDataRequest          ·          -  ·          -  ·      48767  ·           2  │
+························|······························|·············|·············|·············|···············
+|  Deployments                                         ·                                         ·  % of limit  │
+·······················································|·············|·············|·············|···············
+|  MockBlockRelay                                      ·          -  ·          -  ·     630532  ·       9.4 %  │
+·······················································|·············|·············|·············|···············
+|  Request                                             ·          -  ·          -  ·     338184  ·         5 %  │
+·······················································|·············|·············|·············|···············
+|  WitnetRequestsBoard                                 ·    4466162  ·    4466174  ·    4466172  ·      66.5 %  │
+·------------------------------------------------------|-------------|-------------|-------------|--------------·
 ```
+
 
 ## License
 
