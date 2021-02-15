@@ -9,12 +9,6 @@ pragma solidity >=0.6.0 <0.7.0;
  */
 library ActiveBridgeSetLib {
 
-  // Number of Ethereum blocks during which identities can be pushed into a single activity slot
-  uint8 public constant CLAIM_BLOCK_PERIOD = 8;
-
-  // Number of activity slots in the ABS
-  uint8 public constant ACTIVITY_LENGTH = 50;
-
   struct ActiveBridgeSet {
     // Mapping of activity slots with participating identities
     mapping (uint16 => address[]) epochIdentities;
@@ -27,6 +21,12 @@ library ActiveBridgeSetLib {
     // Last used block number during an activity update
     uint256 lastBlockNumber;
   }
+
+  // Number of Ethereum blocks during which identities can be pushed into a single activity slot
+  uint8 public constant CLAIM_BLOCK_PERIOD = 8;
+
+  // Number of activity slots in the ABS
+  uint8 public constant ACTIVITY_LENGTH = 50;
 
   modifier validBlockNumber(uint256 _blockFromArguments, uint256 _blockFromContractState) {
     require (_blockFromArguments >= _blockFromContractState, "The provided block is older than the last updated block");

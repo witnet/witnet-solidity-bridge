@@ -12,9 +12,6 @@ import "./WitnetRequestsBoardInterface.sol";
  */
 contract WitnetRequestsBoardProxy {
 
-  // Address of the Witnet Request Board contract that is currently being used
-  address public witnetRequestsBoardAddress;
-
   // Struct if the information of each controller
   struct ControllerInfo {
     // Address of the Controller
@@ -22,6 +19,9 @@ contract WitnetRequestsBoardProxy {
     // The lastId of the previous Controller
     uint256 lastId;
   }
+
+  // Address of the Witnet Request Board contract that is currently being used
+  address public witnetRequestsBoardAddress;
 
   // Last id of the WRB controller
   uint256 internal currentLastId;
