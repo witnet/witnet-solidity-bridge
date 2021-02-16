@@ -297,6 +297,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 _blockHash,
     uint256 _epoch)
     external
+    payable
     drNotIncluded(_id)
  {
     // Check the data request has been claimed
@@ -306,8 +307,10 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     require(
       requests[_id].epoch < _epoch,
       "The request inclusion must be reported after it is posted into the WRB");
+
     // Update the dr epoch
     requests[_id].epoch = _epoch;
+
     // Update the state upon which this function depends before the external call
     requests[_id].drHash = uint256(sha256(abi.encodePacked(requests[_id].drOutputHash, _poi[0])));
     require(
@@ -317,15 +320,24 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _epoch,
       _index,
       requests[_id].drOutputHash), "Invalid PoI");
+
     // This is the DR block inclusion reward, so we have to split it to reward the result block inclusion as well
     uint256 drRelayerPayment = requests[_id].blockReward / 2;
+
     // We subsctract this value from the reward that we will later pay for the inclusion of the reward block
-    requests[_id].blockReward = requests[_id].blockReward - drRelayerPayment; 
-    // Transfer the relayer payment to the block relayer
-    address payable rewardedAddress = payable(getAddressBlockReward(_id, _blockHash));
-    rewardedAddress.transfer(drRelayerPayment);
+    requests[_id].blockReward = requests[_id].blockReward - drRelayerPayment;
+
+    // Transfer the relayer payment to the block relayer or the requestor in case that the relayer has already been paid
+    if (blockRelay.isRelayerPaid(_blockHash, _epoch) == false) {
+       blockRelay.payRelayer{value: drRelayerPayment}(_blockHash, _epoch);
+    } else {
+       address payable requestor = payable(requests[_id].requestor);
+       requestor.transfer(drRelayerPayment);
+    }
+
     // Transfer the DR inclusion reward to the inclusion verifier
     requests[_id].pkhClaim.transfer(requests[_id].inclusionReward);
+
     // Push requests[_id].pkhClaim to abs
     abs.pushActivity(requests[_id].pkhClaim, getBlockNumber());
     emit IncludedRequest(msg.sender, _id);
@@ -346,6 +358,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
     uint256 _epoch,
     bytes calldata _result)
     external
+    payable
     drIncluded(_id)
     resultNotIncluded(_id)
     absMember(msg.sender)
@@ -370,8 +383,17 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _epoch,
       _index,
       resHash), "Invalid PoI");
-    address payable rewardedAddress = payable(getAddressBlockReward(_id, _blockHash));
-    rewardedAddress.transfer(requests[_id].blockReward);
+
+    // Transfer the relayer payment to the block relayer or the requestor in case that the relayer has already been paid
+    uint256 blockReward =  requests[_id].blockReward;
+    if (blockRelay.isRelayerPaid(_blockHash, _epoch) == false) {
+       blockRelay.payRelayer{value: blockReward}(_blockHash, _epoch);
+    } else {
+       address payable requestor = payable(requests[_id].requestor);
+       requestor.transfer(blockReward);
+    }
+
+    // Transfer the tally reward
     msg.sender.transfer(requests[_id].tallyReward);
 
     emit PostedResult(msg.sender, _id);
@@ -601,17 +623,5 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
 
   function getBlockNumber() internal view virtual returns (uint256) {
     return block.number;
-  }
-
-  /// @dev Returns the relayer address or the requester address in case the block inclusion was already paid
-  /// @param _id The unique identifier of the data request.
-  /// @param _blockHash The hash of the block which inclusion has to be rewarded.
-  function getAddressBlockReward(uint256 _id, uint256 _blockHash) internal returns (address) {
-      if (paidBlocks[_blockHash] == true) {
-          return requests[_id].requestor;
-      } else {
-          paidBlocks[_blockHash] = true;
-          return blockRelay.readRelayerAddress(_blockHash, requests[_id].epoch);
-      }
   }
 }
