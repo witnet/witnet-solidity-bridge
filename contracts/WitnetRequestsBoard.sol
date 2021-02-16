@@ -38,9 +38,6 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
   // Block reporting is not subject to increases
   uint256 public constant MAX_REPORT_BLOCK_GAS = 127963;
 
-  // Maps a block hash into true if its relayer has already been paid
-  mapping (uint256 => bool) internal paidBlocks;
-
   struct DataRequest {
     address requestAddress;
     uint256 drOutputHash;
@@ -384,7 +381,7 @@ contract WitnetRequestsBoard is WitnetRequestsBoardInterface {
       _index,
       resHash), "Invalid PoI");
 
-    // Transfer the relayer payment to the block relayer or the requestor in case that the relayer has already been paid
+    // Transfer the block reward to the relayer only if it has not already been paid, otherwise return it to the requestor
     uint256 blockReward =  requests[_id].blockReward;
     if (blockRelay.isRelayerPaid(_blockHash, _epoch) == false) {
        blockRelay.payRelayer{value: blockReward}(_blockHash, _epoch);
