@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
   * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
-contract WitnetRequestBoard is WitnetRequestsBoardInterface {
+contract CentralizedWRB is WitnetRequestsBoardInterface {
 
   // Result reporting is subject to increases due to number of merkle tree levels
   // The following value corresponds to 9 merkle tree levels
