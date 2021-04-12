@@ -15,7 +15,7 @@
     "migrate-flattened": "npm run flatten && npx truffle migrate --config flattened-config.js",
     "coverage": "solidity-coverage",
     "verify-flattened": "npx truffle run verify",
-    "gas-analysis": "truffle test test/wrb_gas.js test/helpers/WitnetRequestsBoardTestHelper.sol"
+    "gas-analysis": "truffle test test/wrb_gas.js test/helpers/WitnetRequestBoardTestHelper.sol"
   },
   "author": "Witnet Foundation <info@witnet.foundation>",
   "repository": {
@@ -29,9 +29,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@openzeppelin/contracts": "3.2.0",
-    "vrf-solidity": "0.2.3",
-    "witnet-ethereum-block-relay": "witnet/witnet-ethereum-block-relay"
+    "@openzeppelin/contracts": "3.2.0"
   },
   "devDependencies": {
     "@openzeppelin/test-helpers": "^0.5.5",
