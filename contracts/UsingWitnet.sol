@@ -4,7 +4,7 @@ pragma solidity >=0.6.0 <0.7.0;
 
 import "./Request.sol";
 import "./Witnet.sol";
-import "./WitnetRequestsBoardProxy.sol";
+import "./WitnetRequestBoardProxy.sol";
 
 
 /**
@@ -15,14 +15,14 @@ import "./WitnetRequestsBoardProxy.sol";
 contract UsingWitnet {
   using Witnet for Witnet.Result;
 
-  WitnetRequestsBoardProxy internal wrb;
+  WitnetRequestBoardProxy internal wrb;
 
  /**
-  * @notice Include an address to specify the WitnetRequestsBoard.
-  * @param _wrb WitnetRequestsBoard address.
+  * @notice Include an address to specify the WitnetRequestBoard.
+  * @param _wrb WitnetRequestBoard address.
   */
   constructor(address _wrb) public {
-    wrb = WitnetRequestsBoardProxy(_wrb);
+    wrb = WitnetRequestBoardProxy(_wrb);
   }
 
   // Provides a convenient way for client contracts extending this to block the execution of the main logic of the
@@ -43,12 +43,12 @@ contract UsingWitnet {
 
   /**
   * @notice Send a new request to the Witnet network
-  * @dev Call to `post_dr` function in the WitnetRequestsBoard contract
+  * @dev Call to `post_dr` function in the WitnetRequestBoard contract
   * @param _request An instance of the `Request` contract
   * @param _requestReward Reward specified for the user which posts the request into Witnet
   * @param _resultReward Reward specified for the user which posts back the request result
   * @param _blockReward Reward specified for the node which reports the block header for verification
-  * @return Sequencial identifier for the request included in the WitnetRequestsBoard
+  * @return Sequencial identifier for the request included in the WitnetRequestBoard
   */
   function witnetPostRequest(Request _request, uint256 _requestReward, uint256 _resultReward, uint256 _blockReward)
     internal
@@ -62,7 +62,7 @@ contract UsingWitnet {
   * @notice Check if a request has been accepted into Witnet.
   * @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
   * parties) before this method returns `true`.
-  * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestsBoard.
+  * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestBoard.
   * @return A boolean telling if the request has been already accepted or not. `false` do not mean rejection, though.
   */
   function witnetCheckRequestAccepted(uint256 _id) internal view returns (bool) {
@@ -75,8 +75,8 @@ contract UsingWitnet {
 
   /**
   * @notice Upgrade the rewards for a Data Request previously included.
-  * @dev Call to `upgrade_dr` function in the WitnetRequestsBoard contract.
-  * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestsBoard.
+  * @dev Call to `upgrade_dr` function in the WitnetRequestBoard contract.
+  * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestBoard.
   * @param _requestReward Reward specified for the user which posts the request into Witnet
   * @param _resultReward Reward specified for the user which post the Data Request result.
   * @param _blockReward Reward specified for the node which reports the block header for verification
@@ -90,7 +90,7 @@ contract UsingWitnet {
 
   /**
   * @notice Read the result of a resolved request.
-  * @dev Call to `read_result` function in the WitnetRequestsBoard contract.
+  * @dev Call to `read_result` function in the WitnetRequestBoard contract.
   * @param _id The sequential identifier of a request that was posted to Witnet.
   * @return The result of the request as an instance of `Result`.
   */
@@ -100,7 +100,7 @@ contract UsingWitnet {
 
   /**
   * @notice Estimate the reward amount.
-  * @dev Call to `estimate_gas_cost` function in the WitnetRequestsBoard contract.
+  * @dev Call to `estimate_gas_cost` function in the WitnetRequestBoard contract.
   * @param _gasPrice The gas price for which we want to retrieve the estimation.
   * @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
   */

@@ -2,7 +2,7 @@
 
 pragma solidity 0.6.12;
 
-import "./WitnetRequestsBoardInterface.sol";
+import "./WitnetRequestBoardInterface.sol";
 import "./Request.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
   * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
-contract WitnetRequestBoard is WitnetRequestsBoardInterface {
+contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
   // Result reporting is subject to increases due to number of merkle tree levels
   // The following value corresponds to 9 merkle tree levels
@@ -23,6 +23,7 @@ contract WitnetRequestBoard is WitnetRequestsBoardInterface {
 
   struct DataRequest {
     address requestAddress;
+    address requestor;
     uint256 drOutputHash;
     uint256 tallyReward;
     uint256 gasPrice;
@@ -39,16 +40,16 @@ contract WitnetRequestBoard is WitnetRequestsBoardInterface {
 
   address public witnet;
 
-    // List of addresses authorized to post blocks
+  // List of addresses authorized to post blocks
   address[] public committee;
 
- // Event emitted when a new DR is posted
+  // Event emitted when a new DR is posted
   event PostedRequest(address indexed _from, uint256 _id);
 
-    // Event emitted when a result proof is posted
+  // Event emitted when a result proof is posted
   event PostedResult(address indexed _from, uint256 _id);
 
-    // Ensures the result has not been reported yet
+  // Ensures the result has not been reported yet
   modifier resultNotIncluded(uint256 _id) {
     require(requests[_id].result.length == 0, "Result already included");
     _;
@@ -100,13 +101,14 @@ contract WitnetRequestBoard is WitnetRequestsBoardInterface {
   returns(uint256)
   {
     // Checks the tally reward is coverign gas cost
-    uint256 minResultReward = SafeMath.mul(msg.gasPrice, MAX_REPORT_RESULT_GAS);
+    uint256 minResultReward = SafeMath.mul(tx.gasprice, MAX_REPORT_RESULT_GAS);
     require(_tallyReward >= minResultReward, "Result reward should cover gas expenses. Check the estimateGasCost method.");
   
     uint256 _id = requests.length;
 
     DataRequest memory request;
     request.requestAddress = _requestAddress;
+    request.requestor = msg.sender;
     request.tallyReward = _tallyReward;
     request.epoch = getBlockNumber();
     Request requestContract = Request(request.requestAddress);
@@ -130,8 +132,8 @@ contract WitnetRequestBoard is WitnetRequestsBoardInterface {
     external
     payable
     override
-    isAuthorized()
   {
+    require(requests[_id].requestor == msg.sender, "Sender is not the owner of Data Request");
     requests[_id].tallyReward += _tallyReward;
   }
 
@@ -186,7 +188,7 @@ contract WitnetRequestBoard is WitnetRequestsBoardInterface {
   /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
   function estimateGasCost(uint256 _gasPrice) public view override returns(uint256, uint256, uint256){
     return (
-      (SafeMath.mul(0, _gasPrice, MAX_REPORT_RESULT_GAS), 0)
+      (0, SafeMath.mul(_gasPrice, MAX_REPORT_RESULT_GAS), 0)
     );
   }
 

@@ -2,7 +2,7 @@
 
 pragma solidity 0.6.12;
 
-import "./WitnetRequestsBoardInterface.sol";
+import "./WitnetRequestBoardInterface.sol";
 
 
 /**
@@ -10,7 +10,7 @@ import "./WitnetRequestsBoardInterface.sol";
  * @notice Contract to act as a proxy between the Witnet Bridge Interface and the Block Relay.
  * @author Witnet Foundation
  */
-contract WitnetRequestsBoardProxy {
+contract WitnetRequestBoardProxy {
 
   // Struct if the information of each controller
   struct ControllerInfo {
@@ -21,31 +21,31 @@ contract WitnetRequestsBoardProxy {
   }
 
   // Address of the Witnet Request Board contract that is currently being used
-  address public witnetRequestsBoardAddress;
+  address public witnetRequestBoardAddress;
 
   // Last id of the WRB controller
   uint256 internal currentLastId;
 
   // Instance of the current WitnetRequestBoard
-  WitnetRequestsBoardInterface internal witnetRequestsBoardInstance;
+  WitnetRequestBoardInterface internal witnetRequestBoardInstance;
 
   // Array with the controllers that have been used in the Proxy
   ControllerInfo[] internal controllers;
 
   modifier notIdentical(address _newAddress) {
-    require(_newAddress != witnetRequestsBoardAddress, "The provided Witnet Requests Board instance address is already in use");
+    require(_newAddress != witnetRequestBoardAddress, "The provided Witnet Requests Board instance address is already in use");
     _;
   }
 
  /**
   * @notice Include an address to specify the Witnet Request Board.
-  * @param _witnetRequestsBoardAddress WitnetRequestBoard address.
+  * @param _witnetRequestBoardAddress WitnetRequestBoard address.
   */
-  constructor(address _witnetRequestsBoardAddress) public {
+  constructor(address _witnetRequestBoardAddress) public {
     // Initialize the first epoch pointing to the first controller
-    controllers.push(ControllerInfo({controllerAddress: _witnetRequestsBoardAddress, lastId: 0}));
-    witnetRequestsBoardAddress = _witnetRequestsBoardAddress;
-    witnetRequestsBoardInstance = WitnetRequestsBoardInterface(_witnetRequestsBoardAddress);
+    controllers.push(ControllerInfo({controllerAddress: _witnetRequestBoardAddress, lastId: 0}));
+    witnetRequestBoardAddress = _witnetRequestBoardAddress;
+    witnetRequestBoardInstance = WitnetRequestBoardInterface(_witnetRequestBoardAddress);
   }
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
@@ -57,7 +57,7 @@ contract WitnetRequestsBoardProxy {
     uint256 n = controllers.length;
     uint256 offset = controllers[n - 1].lastId;
     // Update the currentLastId with the id in the controller plus the offSet
-    currentLastId = witnetRequestsBoardInstance.postDataRequest{value: msg.value}(_requestAddress, _inclusionReward, _tallyReward) + offset;
+    currentLastId = witnetRequestBoardInstance.postDataRequest{value: msg.value}(_requestAddress, _inclusionReward, _tallyReward) + offset;
     return currentLastId;
   }
 
@@ -69,7 +69,7 @@ contract WitnetRequestsBoardProxy {
     address wrbAddress;
     uint256 wrbOffset;
     (wrbAddress, wrbOffset) = getController(_id);
-    return witnetRequestsBoardInstance.upgradeDataRequest{value: msg.value}(_id - wrbOffset, _inclusionReward, _tallyReward);
+    return witnetRequestBoardInstance.upgradeDataRequest{value: msg.value}(_id - wrbOffset, _inclusionReward, _tallyReward);
   }
 
   /// @dev Retrieves the DR hash of the id from the WRB.
@@ -85,8 +85,8 @@ contract WitnetRequestsBoardProxy {
     uint256 offsetWrb;
     (wrbAddress, offsetWrb) = getController(_id);
     // Return the result of the DR readed in the corresponding Controller with its own id
-    WitnetRequestsBoardInterface wrbWithDrHash;
-    wrbWithDrHash = WitnetRequestsBoardInterface(wrbAddress);
+    WitnetRequestBoardInterface wrbWithDrHash;
+    wrbWithDrHash = WitnetRequestBoardInterface(wrbAddress);
     uint256 drHash = wrbWithDrHash.readDrHash(_id - offsetWrb);
     return drHash;
   }
@@ -100,8 +100,8 @@ contract WitnetRequestsBoardProxy {
     uint256 offSetWrb;
     (wrbAddress, offSetWrb) = getController(_id);
     // Return the result of the DR in the corresponding Controller with its own id
-    WitnetRequestsBoardInterface wrbWithResult;
-    wrbWithResult = WitnetRequestsBoardInterface(wrbAddress);
+    WitnetRequestBoardInterface wrbWithResult;
+    wrbWithResult = WitnetRequestBoardInterface(wrbAddress);
     return wrbWithResult.readResult(_id - offSetWrb);
   }
 
@@ -109,19 +109,19 @@ contract WitnetRequestsBoardProxy {
   /// @param _gasPrice The gas price for which we need to calculate the rewards.
   /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
   function estimateGasCost(uint256 _gasPrice) external view returns(uint256, uint256, uint256) {
-    return witnetRequestsBoardInstance.estimateGasCost(_gasPrice);
+    return witnetRequestBoardInstance.estimateGasCost(_gasPrice);
   }
 
   /// @notice Upgrades the Witnet Requests Board if the current one is upgradeable.
   /// @param _newAddress address of the new block relay to upgrade.
-  function upgradeWitnetRequestsBoard(address _newAddress) external notIdentical(_newAddress) {
+  function upgradeWitnetRequestBoard(address _newAddress) external notIdentical(_newAddress) {
     // Require the WRB is upgradable
-    require(witnetRequestsBoardInstance.isUpgradable(msg.sender), "The upgrade has been rejected by the current implementation");
-    // Map the currentLastId to the corresponding witnetRequestsBoardAddress and add it to controllers
+    require(witnetRequestBoardInstance.isUpgradable(msg.sender), "The upgrade has been rejected by the current implementation");
+    // Map the currentLastId to the corresponding witnetRequestBoardAddress and add it to controllers
     controllers.push(ControllerInfo({controllerAddress: _newAddress, lastId: currentLastId}));
     // Upgrade the WRB
-    witnetRequestsBoardAddress = _newAddress;
-    witnetRequestsBoardInstance = WitnetRequestsBoardInterface(_newAddress);
+    witnetRequestBoardAddress = _newAddress;
+    witnetRequestBoardInstance = WitnetRequestBoardInterface(_newAddress);
   }
 
   /// @notice Gets the controller from an Id.

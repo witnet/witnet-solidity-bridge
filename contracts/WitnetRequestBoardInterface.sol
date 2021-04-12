@@ -11,7 +11,7 @@ pragma solidity >=0.6.0 <0.7.0;
  *  - Read the result of a dr
  * @author Witnet Foundation
  */
-interface WitnetRequestsBoardInterface {
+interface WitnetRequestBoardInterface {
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _requestAddress The request contract address which includes the request bytecode.
