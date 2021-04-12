@@ -2,25 +2,25 @@
 
 pragma solidity 0.6.12;
 
-import "../../contracts/WitnetRequestsBoardProxy.sol";
+import "../../contracts/WitnetRequestBoardProxy.sol";
 
 
 /**
- * @title Test Helper for the WitnetRequestsBoardProxy contract
+ * @title Test Helper for the WitnetRequestBoardProxy contract
  * @dev The aim of this contract is:
- *  Raise the visibility modifier of WitnetRequestsBoardProxy contract functions for testing purposes
+ *  Raise the visibility modifier of WitnetRequestBoardProxy contract functions for testing purposes
  * @author Witnet Foundation
  */
-contract WrbProxyTestHelper is WitnetRequestsBoardProxy {
+contract WrbProxyTestHelper is WitnetRequestBoardProxy {
 
-  constructor (address _witnetRequestsBoardAddress) public WitnetRequestsBoardProxy(_witnetRequestsBoardAddress) {}
+  constructor (address _witnetRequestBoardAddress) public WitnetRequestBoardProxy(_witnetRequestBoardAddress) {}
 
   function checkLastId(uint256 _id) external view returns(bool) {
     return _id == currentLastId;
   }
 
   function getWrbAddress() external view returns(address) {
-    return witnetRequestsBoardAddress;
+    return witnetRequestBoardAddress;
   }
 
   function getControllerAddress(uint256 _id) external view returns(address) {

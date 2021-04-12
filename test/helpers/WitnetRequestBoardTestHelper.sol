@@ -2,23 +2,18 @@
 
 pragma solidity 0.6.12;
 
-import "vrf-solidity/contracts/VRF.sol";
-import "../../contracts/ActiveBridgeSetLib.sol";
-import "witnet-ethereum-block-relay/contracts/BlockRelayProxy.sol";
-import "../../contracts/WitnetRequestsBoardInterface.sol";
+import "../../contracts/WitnetRequestBoardInterface.sol";
 
 
 /**
- * @title Witnet Requests Board Version 2
+ * @title Witnet Requests Board Version 1
  * @notice Contract to bridge requests to Witnet
  * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network
   * The result of the requests will be posted back to this contract by the bridge nodes too.
-  * The contract has been created for testing purposes.
+  * The contract has been created for testing purposes
  * @author Witnet Foundation
  */
-contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
-
-  using ActiveBridgeSetLib for ActiveBridgeSetLib.ActiveBridgeSet;
+contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
 
   struct DataRequest {
     address requestAddress;
@@ -31,16 +26,15 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
     address payable pkhClaim;
   }
 
-  BlockRelayProxy public blockRelay;
-
   DataRequest[] public requests;
-
-  ActiveBridgeSetLib.ActiveBridgeSet public abs;
 
   address public witnet;
 
-  // Replication factor for Active Bridge Set identities
-  uint8 public repFactor;
+  // List of addresses authorized to post blocks
+  address[] public committee;
+
+  // Is upgradable
+  bool upgradable;
 
   // Event emitted when a new DR is posted
   event PostedRequest(address indexed _from, uint256 _id);
@@ -51,14 +45,14 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
   // Event emitted when a result proof is posted
   event PostedResult(address indexed _from, uint256 _id);
 
-  constructor (address _blockRelayAddress, uint8 _repFactor) public {
-    blockRelay = BlockRelayProxy(_blockRelayAddress);
+  constructor (address[] memory _committee, bool _upgradable) public {
     witnet = msg.sender;
+    upgradable = _upgradable;
 
     // Insert an empty request so as to initialize the requests array with length > 0
     DataRequest memory request;
     requests.push(request);
-    repFactor = _repFactor;
+    committee = _committee;
   }
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
@@ -73,8 +67,8 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
 
     requests[_id].requestAddress = _requestAddress;
     requests[_id].inclusionReward = _inclusionReward;
+    requests[_id].blockReward = msg.value - _tallyReward - _inclusionReward;
     requests[_id].tallyReward = _tallyReward;
-    requests[_id].blockReward = msg.value - _inclusionReward - _tallyReward;
     requests[_id].result = "hello";
     requests[_id].timestamp = 0;
     requests[_id].drHash = 0;
@@ -86,7 +80,7 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.
   /// @param _inclusionReward The amount to be added to the inclusion reward.
-  /// @param _tallyReward The amount to be added to the tally reward.
+  /// @param _tallyReward The amount to be added to the tally reward. 
   function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward)
     external
     payable
@@ -114,7 +108,7 @@ contract WitnetRequestsBoardV2 is WitnetRequestsBoardInterface {
   /// @return true if the contract upgradable
   /* solhint-disable-next-line no-unused-vars*/
   function isUpgradable(address) external view override returns(bool) {
-    return true;
+    return upgradable;
   }
 
   /// @dev Estimate the amount of reward we need to insert for a given gas price.

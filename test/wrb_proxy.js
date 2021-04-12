@@ -1,47 +1,43 @@
 const truffleAssert = require("truffle-assertions")
-const WitnetRequestsBoardV1 = artifacts.require("WitnetRequestsBoardV1")
-const WitnetRequestsBoardV2 = artifacts.require("WitnetRequestsBoardV2")
-const WitnetRequestsBoardV3 = artifacts.require("WitnetRequestsBoardV3")
+const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
 const RequestContract = artifacts.require("Request")
 const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
-const MockBlockRelay = artifacts.require("MockBlockRelay")
 
 contract("Witnet Requests Board Proxy", accounts => {
   describe("Witnet Requests Board Proxy test suite", () => {
-    let blockRelay
+    const contractOwner = accounts[0]
+    const requestSender = accounts[1]
+
     let wrbInstance1
     let wrbInstance2
     let wrbInstance3
     let wrbProxy
 
     before(async () => {
-      blockRelay = await MockBlockRelay.new({
-        from: accounts[0],
-      })
-      wrbInstance1 = await WitnetRequestsBoardV1.new(blockRelay.address, 1, {
-        from: accounts[0],
-      })
-      wrbInstance2 = await WitnetRequestsBoardV2.new(blockRelay.address, 1, {
-        from: accounts[0],
-      })
-      wrbInstance3 = await WitnetRequestsBoardV3.new(blockRelay.address, 1, {
-        from: accounts[0],
-      })
+      wrbInstance1 = await WitnetRequestBoard.new([contractOwner], true)
+      wrbInstance2 = await WitnetRequestBoard.new([contractOwner], true)
+      wrbInstance3 = await WitnetRequestBoard.new([contractOwner], false)
       wrbProxy = await WrbProxyHelper.new(wrbInstance1.address, {
-        from: accounts[0],
+        from: contractOwner,
       })
     })
 
     it("should revert when trying to upgrade the same WRB", async () => {
       // It should revert because the WRB to be upgrated is already in use
-      await truffleAssert.reverts(wrbProxy.upgradeWitnetRequestsBoard(wrbInstance1.address),
-        "The provided Witnet Requests Board instance address is already in use")
+      await truffleAssert.reverts(wrbProxy.upgradeWitnetRequestBoard(wrbInstance1.address,
+        {
+          from: contractOwner,
+        }),
+      "The provided Witnet Requests Board instance address is already in use")
     })
 
     it("should revert when inserting id 0", async () => {
       // It should revert because of non-existent id 0
-      await truffleAssert.reverts(wrbProxy.upgradeDataRequest(0, 1, 1),
-        "Non-existent controller for id 0")
+      await truffleAssert.reverts(wrbProxy.upgradeDataRequest(0, 1, 1,
+        {
+          from: requestSender,
+        }),
+      "Non-existent controller for id 0")
     })
 
     it("should post a data request and update the currentLastId", async () => {
@@ -51,9 +47,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // Post the data request through the Proxy
-      const tx1 = wrbProxy.postDataRequest(request.address, halfEther, halfEther, {
-        from: accounts[0],
-        value: web3.utils.toWei("1.5", "ether"),
+      const tx1 = wrbProxy.postDataRequest(request.address, 0, halfEther, {
+        from: requestSender,
+        value: web3.utils.toWei("0.5", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
@@ -72,9 +68,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // Post the data request through the Proxy
-      const tx1 = wrbProxy.postDataRequest(request.address, halfEther, halfEther, {
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
+      const tx1 = wrbProxy.postDataRequest(request.address, 0, halfEther, {
+        from: requestSender,
+        value: web3.utils.toWei("0.5", "ether"),
       })
       const txHash1 = await waitForHash(tx1)
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
@@ -84,7 +80,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(id1, 2)
 
       // Upgrade the WRB address to wrbInstance2
-      await wrbProxy.upgradeWitnetRequestsBoard(wrbInstance2.address)
+      await wrbProxy.upgradeWitnetRequestBoard(wrbInstance2.address, {
+        from: contractOwner,
+      })
       // Get the address of the wrb form id1
       const wrb = await wrbProxy.getControllerAddress.call(id1)
 
@@ -101,17 +99,17 @@ contract("Witnet Requests Board Proxy", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // The id of the data request
-      const id2 = await wrbProxy.postDataRequest.call(request.address, halfEther, halfEther, {
-        from: accounts[0],
-        value: web3.utils.toWei("1.5", "ether"),
+      const id2 = await wrbProxy.postDataRequest.call(request.address, 0, halfEther, {
+        from: requestSender,
+        value: web3.utils.toWei("0.5", "ether"),
       })
       assert.equal(id2, 3)
 
       // Post the data request through the Proxy
       await waitForHash(
-        wrbProxy.postDataRequest(request.address, halfEther, halfEther, {
-          from: accounts[0],
-          value: web3.utils.toWei("1.5", "ether"),
+        wrbProxy.postDataRequest(request.address, 0, halfEther, {
+          from: requestSender,
+          value: web3.utils.toWei("0.5", "ether"),
         })
       )
 
@@ -131,17 +129,17 @@ contract("Witnet Requests Board Proxy", accounts => {
       const halfEther = web3.utils.toWei("0.5", "ether")
 
       // The id of the data request with result "hello"
-      const id2 = await wrbProxy.postDataRequest.call(request.address, halfEther, halfEther, {
-        from: accounts[0],
-        value: web3.utils.toWei("1.5", "ether"),
+      const id2 = await wrbProxy.postDataRequest.call(request.address, 0, halfEther, {
+        from: requestSender,
+        value: web3.utils.toWei("0.5", "ether"),
       })
       assert.equal(id2, 4)
 
       // Post the data request through the Proxy
       await waitForHash(
-        wrbProxy.postDataRequest(request.address, halfEther, halfEther, {
-          from: accounts[0],
-          value: web3.utils.toWei("1", "ether"),
+        wrbProxy.postDataRequest(request.address, 0, halfEther, {
+          from: requestSender,
+          value: web3.utils.toWei("0.5", "ether"),
         })
       )
 
@@ -152,7 +150,9 @@ contract("Witnet Requests Board Proxy", accounts => {
 
     it("should read the result of a dr of and old wrb", async () => {
       // Upgrade the WRB address to wrbInstance3
-      await wrbProxy.upgradeWitnetRequestsBoard(wrbInstance3.address)
+      await wrbProxy.upgradeWitnetRequestBoard(wrbInstance3.address, {
+        from: contractOwner,
+      })
 
       // Read the result of the DR
       const result = await wrbProxy.readResult.call(4)
@@ -161,8 +161,10 @@ contract("Witnet Requests Board Proxy", accounts => {
 
     it("should revert when trying to upgrade a non upgradable WRB", async () => {
       // It should revert when trying to upgrade the wrb since wrbInstance3 is not upgradable
-      await truffleAssert.reverts(wrbProxy.upgradeWitnetRequestsBoard(wrbInstance1.address),
-        "The upgrade has been rejected by the current implementation")
+      await truffleAssert.reverts(wrbProxy.upgradeWitnetRequestBoard(wrbInstance1.address, {
+        from: contractOwner,
+      }),
+      "The upgrade has been rejected by the current implementation")
     })
   })
 })
