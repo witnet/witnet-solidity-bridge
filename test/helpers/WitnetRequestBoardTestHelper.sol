@@ -34,7 +34,7 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
   address[] public committee;
 
   // Is upgradable
-  bool upgradable;
+  bool public upgradable;
 
   // Event emitted when a new DR is posted
   event PostedRequest(address indexed _from, uint256 _id);

@@ -91,10 +91,9 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _requestAddress The request contract address which includes the request bytecode.
-  /// @param _inclusionReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the inclusion of the data request.
   /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward)
+  function postDataRequest(address _requestAddress, uint256, uint256 _tallyReward)
     external
     payable
     override
@@ -126,15 +125,22 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
   /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
   /// @param _id The unique identifier of the data request.
-  /// @param _inclusionReward The amount to be added to the inclusion reward.
   /// @param _tallyReward The amount to be added to the tally reward.
-  function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward)
+  function upgradeDataRequest(uint256 _id, uint256, uint256 _tallyReward)
     external
     payable
     override
   {
-    require(requests[_id].requestor == msg.sender, "Sender is not the owner of Data Request");
-    requests[_id].tallyReward += _tallyReward;
+    // If gas price is increased, then check if new rewards cover gas costs
+    if (tx.gasprice > requests[_id].gasPrice) {
+      // Checks the tally reward is coverign gas cost
+      uint256 minResultReward = SafeMath.mul(tx.gasprice, MAX_REPORT_RESULT_GAS);
+      require(_tallyReward >= minResultReward, "Result reward should cover gas expenses. Check the estimateGasCost method.");
+      requests[_id].gasPrice = tx.gasprice;
+    } 
+  
+    // Update data request reward
+    requests[_id].tallyReward = SafeMath.add(requests[_id].tallyReward, _tallyReward); 
   }
 
 
@@ -150,7 +156,15 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     requests[_id].drHash = _drHash;
     requests[_id].result = _result;
     msg.sender.transfer(requests[_id].tallyReward);
+    emit PostedResult(msg.sender, _id);
   }
+
+  /// @dev Retrieves the gas price set for a specific DR ID.
+  /// @param _id The unique identifier of the data request.
+  /// @return The gas price set by the request creator.
+  function readGasPrice(uint256 _id) external view validId(_id) returns(uint256) {
+  return requests[_id].gasPrice;
+  } 
 
   /// @dev Retrieves the bytes of the serialization of one data request from the WRB.
   /// @param _id The unique identifier of the data request.

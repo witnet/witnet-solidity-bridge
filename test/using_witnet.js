@@ -21,8 +21,8 @@ contract("UsingWitnet", accounts => {
     const blockReward = web3.utils.toWei("0", "ether")
     const overallReward = web3.utils.toWei("1", "ether")
 
-    let witnet, clientContract, wrb, wrbProxy,  request, requestId, result
-    let lastAccount0Balance, lastAccount1Balance
+    let witnet, clientContract, wrb, wrbProxy, request, requestId, result
+    let lastAccount0Balance
 
     before(async () => {
       witnet = await Witnet.deployed()
@@ -31,7 +31,6 @@ contract("UsingWitnet", accounts => {
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(wrbProxy.address)
       lastAccount0Balance = await web3.eth.getBalance(accounts[0])
-      lastAccount1Balance = await web3.eth.getBalance(accounts[1])
     })
 
     it("should create a Witnet request", async () => {
@@ -155,7 +154,7 @@ contract("UsingWitnet", accounts => {
     const blockReward = web3.utils.toWei("0", "ether")
     const overallReward = web3.utils.toWei("1", "ether")
 
-    let witnet, clientContract, wrb,  request, requestId, result
+    let witnet, clientContract, wrb, request, requestId, result
 
     before(async () => {
       witnet = await Witnet.deployed()
@@ -189,7 +188,6 @@ contract("UsingWitnet", accounts => {
     })
 
     it("Should report the result in the WRB", async () => {
-      const epoch = 3
       await returnData(wrb.reportResult(requestId, drHash, resultHex, {
         from: accounts[0],
       }))
@@ -263,9 +261,8 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should revert if not authorized sender tries to report result")
-    
-    it("should revert if not authorized sender tries to upgrade data request reward")
 
+    it("should revert if not authorized sender tries to upgrade data request reward")
   })
 })
 
