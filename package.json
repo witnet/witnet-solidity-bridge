@@ -15,7 +15,7 @@
     "migrate-flattened": "npm run flatten && npx truffle migrate --config flattened-config.js",
     "coverage": "solidity-coverage",
     "verify-flattened": "npx truffle run verify",
-    "gas-analysis": "truffle test test/wrb_gas.js test/helpers/WitnetRequestBoardTestHelper.sol"
+    "gas-analysis": "truffle test test/wrb.js test/helpers/WitnetRequestBoardTestHelper.sol"
   },
   "author": "Witnet Foundation <info@witnet.foundation>",
   "repository": {
