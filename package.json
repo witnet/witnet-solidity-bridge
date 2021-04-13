@@ -1,7 +1,7 @@
 {
   "name": "witnet-ethereum-bridge",
-  "version": "0.1.2",
-  "description": "Witnet-Ethereum Bridge Interface",
+  "version": "0.2.0",
+  "description": "Witnet Bridge for EVM-compatible blockchains",
   "main": "",
   "scripts": {
     "test": "truffle test",
@@ -14,8 +14,7 @@
     "fmt!": "solhint --max-warnings 0 \"contracts/**/*.sol\" --fix && eslint ./test --fix && solhint \"test/**/*.sol\" --fix",
     "migrate-flattened": "npm run flatten && npx truffle migrate --config flattened-config.js",
     "coverage": "solidity-coverage",
-    "verify-flattened": "npx truffle run verify",
-    "gas-analysis": "truffle test test/wrb.js test/helpers/WitnetRequestBoardTestHelper.sol"
+    "verify-flattened": "npx truffle run verify"
   },
   "author": "Witnet Foundation <info@witnet.foundation>",
   "repository": {
