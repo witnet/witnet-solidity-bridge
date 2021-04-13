@@ -118,11 +118,6 @@ contract("UsingWitnet", accounts => {
       assert.equal(wrbBalance, overallReward * 2)
     })
 
-    it("should set a timestamp upon claiming", async () => {
-      const requestInfo = await wrb.requests(requestId)
-      assert(requestInfo.blockNumber)
-    })
-
     it("should post the result of the request into the WRB", async () => {
       await returnData(wrb.reportResult(requestId, drHash, resultHex, {
         from: accounts[0],
@@ -187,7 +182,7 @@ contract("UsingWitnet", accounts => {
       assert.equal(requestId.toString(16), "0x0000000000000000000000000000000000000000000000000000000000000001")
     })
 
-    it("Should report the result in the WRB", async () => {
+    it("should report the result in the WRB", async () => {
       await returnData(wrb.reportResult(requestId, drHash, resultHex, {
         from: accounts[0],
       }))
@@ -195,19 +190,19 @@ contract("UsingWitnet", accounts => {
       assert.equal(requestinfo.result, resultHex)
     })
 
-    it("Should pull the result from the WRB back to the client contract", async () => {
+    it("should pull the result from the WRB back to the client contract", async () => {
       await clientContract._witnetReadResult(requestId, { from: accounts[1] })
       result = await clientContract.result()
       assert.equal(result.cborValue.buffer.data, resultHex)
     })
 
-    it("Should detect the result is false", async () => {
+    it("should detect the result is false", async () => {
       await clientContract._witnetReadResult(requestId, { from: accounts[1] })
       result = await clientContract.result()
       assert.equal(result.success, false)
     })
 
-    it("Should revert if reward amounts are smaller than transaction value", async () => {
+    it("should revert if reward amounts are smaller than transaction value", async () => {
       const requestReward = web3.utils.toWei("1", "ether")
       const resultReward = web3.utils.toWei("1", "ether")
       const blockReward = web3.utils.toWei("0", "ether")
@@ -222,7 +217,7 @@ contract("UsingWitnet", accounts => {
       )
     })
 
-    it("Should revert if reward amounts sum overflows", async () => {
+    it("should revert if reward amounts sum overflows", async () => {
       const resultReward = web3.utils.toBN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 
       await truffleAssert.reverts(
@@ -234,7 +229,7 @@ contract("UsingWitnet", accounts => {
       )
     })
 
-    it("Should revert if reward amounts sum overflows 2", async () => {
+    it("should revert if reward amounts sum overflows 2", async () => {
       const requestReward = web3.utils.toBN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
       const blockReward = web3.utils.toBN("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 
@@ -247,7 +242,7 @@ contract("UsingWitnet", accounts => {
       )
     })
 
-    it("Should be able to estimate gas cost and post the DR", async () => {
+    it("should be able to estimate gas cost and post the DR", async () => {
       const gasPrice = 20000
       const rewards = await clientContract._witnetEstimateGasCost.call(gasPrice)
       await truffleAssert.passes(
@@ -259,10 +254,6 @@ contract("UsingWitnet", accounts => {
         "Estimated rewards should cover the gas costs"
       )
     })
-
-    it("should revert if not authorized sender tries to report result")
-
-    it("should revert if not authorized sender tries to upgrade data request reward")
   })
 })
 
