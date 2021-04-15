@@ -33,7 +33,7 @@ contract("Witnet Requests Board Proxy", accounts => {
 
     it("should revert when inserting id 0", async () => {
       // It should revert because of non-existent id 0
-      await truffleAssert.reverts(wrbProxy.upgradeDataRequest(0, 1, 1,
+      await truffleAssert.reverts(wrbProxy.upgradeDataRequest(0,
         {
           from: requestSender,
         }),
@@ -44,10 +44,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await RequestContract.new(drBytes)
-      const halfEther = web3.utils.toWei("0.5", "ether")
 
       // Post the data request through the Proxy
-      const tx1 = wrbProxy.postDataRequest(request.address, 0, halfEther, {
+      const tx1 = wrbProxy.postDataRequest(request.address, {
         from: requestSender,
         value: web3.utils.toWei("0.5", "ether"),
       })
@@ -65,10 +64,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await RequestContract.new(drBytes)
-      const halfEther = web3.utils.toWei("0.5", "ether")
 
       // Post the data request through the Proxy
-      const tx1 = wrbProxy.postDataRequest(request.address, 0, halfEther, {
+      const tx1 = wrbProxy.postDataRequest(request.address, {
         from: requestSender,
         value: web3.utils.toWei("0.5", "ether"),
       })
@@ -96,10 +94,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await RequestContract.new(drBytes)
-      const halfEther = web3.utils.toWei("0.5", "ether")
 
       // The id of the data request
-      const id2 = await wrbProxy.postDataRequest.call(request.address, 0, halfEther, {
+      const id2 = await wrbProxy.postDataRequest.call(request.address, {
         from: requestSender,
         value: web3.utils.toWei("0.5", "ether"),
       })
@@ -107,7 +104,7 @@ contract("Witnet Requests Board Proxy", accounts => {
 
       // Post the data request through the Proxy
       await waitForHash(
-        wrbProxy.postDataRequest(request.address, 0, halfEther, {
+        wrbProxy.postDataRequest(request.address, {
           from: requestSender,
           value: web3.utils.toWei("0.5", "ether"),
         })
@@ -126,10 +123,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await RequestContract.new(drBytes)
-      const halfEther = web3.utils.toWei("0.5", "ether")
 
       // The id of the data request with result "hello"
-      const id2 = await wrbProxy.postDataRequest.call(request.address, 0, halfEther, {
+      const id2 = await wrbProxy.postDataRequest.call(request.address, {
         from: requestSender,
         value: web3.utils.toWei("0.5", "ether"),
       })
@@ -137,7 +133,7 @@ contract("Witnet Requests Board Proxy", accounts => {
 
       // Post the data request through the Proxy
       await waitForHash(
-        wrbProxy.postDataRequest(request.address, 0, halfEther, {
+        wrbProxy.postDataRequest(request.address, {
           from: requestSender,
           value: web3.utils.toWei("0.5", "ether"),
         })

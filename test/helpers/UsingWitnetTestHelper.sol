@@ -21,12 +21,12 @@ contract UsingWitnetTestHelper is UsingWitnet {
 
   constructor (address _wrbAddress) public UsingWitnet(_wrbAddress) { }
 
-  function _witnetPostRequest(Request _request, uint256 _requestReward, uint256 _tallyReward, uint256 _blockReward) external payable returns(uint256 id) {
-    return witnetPostRequest(_request, _requestReward, _tallyReward, _blockReward);
+  function _witnetPostRequest(Request _request) external payable returns(uint256 id) {
+    return witnetPostRequest(_request);
   }
 
-  function _witnetUpgradeRequest(uint256 _id, uint256 _requestReward, uint256 _tallyReward, uint256 _blockReward) external payable {
-    witnetUpgradeRequest(_id, _requestReward, _tallyReward, _blockReward);
+  function _witnetUpgradeRequest(uint256 _id) external payable {
+    witnetUpgradeRequest(_id);
   }
 
   function _witnetReadResult(uint256 _requestId) external returns(Witnet.Result memory) {
@@ -34,7 +34,7 @@ contract UsingWitnetTestHelper is UsingWitnet {
     return result;
   }
 
-  function _witnetEstimateGasCost(uint256 _gasPrice) external returns(uint256, uint256, uint256) {
+  function _witnetEstimateGasCost(uint256 _gasPrice) external returns(uint256) {
     return witnetEstimateGasCost(_gasPrice);
   }
 

@@ -17,9 +17,7 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
 
   struct DataRequest {
     address requestAddress;
-    uint256 inclusionReward;
-    uint256 tallyReward;
-    uint256 blockReward;
+    uint256 reward;
     bytes result;
     uint256 timestamp;
     uint256 drHash;
@@ -57,37 +55,32 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _requestAddress The request contract address which includes the request bytecode.
-  /// @param _inclusionReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the inclusion of the data request.
-  /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
   /// @return The unique identifier of the data request.
-  function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward) external payable override returns(uint256) {
+  function postDataRequest(address _requestAddress) external payable override returns(uint256) {
     uint256 _id = requests.length;
     DataRequest memory dr;
     requests.push(dr);
 
     requests[_id].requestAddress = _requestAddress;
-    requests[_id].inclusionReward = _inclusionReward;
-    requests[_id].blockReward = msg.value - _tallyReward - _inclusionReward;
-    requests[_id].tallyReward = _tallyReward;
+    requests[_id].reward = msg.value;
     requests[_id].result = "hello";
     requests[_id].timestamp = 0;
     requests[_id].drHash = 0;
     requests[_id].pkhClaim = address(0);
+
     emit PostedRequest(msg.sender, _id);
+
     return _id;
   }
 
-  /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
+  /// @dev Increments the rewards of a data request by adding more value to it.
   /// @param _id The unique identifier of the data request.
-  /// @param _inclusionReward The amount to be added to the inclusion reward.
-  /// @param _tallyReward The amount to be added to the tally reward. 
-  function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward)
+  function upgradeDataRequest(uint256 _id)
     external
     payable
     override
   {
-    requests[_id].inclusionReward += _inclusionReward;
-    requests[_id].tallyReward += _tallyReward;
+    requests[_id].reward += msg.value;
   }
 
   /// @dev Retrieves hash of the data request transaction in Witnet
@@ -113,11 +106,8 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
 
   /// @dev Estimate the amount of reward we need to insert for a given gas price.
   /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
-  function estimateGasCost(uint256) external view override returns(uint256, uint256, uint256){
-    return (0, 
-      0,  
-      0
-    );
+  function estimateGasCost(uint256) external view override returns(uint256){
+    return 0;
   }
 
 }

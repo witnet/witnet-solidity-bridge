@@ -52,8 +52,7 @@ contract("WitnetRequestBoard", ([
       // Post Data Request
       const postDataRequestTx = await this.WitnetRequestBoard.postDataRequest(
         this.Request.address,
-        ether("0"),
-        ether("1"), {
+        {
           from: requestor,
           value: ether("1"),
         })
@@ -69,7 +68,7 @@ contract("WitnetRequestBoard", ([
       expect(postDataRequestTx.logs[0].args._from, "match address of DR creator").to.be.equal(requestor)
       expect(postDataRequestTx.logs[0].args._id, "match data request id").to.be.bignumber.equal(requestId)
 
-      // Check contract balance (increased by rewards)
+      // Check contract balance (increased by reward)
       const contractFinalBalance = await contractBalanceTracker.get()
       expect(
         contractFinalBalance.eq(contractInitialBalance
@@ -82,15 +81,13 @@ contract("WitnetRequestBoard", ([
       // Post Data Requests
       const postDataRequestTx1 = await this.WitnetRequestBoard.postDataRequest(
         this.Request.address,
-        ether("0"),
-        ether("1"), {
+        {
           from: requestor,
           value: ether("1"),
         })
       const postDataRequestTx2 = await this.WitnetRequestBoard.postDataRequest(
         this.Request.address,
-        ether("0"),
-        ether("1"), {
+        {
           from: requestor,
           value: ether("1"),
         })
@@ -117,13 +114,12 @@ contract("WitnetRequestBoard", ([
         "match data request id"
       ).to.be.bignumber.equal(requestId.add(new BN(1)))
     })
-    it("fails if creator is not covering DR rewards", async () => {
-      // Transaction value < rewards
+    it("fails if creator is not covering DR reward", async () => {
+      // Transaction value < reward
       await expectRevert(
         this.WitnetRequestBoard.postDataRequest(
           this.Request.address,
-          ether("0"),
-          ether("0"), {
+          {
             from: requestor,
             value: ether("0"),
             gasPrice: 1,
@@ -133,12 +129,11 @@ contract("WitnetRequestBoard", ([
       )
     })
     it("fails if creator is not covering DR result report gas cost", async () => {
-      // Tally reward < MAX_REPORT_RESULT_GAS
+      // Tally reward < ESTIMATED_REPORT_RESULT_GAS
       await expectRevert(
         this.WitnetRequestBoard.postDataRequest(
           this.Request.address,
-          ether("0"),
-          new BN("1"), {
+          {
             from: requestor,
             value: new BN("1"),
             gasPrice: 1,
@@ -147,48 +142,32 @@ contract("WitnetRequestBoard", ([
         "Result reward should cover gas expenses. Check the estimateGasCost"
       )
     })
-    it("fails if reward is higher than sent value", async () => {
-      // Transaction value < Tally Reward
-      await expectRevert(
-        this.WitnetRequestBoard.postDataRequest(
-          this.Request.address,
-          ether("0"),
-          ether("1"), {
-            from: requestor,
-            value: ether("0.5"),
-            gasPrice: 1,
-          }
-        ),
-        "Transaction value needs to be equal or greater than rewards"
-      )
-    })
   })
 
   describe("upgrade data request", async () => {
     beforeEach(async () => {
       await this.WitnetRequestBoard.postDataRequest(
         this.Request.address,
-        ether("0"),
-        ether("1"), {
+        {
           from: requestor,
           value: ether("1"),
           gasPrice: 2,
         }
       )
     })
-    it("anyone can upgrade existing data request (1 eth for rewards)", async () => {
+    it("anyone can upgrade existing data request increasing the reward", async () => {
       // Initial balance
       const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
       const contractInitialBalance = await contractBalanceTracker.get()
 
-      // Update data request (increased rewards)
-      await this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0"), ether("1"), {
+      // Update data request (increased reward)
+      await this.WitnetRequestBoard.upgradeDataRequest(requestId, {
         from: other,
         value: ether("1"),
         gasPrice: 3,
       })
 
-      // Check contract balance (increased by rewards)
+      // Check contract balance (increased by reward)
       const contractFinalBalance = await contractBalanceTracker.get()
       expect(
         contractFinalBalance.eq(contractInitialBalance
@@ -198,8 +177,8 @@ contract("WitnetRequestBoard", ([
       ).to.equal(true)
     })
     it("anyone can upgrade existing data request gas price", async () => {
-      // Update data request (increased rewards)
-      await this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0"), ether("1"), {
+      // Update data request (increased reward)
+      await this.WitnetRequestBoard.upgradeDataRequest(requestId, {
         from: other,
         value: ether("1"),
         gasPrice: 3,
@@ -215,8 +194,8 @@ contract("WitnetRequestBoard", ([
       ).to.equal(true)
     })
     it("creator cannot decrease existing data request gas price", async () => {
-      // Update data request (increased rewards)
-      await this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0"), ether("1"), {
+      // Update data request (increased reward)
+      await this.WitnetRequestBoard.upgradeDataRequest(requestId, {
         from: requestor,
         value: ether("1"),
         gasPrice: 1,
@@ -231,31 +210,16 @@ contract("WitnetRequestBoard", ([
         "data request gas price should not have been set to 1 wei",
       ).to.equal(true)
     })
-    it("fails if creator is not covering DR result report gas cost", async () => {
-      const gasPrice = ether("0.000005")
-      const postResultGas = await this.WitnetRequestBoard.MAX_REPORT_RESULT_GAS.call()
-
-      // Multiply by gas price and substract the already existing value to the limit
-      const maxResultInvalidReward = (postResultGas.mul(gasPrice)).sub(ether("0.5")).sub(new BN("1"))
-
-      // Report result rewards < maxResultInvalidReward
+    it("fails if anyone upgrades DR with new gas price that decreases reward below gas limit", async () => {
+      // Report result reward < ESTIMATED_REPORT_RESULT_GAS * newGasPrice
+      const newGasPrice = ether("1")
       await expectRevert(
-        this.WitnetRequestBoard.upgradeDataRequest(requestId, 0, maxResultInvalidReward, {
+        this.WitnetRequestBoard.upgradeDataRequest(requestId, {
           from: requestor,
-          value: ether("1"),
-          gasPrice: gasPrice,
+          value: ether("0"),
+          gasPrice: newGasPrice,
         }),
         "Result reward should cover gas expenses. Check the estimateGasCost"
-      )
-    })
-    it("fails if upgraded reward is higher than transaction value", async () => {
-      await expectRevert(
-        this.WitnetRequestBoard.upgradeDataRequest(requestId, 0, ether("1"), {
-          from: requestor,
-          value: ether("0.5"),
-          gasPrice: 1,
-        }),
-        "Transaction value needs to be equal or greater than rewards"
       )
     })
     it("fails if result is already reported", async () => {
@@ -263,9 +227,9 @@ contract("WitnetRequestBoard", ([
         requestId, drHash, resultHex,
         { from: owner, gasPrice: 1 }
       )
-      // Update data request (increased rewards)
+      // Update data request (increased reward)
       await expectRevert(
-        this.WitnetRequestBoard.upgradeDataRequest(requestId, ether("0"), ether("1"), {
+        this.WitnetRequestBoard.upgradeDataRequest(requestId, {
           from: requestor,
           value: ether("1"),
           gasPrice: 3,
@@ -278,7 +242,7 @@ contract("WitnetRequestBoard", ([
   describe("report data request result", async () => {
     beforeEach(async () => {
       // Post data request
-      await this.WitnetRequestBoard.postDataRequest(this.Request.address, ether("0"), ether("1"), {
+      await this.WitnetRequestBoard.postDataRequest(this.Request.address, {
         from: requestor,
         value: ether("1"),
         gasPrice: 1,
@@ -367,7 +331,7 @@ contract("WitnetRequestBoard", ([
     beforeEach(async () => {
       requestTestHelper = await RequestTestHelper.new(requestHex, { from: requestor })
       // Post data request
-      await this.WitnetRequestBoard.postDataRequest(requestTestHelper.address, ether("0"), ether("1"), {
+      await this.WitnetRequestBoard.postDataRequest(requestTestHelper.address, {
         from: requestor,
         value: ether("1"),
       })
@@ -407,8 +371,7 @@ contract("WitnetRequestBoard", ([
     beforeEach(async () => {
       await this.WitnetRequestBoard.postDataRequest(
         this.Request.address,
-        ether("0"),
-        ether("1"), {
+        {
           from: requestor,
           value: ether("1"),
           gasPrice: 1,
@@ -428,11 +391,11 @@ contract("WitnetRequestBoard", ([
   describe("estimate gas cost", async () => {
     it("anyone can estime a data request gas cost", async () => {
       // Gas price = 1
-      const maxResRe = new BN(await this.WitnetRequestBoard.MAX_REPORT_RESULT_GAS.call())
-      const rewards = await this.WitnetRequestBoard.estimateGasCost.call(1)
+      const maxResRe = new BN(await this.WitnetRequestBoard.ESTIMATED_REPORT_RESULT_GAS.call())
+      const reward = await this.WitnetRequestBoard.estimateGasCost.call(1)
 
       expect(
-        rewards[1].eq(maxResRe),
+        reward.eq(maxResRe),
         `The estimated maximum gas cost for result reward should be ${maxResRe.toString()}`
       ).to.equal(true)
     }
