@@ -9,8 +9,7 @@ import "./WitnetRequestBoardProxy.sol";
 
 /**
  * @title The UsingWitnet contract
- * @notice Contract writers can inherit this contract in order to create requests for the
- * Witnet network.
+ * @notice Contract writers can inherit this contract in order to create Witnet data requests.
  */
 contract UsingWitnet {
   using Witnet for Witnet.Result;
@@ -32,33 +31,28 @@ contract UsingWitnet {
     _;
   }
 
-  // Ensures that user-specified rewards are equal to the total transaction value to prevent users from burning any excess value
-  modifier validRewards(uint256 _requestReward, uint256 _resultReward, uint256 _blockReward) {
-    uint256 reqResReward = _requestReward + _resultReward;
-    require(reqResReward >= _requestReward, "The sum of rewards overflows");
-    require(reqResReward + _blockReward >= reqResReward, "The sum of rewards overflows");
-    require(msg.value == _requestReward + _resultReward + _blockReward, "Transaction value should equal the sum of rewards");
+  // Ensures that user-specified reward is equal to the total transaction value to prevent users from burning any excess value
+  modifier validRewards(uint256 _reward) {
+    require(msg.value == _reward, "Transaction value should equal the reward");
     _;
   }
 
-  /**
+ /**
   * @notice Send a new request to the Witnet network
   * @dev Call to `post_dr` function in the WitnetRequestBoard contract
   * @param _request An instance of the `Request` contract
-  * @param _requestReward Reward specified for the user which posts the request into Witnet
-  * @param _resultReward Reward specified for the user which posts back the request result
-  * @param _blockReward Reward specified for the node which reports the block header for verification
+  * @param _reward The value for rewarding the data request result report.
   * @return Sequencial identifier for the request included in the WitnetRequestBoard
   */
-  function witnetPostRequest(Request _request, uint256 _requestReward, uint256 _resultReward, uint256 _blockReward)
+  function witnetPostRequest(Request _request, uint256 _reward)
     internal
-    validRewards(_requestReward, _resultReward, _blockReward)
+    validRewards(_reward)
   returns (uint256)
   {
-    return wrb.postDataRequest{value: _requestReward + _resultReward + _blockReward}(address(_request), _requestReward, _resultReward);
+    return wrb.postDataRequest{value: msg.value}(address(_request), _reward);
   }
 
-  /**
+ /**
   * @notice Check if a request has been accepted into Witnet.
   * @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
   * parties) before this method returns `true`.
@@ -73,22 +67,20 @@ contract UsingWitnet {
     return drHash != 0;
   }
 
-  /**
-  * @notice Upgrade the rewards for a Data Request previously included.
+ /**
+  * @notice Upgrade the reward for a Data Request previously included.
   * @dev Call to `upgrade_dr` function in the WitnetRequestBoard contract.
   * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestBoard.
-  * @param _requestReward Reward specified for the user which posts the request into Witnet
-  * @param _resultReward Reward specified for the user which post the Data Request result.
-  * @param _blockReward Reward specified for the node which reports the block header for verification
+  * @param _reward The value for rewarding the data request result report.
   */
-  function witnetUpgradeRequest(uint256 _id, uint256 _requestReward, uint256 _resultReward, uint256 _blockReward)
+  function witnetUpgradeRequest(uint256 _id, uint256 _reward)
     internal
-    validRewards(_requestReward, _resultReward, _blockReward)
+    validRewards(_reward)
   {
-    wrb.upgradeDataRequest{value: msg.value}(_id, _requestReward, _resultReward);
+    wrb.upgradeDataRequest{value: msg.value}(_id, _reward);
   }
 
-  /**
+ /**
   * @notice Read the result of a resolved request.
   * @dev Call to `read_result` function in the WitnetRequestBoard contract.
   * @param _id The sequential identifier of a request that was posted to Witnet.
@@ -98,13 +90,13 @@ contract UsingWitnet {
     return Witnet.resultFromCborBytes(wrb.readResult(_id));
   }
 
-  /**
+ /**
   * @notice Estimate the reward amount.
   * @dev Call to `estimate_gas_cost` function in the WitnetRequestBoard contract.
   * @param _gasPrice The gas price for which we want to retrieve the estimation.
-  * @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
+  * @return The reward to be included for the given gas price.
   */
-  function witnetEstimateGasCost(uint256 _gasPrice) internal view returns (uint256, uint256, uint256) {
+  function witnetEstimateGasCost(uint256 _gasPrice) internal view returns (uint256) {
     return wrb.estimateGasCost(_gasPrice);
   }
 }
