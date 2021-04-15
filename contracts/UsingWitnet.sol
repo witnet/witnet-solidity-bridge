@@ -24,6 +24,13 @@ contract UsingWitnet {
     wrb = WitnetRequestBoardProxy(_wrb);
   }
 
+  // Provides a convenient way for client contracts extending this to block the execution of the main logic of the
+  // contract until a particular request has been successfully resolved by Witnet
+  modifier witnetRequestResolved(uint256 _id) {
+      require(witnetCheckRequestResolved(_id), "Witnet request is not yet resolved by the Witnet network");
+      _;
+  }
+
  /**
   * @notice Send a new request to the Witnet network with transaction value as result report reward.
   * @dev Call to `post_dr` function in the WitnetRequestBoard contract.
@@ -32,6 +39,18 @@ contract UsingWitnet {
   */
   function witnetPostRequest(Request _request) internal returns (uint256) {
     return wrb.postDataRequest{value: msg.value}(address(_request));
+  }
+
+ /**
+  * @notice Check if a request has been resolved by Witnet.
+  * @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
+  * parties) before this method returns `true`.
+  * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestBoard.
+  * @return A boolean telling if the request has been already resolved or not.
+  */
+  function witnetCheckRequestResolved(uint256 _id) internal view returns (bool) {
+    // If the result of the data request in Witnet is not the default, then it means that it has been reported as resolved.
+    return wrb.readResult(_id).length != 0;
   }
 
  /**
