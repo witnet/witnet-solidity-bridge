@@ -55,15 +55,6 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         _;
     }
 
-    // Ensures the reward is equal to the data request reward
-    modifier payingRewards(uint256 _value, uint256 _reward) {
-        require(
-            _value == _reward,
-            "Transaction value needs to be equal to reward"
-        );
-        _;
-    }
-
     // Ensures the result has not been reported yet
     modifier resultNotIncluded(uint256 _id) {
         require(requests[_id].result.length == 0, "Result already included");
@@ -100,23 +91,18 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
     /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
     /// @param _requestAddress The request contract address which includes the request bytecode.
-    /// @param _reward The value for rewarding the data request result report.
     /// @return The unique identifier of the data request.
-    function postDataRequest(
-        address _requestAddress,
-        uint256 _reward
-    )
+    function postDataRequest(address _requestAddress)
         external
         payable
         override
-        payingRewards(msg.value, _reward)
         returns (uint256)
     {
         // Checks the tally reward is covering gas cost
         uint256 minResultReward =
             SafeMath.mul(tx.gasprice, ESTIMATED_REPORT_RESULT_GAS);
         require(
-            _reward >= minResultReward,
+            msg.value >= minResultReward,
             "Result reward should cover gas expenses. Check the estimateGasCost method."
         );
 
@@ -125,7 +111,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         DataRequest memory request;
         request.requestAddress = _requestAddress;
         request.requestor = msg.sender;
-        request.reward = _reward;
+        request.reward = msg.value;
         Request requestContract = Request(request.requestAddress);
         uint256 _drOutputHash = uint256(sha256(requestContract.bytecode()));
         request.drOutputHash = _drOutputHash;
@@ -139,36 +125,30 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         return _id;
     }
 
-    /// @dev Increments the reward of a data request by adding more value to it.
+    /// @dev Increments the reward of a data request by adding the transaction value to it.
     /// @param _id The unique identifier of the data request.
-    /// @param _reward The amount to be added to the data request reward.
-    function upgradeDataRequest(
-        uint256 _id,
-        uint256 _reward
-    )
+    function upgradeDataRequest(uint256 _id)
         external
         payable
         override
-        payingRewards(msg.value, _reward)
         resultNotIncluded(_id)
     {
+        uint256 newReward = SafeMath.add(requests[_id].reward, msg.value);
+
         // If gas price is increased, then check if new rewards cover gas costs
         if (tx.gasprice > requests[_id].gasPrice) {
             // Checks the reward is covering gas cost
             uint256 minResultReward =
                 SafeMath.mul(tx.gasprice, ESTIMATED_REPORT_RESULT_GAS);
             require(
-                _reward >= minResultReward,
+                newReward >= minResultReward,
                 "Result reward should cover gas expenses. Check the estimateGasCost method."
             );
             requests[_id].gasPrice = tx.gasprice;
         }
 
         // Update data request reward
-        requests[_id].reward = SafeMath.add(
-            requests[_id].reward,
-            _reward
-        );
+        requests[_id].reward = newReward;
     }
 
     /// @dev Reports the result of a data request in Witnet.
@@ -180,6 +160,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         uint256 _drHash,
         bytes calldata _result
     ) external isAuthorized() validId(_id) resultNotIncluded(_id) {
+        require(_drHash != 0, "Data request transaction cannot be zero");
         // Ensures the result byes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(_result.length != 0, "Result has zero length");

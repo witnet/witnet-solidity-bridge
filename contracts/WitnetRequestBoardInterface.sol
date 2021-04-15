@@ -15,14 +15,12 @@ interface WitnetRequestBoardInterface {
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _requestAddress The request contract address which includes the request bytecode.
-  /// @param _reward The value for rewarding the data request result report.
   /// @return The unique identifier of the data request.
-  function postDataRequest(address _requestAddress, uint256 _reward) external payable returns(uint256);
+  function postDataRequest(address _requestAddress) external payable returns(uint256);
 
-  /// @dev Increments the rewards of a data request by adding more value to it.
+  /// @dev Increments the reward of a data request by adding the transaction value to it.
   /// @param _id The unique identifier of the data request.
-  /// @param _reward The amount to be added to the result reward.
-  function upgradeDataRequest(uint256 _id, uint256 _reward) external payable;
+  function upgradeDataRequest(uint256 _id) external payable;
 
   /// @dev Retrieves the DR hash of the id from the WRB.
   /// @param _id The unique identifier of the data request.
