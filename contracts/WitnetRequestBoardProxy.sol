@@ -6,8 +6,8 @@ import "./WitnetRequestBoardInterface.sol";
 
 
 /**
- * @title Block Relay Proxy
- * @notice Contract to act as a proxy between the Witnet Bridge Interface and the Block Relay.
+ * @title Witnet Request Board Proxy
+ * @notice Contract to act as a proxy between the Witnet Bridge Interface and Contracts inheriting UsingWitnet.
  * @author Witnet Foundation
  */
 contract WitnetRequestBoardProxy {
@@ -50,26 +50,24 @@ contract WitnetRequestBoardProxy {
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _requestAddress The request contract address which includes the request bytecode.
-  /// @param _inclusionReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the inclusion of the data request.
-  /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
+  /// @param _reward The value for rewarding the data request result report.
   /// @return The unique identifier of the data request.
-  function postDataRequest(address _requestAddress,  uint256 _inclusionReward, uint256 _tallyReward) external payable returns(uint256) {
+  function postDataRequest(address _requestAddress, uint256 _reward) external payable returns(uint256) {
     uint256 n = controllers.length;
     uint256 offset = controllers[n - 1].lastId;
     // Update the currentLastId with the id in the controller plus the offSet
-    currentLastId = witnetRequestBoardInstance.postDataRequest{value: msg.value}(_requestAddress, _inclusionReward, _tallyReward) + offset;
+    currentLastId = witnetRequestBoardInstance.postDataRequest{value: msg.value}(_requestAddress, _reward) + offset;
     return currentLastId;
   }
 
-  /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
+  /// @dev Increments the reward of a data request by adding more value to it.
   /// @param _id The unique identifier of the data request.
-  /// @param _inclusionReward The amount to be added to the inclusion reward.
-  /// @param _tallyReward The amount to be added to the tally reward.  
-  function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward) external payable {
+  /// @param _reward The amount to be added to the result reward.
+  function upgradeDataRequest(uint256 _id, uint256 _reward) external payable {
     address wrbAddress;
     uint256 wrbOffset;
     (wrbAddress, wrbOffset) = getController(_id);
-    return witnetRequestBoardInstance.upgradeDataRequest{value: msg.value}(_id - wrbOffset, _inclusionReward, _tallyReward);
+    return witnetRequestBoardInstance.upgradeDataRequest{value: msg.value}(_id - wrbOffset, _reward);
   }
 
   /// @dev Retrieves the DR hash of the id from the WRB.
@@ -106,9 +104,9 @@ contract WitnetRequestBoardProxy {
   }
 
   /// @dev Estimate the amount of reward we need to insert for a given gas price.
-  /// @param _gasPrice The gas price for which we need to calculate the rewards.
-  /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
-  function estimateGasCost(uint256 _gasPrice) external view returns(uint256, uint256, uint256) {
+  /// @param _gasPrice The gas price for which we need to calculate the reward.
+  /// @return The reward to be included for the given gas price.
+  function estimateGasCost(uint256 _gasPrice) external view returns(uint256) {
     return witnetRequestBoardInstance.estimateGasCost(_gasPrice);
   }
 
