@@ -15,16 +15,14 @@ interface WitnetRequestBoardInterface {
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _requestAddress The request contract address which includes the request bytecode.
-  /// @param _inclusionReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the inclusion of the data request.
-  /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
+  /// @param _reward The value for rewarding the data request result report.
   /// @return The unique identifier of the data request.
-  function postDataRequest(address _requestAddress, uint256 _inclusionReward, uint256 _tallyReward) external payable returns(uint256);
+  function postDataRequest(address _requestAddress, uint256 _reward) external payable returns(uint256);
 
-  /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
+  /// @dev Increments the rewards of a data request by adding more value to it.
   /// @param _id The unique identifier of the data request.
-  /// @param _inclusionReward The amount to be added to the inclusion reward.
-  /// @param _tallyReward The amount to be added to the tally reward.
-  function upgradeDataRequest(uint256 _id, uint256 _inclusionReward, uint256 _tallyReward) external payable;
+  /// @param _reward The amount to be added to the result reward.
+  function upgradeDataRequest(uint256 _id, uint256 _reward) external payable;
 
   /// @dev Retrieves the DR hash of the id from the WRB.
   /// @param _id The unique identifier of the data request.
@@ -42,6 +40,6 @@ interface WitnetRequestBoardInterface {
 
   /// @dev Estimate the amount of reward we need to insert for a given gas price.
   /// @param _gasPrice The gas price for which we need to calculate the rewards.
-  /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
-  function estimateGasCost(uint256 _gasPrice) external view returns(uint256, uint256, uint256);
+  /// @return The reward to be included for the given gas price.
+  function estimateGasCost(uint256 _gasPrice) external view returns(uint256);
 }
