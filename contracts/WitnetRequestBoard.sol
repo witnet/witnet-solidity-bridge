@@ -14,15 +14,14 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
  * @author Witnet Foundation
  */
 contract WitnetRequestBoard is WitnetRequestBoardInterface {
-    // Result reporting is subject to increases due to number of merkle tree levels
-    // The following value corresponds to 9 merkle tree levels
-    uint256 public constant MAX_REPORT_RESULT_GAS = 102496;
+    // TODO: update max report result gas value
+    uint256 public constant ESTIMATED_REPORT_RESULT_GAS = 102496;
 
     struct DataRequest {
         address requestAddress;
         address requestor;
         uint256 drOutputHash;
-        uint256 tallyReward;
+        uint256 reward;
         uint256 gasPrice;
         bytes result;
         uint256 drHash;
@@ -43,23 +42,24 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     // Event emitted when a result proof is posted
     event PostedResult(address indexed _from, uint256 _id);
 
-    // Only the commitee defined when deploying the contract should be able to push blocks
+    // Only the committee defined when deploying the contract should be able to report results
     modifier isAuthorized() {
         bool senderAuthorized = false;
         for (uint256 i; i < committee.length; i++) {
             if (committee[i] == msg.sender) {
                 senderAuthorized = true;
+                break;
             }
         }
         require(senderAuthorized == true, "Sender not authorized");
-        _; // Otherwise, it continues.
+        _;
     }
 
-    // Ensures the reward is not greater than the value
-    modifier payingRewards(uint256 _value, uint256 _rewards) {
+    // Ensures the reward is equal to the data request reward
+    modifier payingRewards(uint256 _value, uint256 _reward) {
         require(
-            _value >= _rewards,
-            "Transaction value needs to be equal or greater than rewards"
+            _value == _reward,
+            "Transaction value needs to be equal to reward"
         );
         _;
     }
@@ -100,24 +100,23 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
     /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
     /// @param _requestAddress The request contract address which includes the request bytecode.
-    /// @param _tallyReward The amount of value that will be detracted from the transaction value and reserved for rewarding the reporting of the final result (aka tally) of the data request.
+    /// @param _reward The value for rewarding the data request result report.
     /// @return The unique identifier of the data request.
     function postDataRequest(
         address _requestAddress,
-        uint256,
-        uint256 _tallyReward
+        uint256 _reward
     )
         external
         payable
         override
-        payingRewards(msg.value, _tallyReward)
+        payingRewards(msg.value, _reward)
         returns (uint256)
     {
         // Checks the tally reward is covering gas cost
         uint256 minResultReward =
-            SafeMath.mul(tx.gasprice, MAX_REPORT_RESULT_GAS);
+            SafeMath.mul(tx.gasprice, ESTIMATED_REPORT_RESULT_GAS);
         require(
-            _tallyReward >= minResultReward,
+            _reward >= minResultReward,
             "Result reward should cover gas expenses. Check the estimateGasCost method."
         );
 
@@ -126,7 +125,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         DataRequest memory request;
         request.requestAddress = _requestAddress;
         request.requestor = msg.sender;
-        request.tallyReward = _tallyReward;
+        request.reward = _reward;
         Request requestContract = Request(request.requestAddress);
         uint256 _drOutputHash = uint256(sha256(requestContract.bytecode()));
         request.drOutputHash = _drOutputHash;
@@ -140,36 +139,35 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         return _id;
     }
 
-    /// @dev Increments the rewards of a data request by adding more value to it. The new request reward will be increased by msg.value minus the difference between the former tally reward and the new tally reward.
+    /// @dev Increments the reward of a data request by adding more value to it.
     /// @param _id The unique identifier of the data request.
-    /// @param _tallyReward The amount to be added to the tally reward.
+    /// @param _reward The amount to be added to the data request reward.
     function upgradeDataRequest(
         uint256 _id,
-        uint256,
-        uint256 _tallyReward
+        uint256 _reward
     )
         external
         payable
         override
-        payingRewards(msg.value, _tallyReward)
+        payingRewards(msg.value, _reward)
         resultNotIncluded(_id)
     {
         // If gas price is increased, then check if new rewards cover gas costs
         if (tx.gasprice > requests[_id].gasPrice) {
-            // Checks the tally reward is covering gas cost
+            // Checks the reward is covering gas cost
             uint256 minResultReward =
-                SafeMath.mul(tx.gasprice, MAX_REPORT_RESULT_GAS);
+                SafeMath.mul(tx.gasprice, ESTIMATED_REPORT_RESULT_GAS);
             require(
-                _tallyReward >= minResultReward,
+                _reward >= minResultReward,
                 "Result reward should cover gas expenses. Check the estimateGasCost method."
             );
             requests[_id].gasPrice = tx.gasprice;
         }
 
         // Update data request reward
-        requests[_id].tallyReward = SafeMath.add(
-            requests[_id].tallyReward,
-            _tallyReward
+        requests[_id].reward = SafeMath.add(
+            requests[_id].reward,
+            _reward
         );
     }
 
@@ -188,7 +186,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
         requests[_id].drHash = _drHash;
         requests[_id].result = _result;
-        msg.sender.transfer(requests[_id].tallyReward);
+        msg.sender.transfer(requests[_id].reward);
 
         emit PostedResult(msg.sender, _id);
     }
@@ -266,14 +264,14 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     }
 
     /// @dev Estimate the amount of reward we need to insert for a given gas price.
-    /// @param _gasPrice The gas price for which we need to calculate the rewards.
-    /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
+    /// @param _gasPrice The gas price for which we need to calculate the reward.
+    /// @return The reward to be included for the given gas price.
     function estimateGasCost(uint256 _gasPrice)
         public
         view
         override
-        returns (uint256, uint256, uint256)
+        returns (uint256)
     {
-        return ((0, SafeMath.mul(_gasPrice, MAX_REPORT_RESULT_GAS), 0));
+        return SafeMath.mul(_gasPrice, ESTIMATED_REPORT_RESULT_GAS);
     }
 }
