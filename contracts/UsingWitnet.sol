@@ -27,9 +27,8 @@ contract UsingWitnet {
   // Provides a convenient way for client contracts extending this to block the execution of the main logic of the
   // contract until a particular request has been successfully resolved by Witnet
   modifier witnetRequestResolved(uint256 _id) {
-
-      require(witnetCheckRequestResolved(_id), "Witnet request is not yet resolved by the Witnet network");
-      _;
+    require(witnetCheckRequestResolved(_id), "Witnet request is not yet resolved by the Witnet network");
+    _;
   }
 
  /**
