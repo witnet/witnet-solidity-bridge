@@ -42,4 +42,9 @@ contract UsingWitnetTestHelper is UsingWitnet {
     return result.asUint64();
   }
 
+  function _witnetCheckRequestResolved(uint256 _id) external view returns (bool) {
+  // If the result of the data request in Witnet is not the default, then it means that it has been reported as resolved.
+  return wrb.readResult(_id).length != 0;
+  }
+
 }

@@ -299,6 +299,15 @@ contract("WitnetRequestBoard", ([
         "Sender not authorized"
       )
     })
+    it("fails if drHash is zero", async () => {
+      await expectRevert(
+        this.WitnetRequestBoard.reportResult(
+          requestId, 0, resultHex,
+          { from: owner, gasPrice: 1 }
+        ),
+        "Data request transaction cannot be zero"
+      )
+    })
     it("fails if result was already reported", async () => {
       // Report data request result from Witnet to WitnetRequestBoard
       await this.WitnetRequestBoard.reportResult(

@@ -120,6 +120,10 @@ contract("UsingWitnet", accounts => {
       assert.equal(requestInfo.result, resultHex)
     })
 
+    it("should check if the request is resolved", async () => {
+      assert.equal(await clientContract._witnetCheckRequestResolved(requestId), true)
+    })
+
     it("should pull the result from the WRB back into the client contract", async () => {
       await clientContract._witnetReadResult(requestId, { from: accounts[0] })
       result = await clientContract.result()
@@ -169,6 +173,10 @@ contract("UsingWitnet", accounts => {
         }
       ))
       assert.equal(requestId.toString(16), "0x0000000000000000000000000000000000000000000000000000000000000001")
+    })
+
+    it("should check the request is not yet resolved", async () => {
+      assert.equal(await clientContract._witnetCheckRequestResolved(requestId), false)
     })
 
     it("should report the result in the WRB", async () => {
