@@ -45,7 +45,7 @@ contract UsingWitnet {
   * @notice Check if a request has been resolved by Witnet.
   * @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
   * parties) before this method returns `true`.
-  * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestBoard.
+  * @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
   * @return A boolean telling if the request has been already resolved or not.
   */
   function witnetCheckRequestResolved(uint256 _id) internal view returns (bool) {
@@ -56,7 +56,7 @@ contract UsingWitnet {
  /**
   * @notice Upgrade the reward for a Data Request previously included.
   * @dev Call to `upgrade_dr` function in the WitnetRequestBoard contract.
-  * @param _id The sequential identifier of a request that has been previously sent to the WitnetRequestBoard.
+  * @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
   */
   function witnetUpgradeRequest(uint256 _id) internal {
     wrb.upgradeDataRequest{value: msg.value}(_id);
@@ -65,7 +65,7 @@ contract UsingWitnet {
  /**
   * @notice Read the result of a resolved request.
   * @dev Call to `read_result` function in the WitnetRequestBoard contract.
-  * @param _id The sequential identifier of a request that was posted to Witnet.
+  * @param _id The unique identifier of a request that was posted to Witnet.
   * @return The result of the request as an instance of `Result`.
   */
   function witnetReadResult(uint256 _id) internal view returns (Witnet.Result memory) {

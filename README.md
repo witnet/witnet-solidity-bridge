@@ -94,7 +94,7 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
   - _inputs_:
     - *_id*: the sequential identifier of a request that has been previously sent to the WitnetRequestBoard.
   - _output_:
-    - aboolean telling if the request has been already resolved or not.
+    - a boolean telling if the request has been already resolved or not.
 
 
 ## Usage
@@ -140,10 +140,6 @@ contract Example is UsingWitnet {
 ·······················································|·············|·············|·············|···············
 |  WitnetRequestBoard                                  ·      1421528 ·     1442893 ·     1441825 ·      66.5 % │
 ·------------------------------------------------------|-------------|-------------|-------------|--------------·
-```
-
-```
-
 ```
 
 
