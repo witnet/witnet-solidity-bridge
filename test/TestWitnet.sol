@@ -18,13 +18,8 @@ contract WitnetTest {
     Assert.equal(Witnet.stageName(2), "tally", "Stage name for stage #1 should be \"tally\"");
   }
 
-  // Check that all the RADON errors are supported
-  function testErrorCodesSize() external {
-    Assert.equal(uint(Witnet.ErrorCodes.Size), uint(67), "Not every RADON error is supported in `Witnet.ErrorCodes`");
-  }
-
   // Test decoding of `RadonError` error codes
-  function testErrorCodes() external {
+  function testErrorCodes1() external {
     Witnet.ErrorCodes errorCodeEmpty = Witnet.resultFromCborBytes(hex"D82780").asErrorCode();
     Witnet.ErrorCodes errorCode0x00 = Witnet.resultFromCborBytes(hex"D8278100").asErrorCode();
     Witnet.ErrorCodes errorCode0x01 = Witnet.resultFromCborBytes(hex"D8278101").asErrorCode();
@@ -102,6 +97,75 @@ contract WitnetTest {
       uint(errorCode0x42),
       uint(Witnet.ErrorCodes.DivisionByZero),
       "Error code #0x42 should be `Witnet.ErrorCodes.DivisionByZero`"
+    );
+  }
+
+  function testErrorCodes2() external {
+    Witnet.ErrorCodes errorCode0x50 = Witnet.resultFromCborBytes(hex"D827811850").asErrorCode();
+    Witnet.ErrorCodes errorCode0x51 = Witnet.resultFromCborBytes(hex"D827811851").asErrorCode();
+    Witnet.ErrorCodes errorCode0x52 = Witnet.resultFromCborBytes(hex"D827811852").asErrorCode();
+    Witnet.ErrorCodes errorCode0x53 = Witnet.resultFromCborBytes(hex"D827811853").asErrorCode();
+    Witnet.ErrorCodes errorCode0x60 = Witnet.resultFromCborBytes(hex"D827811860").asErrorCode();
+    Witnet.ErrorCodes errorCode0x70 = Witnet.resultFromCborBytes(hex"D827811870").asErrorCode();
+    Witnet.ErrorCodes errorCode0x71 = Witnet.resultFromCborBytes(hex"D827811871").asErrorCode();
+    Witnet.ErrorCodes errorCode0xE0 = Witnet.resultFromCborBytes(hex"D8278118E0").asErrorCode();
+    Witnet.ErrorCodes errorCode0xE1 = Witnet.resultFromCborBytes(hex"D8278118E1").asErrorCode();
+    Witnet.ErrorCodes errorCode0xE2 = Witnet.resultFromCborBytes(hex"D8278118E2").asErrorCode();
+    Witnet.ErrorCodes errorCode0xFF = Witnet.resultFromCborBytes(hex"D8278118FF").asErrorCode();
+    Assert.equal(
+      uint(errorCode0x50),
+      uint(Witnet.ErrorCodes.NoReveals),
+      "Error code #0x50 should be `Witnet.ErrorCodes.NoReveals`"
+    );
+    Assert.equal(
+      uint(errorCode0x51),
+      uint(Witnet.ErrorCodes.InsufficientConsensus),
+      "Error code #0x51 should be `Witnet.ErrorCodes.InsufficientConsensus`"
+    );
+    Assert.equal(
+      uint(errorCode0x52),
+      uint(Witnet.ErrorCodes.InsufficientCommits),
+      "Error code #0x52 should be `Witnet.ErrorCodes.InsufficientCommits`"
+    );
+    Assert.equal(
+      uint(errorCode0x53),
+      uint(Witnet.ErrorCodes.TallyExecution),
+      "Error code #0x53 should be `Witnet.ErrorCodes.TallyExecution`"
+    );
+    Assert.equal(
+      uint(errorCode0x60),
+      uint(Witnet.ErrorCodes.MalformedReveal),
+      "Error code #0x60 should be `Witnet.ErrorCodes.MalformedReveal`"
+    );
+    Assert.equal(
+      uint(errorCode0x70),
+      uint(Witnet.ErrorCodes.ArrayIndexOutOfBounds),
+      "Error code #0x70 should be `Witnet.ErrorCodes.ArrayIndexOutOfBounds`"
+    );
+    Assert.equal(
+      uint(errorCode0x71),
+      uint(Witnet.ErrorCodes.MapKeyNotFound),
+      "Error code #0x71 should be `Witnet.ErrorCodes.MapKeyNotFound`"
+    );
+    Assert.equal(
+      uint(errorCode0xE0),
+      uint(Witnet.ErrorCodes.BridgeMalformedRequest),
+      "Error code #0xE0 should be `Witnet.ErrorCodes.BridgeMalformedRequest`"
+    );
+    Assert.equal(
+      uint(errorCode0xE1),
+      uint(Witnet.ErrorCodes.BridgeWeakIncentives),
+      "Error code #0xE1 should be `Witnet.ErrorCodes.BridgeWeakIncentives`"
+    );
+    Assert.equal(
+      uint(errorCode0xE2),
+      uint(Witnet.ErrorCodes.BridgeOversizedResult),
+      "Error code #0xE2 should be `Witnet.ErrorCodes.BridgeOversizedResult`"
+    );
+    Assert.equal(
+      uint(errorCode0xFF),
+      uint(Witnet.ErrorCodes.UnhandledIntercept),
+      "Error code #0xFF should be `Witnet.ErrorCodes.UnhandledIntercept`"
     );
   }
 

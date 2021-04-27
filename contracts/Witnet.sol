@@ -114,7 +114,218 @@ library Witnet {
     Overflow,
     /// 0x42: Tried to divide by zero.
     DivisionByZero,
-    Size
+    /// Unallocated
+    Math0x43,
+    Math0x44,
+    Math0x45,
+    Math0x46,
+    Math0x47,
+    Math0x48,
+    Math0x49,
+    Math0x4A,
+    Math0x4B,
+    Math0x4C,
+    Math0x4D,
+    Math0x4E,
+    Math0x4F,
+    // Other errors
+    /// 0x50: Received zero reveals
+    NoReveals,
+    /// 0x51: Insufficient consensus in tally precondition clause
+    InsufficientConsensus,
+    /// 0x52: Received zero commits
+    InsufficientCommits,
+    /// 0x53: Generic error during tally execution
+    TallyExecution,
+    /// Unallocated
+    OtherError0x54,
+    OtherError0x55,
+    OtherError0x56,
+    OtherError0x57,
+    OtherError0x58,
+    OtherError0x59,
+    OtherError0x5A,
+    OtherError0x5B,
+    OtherError0x5C,
+    OtherError0x5D,
+    OtherError0x5E,
+    OtherError0x5F,
+    /// 0x60: Invalid reveal serialization (malformed reveals are converted to this value)
+    MalformedReveal,
+    /// Unallocated
+    OtherError0x61,
+    OtherError0x62,
+    OtherError0x63,
+    OtherError0x64,
+    OtherError0x65,
+    OtherError0x66,
+    OtherError0x67,
+    OtherError0x68,
+    OtherError0x69,
+    OtherError0x6A,
+    OtherError0x6B,
+    OtherError0x6C,
+    OtherError0x6D,
+    OtherError0x6E,
+    OtherError0x6F,
+    // Access errors
+    /// 0x70: Tried to access a value from an index using an index that is out of bounds
+    ArrayIndexOutOfBounds,
+    /// 0x71: Tried to access a value from a map using a key that does not exist
+    MapKeyNotFound,
+    /// Unallocated
+    OtherError0x72,
+    OtherError0x73,
+    OtherError0x74,
+    OtherError0x75,
+    OtherError0x76,
+    OtherError0x77,
+    OtherError0x78,
+    OtherError0x79,
+    OtherError0x7A,
+    OtherError0x7B,
+    OtherError0x7C,
+    OtherError0x7D,
+    OtherError0x7E,
+    OtherError0x7F,
+    OtherError0x80,
+    OtherError0x81,
+    OtherError0x82,
+    OtherError0x83,
+    OtherError0x84,
+    OtherError0x85,
+    OtherError0x86,
+    OtherError0x87,
+    OtherError0x88,
+    OtherError0x89,
+    OtherError0x8A,
+    OtherError0x8B,
+    OtherError0x8C,
+    OtherError0x8D,
+    OtherError0x8E,
+    OtherError0x8F,
+    OtherError0x90,
+    OtherError0x91,
+    OtherError0x92,
+    OtherError0x93,
+    OtherError0x94,
+    OtherError0x95,
+    OtherError0x96,
+    OtherError0x97,
+    OtherError0x98,
+    OtherError0x99,
+    OtherError0x9A,
+    OtherError0x9B,
+    OtherError0x9C,
+    OtherError0x9D,
+    OtherError0x9E,
+    OtherError0x9F,
+    OtherError0xA0,
+    OtherError0xA1,
+    OtherError0xA2,
+    OtherError0xA3,
+    OtherError0xA4,
+    OtherError0xA5,
+    OtherError0xA6,
+    OtherError0xA7,
+    OtherError0xA8,
+    OtherError0xA9,
+    OtherError0xAA,
+    OtherError0xAB,
+    OtherError0xAC,
+    OtherError0xAD,
+    OtherError0xAE,
+    OtherError0xAF,
+    OtherError0xB0,
+    OtherError0xB1,
+    OtherError0xB2,
+    OtherError0xB3,
+    OtherError0xB4,
+    OtherError0xB5,
+    OtherError0xB6,
+    OtherError0xB7,
+    OtherError0xB8,
+    OtherError0xB9,
+    OtherError0xBA,
+    OtherError0xBB,
+    OtherError0xBC,
+    OtherError0xBD,
+    OtherError0xBE,
+    OtherError0xBF,
+    OtherError0xC0,
+    OtherError0xC1,
+    OtherError0xC2,
+    OtherError0xC3,
+    OtherError0xC4,
+    OtherError0xC5,
+    OtherError0xC6,
+    OtherError0xC7,
+    OtherError0xC8,
+    OtherError0xC9,
+    OtherError0xCA,
+    OtherError0xCB,
+    OtherError0xCC,
+    OtherError0xCD,
+    OtherError0xCE,
+    OtherError0xCF,
+    OtherError0xD0,
+    OtherError0xD1,
+    OtherError0xD2,
+    OtherError0xD3,
+    OtherError0xD4,
+    OtherError0xD5,
+    OtherError0xD6,
+    OtherError0xD7,
+    OtherError0xD8,
+    OtherError0xD9,
+    OtherError0xDA,
+    OtherError0xDB,
+    OtherError0xDC,
+    OtherError0xDD,
+    OtherError0xDE,
+    OtherError0xDF,
+    // Bridge errors: errors that only belong in inter-client communication
+    /// 0xE0: Requests that cannot be parsed must always get this error as their result.
+    /// However, this is not a valid result in a Tally transaction, because invalid requests
+    /// are never included into blocks and therefore never get a Tally in response.
+    BridgeMalformedRequest,
+    /// 0xE1: Witnesses exceeds 100
+    BridgeWeakIncentives,
+    /// 0xE2: The request is rejected on the grounds that it may cause the submitter to spend or stake an
+    /// amount of value that is unjustifiably high when compared with the reward they will be getting
+    BridgeOversizedResult,
+    /// Unallocated
+    OtherError0xE3,
+    OtherError0xE4,
+    OtherError0xE5,
+    OtherError0xE6,
+    OtherError0xE7,
+    OtherError0xE8,
+    OtherError0xE9,
+    OtherError0xEA,
+    OtherError0xEB,
+    OtherError0xEC,
+    OtherError0xED,
+    OtherError0xEE,
+    OtherError0xEF,
+    OtherError0xF0,
+    OtherError0xF1,
+    OtherError0xF2,
+    OtherError0xF3,
+    OtherError0xF4,
+    OtherError0xF5,
+    OtherError0xF6,
+    OtherError0xF7,
+    OtherError0xF8,
+    OtherError0xF9,
+    OtherError0xFA,
+    OtherError0xFB,
+    OtherError0xFC,
+    OtherError0xFD,
+    OtherError0xFE,
+    // This should not exist:
+    /// 0xFF: Some tally error is not intercepted but should
+    UnhandledIntercept
   }
 
   /*
@@ -398,17 +609,12 @@ library Witnet {
   }
 
   /**
-  * @notice Get an `ErrorCodes` item from its `uint64` discriminant, or default to `ErrorCodes.Unknown` if it doesn't
-  * exist.
+  * @notice Get an `ErrorCodes` item from its `uint64` discriminant.
   * @param _discriminant The numeric identifier of an error.
   * @return A member of `ErrorCodes`.
   */
   function supportedErrorOrElseUnknown(uint64 _discriminant) private pure returns(ErrorCodes) {
-    if (_discriminant < uint8(ErrorCodes.Size)) {
       return ErrorCodes(_discriminant);
-    } else {
-      return ErrorCodes.Unknown;
-    }
   }
 
   /**
