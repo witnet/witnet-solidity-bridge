@@ -30,8 +30,9 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     // Owner of the Witnet Request Board
     address public witnet;
 
-    // List of addresses authorized to report data request
-    address[] public committee;
+
+    // Map of addresses to a bool, true if they are committee members
+    mapping(address => bool) public isInCommittee;
 
     // Witnet Requests within the board
     DataRequest[] public requests;
@@ -44,14 +45,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
     // Only the committee defined when deploying the contract should be able to report results
     modifier isAuthorized() {
-        bool senderAuthorized = false;
-        for (uint256 i; i < committee.length; i++) {
-            if (committee[i] == msg.sender) {
-                senderAuthorized = true;
-                break;
-            }
-        }
-        require(senderAuthorized == true, "Sender not authorized");
+        require(isInCommittee[msg.sender] == true, "Sender not authorized");
         _;
     }
 
@@ -83,8 +77,11 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     /// @param _committee list of authorized addresses.
     constructor(address[] memory _committee) public {
         witnet = msg.sender;
-        committee = _committee;
-        // Insert an empty request so as to initialize the requests array with length > 0
+
+        for (uint256 i; i < _committee.length; i++) {
+            isInCommittee[_committee[i]] = true;
+        }
+    // Insert an empty request so as to initialize the requests array with length > 0
         DataRequest memory request;
         requests.push(request);
     }
