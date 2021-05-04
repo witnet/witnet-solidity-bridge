@@ -290,7 +290,7 @@ library Witnet {
     /// are never included into blocks and therefore never get a Tally in response.
     BridgeMalformedRequest,
     /// 0xE1: Witnesses exceeds 100
-    BridgeWeakIncentives,
+    BridgePoorIncentives,
     /// 0xE2: The request is rejected on the grounds that it may cause the submitter to spend or stake an
     /// amount of value that is unjustifiably high when compared with the reward they will be getting
     BridgeOversizedResult,

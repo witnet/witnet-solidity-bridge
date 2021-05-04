@@ -154,8 +154,8 @@ contract WitnetTest {
     );
     Assert.equal(
       uint(errorCode0xE1),
-      uint(Witnet.ErrorCodes.BridgeWeakIncentives),
-      "Error code #0xE1 should be `Witnet.ErrorCodes.BridgeWeakIncentives`"
+      uint(Witnet.ErrorCodes.BridgePoorIncentives),
+      "Error code #0xE1 should be `Witnet.ErrorCodes.BridgePoorIncentives`"
     );
     Assert.equal(
       uint(errorCode0xE2),
