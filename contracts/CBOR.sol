@@ -31,6 +31,23 @@ library CBOR {
   }
 
   /**
+   * @notice Decode a `CBOR.Value` structure into a native `bool` value.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as a `bool` value.
+   */
+  function decodeBool(Value memory _cborValue) public pure returns(bool) {
+    _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
+    require(_cborValue.majorType == 7, "Tried to read a `fixed` value from a `CBOR.Value` with majorType != 7");
+    if (_cborValue.len == 20) {
+      return false;
+    } else if (_cborValue.len == 21) {
+      return true;
+    } else {
+      revert("Tried to read `bool` from a `CBOR.Value` with an invalid len");
+    }
+  }
+
+  /**
    * @notice Decode a `CBOR.Value` structure into a native `bytes` value.
    * @param _cborValue An instance of `CBOR.Value`.
    * @return The value represented by the input, as a `bytes` value.
