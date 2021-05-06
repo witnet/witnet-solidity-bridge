@@ -13,6 +13,21 @@ contract TestCBOR {
   event Log(string _topic, uint256 _value);
   event Log(string _topic, bytes _value);
 
+  function testBoolDecode() external {
+    bool decodedFalse = CBOR.valueFromBytes(hex"f4").decodeBool();
+    bool decodedTrue = CBOR.valueFromBytes(hex"f5").decodeBool();
+    Assert.equal(
+      decodedFalse,
+      false,
+      "CBOR-encoded false value should be decoded into a CBOR.Value containing the correct bool false value"
+    );
+    Assert.equal(
+      decodedTrue,
+      true,
+      "CBOR-encoded true value should be decoded into a CBOR.Value containing the correct bool true value"
+    );
+  }
+
   function testUint64DecodeDiscriminant() external {
     CBOR.Value memory decoded = CBOR.valueFromBytes(hex"1b0020000000000000");
     Assert.equal(uint(decoded.majorType), 0, "CBOR-encoded Uint64 value should be decoded into a CBOR.Value with major type 0");
