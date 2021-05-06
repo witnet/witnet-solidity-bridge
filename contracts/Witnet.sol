@@ -526,7 +526,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `int128[]` decoded from the Result.
    */
-  function asFixed16Array(Result memory _result) public pure returns(int128[] memory) {
+  function asFixed16Array(Result memory _result) public pure returns(int32[] memory) {
     require(_result.success, "Tried to read `fixed16[]` value from errored Result");
     return _result.cborValue.decodeFixed16Array();
   }

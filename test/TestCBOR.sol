@@ -281,11 +281,12 @@ contract TestCBOR {
 
   function testFixed16ArrayDecode() external {
     bytes memory encoded = hex"84f93c80f9c080f94290f9C249";
-    int128[] memory decoded = CBOR.valueFromBytes(encoded).decodeFixed16Array();
-    int128[4] memory expected = [
-      int128(11250),int128(-22500),
-      int128(32812),
-      int128(-31425)
+    int32[] memory decoded = CBOR.valueFromBytes(encoded).decodeFixed16Array();
+    int32[4] memory expected = [
+      int32(11250),
+      int32(-22500),
+      int32(32812),
+      int32(-31425)
     ];
 
     Assert.equal(
