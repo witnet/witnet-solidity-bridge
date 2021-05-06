@@ -15,16 +15,16 @@ library Witnet {
   using CBOR for CBOR.Value;
 
   /*
-    STRUCTS
-  */
+   *  STRUCTS
+   */
   struct Result {
     bool success;
     CBOR.Value cborValue;
   }
 
   /*
-    ENUMS
-  */
+   *  ENUMS
+   */
   enum ErrorCodes {
     // 0x00: Unknown error. Something went really bad!
     Unknown,
@@ -329,10 +329,10 @@ library Witnet {
   }
 
   /*
-  Result impl's
-  */
+   * Result impl's
+   */
 
- /**
+  /**
    * @notice Decode raw CBOR bytes into a Result instance.
    * @param _cborBytes Raw bytes representing a CBOR-encoded value.
    * @return A `Result` instance.
@@ -342,7 +342,7 @@ library Witnet {
     return resultFromCborValue(cborValue);
   }
 
- /**
+  /**
    * @notice Decode a CBOR value into a Result instance.
    * @param _cborValue An instance of `CBOR.Value`.
    * @return A `Result` instance.
@@ -609,10 +609,10 @@ library Witnet {
   }
 
   /**
-  * @notice Get an `ErrorCodes` item from its `uint64` discriminant.
-  * @param _discriminant The numeric identifier of an error.
-  * @return A member of `ErrorCodes`.
-  */
+   * @notice Get an `ErrorCodes` item from its `uint64` discriminant.
+   * @param _discriminant The numeric identifier of an error.
+   * @return A member of `ErrorCodes`.
+   */
   function supportedErrorOrElseUnknown(uint64 _discriminant) private pure returns(ErrorCodes) {
       return ErrorCodes(_discriminant);
   }
@@ -643,10 +643,10 @@ library Witnet {
   }
 
   /**
- * @notice Convert a `uint64` into a 2 characters long `string` representing its two less significant hexadecimal values.
- * @param _u A `uint64` value.
- * @return The `string` representing its hexadecimal value.
- */
+   * @notice Convert a `uint64` into a 2 characters long `string` representing its two less significant hexadecimal values.
+   * @param _u A `uint64` value.
+   * @return The `string` representing its hexadecimal value.
+   */
   function utohex(uint64 _u) private pure returns(string memory) {
     bytes memory b2 = new bytes(2);
     uint8 d0 = uint8(_u / 16) + 48;

@@ -30,7 +30,6 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     // Owner of the Witnet Request Board
     address public witnet;
 
-
     // Map of addresses to a bool, true if they are committee members
     mapping(address => bool) public isInCommittee;
 
@@ -77,11 +76,10 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     /// @param _committee list of authorized addresses.
     constructor(address[] memory _committee) public {
         witnet = msg.sender;
-
         for (uint256 i; i < _committee.length; i++) {
             isInCommittee[_committee[i]] = true;
         }
-    // Insert an empty request so as to initialize the requests array with length > 0
+        // Insert an empty request so as to initialize the requests array with length > 0
         DataRequest memory request;
         requests.push(request);
     }

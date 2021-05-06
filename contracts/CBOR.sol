@@ -86,12 +86,12 @@ library CBOR {
     return _cborValue.buffer.readFloat16();
   }
 
- /**
-  * @notice Decode a `CBOR.Value` structure into a native `int128[]` value whose inner values follow the same convention.
-  * as explained in `decodeFixed16`.
-  * @param _cborValue An instance of `CBOR.Value`.
-  * @return The value represented by the input, as an `int128[]` value.
-  */
+  /**
+   * @notice Decode a `CBOR.Value` structure into a native `int128[]` value whose inner values follow the same convention.
+   * as explained in `decodeFixed16`.
+   * @param _cborValue An instance of `CBOR.Value`.
+   * @return The value represented by the input, as an `int128[]` value.
+   */
   function decodeFixed16Array(Value memory _cborValue) public pure returns(int32[] memory) {
     require(_cborValue.majorType == 4, "Tried to read `int128[]` from a `CBOR.Value` with majorType != 4");
 
