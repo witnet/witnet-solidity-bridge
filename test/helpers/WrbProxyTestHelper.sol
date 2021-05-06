@@ -20,7 +20,7 @@ contract WrbProxyTestHelper is WitnetRequestBoardProxy {
   }
 
   function getWrbAddress() external view returns(address) {
-    return witnetRequestBoardAddress;
+    return address(currentWitnetRequestBoard);
   }
 
   function getControllerAddress(uint256 _id) external view returns(address) {
