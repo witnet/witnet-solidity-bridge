@@ -28,7 +28,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     }
 
     // Owner of the Witnet Request Board
-    address public witnet;
+    address public owner;
 
     // Map of addresses to a bool, true if they are committee members
     mapping(address => bool) public isInCommittee;
@@ -75,7 +75,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     /// @notice Initilizes a centralized Witnet Request Board with an authorized committee.
     /// @param _committee list of authorized addresses.
     constructor(address[] memory _committee) public {
-        witnet = msg.sender;
+        owner = msg.sender;
         for (uint256 i; i < _committee.length; i++) {
             isInCommittee[_committee[i]] = true;
         }
@@ -233,7 +233,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         override
         returns (bool)
     {
-        if (_address == witnet) {
+        if (_address == owner) {
             return true;
         }
         return false;
