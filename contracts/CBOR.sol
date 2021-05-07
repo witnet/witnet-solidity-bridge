@@ -37,13 +37,13 @@ library CBOR {
    */
   function decodeBool(Value memory _cborValue) public pure returns(bool) {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(_cborValue.majorType == 7, "Tried to read a `fixed` value from a `CBOR.Value` with majorType != 7");
+    require(_cborValue.majorType == 7, "Tried to read a `bool` value from a `CBOR.Value` with majorType != 7");
     if (_cborValue.len == 20) {
       return false;
     } else if (_cborValue.len == 21) {
       return true;
     } else {
-      revert("Tried to read `bool` from a `CBOR.Value` with an invalid len");
+      revert("Tried to read `bool` from a `CBOR.Value` with len different than 20 or 21");
     }
   }
 

@@ -28,6 +28,17 @@ contract TestCBOR {
     );
   }
 
+  function helperDecodeBoolRevert() public pure {
+    CBOR.valueFromBytes(hex"f6").decodeBool();
+  }
+
+  function testBoolDecodeRevert() external {
+    bool r;
+    // solhint-disable-next-line avoid-low-level-calls
+    (r,) = address(this).call(abi.encodePacked(this.helperDecodeBoolRevert.selector));
+    Assert.isFalse(r, "Invalid CBOR-encoded bool value should revert in decodeBool function");
+  }
+
   function testUint64DecodeDiscriminant() external {
     CBOR.Value memory decoded = CBOR.valueFromBytes(hex"1b0020000000000000");
     Assert.equal(uint(decoded.majorType), 0, "CBOR-encoded Uint64 value should be decoded into a CBOR.Value with major type 0");
