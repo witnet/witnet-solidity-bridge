@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity >=0.7.0 <0.9.0;
+pragma experimental ABIEncoderV2;
 
 import "truffle/Assert.sol";
 import "../contracts/Witnet.sol";
@@ -15,6 +16,7 @@ contract WitnetTest {
     Assert.equal(Witnet.stageName(0), "retrieval", "Stage name for stage #1 should be \"retrieval\"");
     Assert.equal(Witnet.stageName(1), "aggregation", "Stage name for stage #1 should be \"aggregation\"");
     Assert.equal(Witnet.stageName(2), "tally", "Stage name for stage #1 should be \"tally\"");
+    
   }
 
   // Test decoding of `RadonError` error codes
@@ -255,4 +257,27 @@ contract WitnetTest {
       "Error message for an unknown error should be properly formatted"
     );
   }
+
+  function testBridgeErrorMessages() external { 
+    (, string memory errorMessage0xE0) = Witnet.resultFromCborBytes(hex"D8278118E0").asErrorMessage();
+    (, string memory errorMessage0xE1) = Witnet.resultFromCborBytes(hex"D8278118E1").asErrorMessage();
+    (, string memory errorMessage0xE2) = Witnet.resultFromCborBytes(hex"D8278118E2").asErrorMessage();  
+
+    Assert.equal(
+      errorMessage0xE0,
+      "The structure of the request is invalid and it cannot be parsed",
+      "Error message failed (0xE0)"
+    );
+    Assert.equal(
+      errorMessage0xE1,
+      "The request has been rejected by the bridge node due to poor incentives",
+      "Error message failed (0xE1)"
+    );
+    Assert.equal(
+      errorMessage0xE2,
+      "The request result length exceeds a bridge contract defined limit",
+      "Error message failed (0xE2)"
+    );
+  }
+
 }

@@ -402,7 +402,8 @@ library Witnet {
    * @param _result An instance of `Result`.
    * @return A tuple containing the `CBORValue.Error memory` decoded from the `Result`, plus a loggable error message.
    */
-  function asErrorMessage(Result memory _result) external pure returns(ErrorCodes, string memory) {
+
+  function asErrorMessage(Result memory _result) public pure returns (ErrorCodes, string memory) {
     uint64[] memory error = asRawError(_result);
     if (error.length == 0) {
       return (ErrorCodes.Unknown, "Unknown error (no error code)");
@@ -411,88 +412,94 @@ library Witnet {
     bytes memory errorMessage;
 
     if (errorCode == ErrorCodes.SourceScriptNotCBOR && error.length >= 2) {
-      errorMessage = abi.encodePacked("Source script #", utoa(error[1]), " was not a valid CBOR value");
+        errorMessage = abi.encodePacked("Source script #", utoa(error[1]), " was not a valid CBOR value");
     } else if (errorCode == ErrorCodes.SourceScriptNotArray && error.length >= 2) {
-      errorMessage = abi.encodePacked("The CBOR value in script #", utoa(error[1]), " was not an Array of calls");
+        errorMessage = abi.encodePacked("The CBOR value in script #", utoa(error[1]), " was not an Array of calls");
     } else if (errorCode == ErrorCodes.SourceScriptNotRADON && error.length >= 2) {
-      errorMessage = abi.encodePacked("The CBOR value in script #", utoa(error[1]), " was not a valid RADON script");
+        errorMessage = abi.encodePacked("The CBOR value in script #", utoa(error[1]), " was not a valid RADON script");
     } else if (errorCode == ErrorCodes.RequestTooManySources && error.length >= 2) {
-      errorMessage = abi.encodePacked("The request contained too many sources (", utoa(error[1]), ")");
+        errorMessage = abi.encodePacked("The request contained too many sources (", utoa(error[1]), ")");
     } else if (errorCode == ErrorCodes.ScriptTooManyCalls && error.length >= 4) {
-      errorMessage = abi.encodePacked(
-        "Script #",
-        utoa(error[2]),
-        " from the ",
-        stageName(error[1]),
-        " stage contained too many calls (",
-        utoa(error[3]),
-        ")"
-      );
+        errorMessage = abi.encodePacked(
+          "Script #",
+          utoa(error[2]),
+          " from the ",
+          stageName(error[1]),
+          " stage contained too many calls (",
+          utoa(error[3]),
+          ")"
+        );
     } else if (errorCode == ErrorCodes.UnsupportedOperator && error.length >= 5) {
-      errorMessage = abi.encodePacked(
-      "Operator code 0x",
-        utohex(error[4]),
-        " found at call #",
-        utoa(error[3]),
-        " in script #",
-        utoa(error[2]),
-        " from ",
-        stageName(error[1]),
-        " stage is not supported"
-      );
+        errorMessage = abi.encodePacked(
+        "Operator code 0x",
+          utohex(error[4]),
+          " found at call #",
+          utoa(error[3]),
+          " in script #",
+          utoa(error[2]),
+          " from ",
+          stageName(error[1]),
+          " stage is not supported"
+        );
     } else if (errorCode == ErrorCodes.HTTP && error.length >= 3) {
-      errorMessage = abi.encodePacked(
-        "Source #",
-        utoa(error[1]),
-        " could not be retrieved. Failed with HTTP error code: ",
-        utoa(error[2] / 100),
-        utoa(error[2] % 100 / 10),
-        utoa(error[2] % 10)
-      );
+        errorMessage = abi.encodePacked(
+          "Source #",
+          utoa(error[1]),
+          " could not be retrieved. Failed with HTTP error code: ",
+          utoa(error[2] / 100),
+          utoa(error[2] % 100 / 10),
+          utoa(error[2] % 10)
+        );
     } else if (errorCode == ErrorCodes.RetrievalTimeout && error.length >= 2) {
-      errorMessage = abi.encodePacked(
-        "Source #",
-        utoa(error[1]),
-        " could not be retrieved because of a timeout."
-      );
+        errorMessage = abi.encodePacked(
+          "Source #",
+          utoa(error[1]),
+          " could not be retrieved because of a timeout."
+        );
     } else if (errorCode == ErrorCodes.Underflow && error.length >= 5) {
-      errorMessage = abi.encodePacked(
-        "Underflow at operator code 0x",
-        utohex(error[4]),
-        " found at call #",
-        utoa(error[3]),
-        " in script #",
-        utoa(error[2]),
-        " from ",
-        stageName(error[1]),
-        " stage"
-      );
+        errorMessage = abi.encodePacked(
+          "Underflow at operator code 0x",
+          utohex(error[4]),
+          " found at call #",
+          utoa(error[3]),
+          " in script #",
+          utoa(error[2]),
+          " from ",
+          stageName(error[1]),
+          " stage"
+        );
     } else if (errorCode == ErrorCodes.Overflow && error.length >= 5) {
-      errorMessage = abi.encodePacked(
-        "Overflow at operator code 0x",
-        utohex(error[4]),
-        " found at call #",
-        utoa(error[3]),
-        " in script #",
-        utoa(error[2]),
-        " from ",
-        stageName(error[1]),
-        " stage"
-      );
+        errorMessage = abi.encodePacked(
+          "Overflow at operator code 0x",
+          utohex(error[4]),
+          " found at call #",
+          utoa(error[3]),
+          " in script #",
+          utoa(error[2]),
+          " from ",
+          stageName(error[1]),
+          " stage"
+        );
     } else if (errorCode == ErrorCodes.DivisionByZero && error.length >= 5) {
-      errorMessage = abi.encodePacked(
-        "Division by zero at operator code 0x",
-        utohex(error[4]),
-        " found at call #",
-        utoa(error[3]),
-        " in script #",
-        utoa(error[2]),
-        " from ",
-        stageName(error[1]),
-        " stage"
-      );
+        errorMessage = abi.encodePacked(
+          "Division by zero at operator code 0x",
+          utohex(error[4]),
+          " found at call #",
+          utoa(error[3]),
+          " in script #",
+          utoa(error[2]),
+          " from ",
+          stageName(error[1]),
+          " stage"
+        );
+    } else if (errorCode == ErrorCodes.BridgeMalformedRequest) {
+        errorMessage = "The structure of the request is invalid and it cannot be parsed";
+    } else if (errorCode == ErrorCodes.BridgePoorIncentives) {
+        errorMessage = "The request has been rejected by the bridge node due to poor incentives";
+    } else if (errorCode == ErrorCodes.BridgeOversizedResult) {
+        errorMessage = "The request result length exceeds a bridge contract defined limit";
     } else {
-      errorMessage = abi.encodePacked("Unknown error (0x", utohex(error[0]), ")");
+        errorMessage = abi.encodePacked("Unknown error (0x", utohex(error[0]), ")");
     }
 
     return (errorCode, string(errorMessage));
