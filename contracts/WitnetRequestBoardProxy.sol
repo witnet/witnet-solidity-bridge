@@ -42,9 +42,10 @@ contract WitnetRequestBoardProxy {
   /// =======================================================================
   /// --- Constructor -------------------------------------------------------
 
+  /// @notice Constructor: initialize controllers list
+    constructor() public {
     // Initialize the first epoch pointing to the first controller
-    controllers.push(ControllerInfo({controllerAddress: _witnetRequestBoardAddress, lastId: 0}));
-    currentWitnetRequestBoard = WitnetRequestBoardInterface(_witnetRequestBoardAddress);
+    controllers.push(ControllerInfo({controllerAddress: address(0), lastId: 0}));
   }
 
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
@@ -109,11 +110,17 @@ contract WitnetRequestBoardProxy {
 
   /// @notice Upgrades the Witnet Requests Board if the current one is upgradeable.
   /// @param _newAddress address of the new block relay to upgrade.
-  function upgradeWitnetRequestBoard(address _newAddress) external notIdentical(_newAddress) {
-    // Require the WRB is upgradable
-    require(currentWitnetRequestBoard.isUpgradable(msg.sender), "The upgrade has been rejected by the current implementation");
+  function upgradeWitnetRequestBoard(address _newAddress) public notIdentical(_newAddress) {
+    // Require current WRB to be upgradable:
+    require(
+        address(currentWitnetRequestBoard) == address(0) 
+          || currentWitnetRequestBoard.isUpgradable(msg.sender)
+        , "The upgrade has been rejected by the current implementation"
+      );
+
     // Map the currentLastId to the corresponding witnetRequestBoardAddress and add it to controllers
     controllers.push(ControllerInfo({controllerAddress: _newAddress, lastId: currentLastId}));
+
     // Upgrade the WRB
     currentWitnetRequestBoard = WitnetRequestBoardInterface(_newAddress);
   }
