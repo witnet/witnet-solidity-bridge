@@ -21,10 +21,11 @@ contract("UsingWitnet", accounts => {
     let witnet, clientContract, wrb, wrbProxy, request, requestId, result
     let lastAccount0Balance
 
-    before(async () => {
+    before(async () => {  
       witnet = await Witnet.deployed()
       wrb = await WRB.new([accounts[0]])
-      wrbProxy = await WRBProxy.new(wrb.address)
+      wrbProxy = await WRBProxy.deployed()
+      await wrbProxy.upgradeWitnetRequestBoard(wrb.address)
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(wrbProxy.address)
       lastAccount0Balance = await web3.eth.getBalance(accounts[0])
