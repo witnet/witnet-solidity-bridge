@@ -29,16 +29,19 @@ contract WitnetRequestBoardProxy {
   // Array with the controllers that have been used in the Proxy
   ControllerInfo[] internal controllers;
 
+
+  /// =======================================================================
+  /// --- Modifiers ---------------------------------------------------------
+
   modifier notIdentical(address _newAddress) {
     require(_newAddress != address(currentWitnetRequestBoard), "The provided Witnet Requests Board instance address is already in use");
     _;
   }
 
- /**
-  * @notice Include an address to specify the Witnet Request Board.
-  * @param _witnetRequestBoardAddress WitnetRequestBoard address.
-  */
-  constructor(address _witnetRequestBoardAddress) public {
+
+  /// =======================================================================
+  /// --- Constructor -------------------------------------------------------
+
     // Initialize the first epoch pointing to the first controller
     controllers.push(ControllerInfo({controllerAddress: _witnetRequestBoardAddress, lastId: 0}));
     currentWitnetRequestBoard = WitnetRequestBoardInterface(_witnetRequestBoardAddress);
