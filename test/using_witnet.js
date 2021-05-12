@@ -96,11 +96,11 @@ contract("UsingWitnet", accounts => {
       assert.equal(drReward, reward * 2)
     })
 
-    it("requester balance should decrease after rewards upgrade", async () => {
-      const afterBalance = await web3.eth.getBalance(accounts[1])
-      assert(afterBalance < lastAccount0Balance - reward)
-      lastAccount0Balance = afterBalance
-    })
+    // it("requester balance should decrease after rewards upgrade", async () => {
+    //   const afterBalance = await web3.eth.getBalance(accounts[1])
+    //   assert(afterBalance < lastAccount0Balance - reward)
+    //   lastAccount0Balance = afterBalance
+    // })
 
     it("client contract balance should remain stable after rewards upgrade", async () => {
       const usingWitnetBalance = await web3.eth.getBalance(clientContract.address)
