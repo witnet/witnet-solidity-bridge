@@ -29,7 +29,7 @@ contract SingletonFactory {
      * @notice Deploys a deterministic address based on `_initCode` and `_salt`.
       using `_salt` for defining the deterministic address.
      * @param _initCode Initialization code.
-     * @param _initCall Calldata to be made to created contract
+     * @param _initCall Calldata to be made to created contract.
      * @param _salt Arbitrary value to modify resulting address.
      * @return createdContract Created contract address.
      */
@@ -41,6 +41,7 @@ contract SingletonFactory {
             createdContract := create2(0, add(_initCode, 0x20), mload(_initCode), _salt)
         }
         if (_initCall.length > 0) {
+            // solhint-disable-next-line avoid-low-level-calls
             (bool success, bytes memory reason) = createdContract.call(_initCall);
             require(success, string(reason));
         }
@@ -48,7 +49,7 @@ contract SingletonFactory {
 
 
     /**
-     * @notice Determine singleton contract address that might be created from this factory, given its `_initCode` and a `_salt`
+     * @notice Determine singleton contract address that might be created from this factory, given its `_initCode` and a `_salt`.
      * @param _initCode Initialization code.
      * @param _salt Arbitrary value to modify resulting address.
      * @return expectedAddr Expected contract address.
