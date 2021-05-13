@@ -21,7 +21,7 @@ contract("UsingWitnet", accounts => {
     let witnet, clientContract, wrb, wrbProxy, request, requestId, result
     let lastAccount0Balance
 
-    before(async () => {  
+    before(async () => {
       witnet = await Witnet.deployed()
       wrb = await WRB.new([accounts[0]])
       wrbProxy = await WRBProxy.deployed()
