@@ -54,15 +54,15 @@ library CBOR {
    */
   function decodeBytes(Value memory _cborValue) public pure returns(bytes memory) {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    if (_cborValue.len == UINT64_MAX) {
+    if (_cborValue.len == UINT32_MAX) {
       bytes memory bytesData;
 
       // These checks look repetitive but the equivalent loop would be more expensive.
       uint32 itemLength = uint32(readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType));
-      if (itemLength < UINT64_MAX) {
+      if (itemLength < UINT32_MAX) {
         bytesData = abi.encodePacked(bytesData, _cborValue.buffer.read(itemLength));
         itemLength = uint32(readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType));
-        if (itemLength < UINT64_MAX) {
+        if (itemLength < UINT32_MAX) {
           bytesData = abi.encodePacked(bytesData, _cborValue.buffer.read(itemLength));
         }
       }
