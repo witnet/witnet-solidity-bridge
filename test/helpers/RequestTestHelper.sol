@@ -20,11 +20,9 @@ contract RequestTestHelper is Request {
   */
   constructor(bytes memory _bytecode) public Request(_bytecode) {
     bytecode = _bytecode;
-    id = uint256(sha256(_bytecode));
   }
 
   function modifyBytecode(bytes memory _bytecode) public {
     bytecode = _bytecode;
-    id = uint256(sha256(_bytecode));
   }
 }

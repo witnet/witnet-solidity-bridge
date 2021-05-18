@@ -6,8 +6,6 @@ const Witnet = artifacts.require("Witnet")
 
 const truffleAssert = require("truffle-assertions")
 
-const sha = require("js-sha256")
-
 contract("UsingWitnet", accounts => {
   describe("UsingWitnet \"happy path\" test case. " +
     "This covers pretty much all the life cycle of a Witnet request.", () => {
@@ -33,12 +31,7 @@ contract("UsingWitnet", accounts => {
     it("should create a Witnet request", async () => {
       request = await Request.new(requestHex)
       const internalBytes = await request.bytecode()
-      // "droid" here stands for "data request output identifier"
-      const internalDroid = (await request.id()).toString(16)
-      const expectedDroid = sha.sha256(web3.utils.hexToBytes(requestHex))
-
       assert.equal(internalBytes, requestHex)
-      assert.equal(internalDroid, expectedDroid)
     })
 
     it("should post a Witnet request into the wrb", async () => {
@@ -156,12 +149,7 @@ contract("UsingWitnet", accounts => {
     it("should create a Witnet request", async () => {
       request = await Request.new(requestHex)
       const internalBytes = await request.bytecode()
-      // "droid" here stands for "data request output identifier"
-      const internalDroid = (await request.id()).toString(16)
-      const expectedDroid = sha.sha256(web3.utils.hexToBytes(requestHex))
-
       assert.equal(internalBytes, requestHex)
-      assert.equal(internalDroid, expectedDroid)
     })
 
     it("should pass the data request to the wrb", async () => {
