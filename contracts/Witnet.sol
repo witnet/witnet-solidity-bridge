@@ -509,6 +509,16 @@ library Witnet {
   }
 
   /**
+   * @notice Decode a boolean value from a Result as an `bool` value.
+   * @param _result An instance of Result.
+   * @return The `bool` decoded from the Result.
+   */
+  function asBool(Result memory _result) public pure returns(bool) {
+    require(_result.success, "Tried to read `bool` value from errored Result");
+    return _result.cborValue.decodeBool();
+  }
+
+  /**
    * @notice Decode a fixed16 (half-precision) numeric value from a Result as an `int32` value.
    * @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values.
    * by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`.
