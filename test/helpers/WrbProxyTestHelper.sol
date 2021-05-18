@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 
 import "../../contracts/WitnetRequestBoardProxy.sol";
 
@@ -13,7 +13,7 @@ import "../../contracts/WitnetRequestBoardProxy.sol";
  */
 contract WrbProxyTestHelper is WitnetRequestBoardProxy {
 
-  constructor (address _witnetRequestBoardAddress) public WitnetRequestBoardProxy(_witnetRequestBoardAddress) {}
+  constructor (address _witnetRequestBoardAddress) WitnetRequestBoardProxy(_witnetRequestBoardAddress) {}
 
   function checkLastId(uint256 _id) external view returns(bool) {
     return _id == currentLastId;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 pragma experimental ABIEncoderV2;
 
 import "truffle/Assert.sol";
@@ -188,7 +188,7 @@ contract ThrowProxy {
   address public target;
   bytes internal data;
 
-  constructor (address _target) public {
+  constructor (address _target) {
     target = _target;
   }
 

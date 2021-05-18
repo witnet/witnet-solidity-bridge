@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 pragma experimental ABIEncoderV2;
 
 import "../../contracts/Request.sol";
@@ -19,7 +19,7 @@ contract UsingWitnetTestHelper is UsingWitnet {
 
   Witnet.Result public result;
 
-  constructor (address _wrbAddress) public UsingWitnet(_wrbAddress) { }
+  constructor (address _wrbAddress) UsingWitnet(_wrbAddress) { }
 
   function _witnetPostRequest(Request _request) external payable returns(uint256 id) {
     return witnetPostRequest(_request);

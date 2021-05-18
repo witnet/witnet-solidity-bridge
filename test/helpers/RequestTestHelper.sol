@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.7.0;
+pragma solidity >=0.6.0 <0.9.0;
 
 import "../../contracts/Request.sol";
 
@@ -18,7 +18,7 @@ contract RequestTestHelper is Request {
   * mismatch and a data request could be resolved with the result of another.
   * @param _bytecode Witnet request in bytes.
   */
-  constructor(bytes memory _bytecode) public Request(_bytecode) {
+  constructor(bytes memory _bytecode) Request(_bytecode) {
     bytecode = _bytecode;
   }
 

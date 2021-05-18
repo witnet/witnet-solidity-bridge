@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 
 import "../../contracts/WitnetRequestBoardInterface.sol";
 
@@ -34,13 +34,7 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
   // Is upgradable
   bool public upgradable;
 
-  // Event emitted when a new DR is posted
-  event PostedRequest(uint256 _id);
-
-  // Event emitted when a result is reported
-  event PostedResult(uint256 _id);
-
-  constructor (address[] memory _committee, bool _upgradable) public {
+  constructor (address[] memory _committee, bool _upgradable) {
     witnet = msg.sender;
     upgradable = _upgradable;
 
@@ -63,7 +57,7 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
     requests[_id].result = "hello";
     requests[_id].timestamp = 0;
     requests[_id].drTxHash = 0;
-    requests[_id].pkhClaim = address(0);
+    requests[_id].pkhClaim = payable(address(0));
 
     emit PostedRequest(_id);
 
