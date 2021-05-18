@@ -65,32 +65,31 @@ module.exports = async function (deployer, network, accounts) {
       throw new Error(`Fatal: unable to deploy contract '${contract}' as singleton. Try providing more gas.`)
     }
 
-    utils.logs.trace("  ", "> contract codehash:  ", web3.utils.soliditySha3(await web3.eth.getCode(artifact.address)))
-    utils.logs.trace("  ", "> contract address:   ", artifact.address)
-    utils.logs.trace("  ", "> current WRB address:", await (await artifact.deployed()).currentWitnetRequestBoard())
+    console.log("  ", "> contract codehash:  ", web3.utils.soliditySha3(await web3.eth.getCode(artifact.address)))
+    console.log("  ", "> contract address:   ", artifact.address)
+    console.log("  ", "> current WRB address:", await (await artifact.deployed()).currentWitnetRequestBoard())
     if (singletons.contracts[contract].links && singletons.contracts[contract].links.length > 0) {
-      utils.logs.trace("  ", "> linked libraries:\t", JSON.stringify(singletons.contracts[contract].links))
+      console.log("  ", "> linked libraries:\t", JSON.stringify(singletons.contracts[contract].links))
     }
-
     addresses["singletons"]["contracts"][contract] = contract_addr
   }
 
-  utils.logs.trace()
+  console.log()
   fs.writeFileSync("./migrations/addresses.json", JSON.stringify(addresses, null, 2))
 }
 
 function traceHeader(header) {
-  utils.logs.trace("")
-  utils.logs.trace("  ", header)
-  utils.logs.trace("  ", `${'-'.repeat(header.length)}`)
+  console.log("")
+  console.log("  ", header)
+  console.log("  ", `${'-'.repeat(header.length)}`)
 }
 
 function traceDeploymentTx(receipt, total_cost) {
-  utils.logs.trace("  ", "> transaction hash:\t", receipt.transactionHash)
-  utils.logs.trace("  ", "> block number:\t", receipt.blockNumber)
-  utils.logs.trace("  ", "> gas used:\t\t", receipt.cumulativeGasUsed)
+  console.log("  ", "> transaction hash:\t", receipt.transactionHash)
+  console.log("  ", "> block number:\t", receipt.blockNumber)
+  console.log("  ", "> gas used:\t\t", receipt.cumulativeGasUsed)
   if (total_cost) {
-    utils.logs.trace("  ", "> total cost:\t", total_cost, "ETH")
+    console.log("  ", "> total cost:\t", total_cost, "ETH")
   }
-  utils.logs.trace()
+  console.log()
 }

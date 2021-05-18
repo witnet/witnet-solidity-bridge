@@ -52,12 +52,12 @@ module.exports = async function (deployer, network, accounts) {
   const factory = await SingletonFactory.deployed()
 
   // Trace factory relevant data:
-  utils.logs.trace("  ", "> sender's balance:\t", `${web3.utils.fromWei((await web3.eth.getBalance(res.sender)).toString(),'ether')} ETH`)
-  utils.logs.trace("  ", "> factory codehash:\t", web3.utils.soliditySha3(await web3.eth.getCode(res.contractAddr)))
-  utils.logs.trace("  ", "> factory sender:\t", res.sender)
-  utils.logs.trace("  ", "> factory address:\t", factory.address)
-  utils.logs.trace("  ", "> factory nonce:\t", await web3.eth.getTransactionCount(factory.address))
-  utils.logs.trace("")
+  console.log("  ", "> sender's balance:\t", `${web3.utils.fromWei((await web3.eth.getBalance(res.sender)).toString(),'ether')} ETH`)
+  console.log("  ", "> factory codehash:\t", web3.utils.soliditySha3(await web3.eth.getCode(res.contractAddr)))
+  console.log("  ", "> factory sender:\t", res.sender)
+  console.log("  ", "> factory address:\t", factory.address)
+  console.log("  ", "> factory nonce:\t", await web3.eth.getTransactionCount(factory.address))
+  console.log("")
 
   // Process all singleton libraries referred in config file:
   for (const lib in singletons.libs) {
@@ -107,9 +107,9 @@ module.exports = async function (deployer, network, accounts) {
       throw new Error(`Fatal: unable to deploy library '${lib}' as singleton. Try providing more gas.`)
     }
 
-    utils.logs.trace("  ", "> library codehash:\t", lib_codehash)
-    utils.logs.trace("  ", "> library address:\t", artifact.address)
-    utils.logs.trace()
+    console.log("  ", "> library codehash:\t", lib_codehash)
+    console.log("  ", "> library address:\t", artifact.address)
+    console.log()
 
     addresses["singletons"]["libraries"][lib] = lib_addr
   }
@@ -118,17 +118,17 @@ module.exports = async function (deployer, network, accounts) {
 }
 
 function traceHeader(header) {
-  utils.logs.trace("")
-  utils.logs.trace("  ", header)
-  utils.logs.trace("  ", `${'-'.repeat(header.length)}`)
+  console.log("")
+  console.log("  ", header)
+  console.log("  ", `${'-'.repeat(header.length)}`)
 }
 
 function traceDeploymentTx(receipt, total_cost) {
-  utils.logs.trace("  ", "> transaction hash:\t", receipt.transactionHash)
-  utils.logs.trace("  ", "> block number:\t", receipt.blockNumber)
-  utils.logs.trace("  ", "> gas used:\t\t", receipt.cumulativeGasUsed)
+  console.log("  ", "> transaction hash:\t", receipt.transactionHash)
+  console.log("  ", "> block number:\t", receipt.blockNumber)
+  console.log("  ", "> gas used:\t\t", receipt.cumulativeGasUsed)
   if (total_cost) {
-    utils.logs.trace("  ", "> total cost:\t", total_cost, "ETH")
+    console.log("  ", "> total cost:\t", total_cost, "ETH")
   }
-  utils.logs.trace()
+  console.log()
 }
