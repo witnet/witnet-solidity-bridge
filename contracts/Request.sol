@@ -8,7 +8,6 @@ pragma solidity >=0.6.0 <0.7.0;
  */
 contract Request {
   bytes public bytecode;
-  uint256 public id;
 
  /**
   * @dev A `Request` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized
@@ -20,6 +19,5 @@ contract Request {
   */
   constructor(bytes memory _bytecode) public {
     bytecode = _bytecode;
-    id = uint256(sha256(_bytecode));
   }
 }
