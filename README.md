@@ -102,7 +102,7 @@ The `UsingWitnet` contract injects the following methods into the contracts inhe
 The `UsingWitnet.sol` contract can be used directly by inheritance:
 
 ```solidity
-pragma solidity >=0.5.3 <0.7.0;;
+pragma solidity >=0.5.3 <0.9.0;;
 
 import "./UsingWitnet.sol";
 

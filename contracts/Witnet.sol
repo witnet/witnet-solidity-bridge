@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 pragma experimental ABIEncoderV2;
 
 import "./CBOR.sol";
@@ -636,18 +636,18 @@ library Witnet {
   function utoa(uint64 _u) private pure returns(string memory) {
     if (_u < 10) {
       bytes memory b1 = new bytes(1);
-      b1[0] = byte(uint8(_u) + 48);
+      b1[0] = bytes1(uint8(_u) + 48);
       return string(b1);
     } else if (_u < 100) {
       bytes memory b2 = new bytes(2);
-      b2[0] = byte(uint8(_u / 10) + 48);
-      b2[1] = byte(uint8(_u % 10) + 48);
+      b2[0] = bytes1(uint8(_u / 10) + 48);
+      b2[1] = bytes1(uint8(_u % 10) + 48);
       return string(b2);
     } else {
       bytes memory b3 = new bytes(3);
-      b3[0] = byte(uint8(_u / 100) + 48);
-      b3[1] = byte(uint8(_u % 100 / 10) + 48);
-      b3[2] = byte(uint8(_u % 10) + 48);
+      b3[0] = bytes1(uint8(_u / 100) + 48);
+      b3[1] = bytes1(uint8(_u % 100 / 10) + 48);
+      b3[2] = bytes1(uint8(_u % 10) + 48);
       return string(b3);
     }
   }
@@ -665,8 +665,8 @@ library Witnet {
       d0 += 7;
     if (d1 > 57)
       d1 += 7;
-    b2[0] = byte(d0);
-    b2[1] = byte(d1);
+    b2[0] = bytes1(d0);
+    b2[1] = bytes1(d1);
     return string(b2);
   }
 }

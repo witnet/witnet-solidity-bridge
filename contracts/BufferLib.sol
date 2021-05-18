@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.7.0;
+pragma solidity >=0.6.0 <0.9.0;
 
 
 /**
@@ -62,7 +62,7 @@ library BufferLib {
   * @param _buffer An instance of `BufferLib.Buffer`.
   * @return The next byte in the buffer counting from the cursor position.
   */
-  function next(Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor, _buffer.data.length) returns (byte) {
+  function next(Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor, _buffer.data.length) returns (bytes1) {
     // Return the byte at the position marked by the cursor and advance the cursor all at once
     return _buffer.data[_buffer.cursor++];
   }
@@ -236,9 +236,9 @@ library BufferLib {
     // Compute `2 ^ exponent · (1 + fraction / 1024)`
     int32 result = 0;
     if (exponent >= 0) {
-      result = int32(((1 << uint256(exponent)) * 10000 * (uint256(significand) | 0x400)) >> 10);
+      result = int32((int256(1 << uint256(int256(exponent))) * 10000 * int256(uint256(int256(significand)) | 0x400)) >> 10);
     } else {
-      result = int32((((uint256(significand) | 0x400) * 10000) / (1 << uint256(- exponent))) >> 10);
+      result = int32(((int256(uint256(int256(significand)) | 0x400) * 10000) / int256(1 << uint256(int256(- exponent)))) >> 10);
     }
 
     // Make the result negative if the sign bit is not 0

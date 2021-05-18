@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 
 import "./WitnetRequestBoardInterface.sol";
 import "./Request.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /**
  * @title Witnet Requests Board mocked
@@ -34,12 +33,6 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
     // Witnet Requests within the board
     DataRequest[] public requests;
-
-    // Event emitted when a new DR is posted
-    event PostedRequest(uint256 _id);
-
-    // Event emitted when a result is reported
-    event PostedResult(uint256 _id);
 
     // Only the committee defined when deploying the contract should be able to report results
     modifier isAuthorized() {
@@ -71,7 +64,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
     /// @notice Initilizes a centralized Witnet Request Board with an authorized committee.
     /// @param _committee list of authorized addresses.
-    constructor(address[] memory _committee) public {
+    constructor(address[] memory _committee) {
         owner = msg.sender;
         for (uint256 i; i < _committee.length; i++) {
             isInCommittee[_committee[i]] = true;
@@ -91,8 +84,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         returns (uint256)
     {
         // Checks the tally reward is covering gas cost
-        uint256 minResultReward =
-            SafeMath.mul(tx.gasprice, ESTIMATED_REPORT_RESULT_GAS);
+        uint256 minResultReward = tx.gasprice * ESTIMATED_REPORT_RESULT_GAS;
         require(
             msg.value >= minResultReward,
             "Result reward should cover gas expenses. Check the estimateGasCost method."
@@ -123,13 +115,12 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         override
         resultNotIncluded(_id)
     {
-        uint256 newReward = SafeMath.add(requests[_id].reward, msg.value);
+        uint256 newReward = requests[_id].reward + msg.value;
 
         // If gas price is increased, then check if new rewards cover gas costs
         if (tx.gasprice > requests[_id].gasPrice) {
             // Checks the reward is covering gas cost
-            uint256 minResultReward =
-                SafeMath.mul(tx.gasprice, ESTIMATED_REPORT_RESULT_GAS);
+            uint256 minResultReward = tx.gasprice * ESTIMATED_REPORT_RESULT_GAS;
             require(
                 newReward >= minResultReward,
                 "Result reward should cover gas expenses. Check the estimateGasCost method."
@@ -157,7 +148,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
         requests[_id].drTxHash = _drTxHash;
         requests[_id].result = _result;
-        msg.sender.transfer(requests[_id].reward);
+        payable(msg.sender).transfer(requests[_id].reward);
 
         emit PostedResult(_id);
     }
@@ -240,11 +231,11 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     /// @return The reward to be included for the given gas price.
     function estimateGasCost(uint256 _gasPrice)
         external
-        view
+        pure
         override
         returns (uint256)
     {
-        return SafeMath.mul(_gasPrice, ESTIMATED_REPORT_RESULT_GAS);
+        return _gasPrice * ESTIMATED_REPORT_RESULT_GAS;
     }
 
     function computeDrOutputHash(bytes memory _bytecode)

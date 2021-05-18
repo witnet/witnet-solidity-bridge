@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 
 import "./WitnetRequestBoardInterface.sol";
 
@@ -38,7 +38,7 @@ contract WitnetRequestBoardProxy {
   * @notice Include an address to specify the Witnet Request Board.
   * @param _witnetRequestBoardAddress WitnetRequestBoard address.
   */
-  constructor(address _witnetRequestBoardAddress) public {
+  constructor(address _witnetRequestBoardAddress) {
     // Initialize the first epoch pointing to the first controller
     controllers.push(ControllerInfo({controllerAddress: _witnetRequestBoardAddress, lastId: 0}));
     currentWitnetRequestBoard = WitnetRequestBoardInterface(_witnetRequestBoardAddress);

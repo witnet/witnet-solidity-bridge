@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.7.0;
+pragma solidity >=0.6.0 <0.9.0;
 
 import "./Request.sol";
 import "./Witnet.sol";
@@ -20,7 +20,7 @@ abstract contract UsingWitnet {
   * @notice Include an address to specify the WitnetRequestBoard.
   * @param _wrb WitnetRequestBoard address.
   */
-  constructor(address _wrb) public {
+  constructor(address _wrb) {
     wrb = WitnetRequestBoardProxy(_wrb);
   }
 

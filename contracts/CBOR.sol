@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.4;
 pragma experimental ABIEncoderV2;
 
 import "./BufferLib.sol";
@@ -19,7 +19,9 @@ import "./BufferLib.sol";
 library CBOR {
   using BufferLib for BufferLib.Buffer;
 
-  uint64 constant internal UINT64_MAX = ~uint64(0);
+  uint32 constant internal UINT32_MAX = type(uint32).max;
+
+  uint64 constant internal UINT64_MAX = type(uint64).max;
 
   struct Value {
     BufferLib.Buffer buffer;
@@ -115,11 +117,11 @@ library CBOR {
   function decodeInt128(Value memory _cborValue) public pure returns(int128) {
     if (_cborValue.majorType == 1) {
       uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-      return int128(-1) - int128(length);
+      return int128(-1) - int128(uint128(length));
     } else if (_cborValue.majorType == 0) {
       // Any `uint64` can be safely casted to `int128`, so this method supports majorType 1 as well so as to have offer
       // a uniform API for positive and negative numbers
-      return int128(decodeUint64(_cborValue));
+      return int128(uint128(decodeUint64(_cborValue)));
     }
     revert("Tried to read `int128` from a `CBOR.Value` with majorType not 0 or 1");
   }
