@@ -58,9 +58,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     modifier validDrOutputHash(uint256 _id) {
         require(
             requests[_id].drOutputHash ==
-                uint256(
-                    sha256(Request(requests[_id].requestAddress).bytecode())
-                ),
+                computeDrOutputHash(Request(requests[_id].requestAddress).bytecode()),
             "The dr has been manipulated and the bytecode has changed"
         );
         _;
@@ -108,8 +106,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         request.requestor = msg.sender;
         request.reward = msg.value;
         Request requestContract = Request(request.requestAddress);
-        uint256 _drOutputHash = uint256(sha256(requestContract.bytecode()));
-        request.drOutputHash = _drOutputHash;
+        request.drOutputHash = computeDrOutputHash(requestContract.bytecode());
         request.gasPrice = tx.gasprice;
         // Push the new request into the contract state
         requests.push(request);
@@ -249,5 +246,13 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         returns (uint256)
     {
         return SafeMath.mul(_gasPrice, ESTIMATED_REPORT_RESULT_GAS);
+    }
+
+    function computeDrOutputHash(bytes memory _bytecode)
+        internal
+        pure
+        returns (uint256)
+    {
+        return uint256(sha256(_bytecode));
     }
 }
