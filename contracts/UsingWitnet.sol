@@ -50,7 +50,7 @@ contract UsingWitnet {
   */
   function witnetCheckRequestResolved(uint256 _id) internal view returns (bool) {
     // If the result of the data request in Witnet is not the default, then it means that it has been reported as resolved.
-    return wrb.readResult(_id).length != 0;
+    return wrb.readDrTxHash(_id) != 0;
   }
 
  /**

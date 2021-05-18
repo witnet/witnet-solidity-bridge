@@ -186,6 +186,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         validId(_id)
         returns (bytes memory)
     {
+        require(requests[_id].drTxHash != 0, "The request has not yet been resolved");
         return requests[_id].result;
     }
 
