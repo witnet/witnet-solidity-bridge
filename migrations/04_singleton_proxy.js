@@ -6,7 +6,6 @@ const SingletonFactory = artifacts.require("SingletonFactory")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
 module.exports = async function (deployer, network, accounts) {
-
   let addresses = require('./addresses.json')
 
   const factory = await SingletonFactory.deployed()
@@ -45,14 +44,12 @@ module.exports = async function (deployer, network, accounts) {
       traceHeader(`Singleton inception of contract '${contract}':`)
 
       const balance = await web3.eth.getBalance(from)
-      const gas = singletons.contracts[contract].gas
-          ? singletons.contracts[contract].gas
-          : 10 ** 6
+      const gas = singletons.contracts[contract].gas || 10 ** 6
 
       // Compose initialization call: 'upgradeWitnetRequestBoard(wrb.address)'
       let initCall = '0x47b1e79b000000000000000000000000' + wrb.address.slice(2)
 
-      const tx = await factory.deployAndInit(bytecode, initCall, salt, {from: from, gas: gas})
+      const tx = await factory.deployAndInit(bytecode, initCall, salt, {from, gas})
       utils.traceEvents(tx.logs)
       traceDeploymentTx(tx.receipt, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
     } else {

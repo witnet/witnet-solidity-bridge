@@ -5,7 +5,6 @@ const utils = require('../utils')
 const SingletonFactory = artifacts.require("SingletonFactory")
 
 module.exports = async function (deployer, network, accounts) {
-
   let addresses = require('./addresses.json')
   const singletons = require('./singletons.json') 
 
@@ -69,17 +68,19 @@ module.exports = async function (deployer, network, accounts) {
       ;
 
     let bytecode = artifact.toJSON().bytecode
-    if (singletons.libs[lib].links) singletons.libs[lib].links.forEach(
-      // Join dependent library address(es) into the library bytecode to be deployed:
-      // Please note: dependent libraries should have been previously deployed, 
-      //   so order in which libraries are declared in the config file actually matters.
-      sublib => {
-        const sublib_artifact = artifacts.require(sublib)
-        const sublib_addr = sublib_artifact.address.slice(2).toLowerCase()
-        const sublib_mark = `__${sublib_artifact.contractName}${'_'.repeat(38 - sublib_artifact.contractName.length)}`
-        bytecode = bytecode.split(sublib_mark).join(sublib_addr)
-      }
-    )
+    if (singletons.libs[lib].links) {
+      singletons.libs[lib].links.forEach(
+        // Join dependent library address(es) into the library bytecode to be deployed:
+        // Please note: dependent libraries should have been previously deployed, 
+        //   so order in which libraries are declared in the config file actually matters.
+        sublib => {
+          const sublib_artifact = artifacts.require(sublib)
+          const sublib_addr = sublib_artifact.address.slice(2).toLowerCase()
+          const sublib_mark = `__${sublib_artifact.contractName}${'_'.repeat(38 - sublib_artifact.contractName.length)}`
+          bytecode = bytecode.split(sublib_mark).join(sublib_addr)
+        }
+      )
+    }
     artifact.bytecode = bytecode
 
     var lib_addr = await factory.determineAddr.call(bytecode, salt)
@@ -89,11 +90,7 @@ module.exports = async function (deployer, network, accounts) {
       traceHeader(`Singleton inception of library '${lib}':`)
 
       const balance = await web3.eth.getBalance(from)
-      const gas = singletons.libs[lib].gas
-          ? singletons.libs[lib].gas
-          : 10 ** 6
-        ;
-
+      const gas = singletons.libs[lib].gas || 10 ** 6
       const tx = await factory.deploy(bytecode, salt, {from: from, gas: gas})
       traceDeploymentTx(tx.receipt, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
     } else {

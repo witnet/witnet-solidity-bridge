@@ -2,7 +2,6 @@ const fs = require('fs')
 const Migrations = artifacts.require("Migrations");
 
 module.exports = async function (deployer, network) {
-
   if (!fs.existsSync('./migrations/addresses.json')) {
     await fs.open('./migrations/addresses.json', 'w', function (err, file) {
       if (err) throw new Error("Fatal: cannot create ./migrations/addreses.json");

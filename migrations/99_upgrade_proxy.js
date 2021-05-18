@@ -3,7 +3,6 @@ const WitnetRequestBoardProxy = artifacts.require("WitnetRequestBoardProxy")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
 module.exports = async function (deployer, network, accounts) {
-
   const WRB = await WitnetRequestBoard.deployed()
   const WRBProxy = await WitnetRequestBoardProxy.deployed()
 
