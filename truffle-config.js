@@ -1,5 +1,5 @@
 // In order to load environment variables (e.g. API keys)
-require('dotenv').config();
+require("dotenv").config()
 
 module.exports = {
   networks: {
@@ -25,16 +25,16 @@ module.exports = {
     },
   },
   mocha: {
-    reporter: 'eth-gas-reporter',
+    reporter: "eth-gas-reporter",
     reporterOptions: {
-        coinmarketcap: process.env.COINMARKETCAP_API_KEY,
-        currency: "USD",
-        gasPrice: 100,
-        excludeContracts: ['Migrations'],
-        src: "contracts"
+      coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+      currency: "USD",
+      gasPrice: 100,
+      excludeContracts: ["Migrations"],
+      src: "contracts",
     },
     timeout: 100000,
-    useColors: true
+    useColors: true,
   },
   compilers: {
     solc: {
@@ -42,15 +42,15 @@ module.exports = {
       settings: {
         optimizer: {
           enabled: true,
-          runs: 200
+          runs: 200,
         },
-      }
+      },
     },
   },
   plugins: [
-    'truffle-verify',
+    "truffle-verify",
   ],
   api_keys: {
     etherscan: process.env.ETHERSCAN_API_KEY,
-  }
+  },
 }

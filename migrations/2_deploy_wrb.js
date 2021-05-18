@@ -1,4 +1,4 @@
-var WitnetRequestBoardProxy = artifacts.require("WitnetRequestBoardProxy")
+const WitnetRequestBoardProxy = artifacts.require("WitnetRequestBoardProxy")
 const addresses = require("./addresses.json")
 
 module.exports = function (deployer, network, accounts) {
