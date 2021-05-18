@@ -240,7 +240,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     /// @param _gasPrice The gas price for which we need to calculate the reward.
     /// @return The reward to be included for the given gas price.
     function estimateGasCost(uint256 _gasPrice)
-        public
+        external
         view
         override
         returns (uint256)
