@@ -20,17 +20,11 @@ module.exports = async function (deployer, network, accounts) {
 
     let addresses = require('./addresses.json')
 
-    const from = singletons.from
-        ? singletons.from
-        : deployer.networks[network].from
-          ? deployer.networks[network].from
-          : accounts[0]
-      ;
+    const from = singletons.from || deployer.networks[network].from || accounts[0]
 
     const salt = singletons.contracts[contract].salt
         ? '0x' + ethUtils.setLengthLeft(ethUtils.toBuffer(singletons.contracts[contract].salt), 32).toString('hex')
         : '0x0'
-      ; 
 
     let bytecode = artifact.toJSON().bytecode
     if (singletons.contracts[contract].links) singletons.contracts[contract].links.forEach(
@@ -54,7 +48,6 @@ module.exports = async function (deployer, network, accounts) {
       const gas = singletons.contracts[contract].gas
           ? singletons.contracts[contract].gas
           : 10 ** 6
-        ;
 
       // Compose initialization call: 'upgradeWitnetRequestBoard(wrb.address)'
       let initCall = '0x47b1e79b000000000000000000000000' + wrb.address.slice(2)
@@ -62,7 +55,6 @@ module.exports = async function (deployer, network, accounts) {
       const tx = await factory.deployAndInit(bytecode, initCall, salt, {from: from, gas: gas})
       utils.traceEvents(tx.logs)
       traceDeploymentTx(tx.receipt, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
-
     } else {
       traceHeader(`Singleton contract: '${contract}'`)
     }

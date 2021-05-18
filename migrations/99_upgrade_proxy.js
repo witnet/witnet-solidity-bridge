@@ -15,7 +15,6 @@ module.exports = async function (deployer, network, accounts) {
     console.log("  ", "Old WRB address  :", current_wrb)
     let tx = await WRBProxy.upgradeWitnetRequestBoard(WitnetRequestBoard.address, {from: accounts[0]})
     console.log("  ", "New WRB address  :", await WRBProxy.currentWitnetRequestBoard.call())
-    
   }
 
 }

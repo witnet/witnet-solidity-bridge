@@ -9,12 +9,8 @@ module.exports = async function (deployer, network, accounts) {
   let addresses = require('./addresses.json')
   const singletons = require('./singletons.json') 
 
-  const from = singletons.from
-    ? singletons.from
-    : deployer.networks[network].from
-      ? deployer.networks[network].from
-      : accounts[0]
-
+  const from = singletons.from || deployer.networks[network].from || acounts[0]
+      
   // Generate SingletonFactory deployment transaction:
   const res = utils.generateDeployTx(
       SingletonFactory.toJSON(),
@@ -30,9 +26,9 @@ module.exports = async function (deployer, network, accounts) {
     // Deploy SingletonFactory instance, if not yet deployed on this `network`:
     traceHeader(`Inception of 'SingletonFactory':`)
 
-    let balance = await web3.eth.getBalance(from)
-    let estimatedGas = res.gasLimit
-    let value = estimatedGas * res.gasPrice
+    const balance = await web3.eth.getBalance(from)
+    const estimatedGas = res.gasLimit
+    const value = estimatedGas * res.gasPrice
     let makerBalance = await web3.eth.getBalance(res.sender)
 
     if (makerBalance < value) {
@@ -47,7 +43,6 @@ module.exports = async function (deployer, network, accounts) {
 
     const tx = await web3.eth.sendSignedTransaction(res.rawTx)
     traceDeploymentTx(tx, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
-
   } else {
     traceHeader(`Singleton factory: 'SingletonFactory`)
   }
@@ -101,7 +96,6 @@ module.exports = async function (deployer, network, accounts) {
 
       const tx = await factory.deploy(bytecode, salt, {from: from, gas: gas})
       traceDeploymentTx(tx.receipt, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
-
     } else {
       traceHeader(`Singleton library: '${lib}'`)
     }
