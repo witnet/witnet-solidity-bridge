@@ -10,9 +10,5 @@ module.exports = async function (logs, web3) {
       default:
         continue;
     }
-    var tabs = '\t'
-    if (event.length < 13) tabs ="\t\t"
-
-    console.log("  ", `>> ${event}${tabs}(${params})`) 
   }
 }

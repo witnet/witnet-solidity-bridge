@@ -45,7 +45,7 @@ module.exports = async function (deployer, network, accounts) {
       makerBalance = await web3.eth.getBalance(res.sender)
     }
 
-    var tx = await web3.eth.sendSignedTransaction(res.rawTx)
+    const tx = await web3.eth.sendSignedTransaction(res.rawTx)
     traceDeploymentTx(tx, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
 
   } else {
