@@ -64,10 +64,10 @@ contract WitnetRequestBoardProxy {
     return currentWitnetRequestBoard.upgradeDataRequest{value: msg.value}(_id - wrbOffset);
   }
 
-  /// @dev Retrieves the DR hash of the id from the WRB.
+  /// @dev Retrieves the DR transaction hash of the id from the WRB.
   /// @param _id The unique identifier of the data request.
-  /// @return The hash of the DR.
-  function readDrHash (uint256 _id)
+  /// @return The transaction hash of the DR.
+  function readDrTxHash (uint256 _id)
     external
     view
   returns(uint256)
@@ -77,10 +77,10 @@ contract WitnetRequestBoardProxy {
     uint256 offsetWrb;
     (wrbAddress, offsetWrb) = getController(_id);
     // Return the result of the DR readed in the corresponding Controller with its own id
-    WitnetRequestBoardInterface wrbWithDrHash;
-    wrbWithDrHash = WitnetRequestBoardInterface(wrbAddress);
-    uint256 drHash = wrbWithDrHash.readDrHash(_id - offsetWrb);
-    return drHash;
+    WitnetRequestBoardInterface wrbWithDrTxHash;
+    wrbWithDrTxHash = WitnetRequestBoardInterface(wrbAddress);
+    uint256 drTxHash = wrbWithDrTxHash.readDrTxHash(_id - offsetWrb);
+    return drTxHash;
   }
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.

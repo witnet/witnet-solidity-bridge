@@ -12,7 +12,7 @@ contract("UsingWitnet", accounts => {
     const requestHex = "0x01"
     const resultHex = "0x1a002fefd8"
     const resultDecimal = 3141592
-    const drHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    const drTxHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
     const reward = web3.utils.toWei("1", "ether")
 
@@ -106,7 +106,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should post the result of the request into the WRB", async () => {
-      await returnData(wrb.reportResult(requestId, drHash, resultHex, {
+      await returnData(wrb.reportResult(requestId, drTxHash, resultHex, {
         from: accounts[0],
       }))
       const requestInfo = await wrb.requests(requestId)
@@ -133,7 +133,7 @@ contract("UsingWitnet", accounts => {
   describe("UsingWitnet \"happy path\" test case with a false result.", () => {
     const requestHex = "0x02"
     const resultHex = "0xd82701"
-    const drHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    const drTxHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
     const reward = web3.utils.toWei("1", "ether")
 
@@ -168,7 +168,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should report the result in the WRB", async () => {
-      await returnData(wrb.reportResult(requestId, drHash, resultHex, {
+      await returnData(wrb.reportResult(requestId, drTxHash, resultHex, {
         from: accounts[0],
       }))
       const requestinfo = await wrb.requests(requestId)

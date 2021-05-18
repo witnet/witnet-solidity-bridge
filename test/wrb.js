@@ -22,7 +22,7 @@ f1a13841877821864646c6173748218571903e8185b125c123168747470733a2f2f6170692e636f6
 908051205fa3fc00000100322090a0508051201011003100a1804200128\
 46308094ebdc03"
 const resultHex = "0x1a000702c8"
-const drHash = "0x0000000000000000000000000000000000000000000000000000000000000001"
+const drTxHash = "0x0000000000000000000000000000000000000000000000000000000000000001"
 
 contract("WitnetRequestBoard", ([
   requestor,
@@ -224,7 +224,7 @@ contract("WitnetRequestBoard", ([
     })
     it("fails if result is already reported", async () => {
       await this.WitnetRequestBoard.reportResult(
-        requestId, drHash, resultHex,
+        requestId, drTxHash, resultHex,
         { from: owner, gasPrice: 1 }
       )
       // Update data request (increased reward)
@@ -257,7 +257,7 @@ contract("WitnetRequestBoard", ([
 
       // Report data request result from Witnet to WitnetRequestBoard
       const reportResultTx = await this.WitnetRequestBoard.reportResult(
-        requestId, drHash, resultHex,
+        requestId, drTxHash, resultHex,
         { from: owner, gasPrice: 1 }
       )
 
@@ -292,14 +292,14 @@ contract("WitnetRequestBoard", ([
     })
     it("fails if reporter is not a committee member", async () => {
       await expectRevert(
-        this.WitnetRequestBoard.reportResult(requestId, drHash, resultHex, {
+        this.WitnetRequestBoard.reportResult(requestId, drTxHash, resultHex, {
           from: other,
           gasPrice: 1,
         }),
         "Sender not authorized"
       )
     })
-    it("fails if drHash is zero", async () => {
+    it("fails if drTxHash is zero", async () => {
       await expectRevert(
         this.WitnetRequestBoard.reportResult(
           requestId, 0, resultHex,
@@ -311,13 +311,13 @@ contract("WitnetRequestBoard", ([
     it("fails if result was already reported", async () => {
       // Report data request result from Witnet to WitnetRequestBoard
       await this.WitnetRequestBoard.reportResult(
-        requestId, drHash, resultHex,
+        requestId, drTxHash, resultHex,
         { from: owner, gasPrice: 1 }
       )
 
       // Try to report the result of the previous data request
       await expectRevert(
-        this.WitnetRequestBoard.reportResult(requestId, drHash, resultHex, {
+        this.WitnetRequestBoard.reportResult(requestId, drTxHash, resultHex, {
           from: committeeMember,
           gasPrice: 1,
         }),
@@ -327,7 +327,7 @@ contract("WitnetRequestBoard", ([
     it("fails if data request has not been posted", async () => {
       await expectRevert(
         this.WitnetRequestBoard.reportResult(
-          requestId.add(new BN(1)), drHash, resultHex,
+          requestId.add(new BN(1)), drTxHash, resultHex,
           { from: owner, gasPrice: 1 }
         ),
         "Id not found"
@@ -345,7 +345,7 @@ contract("WitnetRequestBoard", ([
         value: ether("1"),
       })
       // Report data request result from Witnet to WitnetRequestBoard
-      await this.WitnetRequestBoard.reportResult(requestId, drHash, resultHex, {
+      await this.WitnetRequestBoard.reportResult(requestId, drTxHash, resultHex, {
         from: committeeMember,
         gasPrice: 1,
       })
@@ -371,7 +371,7 @@ contract("WitnetRequestBoard", ([
     })
     it("should revert reading data for non-existent Ids", async () => {
       await expectRevert(this.WitnetRequestBoard.readDataRequest.call(200), "Id not found")
-      await expectRevert(this.WitnetRequestBoard.readDrHash.call(200), "Id not found")
+      await expectRevert(this.WitnetRequestBoard.readDrTxHash.call(200), "Id not found")
       await expectRevert(this.WitnetRequestBoard.readResult.call(200), "Id not found")
     })
   })

@@ -20,7 +20,7 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
     uint256 reward;
     bytes result;
     uint256 timestamp;
-    uint256 drHash;
+    uint256 drTxHash;
     address payable pkhClaim;
   }
 
@@ -65,7 +65,7 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
     requests[_id].reward = msg.value;
     requests[_id].result = "hello";
     requests[_id].timestamp = 0;
-    requests[_id].drHash = 0;
+    requests[_id].drTxHash = 0;
     requests[_id].pkhClaim = address(0);
 
     emit PostedRequest(msg.sender, _id);
@@ -86,8 +86,8 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
   /// @dev Retrieves hash of the data request transaction in Witnet
   /// @param _id The unique identifier of the data request.
   /// @return The hash of the DataRequest transaction in Witnet
-  function readDrHash (uint256 _id) external view override returns(uint256) {
-    return requests[_id].drHash;
+  function readDrTxHash (uint256 _id) external view override returns(uint256) {
+    return requests[_id].drTxHash;
   }
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.

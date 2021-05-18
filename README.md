@@ -52,7 +52,7 @@ The `WitnetRequestBoard` contract provides the following methods:
   - _output_:
     - the result of the data request as `bytes`.
 
-- **readDrHash**:
+- **readDrTxHash**:
   - _description_: retrieves the data request transaction hash in Witnet (if it has already been included and presented) of one data request from the WRB.
   - _inputs_:
     - *_id*: the unique identifier of the data request.

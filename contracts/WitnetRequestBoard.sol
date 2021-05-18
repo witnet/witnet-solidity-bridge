@@ -23,7 +23,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         uint256 reward;
         uint256 gasPrice;
         bytes result;
-        uint256 drHash;
+        uint256 drTxHash;
     }
 
     // Owner of the Witnet Request Board
@@ -143,19 +143,19 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
     /// @dev Reports the result of a data request in Witnet.
     /// @param _id The unique identifier of the data request.
-    /// @param _drHash The unique hash of the request.
+    /// @param _drTxHash The unique hash of the request.
     /// @param _result The result itself as bytes.
     function reportResult(
         uint256 _id,
-        uint256 _drHash,
+        uint256 _drTxHash,
         bytes calldata _result
     ) external isAuthorized() validId(_id) resultNotIncluded(_id) {
-        require(_drHash != 0, "Data request transaction cannot be zero");
+        require(_drTxHash != 0, "Data request transaction cannot be zero");
         // Ensures the result byes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(_result.length != 0, "Result has zero length");
 
-        requests[_id].drHash = _drHash;
+        requests[_id].drTxHash = _drTxHash;
         requests[_id].result = _result;
         msg.sender.transfer(requests[_id].reward);
 
@@ -204,14 +204,14 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     /// @dev Retrieves hash of the data request transaction in Witnet.
     /// @param _id The unique identifier of the data request.
     /// @return The hash of the DataRequest transaction in Witnet.
-    function readDrHash(uint256 _id)
+    function readDrTxHash(uint256 _id)
         external
         view
         override
         validId(_id)
         returns (uint256)
     {
-        return requests[_id].drHash;
+        return requests[_id].drTxHash;
     }
 
     /// @dev Returns the number of data requests in the WRB.
