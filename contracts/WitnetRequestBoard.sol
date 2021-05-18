@@ -19,7 +19,6 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
     struct DataRequest {
         address requestAddress;
-        address requestor;
         uint256 drOutputHash;
         uint256 reward;
         uint256 gasPrice;
@@ -103,7 +102,6 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
         DataRequest memory request;
         request.requestAddress = _requestAddress;
-        request.requestor = msg.sender;
         request.reward = msg.value;
         Request requestContract = Request(request.requestAddress);
         request.drOutputHash = computeDrOutputHash(requestContract.bytecode());
