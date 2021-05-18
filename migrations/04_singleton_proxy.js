@@ -1,6 +1,6 @@
 const ethUtils = require('ethereumjs-util')
 const fs = require('fs')
-const utils = require('../utils/utils.js')
+const utils = require('../utils')
 
 const SingletonFactory = artifacts.require("SingletonFactory")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")

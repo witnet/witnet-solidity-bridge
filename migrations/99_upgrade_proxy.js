@@ -1,4 +1,4 @@
-const utils = require('../utils/utils.js')
+const utils = require('../utils')
 const WitnetRequestBoardProxy = artifacts.require("WitnetRequestBoardProxy")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
