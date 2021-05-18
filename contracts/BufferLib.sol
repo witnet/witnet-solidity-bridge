@@ -3,6 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 
+
 /**
  * @title A convenient wrapper around the `bytes memory` type that exposes a buffer-like interface
  * @notice The buffer has an inner cursor that tracks the final offset of every read, i.e. any subsequent read will

@@ -2,6 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+
 import "./WitnetRequestBoardInterface.sol";
 import "./Request.sol";
 
@@ -148,7 +149,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
         requests[_id].drTxHash = _drTxHash;
         requests[_id].result = _result;
-    
+
         emit PostedResult(_id);
         payable(msg.sender).transfer(requests[_id].reward);
     }
