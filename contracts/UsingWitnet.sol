@@ -11,7 +11,7 @@ import "./WitnetRequestBoardProxy.sol";
  * @title The UsingWitnet contract
  * @notice Contract writers can inherit this contract in order to create Witnet data requests.
  */
-contract UsingWitnet {
+abstract contract UsingWitnet {
   using Witnet for Witnet.Result;
 
   WitnetRequestBoardProxy internal wrb;

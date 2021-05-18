@@ -36,10 +36,10 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     DataRequest[] public requests;
 
     // Event emitted when a new DR is posted
-    event PostedRequest(address indexed _from, uint256 _id);
+    event PostedRequest(uint256 _id);
 
-    // Event emitted when a result proof is posted
-    event PostedResult(address indexed _from, uint256 _id);
+    // Event emitted when a result is reported
+    event PostedResult(uint256 _id);
 
     // Only the committee defined when deploying the contract should be able to report results
     modifier isAuthorized() {
@@ -110,7 +110,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         requests.push(request);
 
         // Let observers know that a new request has been posted
-        emit PostedRequest(msg.sender, _id);
+        emit PostedRequest(_id);
 
         return _id;
     }
@@ -159,7 +159,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
         requests[_id].result = _result;
         msg.sender.transfer(requests[_id].reward);
 
-        emit PostedResult(msg.sender, _id);
+        emit PostedResult(_id);
     }
 
     /// @dev Retrieves the bytes of the serialization of one data request from the WRB.

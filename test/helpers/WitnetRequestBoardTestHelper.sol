@@ -35,13 +35,10 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
   bool public upgradable;
 
   // Event emitted when a new DR is posted
-  event PostedRequest(address indexed _from, uint256 _id);
+  event PostedRequest(uint256 _id);
 
-  // Event emitted when a DR inclusion proof is posted
-  event IncludedRequest(address indexed _from, uint256 _id);
-
-  // Event emitted when a result proof is posted
-  event PostedResult(address indexed _from, uint256 _id);
+  // Event emitted when a result is reported
+  event PostedResult(uint256 _id);
 
   constructor (address[] memory _committee, bool _upgradable) public {
     witnet = msg.sender;
@@ -68,7 +65,7 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardInterface {
     requests[_id].drTxHash = 0;
     requests[_id].pkhClaim = address(0);
 
-    emit PostedRequest(msg.sender, _id);
+    emit PostedRequest(_id);
 
     return _id;
   }

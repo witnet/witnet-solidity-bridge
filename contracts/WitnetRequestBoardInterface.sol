@@ -13,6 +13,12 @@ pragma solidity >=0.6.0 <0.7.0;
  */
 interface WitnetRequestBoardInterface {
 
+  // Event emitted when a new DR is posted
+  event PostedRequest(uint256 _id);
+
+  // Event emitted when a result is reported
+  event PostedResult(uint256 _id);
+
   /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
   /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @return The unique identifier of the data request.

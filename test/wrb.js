@@ -62,10 +62,8 @@ contract("WitnetRequestBoard", ([
         postDataRequestTx,
         "PostedRequest",
         {
-          _from: requestor,
           _id: requestId,
         })
-      expect(postDataRequestTx.logs[0].args._from, "match address of DR creator").to.be.equal(requestor)
       expect(postDataRequestTx.logs[0].args._id, "match data request id").to.be.bignumber.equal(requestId)
 
       // Check contract balance (increased by reward)
@@ -97,7 +95,6 @@ contract("WitnetRequestBoard", ([
         postDataRequestTx1,
         "PostedRequest",
         {
-          _from: requestor,
           _id: requestId,
         })
       expect(postDataRequestTx1.logs[0].args._id, "match data request id").to.be.bignumber.equal(requestId)
@@ -106,7 +103,6 @@ contract("WitnetRequestBoard", ([
         postDataRequestTx2,
         "PostedRequest",
         {
-          _from: requestor,
           _id: requestId.add(new BN(1)),
         })
       expect(
@@ -266,11 +262,9 @@ contract("WitnetRequestBoard", ([
         reportResultTx,
         "PostedResult",
         {
-          _from: owner,
           _id: requestId,
         },
       )
-      expect(reportResultTx.logs[0].args._from, "match address of DR creator").to.be.equal(owner)
       expect(reportResultTx.logs[0].args._id, "match data request id").to.be.bignumber.equal(requestId)
 
       // Check balances (contract decreased and claimer increased)
