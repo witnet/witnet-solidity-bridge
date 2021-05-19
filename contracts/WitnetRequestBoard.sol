@@ -66,7 +66,7 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     /// @param _committee list of authorized addresses.
     constructor(address[] memory _committee) {
         owner = msg.sender;
-        for (uint256 i; i < _committee.length; i++) {
+        for (uint256 i = 0; i < _committee.length; i++) {
             isInCommittee[_committee[i]] = true;
         }
         // Insert an empty request so as to initialize the requests array with length > 0
@@ -148,9 +148,9 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
 
         requests[_id].drTxHash = _drTxHash;
         requests[_id].result = _result;
-        payable(msg.sender).transfer(requests[_id].reward);
-
+    
         emit PostedResult(_id);
+        payable(msg.sender).transfer(requests[_id].reward);
     }
 
     /// @dev Retrieves the bytes of the serialization of one data request from the WRB.
@@ -237,9 +237,12 @@ contract WitnetRequestBoard is WitnetRequestBoardInterface {
     {
         return _gasPrice * ESTIMATED_REPORT_RESULT_GAS;
     }
-
+    
+    /// @dev Computes the output hash of a request from its bytecode.
+    /// @param _bytecode The bytecode of the request.
+    /// @return The output hash of the request.
     function computeDrOutputHash(bytes memory _bytecode)
-        internal
+        public
         pure
         returns (uint256)
     {

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.4;
-pragma experimental ABIEncoderV2;
 
 import "./CBOR.sol";
 
@@ -359,7 +358,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return `true` if successful, `false` if errored.
    */
-  function isOk(Result memory _result) public pure returns(bool) {
+  function isOk(Result memory _result) external pure returns(bool) {
     return _result.success;
   }
 
@@ -368,7 +367,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return `true` if errored, `false` if successful.
    */
-  function isError(Result memory _result) public pure returns(bool) {
+  function isError(Result memory _result) external pure returns(bool) {
     return !_result.success;
   }
 
@@ -377,7 +376,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `bytes` decoded from the Result.
    */
-  function asBytes(Result memory _result) public pure returns(bytes memory) {
+  function asBytes(Result memory _result) external pure returns(bytes memory) {
     require(_result.success, "Tried to read bytes value from errored Result");
     return _result.cborValue.decodeBytes();
   }
@@ -387,7 +386,7 @@ library Witnet {
    * @param _result An instance of `Result`.
    * @return The `CBORValue.Error memory` decoded from the Result.
    */
-  function asErrorCode(Result memory _result) public pure returns(ErrorCodes) {
+  function asErrorCode(Result memory _result) external pure returns(ErrorCodes) {
     uint64[] memory error = asRawError(_result);
     if (error.length == 0) {
       return ErrorCodes.Unknown;
@@ -402,7 +401,7 @@ library Witnet {
    * @param _result An instance of `Result`.
    * @return A tuple containing the `CBORValue.Error memory` decoded from the `Result`, plus a loggable error message.
    */
-  function asErrorMessage(Result memory _result) public pure returns(ErrorCodes, string memory) {
+  function asErrorMessage(Result memory _result) external pure returns(ErrorCodes, string memory) {
     uint64[] memory error = asRawError(_result);
     if (error.length == 0) {
       return (ErrorCodes.Unknown, "Unknown error (no error code)");
@@ -513,7 +512,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `bool` decoded from the Result.
    */
-  function asBool(Result memory _result) public pure returns(bool) {
+  function asBool(Result memory _result) external pure returns(bool) {
     require(_result.success, "Tried to read `bool` value from errored Result");
     return _result.cborValue.decodeBool();
   }
@@ -526,7 +525,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `int128` decoded from the Result.
    */
-  function asFixed16(Result memory _result) public pure returns(int32) {
+  function asFixed16(Result memory _result) external pure returns(int32) {
     require(_result.success, "Tried to read `fixed16` value from errored Result");
     return _result.cborValue.decodeFixed16();
   }
@@ -536,7 +535,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `int128[]` decoded from the Result.
    */
-  function asFixed16Array(Result memory _result) public pure returns(int32[] memory) {
+  function asFixed16Array(Result memory _result) external pure returns(int32[] memory) {
     require(_result.success, "Tried to read `fixed16[]` value from errored Result");
     return _result.cborValue.decodeFixed16Array();
   }
@@ -546,7 +545,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `int128` decoded from the Result.
    */
-  function asInt128(Result memory _result) public pure returns(int128) {
+  function asInt128(Result memory _result) external pure returns(int128) {
     require(_result.success, "Tried to read `int128` value from errored Result");
     return _result.cborValue.decodeInt128();
   }
@@ -556,7 +555,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `int128[]` decoded from the Result.
    */
-  function asInt128Array(Result memory _result) public pure returns(int128[] memory) {
+  function asInt128Array(Result memory _result) external pure returns(int128[] memory) {
     require(_result.success, "Tried to read `int128[]` value from errored Result");
     return _result.cborValue.decodeInt128Array();
   }
@@ -566,7 +565,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `string` decoded from the Result.
    */
-  function asString(Result memory _result) public pure returns(string memory) {
+  function asString(Result memory _result) external pure returns(string memory) {
     require(_result.success, "Tried to read `string` value from errored Result");
     return _result.cborValue.decodeString();
   }
@@ -576,7 +575,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `string[]` decoded from the Result.
    */
-  function asStringArray(Result memory _result) public pure returns(string[] memory) {
+  function asStringArray(Result memory _result) external pure returns(string[] memory) {
     require(_result.success, "Tried to read `string[]` value from errored Result");
     return _result.cborValue.decodeStringArray();
   }
@@ -586,7 +585,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `uint64` decoded from the Result.
    */
-  function asUint64(Result memory _result) public pure returns(uint64) {
+  function asUint64(Result memory _result) external pure returns(uint64) {
     require(_result.success, "Tried to read `uint64` value from errored Result");
     return _result.cborValue.decodeUint64();
   }
@@ -596,7 +595,7 @@ library Witnet {
    * @param _result An instance of Result.
    * @return The `uint64[]` decoded from the Result.
    */
-  function asUint64Array(Result memory _result) public pure returns(uint64[] memory) {
+  function asUint64Array(Result memory _result) external pure returns(uint64[] memory) {
     require(_result.success, "Tried to read `uint64[]` value from errored Result");
     return _result.cborValue.decodeUint64Array();
   }

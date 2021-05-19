@@ -73,13 +73,9 @@ contract WitnetRequestBoardProxy {
   returns(uint256)
   {
     // Get the address and the offset of the corresponding to id
-    address wrbAddress;
-    uint256 offsetWrb;
-    (wrbAddress, offsetWrb) = getController(_id);
+    (address wrbAddress, uint256 offsetWrb) = getController(_id);
     // Return the result of the DR readed in the corresponding Controller with its own id
-    WitnetRequestBoardInterface wrbWithDrTxHash;
-    wrbWithDrTxHash = WitnetRequestBoardInterface(wrbAddress);
-    uint256 drTxHash = wrbWithDrTxHash.readDrTxHash(_id - offsetWrb);
+    uint256 drTxHash = WitnetRequestBoardInterface(wrbAddress).readDrTxHash(_id - offsetWrb);
     return drTxHash;
   }
 

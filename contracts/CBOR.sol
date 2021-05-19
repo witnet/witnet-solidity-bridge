@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.4;
-pragma experimental ABIEncoderV2;
 
 import "./BufferLib.sol";
 
@@ -94,7 +93,7 @@ library CBOR {
    * @param _cborValue An instance of `CBOR.Value`.
    * @return The value represented by the input, as an `int128[]` value.
    */
-  function decodeFixed16Array(Value memory _cborValue) public pure returns(int32[] memory) {
+  function decodeFixed16Array(Value memory _cborValue) external pure returns(int32[] memory) {
     require(_cborValue.majorType == 4, "Tried to read `int128[]` from a `CBOR.Value` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
@@ -131,7 +130,7 @@ library CBOR {
    * @param _cborValue An instance of `CBOR.Value`.
    * @return The value represented by the input, as an `int128[]` value.
    */
-  function decodeInt128Array(Value memory _cborValue) public pure returns(int128[] memory) {
+  function decodeInt128Array(Value memory _cborValue) external pure returns(int128[] memory) {
     require(_cborValue.majorType == 4, "Tried to read `int128[]` from a `CBOR.Value` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
@@ -175,7 +174,7 @@ library CBOR {
    * @param _cborValue An instance of `CBOR.Value`.
    * @return The value represented by the input, as an `string[]` value.
    */
-  function decodeStringArray(Value memory _cborValue) public pure returns(string[] memory) {
+  function decodeStringArray(Value memory _cborValue) external pure returns(string[] memory) {
     require(_cborValue.majorType == 4, "Tried to read `string[]` from a `CBOR.Value` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
@@ -205,7 +204,7 @@ library CBOR {
    * @param _cborValue An instance of `CBOR.Value`.
    * @return The value represented by the input, as an `uint64[]` value.
    */
-  function decodeUint64Array(Value memory _cborValue) public pure returns(uint64[] memory) {
+  function decodeUint64Array(Value memory _cborValue) external pure returns(uint64[] memory) {
     require(_cborValue.majorType == 4, "Tried to read `uint64[]` from a `CBOR.Value` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
@@ -226,7 +225,7 @@ library CBOR {
    * @param _cborBytes Raw bytes representing a CBOR-encoded value.
    * @return A `CBOR.Value` instance containing a partially decoded value.
    */
-  function valueFromBytes(bytes memory _cborBytes) public pure returns(Value memory) {
+  function valueFromBytes(bytes memory _cborBytes) external pure returns(Value memory) {
     BufferLib.Buffer memory buffer = BufferLib.Buffer(_cborBytes, 0);
 
     return valueFromBuffer(buffer);
