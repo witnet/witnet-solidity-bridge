@@ -243,7 +243,6 @@ library CBOR {
     uint8 initialByte;
     uint8 majorType = 255;
     uint8 additionalInformation;
-    uint64 length;
     uint64 tag = UINT64_MAX;
 
     bool isTagged = true;
@@ -268,7 +267,7 @@ library CBOR {
       initialByte,
       majorType,
       additionalInformation,
-      length,
+      0,
       tag);
   }
 

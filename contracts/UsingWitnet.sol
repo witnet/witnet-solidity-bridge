@@ -4,7 +4,7 @@ pragma solidity >=0.6.0 <0.9.0;
 
 import "./Request.sol";
 import "./Witnet.sol";
-import "./WitnetRequestBoardProxy.sol";
+import "./WitnetRequestBoardInterface.sol";
 
 
 /**
@@ -14,14 +14,14 @@ import "./WitnetRequestBoardProxy.sol";
 abstract contract UsingWitnet {
   using Witnet for Witnet.Result;
 
-  WitnetRequestBoardProxy internal wrb;
+  WitnetRequestBoardInterface internal immutable wrb;
 
  /**
   * @notice Include an address to specify the WitnetRequestBoard.
   * @param _wrb WitnetRequestBoard address.
   */
   constructor(address _wrb) {
-    wrb = WitnetRequestBoardProxy(_wrb);
+    wrb = WitnetRequestBoardInterface(_wrb);
   }
 
   // Provides a convenient way for client contracts extending this to block the execution of the main logic of the
