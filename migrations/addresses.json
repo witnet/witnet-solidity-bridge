@@ -3,11 +3,11 @@
   },
   "singletons": {
     "libraries": {
-      "CBOR": "0x67A8edFa7c3e1096D093312f6863b8a954a19dD2",
-      "Witnet": "0x9426847C68059fC7399D8d5338E11cE7808c9eA4"
+      "CBOR": "0xd75b64FEb11193F9b77BCC3Ec904c89Bd0b9E421",
+      "Witnet": "0xC72d494a355a58A4FFb31434073118c7CB0651CD"
     },
     "contracts": {
-      "WitnetRequestBoardProxy": "0x28c93192A5415194b04Cb54762d60eAC528C5175"
+      "WitnetRequestBoardProxy": "0x1F1a458dAF4162CC07BDaC1D25F459feCAab6C20"
     }
   }
 }
