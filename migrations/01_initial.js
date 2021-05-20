@@ -1,16 +1,16 @@
-const fs = require('fs')
-const Migrations = artifacts.require("Migrations");
+const fs = require("fs")
+const Migrations = artifacts.require("Migrations")
 
 module.exports = async function (deployer, network) {
-  if (!fs.existsSync('./migrations/addresses.json')) {
-    await fs.open('./migrations/addresses.json', 'w', function (err, file) {
-      if (err) throw new Error("Fatal: cannot create ./migrations/addreses.json");
-      console.log("> Created ./migrations/addresses.json file.");
+  if (!fs.existsSync("./migrations/addresses.json")) {
+    await fs.open("./migrations/addresses.json", "w", function (err, file) {
+      if (err) throw new Error("Fatal: cannot create ./migrations/addreses.json")
+      console.log("> Created ./migrations/addresses.json file.")
     })
   }
 
-  // Prepare 'addresses.json' structure if necessary:
-  let addresses = await fs.readFileSync('./migrations/addresses.json')
+  // Prepare "addresses.json" structure if necessary:
+  let addresses = await fs.readFileSync("./migrations/addresses.json")
   if (addresses.length === 0) addresses = "{}"
   addresses = JSON.parse(addresses)
 
@@ -19,7 +19,7 @@ module.exports = async function (deployer, network) {
     addresses.networks = {}
     changes = true
   }
-  if (!(network in addresses["networks"])) {
+  if (!(network in addresses.networks)) {
     addresses.networks[network] = {}
     changes = true
   }
@@ -39,6 +39,6 @@ module.exports = async function (deployer, network) {
     await fs.writeFileSync("./migrations/addresses.json", JSON.stringify(addresses, null, 2))
   }
 
-  // Deploy 'Migrations' contract:
+  // Deploy "Migrations" contract:
   await deployer.deploy(Migrations)
 }
