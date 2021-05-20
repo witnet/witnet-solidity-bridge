@@ -41,7 +41,7 @@ module.exports = async function (deployer, network, accounts) {
 
     if ((await web3.eth.getCode(contract_addr)).length <= 3) {
       // Deploy contract instance, if not yet deployed on this `network`:
-      traceHeader(`Singleton inception of contract '${contract}':`)
+      utils.traceHeader(`Singleton inception of contract '${contract}':`)
 
       const balance = await web3.eth.getBalance(from)
       const gas = singletons.contracts[contract].gas || 10 ** 6
@@ -51,9 +51,9 @@ module.exports = async function (deployer, network, accounts) {
 
       const tx = await factory.deployAndInit(bytecode, initCall, salt, {from, gas})
       utils.traceEvents(tx.logs)
-      traceDeploymentTx(tx.receipt, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
+      utils.traceTx(tx.receipt, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
     } else {
-      traceHeader(`Singleton contract: '${contract}'`)
+      utils.traceHeader(`Singleton contract: '${contract}'`)
     }
 
     artifact.address = contract_addr

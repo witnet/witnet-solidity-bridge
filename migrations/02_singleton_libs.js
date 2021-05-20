@@ -23,7 +23,7 @@ module.exports = async function (deployer, network, accounts) {
 
   if (deployedCode.length <= 3) {
     // Deploy SingletonFactory instance, if not yet deployed on this `network`:
-    traceHeader(`Inception of 'SingletonFactory':`)
+    utils.traceHeader("Inception of 'SingletonFactory':")
 
     const balance = await web3.eth.getBalance(from)
     const estimatedGas = res.gasLimit
@@ -41,9 +41,9 @@ module.exports = async function (deployer, network, accounts) {
     }
 
     const tx = await web3.eth.sendSignedTransaction(res.rawTx)
-    traceDeploymentTx(tx, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
+    utils.traceTx(tx, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
   } else {
-    traceHeader(`Singleton factory: 'SingletonFactory`)
+    utils.traceHeader("Singleton factory: 'SingletonFactory")
   }
 
   // Set SingletonFactory address on current network:
@@ -87,14 +87,13 @@ module.exports = async function (deployer, network, accounts) {
 
     if ((await web3.eth.getCode(lib_addr)).length <= 3) {
       // Deploy library instance, if not yet deployed on this `network`:
-      traceHeader(`Singleton inception of library '${lib}':`)
+      utils.traceHeader(`Singleton inception of library '${lib}':`)
 
       const balance = await web3.eth.getBalance(from)
       const gas = singletons.libs[lib].gas || 10 ** 6
-      const tx = await factory.deploy(bytecode, salt, {from: from, gas: gas})
-      traceDeploymentTx(tx.receipt, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
+      utils.traceTx(tx.receipt, web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString()))
     } else {
-      traceHeader(`Singleton library: '${lib}'`)
+      utils.traceHeader(`Singleton library: '${lib}'`)
     }
 
     artifact.address = lib_addr
