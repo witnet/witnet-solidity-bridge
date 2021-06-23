@@ -30,8 +30,8 @@ interface IWitnetQuery {
   function readDrGasPrice(uint256 id) external view returns (uint256);
 
   /// @dev Retrieves Witnet tx hash of a previously solved DR.
-    /// @param id The unique identifier of a previously posted data request.
-    /// @return The hash of the DataRequest transaction in Witnet.
+  /// @param id The unique identifier of a previously posted data request.
+  /// @return The hash of the DataRequest transaction in Witnet.
   function readDrTxHash(uint256 id) external view returns (uint256);
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
