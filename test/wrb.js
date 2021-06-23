@@ -10,7 +10,7 @@ const { expect } = require("chai")
 // Contracts
 const WRB = artifacts.require("WitnetRequestBoard")
 
-const Request = artifacts.require("Request")
+const Request = artifacts.require("WitnetRequest")
 const RequestTestHelper = artifacts.require("RequestTestHelper")
 
 // Request definition
