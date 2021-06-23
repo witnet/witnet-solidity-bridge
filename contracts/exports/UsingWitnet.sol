@@ -3,11 +3,9 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./IWitnetQuery.sol";
-import "./IWitnetRequestor.sol";
+import "./WitnetRequestBoardInterface.sol";
 import "./WitnetRequest.sol";
-import "./WitnetTypes.sol";
-
+import "../libs/Witnet.sol";
 
 /**
  * @title The UsingWitnet contract
@@ -38,7 +36,7 @@ abstract contract UsingWitnet {
   * @return Sequencial identifier for the request included in the WitnetRequestBoard.
   */
   function witnetPostRequest(WitnetRequest _request) internal returns (uint256) {
-    return IWitnetRequestor(witnet).postDataRequest{value: msg.value}(address(_request));
+    return WitnetRequestBoardInterface(witnet).postDataRequest{value: msg.value}(address(_request));
   }
 
  /**
@@ -50,7 +48,7 @@ abstract contract UsingWitnet {
   */
   function witnetCheckRequestResolved(uint256 _id) internal view returns (bool) {
     // If the result of the data request in Witnet is not the default, then it means that it has been reported as resolved.
-    return IWitnetQuery(witnet).readDrTxHash(_id) != 0;
+    return WitnetRequestBoardInterface(witnet).readDrTxHash(_id) != 0;
   }
 
  /**
@@ -59,7 +57,7 @@ abstract contract UsingWitnet {
   * @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
   */
   function witnetUpgradeRequest(uint256 _id) internal {
-    IWitnetRequestor(witnet).upgradeDataRequest{value: msg.value}(_id);
+    WitnetRequestBoardInterface(witnet).upgradeDataRequest{value: msg.value}(_id);
   }
 
  /**
@@ -69,7 +67,7 @@ abstract contract UsingWitnet {
   * @return The result of the request as an instance of `Result`.
   */
   function witnetReadResult(uint256 _id) internal view returns (WitnetTypes.Result memory) {
-    return IWitnetQuery(witnet).readResult(_id);
+    return Witnet.resultFromCborBytes(WitnetRequestBoardInterface(witnet).readResult(_id));
   }
 
  /**
@@ -79,6 +77,6 @@ abstract contract UsingWitnet {
   * @return The reward to be included for the given gas price.
   */
   function witnetEstimateGasCost(uint256 _gasPrice) internal view returns (uint256) {
-    return IWitnetRequestor(witnet).estimateGasCost(_gasPrice);
+    return WitnetRequestBoardInterface(witnet).estimateGasCost(_gasPrice);
   }
 }

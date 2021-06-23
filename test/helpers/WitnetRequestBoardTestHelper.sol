@@ -48,8 +48,8 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
-  function readResult(uint256 _id) external view override returns (WitnetTypes.Result memory) {
-    return Witnet.resultFromCborBytes(__data().requests[_id].result);
+  function readResult(uint256 _id) external view override returns (bytes memory) {
+    return __data().requests[_id].result;
   }
 
   /// @dev Verifies if the contract is upgradable

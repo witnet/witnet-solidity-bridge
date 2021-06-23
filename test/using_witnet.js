@@ -139,7 +139,7 @@ contract("UsingWitnet", accounts => {
         from: reporterAccount,
       }))
       const result = await wrb.readResult(requestId)
-      assert.equal(result.value.buffer.data, resultHex)
+      assert.equal(result, resultHex)
     })
 
     it("should check if the request is resolved", async () => {
@@ -224,7 +224,7 @@ contract("UsingWitnet", accounts => {
         from: reporterAccount,
       }))
       const result = await wrb.readResult(requestId)
-      assert.equal(result.value.buffer.data, resultHex)
+      assert.equal(result, resultHex)
     })
 
     it("should pull the result from the WRB back to the client contract", async () => {

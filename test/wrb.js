@@ -345,7 +345,7 @@ contract("WitnetRequestBoard", ([
     it("anyone can read the data request result", async () => {
       // Read data request result from WitnetRequestBoard by `requestId`
       const requestResultCall = await this.WitnetRequestBoard.readResult(requestId, { from: requestor })
-      expect(requestResultCall.value.buffer.data).to.be.equal(resultHex)
+      expect(requestResultCall).to.be.equal(resultHex)
     })
     it("fails if data request bytecode has been manipulated", async () => {
       // Change the bytecode of the request already posted
@@ -402,49 +402,6 @@ contract("WitnetRequestBoard", ([
     )
   })
 
-  describe("IWitnetAdmin:", async () => {
-    it("owner can transfer ownership", async () => {
-      await this.WitnetRequestBoard.transferOwnership(other, { from: owner })
-      await this.WitnetRequestBoard.transferOwnership(owner, { from: other })
-      expect(
-        await this.WitnetRequestBoard.owner.call()
-      ).to.equal(owner)
-    })
-    it("fails if non owner tries to transfer ownership", async () => {
-      await expectRevert(
-        this.WitnetRequestBoard.transferOwnership(other, { from: other }),
-        "only owner"
-      )
-    })
-  })
-
-  describe("IWitnetAdminWhitelists:", async () => {
-    it("fails if trying to set reporters from non owner address", async () => {
-      await expectRevert(
-        this.WitnetRequestBoard.setReporters([other], { from: other }),
-        "only owner"
-      )
-    })
-    it("owner can set new reporters", async () => {
-      await this.WitnetRequestBoard.setReporters([other], { from: owner })
-      expect(
-        await this.WitnetRequestBoard.isReporter.call(other)
-      ).to.equal(true)
-    })
-    it("fails it trying to unset reporters from non owner address", async () => {
-      await expectRevert(
-        this.WitnetRequestBoard.unsetReporters([other], { from: other }),
-        "only owner"
-      )
-    })
-    it("owner can unset reporters", async () => {
-      await this.WitnetRequestBoard.unsetReporters([other], { from: owner })
-      expect(
-        await this.WitnetRequestBoard.isReporter.call(other)
-      ).to.equal(false)
-    })
-  })
-
   describe("Upgradable:", async () => {
     it("initialization fails if called from non owner address", async () => {
       await expectRevert(
@@ -476,7 +433,7 @@ contract("WitnetRequestBoard", ([
     it("instance gets actually destroyed", async () => {
       await this.WitnetRequestBoard.destroy({ from: owner })
       await expectRevert(
-        this.WitnetRequestBoard.isReporter(owner),
+        this.WitnetRequestBoard.requestsCount(),
         "Out of Gas?"
       )
     })

@@ -2,15 +2,13 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./IWitnetQuery.sol";
-import "./IWitnetReporter.sol";
-import "./IWitnetRequestor.sol";
+import "./WitnetRequestBoardInterface.sol";
 
 /**
  * @title Witnet Requests Board functionality base contract.
  * @author Witnet Foundation
  */
-abstract contract WitnetBoard is IWitnetQuery, IWitnetReporter, IWitnetRequestor {
+abstract contract WitnetBoard is WitnetRequestBoardInterface {
 
     receive() external payable {
         revert("WitnetBoard: no ETH accepted");

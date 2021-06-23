@@ -4,16 +4,13 @@ pragma solidity 0.8.5;
 
 // Inherits:
 import "../../data/WitnetBoardDataWhitelists.sol";
-import "../../exports/IWitnetAdmin.sol";
-import "../../exports/IWitnetAdminWhitelists.sol";
+import "../../exports/WitnetRequestBoardInterface.sol";
 import "../../exports/WitnetBoard.sol";
 import "../../utils/Destructible.sol";
 import "../../utils/Upgradable.sol";
 
 // Uses:
 import "../../exports/WitnetRequest.sol";
-import "../../libs/Witnet.sol";
-
 
 /**
  * @title Witnet Requests Board mocked
@@ -27,9 +24,7 @@ contract WitnetRequestBoard
         Destructible,
         Upgradable, 
         WitnetBoard, 
-        WitnetBoardDataWhitelists,
-        IWitnetAdmin, 
-        IWitnetAdminWhitelists
+        WitnetBoardDataWhitelists
 {
     uint256 internal constant __ESTIMATED_REPORT_RESULT_GAS = 102496;
 
@@ -58,7 +53,6 @@ contract WitnetRequestBoard
             // set owner if not yet set
             _owner = msg.sender;
             __data().owner = _owner;
-            emit OwnershipTransferred(address(0), msg.sender);
         }
 
         // only owner can initialize:
@@ -80,35 +74,11 @@ contract WitnetRequestBoard
 
 
     // ================================================================================================================
-    // --- Implements 'IWitnetAdmin' ----------------------------------------------------------------------------------
-
-    function owner() external view override returns (address) {
-        return __data().owner;
-    }
-
-    function transferOwnership(address _newOwner) external override onlyOwner {
-        if (_newOwner != address(0)) {
-            emit OwnershipTransferred(__data().owner, _newOwner);
-            __data().owner = _newOwner;
-        }
-    }
-
-
-    // ================================================================================================================
-    // --- Implements 'IWitnetAdminWhitelists' ------------------------------------------------------------------------
-
-    function isReporter(address reporter)
-        external
-        view
-        override
-        returns (bool)
-    {
-        return __whitelists().isReporter_[reporter];
-    }
+    // --- Utility functions not declared within an interface ---------------------------------------------------------
 
     function setReporters(address[] memory reporters)
         public
-        override 
+        virtual
         onlyOwner
     {
         for (uint ix = 0; ix < reporters.length; ix ++) {
@@ -117,33 +87,14 @@ contract WitnetRequestBoard
                 __whitelists().isReporter_[_reporter] = true;
             }
         }
-        emit ReportersSet(reporters);
     }
-
-    function unsetReporters(address[] calldata reporters)
-        external
-        override 
-        onlyOwner
-    {
-        for (uint ix = 0; ix < reporters.length; ix ++) {
-            address _reporter = reporters[ix];
-            if (_reporter != address(0)) {
-                __whitelists().isReporter_[_reporter] = false;
-            }
-        }
-        emit ReportersUnset(reporters);
-    }    
-
-
-    // ================================================================================================================
-    // --- Implements 'IWitnetQuery' ----------------------------------------------------------------------------------
 
     /// @dev Retrieves the whole DR post record from the WRB.
     /// @param id The unique identifier of a previously posted data request.
     /// @return The DR record.
     function readDr(uint256 id)
-        external 
-        override view
+        external view
+        virtual
         wasPosted(id)
         returns (WitnetTypes.DataRequest memory)
     {
@@ -154,9 +105,8 @@ contract WitnetRequestBoard
     /// @param id The unique identifier of the previously posted DR.
     /// @return _bytecode The RADON bytecode. Fails if changed after being posted.
     function readDrBytecode(uint256 id)
-        external
-        override
-        view
+        external view
+        virtual
         wasPosted(id)
         returns (bytes memory _bytecode)
     {
@@ -173,12 +123,45 @@ contract WitnetRequestBoard
     /// @return The latest gas price set by either the DR requestor, or upgrader.
     function readDrGasPrice(uint256 id)
         external view
-        override
+        virtual
         wasPosted(id)
         returns (uint256)
     {
         return __dataRequest(id).gasprice;
     }
+
+    /// @dev Reports the result of a data request solved by Witnet network.
+    /// @param id The unique identifier of the data request.
+    /// @param txhash Hash of the solving tally transaction in Witnet.
+    /// @param result The result itself as bytes.
+    function reportResult(
+            uint256 id,
+            uint256 txhash,
+            bytes calldata result
+        )
+        external
+        virtual
+        onlyReporters
+        wasPosted(id)
+        resultNotYetReported(id)
+    {
+        require(txhash != 0, "WitnetRequestBoard: tx hash cannot be zero");
+        // Ensures the result byes do not have zero length
+        // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
+        require(result.length != 0, "WitnetRequestBoard: result cannot be empty");
+
+        
+        SWitnetBoardDataRequest storage _req = __data().requests[id];
+        _req.dr.txhash = txhash;
+        _req.result = result;
+
+        emit PostedResult(id);
+        payable(msg.sender).transfer(_req.dr.reward);
+    }
+
+    
+    // ================================================================================================================
+    // --- Implements 'WitnetRequestBoardInterface' -------------------------------------------------------------------
 
     /// @dev Retrieves Witnet tx hash of a previously solved DR.
     /// @param id The unique identifier of a previously posted data request.
@@ -199,55 +182,18 @@ contract WitnetRequestBoard
         external view
         virtual override        
         wasPosted(id)
-        returns (WitnetTypes.Result memory)
+        returns (bytes memory)
     {
         SWitnetBoardDataRequest storage _req = __data().requests[id];
         require(_req.dr.txhash != 0, "WitnetRequestBoard: not yet solved");
-        return Witnet.resultFromCborBytes(_req.result);
+        return _req.result;
     }  
 
     /// @dev Returns the number of posted data requests in the WRB.
     /// @return The number of posted data requests in the WRB.
-    function requestsCount() external override view returns (uint256) {
+    function requestsCount() external virtual view returns (uint256) {
         return __data().noRequests;
     }
-
-
-    // ================================================================================================================
-    // --- Implements 'IWitnetReporter' -------------------------------------------------------------------------------
-
-    /// @dev Reports the result of a data request solved by Witnet network.
-    /// @param id The unique identifier of the data request.
-    /// @param txhash Hash of the solving tally transaction in Witnet.
-    /// @param result The result itself as bytes.
-    function reportResult(
-            uint256 id,
-            uint256 txhash,
-            bytes calldata result
-        )
-        external
-        virtual override
-        onlyReporters
-        wasPosted(id)
-        resultNotYetReported(id)
-    {
-        require(txhash != 0, "WitnetRequestBoard: tx hash cannot be zero");
-        // Ensures the result byes do not have zero length
-        // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
-        require(result.length != 0, "WitnetRequestBoard: result cannot be empty");
-
-        
-        SWitnetBoardDataRequest storage _req = __data().requests[id];
-        _req.dr.txhash = txhash;
-        _req.result = result;
-
-        emit PostedResult(id);
-        payable(msg.sender).transfer(_req.dr.reward);
-    }
-
-
-    // ================================================================================================================
-    // --- Implements 'IWitnetRequestor' ------------------------------------------------------------------------------
 
     /// @dev Estimate the amount of reward we need to insert for a given gas price.
     /// @param gasPrice The gas price for which we need to calculate the rewards.
