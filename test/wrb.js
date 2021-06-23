@@ -454,4 +454,20 @@ contract("WitnetRequestBoard", ([
       )
     })
   })
+
+  describe("Destructible:", async () => {
+    it("fails if trying to destroy from non owner address", async () => {
+      await expectRevert(
+        this.WitnetRequestBoard.destroy({ from: other }),
+        "only owner"
+      )
+    })
+    it("instance gets actually destroyed", async () => {
+      await this.WitnetRequestBoard.destroy({ from: owner })
+      await expectRevert(
+        this.WitnetRequestBoard.isReporter(owner),
+        "Out of Gas?"
+      )
+    })
+  })
 })

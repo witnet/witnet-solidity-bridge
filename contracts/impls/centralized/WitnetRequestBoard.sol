@@ -7,6 +7,7 @@ import "../../data/WitnetBoardDataWhitelists.sol";
 import "../../exports/IWitnetAdmin.sol";
 import "../../exports/IWitnetAdminWhitelists.sol";
 import "../../exports/WitnetBoard.sol";
+import "../../utils/Destructible.sol";
 import "../../utils/Upgradable.sol";
 
 // Uses:
@@ -23,6 +24,7 @@ import "../../libs/Witnet.sol";
  */
 contract WitnetRequestBoard
     is 
+        Destructible,
         Upgradable, 
         WitnetBoard, 
         WitnetBoardDataWhitelists,
@@ -34,6 +36,14 @@ contract WitnetRequestBoard
     constructor() {
         // sets instance as initialized:
         __data().instance = address(this);
+    }
+
+
+    // ================================================================================================================
+    // --- Overrides 'Destructible' -----------------------------------------------------------------------------------
+
+    function destroy() external override onlyOwner {
+        selfdestruct(payable(msg.sender));
     }
 
 
