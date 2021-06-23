@@ -8,8 +8,8 @@ pragma solidity >=0.7.0 <0.9.0;
  */
 interface IWitnetReporter {
 
-  // Event emitted when a result is reported
-  event PostedResult(uint256 _id);
+  /// @notice Event emitted when a result is reported.
+  event PostedResult(uint256 id);
   
   /// @dev Reports the result of a data request in Witnet.
   /// @param _id The unique identifier of the data request.

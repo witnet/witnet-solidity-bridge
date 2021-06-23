@@ -10,4 +10,12 @@ import "./IWitnetRequestor.sol";
  * @title Witnet Requests Board functionality base contract.
  * @author Witnet Foundation
  */
-abstract contract WitnetBoard is IWitnetQuery, IWitnetReporter, IWitnetRequestor {}
+abstract contract WitnetBoard is IWitnetQuery, IWitnetReporter, IWitnetRequestor {
+
+    receive() external payable {
+        revert("WitnetBoard: no ETH accepted");
+    }
+    fallback() external payable {
+        revert("WitnetBoard: not implemented");
+    }
+}
