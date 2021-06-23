@@ -3,10 +3,10 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
+import "./IWitnetQuery.sol";
+import "./IWitnetRequestor.sol";
 import "./WitnetRequest.sol";
-import "../libs/Witnet.sol";
-import "../exports/IWitnetQuery.sol";
-import "../exports/IWitnetRequestor.sol";
+import "./WitnetTypes.sol";
 
 
 /**
@@ -14,8 +14,6 @@ import "../exports/IWitnetRequestor.sol";
  * @notice Contract writers can inherit this contract in order to create Witnet data requests.
  */
 abstract contract UsingWitnet {
-  using Witnet for Witnet.Result;
-
   address internal immutable witnet;
 
  /**
@@ -70,8 +68,8 @@ abstract contract UsingWitnet {
   * @param _id The unique identifier of a request that was posted to Witnet.
   * @return The result of the request as an instance of `Result`.
   */
-  function witnetReadResult(uint256 _id) internal view returns (Witnet.Result memory) {
-    return Witnet.resultFromCborBytes(IWitnetQuery(witnet).readResult(_id));
+  function witnetReadResult(uint256 _id) internal view returns (WitnetTypes.Result memory) {
+    return IWitnetQuery(witnet).readResult(_id);
   }
 
  /**

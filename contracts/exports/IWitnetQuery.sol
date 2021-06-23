@@ -35,9 +35,9 @@ interface IWitnetQuery {
   function readDrTxHash(uint256 id) external view returns (uint256);
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
-  /// @param _id The unique identifier of the data request.
+  /// @param id The unique identifier of the data request.
   /// @return The result of the DR
-  function readResult (uint256 _id) external view returns(bytes memory);
+  function readResult(uint256 id) external view returns (WitnetTypes.Result memory);
 
   /// @dev Returns the number of posted data requests in the WRB.
   /// @return The number of posted data requests in the WRB.
