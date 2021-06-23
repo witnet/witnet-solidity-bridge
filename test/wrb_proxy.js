@@ -1,3 +1,4 @@
+const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
 const RequestContract = artifacts.require("WitnetRequest")
@@ -146,7 +147,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(result.value.buffer.data, web3.utils.fromAscii("hello"))
     })
 
-    it("should read the result of a dr of and old wrb", async () => {
+    it("should read the result of a dr of an old wrb", async () => {
       // Upgrade the WRB address to wrbInstance3
       await proxy.upgradeWitnetRequestBoard(wrbInstance3.address, {
         from: contractOwner,
@@ -155,6 +156,26 @@ contract("Witnet Requests Board Proxy", accounts => {
       // Read the result of the DR
       const result = await wrb.readResult.call(4)
       assert.equal(result.value.buffer.data, web3.utils.fromAscii("hello"))
+    })
+
+    it("a solved data request can only be destroyed by actual requestor", async () => {
+      // Read the result of the DR just before destruction:
+      const result = await wrb.destroyResult.call(4, { from: requestSender })
+      assert.equal(result.value.buffer.data, web3.utils.fromAscii("hello"))
+
+      await truffleAssert.reverts(
+        wrb.destroyResult(4, { from: contractOwner }),
+        "only actual requestor"
+      )
+      const tx = await wrb.destroyResult(4, { from: requestSender }) // should work
+      assert.equal(tx.logs[0].args[0], requestSender)
+    })
+
+    it("destroyed results should not be readable any more", async () => {
+      await truffleAssert.reverts(
+        wrb.readResult.call(4),
+        "empty buffer"
+      )
     })
 
     it("should revert when trying to upgrade a non upgradable WRB", async () => {

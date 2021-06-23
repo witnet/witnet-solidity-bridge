@@ -28,13 +28,14 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
     setReporters(_committee);
   }
 
-  /// @dev Posts a data request into the WRB in expectation that it will be relayed and resolved in Witnet with a total reward that equals to msg.value.
+  /// @dev Posts a data request into the WRB, with immediate mock result.
   /// @param _requestAddress The request contract address which includes the request bytecode.
   /// @return _id The unique identifier of the data request.
   function postDataRequest(address _requestAddress)
     public payable override returns(uint256 _id)
   {
     _id = super.postDataRequest(_requestAddress);
+    __data().requests[_id].dr.txhash = uint256(keccak256("hello"));
     __data().requests[_id].result = "hello";
   }
 

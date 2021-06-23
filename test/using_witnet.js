@@ -5,7 +5,7 @@ const {
 // const { expect } = require("chai")
 
 const WRB = artifacts.require("WitnetRequestBoard")
-const WRBProxy = artifacts.require("WitnetBoardProxy")
+const WRBProxy = artifacts.require("WitnetProxy")
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
 const Request = artifacts.require("WitnetRequest")
 const Witnet = artifacts.require("Witnet")

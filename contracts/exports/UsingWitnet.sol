@@ -8,7 +8,6 @@ import "./IWitnetRequestor.sol";
 import "./WitnetRequest.sol";
 import "./WitnetTypes.sol";
 
-
 /**
  * @title The UsingWitnet contract
  * @notice Contract writers can inherit this contract in order to create Witnet data requests.
@@ -26,59 +25,65 @@ abstract contract UsingWitnet {
 
   // Provides a convenient way for client contracts extending this to block the execution of the main logic of the
   // contract until a particular request has been successfully resolved by Witnet
-  modifier witnetRequestResolved(uint256 _id) {
-    require(witnetCheckRequestResolved(_id), "Witnet request is not yet resolved by the Witnet network");
+  modifier witnetRequestResolved(uint256 id) {
+    require(witnetCheckRequestResolved(id), "Witnet request is not yet resolved by the Witnet network");
     _;
   }
 
- /**
-  * @notice Send a new request to the Witnet network with transaction value as result report reward.
-  * @dev Call to `post_dr` function in the WitnetRequestBoard contract.
-  * @param _request An instance of the `Request` contract.
-  * @return Sequencial identifier for the request included in the WitnetRequestBoard.
-  */
-  function witnetPostRequest(WitnetRequest _request) internal returns (uint256) {
-    return IWitnetRequestor(witnet).postDataRequest{value: msg.value}(address(_request));
-  }
-
- /**
-  * @notice Check if a request has been resolved by Witnet.
-  * @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
-  * parties) before this method returns `true`.
-  * @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
-  * @return A boolean telling if the request has been already resolved or not.
-  */
-  function witnetCheckRequestResolved(uint256 _id) internal view returns (bool) {
+  /**
+   * @notice Check if a request has been resolved by Witnet.
+   * @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
+   * parties) before this method returns `true`.
+   * @param id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
+   * @return A boolean telling if the request has been already resolved or not.
+  **/
+  function witnetCheckRequestResolved(uint256 id) internal view returns (bool) {
     // If the result of the data request in Witnet is not the default, then it means that it has been reported as resolved.
-    return IWitnetQuery(witnet).readDrTxHash(_id) != 0;
+    return IWitnetQuery(witnet).readDrTxHash(id) != 0;
   }
 
- /**
-  * @notice Upgrade the reward for a Data Request previously included.
-  * @dev Call to `upgrade_dr` function in the WitnetRequestBoard contract.
-  * @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
-  */
-  function witnetUpgradeRequest(uint256 _id) internal {
-    IWitnetRequestor(witnet).upgradeDataRequest{value: msg.value}(_id);
+  /**
+   * @notice Read the result of a resolved Data Request.
+   * @param id The unique identifier of a request that was posted to Witnet.
+   * @return The result of the request as an instance of `Result`.
+  **/
+  function witnetDestroyResult(uint256 id) internal returns (WitnetTypes.Result memory) {
+    return IWitnetRequestor(witnet).destroyResult(id);
   }
 
- /**
-  * @notice Read the result of a resolved request.
-  * @dev Call to `read_result` function in the WitnetRequestBoard contract.
-  * @param _id The unique identifier of a request that was posted to Witnet.
-  * @return The result of the request as an instance of `Result`.
-  */
-  function witnetReadResult(uint256 _id) internal view returns (WitnetTypes.Result memory) {
-    return IWitnetQuery(witnet).readResult(_id);
+  /**
+   * @notice Estimate the reward amount.
+   * @dev Call to `estimate_gas_cost` function in the WitnetRequestBoard contract.
+   * @param gasPrice The gas price for which we want to retrieve the estimation.
+   * @return The reward to be included for the given gas price.
+  **/
+  function witnetEstimateGasCost(uint256 gasPrice) internal view returns (uint256) {
+    return IWitnetRequestor(witnet).estimateGasCost(gasPrice);
   }
 
- /**
-  * @notice Estimate the reward amount.
-  * @dev Call to `estimate_gas_cost` function in the WitnetRequestBoard contract.
-  * @param _gasPrice The gas price for which we want to retrieve the estimation.
-  * @return The reward to be included for the given gas price.
-  */
-  function witnetEstimateGasCost(uint256 _gasPrice) internal view returns (uint256) {
-    return IWitnetRequestor(witnet).estimateGasCost(_gasPrice);
+  /**
+   * @notice Send a new request to the Witnet network with transaction value as result report reward.
+   * @param request An instance of the `WitnetRequest` contract.
+   * @return Sequencial identifier for the request included in the WitnetRequestBoard.
+  **/
+  function witnetPostRequest(WitnetRequest request) internal returns (uint256) {
+    return IWitnetRequestor(witnet).postDataRequest{value: msg.value}(address(request));
+  }
+
+  /**
+   * @notice Read the result of a resolved Data Request.
+   * @param id The unique identifier of a request that was posted to Witnet.
+   * @return The result of the request as an instance of `Result`.
+  **/
+  function witnetReadResult(uint256 id) internal view returns (WitnetTypes.Result memory) {
+    return IWitnetRequestor(witnet).readResult(id);
+  }
+
+  /**
+   * @notice Upgrade the reward for a Data Request previously included.
+   * @param id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
+  **/
+  function witnetUpgradeRequest(uint256 id) internal {
+    IWitnetRequestor(witnet).upgradeDataRequest{value: msg.value}(id);
   }
 }

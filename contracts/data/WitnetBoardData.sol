@@ -38,6 +38,7 @@ abstract contract WitnetBoardData {
 
   modifier wasPosted(uint256 id) {
     require(id > 0 && id <= __data().noRequests, "WitnetBoardData: not yet posted");
+    require(__dataRequest(id).requestor != address(0), "WitnetBoardData: destroyed");
     _;
   }
 

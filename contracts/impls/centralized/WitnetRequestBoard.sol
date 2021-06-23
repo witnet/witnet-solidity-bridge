@@ -241,13 +241,29 @@ contract WitnetRequestBoard
         _req.dr.txhash = txhash;
         _req.result = result;
 
-        emit PostedResult(id);
+        emit PostedResult(id, msg.sender);
         payable(msg.sender).transfer(_req.dr.reward);
     }
 
 
     // ================================================================================================================
     // --- Implements 'IWitnetRequestor' ------------------------------------------------------------------------------
+
+    /// @dev Retrieves result of previously posted DR, and removes it from storage.
+    /// @param id The unique identifier of a previously posted data request.
+    /// @return _result The result of the DR.
+    function destroyResult(uint256 id)
+        external 
+        virtual override
+        returns (WitnetTypes.Result memory _result)
+    {
+        SWitnetBoardDataRequest storage _req = __data().requests[id];
+        require(msg.sender == _req.dr.requestor, "WitnetRequestBoard: only actual requestor");
+        require(_req.dr.txhash != 0, "WitnetRequestBoard: not yet solved");
+        _result = Witnet.resultFromCborBytes(_req.result);
+        delete __data().requests[id];
+        emit DestroyedRequest(id, msg.sender);
+    }
 
     /// @dev Estimate the amount of reward we need to insert for a given gas price.
     /// @param gasPrice The gas price for which we need to calculate the rewards.
@@ -287,7 +303,7 @@ contract WitnetRequestBoard
         _dr.reward = msg.value;
 
         // Let observers know that a new request has been posted
-        emit PostedRequest(_id);
+        emit PostedRequest(_id, msg.sender);
     }
 
     /// @dev Increments the reward of a data request by adding the transaction value to it.
