@@ -13,11 +13,13 @@ contract WitnetProxy {
     revert("WitnetProxy: no ETH accepted");
   }
 
+  // solhint-disable-next-line
   fallback() external payable {
     address _wrb = address(wrb);
     assembly {
       let ptr := mload(0x40)
       calldatacopy(ptr, 0, calldatasize())
+      // solhint-disable-next-line
       let result := delegatecall(gas(), _wrb, ptr, calldatasize(), 0, 0)
       let size := returndatasize()
       returndatacopy(ptr, 0, size)
@@ -33,6 +35,7 @@ contract WitnetProxy {
     if (address(wrb) != address(0)) {
       require(wrb.isUpgradable(), "WitnetProxy: not upgradable");
     }
+    // solhint-disable-next-line
     (bool _wasInitialized,) = _newWrb.delegatecall(
       abi.encodeWithSignature("initialize(bytes)", _initData)
     );
