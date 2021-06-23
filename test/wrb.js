@@ -392,7 +392,6 @@ contract("WitnetRequestBoard", ([
   describe("estimate gas cost", async () => {
     it("anyone can estime a data request gas cost", async () => {
       // Gas price = 1
-      const maxResRe = new BN(await this.WitnetRequestBoard.ESTIMATED_REPORT_RESULT_GAS.call())
       const maxResRe = new BN(102496)
       const reward = await this.WitnetRequestBoard.estimateGasCost.call(1)
       expect(
@@ -431,6 +430,18 @@ contract("WitnetRequestBoard", ([
       expect(
         await this.WitnetRequestBoard.isReporter.call(other)
       ).to.equal(true)
+    })
+    it("fails it trying to unset reporters from non owner address", async () => {
+      await expectRevert(
+        this.WitnetRequestBoard.unsetReporters([other], { from: other }),
+        "only owner"
+      )
+    })
+    it("owner can unset reporters", async () => {
+      await this.WitnetRequestBoard.unsetReporters([other], { from: owner })
+      expect(
+        await this.WitnetRequestBoard.isReporter.call(other)
+      ).to.equal(false)
     })
   })
 

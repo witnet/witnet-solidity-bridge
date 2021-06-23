@@ -7,4 +7,5 @@ interface IWitnetAdminWhitelists {
   event ReportersUnset(address[] reporters);
   function isReporter(address) external view returns (bool);
   function setReporters(address[] calldata reporters) external;
+  function unsetReporters(address[] calldata reporters) external;
 }

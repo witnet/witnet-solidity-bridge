@@ -120,6 +120,19 @@ contract WitnetRequestBoard
         emit ReportersSet(reporters);
     }
 
+    function unsetReporters(address[] calldata reporters)
+        external
+        override 
+        onlyOwner
+    {
+        for (uint ix = 0; ix < reporters.length; ix ++) {
+            address _reporter = reporters[ix];
+            if (_reporter != address(0)) {
+                __whitelists().isReporter_[_reporter] = false;
+            }
+        }
+        emit ReportersUnset(reporters);
+    }    
 
 
     // ================================================================================================================
