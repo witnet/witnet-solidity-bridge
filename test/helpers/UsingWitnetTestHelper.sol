@@ -41,7 +41,7 @@ contract UsingWitnetTestHelper is UsingWitnet {
   }
 
   function _witnetCheckRequestResolved(uint256 _id) external view returns (bool) {
-  // If the result of the data request in Witnet is not the default, then it means that it has been reported as resolved.
-  return IWitnetQuery(witnet).readDrTxHash(_id) != 0;
+    // If the result of the data request in Witnet is not the default, then it means that it has been reported as resolved.
+    return WitnetRequestBoardInterface(witnet).readDrTxHash(_id) != 0;
   }
 }

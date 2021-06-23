@@ -143,7 +143,7 @@ contract("Witnet Requests Board Proxy", accounts => {
 
       // Read the result of the DR
       const result = await wrb.readResult.call(id2)
-      assert.equal(result.value.buffer.data, web3.utils.fromAscii("hello"))
+      assert.equal(result, web3.utils.fromAscii("hello"))
     })
 
     it("should read the result of a dr of and old wrb", async () => {
@@ -154,7 +154,7 @@ contract("Witnet Requests Board Proxy", accounts => {
 
       // Read the result of the DR
       const result = await wrb.readResult.call(4)
-      assert.equal(result.value.buffer.data, web3.utils.fromAscii("hello"))
+      assert.equal(result, web3.utils.fromAscii("hello"))
     })
 
     it("should revert when trying to upgrade a non upgradable WRB", async () => {
