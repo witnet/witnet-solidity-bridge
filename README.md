@@ -38,7 +38,7 @@ The `WitnetRequestBoard` contract provides the following methods:
     - *_dr_Hash*: the unique hash of the request.
     - *_result*: the result itself as `bytes`.
 
-- **readDataRequest**:
+- **readDrBytecode**:
   - _description_: retrieves the bytes of the serialization of one data request from the WRB.
   - _inputs_:
     - *_id*: the unique identifier of the data request.
