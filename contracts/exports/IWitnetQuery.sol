@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.7.0 <0.9.0;
+pragma experimental ABIEncoderV2;
+
+import "./WitnetTypes.sol";
 
 /**
  * @title Witnet Request Board querying interface.
@@ -11,29 +14,32 @@ pragma solidity >=0.7.0 <0.9.0;
  * @author Witnet Foundation
  */
 interface IWitnetQuery {
+  /// @dev Retrieves the whole DR post record from the WRB.
+  /// @param id The unique identifier of a previously posted data request.
+  /// @return The DR record.
+  function readDr(uint256 id) external view returns (WitnetTypes.DataRequest memory);
 
-  /// @dev Retrieves the bytes of the serialization of one data request from the WRB.
-  /// @param _id The unique identifier of the data request.
-  /// @return The result of the data request as bytes.
-  function readDataRequest(uint256 _id) external view returns (bytes memory);
+  /// @dev Retrieves bytecode of a previously posted DR.
+  /// @param id The unique identifier of the data request.
+  /// @return The DR bytecode.
+  function readDrBytecode(uint256 id) external view returns (bytes memory);
 
-  /// @dev Retrieves the DR transaction hash of the id from the WRB.
-  /// @param _id The unique identifier of the data request.
-  /// @return The hash of the DR transaction
-  function readDrTxHash (uint256 _id) external view returns(uint256);
+  /// @dev Retrieves the gas price set for a previously posted DR.
+  /// @param id The unique identifier of a previously posted DR.
+  /// @return The latest gas price set by either the DR requestor, or upgrader.
+  function readDrGasPrice(uint256 id) external view returns (uint256);
 
-  /// @dev Retrieves the gas price set for a specific DR ID.
-  /// @param _id The unique identifier of the data request.
-  /// @return The gas price set by the request creator.
-  function readGasPrice(uint256 _id) external view returns (uint256);
+  /// @dev Retrieves Witnet tx hash of a previously solved DR.
+    /// @param id The unique identifier of a previously posted data request.
+    /// @return The hash of the DataRequest transaction in Witnet.
+  function readDrTxHash(uint256 id) external view returns (uint256);
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
   function readResult (uint256 _id) external view returns(bytes memory);
 
-  /// @dev Returns the number of data requests in the WRB.
-  /// @return the number of data requests in the WRB.
+  /// @dev Returns the number of posted data requests in the WRB.
+  /// @return The number of posted data requests in the WRB.
   function requestsCount() external view returns (uint256);
-
 }
