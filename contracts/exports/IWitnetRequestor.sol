@@ -11,10 +11,10 @@ import "./WitnetTypes.sol";
 interface IWitnetRequestor {
 
   /// @notice Event emitted when a new DR is posted.
-  event PostedRequest(uint256 indexed id, address indexed from);
+  event PostedRequest(uint256 id, address from);
 
   /// @notice Event emitted when a solved DR gets destroyed.
-  event DestroyedRequest(uint256 indexed id, address indexed from);
+  event DestroyedRequest(uint256 id, address from);
 
   /// @dev Retrieves result of previously posted DR, and removes it from storage.
   /// @param id The unique identifier of a previously posted data request.

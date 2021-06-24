@@ -1,3 +1,4 @@
+const { web3 } = require("@openzeppelin/test-helpers/src/setup")
 const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
@@ -58,7 +59,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
 
       // The id of the data request
-      const id1 = txReceipt1.logs[txReceipt1.logs.length - 1].data
+      const id1 = decodeWitnetLogs(txReceipt1.logs, 0).id
 
       // check the currentLastId has been updated in the Proxy when posting the data request
       assert.equal(true, await proxy.checkLastId.call(id1))
@@ -85,7 +86,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
 
       // The id of the data request, it should be equal 2 since is the second DR
-      const id1 = txReceipt1.logs[0].data
+      const id1 = decodeWitnetLogs(txReceipt1.logs, 0).id
       assert.equal(id1, 2)
 
       // Upgrade the WRB address to wrbInstance2 (destroying wrbInstace1)
@@ -168,7 +169,7 @@ contract("Witnet Requests Board Proxy", accounts => {
         "only actual requestor"
       )
       const tx = await wrb.destroyResult(4, { from: requestSender }) // should work
-      assert.equal(tx.logs[0].args[0], requestSender)
+      assert.equal(tx.logs[0].args[1], requestSender)
     })
 
     it("destroyed results should not be readable any more", async () => {
@@ -192,3 +193,21 @@ const waitForHash = txQ =>
   new Promise((resolve, reject) =>
     txQ.on("transactionHash", resolve).catch(reject)
   )
+
+function decodeWitnetLogs (logs, index) {
+  if (logs.length > index) {
+    return web3.eth.abi.decodeLog(
+      [
+        {
+          type: "uint256",
+          name: "id",
+        }, {
+          type: "address",
+          name: "from",
+        },
+      ],
+      logs[index].data,
+      logs[index].topcis
+    )
+  }
+}
