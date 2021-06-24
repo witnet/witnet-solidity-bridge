@@ -53,7 +53,8 @@ contract("WitnetRequestBoard", ([
         {
           from: requestor,
           value: ether("1"),
-        })
+        }
+      )
 
       // Check `PostedRequest` event
       expectEvent(
@@ -402,40 +403,74 @@ contract("WitnetRequestBoard", ([
     )
   })
 
-  describe("Upgradable:", async () => {
-    it("initialization fails if called from non owner address", async () => {
+  describe("destroy data request", async () => {
+    let requestId
+    it("fails if trying to destroy data request from non requestor address", async () => {
+      const tx = await this.WitnetRequestBoard.postDataRequest(this.Request.address, {
+        from: requestor,
+        value: ether("0.1"),
+      })
+      requestId = tx.logs[0].args[0]
       await expectRevert(
-        this.WitnetRequestBoard.initialize(
-          web3.eth.abi.encodeParameter("address[]", [other]),
-          { from: other }
-        ),
-        "only owner"
+        this.WitnetRequestBoard.destroyResult(requestId, { from: other }),
+        "only actual requestor"
       )
     })
-    it("cannot initialize same instance more than once", async () => {
+    it("unsolved data request cannot be destroyed", async () => {
+      const tx = await this.WitnetRequestBoard.postDataRequest(this.Request.address, {
+        from: requestor,
+        value: ether("0.1"),
+      })
+      requestId = tx.logs[0].args[0]
       await expectRevert(
-        this.WitnetRequestBoard.initialize(
-          web3.eth.abi.encodeParameter("address[]", [other]),
-          { from: owner }
-        ),
-        "already initialized"
+        this.WitnetRequestBoard.destroyResult(requestId, { from: requestor }),
+        "not yet solved"
       )
     })
   })
 
-  describe("Destructible:", async () => {
-    it("fails if trying to destroy from non owner address", async () => {
-      await expectRevert(
-        this.WitnetRequestBoard.destroy({ from: other }),
-        "only owner"
-      )
+  describe("interfaces", async () => {
+    describe("Upgradable:", async () => {
+      it("initialization fails if called from non owner address", async () => {
+        await expectRevert(
+          this.WitnetRequestBoard.initialize(
+            web3.eth.abi.encodeParameter("address[]", [other]),
+            { from: other }
+          ),
+          "only owner"
+        )
+      })
+      it("cannot initialize same instance more than once", async () => {
+        await expectRevert(
+          this.WitnetRequestBoard.initialize(
+            web3.eth.abi.encodeParameter("address[]", [other]),
+            { from: owner }
+          ),
+          "already initialized"
+        )
+      })
     })
-    it("instance gets actually destroyed", async () => {
-      await this.WitnetRequestBoard.destroy({ from: owner })
-      await expectRevert(
-        this.WitnetRequestBoard.requestsCount(),
-        "Out of Gas?"
-      )
+
+    describe("Destructible:", async () => {
+      it("fails if trying to destroy from non owner address", async () => {
+        await expectRevert(
+          this.WitnetRequestBoard.destroy({ from: other }),
+          "only owner"
+        )
+      })
+      it("instance gets actually destroyed", async () => {
+        await this.WitnetRequestBoard.destroy({ from: owner })
+        await expectRevert(
+          this.WitnetRequestBoard.requestsCount(),
+          "Out of Gas?"
+        )
+      })
+      it("fails if trying to destroy unposted DR", async () => {
+        await expectRevert(
+          this.WitnetRequestBoard.destroyResult(200),
+          "only actual requestor"
+        )
+      })
     })
   })
 })
