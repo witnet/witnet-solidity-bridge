@@ -70,7 +70,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should have posted and read the same bytes", async () => {
-      const internalBytes = await wrb.readDrBytecode(requestId)
+      const internalBytes = await wrb.readDataRequest(requestId)
       assert.equal(internalBytes, requestHex)
     })
 

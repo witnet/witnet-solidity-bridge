@@ -104,7 +104,7 @@ contract WitnetRequestBoard
     /// @dev Retrieves RADON bytecode of a previously posted DR.
     /// @param id The unique identifier of the previously posted DR.
     /// @return _bytecode The RADON bytecode. Fails if changed after being posted.
-    function readDrBytecode(uint256 id)
+    function readDataRequest(uint256 id)
         external view
         virtual
         wasPosted(id)
@@ -121,7 +121,7 @@ contract WitnetRequestBoard
     /// @dev Retrieves the gas price set for a previously posted DR.
     /// @param id The unique identifier of a previously posted DR.
     /// @return The latest gas price set by either the DR requestor, or upgrader.
-    function readDrGasPrice(uint256 id)
+    function readGasPrice(uint256 id)
         external view
         virtual
         wasPosted(id)

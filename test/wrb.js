@@ -179,7 +179,7 @@ contract("WitnetRequestBoard", ([
       })
 
       // Read data request gas price from WitnetRequestBoard by `requestId`
-      const gasPrice = await this.WitnetRequestBoard.readDrGasPrice.call(requestId, { from: other })
+      const gasPrice = await this.WitnetRequestBoard.readGasPrice.call(requestId, { from: other })
 
       // Check that gas price has been updated to 3 wei
       expect(
@@ -196,7 +196,7 @@ contract("WitnetRequestBoard", ([
       })
 
       // Read data request gas price from WitnetRequestBoard by `requestId`
-      const gasPrice = await this.WitnetRequestBoard.readDrGasPrice.call(requestId, { from: other })
+      const gasPrice = await this.WitnetRequestBoard.readGasPrice.call(requestId, { from: other })
 
       // Check that gas price has not been updated to 1 wei
       expect(
@@ -354,7 +354,7 @@ contract("WitnetRequestBoard", ([
 
       // Should revert when reading the request since the bytecode has changed
       await expectRevert(
-        this.WitnetRequestBoard.readDrBytecode(requestId, {
+        this.WitnetRequestBoard.readDataRequest(requestId, {
           from: other,
           gasPrice: 1,
         }),
@@ -362,7 +362,7 @@ contract("WitnetRequestBoard", ([
       )
     })
     it("should revert reading data for non-existent Ids", async () => {
-      await expectRevert(this.WitnetRequestBoard.readDrBytecode.call(200), "not yet posted")
+      await expectRevert(this.WitnetRequestBoard.readDataRequest.call(200), "not yet posted")
       await expectRevert(this.WitnetRequestBoard.readDrTxHash.call(200), "not yet posted")
       await expectRevert(this.WitnetRequestBoard.readResult.call(200), "not yet posted")
     })
@@ -381,7 +381,7 @@ contract("WitnetRequestBoard", ([
     })
     it("anyone can read data request gas price", async () => {
       // Read data request gas price from WitnetRequestBoard by `requestId`
-      const gasPrice = await this.WitnetRequestBoard.readDrGasPrice.call(requestId, { from: other })
+      const gasPrice = await this.WitnetRequestBoard.readGasPrice.call(requestId, { from: other })
       expect(
         gasPrice.eq(new BN("1")),
         "data request gas price should have been set to 1 wei",
