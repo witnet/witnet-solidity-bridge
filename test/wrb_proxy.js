@@ -1,3 +1,4 @@
+const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
 const RequestContract = artifacts.require("WitnetRequest")
@@ -57,7 +58,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
 
       // The id of the data request
-      const id1 = txReceipt1.logs[txReceipt1.logs.length - 1].data
+      const id1 = decodeWitnetLogs(txReceipt1.logs, 0).id
 
       // check the currentLastId has been updated in the Proxy when posting the data request
       assert.equal(true, await proxy.checkLastId.call(id1))
@@ -84,7 +85,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
 
       // The id of the data request, it should be equal 2 since is the second DR
-      const id1 = txReceipt1.logs[0].data
+      const id1 = decodeWitnetLogs(txReceipt1.logs, 0).id
       assert.equal(id1, 2)
 
       // Upgrade the WRB address to wrbInstance2 (destroying wrbInstace1)
@@ -94,7 +95,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       )
 
       // The current wrb in the proxy should be equal to wrbInstance2
-      assert.equal(await proxy.wrb.call(), wrbInstance2.address)
+      assert.equal(await proxy.delegate.call(), wrbInstance2.address)
     })
 
     it("should post a data request to new WRB and keep previous data request routes", async () => {
@@ -141,20 +142,43 @@ contract("Witnet Requests Board Proxy", accounts => {
         })
       )
 
-      // Read the result of the DR
+      // Read the actual result of the DR
       const result = await wrb.readResult.call(id2)
       assert.equal(result, web3.utils.fromAscii("hello"))
     })
 
-    it("should read the result of a dr of and old wrb", async () => {
+    it("should read the result of a dr of an old wrb", async () => {
       // Upgrade the WRB address to wrbInstance3
       await proxy.upgradeWitnetRequestBoard(wrbInstance3.address, {
         from: contractOwner,
       })
 
-      // Read the result of the DR
+      // Read the actual result of the DR
       const result = await wrb.readResult.call(4)
       assert.equal(result, web3.utils.fromAscii("hello"))
+    })
+
+    it("a solved data request can only be destroyed by actual requestor", async () => {
+      // Read the result of the DR just before destruction:
+      const result = await wrb.destroyResult.call(4, { from: requestSender })
+      assert.equal(result, web3.utils.fromAscii("hello"))
+
+      await truffleAssert.reverts(
+        wrb.destroyResult(4, { from: contractOwner }),
+        "only actual requestor"
+      )
+      const tx = await wrb.destroyResult(4, { from: requestSender }) // should work
+      assert.equal(tx.logs[0].args[1], requestSender)
+    })
+
+    it("destroyed results should not be readable any more", async () => {
+      await truffleAssert.reverts(
+        wrb.upgradeDataRequest(4, {
+          from: requestSender,
+          value: web3.utils.toWei("0.5", "ether"),
+        }),
+        "destroyed"
+      )
     })
 
     it("should revert when trying to upgrade a non upgradable WRB", async () => {
@@ -171,3 +195,21 @@ const waitForHash = txQ =>
   new Promise((resolve, reject) =>
     txQ.on("transactionHash", resolve).catch(reject)
   )
+
+function decodeWitnetLogs (logs, index) {
+  if (logs.length > index) {
+    return web3.eth.abi.decodeLog(
+      [
+        {
+          type: "uint256",
+          name: "id",
+        }, {
+          type: "address",
+          name: "from",
+        },
+      ],
+      logs[index].data,
+      logs[index].topcis
+    )
+  }
+}

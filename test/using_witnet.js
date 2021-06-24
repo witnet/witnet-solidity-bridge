@@ -36,7 +36,7 @@ contract("UsingWitnet", accounts => {
         // let 'wrb' artifact always point to proxy address
         wrb = await WRB.at(proxy.address)
       }
-      // upgrade proxy on each iteration...
+      // notwithstanding, upgrade proxy on each iteration...
       await proxy.upgrade(
         // ...to new implementation instance:
         (await WRB.new({ from: ownerAccount })).address,
@@ -46,7 +46,7 @@ contract("UsingWitnet", accounts => {
         { from: ownerAccount }
       )
       await UsingWitnetTestHelper.link(Witnet, witnet.address)
-      clientContract = await UsingWitnetTestHelper.new(wrb.address)
+      clientContract = await UsingWitnetTestHelper.new(proxy.address)
       lastAccount0Balance = await web3.eth.getBalance(accounts[0])
     })
 
@@ -64,9 +64,7 @@ contract("UsingWitnet", accounts => {
           value: reward,
         }
       ))
-      const expectedId = "0x0000000000000000000000000000000000000000000000000000000000000001"
-
-      assert.equal(requestId.toString(16), expectedId)
+      assert.equal(requestId, 1)
     })
 
     it("should have posted and read the same bytes", async () => {
@@ -205,7 +203,7 @@ contract("UsingWitnet", accounts => {
           value: reward,
         }
       ))
-      assert.equal(requestId.toString(16), "0x0000000000000000000000000000000000000000000000000000000000000001")
+      assert.equal(requestId, 1)
     })
 
     it("should check the request is not yet resolved", async () => {
@@ -263,7 +261,20 @@ function waitForHash (tx) {
 async function returnData (tx) {
   const txHash = await waitForHash(tx)
   const txReceipt = await web3.eth.getTransactionReceipt(txHash)
-  if (txReceipt.logs[0]) {
-    return txReceipt.logs[0].data
+  if (txReceipt.logs && txReceipt.logs.length > 0) {
+    const decoded = web3.eth.abi.decodeLog(
+      [
+        {
+          type: "uint256",
+          name: "id",
+        }, {
+          type: "address",
+          name: "from",
+        },
+      ],
+      txReceipt.logs[0].data,
+      txReceipt.logs[0].topics
+    )
+    return decoded.id
   }
 }

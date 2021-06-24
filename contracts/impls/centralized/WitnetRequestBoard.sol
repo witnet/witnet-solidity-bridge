@@ -155,45 +155,19 @@ contract WitnetRequestBoard
         _req.dr.txhash = txhash;
         _req.result = result;
 
-        emit PostedResult(id);
+        emit PostedResult(id, msg.sender);
         payable(msg.sender).transfer(_req.dr.reward);
     }
-
     
-    // ================================================================================================================
-    // --- Implements 'WitnetRequestBoardInterface' -------------------------------------------------------------------
-
-    /// @dev Retrieves Witnet tx hash of a previously solved DR.
-    /// @param id The unique identifier of a previously posted data request.
-    /// @return The hash of the DataRequest transaction in Witnet.
-    function readDrTxHash(uint256 id)
-        external view        
-        virtual override
-        wasPosted(id)
-        returns (uint256)
-    {
-        return __dataRequest(id).txhash;
-    }   
-    
-    /// @dev Retrieves the result (if already available) of one data request from the WRB.
-    /// @param id The unique identifier of the data request.
-    /// @return The result of the DR.
-    function readResult(uint256 id)
-        external view
-        virtual override        
-        wasPosted(id)
-        returns (bytes memory)
-    {
-        SWitnetBoardDataRequest storage _req = __data().requests[id];
-        require(_req.dr.txhash != 0, "WitnetRequestBoard: not yet solved");
-        return _req.result;
-    }  
-
     /// @dev Returns the number of posted data requests in the WRB.
     /// @return The number of posted data requests in the WRB.
     function requestsCount() external virtual view returns (uint256) {
         return __data().noRequests;
     }
+
+    
+    // ================================================================================================================
+    // --- Implements 'WitnetRequestBoardInterface' -------------------------------------------------------------------
 
     /// @dev Estimate the amount of reward we need to insert for a given gas price.
     /// @param gasPrice The gas price for which we need to calculate the rewards.
@@ -205,7 +179,23 @@ contract WitnetRequestBoard
     {
         return gasPrice * __ESTIMATED_REPORT_RESULT_GAS;
     }
-    
+
+    /// @dev Retrieves result of previously posted DR, and removes it from storage.
+    /// @param id The unique identifier of a previously posted data request.
+    /// @return _result The CBOR-encoded result of the DR.
+    function destroyResult(uint256 id)
+        external
+        virtual override
+        returns (bytes memory _result)
+    {
+        SWitnetBoardDataRequest storage _req = __data().requests[id];
+        require(msg.sender == _req.dr.requestor, "WitnetRequestBoard: only actual requestor");
+        require(_req.dr.txhash != 0, "WitnetReuqestBoard: not yet solved");
+        _result = _req.result;
+        delete __data().requests[id];
+        emit DestroyedRequest(id, msg.sender);
+    }
+
     /// @dev Posts a data request into the WRB in expectation that it will be relayed 
     /// @dev and resolved in Witnet with a total reward that equals to msg.value.
     /// @param requestAddr The Witnet request contract address which provides actual RADON bytecode.
@@ -233,8 +223,34 @@ contract WitnetRequestBoard
         _dr.reward = msg.value;
 
         // Let observers know that a new request has been posted
-        emit PostedRequest(_id);
+        emit PostedRequest(_id, msg.sender);
     }
+    
+    /// @dev Retrieves Witnet tx hash of a previously solved DR.
+    /// @param id The unique identifier of a previously posted data request.
+    /// @return The hash of the DataRequest transaction in Witnet.
+    function readDrTxHash(uint256 id)
+        external view        
+        virtual override
+        wasPosted(id)
+        returns (uint256)
+    {
+        return __dataRequest(id).txhash;
+    }   
+    
+    /// @dev Retrieves the result (if already available) of one data request from the WRB.
+    /// @param id The unique identifier of the data request.
+    /// @return The result of the DR.
+    function readResult(uint256 id)
+        external view
+        virtual override        
+        wasPosted(id)
+        returns (bytes memory)
+    {
+        SWitnetBoardDataRequest storage _req = __data().requests[id];
+        require(_req.dr.txhash != 0, "WitnetRequestBoard: not yet solved");
+        return _req.result;
+    }    
 
     /// @dev Increments the reward of a data request by adding the transaction value to it.
     /// @param id The unique identifier of a previously posted data request.

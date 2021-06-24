@@ -5,7 +5,7 @@ pragma solidity 0.8.5;
 import "./utils/Upgradable.sol";
 
 contract WitnetProxy {
-  Upgradable public wrb;
+  Upgradable public delegate;
 
   constructor () {}
 
@@ -15,12 +15,12 @@ contract WitnetProxy {
 
   // solhint-disable-next-line
   fallback() external payable {
-    address _wrb = address(wrb);
+    address _delegate = address(delegate);
     assembly {
       let ptr := mload(0x40)
       calldatacopy(ptr, 0, calldatasize())
       // solhint-disable-next-line
-      let result := delegatecall(gas(), _wrb, ptr, calldatasize(), 0, 0)
+      let result := delegatecall(gas(), _delegate, ptr, calldatasize(), 0, 0)
       let size := returndatasize()
       returndatacopy(ptr, 0, size)
       switch result
@@ -30,16 +30,16 @@ contract WitnetProxy {
   }
 
   function upgrade(address _newWrb, bytes memory _initData) public {
-    require(_newWrb != address(0), "WitnetProxy: null wrb");
-    require(_newWrb != address(wrb), "WitnetProxy: nothing to upgrade");
-    if (address(wrb) != address(0)) {
-      require(wrb.isUpgradable(), "WitnetProxy: not upgradable");
+    require(_newWrb != address(0), "WitnetProxy: null contract");
+    require(_newWrb != address(delegate), "WitnetProxy: nothing to upgrade");
+    if (address(delegate) != address(0)) {
+      require(delegate.isUpgradable(), "WitnetProxy: not upgradable");
     }
     // solhint-disable-next-line
     (bool _wasInitialized,) = _newWrb.delegatecall(
       abi.encodeWithSignature("initialize(bytes)", _initData)
     );
     require(_wasInitialized, "WitnetProxy: unable to initialize new wrb");
-    wrb = Upgradable(_newWrb);
+    delegate = Upgradable(_newWrb);
   }
 }
