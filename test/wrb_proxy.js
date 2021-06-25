@@ -44,7 +44,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       )
     })
 
-    it("should post a data request and update the currentLastId", async () => {
+    it("should post a data request and update the requestsCount meter", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await RequestContract.new(drBytes)
@@ -58,10 +58,11 @@ contract("Witnet Requests Board Proxy", accounts => {
       const txReceipt1 = await web3.eth.getTransactionReceipt(txHash1)
 
       // The id of the data request
-      const id1 = decodeWitnetLogs(txReceipt1.logs, 0).id
+      const id1 = parseInt(decodeWitnetLogs(txReceipt1.logs, 0).id)
+      const nextId = await wrb.requestsCount.call()
 
-      // check the currentLastId has been updated in the Proxy when posting the data request
-      assert.equal(true, await proxy.checkLastId.call(id1))
+      // check the nextId has been updated in the Proxy when posting the data request
+      assert.equal((id1 + 1).toString(), nextId.toString())
     })
 
     it("should revert when trying to upgrade from non owner address", async () => {

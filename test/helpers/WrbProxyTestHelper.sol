@@ -15,15 +15,6 @@ import "../../contracts/exports/WitnetBoard.sol";
 contract WrbProxyTestHelper is WitnetProxy {
 
   constructor () {}
-
-  function checkLastId(uint256 _id) external returns(bool) {
-    // solhint-disable-next-line
-    (bool _success, bytes memory _retdata) = address(delegate).delegatecall(abi.encodeWithSignature("requestsCount()"));
-    require(_success, "WrbProxyTestHelper: cannot delegate call");
-    uint256 _count = abi.decode(_retdata, (uint256));
-    return (_id == _count);
-  }
-
   function getWrbAddress() external view returns(address) {
     return address(delegate);
   }
