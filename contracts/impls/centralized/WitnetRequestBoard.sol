@@ -69,7 +69,7 @@ contract WitnetRequestBoard
 
     /// @dev Retrieves named version of current implementation.
     function version() virtual external pure override returns (string memory) {
-        return "WitnetRequestBoard-Centralized-v0.3.0";
+        return "WitnetRequestBoard-Centralized-v0.3.0.1";
     }
 
 
@@ -162,7 +162,10 @@ contract WitnetRequestBoard
     /// @dev Returns the number of posted data requests in the WRB.
     /// @return The number of posted data requests in the WRB.
     function requestsCount() external virtual view returns (uint256) {
-        return __data().noRequests;
+        // TODO: either rename this method (e.g. getNextId()) or change bridge node 
+        //       as to interpret returned value as actual number of posted data requests 
+        //       in the WRB.
+        return __data().noRequests + 1;
     }
 
     
