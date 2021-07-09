@@ -69,7 +69,7 @@ contract WitnetRequestBoard
 
     /// @dev Retrieves named version of current implementation.
     function version() virtual external pure override returns (string memory) {
-        return "WitnetRequestBoard-Centralized-v0.3.0.1";
+        return "WitnetRequestBoard-Centralized-v0.3.1.1";
     }
 
 
