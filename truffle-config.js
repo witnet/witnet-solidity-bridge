@@ -23,10 +23,17 @@ module.exports = {
       host: "localhost",
       port: 8542,
     },
-    conflux: {
+    "conflux.testnet": {
+      host: "localhost",
+      port: 8540,
+      network_id: 1,
+      gasPrice: 1,
+    },
+    "conflux.mainnet": {
       host: "localhost",
       port: 3000,
-      network_id: 1,
+      network_id: 1029,
+      gasPrice: 1,
     },
   },
   mocha: {
