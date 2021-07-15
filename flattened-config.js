@@ -30,6 +30,12 @@ module.exports = {
       host: "localhost",
       port: 8542,
     },
+    mainnet: {
+      network_id: 1,
+      host: "localhost",
+      port: 9545,
+      gasPrice: 20000000000, // 20 gwei
+    },
   },
   // Set default mocha options here, use special reporters etc.
   mocha: {
@@ -38,7 +44,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.6.12", // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.8.4", // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: { // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
