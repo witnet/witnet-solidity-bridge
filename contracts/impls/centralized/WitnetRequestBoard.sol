@@ -111,11 +111,13 @@ contract WitnetRequestBoard
         returns (bytes memory _bytecode)
     {
         WitnetTypes.DataRequest storage _dr = __dataRequest(id);
-        _bytecode = WitnetRequest(_dr.addr).bytecode();
-        require(
-            WitnetTypes.computeDataRequestCodehash(_bytecode) == _dr.codehash,
-            "WitnetRequestBoard: manipulated request"
-        );
+        if (_dr.addr != address(0)) {
+            _bytecode = WitnetRequest(_dr.addr).bytecode();
+            require(
+                WitnetTypes.computeDataRequestCodehash(_bytecode) == _dr.codehash,
+                "WitnetRequestBoard: manipulated request"
+            );
+        }
     }
 
     /// @dev Retrieves the gas price set for a previously posted DR.
@@ -142,7 +144,7 @@ contract WitnetRequestBoard
         external
         virtual
         onlyReporters
-        wasPosted(id)
+        notDestroyed(id)
         resultNotYetReported(id)
     {
         require(txhash != 0, "WitnetRequestBoard: tx hash cannot be zero");
@@ -150,7 +152,6 @@ contract WitnetRequestBoard
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(result.length != 0, "WitnetRequestBoard: result cannot be empty");
 
-        
         SWitnetBoardDataRequest storage _req = __data().requests[id];
         _req.dr.txhash = txhash;
         _req.result = result;

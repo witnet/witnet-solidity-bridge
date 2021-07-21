@@ -172,14 +172,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(tx.logs[0].args[1], requestSender)
     })
 
-    it("destroyed results should not be readable any more", async () => {
-      await truffleAssert.reverts(
-        wrb.upgradeDataRequest(4, {
-          from: requestSender,
-          value: web3.utils.toWei("0.5", "ether"),
-        }),
-        "destroyed"
-      )
+    it("gets empty bytecode from destroyed DRs", async () => {
+      const bytecode = await wrb.readDataRequest.call(4)
+      assert.equal(bytecode, null)
     })
 
     it("should revert when trying to upgrade a non upgradable WRB", async () => {
