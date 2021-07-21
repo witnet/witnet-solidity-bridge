@@ -5,7 +5,7 @@ const {
   balance,
   ether,
 } = require("@openzeppelin/test-helpers")
-const { expect } = require("chai")
+const { expect, assert } = require("chai")
 
 // Contracts
 const WRB = artifacts.require("WitnetRequestBoard")
@@ -404,28 +404,59 @@ contract("WitnetRequestBoard", ([
   })
 
   describe("destroy data request", async () => {
-    let requestId
+    let drId
+    beforeEach(async () => {
+      const tx = await this.WitnetRequestBoard.postDataRequest(
+        this.Request.address,
+        {
+          from: requestor,
+          value: ether("0.1"),
+          gasPrice: 1,
+        }
+      )
+      drId = tx.logs[0].args[0]
+    })
     it("fails if trying to destroy data request from non requestor address", async () => {
-      const tx = await this.WitnetRequestBoard.postDataRequest(this.Request.address, {
-        from: requestor,
-        value: ether("0.1"),
-      })
-      requestId = tx.logs[0].args[0]
       await expectRevert(
-        this.WitnetRequestBoard.destroyResult(requestId, { from: other }),
+        this.WitnetRequestBoard.destroyResult(drId, { from: other }),
         "only actual requestor"
       )
     })
     it("unsolved data request cannot be destroyed", async () => {
-      const tx = await this.WitnetRequestBoard.postDataRequest(this.Request.address, {
-        from: requestor,
-        value: ether("0.1"),
-      })
-      requestId = tx.logs[0].args[0]
       await expectRevert(
-        this.WitnetRequestBoard.destroyResult(requestId, { from: requestor }),
+        this.WitnetRequestBoard.destroyResult(drId, { from: requestor }),
         "not yet solved"
       )
+    })
+    it("requestor can destroy solved data request", async () => {
+      await this.WitnetRequestBoard.reportResult(
+        drId, drTxHash, resultHex,
+        { from: owner, gasPrice: 1 }
+      )
+      await this.WitnetRequestBoard.destroyResult(drId, { from: requestor })
+    })
+    it("fails if reporting result on destroyed data request", async () => {
+      await this.WitnetRequestBoard.reportResult(
+        drId, drTxHash, resultHex,
+        { from: owner, gasPrice: 1 }
+      )
+      await this.WitnetRequestBoard.destroyResult(drId, { from: requestor })
+      await expectRevert(
+        this.WitnetRequestBoard.reportResult(
+          drId, drTxHash, resultHex,
+          { from: owner, gasPrice: 1 }
+        ),
+        "destroyed"
+      )
+    })
+    it("reads empty bytecode from destroyed data request", async () => {
+      await this.WitnetRequestBoard.reportResult(
+        drId, drTxHash, resultHex,
+        { from: owner, gasPrice: 1 }
+      )
+      await this.WitnetRequestBoard.destroyResult(drId, { from: requestor })
+      const bytecode = await this.WitnetRequestBoard.readDataRequest(drId)
+      assert.equal(bytecode, null)
     })
   })
 
