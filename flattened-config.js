@@ -30,6 +30,13 @@ module.exports = {
       host: "localhost",
       port: 8542,
     },
+    "conflux.testnet": {
+      host: "localhost",
+      port: 8540,
+      network_id: 1,
+      gasPrice: 10,
+      skipDryRun: true,
+    },
   },
   // Set default mocha options here, use special reporters etc.
   mocha: {
@@ -38,14 +45,12 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.6.12", // Fetch exact version from solc-bin (default: truffle's version)
-      // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
+      version: "0.8.6", // Fetch exact version from solc-bin (default: truffle's version)
       settings: { // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
           runs: 200,
         },
-      //  evmVersion: "byzantium"
       },
     },
   },

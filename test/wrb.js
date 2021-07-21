@@ -359,7 +359,7 @@ contract("WitnetRequestBoard", ([
           from: other,
           gasPrice: 1,
         }),
-        "manipulated request"
+        "bytecode changed after posting"
       )
     })
     it("should revert reading data for non-existent Ids", async () => {

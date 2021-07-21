@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 
-import "../../contracts/exports/WitnetRequest.sol";
+import "../../contracts/libs/WitnetData.sol";
 
 
 /**

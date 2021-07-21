@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.5;
+pragma solidity 0.8.6;
 
+import "../../contracts/WitnetBoard.sol";
 import "../../contracts/WitnetProxy.sol";
-import "../../contracts/exports/WitnetBoard.sol";
-
 
 /**
  * @title Test Helper for the WitnetRequestBoardProxy contract

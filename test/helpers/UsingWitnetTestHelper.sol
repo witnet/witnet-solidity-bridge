@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.5;
+pragma solidity 0.8.6;
 
-import "../../contracts/exports/WitnetRequest.sol";
-import "../../contracts/exports/UsingWitnet.sol";
-import "../../contracts/libs/Witnet.sol";
+import "../../contracts/UsingWitnet.sol";
 
 /**
  * @title Test Helper for the UsingWitnet contract

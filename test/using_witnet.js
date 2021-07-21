@@ -1,8 +1,4 @@
-const {
-  // expectEvent,
-  expectRevert,
-} = require("@openzeppelin/test-helpers")
-// const { expect } = require("chai")
+const { expectRevert } = require("@openzeppelin/test-helpers")
 
 const WRB = artifacts.require("WitnetRequestBoard")
 const WRBProxy = artifacts.require("WitnetProxy")
@@ -40,7 +36,7 @@ contract("UsingWitnet", accounts => {
       await proxy.upgrade(
         // ...to new implementation instance:
         (await WRB.new({ from: ownerAccount })).address,
-        // ...resetting reporters whitelist:
+        // ...resetting reporters ACL:
         web3.eth.abi.encodeParameter("address[]", [reporterAccount]),
         // ...from owner account.
         { from: ownerAccount }

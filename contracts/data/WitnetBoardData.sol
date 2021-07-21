@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../exports/WitnetTypes.sol";
+import "../libs/WitnetData.sol";
 
 /**
  * @title Witnet Board basal data model. 
@@ -12,9 +12,9 @@ abstract contract WitnetBoardData {
 
   struct SWitnetBoardData {
     address owner;
-    address instance;
+    address base;
     mapping (uint => SWitnetBoardDataRequest) requests;
-    uint256 noRequests;
+    uint256 numRequests;
   }
 
   struct SWitnetBoardDataRequest {
@@ -27,7 +27,7 @@ abstract contract WitnetBoardData {
   }
 
   modifier notDestroyed(uint256 id) {
-    require(id > 0 && id <= __data().noRequests, "WitnetBoardData: not yet posted");
+    require(id > 0 && id <= __data().numRequests, "WitnetBoardData: not yet posted");
     require(__dataRequest(id).requestor != address(0), "WitnetBoardData: destroyed");
     _;
   }
@@ -43,7 +43,7 @@ abstract contract WitnetBoardData {
   }
 
   modifier wasPosted(uint256 id) {
-    require(id > 0 && id <= __data().noRequests, "WitnetBoardData: not yet posted");
+    require(id > 0 && id <= __data().numRequests, "WitnetBoardData: not yet posted");
     _;
   }
 

@@ -3,9 +3,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetRequestBoardInterface.sol";
-import "./WitnetRequest.sol";
-import "../libs/Witnet.sol";
+import "./libs/Witnet.sol";
+import "./interfaces/WitnetRequestBoardInterface.sol";
 
 /**
  * @title The UsingWitnet contract

@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./WitnetRequestBoardInterface.sol";
+import "./interfaces/WitnetRequestBoardInterface.sol";
 
 /**
  * @title Witnet Requests Board functionality base contract.
