@@ -18,7 +18,7 @@ interface WitnetRequestBoardInterface {
   /// @notice Event emitted when a result is reported
   event PostedResult(uint256 id, address from);
 
-  /// @notice Event emitted when a result is reported
+  /// @notice Event emitted when a result is destroyed
   event DestroyedRequest(uint256 id, address from);
 
   /// @notice Estimate the amount of reward we need to insert for a given gas price.

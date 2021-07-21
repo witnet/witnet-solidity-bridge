@@ -14,6 +14,6 @@
   "conflux.testnet" : {
     "Witnet": "0x8239dbA17E9E922c62128d4083B8627b3b63f69a",
     "WitnetProxy": "0x80786fD4878c98EC22559942e533223CaA8B003F",
-    "WitnetRequestBoard": "0x8cb32f8b8b34055521c47ec56156c3a1509fd360"
+    "WitnetRequestBoard": "0x8571547A7Ce6263cbC9BEF8aB1656704cDee7b3D "
   }
 }

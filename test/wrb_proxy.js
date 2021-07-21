@@ -28,14 +28,6 @@ contract("Witnet Requests Board Proxy", accounts => {
       wrb = await WitnetRequestBoard.at(proxy.address)
     })
 
-    it("should revert when trying to upgrade the same WRB", async () => {
-      // It should revert because the WRB to be upgrated is already in use
-      await truffleAssert.reverts(
-        proxy.upgradeWitnetRequestBoard(wrbInstance1.address, { from: contractOwner }),
-        "nothing to upgrade"
-      )
-    })
-
     it("should revert when inserting id 0", async () => {
       // It should revert because of non-existent id 0
       await truffleAssert.reverts(
@@ -65,14 +57,35 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal((id1 + 1).toString(), nextId.toString())
     })
 
-    it("should revert when trying to upgrade from non owner address", async () => {
+    it("fails if trying to upgrade to null contract", async () => {
       await truffleAssert.reverts(
-        proxy.upgradeWitnetRequestBoard(wrbInstance2.address, { from: requestSender }),
-        "unable to initialize"
+        proxy.upgradeWitnetRequestBoard("0x0000000000000000000000000000000000000000", { from: contractOwner }),
+        "null delegate"
       )
     })
 
-    it("should upgrade proxy if called from owner address", async () => {
+    it("fails if trying to upgrade to same delegate instance from current delegate's owner", async () => {
+      await truffleAssert.reverts(
+        proxy.upgradeWitnetRequestBoard(await proxy.delegate.call(), { from: contractOwner }),
+        "nothing to upgrade"
+      )
+    })
+
+    it("fails if trying to upgrade to non-initializable delegate from current delegate's owner", async () => {
+      await truffleAssert.reverts(
+        proxy.upgradeWitnetRequestBoard(proxy.address, { from: contractOwner }),
+        ""
+      )
+    })
+
+    it("fails if trying to upgrade to compliant new delegate, from non owner address", async () => {
+      await truffleAssert.reverts(
+        proxy.upgradeWitnetRequestBoard(wrbInstance2.address, { from: requestSender }),
+        "not authorized"
+      )
+    })
+
+    it("should upgrade proxy to compliant new delegate, if called from owner address", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await RequestContract.new(drBytes)
@@ -90,10 +103,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(id1, 2)
 
       // Upgrade the WRB address to wrbInstance2 (destroying wrbInstace1)
-      await proxy.upgradeWitnetRequestBoard(
-        wrbInstance2.address,
-        { from: contractOwner }
-      )
+      await proxy.upgradeWitnetRequestBoard(wrbInstance2.address, { from: contractOwner })
 
       // The current wrb in the proxy should be equal to wrbInstance2
       assert.equal(await proxy.delegate.call(), wrbInstance2.address)
@@ -177,7 +187,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(bytecode, null)
     })
 
-    it("should revert when trying to upgrade a non upgradable WRB", async () => {
+    it("fails if trying to upgrade a non upgradable delegate", async () => {
       // It should revert when trying to upgrade the wrb since wrbInstance3 is not upgradable
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard(wrbInstance1.address, { from: contractOwner }),

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.5;
+pragma solidity 0.8.6;
 
-// import "../../contracts/data/WitnetBoardData.sol";
 import "../../contracts/impls/centralized/WitnetRequestBoard.sol";
 
 /**
@@ -16,15 +15,14 @@ import "../../contracts/impls/centralized/WitnetRequestBoard.sol";
 contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
 
   address public witnet;
+  
 
-  // Is upgradable
-  bool public upgradable;
+  // Data fields to be accessed in the context of a proxy delegate-call, must be declared as `immutable`:
+  bool public immutable upgradable;
 
   constructor (address[] memory _committee, bool _upgradable) {
     witnet = msg.sender;
     upgradable = _upgradable;
-
-    // Insert an empty request so as to initialize the requests array with length > 0
     setReporters(_committee);
   }
 
@@ -56,7 +54,7 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
   /// @dev Verifies if the contract is upgradable
   /// @return true if the contract upgradable
   /* solhint-disable-next-line no-unused-vars*/
-  function isUpgradable() external view override returns (bool) {
+  function isUpgradable() public view override returns (bool) {
     return upgradable;
   }
 

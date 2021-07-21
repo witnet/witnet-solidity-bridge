@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "./BufferLib.sol";
-import "../exports/WitnetTypes.sol";
+import "./WitnetData.sol";
 
 /**
  * @title A minimalistic implementation of “RFC 7049 Concise Binary Object Representation”

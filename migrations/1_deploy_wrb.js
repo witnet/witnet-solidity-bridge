@@ -15,19 +15,19 @@ module.exports = async function (deployer, network, accounts) {
     if (addresses[network].WitnetRequestBoard) {
       WitnetRequestBoard.address = addresses[network].WitnetRequestBoard
       if (!isNullAddress(WitnetRequestBoard.address)) {
-        deployWRB = false;
+        deployWRB = false
         if (WitnetProxy.isDeployed() && !isNullAddress(WitnetProxy.address)) {
           const proxy = await WitnetProxy.deployed()
           const currentWRB = await proxy.delegate.call()
-          if (currentWRB.toLowerCase() !== WitnetRequestBoard.address.toLowerCase()) {            
-            console.log(`Info: Witnet proxy delegate mismatch!`)
+          if (currentWRB.toLowerCase() !== WitnetRequestBoard.address.toLowerCase()) {
+            console.log("Info: Witnet proxy delegate mismatch!")
             console.log()
             console.log(`  >> WitnetRequestBoard address in file: ${WitnetRequestBoard.address}`)
-            console.log(`  >> WitnetProxy actual WRB instance:    ${currentWRB}`)            
+            console.log(`  >> WitnetProxy actual WRB instance:    ${currentWRB}`)
             console.log()
           } else {
             upgradeProxy = false
-          }          
+          }
         }
       }
     }
@@ -41,9 +41,9 @@ module.exports = async function (deployer, network, accounts) {
     console.log(`> Migrating new WitnetRequestBoard instance into ${network} network...`)
     await deployer.deploy(WitnetRequestBoard)
   }
-  if (upgradeProxy) {    
+  if (upgradeProxy) {
     const proxy = await WitnetProxy.deployed()
-    const wrb = await WitnetRequestBoard.at(WitnetProxy.address);
+    const wrb = await WitnetRequestBoard.at(WitnetProxy.address)
     const oldAddr = await proxy.delegate.call()
     let oldCodehash
     let oldVersion
@@ -73,9 +73,9 @@ module.exports = async function (deployer, network, accounts) {
   }
 }
 
-function isNullAddress(addr) {
-  return !addr
-    || addr === ""
-    || addr === "0x0000000000000000000000000000000000000000"
-    || !web3.utils.isAddress(addr)
+function isNullAddress (addr) {
+  return !addr ||
+    addr === "" ||
+    addr === "0x0000000000000000000000000000000000000000" ||
+    !web3.utils.isAddress(addr)
 }

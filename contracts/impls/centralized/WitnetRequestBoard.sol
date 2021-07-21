@@ -1,16 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.5;
+pragma solidity 0.8.6;
 
-// Inherits:
-import "../../data/WitnetBoardDataWhitelists.sol";
-import "../../exports/WitnetRequestBoardInterface.sol";
-import "../../exports/WitnetBoard.sol";
+import "../../WitnetBoard.sol";
+import "../../data/WitnetBoardDataACLs.sol";
+import "../../interfaces/WitnetRequestBoardInterface.sol";
 import "../../utils/Destructible.sol";
 import "../../utils/Upgradable.sol";
-
-// Uses:
-import "../../exports/WitnetRequest.sol";
 
 /**
  * @title Witnet Requests Board mocked
@@ -24,15 +20,14 @@ contract WitnetRequestBoard
         Destructible,
         Upgradable, 
         WitnetBoard, 
-        WitnetBoardDataWhitelists
+        WitnetBoardDataACLs
 {
     uint256 internal constant __ESTIMATED_REPORT_RESULT_GAS = 102496;
 
     constructor() {
         // sets instance as initialized:
-        __data().instance = address(this);
+        __data().base = address(this);
     }
-
 
     // ================================================================================================================
     // --- Overrides 'Destructible' -----------------------------------------------------------------------------------
@@ -50,48 +45,52 @@ contract WitnetRequestBoard
     function initialize(bytes memory _initData) virtual external override {
         address _owner = __data().owner;
         if (_owner == address(0)) {
-            // set owner if not yet set
+            // set owner if none set yet
             _owner = msg.sender;
             __data().owner = _owner;
-        }
-
-        // only owner can initialize:
-        require(msg.sender == _owner, "WitnetRequestBoard: only owner");
+        } else {
+            // only owner can initialize:
+            require(msg.sender == _owner, "WitnetRequestBoard: only owner");
+        }        
 
         // current instance cannot be initialized more than once:
-        require(__data().instance != __stub, "WitnetRequestBoard: already initialized");
-        __data().instance = __stub;
+        require(__data().base != __stub, "WitnetRequestBoard: already initialized");
+        __data().base = __stub;
 
         // do actual initialization:
         setReporters(abi.decode(_initData, (address[])));
         emit Initialized(msg.sender, __stub);
     }
 
+    /// @dev Determines whether current instance allows being upgraded.
+    /// @dev Returns value should be invariant from whoever is calling.
+    function isUpgradable() virtual public view override returns (bool) {
+        return true;
+    }
+
+    /// @dev Tells whether provided address could eventually upgrade the contract.
+    function isUpgradableFrom(address from) external view override returns (bool) {
+        address _owner = __data().owner;
+        return (
+            isUpgradable() && (
+                _owner == address(0) ||
+                _owner == from
+            )
+        );
+    }
+
     /// @dev Retrieves named version of current implementation.
     function version() virtual external pure override returns (string memory) {
-        return "WitnetRequestBoard-Centralized-v0.3.1.1";
+        return "WitnetRequestBoard-Centralized-v0.3.1.2";
     }
 
 
     // ================================================================================================================
     // --- Utility functions not declared within an interface ---------------------------------------------------------
 
-    function setReporters(address[] memory reporters)
-        public
-        virtual
-        onlyOwner
-    {
-        for (uint ix = 0; ix < reporters.length; ix ++) {
-            address _reporter = reporters[ix];
-            if (_reporter != address(0)) {
-                __whitelists().isReporter_[_reporter] = true;
-            }
-        }
-    }
-
     /// @dev Retrieves the whole DR post record from the WRB.
     /// @param id The unique identifier of a previously posted data request.
-    /// @return The DR record.
+    /// @return The DR record. Fails if DR current bytecode differs from the one it had when posted.
     function readDr(uint256 id)
         external view
         virtual
@@ -103,7 +102,7 @@ contract WitnetRequestBoard
     
     /// @dev Retrieves RADON bytecode of a previously posted DR.
     /// @param id The unique identifier of the previously posted DR.
-    /// @return _bytecode The RADON bytecode. Fails if changed after being posted.
+    /// @return _bytecode The RADON bytecode. Fails if changed after being posted. Empty if the DR was solved and destroyed.
     function readDataRequest(uint256 id)
         external view
         virtual
@@ -112,12 +111,15 @@ contract WitnetRequestBoard
     {
         WitnetTypes.DataRequest storage _dr = __dataRequest(id);
         if (_dr.addr != address(0)) {
+            // if DR's request contract address is not zero,
+            // we assume the DR has not been destroyed, so
+            // DR's bytecode can still be fetched:
             _bytecode = WitnetRequest(_dr.addr).bytecode();
             require(
                 WitnetTypes.computeDataRequestCodehash(_bytecode) == _dr.codehash,
-                "WitnetRequestBoard: manipulated request"
+                "WitnetRequestBoard: bytecode changed after posting"
             );
-        }
+        } 
     }
 
     /// @dev Retrieves the gas price set for a previously posted DR.
@@ -147,7 +149,7 @@ contract WitnetRequestBoard
         notDestroyed(id)
         resultNotYetReported(id)
     {
-        require(txhash != 0, "WitnetRequestBoard: tx hash cannot be zero");
+        require(txhash != 0, "WitnetRequestBoard: Witnet tally tx hash cannot be zero");
         // Ensures the result byes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(result.length != 0, "WitnetRequestBoard: result cannot be empty");
@@ -166,7 +168,20 @@ contract WitnetRequestBoard
         // TODO: either rename this method (e.g. getNextId()) or change bridge node 
         //       as to interpret returned value as actual number of posted data requests 
         //       in the WRB.
-        return __data().noRequests + 1;
+        return __data().numRequests + 1;
+    }
+
+    /// @dev Adds given addresses to the active reporters control list.
+    /// @param reporters List of addresses to be added to the active reporters control list.
+    function setReporters(address[] memory reporters)
+        public
+        virtual
+        onlyOwner
+    {
+        for (uint ix = 0; ix < reporters.length; ix ++) {
+            address _reporter = reporters[ix];
+            __acls().isReporter_[_reporter] = true;
+        }
     }
 
     
@@ -194,7 +209,7 @@ contract WitnetRequestBoard
     {
         SWitnetBoardDataRequest storage _req = __data().requests[id];
         require(msg.sender == _req.dr.requestor, "WitnetRequestBoard: only actual requestor");
-        require(_req.dr.txhash != 0, "WitnetReuqestBoard: not yet solved");
+        require(_req.dr.txhash != 0, "WitnetRequestBoard: not yet solved");
         _result = _req.result;
         delete __data().requests[id];
         emit DestroyedRequest(id, msg.sender);
@@ -215,7 +230,7 @@ contract WitnetRequestBoard
         uint256 minResultReward = tx.gasprice * __ESTIMATED_REPORT_RESULT_GAS;
         require(msg.value >= minResultReward, "WitnetRequestBoard: reward too low");
 
-        _id = ++ __data().noRequests;
+        _id = ++ __data().numRequests;
         WitnetTypes.DataRequest storage _dr = __dataRequest(_id);
 
         _dr.addr = requestAddr;
@@ -289,10 +304,15 @@ contract WitnetRequestBoard
         private view returns (WitnetTypes.DataRequest storage _dr)
     {
         _dr = __dataRequest(id);
-        bytes memory _bytecode = WitnetRequest(_dr.addr).bytecode();
-        require(
-            WitnetTypes.computeDataRequestCodehash(_bytecode) == _dr.codehash,
-            "WitnetRequestBoard: manipulated request"
-        );
+        if (_dr.addr != address(0)) {
+            // if DR's request contract address is not zero,
+            // we assume the DR has not been destroyed, so
+            // DR's bytecode can still be fetched:
+            bytes memory _bytecode = WitnetRequest(_dr.addr).bytecode();
+            require(
+                WitnetTypes.computeDataRequestCodehash(_bytecode) == _dr.codehash,
+                "WitnetRequestBoard: bytecode changed after posting"
+            );
+        }        
     }
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.5;
+pragma solidity 0.8.6;
 
 import "truffle/Assert.sol";
 import "../contracts/libs/BufferLib.sol";

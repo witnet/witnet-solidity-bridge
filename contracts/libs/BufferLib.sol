@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../exports/WitnetTypes.sol";
+import "./WitnetData.sol";
 
 /**
  * @title A convenient wrapper around the `bytes memory` type that exposes a buffer-like interface

@@ -3,12 +3,11 @@ build/
 coverage/
 coverage.json
 contracts/flattened
+Flattened*.sol
 
 .env
 .idea
 .vscode
-.old
-*.old
 
 yarn.lock
 package-lock.json

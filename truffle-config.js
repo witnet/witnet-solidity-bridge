@@ -27,13 +27,15 @@ module.exports = {
       host: "localhost",
       port: 8540,
       network_id: 1,
-      gasPrice: 1,
+      gasPrice: 10,
+      skipDryRun: true,
     },
     "conflux.mainnet": {
       host: "localhost",
-      port: 3000,
+      port: 9540,
       network_id: 1029,
       gasPrice: 1,
+      skipDryRun: true,
     },
   },
   mocha: {
@@ -50,7 +52,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.8.5",
+      version: "0.8.6",
       settings: {
         optimizer: {
           enabled: true,
