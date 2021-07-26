@@ -58,13 +58,8 @@ contract WitnetRequestBoard
 
         // do actual initialization:
         setReporters(abi.decode(_initData, (address[])));
-        emit Initialized(msg.sender, __stub);
-    }
 
-    /// @dev Determines whether current instance allows being upgraded.
-    /// @dev Returns value should be invariant from whoever is calling.
-    function isUpgradable() virtual public view override returns (bool) {
-        return true;
+        emit Initialized(msg.sender, __base, codehash());
     }
 
     /// @dev Tells whether provided address could eventually upgrade the contract.
