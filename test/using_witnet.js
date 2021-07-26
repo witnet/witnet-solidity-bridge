@@ -176,7 +176,7 @@ contract("UsingWitnet", accounts => {
         //   setting 'ownerAccount' as owner
         //   and 'reporterAccount' as authorized reporter:
         await proxy.upgrade(
-          (await WRB.new()).address,
+          (await WRB.new(true)).address,
           web3.eth.abi.encodeParameter("address[]", [reporterAccount]),
           { from: ownerAccount }
         )

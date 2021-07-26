@@ -1,9 +1,10 @@
 const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
-const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
 const RequestContract = artifacts.require("WitnetRequest")
-const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
+const TroyHorse = artifacts.require("WitnetRequestBoardNotCompliantTroyHorse")
 const Witnet = artifacts.require("Witnet")
+const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
+const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
 
 contract("Witnet Requests Board Proxy", accounts => {
   describe("Witnet Requests Board Proxy test suite", () => {
@@ -71,7 +72,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       )
     })
 
-    it("fails if trying to upgrade to non-initializable delegate from current delegate's owner", async () => {
+    it("fails if trying to upgrade to non-Initializable delegate from current delegate's owner", async () => {
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard(proxy.address, { from: contractOwner }),
         ""
@@ -82,6 +83,14 @@ contract("Witnet Requests Board Proxy", accounts => {
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard(wrbInstance2.address, { from: requestSender }),
         "not authorized"
+      )
+    })
+
+    it("fails if trying to upgrade to not Upgradable-compliant from current delegate's owner", async () => {
+      const troyHorse = await TroyHorse.new()
+      await truffleAssert.reverts(
+        proxy.upgradeWitnetRequestBoard(troyHorse.address, { from: contractOwner }),
+        "not compliant"
       )
     })
 
@@ -111,17 +120,17 @@ contract("Witnet Requests Board Proxy", accounts => {
 
     it("fails if trying to re-initialize current implementation, from non owner address", async () => {
       await truffleAssert.reverts(
-        wrb.initialize(web3.eth.abi.encodeParameter('address[]',[requestSender]), { from: requestSender }),
+        wrb.initialize(web3.eth.abi.encodeParameter("address[]", [requestSender]), { from: requestSender }),
         "only owner"
       )
     })
 
     it("fails also if trying to re-initialize current implementation, even from owner address", async () => {
       await truffleAssert.reverts(
-        wrb.initialize(web3.eth.abi.encodeParameter('address[]',[requestSender]), { from: contractOwner }),
+        wrb.initialize(web3.eth.abi.encodeParameter("address[]", [requestSender]), { from: contractOwner }),
         "already initialized"
       )
-    })    
+    })
 
     it("should post a data request to new WRB and keep previous data request routes", async () => {
       // The data request to be posted

@@ -16,7 +16,7 @@ abstract contract UsingWitnet {
  /**
   * @notice Include an address to specify the WitnetRequestBoard.
   * @param _wrb WitnetRequestBoard address.
-  */
+  **/
   constructor(address _wrb) {
     require(_wrb != address(0), "UsingWitnet: null contract");
     witnet = WitnetRequestBoardInterface(_wrb);
@@ -63,7 +63,7 @@ abstract contract UsingWitnet {
   * @notice Send a new request to the Witnet network with transaction value as result report reward.
   * @param _request An instance of the `WitnetRequest` contract.
   * @return Sequencial identifier for the request included in the WitnetRequestBoard.
-  */
+  **/
   function witnetPostRequest(WitnetRequest _request) internal returns (uint256) {
     return witnet.postDataRequest{value: msg.value}(address(_request));
   }

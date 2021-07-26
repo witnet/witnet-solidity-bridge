@@ -52,21 +52,22 @@ contract WitnetRequestBoard
 
         if (__data().base != address(0)) {
             // current implementation cannot be initialized more than once:
-            require(__data().base != __base, "WitnetRequestBoard: already initialized");
+            require(__data().base != base(), "WitnetRequestBoard: already initialized");
         }        
-        __data().base = __base;
+        __data().base = base();
 
-        // do actual initialization:
+        emit Initialized(msg.sender, base(), codehash(), version());
+
+        // Do actual base initialization:
         setReporters(abi.decode(_initData, (address[])));
-
-        emit Initialized(msg.sender, __base, codehash());
     }
 
     /// @dev Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address from) external view override returns (bool) {
         address _owner = __data().owner;
         return (
-            isUpgradable() && (
+            // false if the WRB is intrinsically not upgradable
+            isUpgradable() && (                
                 _owner == address(0) ||
                 _owner == from
             )
@@ -74,7 +75,7 @@ contract WitnetRequestBoard
     }
 
     /// @dev Retrieves named version of current implementation.
-    function version() virtual external pure override returns (string memory) {
+    function version() virtual public pure override returns (string memory) {
         return "WitnetRequestBoard-Centralized-v0.3.1.3";
     }
 

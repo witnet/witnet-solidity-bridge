@@ -2,9 +2,6 @@
 
 pragma solidity 0.8.6;
 
-/* solhint-disable avoid-low-level-calls */
-/* solhint-disable no-complex-fallback */
-
 import "./utils/Upgradable.sol";
 
 contract WitnetProxy {
@@ -18,10 +15,11 @@ contract WitnetProxy {
     revert("WitnetProxy: no ETH accepted");
   }
 
-  /// @dev Payable fallback accepts delegating calls to payable functions.
-  fallback() external payable {
+  /// @dev Payable fallback accepts delegating calls to payable functions.  
+  fallback() external payable { /* solhint-disable no-complex-fallback */
     address _delegate = address(delegate);
-    assembly {
+
+    assembly { /* solhint-disable avoid-low-level-calls */
       // Gas optimized delegate call to 'delegate' contract.
       // Note: `msg.data`, `msg.sender` and `msg.value` will be passed over 
       //       to actual implementation of `msg.sig` within `delegate` contract.
@@ -45,13 +43,23 @@ contract WitnetProxy {
   /// @dev Upgrades the `delegate` address.
   /// @param _newDelegate New implementation address.
   /// @param _initData Raw data with which new implementation will be initialized.
-  function upgrade(address _newDelegate, bytes memory _initData) public {    
+  /// @return Returns whether new implementation would be further upgradable, or not.
+  function upgrade(address _newDelegate, bytes memory _initData)
+    public returns (bool)
+  {
     // New delegate cannot be null:
     require(_newDelegate != address(0), "WitnetProxy: null delegate");
 
     if (address(delegate) != address(0)) {
       // New delegate address must differ from current one:
       require(_newDelegate != address(delegate), "WitnetProxy: nothing to upgrade");
+
+      // Assert whether current implementation is intrinsically upgradable:
+      try delegate.isUpgradable() returns (bool _isUpgradable) {
+        require(_isUpgradable, "WitnetProxy: not upgradable");
+      } catch {
+        revert("WitnetProxy: unable to check upgradability");
+      }
 
       // Assert whether current implementation allows `msg.sender` to upgrade the proxy:
       (bool _wasCalled, bytes memory _result) = address(delegate).delegatecall(
@@ -75,5 +83,13 @@ contract WitnetProxy {
 
     // If all checks and initialization pass, update implementation address:
     delegate = Upgradable(_newDelegate);
+
+    // Asserts new delegate complies w/ minimal implementation of Upgradable interface:
+    try delegate.isUpgradable() returns (bool _isUpgradable) {
+      return _isUpgradable;
+    }
+    catch {
+      revert ("WitnetProxy: not compliant");
+    }
   }
 }

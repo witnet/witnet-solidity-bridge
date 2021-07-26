@@ -11,6 +11,7 @@ interface Initializable {
     event Initialized(
         address indexed from,
         address indexed baseAddr,
-        bytes32 indexed baseCodehash
+        bytes32 indexed baseCodehash,
+        string versionTag
     );
 }

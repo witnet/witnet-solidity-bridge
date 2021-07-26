@@ -69,7 +69,7 @@ module.exports = async function (deployer, network, accounts) {
       console.log(`  >> WRB addresses:\t${oldAddr} => ${await proxy.delegate.call()}`)
       console.log(`  >> WRB codehashes:\t${oldCodehash} => ${await wrb.codehash.call()}`)
       console.log(`  >> WRB version tags:\t${oldVersion} => ${await wrb.version.call()}`)
-    }    
+    }
     console.log(`  >> WRB is upgradable:\t${await wrb.isUpgradable.call()}`)
     console.log()
   }

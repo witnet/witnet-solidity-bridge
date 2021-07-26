@@ -48,5 +48,5 @@ abstract contract Upgradable is Initializable {
     function isUpgradableFrom(address from) virtual external view returns (bool);
 
     /// @dev Retrieves named version of current implementation.
-    function version() virtual external pure returns (string memory);
+    function version() virtual public pure returns (string memory);
 }

@@ -9,10 +9,10 @@ const { expect, assert } = require("chai")
 
 // Contracts
 const WRB = artifacts.require("WitnetRequestBoard")
-const Request = artifacts.require("WitnetRequest")
+const WitnetRequest = artifacts.require("WitnetRequest")
 const RequestTestHelper = artifacts.require("RequestTestHelper")
 
-// Request definition
+// WitnetRequest definition
 const requestId = new BN(1)
 // eslint-disable-next-line no-multi-str
 const requestHex = "0x0abb0108bd8cb8fa05123b122468747470733a2f2f7777772e6269747374616d702e6e65742f6170692f7469636b65722\
@@ -30,9 +30,13 @@ contract("WitnetRequestBoard", ([
   other,
 ]) => {
   beforeEach(async () => {
-    this.WitnetRequestBoard = await WRB.new({ from: owner })
-    await this.WitnetRequestBoard.setReporters([owner, committeeMember], { from: owner })
-    this.Request = await Request.new(requestHex, { from: requestor })
+    this.WitnetRequestBoard = await WRB.new(true, { from: owner })
+    await this.WitnetRequestBoard.initialize(
+      web3.eth.abi.encodeParameter("address[]",
+        [owner, committeeMember]),
+      { from: owner }
+    )
+    this.WitnetRequest = await WitnetRequest.new(requestHex, { from: requestor })
   })
 
   describe("deployments", async () => {
@@ -49,7 +53,7 @@ contract("WitnetRequestBoard", ([
 
       // Post Data Request
       const postDataRequestTx = await this.WitnetRequestBoard.postDataRequest(
-        this.Request.address,
+        this.WitnetRequest.address,
         {
           from: requestor,
           value: ether("1"),
@@ -77,13 +81,13 @@ contract("WitnetRequestBoard", ([
     it("creator can post data requests with sequential identifiers", async () => {
       // Post Data Requests
       const postDataRequestTx1 = await this.WitnetRequestBoard.postDataRequest(
-        this.Request.address,
+        this.WitnetRequest.address,
         {
           from: requestor,
           value: ether("1"),
         })
       const postDataRequestTx2 = await this.WitnetRequestBoard.postDataRequest(
-        this.Request.address,
+        this.WitnetRequest.address,
         {
           from: requestor,
           value: ether("1"),
@@ -113,7 +117,7 @@ contract("WitnetRequestBoard", ([
       // Transaction value < reward
       await expectRevert(
         this.WitnetRequestBoard.postDataRequest(
-          this.Request.address,
+          this.WitnetRequest.address,
           {
             from: requestor,
             value: ether("0"),
@@ -127,7 +131,7 @@ contract("WitnetRequestBoard", ([
       // Tally reward < ESTIMATED_REPORT_RESULT_GAS
       await expectRevert(
         this.WitnetRequestBoard.postDataRequest(
-          this.Request.address,
+          this.WitnetRequest.address,
           {
             from: requestor,
             value: new BN("1"),
@@ -142,7 +146,7 @@ contract("WitnetRequestBoard", ([
   describe("upgrade data request", async () => {
     beforeEach(async () => {
       await this.WitnetRequestBoard.postDataRequest(
-        this.Request.address,
+        this.WitnetRequest.address,
         {
           from: requestor,
           value: ether("1"),
@@ -237,7 +241,7 @@ contract("WitnetRequestBoard", ([
   describe("report data request result", async () => {
     beforeEach(async () => {
       // Post data request
-      await this.WitnetRequestBoard.postDataRequest(this.Request.address, {
+      await this.WitnetRequestBoard.postDataRequest(this.WitnetRequest.address, {
         from: requestor,
         value: ether("1"),
         gasPrice: 1,
@@ -372,7 +376,7 @@ contract("WitnetRequestBoard", ([
   describe("read data request gas price", async () => {
     beforeEach(async () => {
       await this.WitnetRequestBoard.postDataRequest(
-        this.Request.address,
+        this.WitnetRequest.address,
         {
           from: requestor,
           value: ether("1"),
@@ -407,7 +411,7 @@ contract("WitnetRequestBoard", ([
     let drId
     beforeEach(async () => {
       const tx = await this.WitnetRequestBoard.postDataRequest(
-        this.Request.address,
+        this.WitnetRequest.address,
         {
           from: requestor,
           value: ether("0.1"),
