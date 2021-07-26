@@ -31,7 +31,7 @@ library WitnetData {
     }
 
     /// @notice Data kept in EVM-storage for every Data Request (DR) posted to Witnet.
-    struct DataRequest {
+    struct Request {
         address addr;       // WitnetRequest contract address.
         address requestor;  // Address from which the DR was posted.
         uint256 codehash;   // Codehash of the DR.

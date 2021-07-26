@@ -13,12 +13,12 @@ abstract contract WitnetBoardData {
   struct SWitnetBoardData {
     address owner;
     address base;
-    mapping (uint => SWitnetBoardDataRequest) requests;
-    uint256 numRequests;
+    mapping (uint => SWitnetBoardDataRecord) records;
+    uint256 numRecords;
   }
 
-  struct SWitnetBoardDataRequest {
-    WitnetTypes.DataRequest dr;
+  struct SWitnetBoardDataRecord {
+    WitnetData.Request request;
     bytes result;
   }
 
@@ -27,7 +27,7 @@ abstract contract WitnetBoardData {
   }
 
   modifier notDestroyed(uint256 id) {
-    require(id > 0 && id <= __data().numRequests, "WitnetBoardData: not yet posted");
+    require(id > 0 && id <= __data().numRecords, "WitnetBoardData: not yet posted");
     require(__dataRequest(id).requestor != address(0), "WitnetBoardData: destroyed");
     _;
   }
@@ -43,7 +43,7 @@ abstract contract WitnetBoardData {
   }
 
   modifier wasPosted(uint256 id) {
-    require(id > 0 && id <= __data().numRequests, "WitnetBoardData: not yet posted");
+    require(id > 0 && id <= __data().numRecords, "WitnetBoardData: not yet posted");
     _;
   }
 
@@ -53,8 +53,8 @@ abstract contract WitnetBoardData {
     }
   }
 
-  function __dataRequest(uint256 id) internal view returns (WitnetTypes.DataRequest storage) {
-    return __data().requests[id].dr;
+  function __dataRequest(uint256 id) internal view returns (WitnetData.Request storage) {
+    return __data().records[id].request;
   }
   
   bytes32 internal constant WITNET_BOARD_DATA_SLOTHASH = "WitnetBoard.Data";  

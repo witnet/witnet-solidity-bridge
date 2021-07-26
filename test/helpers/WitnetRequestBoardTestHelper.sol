@@ -33,8 +33,8 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
     public payable override returns(uint256 _id)
   {
     _id = super.postDataRequest(_requestAddress);
-    __data().requests[_id].dr.txhash = uint256(keccak256("hello"));
-    __data().requests[_id].result = "hello";
+    __data().records[_id].request.txhash = uint256(keccak256("hello"));
+    __data().records[_id].result = "hello";
   }
 
   /// @dev Retrieves hash of the data request transaction in Witnet
@@ -48,14 +48,7 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
   function readResult(uint256 _id) external view override returns (bytes memory) {
-    return __data().requests[_id].result;
-  }
-
-  /// @dev Verifies if the contract is upgradable
-  /// @return true if the contract upgradable
-  /* solhint-disable-next-line no-unused-vars*/
-  function isUpgradable() public view override returns (bool) {
-    return upgradable;
+    return __data().records[_id].result;
   }
 
   /// @dev Estimate the amount of reward we need to insert for a given gas price.

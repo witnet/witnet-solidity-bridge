@@ -154,12 +154,12 @@ contract WitnetRequestBoard
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(result.length != 0, "WitnetRequestBoard: result cannot be empty");
 
-        SWitnetBoardDataRequest storage _req = __data().requests[id];
-        _req.dr.txhash = txhash;
-        _req.result = result;
+        SWitnetBoardDataRecord storage _record = __data().records[id];
+        _record.request.txhash = txhash;
+        _record.result = result;
 
         emit PostedResult(id, msg.sender);
-        payable(msg.sender).transfer(_req.dr.reward);
+        payable(msg.sender).transfer(_record.request.reward);
     }
     
     /// @dev Returns the number of posted data requests in the WRB.
@@ -168,7 +168,7 @@ contract WitnetRequestBoard
         // TODO: either rename this method (e.g. getNextId()) or change bridge node 
         //       as to interpret returned value as actual number of posted data requests 
         //       in the WRB.
-        return __data().numRequests + 1;
+        return __data().numRecords + 1;
     }
 
     /// @dev Adds given addresses to the active reporters control list.
@@ -207,11 +207,11 @@ contract WitnetRequestBoard
         virtual override
         returns (bytes memory _result)
     {
-        SWitnetBoardDataRequest storage _req = __data().requests[id];
-        require(msg.sender == _req.dr.requestor, "WitnetRequestBoard: only actual requestor");
-        require(_req.dr.txhash != 0, "WitnetRequestBoard: not yet solved");
-        _result = _req.result;
-        delete __data().requests[id];
+        SWitnetBoardDataRecord storage _record = __data().records[id];
+        require(msg.sender == _record.request.requestor, "WitnetRequestBoard: only actual requestor");
+        require(_record.request.txhash != 0, "WitnetRequestBoard: not yet solved");
+        _result = _record.result;
+        delete __data().records[id];
         emit DestroyedRequest(id, msg.sender);
     }
 
@@ -230,8 +230,8 @@ contract WitnetRequestBoard
         uint256 minResultReward = tx.gasprice * __ESTIMATED_REPORT_RESULT_GAS;
         require(msg.value >= minResultReward, "WitnetRequestBoard: reward too low");
 
-        _id = ++ __data().numRequests;
-        WitnetTypes.DataRequest storage _dr = __dataRequest(_id);
+        _id = ++ __data().numRecords;
+        WitnetData.Request storage _dr = __dataRequest(_id);
 
         _dr.addr = requestAddr;
         _dr.requestor = msg.sender;
@@ -266,9 +266,9 @@ contract WitnetRequestBoard
         wasPosted(id)
         returns (bytes memory)
     {
-        SWitnetBoardDataRequest storage _req = __data().requests[id];
-        require(_req.dr.txhash != 0, "WitnetRequestBoard: not yet solved");
-        return _req.result;
+        SWitnetBoardDataRecord storage _record = __data().records[id];
+        require(_record.request.txhash != 0, "WitnetRequestBoard: not yet solved");
+        return _record.result;
     }    
 
     /// @dev Increments the reward of a data request by adding the transaction value to it.
@@ -301,7 +301,7 @@ contract WitnetRequestBoard
     // --- Private functions ------------------------------------------------------------------------------------------
 
     function __checkDr(uint256 id)
-        private view returns (WitnetTypes.DataRequest storage _dr)
+        private view returns (WitnetData.Request storage _dr)
     {
         _dr = __dataRequest(id);
         if (_dr.addr != address(0)) {
