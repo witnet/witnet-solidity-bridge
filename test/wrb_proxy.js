@@ -109,6 +109,20 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(await proxy.delegate.call(), wrbInstance2.address)
     })
 
+    it("fails if trying to re-initialize current implementation, from non owner address", async () => {
+      await truffleAssert.reverts(
+        wrb.initialize(web3.eth.abi.encodeParameter('address[]',[requestSender]), { from: requestSender }),
+        "only owner"
+      )
+    })
+
+    it("fails also if trying to re-initialize current implementation, even from owner address", async () => {
+      await truffleAssert.reverts(
+        wrb.initialize(web3.eth.abi.encodeParameter('address[]',[requestSender]), { from: contractOwner }),
+        "already initialized"
+      )
+    })    
+
     it("should post a data request to new WRB and keep previous data request routes", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
