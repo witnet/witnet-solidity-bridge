@@ -15,14 +15,9 @@ import "../../contracts/impls/centralized/WitnetRequestBoard.sol";
 contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
 
   address public witnet;
-  
 
-  // Data fields to be accessed in the context of a proxy delegate-call, must be declared as `immutable`:
-  bool public immutable upgradable;
-
-  constructor (address[] memory _committee, bool _upgradable) {
+  constructor (address[] memory _committee, bool _upgradable) WitnetRequestBoard(_upgradable) {
     witnet = msg.sender;
-    upgradable = _upgradable;
     setReporters(_committee);
   }
 

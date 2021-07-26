@@ -24,10 +24,7 @@ contract WitnetRequestBoard
 {
     uint256 internal constant __ESTIMATED_REPORT_RESULT_GAS = 102496;
 
-    constructor() {
-        // sets instance as initialized:
-        __data().base = address(this);
-    }
+    constructor(bool _isUpgradable) Upgradable(_isUpgradable) {}
 
     // ================================================================================================================
     // --- Overrides 'Destructible' -----------------------------------------------------------------------------------
@@ -53,9 +50,11 @@ contract WitnetRequestBoard
             require(msg.sender == _owner, "WitnetRequestBoard: only owner");
         }        
 
-        // current instance cannot be initialized more than once:
-        require(__data().base != __stub, "WitnetRequestBoard: already initialized");
-        __data().base = __stub;
+        if (__data().base != address(0)) {
+            // current implementation cannot be initialized more than once:
+            require(__data().base != __base, "WitnetRequestBoard: already initialized");
+        }        
+        __data().base = __base;
 
         // do actual initialization:
         setReporters(abi.decode(_initData, (address[])));
@@ -81,12 +80,18 @@ contract WitnetRequestBoard
 
     /// @dev Retrieves named version of current implementation.
     function version() virtual external pure override returns (string memory) {
-        return "WitnetRequestBoard-Centralized-v0.3.1.2";
+        return "WitnetRequestBoard-Centralized-v0.3.1.3";
     }
 
 
     // ================================================================================================================
     // --- Utility functions not declared within an interface ---------------------------------------------------------
+
+    /// @dev Gets admin/owner address.
+    function owner() external view returns (address) {
+        return __data().owner;
+    }
+        
 
     /// @dev Retrieves the whole DR post record from the WRB.
     /// @param id The unique identifier of a previously posted data request.

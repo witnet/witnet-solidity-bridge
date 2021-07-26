@@ -39,7 +39,7 @@ module.exports = async function (deployer, network, accounts) {
   }
   if (deployWRB) {
     console.log(`> Migrating new WitnetRequestBoard instance into ${network} network...`)
-    await deployer.deploy(WitnetRequestBoard)
+    await deployer.deploy(WitnetRequestBoard, true)
   }
   if (upgradeProxy) {
     const proxy = await WitnetProxy.deployed()

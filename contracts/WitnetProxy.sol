@@ -10,12 +10,15 @@ import "./utils/Upgradable.sol";
 contract WitnetProxy {
   Upgradable public delegate;
 
+  /// @dev Constructor with no params as to ease eventual support of Singleton pattern (i.e. ERC-2470)
   constructor () {}
 
+  /// @dev WitnetProxies will never accept direct transfer of ETHs.
   receive() external payable {
     revert("WitnetProxy: no ETH accepted");
   }
 
+  /// @dev Payable fallback accepts delegating calls to payable functions.
   fallback() external payable {
     address _delegate = address(delegate);
     assembly {
@@ -39,38 +42,38 @@ contract WitnetProxy {
     }
   }
 
-  function upgrade(address _newDelegate, bytes memory _initData) public {
+  /// @dev Upgrades the `delegate` address.
+  /// @param _newDelegate New implementation address.
+  /// @param _initData Raw data with which new implementation will be initialized.
+  function upgrade(address _newDelegate, bytes memory _initData) public {    
+    // New delegate cannot be null:
     require(_newDelegate != address(0), "WitnetProxy: null delegate");
+
     if (address(delegate) != address(0)) {
-      require(
-        _newDelegate != address(delegate),
-        "WitnetProxy: nothing to upgrade"
-      );
-      require(
-        delegate.isUpgradable(),
-        "WitnetProxy: not upgradable"
-      );
+      // New delegate address must differ from current one:
+      require(_newDelegate != address(delegate), "WitnetProxy: nothing to upgrade");
+
+      // Assert whether current implementation allows `msg.sender` to upgrade the proxy:
       (bool _wasCalled, bytes memory _result) = address(delegate).delegatecall(
         abi.encodeWithSignature(
           "isUpgradableFrom(address)",
           msg.sender
         )
       );
-      require(
-        _wasCalled && abi.decode(_result, (bool)),
-        "WitnetProxy: not authorized"
-      );
+      require(_wasCalled, "WitnetProxy: not compliant");
+      require(abi.decode(_result, (bool)), "WitnetProxy: not authorized");
     }
+
+    // Initialize new implementation within proxy-context storage:
     (bool _wasInitialized,) = _newDelegate.delegatecall(
       abi.encodeWithSignature(
         "initialize(bytes)",
         _initData
       )
     );
-    require(
-      _wasInitialized,
-      "WitnetProxy: unable to initialize"
-    );
+    require(_wasInitialized, "WitnetProxy: unable to initialize");
+
+    // If all checks and initialization pass, update implementation address:
     delegate = Upgradable(_newDelegate);
   }
 }
