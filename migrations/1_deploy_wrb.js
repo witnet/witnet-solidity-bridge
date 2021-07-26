@@ -61,14 +61,16 @@ module.exports = async function (deployer, network, accounts) {
       )
     )
     if (isNullAddress(oldAddr)) {
+      console.log(`  >> WRB owner addr:\t${await wrb.owner.call()}`)
       console.log(`  >> WRB address:\t${await proxy.delegate.call()}`)
       console.log(`  >> WRB codehash:\t${await wrb.codehash.call()}`)
-      console.log(`  >> WRB version:\t${await wrb.version.call()}`)
+      console.log(`  >> WRB version tag:\t${await wrb.version.call()}`)
     } else {
       console.log(`  >> WRB addresses:\t${oldAddr} => ${await proxy.delegate.call()}`)
       console.log(`  >> WRB codehashes:\t${oldCodehash} => ${await wrb.codehash.call()}`)
-      console.log(`  >> WRB versions:\t${oldVersion} => ${await wrb.version.call()}`)
-    }
+      console.log(`  >> WRB version tags:\t${oldVersion} => ${await wrb.version.call()}`)
+    }    
+    console.log(`  >> WRB is upgradable:\t${await wrb.isUpgradable.call()}`)
     console.log()
   }
 }
