@@ -8,7 +8,7 @@ import "../contracts/libs/Witnet.sol";
 
 
 contract WitnetTest {
-  using Witnet for WitnetTypes.Result;
+  using Witnet for WitnetData.Result;
 
   // Test the `Witnet.stageNames` pure method, which gives strings with the names for the different Witnet request
   // stages
@@ -21,152 +21,152 @@ contract WitnetTest {
 
   // Test decoding of `RadonError` error codes
   function testErrorCodes1() external {
-    WitnetTypes.ErrorCodes errorCodeEmpty = Witnet.resultFromCborBytes(hex"D82780").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x00 = Witnet.resultFromCborBytes(hex"D8278100").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x01 = Witnet.resultFromCborBytes(hex"D8278101").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x02 = Witnet.resultFromCborBytes(hex"D8278102").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x03 = Witnet.resultFromCborBytes(hex"D8278103").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x10 = Witnet.resultFromCborBytes(hex"D8278110").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x11 = Witnet.resultFromCborBytes(hex"D8278111").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x20 = Witnet.resultFromCborBytes(hex"D827811820").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x30 = Witnet.resultFromCborBytes(hex"D827811830").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x31 = Witnet.resultFromCborBytes(hex"D827811831").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x40 = Witnet.resultFromCborBytes(hex"D827811840").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x41 = Witnet.resultFromCborBytes(hex"D827811841").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x42 = Witnet.resultFromCborBytes(hex"D827811842").asErrorCode();
+    WitnetData.ErrorCodes errorCodeEmpty = Witnet.resultFromCborBytes(hex"D82780").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x00 = Witnet.resultFromCborBytes(hex"D8278100").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x01 = Witnet.resultFromCborBytes(hex"D8278101").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x02 = Witnet.resultFromCborBytes(hex"D8278102").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x03 = Witnet.resultFromCborBytes(hex"D8278103").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x10 = Witnet.resultFromCborBytes(hex"D8278110").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x11 = Witnet.resultFromCborBytes(hex"D8278111").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x20 = Witnet.resultFromCborBytes(hex"D827811820").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x30 = Witnet.resultFromCborBytes(hex"D827811830").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x31 = Witnet.resultFromCborBytes(hex"D827811831").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x40 = Witnet.resultFromCborBytes(hex"D827811840").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x41 = Witnet.resultFromCborBytes(hex"D827811841").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x42 = Witnet.resultFromCborBytes(hex"D827811842").asErrorCode();
     Assert.equal(
       uint(errorCodeEmpty),
-      uint(WitnetTypes.ErrorCodes.Unknown),
-      "empty error code `[]` should be `WitnetTypes.ErrorCodes.Unknown`"
+      uint(WitnetData.ErrorCodes.Unknown),
+      "empty error code `[]` should be `WitnetData.ErrorCodes.Unknown`"
     );
     Assert.equal(
       uint(errorCode0x00),
-      uint(WitnetTypes.ErrorCodes.Unknown),
-      "error code `0x00` should be `WitnetTypes.ErrorCodes.Unknown`"
+      uint(WitnetData.ErrorCodes.Unknown),
+      "error code `0x00` should be `WitnetData.ErrorCodes.Unknown`"
     );
     Assert.equal(
       uint(errorCode0x01),
-      uint(WitnetTypes.ErrorCodes.SourceScriptNotCBOR),
-      "error code `0x01` should be `WitnetTypes.ErrorCodes.SourceScriptNotCBOR`"
+      uint(WitnetData.ErrorCodes.SourceScriptNotCBOR),
+      "error code `0x01` should be `WitnetData.ErrorCodes.SourceScriptNotCBOR`"
     );
     Assert.equal(
       uint(errorCode0x02),
-      uint(WitnetTypes.ErrorCodes.SourceScriptNotArray),
-      "error code `0x02` should be `WitnetTypes.ErrorCodes.SourceScriptNotArray`"
+      uint(WitnetData.ErrorCodes.SourceScriptNotArray),
+      "error code `0x02` should be `WitnetData.ErrorCodes.SourceScriptNotArray`"
     );
     Assert.equal(
       uint(errorCode0x03),
-      uint(WitnetTypes.ErrorCodes.SourceScriptNotRADON),
-      "error code `0x03` should be `WitnetTypes.ErrorCodes.SourceScriptNotRADON`"
+      uint(WitnetData.ErrorCodes.SourceScriptNotRADON),
+      "error code `0x03` should be `WitnetData.ErrorCodes.SourceScriptNotRADON`"
     );
     Assert.equal(
       uint(errorCode0x10),
-      uint(WitnetTypes.ErrorCodes.RequestTooManySources),
-      "error code `0x10` should be `WitnetTypes.ErrorCodes.RequestTooManySources`"
+      uint(WitnetData.ErrorCodes.RequestTooManySources),
+      "error code `0x10` should be `WitnetData.ErrorCodes.RequestTooManySources`"
     );
     Assert.equal(
       uint(errorCode0x11),
-      uint(WitnetTypes.ErrorCodes.ScriptTooManyCalls),
-      "error code `0x11` should be `WitnetTypes.ErrorCodes.ScriptTooManyCalls`"
+      uint(WitnetData.ErrorCodes.ScriptTooManyCalls),
+      "error code `0x11` should be `WitnetData.ErrorCodes.ScriptTooManyCalls`"
     );
     Assert.equal(
       uint(errorCode0x20),
-      uint(WitnetTypes.ErrorCodes.UnsupportedOperator),
-      "error code `0x20` should be `WitnetTypes.ErrorCodes.UnsupportedOperator`"
+      uint(WitnetData.ErrorCodes.UnsupportedOperator),
+      "error code `0x20` should be `WitnetData.ErrorCodes.UnsupportedOperator`"
     );
     Assert.equal(
       uint(errorCode0x30),
-      uint(WitnetTypes.ErrorCodes.HTTP),
-      "error code `0x30` should be `WitnetTypes.ErrorCodes.HTTP`"
+      uint(WitnetData.ErrorCodes.HTTP),
+      "error code `0x30` should be `WitnetData.ErrorCodes.HTTP`"
     );
     Assert.equal(
       uint(errorCode0x31),
-      uint(WitnetTypes.ErrorCodes.RetrievalTimeout),
-      "Error code 0x31 should be `WitnetTypes.ErrorCodes.RetrievalTimeout`"
+      uint(WitnetData.ErrorCodes.RetrievalTimeout),
+      "Error code 0x31 should be `WitnetData.ErrorCodes.RetrievalTimeout`"
     );
     Assert.equal(
       uint(errorCode0x40),
-      uint(WitnetTypes.ErrorCodes.Underflow),
-      "error code `0x40` should be `WitnetTypes.ErrorCodes.Underflow`"
+      uint(WitnetData.ErrorCodes.Underflow),
+      "error code `0x40` should be `WitnetData.ErrorCodes.Underflow`"
     );
     Assert.equal(
       uint(errorCode0x41),
-      uint(WitnetTypes.ErrorCodes.Overflow),
-      "error code `0x41` should be `WitnetTypes.ErrorCodes.Overflow`"
+      uint(WitnetData.ErrorCodes.Overflow),
+      "error code `0x41` should be `WitnetData.ErrorCodes.Overflow`"
     );
     Assert.equal(
       uint(errorCode0x42),
-      uint(WitnetTypes.ErrorCodes.DivisionByZero),
-      "Error code #0x42 should be `WitnetTypes.ErrorCodes.DivisionByZero`"
+      uint(WitnetData.ErrorCodes.DivisionByZero),
+      "Error code #0x42 should be `WitnetData.ErrorCodes.DivisionByZero`"
     );
   }
 
   function testErrorCodes2() external {
-    WitnetTypes.ErrorCodes errorCode0x50 = Witnet.resultFromCborBytes(hex"D827811850").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x51 = Witnet.resultFromCborBytes(hex"D827811851").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x52 = Witnet.resultFromCborBytes(hex"D827811852").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x53 = Witnet.resultFromCborBytes(hex"D827811853").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x60 = Witnet.resultFromCborBytes(hex"D827811860").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x70 = Witnet.resultFromCborBytes(hex"D827811870").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0x71 = Witnet.resultFromCborBytes(hex"D827811871").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0xE0 = Witnet.resultFromCborBytes(hex"D8278118E0").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0xE1 = Witnet.resultFromCborBytes(hex"D8278118E1").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0xE2 = Witnet.resultFromCborBytes(hex"D8278118E2").asErrorCode();
-    WitnetTypes.ErrorCodes errorCode0xFF = Witnet.resultFromCborBytes(hex"D8278118FF").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x50 = Witnet.resultFromCborBytes(hex"D827811850").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x51 = Witnet.resultFromCborBytes(hex"D827811851").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x52 = Witnet.resultFromCborBytes(hex"D827811852").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x53 = Witnet.resultFromCborBytes(hex"D827811853").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x60 = Witnet.resultFromCborBytes(hex"D827811860").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x70 = Witnet.resultFromCborBytes(hex"D827811870").asErrorCode();
+    WitnetData.ErrorCodes errorCode0x71 = Witnet.resultFromCborBytes(hex"D827811871").asErrorCode();
+    WitnetData.ErrorCodes errorCode0xE0 = Witnet.resultFromCborBytes(hex"D8278118E0").asErrorCode();
+    WitnetData.ErrorCodes errorCode0xE1 = Witnet.resultFromCborBytes(hex"D8278118E1").asErrorCode();
+    WitnetData.ErrorCodes errorCode0xE2 = Witnet.resultFromCborBytes(hex"D8278118E2").asErrorCode();
+    WitnetData.ErrorCodes errorCode0xFF = Witnet.resultFromCborBytes(hex"D8278118FF").asErrorCode();
     Assert.equal(
       uint(errorCode0x50),
-      uint(WitnetTypes.ErrorCodes.NoReveals),
-      "Error code #0x50 should be `WitnetTypes.ErrorCodes.NoReveals`"
+      uint(WitnetData.ErrorCodes.NoReveals),
+      "Error code #0x50 should be `WitnetData.ErrorCodes.NoReveals`"
     );
     Assert.equal(
       uint(errorCode0x51),
-      uint(WitnetTypes.ErrorCodes.InsufficientConsensus),
-      "Error code #0x51 should be `WitnetTypes.ErrorCodes.InsufficientConsensus`"
+      uint(WitnetData.ErrorCodes.InsufficientConsensus),
+      "Error code #0x51 should be `WitnetData.ErrorCodes.InsufficientConsensus`"
     );
     Assert.equal(
       uint(errorCode0x52),
-      uint(WitnetTypes.ErrorCodes.InsufficientCommits),
-      "Error code #0x52 should be `WitnetTypes.ErrorCodes.InsufficientCommits`"
+      uint(WitnetData.ErrorCodes.InsufficientCommits),
+      "Error code #0x52 should be `WitnetData.ErrorCodes.InsufficientCommits`"
     );
     Assert.equal(
       uint(errorCode0x53),
-      uint(WitnetTypes.ErrorCodes.TallyExecution),
-      "Error code #0x53 should be `WitnetTypes.ErrorCodes.TallyExecution`"
+      uint(WitnetData.ErrorCodes.TallyExecution),
+      "Error code #0x53 should be `WitnetData.ErrorCodes.TallyExecution`"
     );
     Assert.equal(
       uint(errorCode0x60),
-      uint(WitnetTypes.ErrorCodes.MalformedReveal),
-      "Error code #0x60 should be `WitnetTypes.ErrorCodes.MalformedReveal`"
+      uint(WitnetData.ErrorCodes.MalformedReveal),
+      "Error code #0x60 should be `WitnetData.ErrorCodes.MalformedReveal`"
     );
     Assert.equal(
       uint(errorCode0x70),
-      uint(WitnetTypes.ErrorCodes.ArrayIndexOutOfBounds),
-      "Error code #0x70 should be `WitnetTypes.ErrorCodes.ArrayIndexOutOfBounds`"
+      uint(WitnetData.ErrorCodes.ArrayIndexOutOfBounds),
+      "Error code #0x70 should be `WitnetData.ErrorCodes.ArrayIndexOutOfBounds`"
     );
     Assert.equal(
       uint(errorCode0x71),
-      uint(WitnetTypes.ErrorCodes.MapKeyNotFound),
-      "Error code #0x71 should be `WitnetTypes.ErrorCodes.MapKeyNotFound`"
+      uint(WitnetData.ErrorCodes.MapKeyNotFound),
+      "Error code #0x71 should be `WitnetData.ErrorCodes.MapKeyNotFound`"
     );
     Assert.equal(
       uint(errorCode0xE0),
-      uint(WitnetTypes.ErrorCodes.BridgeMalformedRequest),
-      "Error code #0xE0 should be `WitnetTypes.ErrorCodes.BridgeMalformedRequest`"
+      uint(WitnetData.ErrorCodes.BridgeMalformedRequest),
+      "Error code #0xE0 should be `WitnetData.ErrorCodes.BridgeMalformedRequest`"
     );
     Assert.equal(
       uint(errorCode0xE1),
-      uint(WitnetTypes.ErrorCodes.BridgePoorIncentives),
-      "Error code #0xE1 should be `WitnetTypes.ErrorCodes.BridgePoorIncentives`"
+      uint(WitnetData.ErrorCodes.BridgePoorIncentives),
+      "Error code #0xE1 should be `WitnetData.ErrorCodes.BridgePoorIncentives`"
     );
     Assert.equal(
       uint(errorCode0xE2),
-      uint(WitnetTypes.ErrorCodes.BridgeOversizedResult),
-      "Error code #0xE2 should be `WitnetTypes.ErrorCodes.BridgeOversizedResult`"
+      uint(WitnetData.ErrorCodes.BridgeOversizedResult),
+      "Error code #0xE2 should be `WitnetData.ErrorCodes.BridgeOversizedResult`"
     );
     Assert.equal(
       uint(errorCode0xFF),
-      uint(WitnetTypes.ErrorCodes.UnhandledIntercept),
-      "Error code #0xFF should be `WitnetTypes.ErrorCodes.UnhandledIntercept`"
+      uint(WitnetData.ErrorCodes.UnhandledIntercept),
+      "Error code #0xFF should be `WitnetData.ErrorCodes.UnhandledIntercept`"
     );
   }
 
@@ -199,57 +199,57 @@ contract WitnetTest {
     Assert.equal(
       errorMessage0x01,
       "Source script #2 was not a valid CBOR value",
-      "Error message for error code `0x01` (`WitnetTypes.ErrorCodes.SourceScriptNotCBOR`) should be properly formatted"
+      "Error message for error code `0x01` (`WitnetData.ErrorCodes.SourceScriptNotCBOR`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x02,
       "The CBOR value in script #3 was not an Array of calls",
-      "Error message for error code `0x02` (`WitnetTypes.ErrorCodes.SourceScriptNotArray`) should be properly formatted"
+      "Error message for error code `0x02` (`WitnetData.ErrorCodes.SourceScriptNotArray`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x03,
       "The CBOR value in script #4 was not a valid RADON script",
-      "Error message for error code `0x03` (`WitnetTypes.ErrorCodes.SourceScriptNotRADON`) should be properly formatted"
+      "Error message for error code `0x03` (`WitnetData.ErrorCodes.SourceScriptNotRADON`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x10,
       "The request contained too many sources (5)",
-      "Error message for error code `0x10` (`WitnetTypes.ErrorCodes.RequestTooManySources`) should be properly formatted"
+      "Error message for error code `0x10` (`WitnetData.ErrorCodes.RequestTooManySources`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x11,
       "Script #7 from the retrieval stage contained too many calls (8)",
-      "Error message for error code `0x11` (`WitnetTypes.ErrorCodes.ScriptTooManyCalls`) should be properly formatted"
+      "Error message for error code `0x11` (`WitnetData.ErrorCodes.ScriptTooManyCalls`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x20,
       "Operator code 0x0A found at call #9 in script #8 from aggregation stage is not supported",
-      "Error message for error code `0x20` (`WitnetTypes.ErrorCodes.UnsupportedOperator`) should be properly formatted"
+      "Error message for error code `0x20` (`WitnetData.ErrorCodes.UnsupportedOperator`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x30,
       "Source #8 could not be retrieved. Failed with HTTP error code: 321",
-      "Error message for error code `0x30` (`WitnetTypes.ErrorCodes.HTTP`) should be properly formatted"
+      "Error message for error code `0x30` (`WitnetData.ErrorCodes.HTTP`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x31,
       "Source #9 could not be retrieved because of a timeout",
-      "Error message for error code `0x31` (`WitnetTypes.ErrorCodes.HTTP`) should be properly formatted"
+      "Error message for error code `0x31` (`WitnetData.ErrorCodes.HTTP`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x40,
       "Underflow at operator code 0x0B found at call #10 in script #9 from tally stage",
-      "Error message for error code `0x40` (`WitnetTypes.ErrorCodes.Underflow`) should be properly formatted"
+      "Error message for error code `0x40` (`WitnetData.ErrorCodes.Underflow`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x41,
       "Overflow at operator code 0x0C found at call #11 in script #10 from retrieval stage",
-      "Error message for error code `0x41` (`WitnetTypes.ErrorCodes.Overflow`) should be properly formatted"
+      "Error message for error code `0x41` (`WitnetData.ErrorCodes.Overflow`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0x42,
       "Division by zero at operator code 0x0D found at call #12 in script #11 from aggregation stage",
-      "Error message for error code `0x42` (`WitnetTypes.ErrorCodes.DivisionByZero`) should be properly formatted"
+      "Error message for error code `0x42` (`WitnetData.ErrorCodes.DivisionByZero`) should be properly formatted"
     );
     Assert.equal(
       errorMessage0xFF,

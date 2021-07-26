@@ -11,9 +11,9 @@ import "../../contracts/UsingWitnet.sol";
  * @author Witnet Foundation
  */
 contract UsingWitnetTestHelper is UsingWitnet {
-  using Witnet for WitnetTypes.Result;
+  using Witnet for WitnetData.Result;
 
-  WitnetTypes.Result public result;
+  WitnetData.Result public result;
 
   constructor (address _wrbAddress) UsingWitnet(_wrbAddress) { }
 
@@ -25,7 +25,7 @@ contract UsingWitnetTestHelper is UsingWitnet {
     witnetUpgradeRequest(_id);
   }
 
-  function _witnetReadResult(uint256 _requestId) external returns (WitnetTypes.Result memory) {
+  function _witnetReadResult(uint256 _requestId) external returns (WitnetData.Result memory) {
     result = witnetReadResult(_requestId);
     return result;
   }

@@ -46,7 +46,7 @@ abstract contract UsingWitnet {
    * @param _id The unique identifier of a previously posted data request.
    * @return The result of the DR
   **/
-  function witnetDestroyResult(uint256 _id) internal returns (WitnetTypes.Result memory) {
+  function witnetDestroyResult(uint256 _id) internal returns (WitnetData.Result memory) {
     return Witnet.resultFromCborBytes(witnet.destroyResult(_id));
   }
 
@@ -73,7 +73,7 @@ abstract contract UsingWitnet {
    * @param _id The unique identifier of a request that was posted to Witnet.
    * @return The result of the request as an instance of `Result`.
   **/
-  function witnetReadResult(uint256 _id) internal view returns (WitnetTypes.Result memory) {
+  function witnetReadResult(uint256 _id) internal view returns (WitnetData.Result memory) {
     return Witnet.resultFromCborBytes(witnet.readResult(_id));
   } 
 

@@ -95,7 +95,7 @@ contract WitnetRequestBoard
         external view
         virtual
         wasPosted(id)
-        returns (WitnetTypes.DataRequest memory)
+        returns (WitnetData.Request memory)
     {
         return __checkDr(id);
     }
@@ -109,14 +109,14 @@ contract WitnetRequestBoard
         wasPosted(id)
         returns (bytes memory _bytecode)
     {
-        WitnetTypes.DataRequest storage _dr = __dataRequest(id);
+        WitnetData.Request storage _dr = __dataRequest(id);
         if (_dr.addr != address(0)) {
             // if DR's request contract address is not zero,
             // we assume the DR has not been destroyed, so
             // DR's bytecode can still be fetched:
             _bytecode = WitnetRequest(_dr.addr).bytecode();
             require(
-                WitnetTypes.computeDataRequestCodehash(_bytecode) == _dr.codehash,
+                WitnetData.computeDataRequestCodehash(_bytecode) == _dr.codehash,
                 "WitnetRequestBoard: bytecode changed after posting"
             );
         } 
@@ -235,7 +235,7 @@ contract WitnetRequestBoard
 
         _dr.addr = requestAddr;
         _dr.requestor = msg.sender;
-        _dr.codehash = WitnetTypes.computeDataRequestCodehash(
+        _dr.codehash = WitnetData.computeDataRequestCodehash(
             WitnetRequest(requestAddr).bytecode()
         );
         _dr.gasprice = tx.gasprice;
@@ -278,7 +278,7 @@ contract WitnetRequestBoard
         virtual override        
         wasPosted(id)        
     {
-        WitnetTypes.DataRequest storage _dr = __dataRequest(id);
+        WitnetData.Request storage _dr = __dataRequest(id);
         require(_dr.txhash == 0, "WitnetRequestBoard: already solved");
 
         uint256 _newReward = _dr.reward + msg.value;
@@ -310,7 +310,7 @@ contract WitnetRequestBoard
             // DR's bytecode can still be fetched:
             bytes memory _bytecode = WitnetRequest(_dr.addr).bytecode();
             require(
-                WitnetTypes.computeDataRequestCodehash(_bytecode) == _dr.codehash,
+                WitnetData.computeDataRequestCodehash(_bytecode) == _dr.codehash,
                 "WitnetRequestBoard: bytecode changed after posting"
             );
         }        

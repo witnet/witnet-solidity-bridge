@@ -22,7 +22,7 @@ contract WitnetRequest {
     }
 }
 
-library WitnetTypes {
+library WitnetData {
 
     /// @notice Witnet lambda function that computes the hash of a CBOR-encoded RADON script.
     /// @param _bytecode CBOR-encoded RADON.
