@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.6;
 
-import "./utils/Upgradable.sol";
+import "../utils/Upgradable.sol";
 
 contract WitnetProxy {
   Upgradable public delegate;

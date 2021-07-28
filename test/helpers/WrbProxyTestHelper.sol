@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.6;
 
-import "../../contracts/WitnetBoard.sol";
-import "../../contracts/WitnetProxy.sol";
+import "../../contracts/impls/WitnetBoard.sol";
+import "../../contracts/impls/WitnetProxy.sol";
 
 /**
  * @title Test Helper for the WitnetRequestBoardProxy contract

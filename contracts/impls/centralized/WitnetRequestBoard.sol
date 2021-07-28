@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.6;
 
-import "../../WitnetBoard.sol";
+import "../WitnetBoard.sol";
 import "../../data/WitnetBoardDataACLs.sol";
 import "../../interfaces/WitnetRequestBoardInterface.sol";
 import "../../utils/Destructible.sol";
