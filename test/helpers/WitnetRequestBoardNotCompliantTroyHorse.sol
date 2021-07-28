@@ -35,7 +35,7 @@ contract WitnetRequestBoardNotCompliantTroyHorse is Initializable {
   }
 
   function initialize(bytes calldata) external override onlyOwner {
-    emit Initialized(msg.sender, __base, __codehash, "WitnetRequestBoardNotCompliantTroyHorse");
+    emit Initialized(msg.sender, __base, __codehash, "non-compliant-troy-horse");
   }
 
   function isUpgradableFrom(address) external pure returns (bool) {

@@ -1,3 +1,4 @@
+const packageJson = require("../package.json")
 const {
   BN,
   expectEvent,
@@ -30,7 +31,7 @@ contract("WitnetRequestBoard", ([
   other,
 ]) => {
   beforeEach(async () => {
-    this.WitnetRequestBoard = await WRB.new(true, { from: owner })
+    this.WitnetRequestBoard = await WRB.new(true, web3.utils.fromAscii(packageJson.version), { from: owner })
     await this.WitnetRequestBoard.initialize(
       web3.eth.abi.encodeParameter("address[]",
         [owner, committeeMember]),

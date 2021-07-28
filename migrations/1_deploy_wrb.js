@@ -1,4 +1,5 @@
 const addresses = require("./addresses.json")
+const packageJson = require("../package.json")
 const WitnetProxy = artifacts.require("WitnetProxy")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
@@ -39,7 +40,7 @@ module.exports = async function (deployer, network, accounts) {
   }
   if (deployWRB) {
     console.log(`> Migrating new WitnetRequestBoard instance into ${network} network...`)
-    await deployer.deploy(WitnetRequestBoard, true)
+    await deployer.deploy(WitnetRequestBoard, true, web3.utils.fromAscii(packageJson.version))
   }
   if (upgradeProxy) {
     const proxy = await WitnetProxy.deployed()
@@ -64,11 +65,14 @@ module.exports = async function (deployer, network, accounts) {
       console.log(`  >> WRB owner addr:\t${await wrb.owner.call()}`)
       console.log(`  >> WRB address:\t${await proxy.delegate.call()}`)
       console.log(`  >> WRB codehash:\t${await wrb.codehash.call()}`)
-      console.log(`  >> WRB version tag:\t${await wrb.version.call()}`)
+      console.log(`  >> WRB version tag:\t${web3.utils.hexToString(await wrb.version.call())}`)
     } else {
       console.log(`  >> WRB addresses:\t${oldAddr} => ${await proxy.delegate.call()}`)
       console.log(`  >> WRB codehashes:\t${oldCodehash} => ${await wrb.codehash.call()}`)
-      console.log(`  >> WRB version tags:\t${oldVersion} => ${await wrb.version.call()}`)
+      console.log(
+        `  >> WRB version tags:\t'${web3.utils.hexToString(oldVersion)}'`,
+        `=> '${web3.utils.hexToString(await wrb.version.call())}'`
+      )
     }
     console.log(`  >> WRB is upgradable:\t${await wrb.isUpgradable.call()}`)
     console.log()

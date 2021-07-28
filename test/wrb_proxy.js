@@ -1,10 +1,11 @@
 const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
-const RequestContract = artifacts.require("WitnetRequest")
-const TroyHorse = artifacts.require("WitnetRequestBoardNotCompliantTroyHorse")
+
+const WitnetRequest = artifacts.require("WitnetRequest")
 const Witnet = artifacts.require("Witnet")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
 const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
+const TroyHorse = artifacts.require("WitnetRequestBoardNotCompliantTroyHorse")
 
 contract("Witnet Requests Board Proxy", accounts => {
   describe("Witnet Requests Board Proxy test suite", () => {
@@ -40,7 +41,7 @@ contract("Witnet Requests Board Proxy", accounts => {
     it("should post a data request and update the requestsCount meter", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
-      const request = await RequestContract.new(drBytes)
+      const request = await WitnetRequest.new(drBytes)
 
       // Post the data request through the Proxy
       const tx1 = wrb.postDataRequest(request.address, {
@@ -97,7 +98,7 @@ contract("Witnet Requests Board Proxy", accounts => {
     it("should upgrade proxy to compliant new delegate, if called from owner address", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
-      const request = await RequestContract.new(drBytes)
+      const request = await WitnetRequest.new(drBytes)
 
       // Post the data request through the Proxy
       const tx1 = wrb.postDataRequest(request.address, {
@@ -135,7 +136,7 @@ contract("Witnet Requests Board Proxy", accounts => {
     it("should post a data request to new WRB and keep previous data request routes", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
-      const request = await RequestContract.new(drBytes)
+      const request = await WitnetRequest.new(drBytes)
 
       // The id of the data request
       const id2 = await wrb.postDataRequest.call(request.address, {
@@ -159,7 +160,7 @@ contract("Witnet Requests Board Proxy", accounts => {
     it("should post a data request to WRB and read the result", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
-      const request = await RequestContract.new(drBytes)
+      const request = await WitnetRequest.new(drBytes)
 
       // The id of the data request with result "hello"
       const id2 = await wrb.postDataRequest.call(request.address, {

@@ -16,7 +16,9 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
 
   address public witnet;
 
-  constructor (address[] memory _committee, bool _upgradable) WitnetRequestBoard(_upgradable) {
+  constructor (address[] memory _committee, bool _upgradable)
+    WitnetRequestBoard(_upgradable, "WitnetRequestBoardTestHelper")
+  {
     witnet = msg.sender;
     setReporters(_committee);
   }

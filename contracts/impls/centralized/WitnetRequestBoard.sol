@@ -23,8 +23,14 @@ contract WitnetRequestBoard
         WitnetBoardDataACLs
 {
     uint256 internal constant __ESTIMATED_REPORT_RESULT_GAS = 102496;
+    bytes32 internal immutable __version;
 
-    constructor(bool _isUpgradable) Upgradable(_isUpgradable) {}
+    constructor(bool _isUpgradable, bytes32 _versionTag)
+        Upgradable(_isUpgradable)
+    {
+        __version = _versionTag;
+    }
+
 
     // ================================================================================================================
     // --- Overrides 'Destructible' -----------------------------------------------------------------------------------
@@ -75,8 +81,8 @@ contract WitnetRequestBoard
     }
 
     /// @dev Retrieves named version of current implementation.
-    function version() virtual public pure override returns (string memory) {
-        return "WitnetRequestBoard-Centralized-v0.3.1.3";
+    function version() public view override returns (bytes32) {
+        return __version;
     }
 
 

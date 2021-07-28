@@ -12,6 +12,6 @@ interface Initializable {
         address indexed from,
         address indexed baseAddr,
         bytes32 indexed baseCodehash,
-        string versionTag
+        bytes32 versionTag
     );
 }
