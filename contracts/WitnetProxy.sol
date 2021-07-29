@@ -107,4 +107,12 @@ contract WitnetProxy {
       revert ("WitnetProxy: not compliant");
     }
   }
+
+  /// @dev Complying with EIP-1967, retrieves storage struct containing proxy's current implementation address.
+  function __proxySlot() private pure returns (WitnetProxyData storage _slot) {
+    assembly {
+      // bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
+      _slot.slot := 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc
+    }
+  }
 }
