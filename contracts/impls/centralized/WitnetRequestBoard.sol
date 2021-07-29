@@ -207,19 +207,19 @@ contract WitnetRequestBoard
     }
 
     /// @dev Retrieves result of previously posted DR, and removes it from storage.
-    /// @param id The unique identifier of a previously posted data request.
+    /// @param _id The unique identifier of a previously posted data request.
     /// @return _result The CBOR-encoded result of the DR.
-    function destroyResult(uint256 id)
+    function destroyResult(uint256 _id)
         external
         virtual override
         returns (bytes memory _result)
     {
-        SWitnetBoardDataRecord storage _record = __data().records[id];
+        SWitnetBoardDataRecord storage _record = __data().records[_id];
         require(msg.sender == _record.request.requestor, "WitnetRequestBoard: only actual requestor");
         require(_record.request.txhash != 0, "WitnetRequestBoard: not yet solved");
         _result = _record.result;
-        delete __data().records[id];
-        emit DestroyedRequest(id, msg.sender);
+        delete __data().records[_id];
+        emit DestroyedResult(_id, msg.sender);
     }
 
     /// @dev Posts a data request into the WRB in expectation that it will be relayed 

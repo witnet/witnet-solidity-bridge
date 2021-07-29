@@ -6,7 +6,7 @@ module.exports = function (deployer, network) {
   if (network in addresses && addresses[network].Witnet) {
     Witnet.address = addresses[network].Witnet
   } else {
-    console.log(`> Migrating Witnet libraries into ${network} network...`)
+    console.log(`> Migrating deployable Witnet libraries into "${network}" network...`)
     const CBOR = artifacts.require("CBOR")
     deployer.deploy(CBOR).then(function () {
       deployer.link(CBOR, Witnet)

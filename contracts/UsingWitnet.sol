@@ -34,7 +34,7 @@ abstract contract UsingWitnet {
    * @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
    * parties) before this method returns `true`.
    * @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
-   * @return A boolean telling if the request has been already resolved or not.
+   * @return A boolean telling if the request has been already resolved or not. Returns `false` if called after destroying the result (i.e. `destroyResult(uint256 _id).
   **/
   function witnetCheckRequestResolved(uint256 _id) internal view returns (bool) {
     // If the result of the data request in Witnet is not the default, then it means that it has been reported as resolved.

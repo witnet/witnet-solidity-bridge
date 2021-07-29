@@ -2,8 +2,15 @@
 
 pragma solidity 0.8.6;
 
-import "../utils/Upgradable.sol";
+import "./utils/Upgradable.sol";
 
+/** @title WitnetProxy: upgradable delegate-proxy contract that routes Witnet data requests coming from a 
+ * `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
+ *
+ * https://github.com/witnet/witnet-ethereum-bridge/tree/0.3.x
+ *
+ * Written in 2021 by the Witnet Foundation.
+ **/
 contract WitnetProxy {
   Upgradable public delegate;
 
