@@ -28,5 +28,6 @@ abstract contract WitnetBoardDataACLs is WitnetBoardData {
     }
   }
   
-  bytes32 internal constant WITNET_BOARD_ACLS_SLOTHASH = "WitnetBoard.ACLs";
+  bytes32 internal constant WITNET_BOARD_ACLS_SLOTHASH = /* keccak256("io.witnet.board.data.acls") */
+    0xcd72f56a6985e636b405ff061ec7e64e5428b269bdf2efabdd134b36b111d605;
 }
