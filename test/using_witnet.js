@@ -10,6 +10,15 @@ const Witnet = artifacts.require("Witnet")
 const truffleAssert = require("truffle-assertions")
 
 contract("UsingWitnet", accounts => {
+  it("Fails if null address is passed in construction", async () => {
+    const witnet = Witnet.deployed()
+    await UsingWitnetTestHelper.link(Witnet, witnet.address)
+    await expectRevert(
+      UsingWitnetTestHelper.new("0x0000000000000000000000000000000000000000"),
+      "null contract"
+    )
+  })
+
   describe("UsingWitnet \"happy path\" test case. " +
     "This covers pretty much all the life cycle of a Witnet request.", () => {
     const requestHex = "0x01"

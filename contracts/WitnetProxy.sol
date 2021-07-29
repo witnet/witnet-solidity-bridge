@@ -2,8 +2,15 @@
 
 pragma solidity 0.8.6;
 
-import "../utils/Upgradable.sol";
+import "./utils/Upgradable.sol";
 
+/** @title WitnetProxy: upgradable delegate-proxy contract that routes Witnet data requests coming from a 
+ * `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
+ *
+ * https://github.com/witnet/witnet-ethereum-bridge/tree/0.3.x
+ *
+ * Written in 2021 by the Witnet Foundation.
+ **/
 contract WitnetProxy {
   Upgradable public delegate;
 
@@ -16,10 +23,11 @@ contract WitnetProxy {
   }
 
   /// @dev Payable fallback accepts delegating calls to payable functions.  
-  fallback() external payable { /* solhint-disable no-complex-fallback */
+  // solhint-disable-next-line no-complex-fallback
+  fallback() external payable {
     address _delegate = address(delegate);
 
-    assembly { /* solhint-disable avoid-low-level-calls */
+    assembly {
       // Gas optimized delegate call to 'delegate' contract.
       // Note: `msg.data`, `msg.sender` and `msg.value` will be passed over 
       //       to actual implementation of `msg.sig` within `delegate` contract.
@@ -62,6 +70,7 @@ contract WitnetProxy {
       }
 
       // Assert whether current implementation allows `msg.sender` to upgrade the proxy:
+      // solhint-disable-next-line avoid-low-level-calls
       (bool _wasCalled, bytes memory _result) = address(delegate).delegatecall(
         abi.encodeWithSignature(
           "isUpgradableFrom(address)",
@@ -73,6 +82,7 @@ contract WitnetProxy {
     }
 
     // Initialize new implementation within proxy-context storage:
+    // solhint-disable-next-line avoid-low-level-calls
     (bool _wasInitialized,) = _newDelegate.delegatecall(
       abi.encodeWithSignature(
         "initialize(bytes)",

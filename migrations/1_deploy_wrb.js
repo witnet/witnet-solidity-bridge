@@ -34,12 +34,12 @@ module.exports = async function (deployer, network, accounts) {
     }
   }
   if (!WitnetProxy.isDeployed() || isNullAddress(WitnetProxy.address)) {
-    console.log(`> Migrating new WitnetProxy instance into '${network}' network...`)
+    console.log(`> Migrating new WitnetProxy instance into "${network}" network...`)
     await deployer.deploy(WitnetProxy)
     upgradeProxy = true
   }
   if (deployWRB) {
-    console.log(`> Migrating new WitnetRequestBoard instance into ${network} network...`)
+    console.log(`> Migrating new WitnetRequestBoard instance into "${network}" network...`)
     await deployer.deploy(WitnetRequestBoard, true, web3.utils.fromAscii(packageJson.version))
   }
   if (upgradeProxy) {

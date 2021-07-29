@@ -239,7 +239,7 @@ function decodeWitnetLogs (logs, index) {
         },
       ],
       logs[index].data,
-      logs[index].topcis
+      logs[index].topics
     )
   }
 }

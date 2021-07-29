@@ -5,7 +5,7 @@ coverage.json
 contracts/flattened
 Flattened*.sol
 
-.env
+.env*
 .idea
 .vscode
 
