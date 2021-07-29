@@ -1,7 +1,7 @@
 const addresses = require("./addresses.json")
 const packageJson = require("../package.json")
 const WitnetProxy = artifacts.require("WitnetProxy")
-const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
+const WitnetRequestBoard = artifacts.require("WitnetRequestBoardV03")
 
 module.exports = async function (deployer, network, accounts) {
   network = network.split("-")[0]

@@ -1,7 +1,7 @@
 const packageJson = require("../package.json")
 const { expectRevert } = require("@openzeppelin/test-helpers")
 
-const WRB = artifacts.require("WitnetRequestBoard")
+const WRB = artifacts.require("WitnetRequestBoardV03")
 const WRBProxy = artifacts.require("WitnetProxy")
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
 const WitnetRequest = artifacts.require("WitnetRequest")

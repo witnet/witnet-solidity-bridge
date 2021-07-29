@@ -15,7 +15,7 @@ import "../../utils/Upgradable.sol";
  * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
-contract WitnetRequestBoard
+contract WitnetRequestBoardV03
     is 
         Destructible,
         Upgradable, 
@@ -25,8 +25,8 @@ contract WitnetRequestBoard
     uint256 internal constant __ESTIMATED_REPORT_RESULT_GAS = 102496;
     bytes32 internal immutable __version;
 
-    constructor(bool _isUpgradable, bytes32 _versionTag)
-        Upgradable(_isUpgradable)
+    constructor(bool _upgradable, bytes32 _versionTag)
+        Upgradable(_upgradable)
     {
         __version = _versionTag;
     }
@@ -83,8 +83,10 @@ contract WitnetRequestBoard
     /// @dev Gets immutable "heritage blood line" (ie. genotype) as a Proxiable, and eventually Upgradable, contract.
     /// @dev Should fail when trying to upgrade this contract to another one with a different `proxiableUUID()` value. 
     function proxiableUUID() external pure override returns (bytes32) {
-        return /* keccak256("io.witnet.proxiable.WitnetRequestBoard") */
-            0x9935666da8312563fc25fd916bc0cadc34596af55d78a55e649283f7a0f3fdb2;
+        return (
+            /* keccak256("io.witnet.proxiable.WitnetRequestBoard") */
+            0x9935666da8312563fc25fd916bc0cadc34596af55d78a55e649283f7a0f3fdb2
+        );
     }
 
     /// @dev Retrieves named version of current implementation.
@@ -100,30 +102,29 @@ contract WitnetRequestBoard
     function owner() external view returns (address) {
         return __data().owner;
     }
-        
 
     /// @dev Retrieves the whole DR post record from the WRB.
-    /// @param id The unique identifier of a previously posted data request.
+    /// @param _id The unique identifier of a previously posted data request.
     /// @return The DR record. Fails if DR current bytecode differs from the one it had when posted.
-    function readDr(uint256 id)
+    function readDr(uint256 _id)
         external view
         virtual
-        wasPosted(id)
+        wasPosted(_id)
         returns (WitnetData.Request memory)
     {
-        return __checkDr(id);
+        return __checkDr(_id);
     }
     
     /// @dev Retrieves RADON bytecode of a previously posted DR.
-    /// @param id The unique identifier of the previously posted DR.
+    /// @param _id The unique identifier of the previously posted DR.
     /// @return _bytecode The RADON bytecode. Fails if changed after being posted. Empty if the DR was solved and destroyed.
-    function readDataRequest(uint256 id)
+    function readDataRequest(uint256 _id)
         external view
         virtual
-        wasPosted(id)
+        wasPosted(_id)
         returns (bytes memory _bytecode)
     {
-        WitnetData.Request storage _dr = __dataRequest(id);
+        WitnetData.Request storage _dr = __dataRequest(_id);
         if (_dr.addr != address(0)) {
             // if DR's request contract address is not zero,
             // we assume the DR has not been destroyed, so
@@ -137,42 +138,42 @@ contract WitnetRequestBoard
     }
 
     /// @dev Retrieves the gas price set for a previously posted DR.
-    /// @param id The unique identifier of a previously posted DR.
+    /// @param _id The unique identifier of a previously posted DR.
     /// @return The latest gas price set by either the DR requestor, or upgrader.
-    function readGasPrice(uint256 id)
+    function readGasPrice(uint256 _id)
         external view
         virtual
-        wasPosted(id)
+        wasPosted(_id)
         returns (uint256)
     {
-        return __dataRequest(id).gasprice;
+        return __dataRequest(_id).gasprice;
     }
 
     /// @dev Reports the result of a data request solved by Witnet network.
-    /// @param id The unique identifier of the data request.
-    /// @param txhash Hash of the solving tally transaction in Witnet.
-    /// @param result The result itself as bytes.
+    /// @param _id The unique identifier of the data request.
+    /// @param _txhash Hash of the solving tally transaction in Witnet.
+    /// @param _result The result itself as bytes.
     function reportResult(
-            uint256 id,
-            uint256 txhash,
-            bytes calldata result
+            uint256 _id,
+            uint256 _txhash,
+            bytes calldata _result
         )
         external
         virtual
         onlyReporters
-        notDestroyed(id)
-        resultNotYetReported(id)
+        notDestroyed(_id)
+        resultNotYetReported(_id)
     {
-        require(txhash != 0, "WitnetRequestBoard: Witnet tally tx hash cannot be zero");
+        require(_txhash != 0, "WitnetRequestBoard: Witnet tally tx hash cannot be zero");
         // Ensures the result byes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
-        require(result.length != 0, "WitnetRequestBoard: result cannot be empty");
+        require(_result.length != 0, "WitnetRequestBoard: result cannot be empty");
 
-        SWitnetBoardDataRecord storage _record = __data().records[id];
-        _record.request.txhash = txhash;
-        _record.result = result;
+        SWitnetBoardDataRecord storage _record = __data().records[_id];
+        _record.request.txhash = _txhash;
+        _record.result = _result;
 
-        emit PostedResult(id, msg.sender);
+        emit PostedResult(_id, msg.sender);
         payable(msg.sender).transfer(_record.request.reward);
     }
     
@@ -186,14 +187,14 @@ contract WitnetRequestBoard
     }
 
     /// @dev Adds given addresses to the active reporters control list.
-    /// @param reporters List of addresses to be added to the active reporters control list.
-    function setReporters(address[] memory reporters)
+    /// @param _reporters List of addresses to be added to the active reporters control list.
+    function setReporters(address[] memory _reporters)
         public
         virtual
         onlyOwner
     {
-        for (uint ix = 0; ix < reporters.length; ix ++) {
-            address _reporter = reporters[ix];
+        for (uint ix = 0; ix < _reporters.length; ix ++) {
+            address _reporter = _reporters[ix];
             __acls().isReporter_[_reporter] = true;
         }
     }
@@ -202,15 +203,16 @@ contract WitnetRequestBoard
     // ================================================================================================================
     // --- Implements 'WitnetRequestBoardInterface' -------------------------------------------------------------------
 
-    /// @dev Estimate the amount of reward we need to insert for a given gas price.
-    /// @param gasPrice The gas price for which we need to calculate the rewards.
-    /// @return The reward to be included for the given gas price.
-    function estimateGasCost(uint256 gasPrice)
+    /// @dev Estimate the minimal amount of reward we need to insert for a given gas price.
+    /// @param _gasPrice The gas price for which we need to calculate the rewards.
+    /// @return The minimal reward to be included for the given gas price.
+    function estimateGasCost(uint256 _gasPrice)
         external pure
         virtual override
         returns (uint256)
     {
-        return gasPrice * __ESTIMATED_REPORT_RESULT_GAS;
+        // TODO: consider renaming this method as `estimateMinimalReward(uint256 _gasPrice)`
+        return _gasPrice * __ESTIMATED_REPORT_RESULT_GAS;
     }
 
     /// @dev Retrieves result of previously posted DR, and removes it from storage.
@@ -231,14 +233,14 @@ contract WitnetRequestBoard
 
     /// @dev Posts a data request into the WRB in expectation that it will be relayed 
     /// @dev and resolved in Witnet with a total reward that equals to msg.value.
-    /// @param requestAddr The Witnet request contract address which provides actual RADON bytecode.
+    /// @param _requestAddr The Witnet request contract address which provides actual RADON bytecode.
     /// @return _id The unique identifier of the posted DR.
-    function postDataRequest(address requestAddr)
+    function postDataRequest(address _requestAddr)
         public payable
         virtual override
         returns (uint256 _id)
     {
-        require(requestAddr != address(0), "WitnetRequestBoard: null request");
+        require(_requestAddr != address(0), "WitnetRequestBoard: null request");
 
         // Checks the tally reward is covering gas cost
         uint256 minResultReward = tx.gasprice * __ESTIMATED_REPORT_RESULT_GAS;
@@ -247,10 +249,10 @@ contract WitnetRequestBoard
         _id = ++ __data().numRecords;
         WitnetData.Request storage _dr = __dataRequest(_id);
 
-        _dr.addr = requestAddr;
+        _dr.addr = _requestAddr;
         _dr.requestor = msg.sender;
         _dr.codehash = WitnetData.computeDataRequestCodehash(
-            WitnetRequest(requestAddr).bytecode()
+            WitnetRequest(_requestAddr).bytecode()
         );
         _dr.gasprice = tx.gasprice;
         _dr.reward = msg.value;
@@ -260,39 +262,39 @@ contract WitnetRequestBoard
     }
     
     /// @dev Retrieves Witnet tx hash of a previously solved DR.
-    /// @param id The unique identifier of a previously posted data request.
+    /// @param _id The unique identifier of a previously posted data request.
     /// @return The hash of the DataRequest transaction in Witnet.
-    function readDrTxHash(uint256 id)
+    function readDrTxHash(uint256 _id)
         external view        
         virtual override
-        wasPosted(id)
+        wasPosted(_id)
         returns (uint256)
     {
-        return __dataRequest(id).txhash;
-    }   
+        return __dataRequest(_id).txhash;
+    }
     
     /// @dev Retrieves the result (if already available) of one data request from the WRB.
-    /// @param id The unique identifier of the data request.
+    /// @param _id The unique identifier of the data request.
     /// @return The result of the DR.
-    function readResult(uint256 id)
+    function readResult(uint256 _id)
         external view
         virtual override        
-        wasPosted(id)
+        wasPosted(_id)
         returns (bytes memory)
     {
-        SWitnetBoardDataRecord storage _record = __data().records[id];
+        SWitnetBoardDataRecord storage _record = __data().records[_id];
         require(_record.request.txhash != 0, "WitnetRequestBoard: not yet solved");
         return _record.result;
     }    
 
     /// @dev Increments the reward of a data request by adding the transaction value to it.
-    /// @param id The unique identifier of a previously posted data request.
-    function upgradeDataRequest(uint256 id)
+    /// @param _id The unique identifier of a previously posted data request.
+    function upgradeDataRequest(uint256 _id)
         external payable
         virtual override        
-        wasPosted(id)        
+        wasPosted(_id)
     {
-        WitnetData.Request storage _dr = __dataRequest(id);
+        WitnetData.Request storage _dr = __dataRequest(_id);
         require(_dr.txhash == 0, "WitnetRequestBoard: already solved");
 
         uint256 _newReward = _dr.reward + msg.value;
@@ -314,10 +316,10 @@ contract WitnetRequestBoard
     // ================================================================================================================
     // --- Private functions ------------------------------------------------------------------------------------------
 
-    function __checkDr(uint256 id)
+    function __checkDr(uint256 _id)
         private view returns (WitnetData.Request storage _dr)
     {
-        _dr = __dataRequest(id);
+        _dr = __dataRequest(_id);
         if (_dr.addr != address(0)) {
             // if DR's request contract address is not zero,
             // we assume the DR has not been destroyed, so

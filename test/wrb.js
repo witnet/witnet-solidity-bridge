@@ -9,7 +9,7 @@ const {
 const { expect, assert } = require("chai")
 
 // Contracts
-const WRB = artifacts.require("WitnetRequestBoard")
+const WRB = artifacts.require("WitnetRequestBoardV03")
 const WitnetRequest = artifacts.require("WitnetRequest")
 const RequestTestHelper = artifacts.require("RequestTestHelper")
 
@@ -24,7 +24,7 @@ f1a13841877821864646c6173748218571903e8185b125c123168747470733a2f2f6170692e636f6
 const resultHex = "0x1a000702c8"
 const drTxHash = "0x0000000000000000000000000000000000000000000000000000000000000001"
 
-contract("WitnetRequestBoard", ([
+contract("WitnetRequestBoardV03", ([
   requestor,
   owner,
   committeeMember,

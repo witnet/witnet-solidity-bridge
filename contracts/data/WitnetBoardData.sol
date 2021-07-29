@@ -11,8 +11,8 @@ import "../libs/WitnetData.sol";
 abstract contract WitnetBoardData {  
 
   struct SWitnetBoardData {
-    address owner;
     address base;
+    address owner;
     mapping (uint => SWitnetBoardDataRecord) records;
     uint256 numRecords;
   }
@@ -57,6 +57,7 @@ abstract contract WitnetBoardData {
     return __data().records[id].request;
   }
   
-  bytes32 internal constant WITNET_BOARD_DATA_SLOTHASH = /* keccak256("io.witnet.board.data") */
+  bytes32 internal constant WITNET_BOARD_DATA_SLOTHASH =
+    /* keccak256("io.witnet.board.data") */
     0x641d5bbf2c42118a382e660df7903a98dce7b5bb834d3ba9beae1890b2a72054;
 }
