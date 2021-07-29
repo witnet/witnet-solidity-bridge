@@ -3,8 +3,9 @@
 pragma solidity >=0.6.0 <0.9.0;
 
 import "./Initializable.sol";
+import "./Proxiable.sol";
 
-abstract contract Upgradable is Initializable {
+abstract contract Upgradable is Initializable, Proxiable {
 
     address internal immutable __base;
     bytes32 internal immutable __codehash;

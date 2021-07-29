@@ -80,6 +80,13 @@ contract WitnetRequestBoard
         );
     }
 
+    /// @dev Gets immutable "heritage blood line" (ie. genotype) as a Proxiable, and eventually Upgradable, contract.
+    /// @dev Should fail when trying to upgrade this contract to another one with a different `proxiableUUID()` value. 
+    function proxiableUUID() external pure override returns (bytes32) {
+        return /* keccak256("io.witnet.proxiable.WitnetRequestBoard") */
+            0x9935666da8312563fc25fd916bc0cadc34596af55d78a55e649283f7a0f3fdb2;
+    }
+
     /// @dev Retrieves named version of current implementation.
     function version() public view override returns (bytes32) {
         return __version;
