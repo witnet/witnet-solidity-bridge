@@ -5,7 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./WitnetBoardData.sol";
 
 /**
- * @title Witnet Access Control Lists storage layout, for centralized request boards.
+ * @title Witnet Access Control Lists storage layout, for Witnet-trusted request boards.
  * @author Witnet Foundation
  */
 abstract contract WitnetBoardDataACLs is WitnetBoardData {  

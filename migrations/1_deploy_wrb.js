@@ -1,7 +1,7 @@
 const addresses = require("./addresses.json")
 const packageJson = require("../package.json")
 const WitnetProxy = artifacts.require("WitnetProxy")
-const WitnetRequestBoard = artifacts.require("WitnetRequestBoardV03")
+const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
 module.exports = async function (deployer, network, accounts) {
   network = network.split("-")[0]
@@ -19,9 +19,9 @@ module.exports = async function (deployer, network, accounts) {
         deployWRB = false
         if (WitnetProxy.isDeployed() && !isNullAddress(WitnetProxy.address)) {
           const proxy = await WitnetProxy.deployed()
-          const currentWRB = await proxy.delegate.call()
+          const currentWRB = await proxy.implementation.call()
           if (currentWRB.toLowerCase() !== WitnetRequestBoard.address.toLowerCase()) {
-            console.log("Info: Witnet proxy delegate mismatch!")
+            console.log("Info: Witnet proxy implementation mismatch!")
             console.log()
             console.log(`  >> WitnetRequestBoard address in file: ${WitnetRequestBoard.address}`)
             console.log(`  >> WitnetProxy actual WRB instance:    ${currentWRB}`)
@@ -45,7 +45,7 @@ module.exports = async function (deployer, network, accounts) {
   if (upgradeProxy) {
     const proxy = await WitnetProxy.deployed()
     const wrb = await WitnetRequestBoard.at(WitnetProxy.address)
-    const oldAddr = await proxy.delegate.call()
+    const oldAddr = await proxy.implementation.call()
     let oldCodehash
     let oldVersion
     if (!isNullAddress(oldAddr)) {
@@ -61,20 +61,21 @@ module.exports = async function (deployer, network, accounts) {
         [accounts[0]]
       )
     )
+    console.log(`  >> WRB owner address:\t${await wrb.owner.call()}`)
     if (isNullAddress(oldAddr)) {
-      console.log(`  >> WRB owner addr:\t${await wrb.owner.call()}`)
-      console.log(`  >> WRB address:\t${await proxy.delegate.call()}`)
+      console.log(`  >> WRB address:\t${await proxy.implementation.call()}`)
       console.log(`  >> WRB codehash:\t${await wrb.codehash.call()}`)
       console.log(`  >> WRB version tag:\t${web3.utils.hexToString(await wrb.version.call())}`)
     } else {
-      console.log(`  >> WRB addresses:\t${oldAddr} => ${await proxy.delegate.call()}`)
+      console.log(`  >> WRB addresses:\t${oldAddr} => ${await proxy.implementation.call()}`)
       console.log(`  >> WRB codehashes:\t${oldCodehash} => ${await wrb.codehash.call()}`)
       console.log(
         `  >> WRB version tags:\t'${web3.utils.hexToString(oldVersion)}'`,
         `=> '${web3.utils.hexToString(await wrb.version.call())}'`
       )
-    }
+    }    
     console.log(`  >> WRB is upgradable:\t${await wrb.isUpgradable.call()}`)
+    console.log(`  >> WRB proxiableUUID:\t${await wrb.proxiableUUID.call()}`)
     console.log()
   }
 }

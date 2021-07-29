@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.6;
 
-import "../../contracts/impls/centralized/WitnetRequestBoardV03.sol";
+import "../../contracts/WitnetRequestBoard.sol";
 
 /**
  * @title Witnet Requests Board Version 1
@@ -12,12 +12,12 @@ import "../../contracts/impls/centralized/WitnetRequestBoardV03.sol";
   * The contract has been created for testing purposes
  * @author Witnet Foundation
  */
-contract WitnetRequestBoardTestHelper is WitnetRequestBoardV03 {
+contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
 
   address public witnet;
 
   constructor (address[] memory _committee, bool _upgradable)
-    WitnetRequestBoardV03(_upgradable, "WitnetRequestBoardV03")
+    WitnetRequestBoard(_upgradable, "WitnetRequestBoardTestHelper")
   {
     witnet = msg.sender;
     setReporters(_committee);

@@ -1,6 +1,6 @@
 {
   "name": "witnet-ethereum-bridge",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Witnet Bridge for EVM-compatible blockchains",
   "main": "",
   "scripts": {
@@ -8,7 +8,11 @@
     "compile-flattened": "npx truffle compile --all --config flattened-config.js ",
     "console": "truffle console",
     "coverage": "solidity-coverage",
-    "flatten": " mkdir contracts/flattened/ 2>/dev/null; npx truffle-flattener contracts/*.sol > contracts/flattened/Flattened.sol",
+    "flatten": "yarn flatten:witnet",
+    "flatten:witnet": "yarn flatten:witnet:lib && yarn flatten:witnet:proxy && yarn flatten:witnet:board",
+    "flatten:witnet:lib": "npx truffle-flattener contracts/libs/Witnet.sol > contracts/flattened/FlattenedWitnet.sol",
+    "flatten:witnet:proxy": "npx truffle-flattener contracts/WitnetProxy.sol > contracts/flattened/FlattenedWitnetProxy.sol",
+    "flatten:witnet:board": "npx truffle-flattener contracts/WitnetRequestBoard.sol > contracts/flattened/FlattenedWitnetRequestBoard.sol",    
     "fmt:js": "eslint \"**/*.js\"",
     "fmt:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" && solhint \"test/**/*.sol\"",
     "fmt!:js": "eslint \"**/*.js\" --fix",

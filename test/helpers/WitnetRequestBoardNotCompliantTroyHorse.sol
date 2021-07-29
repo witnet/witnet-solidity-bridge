@@ -3,6 +3,7 @@
 pragma solidity 0.8.6;
 
 import "../../contracts/utils/Initializable.sol";
+import "../../contracts/utils/Proxiable.sol";
 
 /**
  * @title Witnet Requests Board Troy Horse 1
@@ -12,7 +13,7 @@ import "../../contracts/utils/Initializable.sol";
   * The contract has been created for testing purposes
  * @author Witnet Foundation
  */
-contract WitnetRequestBoardNotCompliantTroyHorse is Initializable {
+contract WitnetRequestBoardNotCompliantTroyHorse is Initializable, Proxiable {
   address internal immutable __base;
   bytes32 internal immutable __codehash;
   address internal immutable __owner;
@@ -40,6 +41,13 @@ contract WitnetRequestBoardNotCompliantTroyHorse is Initializable {
 
   function isUpgradableFrom(address) external pure returns (bool) {
     return true;
+  }
+
+  function proxiableUUID() external pure override returns (bytes32) {
+    return (
+      /* keccak256("io.witnet.proxiable.board") */
+  0x9969c6aff411c5e5f0807500693e8f819ce88529615cfa6cab569b24788a1018
+    );
   }
 
   /* On purpose: isUpgradable(bool) not to be implemented */
