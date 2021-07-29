@@ -16,6 +16,9 @@ contract WitnetProxy {
     address implementation;
   }
 
+  /// @notice Event emitted when a new DR is posted
+  event Upgraded(address indexed implementation);  
+
   /// @dev Constructor with no params as to ease eventual support of Singleton pattern (i.e. ERC-2470)
   constructor () {}
 
@@ -98,6 +101,7 @@ contract WitnetProxy {
 
     // If all checks and initialization pass, update implementation address:
     __proxySlot().implementation = _newImplementation;
+    emit Upgraded(_newImplementation);
 
     // Asserts new implementation complies w/ minimal implementation of Upgradable interface:
     try Upgradable(_newImplementation).isUpgradable() returns (bool _isUpgradable) {
