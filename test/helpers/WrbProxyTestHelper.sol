@@ -21,6 +21,6 @@ contract WrbProxyTestHelper is WitnetProxy {
   function upgradeWitnetRequestBoard(address _newWrb) external {
     address[] memory _reporters = new address[](1);
     _reporters[0] = msg.sender;
-    upgrade(_newWrb, abi.encode(_reporters));
+    upgradeTo(_newWrb, abi.encode(_reporters));
   }
 }

@@ -34,7 +34,7 @@ contract("UsingWitnet", accounts => {
         wrb = await WRB.at(proxy.address)
       }
       // notwithstanding, upgrade proxy on each iteration...
-      await proxy.upgrade(
+      await proxy.upgradeTo(
         // ...to new implementation instance:
         (await WRB.new(true, web3.utils.fromAscii(packageJson.version), { from: ownerAccount })).address,
         // ...resetting reporters ACL:
@@ -176,7 +176,7 @@ contract("UsingWitnet", accounts => {
         // initialize 'wrb' artifact,
         //   setting 'ownerAccount' as owner
         //   and 'reporterAccount' as authorized reporter:
-        await proxy.upgrade(
+        await proxy.upgradeTo(
           (await WRB.new(true, web3.utils.fromAscii(packageJson.version))).address,
           web3.eth.abi.encodeParameter("address[]", [reporterAccount]),
           { from: ownerAccount }

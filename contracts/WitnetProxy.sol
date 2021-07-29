@@ -61,7 +61,7 @@ contract WitnetProxy {
   /// @param _newImplementation New implementation address.
   /// @param _initData Raw data with which new implementation will be initialized.
   /// @return Returns whether new implementation would be further upgradable, or not.
-  function upgrade(address _newImplementation, bytes memory _initData)
+  function upgradeTo(address _newImplementation, bytes memory _initData)
     public returns (bool)
   {
     // New implementation cannot be null:
@@ -88,6 +88,10 @@ contract WitnetProxy {
       );
       require(_wasCalled, "WitnetProxy: not compliant");
       require(abi.decode(_result, (bool)), "WitnetProxy: not authorized");
+      require(
+        Upgradable(_oldImplementation).proxiableUUID() == Upgradable(_newImplementation).proxiableUUID(),
+        "WitnetProxy: proxiableUUIDs mismatch"
+      );
     }
 
     // Initialize new implementation within proxy-context storage:

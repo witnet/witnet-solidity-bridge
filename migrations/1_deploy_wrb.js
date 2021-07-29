@@ -54,7 +54,7 @@ module.exports = async function (deployer, network, accounts) {
     }
     console.log(`> Upgrading WitnetProxy instance at ${WitnetProxy.address}...`)
     console.log()
-    await proxy.upgrade(
+    await proxy.upgradeTo(
       WitnetRequestBoard.address,
       web3.eth.abi.encodeParameter(
         "address[]",
