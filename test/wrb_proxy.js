@@ -8,7 +8,7 @@ const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
 const TroyHorse = artifacts.require("WitnetRequestBoardNotCompliantTroyHorse")
 
 contract("Witnet Requests Board Proxy", accounts => {
-  describe("Witnet Requests Board Proxy test suite", () => {
+  describe("Witnet Requests Board Proxy test suite:", () => {
     const contractOwner = accounts[0]
     const requestSender = accounts[1]
 
@@ -62,32 +62,32 @@ contract("Witnet Requests Board Proxy", accounts => {
     it("fails if trying to upgrade to null contract", async () => {
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard("0x0000000000000000000000000000000000000000", { from: contractOwner }),
-        "null delegate"
+        "null implementation"
       )
     })
 
-    it("fails if trying to upgrade to same delegate instance from current delegate's owner", async () => {
+    it("fails if owner tries to upgrade to same implementation instance as current one", async () => {
       await truffleAssert.reverts(
-        proxy.upgradeWitnetRequestBoard(await proxy.delegate.call(), { from: contractOwner }),
+        proxy.upgradeWitnetRequestBoard(await proxy.implementation.call(), { from: contractOwner }),
         "nothing to upgrade"
       )
     })
 
-    it("fails if trying to upgrade to non-Initializable delegate from current delegate's owner", async () => {
+    it("fails if owner tries to upgrade to non-Initializable implementation", async () => {
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard(proxy.address, { from: contractOwner }),
         ""
       )
     })
 
-    it("fails if trying to upgrade to compliant new delegate, from non owner address", async () => {
+    it("fails if foreigner tries to upgrade to compliant new implementation", async () => {
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard(wrbInstance2.address, { from: requestSender }),
         "not authorized"
       )
     })
 
-    it("fails if trying to upgrade to not Upgradable-compliant from current delegate's owner", async () => {
+    it("fails if owner tries to upgrade to not Upgradable-compliant implementation", async () => {
       const troyHorse = await TroyHorse.new()
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard(troyHorse.address, { from: contractOwner }),
@@ -95,7 +95,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       )
     })
 
-    it("should upgrade proxy to compliant new delegate, if called from owner address", async () => {
+    it("should upgrade proxy to compliant new implementation, if called from owner address", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await WitnetRequest.new(drBytes)
@@ -116,17 +116,17 @@ contract("Witnet Requests Board Proxy", accounts => {
       await proxy.upgradeWitnetRequestBoard(wrbInstance2.address, { from: contractOwner })
 
       // The current wrb in the proxy should be equal to wrbInstance2
-      assert.equal(await proxy.delegate.call(), wrbInstance2.address)
+      assert.equal(await proxy.implementation.call(), wrbInstance2.address)
     })
 
-    it("fails if trying to re-initialize current implementation, from non owner address", async () => {
+    it("fails if foreigner tries to re-initialize current implementation", async () => {
       await truffleAssert.reverts(
         wrb.initialize(web3.eth.abi.encodeParameter("address[]", [requestSender]), { from: requestSender }),
         "only owner"
       )
     })
 
-    it("fails also if trying to re-initialize current implementation, even from owner address", async () => {
+    it("fails also if the owner tries to re-initialize current implementation", async () => {
       await truffleAssert.reverts(
         wrb.initialize(web3.eth.abi.encodeParameter("address[]", [requestSender]), { from: contractOwner }),
         "already initialized"
@@ -211,7 +211,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(bytecode, null)
     })
 
-    it("fails if trying to upgrade a non upgradable delegate", async () => {
+    it("fails if trying to upgrade a non upgradable implementation", async () => {
       // It should revert when trying to upgrade the wrb since wrbInstance3 is not upgradable
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard(wrbInstance1.address, { from: contractOwner }),

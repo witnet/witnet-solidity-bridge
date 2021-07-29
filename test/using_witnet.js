@@ -1,7 +1,7 @@
 const packageJson = require("../package.json")
 const { expectRevert } = require("@openzeppelin/test-helpers")
 
-const WRB = artifacts.require("WitnetRequestBoardV03")
+const WRB = artifacts.require("WitnetRequestBoard")
 const WRBProxy = artifacts.require("WitnetProxy")
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
 const WitnetRequest = artifacts.require("WitnetRequest")
@@ -11,7 +11,7 @@ const truffleAssert = require("truffle-assertions")
 
 contract("UsingWitnet", accounts => {
   describe("UsingWitnet \"happy path\" test case. " +
-    "This covers pretty much all the life cycle of a Witnet request.", () => {
+    "This covers pretty much all the life cycle of a Witnet request:", () => {
     const requestHex = "0x01"
     const resultHex = "0x1a002fefd8"
     const resultDecimal = 3141592
@@ -154,7 +154,7 @@ contract("UsingWitnet", accounts => {
     })
   })
 
-  describe("UsingWitnet \"happy path\" test case with a false result.", () => {
+  describe("UsingWitnet \"happy path\" test case with a false result:", () => {
     const requestHex = "0x02"
     const resultHex = "0xd82701"
     const drTxHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"

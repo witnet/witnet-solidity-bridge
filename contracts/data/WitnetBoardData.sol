@@ -47,6 +47,11 @@ abstract contract WitnetBoardData {
     _;
   }
 
+  /// @dev Gets admin/owner address.
+  function owner() public view returns (address) {
+    return __data().owner;
+  }
+
   function __data() internal pure returns (SWitnetBoardData storage _struct) {
     assembly {
       _struct.slot := WITNET_BOARD_DATA_SLOTHASH

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.6;
 
-import "../../contracts/impls/WitnetBoard.sol";
+import "../../contracts/impls/WitnetProxiableBoard.sol";
 import "../../contracts/WitnetProxy.sol";
 
 /**
@@ -15,7 +15,7 @@ contract WrbProxyTestHelper is WitnetProxy {
 
   constructor () {}
   function getWrbAddress() external view returns(address) {
-    return address(delegate);
+    return implementation();
   }
   
   function upgradeWitnetRequestBoard(address _newWrb) external {

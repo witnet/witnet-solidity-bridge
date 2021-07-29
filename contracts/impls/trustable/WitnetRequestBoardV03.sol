@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.6;
+pragma solidity >=0.7.0 <0.9.0;
+pragma experimental ABIEncoderV2;
 
-import "../WitnetBoard.sol";
+import "../WitnetUpgradableBoard.sol";
 import "../../data/WitnetBoardDataACLs.sol";
-import "../../interfaces/WitnetRequestBoardInterface.sol";
-import "../../utils/Destructible.sol";
-import "../../utils/Upgradable.sol";
 
 /**
  * @title Witnet Requests Board mocked
@@ -17,24 +15,19 @@ import "../../utils/Upgradable.sol";
  */
 contract WitnetRequestBoardV03
     is 
-        Destructible,
-        Upgradable, 
-        WitnetBoard, 
+        WitnetUpgradableBoard,
         WitnetBoardDataACLs
 {
     uint256 internal constant __ESTIMATED_REPORT_RESULT_GAS = 102496;
-    bytes32 internal immutable __version;
-
+    
     constructor(bool _upgradable, bytes32 _versionTag)
-        Upgradable(_upgradable)
-    {
-        __version = _versionTag;
-    }
-
+        WitnetUpgradableBoard(_upgradable, _versionTag)
+    {}
 
     // ================================================================================================================
     // --- Overrides 'Destructible' -----------------------------------------------------------------------------------
 
+    /// @dev Destroys current instance. Only callable by the owner.
     function destroy() external override onlyOwner {
         selfdestruct(payable(msg.sender));
     }
@@ -80,19 +73,9 @@ contract WitnetRequestBoardV03
         );
     }
 
-    /// @dev Retrieves named version of current implementation.
-    function version() public view override returns (bytes32) {
-        return __version;
-    }
-
 
     // ================================================================================================================
     // --- Utility functions not declared within an interface ---------------------------------------------------------
-
-    /// @dev Gets admin/owner address.
-    function owner() external view returns (address) {
-        return __data().owner;
-    }
 
     /// @dev Retrieves the whole DR post record from the WRB.
     /// @param _id The unique identifier of a previously posted data request.
