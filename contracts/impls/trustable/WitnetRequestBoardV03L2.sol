@@ -3,33 +3,32 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../WitnetRequestBoardDestructibleBase.sol";
+import "../WitnetRequestBoardUpgradableBase.sol";
 import "../../data/WitnetBoardDataACLs.sol";
 
 /**
- * @title Witnet Requests Board V03
+ * @title Witnet Requests Board V03 - Layer 2
  * @notice Contract to bridge requests to Witnet Decenetralized Oracle Network.
  * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
  * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
-contract WitnetRequestBoardV03
+contract WitnetRequestBoardV03L2
     is 
-        WitnetRequestBoardDestructibleBase,
+        WitnetRequestBoardUpgradableBase,
         WitnetBoardDataACLs
 {
     uint256 internal constant __ESTIMATED_REPORT_RESULT_GAS = 102496;
+    uint256 internal immutable __layer2GasPrice;
     
-    constructor(bool _upgradable, bytes32 _versionTag)
-        WitnetRequestBoardDestructibleBase(_upgradable, _versionTag)
-    {}
-
-    // ================================================================================================================
-    // --- Overrides 'Destructible' -----------------------------------------------------------------------------------
-
-    /// @dev Destroys current instance. Only callable by the owner.
-    function destroy() external override onlyOwner {
-        selfdestruct(payable(msg.sender));
+    constructor(
+            bool _upgradable,
+            bytes32 _versionTag,
+            uint256 _layer2GasPrice
+        )
+        WitnetRequestBoardUpgradableBase(_upgradable, _versionTag)
+    {
+        __layer2GasPrice = _layer2GasPrice;
     }
 
 
@@ -217,7 +216,7 @@ contract WitnetRequestBoardV03
         require(_requestAddr != address(0), "WitnetRequestBoard: null request");
 
         // Checks the tally reward is covering gas cost
-        uint256 minResultReward = tx.gasprice * __ESTIMATED_REPORT_RESULT_GAS;
+        uint256 minResultReward = __layer2GasPrice * __ESTIMATED_REPORT_RESULT_GAS;
         require(msg.value >= minResultReward, "WitnetRequestBoard: reward too low");
 
         _id = ++ __data().numRecords;
@@ -228,7 +227,7 @@ contract WitnetRequestBoardV03
         _dr.codehash = WitnetData.computeDataRequestCodehash(
             WitnetRequest(_requestAddr).bytecode()
         );
-        _dr.gasprice = tx.gasprice;
+        _dr.gasprice = __layer2GasPrice;
         _dr.reward = msg.value;
 
         // Let observers know that a new request has been posted
@@ -274,14 +273,14 @@ contract WitnetRequestBoardV03
         uint256 _newReward = _dr.reward + msg.value;
 
         // If gas price is increased, then check if new rewards cover gas costs
-        if (tx.gasprice > _dr.gasprice) {
+        if (__layer2GasPrice > _dr.gasprice) {
             // Checks the reward is covering gas cost
-            uint256 _minResultReward = tx.gasprice * __ESTIMATED_REPORT_RESULT_GAS;
+            uint256 _minResultReward = __layer2GasPrice * __ESTIMATED_REPORT_RESULT_GAS;
             require(
                 _newReward >= _minResultReward,
                 "WitnetRequestBoard: reward too low"
             );
-            _dr.gasprice = tx.gasprice;
+            _dr.gasprice = __layer2GasPrice;
         }
         _dr.reward = _newReward;
     }

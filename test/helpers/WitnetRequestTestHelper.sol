@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.7.0 <0.9.0;
-
-
 import "../../contracts/libs/WitnetData.sol";
-
 
 /**
  * @title The serialized form of a Witnet data request
  */
-contract RequestTestHelper is WitnetRequest {
+contract WitnetRequestTestHelper is WitnetRequest {
 
  /**
   * @dev A `WitnetRequest` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized

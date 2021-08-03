@@ -1,8 +1,11 @@
+const settings = require("../migrations/settings")
+
 const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
 
+const Witnet = artifacts.require(settings.artifacts.default.Witnet)
+
 const WitnetRequest = artifacts.require("WitnetRequest")
-const Witnet = artifacts.require("Witnet")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
 const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
 const TroyHorse = artifacts.require("WitnetRequestBoardNotCompliantTroyHorse")

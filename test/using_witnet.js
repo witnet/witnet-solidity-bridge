@@ -1,11 +1,13 @@
-const packageJson = require("../package.json")
+const settings = require("../migrations/settings")
+
 const { expectRevert } = require("@openzeppelin/test-helpers")
 
-const WRB = artifacts.require("WitnetRequestBoard")
-const WRBProxy = artifacts.require("WitnetProxy")
+const WRB = artifacts.require(settings.artifacts.default.WitnetRequestBoard)
+const WRBProxy = artifacts.require(settings.artifacts.default.WitnetProxy)
+const Witnet = artifacts.require(settings.artifacts.default.Witnet)
+
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
 const WitnetRequest = artifacts.require("WitnetRequest")
-const Witnet = artifacts.require("Witnet")
 
 const truffleAssert = require("truffle-assertions")
 
@@ -36,7 +38,11 @@ contract("UsingWitnet", accounts => {
       // notwithstanding, upgrade proxy on each iteration...
       await proxy.upgradeTo(
         // ...to new implementation instance:
-        (await WRB.new(true, web3.utils.fromAscii(packageJson.version), { from: ownerAccount })).address,
+        (await WRB.new(
+          ...settings.constructorParams.default.WitnetRequestBoard,
+          { from: ownerAccount }
+        )
+        ).address,
         // ...resetting reporters ACL:
         web3.eth.abi.encodeParameter("address[]", [reporterAccount]),
         // ...from owner account.
@@ -177,7 +183,10 @@ contract("UsingWitnet", accounts => {
         //   setting 'ownerAccount' as owner
         //   and 'reporterAccount' as authorized reporter:
         await proxy.upgradeTo(
-          (await WRB.new(true, web3.utils.fromAscii(packageJson.version))).address,
+          (await WRB.new(
+            ...settings.constructorParams.default.WitnetRequestBoard
+          )
+          ).address,
           web3.eth.abi.encodeParameter("address[]", [reporterAccount]),
           { from: ownerAccount }
         )

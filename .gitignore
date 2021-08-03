@@ -2,10 +2,9 @@ node_modules/
 build/
 coverage/
 coverage.json
-contracts/flattened
-Flattened*.sol
+flattened/**
 
-.env
+.env*
 .idea
 .vscode
 

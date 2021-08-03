@@ -2,14 +2,18 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./WitnetBoard.sol";
+import "../WitnetRequestBoard.sol";
 import "../utils/Proxiable.sol";
 
 /**
  * @title Witnet Board base contract, with a Proxiable touch.
  * @author Witnet Foundation
  **/
-abstract contract WitnetProxiableBoard is Proxiable, WitnetBoard {
+abstract contract WitnetRequestBoardProxiableBase
+    is
+        Proxiable,
+        WitnetRequestBoard
+{
     // ================================================================================================================
     // --- Overrides 'Proxiable' --------------------------------------------------------------------------------------
 

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.6;
+pragma solidity >=0.7.0 <0.9.0;
+pragma experimental ABIEncoderV2;
 
-import "../../contracts/WitnetRequestBoard.sol";
+import "../../contracts/impls/latest/WitnetRequestBoardLatest.sol";
 
 /**
  * @title Witnet Requests Board Version 1
@@ -12,12 +13,12 @@ import "../../contracts/WitnetRequestBoard.sol";
   * The contract has been created for testing purposes
  * @author Witnet Foundation
  */
-contract WitnetRequestBoardTestHelper is WitnetRequestBoard {
+contract WitnetRequestBoardTestHelper is WitnetRequestBoardLatest {
 
   address public witnet;
 
   constructor (address[] memory _committee, bool _upgradable)
-    WitnetRequestBoard(_upgradable, "WitnetRequestBoardTestHelper")
+    WitnetRequestBoardLatest(_upgradable, "WitnetRequestBoardTestHelper")
   {
     witnet = msg.sender;
     setReporters(_committee);

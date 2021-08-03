@@ -1,43 +1,11 @@
 // In order to load environment variables (e.g. API keys)
 require("dotenv").config()
+const statics = require("./migrations/settings")
 
 module.exports = {
-  networks: {
-    ropsten: {
-      network_id: 3,
-      host: "localhost",
-      port: 8543,
-    },
-    rinkeby: {
-      network_id: 4,
-      host: "localhost",
-      port: 8544,
-    },
-    goerli: {
-      network_id: 5,
-      host: "localhost",
-      port: 8545,
-    },
-    kovan: {
-      network_id: 42,
-      host: "localhost",
-      port: 8542,
-    },
-    "conflux.testnet": {
-      host: "localhost",
-      port: 8540,
-      network_id: 1,
-      gasPrice: 10,
-      skipDryRun: true,
-    },
-    "conflux.mainnet": {
-      host: "localhost",
-      port: 9540,
-      network_id: 1029,
-      gasPrice: 1,
-      skipDryRun: true,
-    },
-  },
+  build_directory: "./build/" + (process.env.WITNET_EVM_REALM || "evm") + "/",
+  migrations_directory: "./migrations/scripts/",
+  networks: statics.networks[process.env.WITNET_EVM_REALM || "default"],
   mocha: {
     reporter: "eth-gas-reporter",
     reporterOptions: {
@@ -52,19 +20,14 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.8.6",
+      version: statics.compilers[process.env.WITNET_EVM_REALM || "default"].version || "0.8.6",
       settings: {
         optimizer: {
           enabled: true,
           runs: 200,
         },
       },
+      evmVersion: statics.compilers[process.env.WITNET_EVM_REALM || "default"].evmVersion || "petersburg",
     },
-  },
-  plugins: [
-    "truffle-verify",
-  ],
-  api_keys: {
-    etherscan: process.env.ETHERSCAN_API_KEY,
   },
 }

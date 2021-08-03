@@ -2,19 +2,17 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./WitnetProxiableBoard.sol";
-import "../utils/Destructible.sol";
+import "./WitnetRequestBoardProxiableBase.sol";
 import "../utils/Upgradable.sol";
 
 /**
  * @title Witnet Board base contract, with an Upgradable (and Destructible) touch.
  * @author Witnet Foundation
  **/
-abstract contract WitnetUpgradableBoard
+abstract contract WitnetRequestBoardUpgradableBase
     is
-        WitnetProxiableBoard,        
-        Upgradable,
-        Destructible
+        WitnetRequestBoardProxiableBase,        
+        Upgradable
 {
     bytes32 internal immutable __version;
     constructor(

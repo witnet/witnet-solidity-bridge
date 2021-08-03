@@ -1,4 +1,5 @@
-const packageJson = require("../package.json")
+const settings = require("../migrations/settings")
+
 const {
   BN,
   expectEvent,
@@ -9,9 +10,10 @@ const {
 const { expect, assert } = require("chai")
 
 // Contracts
-const WRB = artifacts.require("WitnetRequestBoard")
+const WRB = artifacts.require(settings.artifacts.default.WitnetRequestBoard)
+
 const WitnetRequest = artifacts.require("WitnetRequest")
-const RequestTestHelper = artifacts.require("RequestTestHelper")
+const WitnetRequestTestHelper = artifacts.require("WitnetRequestTestHelper")
 
 // WitnetRequest definition
 const requestId = new BN(1)
@@ -31,7 +33,10 @@ contract("WitnetRequestBoard", ([
   other,
 ]) => {
   beforeEach(async () => {
-    this.WitnetRequestBoard = await WRB.new(true, web3.utils.fromAscii(packageJson.version), { from: owner })
+    this.WitnetRequestBoard = await WRB.new(
+      ...settings.constructorParams.default.WitnetRequestBoard,
+      { from: owner }
+    )
     await this.WitnetRequestBoard.initialize(
       web3.eth.abi.encodeParameter("address[]",
         [owner, committeeMember]),
@@ -336,7 +341,7 @@ contract("WitnetRequestBoard", ([
   describe("read data request result", async () => {
     let requestTestHelper
     beforeEach(async () => {
-      requestTestHelper = await RequestTestHelper.new(requestHex, { from: requestor })
+      requestTestHelper = await WitnetRequestTestHelper.new(requestHex, { from: requestor })
       // Post data request
       await this.WitnetRequestBoard.postDataRequest(requestTestHelper.address, {
         from: requestor,

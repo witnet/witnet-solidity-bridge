@@ -1,18 +1,25 @@
-const addresses = require("./addresses.json")
-const packageJson = require("../package.json")
-const WitnetProxy = artifacts.require("WitnetProxy")
-const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
+const realm = process.env.WITNET_EVM_REALM || "default"
+const addresses = require("../addresses")[realm]
+const settings = require("../settings")
+
+let WitnetProxy, WitnetRequestBoard
 
 module.exports = async function (deployer, network, accounts) {
-  network = network.split("-")[0]
+  try {
+    WitnetProxy = artifacts.require(settings.artifacts[realm].WitnetProxy || settings.artifacts.default.WitnetProxy)
+    WitnetRequestBoard = artifacts.require(
+      settings.artifacts[realm].WitnetRequestBoard || settings.artifacts[realm].WitnetRequestBoard
+    )
+  } catch {
+    console.log("Skipped: 'WitnetRequestBoard' artifact not found.")
+    return
+  }
 
   let deployWRB = true
   let upgradeProxy = true
 
+  network = network.split("-")[0]
   if (network in addresses) {
-    if (addresses[network].WitnetProxy) {
-      WitnetProxy.address = addresses[network].WitnetProxy
-    }
     if (addresses[network].WitnetRequestBoard) {
       WitnetRequestBoard.address = addresses[network].WitnetRequestBoard
       if (!isNullAddress(WitnetRequestBoard.address)) {
@@ -29,19 +36,23 @@ module.exports = async function (deployer, network, accounts) {
           } else {
             upgradeProxy = false
           }
+        } else {
+          console.log("Fatal: WitnetProxy not deployed?")
+          process.exit(-1)
         }
       }
     }
   }
-  if (!WitnetProxy.isDeployed() || isNullAddress(WitnetProxy.address)) {
-    console.log(`> Migrating new WitnetProxy instance into "${network}" network...`)
-    await deployer.deploy(WitnetProxy)
-    upgradeProxy = true
-  }
+
   if (deployWRB) {
-    console.log(`> Migrating new WitnetRequestBoard instance into "${network}" network...`)
-    await deployer.deploy(WitnetRequestBoard, true, web3.utils.fromAscii(packageJson.version))
+    console.log(`> Migrating new 'WitnetRequestBoard' instance into "${realm}:${network}"...`)
+    await deployer.deploy(
+      WitnetRequestBoard,
+      ...settings.constructorParams[realm].WitnetRequestBoard ||
+      settings.constructorParams.default.WitnetRequestBoard
+    )
   }
+
   if (upgradeProxy) {
     const proxy = await WitnetProxy.deployed()
     const wrb = await WitnetRequestBoard.at(WitnetProxy.address)
@@ -52,7 +63,7 @@ module.exports = async function (deployer, network, accounts) {
       oldCodehash = await wrb.codehash.call()
       oldVersion = await wrb.version.call()
     }
-    console.log(`> Upgrading WitnetProxy instance at ${WitnetProxy.address}...`)
+    console.log(`> Upgrading 'WitnetProxy' instance at ${WitnetProxy.address}...`)
     console.log()
     await proxy.upgradeTo(
       WitnetRequestBoard.address,
@@ -73,10 +84,15 @@ module.exports = async function (deployer, network, accounts) {
         `  >> WRB version tags:\t'${web3.utils.hexToString(oldVersion)}'`,
         `=> '${web3.utils.hexToString(await wrb.version.call())}'`
       )
-    }    
+    }
     console.log(`  >> WRB is upgradable:\t${await wrb.isUpgradable.call()}`)
     console.log(`  >> WRB proxiableUUID:\t${await wrb.proxiableUUID.call()}`)
     console.log()
+  }
+
+  if (!deployWRB && !upgradeProxy) {
+    console.log()
+    console.log("> Skipped: no 'WitnetRequestBoard' to upgrade.")
   }
 }
 

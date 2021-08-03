@@ -1,11 +1,20 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity >=0.7.0 <0.9.0;
-pragma abicoder v2;
 
-import "./impls/trustable/WitnetRequestBoardV03.sol";
+import "./interfaces/WitnetRequestBoardInterface.sol";
 
-contract WitnetRequestBoard is WitnetRequestBoardV03 {
-    constructor(bool _upgradable, bytes32 _versionTag)
-        WitnetRequestBoardV03(_upgradable, _versionTag)
-    {}
+/**
+ * @title Witnet Board functionality base contract.
+ * @author Witnet Foundation
+ **/
+abstract contract WitnetRequestBoard is
+    WitnetRequestBoardInterface
+{
+    receive() external payable {
+        revert("WitnetRequestBoard: no ETH accepted");
+    }
+    fallback() external payable {
+        revert("WitnetRequestBoard: not implemented");
+    }
 }

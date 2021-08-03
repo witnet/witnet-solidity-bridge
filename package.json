@@ -1,28 +1,33 @@
 {
   "name": "witnet-ethereum-bridge",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Witnet Bridge for EVM-compatible blockchains",
   "main": "",
   "scripts": {
-    "compile-contracts": "truffle compile --all",
-    "compile-flattened": "npx truffle compile --all --config flattened-config.js ",
+    "addresses": "node ./scripts/addresses.js 2>&1",
+    "clean": "npm run clean:build && npm run clean:flattened",
+    "clean:build": "node ./scripts/clean.js build",
+    "clean:flattened": "node ./scripts/clean.js flattened",
+    "compile": "truffle compile --all",
     "console": "truffle console",
     "coverage": "solidity-coverage",
-    "flatten": "yarn flatten:witnet",
-    "flatten:witnet": "yarn flatten:witnet:lib && yarn flatten:witnet:proxy && yarn flatten:witnet:board",
-    "flatten:witnet:lib": "npx truffle-flattener contracts/libs/Witnet.sol > contracts/flattened/FlattenedWitnet.sol",
-    "flatten:witnet:proxy": "npx truffle-flattener contracts/WitnetProxy.sol > contracts/flattened/FlattenedWitnetProxy.sol",
-    "flatten:witnet:board": "npx truffle-flattener contracts/WitnetRequestBoard.sol > contracts/flattened/FlattenedWitnetRequestBoard.sol",    
+    "flatten": "node ./scripts/flatten.js 2>&1",
+    "flatten:witnet": "npm run clean && npm run flatten:witnet:libs && npm run flatten:witnet:proxy && npm run flatten:witnet:board",
+    "flatten:witnet:libs": "npm run flatten contracts/libs/Witnet.sol && npm run flatten contracts/libs/CBOR.sol",
+    "flatten:witnet:proxy": "npm run flatten contracts/WitnetProxy.sol",
+    "flatten:witnet:board": "npm run flatten:witnet:board:trustable && npm run flatten:witnet:board:trustless",
+    "flatten:witnet:board:trustable": "npm run flatten contracts/impls/trustable/",
+    "flatten:witnet:board:trustless": "npm run flatten contracts/impls/trustless/",
     "fmt:js": "eslint \"**/*.js\"",
     "fmt:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" && solhint \"test/**/*.sol\"",
     "fmt!:js": "eslint \"**/*.js\" --fix",
     "fmt!:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" --fix && solhint \"test/**/*.sol\" --fix",
-    "fmt!": "yarn fmt!:js && yarn fmt!:sol",
-    "fmt": "yarn fmt:js && yarn fmt:sol",
-    "migrate-flattened": "npm run flatten && npx truffle migrate --config flattened-config.js",
-    "postinstall": "npm run compile-contracts",
-    "test": "truffle test",
-    "verify-flattened": "npx truffle run verify"
+    "fmt!": "npm run fmt!:js && npm run fmt!:sol",
+    "fmt": "npm run fmt:js && npm run fmt:sol",
+    "migrate": "truffle migrate --reset",
+    "migrate-flattened": "node ./scripts/migrate-flattened.js 2>&1",    
+    "networks": "node ./scripts/networks.js 2>&1",
+    "test": "truffle test"
   },
   "author": "Witnet Foundation <info@witnet.foundation>",
   "repository": {
@@ -36,6 +41,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@eth-optimism/solc": "^0.7.6-alpha.1",
     "@openzeppelin/contracts": "3.2.0"
   },
   "devDependencies": {
@@ -55,8 +61,6 @@
     "solidity-coverage": "0.7.16",
     "truffle": "5.3.1",
     "truffle-assertions": "0.9.2",
-    "truffle-flattener": "git+https://github.com/witnet/truffle-flattener.git#single-experimental",
-    "truffle-plugin-verify": "0.5.7",
-    "truffle-verify": "1.0.8"
+    "truffle-flattener": "https://github.com/witnet/truffle-flattener.git#single-experimental"
   }
 }
