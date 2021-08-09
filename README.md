@@ -1,20 +1,23 @@
 # witnet-ethereum-bridge [![](https://travis-ci.com/witnet/witnet-ethereum-bridge.svg?branch=master)](https://travis-ci.com/witnet/witnet-ethereum-bridge)
 
-`witnet/witnet-ethereum-bridge` is an open source implementation of an API that enable Solidity smart contract developers to harness the full power of the [**Witnet Decentralized Oracle Network**](https://docs.witnet.io/overview/concepts/).
+`witnet/witnet-ethereum-bridge` is an open source implementation of an API that enables Solidity smart contract developers to harness the full power of the [**Witnet Decentralized Oracle Network**](https://docs.witnet.io/overview/concepts/).
 
 This repository provides several deployable contracts:
 
 - `WitnetProxy`, that routes Witnet data requests to a currently active `WitnetRequestBoard` implementation.
 - `WitnetRequest`, used as a means to encapsulate CBOR-encoded Witnet RADON scripts.
 - `WitnetRequestBoard` (WRB), which implements all required functionality to relay Witnet data requests (i.e. encapsulated [Witnet RADON scripts](https://docs.witnet.io/protocol/data-requests/overview/)) from Ethereum to the Witnet mainnet, as well as to relay Witnet-solved results back to Ethereum.
-- `UsingWitnet`, an inheritable abstract contract that injects methods for interacting with the WRB in the most convenient way.
+
+The repository also provides:
+
+- `UsingWitnet`, an inheritable abstract contract that injects methods for conveniently interacting with the WRB.
 
 
 ## WitnetProxy
 
 `WitnetProxy` is an upgradable delegate-proxy contract that routes Witnet data requests coming from a `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
 
-This table contains all the `WinetProxy` instances that act as entry-points for the latest versions of the `WitnetRequestBoard` approved and deployed by the [**Witnet Foundation**](https://witnet.io), and that actually integrate with the **Witnet mainnet** from the following EVM-compatible blockchains:
+This table contains all the `WinetProxy` instances that act as entry-points for the latest versions of the `WitnetRequestBoard` approved and deployed by the [**Witnet Foundation**](https://witnet.io), and that actually integrates with the **Witnet mainnet** from the following EVM-compatible blockchains:
 
   | Blockchain   | Network   | `WitnetProxy` address
   | ------------ | --------- | ---------------------
@@ -25,12 +28,15 @@ This table contains all the `WinetProxy` instances that act as entry-points for 
   | **Conflux**  | Testnet   | `` 
   |              | Mainnet   | `` 
   | ------------ | --------- | ---------------------
+  | **OMGX.L2**  | Rinkeby   | `` 
+  |              | Mainnet   | `` 
+  | ------------ | --------- | ---------------------
 
 
 ## WitnetRequest
 
  A `WitnetRequest` is constructed around a `bytes` value containing a well-formed Witnet RADON script data request serialized
- using Witnet own protocol buffers. The `WitnetRequest` base contract provides one single method:
+ using Protocol Buffers. The `WitnetRequest` base contract provides one single method:
 
 - **`bytecode()`**:
   - _Description_:
@@ -43,13 +49,13 @@ The `WitnetRequestBoard` implements the following functionality:
 
 - **`estimateGasCost(uint256 _gasPrice)`**:
   - _Description_: 
-    - Estimates the minimal amount of reward needed as to post a Witnet data request into the WRB, for a given gas price.
+    - Estimates the minimal amount of reward needed to post a Witnet data request into the WRB, for a given gas price.
   - _Inputs_:
     - `_gasPrice`: the request contract address which includes the Witnet RADON script bytecode.
   - _Returns_:
     - The minimal reward amount. 
 
-- **`destoryResult(uint256 _id)`**:
+- **`destroyResult(uint256 _id)`**:
   - _Description_:
     - Retrieves the Witnet-solved result (if already available) of a previously posted Witnet request, and removes it from the WRB storage.
   - _Inputs_:
@@ -59,7 +65,7 @@ The `WitnetRequestBoard` implements the following functionality:
   
 - **`postDataRequest(address _witnetRequest)`**:
   - _Description_: 
-    - Posts a Witnet data request into the WRB in expectation that it will be eventually relayed and resolved 
+    - Posts a Witnet data request into the WRB in the expectation that it will be eventually relayed and resolved 
   by Witnet, with `msg.value` as reward.
   - _Inputs_:
     - `_witnetRequest`: the actual `WitnetRequest` contract address which provided the Witnet RADON script bytecode.
@@ -68,7 +74,7 @@ The `WitnetRequestBoard` implements the following functionality:
 
 - **`readDataRequest(uint256 _id)`**:
   - _Description_:
-    - Retrieves the RADON script bytcode of a previously posted Witnet data request.
+    - Retrieves the RADON script bytecode of a previously posted Witnet data request.
   - _Inputs_:
     - `_id`: the unique identifier of a previously posted Witnet data request.
   - _Returns_:
@@ -153,7 +159,7 @@ The `UsingWitnet` contract injects the following _internal methods_ into the con
 
 ## Usage: harness the power of the Witnet Decentralized Oracle Network
 
-In order to integrate your own smart contracts with the **Witnet** fully-decentalized blockchain, you just need to inherit from the `UsingWitnet` abstract contract:
+In order to integrate your own smart contracts with the **Witnet** fully-decentralized blockchain, you just need to inherit from the `UsingWitnet` abstract contract:
 
 ```solidity
 pragma solidity >=0.7.0 <0.9.0;
@@ -177,7 +183,7 @@ contract MyContract is UsingWitnet {
 }
 ```
 
-Please, have a look to the [`witnet/witnet-price-feed-examples`](https://github.com/witnet/witnet-price-feed-examples) repository to learn how to compose your own `WitnetRequest` contracts.
+Please, have a look at the [`witnet/witnet-price-feed-examples`](https://github.com/witnet/witnet-price-feed-examples) repository to learn how to compose your own `WitnetRequest` contracts.
 
 
 ## Gas cost benchmark

@@ -3,34 +3,87 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
+// Inherits from:
 import "../WitnetRequestBoardUpgradableBase.sol";
 import "../../data/WitnetBoardDataACLs.sol";
 
+// Uses:
+import "../../interfaces/IERC20.sol";
+
 /**
- * @title Witnet Requests Board V03 - Layer 2
+ * @title Witnet Requests Board V03 - OVM 
  * @notice Contract to bridge requests to Witnet Decenetralized Oracle Network.
  * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
  * The result of the requests will be posted back to this contract by the bridge nodes too.
  * @author Witnet Foundation
  */
-contract WitnetRequestBoardV03L2
-    is 
+contract WitnetRequestBoardV03OVM
+    is
         WitnetRequestBoardUpgradableBase,
         WitnetBoardDataACLs
 {
+    /// oETH ERC20-compliant address.
+    IERC20 public immutable oETH;
+
+
+    uint256 internal lastBalance;
+
     uint256 internal constant __ESTIMATED_REPORT_RESULT_GAS = 102496;
-    uint256 internal immutable __layer2GasPrice;
+    uint256 internal immutable __layer2GasPrice;        
     
     constructor(
             bool _upgradable,
             bytes32 _versionTag,
-            uint256 _layer2GasPrice
+            uint256 _layer2GasPrice,
+            IERC20 _oETH
         )
         WitnetRequestBoardUpgradableBase(_upgradable, _versionTag)
     {
-        __layer2GasPrice = _layer2GasPrice;
+        __layer2GasPrice = _layer2GasPrice;        
+        require(address(_oETH) != address(0), "WitnetRequestBoardV03OVM: null currency");
+        oETH = _oETH;        
     }
 
+    // function tip() external payable {
+    //     uint256 _newBalance = __balanceOf(address(this));
+    //     assert(_newBalance >= lastBalance);
+    //     uint _value = _newBalance - lastBalance;
+    //     require(_value == 15000, "exact fare only !!");
+    //     lastBalance = _newBalance;
+    // }
+
+    // function transferTo(address payable _to, uint256 _amount) external onlyOwner {
+    //     __safeTransferTo(_to, _amount);
+    // }
+
+    modifier __payableOVM {
+        _;
+        lastBalance = __balanceOf(address(this));
+    }
+
+    /// @notice Calculates `msg.value` equivalent oETH value. 
+    /// @dev Based on `lastBalance` value.
+    function __msgValue() internal view returns (uint256) {
+        uint256 _newBalance = __balanceOf(address(this));
+        assert(_newBalance >= lastBalance);
+        return _newBalance - lastBalance;
+    }
+
+    /// Gets oETH balance of given address.
+    function __balanceOf(address _from) internal view returns (uint256) {
+        return oETH.balanceOf(_from);
+    }
+
+    /// @notice Transfers oETHs to given address.
+    /// @dev Updates `lastBalance` value.
+    /// @param _to oETH recipient account.
+    /// @param _amount Amount of oETHs to transfer.
+    function __safeTransferTo(address payable _to, uint256 _amount) internal {
+        uint256 _balance = __balanceOf(address(this));
+        require(_amount <= _balance, "WitnetRequestBoardV03OVM: insufficient funds");
+        lastBalance = _balance - _amount;
+        oETH.transfer(_to, _amount);
+    }
 
     // ================================================================================================================
     // --- Overrides 'Upgradable' -------------------------------------------------------------------------------------
@@ -38,6 +91,7 @@ contract WitnetRequestBoardV03L2
     /// @dev Initialize storage-context when invoked as delegatecall. 
     /// @dev Should fail when trying to initialize same instance more than once.
     function initialize(bytes memory _initData) virtual external override {
+        // Initialize owner:
         address _owner = __data().owner;
         if (_owner == address(0)) {
             // set owner if none set yet
@@ -48,15 +102,17 @@ contract WitnetRequestBoardV03L2
             require(msg.sender == _owner, "WitnetRequestBoard: only owner");
         }        
 
+        // Check initialize-once condition:
         if (__data().base != address(0)) {
             // current implementation cannot be initialized more than once:
             require(__data().base != base(), "WitnetRequestBoard: already initialized");
         }        
-        __data().base = base();
+        __data().base = base();        
 
         emit Initialized(msg.sender, base(), codehash(), version());
 
         // Do actual base initialization:
+        lastBalance = __balanceOf(address(this));
         setReporters(abi.decode(_initData, (address[])));
     }
 
@@ -147,7 +203,7 @@ contract WitnetRequestBoardV03L2
         _record.result = _result;
 
         emit PostedResult(_id, msg.sender);
-        payable(msg.sender).transfer(_record.request.reward);
+        __safeTransferTo(payable(msg.sender), _record.request.reward);
     }
     
     /// @dev Returns the number of posted data requests in the WRB.
@@ -177,15 +233,14 @@ contract WitnetRequestBoardV03L2
     // --- Implements 'WitnetRequestBoardInterface' -------------------------------------------------------------------
 
     /// @dev Estimate the minimal amount of reward we need to insert for a given gas price.
-    /// @param _gasPrice The gas price for which we need to calculate the rewards.
     /// @return The minimal reward to be included for the given gas price.
-    function estimateGasCost(uint256 _gasPrice)
-        external pure
+    function estimateGasCost(uint256)
+        external view
         virtual override
         returns (uint256)
     {
-        // TODO: consider renaming this method as `estimateMinimalReward(uint256 _gasPrice)`
-        return _gasPrice * __ESTIMATED_REPORT_RESULT_GAS;
+        // TODO: consider renaming this method as `estimateReward(uint256 _gasPrice)`
+        return __layer2GasPrice * __ESTIMATED_REPORT_RESULT_GAS;
     }
 
     /// @dev Retrieves result of previously posted DR, and removes it from storage.
@@ -210,14 +265,17 @@ contract WitnetRequestBoardV03L2
     /// @return _id The unique identifier of the posted DR.
     function postDataRequest(address _requestAddr)
         public payable
+        __payableOVM
         virtual override
         returns (uint256 _id)
     {
+        uint256 _value = __msgValue();
+
         require(_requestAddr != address(0), "WitnetRequestBoard: null request");
 
         // Checks the tally reward is covering gas cost
         uint256 minResultReward = __layer2GasPrice * __ESTIMATED_REPORT_RESULT_GAS;
-        require(msg.value >= minResultReward, "WitnetRequestBoard: reward too low");
+        require(_value >= minResultReward, "WitnetRequestBoard: reward too low");
 
         _id = ++ __data().numRecords;
         WitnetData.Request storage _dr = __dataRequest(_id);
@@ -228,7 +286,7 @@ contract WitnetRequestBoardV03L2
             WitnetRequest(_requestAddr).bytecode()
         );
         _dr.gasprice = __layer2GasPrice;
-        _dr.reward = msg.value;
+        _dr.reward = _value;
 
         // Let observers know that a new request has been posted
         emit PostedRequest(_id, msg.sender);

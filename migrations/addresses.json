@@ -4,27 +4,33 @@
     "ethereum.kovan": {},
     "ethereum.mainnet": {},
     "ethereum.rinkeby" : {
-      "CBOR": "",
-      "Witnet": "",
-      "WitnetProxy": "",
-      "WitnetRequestBoard": ""    
+      "CBOR": "0xb0a14639a4E30a3756C27b385835F8F8FA500078",
+      "Witnet": "0x7C8e70EDD46739ad1BAb9C296E72e2eEbf09ba9A",
+      "WitnetProxy": "0xa6534D780c6D4ab8Caf8cA2F4FE345B5688e38E4",
+      "WitnetRequestBoard": "0x099E1a331C5a3258b129F97E8486576a87162879"    
     }
   },
   "conflux": {
-    "conflux.tesnet": {
-      "WitnetProxy": "0x84f3342E460265D1A271Fc1Bd678A361a9208e72",
-      "WitnetRequestBoard": "0x884c5DFC4C4011930Dab4cA7EA45d657384d96b0",
+    "conflux.testnet": {
+      "CBOR": "0x8564EA46dD3e34051Db3020b43aC720C414C93E6",
       "Witnet": "0x896C92c11E04B4ac1625F82EF3ed0F14c0dFC1d7",
-      "CBOR": "0x8564EA46dD3e34051Db3020b43aC720C414C93E6"
+      "WitnetProxy": "0x84f3342E460265D1A271Fc1Bd678A361a9208e72",
+      "WitnetRequestBoard": "0x884c5DFC4C4011930Dab4cA7EA45d657384d96b0"      
     },
     "conflux.tethys": {}
   },
   "omgx": {
+    "test": {
+      "CBOR": "0x6c69E486Bc92B717081252CBf59D9F96B7fDc1E0",
+      "Witnet": "0x15e0430bf02D812fFbBeaeB5B0e45D9BbbF407f3",
+      "WitnetProxy": "0x9AEC8fDABa5AC2add0C6be7d833D05ed35240A3c",
+      "WitnetRequestBoard": "0x342115938A8fBfA503e4b5463099C5de69dEb0f9"
+    },
     "omgx.rinkeby": {
       "CBOR": "0x6c69E486Bc92B717081252CBf59D9F96B7fDc1E0",
       "Witnet": "0x15e0430bf02D812fFbBeaeB5B0e45D9BbbF407f3",
       "WitnetProxy": "0x9AEC8fDABa5AC2add0C6be7d833D05ed35240A3c",
-      "WitnetRequestBoard": "0x48D6ff4d80Ebe2f749D7Bb44e6A92c51afD954E3"
+      "WitnetRequestBoard": "0x342115938A8fBfA503e4b5463099C5de69dEb0f9"
     }
   }
 }

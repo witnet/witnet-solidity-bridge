@@ -25,15 +25,13 @@ module.exports = function (deployer, network) {
       return deployer.deploy(Witnet)
     })
   } else {
-    console.log()
-    console.log(`> Skipped: 'Witnet' library deployed at ${Witnet.address}.`)
+    console.log(`\n> Skipped: 'Witnet' library deployed at ${Witnet.address}.`)
     console.log(`> Skipped: 'CBOR' library deployed at ${CBOR.address}.`)
   }
 }
 
 function isNullAddress (addr) {
   return !addr ||
-    addr === "" ||
     addr === "0x0000000000000000000000000000000000000000" ||
     !web3.utils.isAddress(addr)
 }

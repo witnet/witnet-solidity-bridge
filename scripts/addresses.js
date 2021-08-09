@@ -19,10 +19,10 @@ if (process.argv.length >= 3) {
         process.exit(0)
       } else {
         addresses = addresses[realm][`${realm}.${network}`]
-      }      
+      }
     } else {
       addresses = addresses[realm][network]
-    }    
+    }
   } else {
     addresses = addresses[realm]
   }

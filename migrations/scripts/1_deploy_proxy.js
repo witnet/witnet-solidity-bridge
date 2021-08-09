@@ -20,14 +20,12 @@ module.exports = async function (deployer, network, accounts) {
     console.log(`> Migrating new 'WitnetProxy' instance into "${realm}:${network}"...`)
     await deployer.deploy(WitnetProxy)
   } else {
-    console.log()
-    console.log(`> Skipped: 'WitnetProxy' deployed at ${WitnetProxy.address}.`)
+    console.log(`\n> Skipped: 'WitnetProxy' deployed at ${WitnetProxy.address}.`)
   }
 }
 
 function isNullAddress (addr) {
   return !addr ||
-    addr === "" ||
     addr === "0x0000000000000000000000000000000000000000" ||
     !web3.utils.isAddress(addr)
 }

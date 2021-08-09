@@ -40,7 +40,7 @@ compileFlattened().then(() => {
   .catch(err => {
     console.error("Fatal:", err)
     console.error()
-    process.exit(-1)
+    process.exit(1)
   })
 
 /// ////////////////////////////////////////////////////////////////////////////
@@ -51,9 +51,9 @@ function cli_func () {
       exec(cmd, (error, stdout, stderr) => {
         if (error) {
           reject(error)
-          return
+        } else {
+          resolve(stdout)
         }
-        resolve(stdout)
       }).stdout.pipe(process.stdout)
     })
   }
@@ -68,7 +68,7 @@ async function migrateFlattened (network) {
   await cli.exec(`truffle migrate --reset --config truffle-config.flattened.js --network ${network}`)
     .catch(err => {
       console.error(err)
-      process.exit(-2)
+      process.exit(1)
     })
 }
 
@@ -77,6 +77,6 @@ async function compileFlattened () {
   await cli.exec("truffle compile --all --config truffle-config.flattened.js")
     .catch(err => {
       console.error(err)
-      process.exit(-1)
+      process.exit(1)
     })
 }

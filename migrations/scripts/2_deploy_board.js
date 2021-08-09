@@ -8,7 +8,7 @@ module.exports = async function (deployer, network, accounts) {
   try {
     WitnetProxy = artifacts.require(settings.artifacts[realm].WitnetProxy || settings.artifacts.default.WitnetProxy)
     WitnetRequestBoard = artifacts.require(
-      settings.artifacts[realm].WitnetRequestBoard || settings.artifacts[realm].WitnetRequestBoard
+      settings.artifacts[realm].WitnetRequestBoard || settings.artifacts.default.WitnetRequestBoard
     )
   } catch {
     console.log("Skipped: 'WitnetRequestBoard' artifact not found.")
@@ -37,8 +37,8 @@ module.exports = async function (deployer, network, accounts) {
             upgradeProxy = false
           }
         } else {
-          console.log("Fatal: WitnetProxy not deployed?")
-          process.exit(-1)
+          console.error("Fatal: WitnetProxy not deployed?")
+          process.exit(1)
         }
       }
     }
@@ -91,14 +91,12 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   if (!deployWRB && !upgradeProxy) {
-    console.log()
-    console.log("> Skipped: no 'WitnetRequestBoard' to upgrade.")
+    console.log("\n> Skipped: no 'WitnetRequestBoard' to upgrade.")
   }
 }
 
 function isNullAddress (addr) {
   return !addr ||
-    addr === "" ||
     addr === "0x0000000000000000000000000000000000000000" ||
     !web3.utils.isAddress(addr)
 }

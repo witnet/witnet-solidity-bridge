@@ -8,7 +8,8 @@ const Witnet = artifacts.require(settings.artifacts.default.Witnet)
 const WitnetRequest = artifacts.require("WitnetRequest")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
 const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
-const TroyHorse = artifacts.require("WitnetRequestBoardNotCompliantTroyHorse")
+const TrojanHorseNotUpgradable = artifacts.require("WitnetRequestBoardTrojanHorseNotUpgradable")
+const TrojanHorseBadProxiable = artifacts.require("WitnetRequestBoardTrojanHorseBadProxiable")
 
 contract("Witnet Requests Board Proxy", accounts => {
   describe("Witnet Requests Board Proxy test suite:", () => {
@@ -91,10 +92,18 @@ contract("Witnet Requests Board Proxy", accounts => {
     })
 
     it("fails if owner tries to upgrade to not Upgradable-compliant implementation", async () => {
-      const troyHorse = await TroyHorse.new()
+      const troyHorse = await TrojanHorseNotUpgradable.new()
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard(troyHorse.address, { from: contractOwner }),
         "not compliant"
+      )
+    })
+
+    it("fails if owner tries to upgrade to a bad Proxiable-compliant implementation", async () => {
+      const troyHorse = await TrojanHorseBadProxiable.new()
+      await truffleAssert.reverts(
+        proxy.upgradeWitnetRequestBoard(troyHorse.address, { from: contractOwner }),
+        "proxiableUUIDs mismatch"
       )
     })
 

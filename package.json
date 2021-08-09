@@ -8,7 +8,7 @@
     "clean": "npm run clean:build && npm run clean:flattened",
     "clean:build": "node ./scripts/clean.js build",
     "clean:flattened": "node ./scripts/clean.js flattened",
-    "compile": "truffle compile --all",
+    "compile-contracts": "truffle compile --all",
     "console": "truffle console",
     "coverage": "solidity-coverage",
     "flatten": "node ./scripts/flatten.js 2>&1",

@@ -27,8 +27,8 @@ try {
     console.log(`Processed ${files.length} Solidity files.`)
   }
 } catch (e) {
-  console.log("Fatal:", e)
-  process.exit(-1)
+  console.error("Fatal:", e)
+  process.exit(1)
 }
 
 /// ////////////////////////////////////////////////////////////////////////////

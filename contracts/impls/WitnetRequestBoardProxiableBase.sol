@@ -2,8 +2,12 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+// Inherits from:
 import "../WitnetRequestBoard.sol";
 import "../utils/Proxiable.sol";
+
+// Eventual deployment dependencies:
+import "../WitnetProxy.sol";
 
 /**
  * @title Witnet Board base contract, with a Proxiable touch.
@@ -14,6 +18,10 @@ abstract contract WitnetRequestBoardProxiableBase
         Proxiable,
         WitnetRequestBoard
 {
+    fallback() external payable {
+        revert("WitnetRequestBoardProxiableBase: not implemented");
+    }
+
     // ================================================================================================================
     // --- Overrides 'Proxiable' --------------------------------------------------------------------------------------
 

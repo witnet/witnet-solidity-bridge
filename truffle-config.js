@@ -20,14 +20,14 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: statics.compilers[process.env.WITNET_EVM_REALM || "default"].version || "0.8.6",
+      version: statics.compilers[process.env.WITNET_EVM_REALM || "default"].version,
       settings: {
         optimizer: {
           enabled: true,
           runs: 200,
         },
       },
-      evmVersion: statics.compilers[process.env.WITNET_EVM_REALM || "default"].evmVersion || "petersburg",
+      evmVersion: statics.compilers[process.env.WITNET_EVM_REALM || "default"].evmVersion,
     },
   },
 }

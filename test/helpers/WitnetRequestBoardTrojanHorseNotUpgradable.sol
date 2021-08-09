@@ -6,14 +6,14 @@ import "../../contracts/utils/Initializable.sol";
 import "../../contracts/utils/Proxiable.sol";
 
 /**
- * @title Witnet Requests Board Troy Horse 1
- * @notice Contract to test proxy upgrade assertions. 
- * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network
-  * The result of the requests will be posted back to this contract by the bridge nodes too.
-  * The contract has been created for testing purposes
+ * @title Witnet Requests Board Trojan Horse: Proxiable but not-Upgradable
+ * @notice Contract to test proxy upgrade assertions.
+ * @dev Upgrading an existing WitnetRequestBoard implementation with an instance of 
+ * this kind (i.e. Proxiable but not-Upgradable), should not be permitted by the WitnetProxy.
+ * The contract has been created for testing purposes.
  * @author Witnet Foundation
  */
-contract WitnetRequestBoardNotCompliantTroyHorse is Initializable, Proxiable {
+contract WitnetRequestBoardTrojanHorseNotUpgradable is Initializable, Proxiable {
   address internal immutable __base;
   bytes32 internal immutable __codehash;
   address internal immutable __owner;
@@ -36,7 +36,7 @@ contract WitnetRequestBoardNotCompliantTroyHorse is Initializable, Proxiable {
   }
 
   function initialize(bytes calldata) external override onlyOwner {
-    emit Initialized(msg.sender, __base, __codehash, "non-compliant-troy-horse");
+    emit Initialized(msg.sender, __base, __codehash, "trojan-horse-not-upgradable");
   }
 
   function isUpgradableFrom(address) external pure returns (bool) {

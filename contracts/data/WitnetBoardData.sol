@@ -5,7 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../libs/WitnetData.sol";
 
 /**
- * @title Witnet Board basal data model. 
+ * @title Witnet Board base data model. 
  * @author Witnet Foundation
  */
 abstract contract WitnetBoardData {  

@@ -12,9 +12,6 @@ abstract contract WitnetRequestBoard is
     WitnetRequestBoardInterface
 {
     receive() external payable {
-        revert("WitnetRequestBoard: no ETH accepted");
-    }
-    fallback() external payable {
-        revert("WitnetRequestBoard: not implemented");
+        revert("WitnetRequestBoard: no transfers accepted");
     }
 }

@@ -8,7 +8,7 @@ module.exports = {
       WitnetRequestBoard: "WitnetRequestBoardV03",
     },
     omgx: {
-      WitnetRequestBoard: "WitnetRequestBoardV03L2",
+      WitnetRequestBoard: "WitnetRequestBoardV03OVM",
     },
   },
   constructorParams: {
@@ -16,12 +16,18 @@ module.exports = {
       WitnetRequestBoard: [true, fromAscii(packageJson.version)],
     },
     omgx: {
-      WitnetRequestBoard: [true, fromAscii(packageJson.version), 15000000],
+      WitnetRequestBoard: [
+        true, // _isUpgradable
+        fromAscii(packageJson.version), // _versionTag
+        15000000, // _l2GasPrice
+        "0x4200000000000000000000000000000000000006", // _oETH_ERC20
+      ],
     },
   },
   compilers: {
     default: {
       version: "0.8.6",
+      evmVersion: "petersburg",
     },
     conflux: {
       evmVersion: "petersburg",
@@ -52,6 +58,11 @@ module.exports = {
         host: "localhost",
         port: 8542,
       },
+      "ethereum.mainnet": {
+        network_id: 1,
+        host: "localhost",
+        port: 9545,
+      },
     },
     conflux: {
       "conflux.testnet": {
@@ -61,7 +72,7 @@ module.exports = {
         gasPrice: 10,
         skipDryRun: true,
       },
-      "conflux.tethys": {
+      "conflux.mainnet": {
         host: "localhost",
         port: 9540,
         network_id: 1029,
@@ -70,18 +81,18 @@ module.exports = {
       },
     },
     omgx: {
-      // test: {
-      //   network_id: 28,
-      //   host: "localhost",
-      //   port: 7545,
-      //   networkCheckTimeout: 1000,
-      //   gasPrice: 15000000,
-      //   gasLimit: 150000000
-      // },
-      "omgx.rinkeby": {
+      test: {
         network_id: 28,
         host: "localhost",
         port: 7545,
+        networkCheckTimeout: 1000,
+        gasPrice: 15000000,
+        gasLimit: 150000000,
+      },
+      "omgx.rinkeby": {
+        network_id: 28,
+        host: "localhost",
+        port: 8539,
         gasPrice: 15000000,
         gas: 150000000,
         skipDryRun: true,

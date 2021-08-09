@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../contracts/impls/latest/WitnetRequestBoardLatest.sol";
+import "../../contracts/impls/trustable/WitnetRequestBoardV03.sol";
 
 /**
  * @title Witnet Requests Board Version 1
@@ -13,12 +13,12 @@ import "../../contracts/impls/latest/WitnetRequestBoardLatest.sol";
   * The contract has been created for testing purposes
  * @author Witnet Foundation
  */
-contract WitnetRequestBoardTestHelper is WitnetRequestBoardLatest {
+contract WitnetRequestBoardTestHelper is WitnetRequestBoardV03 {
 
   address public witnet;
 
   constructor (address[] memory _committee, bool _upgradable)
-    WitnetRequestBoardLatest(_upgradable, "WitnetRequestBoardTestHelper")
+    WitnetRequestBoardV03(_upgradable, "WitnetRequestBoardTestHelper")
   {
     witnet = msg.sender;
     setReporters(_committee);

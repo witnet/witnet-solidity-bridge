@@ -25,7 +25,7 @@ contract WitnetProxy {
 
   /// @dev WitnetProxies will never accept direct transfer of ETHs.
   receive() external payable {
-    revert("WitnetProxy: no ETH accepted");
+    revert("WitnetProxy: no transfers accepted");
   }
 
   /// @dev Payable fallback accepts delegating calls to payable functions.  
