@@ -20,20 +20,36 @@ module.exports = {
         true, // _isUpgradable
         fromAscii(packageJson.version), // _versionTag
         15000000, // _l2GasPrice
-        "0x4200000000000000000000000000000000000006", // _oETH_ERC20
+        "0x4200000000000000000000000000000000000006", // _OVM_ETH
       ],
     },
   },
   compilers: {
     default: {
-      version: "0.8.6",
-      evmVersion: "petersburg",
+      solc: {
+        version: "0.8.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+        outputSelection: {
+          "*": {
+            "*": ["evm.bytecode"],
+          },
+        },
+      },
     },
     conflux: {
-      evmVersion: "petersburg",
+      solc: {
+        evmVersion: "petersburg",
+      },
     },
     omgx: {
-      version: "./node_modules/@eth-optimism/solc",
+      solc: {
+        version: "./node_modules/@eth-optimism/solc",
+      },
     },
   },
   networks: {
@@ -47,16 +63,19 @@ module.exports = {
         network_id: 4,
         host: "localhost",
         port: 8544,
+        skipDryRun: true,
       },
       "ethereum.goerli": {
         network_id: 5,
         host: "localhost",
         port: 8545,
+        skipDryRun: true,
       },
       "ethereum.kovan": {
         network_id: 42,
         host: "localhost",
         port: 8542,
+        skipDryRun: true,
       },
       "ethereum.mainnet": {
         network_id: 1,

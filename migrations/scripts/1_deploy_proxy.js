@@ -1,26 +1,26 @@
-const realm = process.env.WITNET_EVM_REALM || "default"
-const addresses = require("../addresses")[realm]
+const { merge } = require("lodash")
+
+const realm = process.env.WITNET_EVM_REALM ? process.env.WITNET_EVM_REALM.toLowerCase() : "default"
 const settings = require("../settings")
+const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
 
-let WitnetProxy
+module.exports = async function (deployer, network) {
+  let WitnetProxy
+  const addresses = require("../addresses")[realm][network.split("-")[0]]
 
-module.exports = async function (deployer, network, accounts) {
   try {
-    WitnetProxy = artifacts.require(settings.artifacts[realm].WitnetProxy || settings.artifacts.default.WitnetProxy)
+    WitnetProxy = artifacts.require(artifactsName.WitnetProxy)
   } catch {
-    console.log("Skipped: 'WitnetProxy' artifact not found.")
+    console.log("\n   Skipped: 'WitnetProxy' artifact not found.")
     return
   }
-
-  network = network.split("-")[0]
-  if (network in addresses) {
-    WitnetProxy.address = addresses[network].WitnetProxy
+  if (!WitnetProxy.isDeployed() || WitnetProxy.address !== addresses.WitnetProxy) {
+    if (addresses) WitnetProxy.address = addresses.WitnetProxy
   }
   if (!WitnetProxy.isDeployed() || isNullAddress(WitnetProxy.address)) {
-    console.log(`> Migrating new 'WitnetProxy' instance into "${realm}:${network}"...`)
     await deployer.deploy(WitnetProxy)
   } else {
-    console.log(`\n> Skipped: 'WitnetProxy' deployed at ${WitnetProxy.address}.`)
+    console.log(`\n   Skipped: 'WitnetProxy' deployed at ${WitnetProxy.address}.`)
   }
 }
 

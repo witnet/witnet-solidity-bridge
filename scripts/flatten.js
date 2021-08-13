@@ -24,7 +24,7 @@ try {
     files.forEach(filename => {
       flatten(basedir, filename)
     })
-    console.log(`Processed ${files.length} Solidity files.`)
+    console.log(`\nProcessed ${files.length} Solidity files.`)
   }
 } catch (e) {
   console.error("Fatal:", e)

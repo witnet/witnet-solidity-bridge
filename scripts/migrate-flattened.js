@@ -13,14 +13,14 @@ const cli = new cli_func()
 if (process.argv.length < 4) {
   console.log()
   console.log("\n\
-    Usage: yarn migrate-flattened <ArtifactName> <Network>\n\
-       or: npm run migrate-flattened <ArtifactName> <Network>\n\n\
+    Usage: yarn migrate-flattened <Network> <ArtifactName>\n\
+       or: npm run migrate-flattened <Network> <ArtifactName>\n\n\
   ")
   process.exit(0)
 }
 
-const artifact = process.argv[2]
-const network = process.argv[3]
+const network = process.argv[2]
+const artifact = process.argv[3]
 process.env.FLATTENED_DIRECTORY = `./flattened/${artifact}/`
 
 if (!fs.existsSync(`${process.env.FLATTENED_DIRECTORY}/Flattened${artifact}.sol`)) {
@@ -43,7 +43,7 @@ compileFlattened().then(() => {
     process.exit(1)
   })
 
-/// ////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
 function cli_func () {
   this.exec = async function (cmd) {

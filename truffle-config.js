@@ -1,11 +1,14 @@
 // In order to load environment variables (e.g. API keys)
 require("dotenv").config()
-const statics = require("./migrations/settings")
+const { merge } = require("lodash")
+const settings = require("./migrations/settings")
+const realm = process.env.WITNET_EVM_REALM ? process.env.WITNET_EVM_REALM.toLowerCase() : "default"
 
 module.exports = {
-  build_directory: "./build/" + (process.env.WITNET_EVM_REALM || "evm") + "/",
+  build_directory: `./build/${realm}/`,
   migrations_directory: "./migrations/scripts/",
-  networks: statics.networks[process.env.WITNET_EVM_REALM || "default"],
+  networks: settings.networks[realm],
+  compilers: merge(settings.compilers.default, settings.compilers[realm]),
   mocha: {
     reporter: "eth-gas-reporter",
     reporterOptions: {
@@ -17,17 +20,5 @@ module.exports = {
     },
     timeout: 100000,
     useColors: true,
-  },
-  compilers: {
-    solc: {
-      version: statics.compilers[process.env.WITNET_EVM_REALM || "default"].version,
-      settings: {
-        optimizer: {
-          enabled: true,
-          runs: 200,
-        },
-      },
-      evmVersion: statics.compilers[process.env.WITNET_EVM_REALM || "default"].evmVersion,
-    },
   },
 }

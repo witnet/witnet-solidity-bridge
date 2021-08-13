@@ -1,58 +1,66 @@
-const realm = process.env.WITNET_EVM_REALM || "default"
-const addresses = require("../addresses")[realm]
-const settings = require("../settings")
+const { merge } = require("lodash")
 
-let WitnetProxy, WitnetRequestBoard
+const realm = process.env.WITNET_EVM_REALM ? process.env.WITNET_EVM_REALM.toLowerCase() : "default"
+const settings = require("../settings")
+const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
 
 module.exports = async function (deployer, network, accounts) {
+  let WitnetProxy, WitnetRequestBoard
+  const addresses = require("../addresses")[realm][network.split("-")[0]]
+
   try {
-    WitnetProxy = artifacts.require(settings.artifacts[realm].WitnetProxy || settings.artifacts.default.WitnetProxy)
-    WitnetRequestBoard = artifacts.require(
-      settings.artifacts[realm].WitnetRequestBoard || settings.artifacts.default.WitnetRequestBoard
-    )
+    WitnetProxy = artifacts.require(artifactsName.WitnetProxy)
   } catch {
-    console.log("Skipped: 'WitnetRequestBoard' artifact not found.")
+    console.log("\n   Skipped: 'WitnetProxy' artifact not found.")
+    return
+  }
+  try {
+    WitnetRequestBoard = artifacts.require(artifactsName.WitnetRequestBoard)
+  } catch {
+    console.log("\n   Skipped: 'WitnetRequestBoard' artifact not found.")
     return
   }
 
   let deployWRB = true
   let upgradeProxy = true
-
-  network = network.split("-")[0]
-  if (network in addresses) {
-    if (addresses[network].WitnetRequestBoard) {
-      WitnetRequestBoard.address = addresses[network].WitnetRequestBoard
-      if (!isNullAddress(WitnetRequestBoard.address)) {
-        deployWRB = false
-        if (WitnetProxy.isDeployed() && !isNullAddress(WitnetProxy.address)) {
-          const proxy = await WitnetProxy.deployed()
-          const currentWRB = await proxy.implementation.call()
-          if (currentWRB.toLowerCase() !== WitnetRequestBoard.address.toLowerCase()) {
-            console.log("Info: Witnet proxy implementation mismatch!")
-            console.log()
-            console.log(`  >> WitnetRequestBoard address in file: ${WitnetRequestBoard.address}`)
-            console.log(`  >> WitnetProxy actual WRB instance:    ${currentWRB}`)
-            console.log()
-          } else {
-            upgradeProxy = false
-          }
+  if (addresses && addresses.WitnetRequestBoard) {
+    WitnetRequestBoard.address = addresses.WitnetRequestBoard
+    if (!isNullAddress(WitnetRequestBoard.address)) {
+      // if there's a not null address established in 'addresses.json':
+      // => no new WRB will be deployed
+      deployWRB = false
+      if (WitnetProxy.isDeployed() && !isNullAddress(WitnetProxy.address)) {
+        // and if the proxy is already deployed...
+        const proxy = await WitnetProxy.deployed()
+        const currentWRB = await proxy.implementation.call()
+        if (currentWRB.toLowerCase() !== WitnetRequestBoard.address.toLowerCase()) {
+          // and proxy implementation differs from the WitnetRequestBoard established in 'addresses.json':
+          console.log("\n   Info: Proxy's implementation mismatch!\n")
+          console.log(`   >> WitnetRequestBoard address in file: ${WitnetRequestBoard.address}`)
+          console.log(`   >> WitnetProxy actual WRB instance:    ${currentWRB}`)
+          console.log()
+          // => Proxy will be upgraded
         } else {
-          console.error("Fatal: WitnetProxy not deployed?")
-          process.exit(1)
+          // => Otherwise, Proxy won't be upgraded
+          upgradeProxy = false
         }
+      } else {
+        console.error("\n   Fatal: 'WitnetProxy' not deployed?\n")
+        process.exit(1)
       }
     }
   }
-
   if (deployWRB) {
-    console.log(`> Migrating new 'WitnetRequestBoard' instance into "${realm}:${network}"...`)
     await deployer.deploy(
       WitnetRequestBoard,
-      ...settings.constructorParams[realm].WitnetRequestBoard ||
-      settings.constructorParams.default.WitnetRequestBoard
+      ...(
+        // use realm-specific constructor parameters, if defined...
+        settings.constructorParams[realm] && settings.constructorParams[realm].WitnetRequestBoard
+          ? settings.constructorParams[realm].WitnetRequestBoard
+          : settings.constructorParams.default.WitnetRequestBoard
+      )
     )
   }
-
   if (upgradeProxy) {
     const proxy = await WitnetProxy.deployed()
     const wrb = await WitnetRequestBoard.at(WitnetProxy.address)
@@ -63,8 +71,7 @@ module.exports = async function (deployer, network, accounts) {
       oldCodehash = await wrb.codehash.call()
       oldVersion = await wrb.version.call()
     }
-    console.log(`> Upgrading 'WitnetProxy' instance at ${WitnetProxy.address}...`)
-    console.log()
+    console.log(`   Upgrading 'WitnetProxy' instance at ${WitnetProxy.address}:\n`)
     await proxy.upgradeTo(
       WitnetRequestBoard.address,
       web3.eth.abi.encodeParameter(
@@ -72,26 +79,25 @@ module.exports = async function (deployer, network, accounts) {
         [accounts[0]]
       )
     )
-    console.log(`  >> WRB owner address:\t${await wrb.owner.call()}`)
+    console.log(`   >> WRB owner address:  ${await wrb.owner.call()}`)
     if (isNullAddress(oldAddr)) {
-      console.log(`  >> WRB address:\t${await proxy.implementation.call()}`)
-      console.log(`  >> WRB codehash:\t${await wrb.codehash.call()}`)
-      console.log(`  >> WRB version tag:\t${web3.utils.hexToString(await wrb.version.call())}`)
+      console.log(`   >> WRB address:        ${await proxy.implementation.call()}`)
+      console.log(`   >> WRB proxiableUUID:  ${await wrb.proxiableUUID.call()}`)
+      console.log(`   >> WRB codehash:       ${await wrb.codehash.call()}`)
+      console.log(`   >> WRB version tag:    ${web3.utils.hexToString(await wrb.version.call())}`)
     } else {
-      console.log(`  >> WRB addresses:\t${oldAddr} => ${await proxy.implementation.call()}`)
-      console.log(`  >> WRB codehashes:\t${oldCodehash} => ${await wrb.codehash.call()}`)
+      console.log(`   >> WRB addresses:      ${oldAddr} => ${await proxy.implementation.call()}`)
+      console.log(`   >> WRB proxiableUUID:  ${await wrb.proxiableUUID.call()}`)
+      console.log(`   >> WRB codehashes:     ${oldCodehash} => ${await wrb.codehash.call()}`)
       console.log(
-        `  >> WRB version tags:\t'${web3.utils.hexToString(oldVersion)}'`,
+        `   >> WRB version tags:   '${web3.utils.hexToString(oldVersion)}'`,
         `=> '${web3.utils.hexToString(await wrb.version.call())}'`
       )
     }
-    console.log(`  >> WRB is upgradable:\t${await wrb.isUpgradable.call()}`)
-    console.log(`  >> WRB proxiableUUID:\t${await wrb.proxiableUUID.call()}`)
-    console.log()
+    console.log(`   >> WRB is upgradable:  ${await wrb.isUpgradable.call()}\n`)
   }
-
   if (!deployWRB && !upgradeProxy) {
-    console.log("\n> Skipped: no 'WitnetRequestBoard' to upgrade.")
+    console.log(`\n   Skipped: 'WitnetRequestBoard' deployed at ${WitnetRequestBoard.address}.`)
   }
 }
 
