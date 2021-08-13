@@ -1,35 +1,34 @@
 // SPDX-License-Identifier: MIT
 
+/* solhint-disable var-name-mixedcase */
+
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 // Inherits from:
-import "../WitnetRequestBoardUpgradableBase.sol";
+import "../WitnetBoardUpgradableBase.sol";
 import "../../data/WitnetBoardDataACLs.sol";
 
 // Uses:
 import "../../interfaces/IERC20.sol";
 
-/**
- * @title Witnet Requests Board V03 - OVM 
- * @notice Contract to bridge requests to Witnet Decenetralized Oracle Network.
- * @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
- * The result of the requests will be posted back to this contract by the bridge nodes too.
- * @author Witnet Foundation
- */
+/// @title Witnet Requests Board V03 - OVM.
+/// @notice Contract to bridge requests to Witnet Decenetralized Oracle Network.
+/// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
+/// The result of the requests will be posted back to this contract by the bridge nodes too.
+/// @author The Witnet Foundation
 contract WitnetRequestBoardV03OVM
     is
-        WitnetRequestBoardUpgradableBase,
+        WitnetBoardUpgradableBase,
         WitnetBoardDataACLs
 {
-    /// oETH ERC20-compliant address.
-    IERC20 public immutable oETH;
-
+    /// OVM_ETH ERC20-compliant address.
+    IERC20 public immutable OVM_ETH;
 
     uint256 internal lastBalance;
 
-    uint256 internal constant __ESTIMATED_REPORT_RESULT_GAS = 102496;
-    uint256 internal immutable __layer2GasPrice;        
+    uint256 internal constant _ESTIMATED_REPORT_RESULT_GAS = 102496;
+    uint256 internal immutable _OVM_GAS_PRICE;        
     
     constructor(
             bool _upgradable,
@@ -37,93 +36,81 @@ contract WitnetRequestBoardV03OVM
             uint256 _layer2GasPrice,
             IERC20 _oETH
         )
-        WitnetRequestBoardUpgradableBase(_upgradable, _versionTag)
+        WitnetBoardUpgradableBase(_upgradable, _versionTag)
     {
-        __layer2GasPrice = _layer2GasPrice;        
+        _OVM_GAS_PRICE = _layer2GasPrice;        
         require(address(_oETH) != address(0), "WitnetRequestBoardV03OVM: null currency");
-        oETH = _oETH;        
+        OVM_ETH = _oETH;        
     }
 
-    // function tip() external payable {
-    //     uint256 _newBalance = __balanceOf(address(this));
-    //     assert(_newBalance >= lastBalance);
-    //     uint _value = _newBalance - lastBalance;
-    //     require(_value == 15000, "exact fare only !!");
-    //     lastBalance = _newBalance;
-    // }
-
-    // function transferTo(address payable _to, uint256 _amount) external onlyOwner {
-    //     __safeTransferTo(_to, _amount);
-    // }
-
-    modifier __payableOVM {
+    modifier ovmPayable {
         _;
-        lastBalance = __balanceOf(address(this));
+        lastBalance = _balanceOf(address(this));
     }
 
-    /// @notice Calculates `msg.value` equivalent oETH value. 
+    /// Calculates `msg.value` equivalent OVM_ETH value. 
     /// @dev Based on `lastBalance` value.
-    function __msgValue() internal view returns (uint256) {
-        uint256 _newBalance = __balanceOf(address(this));
+    function _msgValue() internal view returns (uint256) {
+        uint256 _newBalance = _balanceOf(address(this));
         assert(_newBalance >= lastBalance);
         return _newBalance - lastBalance;
     }
 
-    /// Gets oETH balance of given address.
-    function __balanceOf(address _from) internal view returns (uint256) {
-        return oETH.balanceOf(_from);
+    /// Gets OVM_ETH balance of given address.
+    function _balanceOf(address _from) internal view returns (uint256) {
+        return OVM_ETH.balanceOf(_from);
     }
 
-    /// @notice Transfers oETHs to given address.
+    /// Transfers oETHs to given address.
     /// @dev Updates `lastBalance` value.
-    /// @param _to oETH recipient account.
+    /// @param _to OVM_ETH recipient account.
     /// @param _amount Amount of oETHs to transfer.
-    function __safeTransferTo(address payable _to, uint256 _amount) internal {
-        uint256 _balance = __balanceOf(address(this));
+    function _safeTransferTo(address payable _to, uint256 _amount) internal {
+        uint256 _balance = _balanceOf(address(this));
         require(_amount <= _balance, "WitnetRequestBoardV03OVM: insufficient funds");
         lastBalance = _balance - _amount;
-        oETH.transfer(_to, _amount);
+        OVM_ETH.transfer(_to, _amount);
     }
 
     // ================================================================================================================
     // --- Overrides 'Upgradable' -------------------------------------------------------------------------------------
 
-    /// @dev Initialize storage-context when invoked as delegatecall. 
+    /// Initialize storage-context when invoked as delegatecall. 
     /// @dev Should fail when trying to initialize same instance more than once.
     function initialize(bytes memory _initData) virtual external override {
         // Initialize owner:
-        address _owner = __data().owner;
+        address _owner = _state().owner;
         if (_owner == address(0)) {
             // set owner if none set yet
             _owner = msg.sender;
-            __data().owner = _owner;
+            _state().owner = _owner;
         } else {
             // only owner can initialize:
             require(msg.sender == _owner, "WitnetRequestBoard: only owner");
         }        
 
         // Check initialize-once condition:
-        if (__data().base != address(0)) {
+        if (_state().base != address(0)) {
             // current implementation cannot be initialized more than once:
-            require(__data().base != base(), "WitnetRequestBoard: already initialized");
+            require(_state().base != base(), "WitnetRequestBoard: already initialized");
         }        
-        __data().base = base();        
+        _state().base = base();        
 
         emit Initialized(msg.sender, base(), codehash(), version());
 
         // Do actual base initialization:
-        lastBalance = __balanceOf(address(this));
+        lastBalance = _balanceOf(address(this));
         setReporters(abi.decode(_initData, (address[])));
     }
 
-    /// @dev Tells whether provided address could eventually upgrade the contract.
-    function isUpgradableFrom(address from) external view override returns (bool) {
-        address _owner = __data().owner;
+    /// Tells whether provided address could eventually upgrade the contract.
+    function isUpgradableFrom(address _from) external view override returns (bool) {
+        address _owner = _state().owner;
         return (
             // false if the WRB is intrinsically not upgradable
             isUpgradable() && (                
                 _owner == address(0) ||
-                _owner == from
+                _owner == _from
             )
         );
     }
@@ -132,35 +119,35 @@ contract WitnetRequestBoardV03OVM
     // ================================================================================================================
     // --- Utility functions not declared within an interface ---------------------------------------------------------
 
-    /// @dev Retrieves the whole DR post record from the WRB.
+    /// Retrieves the whole DR post record from the WRB.
     /// @param _id The unique identifier of a previously posted data request.
     /// @return The DR record. Fails if DR current bytecode differs from the one it had when posted.
     function readDr(uint256 _id)
         external view
         virtual
         wasPosted(_id)
-        returns (WitnetData.Request memory)
+        returns (WitnetData.Query memory)
     {
-        return __checkDr(_id);
+        return _checkDr(_id);
     }
     
-    /// @dev Retrieves RADON bytecode of a previously posted DR.
+    /// Retrieves the Radon script bytecode of a previously posted DR. Fails if changed after being posted. 
     /// @param _id The unique identifier of the previously posted DR.
-    /// @return _bytecode The RADON bytecode. Fails if changed after being posted. Empty if the DR was solved and destroyed.
+    /// @return _bytecode The Radon script bytecode. Empty if the DR was already solved and destroyed.
     function readDataRequest(uint256 _id)
         external view
         virtual
         wasPosted(_id)
         returns (bytes memory _bytecode)
     {
-        WitnetData.Request storage _dr = __dataRequest(_id);
-        if (_dr.addr != address(0)) {
+        WitnetData.Query storage _dr = _getRequestQuery(_id);
+        if (_dr.script != address(0)) {
             // if DR's request contract address is not zero,
             // we assume the DR has not been destroyed, so
             // DR's bytecode can still be fetched:
-            _bytecode = WitnetRequest(_dr.addr).bytecode();
+            _bytecode = WitnetRequest(_dr.script).bytecode();
             require(
-                WitnetData.computeDataRequestCodehash(_bytecode) == _dr.codehash,
+                WitnetData.computeScriptCodehash(_bytecode) == _dr.codehash,
                 "WitnetRequestBoard: bytecode changed after posting"
             );
         } 
@@ -175,7 +162,7 @@ contract WitnetRequestBoardV03OVM
         wasPosted(_id)
         returns (uint256)
     {
-        return __dataRequest(_id).gasprice;
+        return _getRequestQuery(_id).gasprice;
     }
 
     /// @dev Reports the result of a data request solved by Witnet network.
@@ -198,12 +185,12 @@ contract WitnetRequestBoardV03OVM
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(_result.length != 0, "WitnetRequestBoard: result cannot be empty");
 
-        SWitnetBoardDataRecord storage _record = __data().records[_id];
-        _record.request.txhash = _txhash;
+        WitnetBoardDataRequest storage _record = _state().requests[_id];
+        _record.query.txhash = _txhash;
         _record.result = _result;
 
         emit PostedResult(_id, msg.sender);
-        __safeTransferTo(payable(msg.sender), _record.request.reward);
+        _safeTransferTo(payable(msg.sender), _record.query.reward);
     }
     
     /// @dev Returns the number of posted data requests in the WRB.
@@ -212,7 +199,7 @@ contract WitnetRequestBoardV03OVM
         // TODO: either rename this method (e.g. getNextId()) or change bridge node 
         //       as to interpret returned value as actual number of posted data requests 
         //       in the WRB.
-        return __data().numRecords + 1;
+        return _state().numRecords + 1;
     }
 
     /// @dev Adds given addresses to the active reporters control list.
@@ -224,7 +211,7 @@ contract WitnetRequestBoardV03OVM
     {
         for (uint ix = 0; ix < _reporters.length; ix ++) {
             address _reporter = _reporters[ix];
-            __acls().isReporter_[_reporter] = true;
+            _acls().isReporter_[_reporter] = true;
         }
     }
 
@@ -240,7 +227,7 @@ contract WitnetRequestBoardV03OVM
         returns (uint256)
     {
         // TODO: consider renaming this method as `estimateReward(uint256 _gasPrice)`
-        return __layer2GasPrice * __ESTIMATED_REPORT_RESULT_GAS;
+        return _OVM_GAS_PRICE * _ESTIMATED_REPORT_RESULT_GAS;
     }
 
     /// @dev Retrieves result of previously posted DR, and removes it from storage.
@@ -251,11 +238,11 @@ contract WitnetRequestBoardV03OVM
         virtual override
         returns (bytes memory _result)
     {
-        SWitnetBoardDataRecord storage _record = __data().records[_id];
-        require(msg.sender == _record.request.requestor, "WitnetRequestBoard: only actual requestor");
-        require(_record.request.txhash != 0, "WitnetRequestBoard: not yet solved");
+        WitnetBoardDataRequest storage _record = _state().requests[_id];
+        require(msg.sender == _record.query.requestor, "WitnetRequestBoard: only actual requestor");
+        require(_record.query.txhash != 0, "WitnetRequestBoard: not yet solved");
         _result = _record.result;
-        delete __data().records[_id];
+        delete _state().requests[_id];
         emit DestroyedResult(_id, msg.sender);
     }
 
@@ -265,27 +252,27 @@ contract WitnetRequestBoardV03OVM
     /// @return _id The unique identifier of the posted DR.
     function postDataRequest(address _requestAddr)
         public payable
-        __payableOVM
+        ovmPayable
         virtual override
         returns (uint256 _id)
     {
-        uint256 _value = __msgValue();
+        uint256 _value = _msgValue();
 
         require(_requestAddr != address(0), "WitnetRequestBoard: null request");
 
         // Checks the tally reward is covering gas cost
-        uint256 minResultReward = __layer2GasPrice * __ESTIMATED_REPORT_RESULT_GAS;
+        uint256 minResultReward = _OVM_GAS_PRICE * _ESTIMATED_REPORT_RESULT_GAS;
         require(_value >= minResultReward, "WitnetRequestBoard: reward too low");
 
-        _id = ++ __data().numRecords;
-        WitnetData.Request storage _dr = __dataRequest(_id);
+        _id = ++ _state().numRecords;
+        WitnetData.Query storage _dr = _getRequestQuery(_id);
 
-        _dr.addr = _requestAddr;
+        _dr.script = _requestAddr;
         _dr.requestor = msg.sender;
-        _dr.codehash = WitnetData.computeDataRequestCodehash(
+        _dr.codehash = WitnetData.computeScriptCodehash(
             WitnetRequest(_requestAddr).bytecode()
         );
-        _dr.gasprice = __layer2GasPrice;
+        _dr.gasprice = _OVM_GAS_PRICE;
         _dr.reward = _value;
 
         // Let observers know that a new request has been posted
@@ -301,7 +288,7 @@ contract WitnetRequestBoardV03OVM
         wasPosted(_id)
         returns (uint256)
     {
-        return __dataRequest(_id).txhash;
+        return _getRequestQuery(_id).txhash;
     }
     
     /// @dev Retrieves the result (if already available) of one data request from the WRB.
@@ -313,8 +300,8 @@ contract WitnetRequestBoardV03OVM
         wasPosted(_id)
         returns (bytes memory)
     {
-        SWitnetBoardDataRecord storage _record = __data().records[_id];
-        require(_record.request.txhash != 0, "WitnetRequestBoard: not yet solved");
+        WitnetBoardDataRequest storage _record = _state().requests[_id];
+        require(_record.query.txhash != 0, "WitnetRequestBoard: not yet solved");
         return _record.result;
     }    
 
@@ -325,20 +312,20 @@ contract WitnetRequestBoardV03OVM
         virtual override        
         wasPosted(_id)
     {
-        WitnetData.Request storage _dr = __dataRequest(_id);
+        WitnetData.Query storage _dr = _getRequestQuery(_id);
         require(_dr.txhash == 0, "WitnetRequestBoard: already solved");
 
         uint256 _newReward = _dr.reward + msg.value;
 
         // If gas price is increased, then check if new rewards cover gas costs
-        if (__layer2GasPrice > _dr.gasprice) {
+        if (_OVM_GAS_PRICE > _dr.gasprice) {
             // Checks the reward is covering gas cost
-            uint256 _minResultReward = __layer2GasPrice * __ESTIMATED_REPORT_RESULT_GAS;
+            uint256 _minResultReward = _OVM_GAS_PRICE * _ESTIMATED_REPORT_RESULT_GAS;
             require(
                 _newReward >= _minResultReward,
                 "WitnetRequestBoard: reward too low"
             );
-            _dr.gasprice = __layer2GasPrice;
+            _dr.gasprice = _OVM_GAS_PRICE;
         }
         _dr.reward = _newReward;
     }
@@ -347,17 +334,17 @@ contract WitnetRequestBoardV03OVM
     // ================================================================================================================
     // --- Private functions ------------------------------------------------------------------------------------------
 
-    function __checkDr(uint256 _id)
-        private view returns (WitnetData.Request storage _dr)
+    function _checkDr(uint256 _id)
+        private view returns (WitnetData.Query storage _dr)
     {
-        _dr = __dataRequest(_id);
-        if (_dr.addr != address(0)) {
+        _dr = _getRequestQuery(_id);
+        if (_dr.script != address(0)) {
             // if DR's request contract address is not zero,
             // we assume the DR has not been destroyed, so
             // DR's bytecode can still be fetched:
-            bytes memory _bytecode = WitnetRequest(_dr.addr).bytecode();
+            bytes memory _bytecode = WitnetRequest(_dr.script).bytecode();
             require(
-                WitnetData.computeDataRequestCodehash(_bytecode) == _dr.codehash,
+                WitnetData.computeScriptCodehash(_bytecode) == _dr.codehash,
                 "WitnetRequestBoard: bytecode changed after posting"
             );
         }        

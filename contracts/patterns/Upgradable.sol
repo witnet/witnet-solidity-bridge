@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+/* solhint-disable var-name-mixedcase */
+
 pragma solidity >=0.6.0 <0.9.0;
 
 import "./Initializable.sol";
@@ -7,9 +9,9 @@ import "./Proxiable.sol";
 
 abstract contract Upgradable is Initializable, Proxiable {
 
-    address internal immutable __base;
-    bytes32 internal immutable __codehash;
-    bool internal immutable __upgradable;
+    address internal immutable _BASE;
+    bytes32 internal immutable _CODEHASH;
+    bool internal immutable _UPGRADABLE;
 
     constructor (bool _isUpgradable) {
         address _base = address(this);
@@ -17,9 +19,9 @@ abstract contract Upgradable is Initializable, Proxiable {
         assembly {
             _codehash := extcodehash(_base)
         }
-        __base = _base;
-        __codehash = _codehash;        
-        __upgradable = _isUpgradable;
+        _BASE = _base;
+        _CODEHASH = _codehash;        
+        _UPGRADABLE = _isUpgradable;
     }
 
     /// @dev Tells whether provided address could eventually upgrade the contract.
@@ -32,19 +34,19 @@ abstract contract Upgradable is Initializable, Proxiable {
 
     /// @dev Retrieves base contract. Differs from address(this) when via delegate-proxy pattern.
     function base() public view returns (address) {
-        return __base;
+        return _BASE;
     }
 
     /// @dev Retrieves the immutable codehash of this contract, even if invoked as delegatecall.
     /// @return _codehash This contracts immutable codehash.
     function codehash() public view returns (bytes32 _codehash) {
-        return __codehash;
+        return _CODEHASH;
     }
     
     /// @dev Determines whether current instance allows being upgraded.
     /// @dev Returned value should be invariant from whoever is calling.
     function isUpgradable() public view returns (bool) {        
-        return __upgradable;
+        return _UPGRADABLE;
     }
 
     /// @dev Retrieves human-redable named version of current implementation.

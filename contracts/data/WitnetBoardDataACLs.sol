@@ -4,25 +4,23 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "./WitnetBoardData.sol";
 
-/**
- * @title Witnet Access Control Lists storage layout, for Witnet-trusted request boards.
- * @author Witnet Foundation
- */
+/// @title Witnet Access Control Lists storage layout, for Witnet-trusted request boards.
+/// @author The Witnet Foundation.
 abstract contract WitnetBoardDataACLs is WitnetBoardData {  
-  struct SWitnetBoardACLs {
+  struct WitnetBoardACLs {
     mapping (address => bool) isReporter_;
   }
 
   constructor() {
-    __acls().isReporter_[msg.sender] = true;
+    _acls().isReporter_[msg.sender] = true;
   }
 
   modifier onlyReporters {
-    require(__acls().isReporter_[msg.sender], "WitnetBoardDataACLs: unauthorized reporter");
+    require(_acls().isReporter_[msg.sender], "WitnetBoardDataACLs: unauthorized reporter");
     _;
   }  
 
-  function __acls() internal pure returns (SWitnetBoardACLs storage _struct) {
+  function _acls() internal pure returns (WitnetBoardACLs storage _struct) {
     assembly {
       _struct.slot := WITNET_BOARD_ACLS_SLOTHASH
     }

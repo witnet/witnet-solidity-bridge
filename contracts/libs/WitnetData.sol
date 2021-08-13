@@ -3,20 +3,16 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-/**
- * @title The serialized form of a Witnet data request
- */
+/// @title Contract containing the serialized bytecode of a Witnet Radon script.
+/// @author The Witnet Foundation.
 contract WitnetRequest {
     bytes public bytecode;
-
-  /**
-    * @dev A `WitnetRequest` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized
-    * using Protocol Buffers. However, we cannot verify its validity at this point. This implies that contracts using
-    * the WRB should not be considered trustless before a valid Proof-of-Inclusion has been posted for the requests.
-    * The hash of the request is computed in the constructor to guarantee consistency. Otherwise there could be a
-    * mismatch and a data request could be resolved with the result of another.
-    * @param _bytecode Witnet request in bytes.
-    */
+    /// @dev A `WitnetRequest` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized
+    /// @dev using Protocol Buffers. However, we cannot verify its validity at this point. This implies that contracts using
+    /// @dev the WRB should not be considered trustless before a valid Proof-of-Inclusion has been posted for the requests.
+    /// @dev The hash of the request is computed in the constructor to guarantee consistency. Otherwise there could be a
+    /// @dev mismatch and a data request could be resolved with the result of another.
+    /// @param _bytecode Actual Radon script in bytes.
     constructor(bytes memory _bytecode) {
         bytecode = _bytecode;
     }
@@ -26,27 +22,27 @@ library WitnetData {
 
     /// @notice Witnet lambda function that computes the hash of a CBOR-encoded RADON script.
     /// @param _bytecode CBOR-encoded RADON.
-    function computeDataRequestCodehash(bytes memory _bytecode) internal pure returns (uint256) {
+    function computeScriptCodehash(bytes memory _bytecode) internal pure returns (uint256) {
         return uint256(sha256(_bytecode));
     }
 
-    /// @notice Data kept in EVM-storage for every Data Request (DR) posted to Witnet.
-    struct Request {
-        address addr;       // WitnetRequest contract address.
+    /// Data kept in EVM-storage for every Data Request (DR) posted to Witnet.
+    struct Query {
         address requestor;  // Address from which the DR was posted.
+        address script;     // WitnetRequest contract address.        
         uint256 codehash;   // Codehash of the DR.
         uint256 gasprice;   // Minimum gas price the DR resolver should pay on the solving tx.
         uint256 reward;     // escrow reward to by paid to the DR resolver.
         uint256 txhash;     // Hash of the Witnet tx that actually solved the DR.
     }
 
-    /// @notice DR result data provided by Witnet.
+    /// DR result data provided by Witnet.
     struct Result {
         bool success;       // Resolution was successful.
         CBOR value;         // Resulting value encoded as a Concise Binary Object Representation (CBOR).
     }
 
-    /// @notice Data struct following the RFC-7049 standard: Concise Binary Object Representation.
+    /// Data struct following the RFC-7049 standard: Concise Binary Object Representation.
     struct CBOR {
         Buffer buffer;
         uint8 initialByte;
@@ -56,13 +52,13 @@ library WitnetData {
         uint64 tag;
     }
 
-    /// @notice Iterable bytes buffer.
+    /// Iterable bytes buffer.
     struct Buffer {
         bytes data;
         uint32 cursor;
     }
 
-    /// @notice Witnet error codes table.
+    /// Witnet error codes table.
     enum ErrorCodes {
         // 0x00: Unknown error. Something went really bad!
         Unknown,

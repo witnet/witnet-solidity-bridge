@@ -2,8 +2,10 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../../contracts/utils/Initializable.sol";
-import "../../contracts/utils/Proxiable.sol";
+/* solhint-disable var-name-mixedcase */
+
+import "../../contracts/patterns/Initializable.sol";
+import "../../contracts/patterns/Proxiable.sol";
 
 /**
  * @title Witnet Requests Board Trojan Horse: Proxiable but not-Upgradable
@@ -14,9 +16,9 @@ import "../../contracts/utils/Proxiable.sol";
  * @author Witnet Foundation
  */
 contract WitnetRequestBoardTrojanHorseNotUpgradable is Initializable, Proxiable {
-  address internal immutable __base;
-  bytes32 internal immutable __codehash;
-  address internal immutable __owner;
+  address internal immutable _BASE;
+  bytes32 internal immutable _CODEHASH;
+  address internal immutable _OWNER;
 
   constructor() {
     address _base = address(this);
@@ -24,19 +26,19 @@ contract WitnetRequestBoardTrojanHorseNotUpgradable is Initializable, Proxiable 
     assembly {
       _codehash := extcodehash(_base)
     }
-    __base = _base;
-    __codehash = _codehash;   
-    __owner = msg.sender;
+    _BASE = _base;
+    _CODEHASH = _codehash;   
+    _OWNER = msg.sender;
   }
 
   modifier onlyOwner {
-    if (msg.sender == __owner) {
+    if (msg.sender == _OWNER) {
       _;
     }
   }
 
   function initialize(bytes calldata) external override onlyOwner {
-    emit Initialized(msg.sender, __base, __codehash, "trojan-horse-not-upgradable");
+    emit Initialized(msg.sender, _BASE, _CODEHASH, "trojan-horse-not-upgradable");
   }
 
   function isUpgradableFrom(address) external pure returns (bool) {

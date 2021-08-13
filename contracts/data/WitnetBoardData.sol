@@ -4,62 +4,68 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../libs/WitnetData.sol";
 
-/**
- * @title Witnet Board base data model. 
- * @author Witnet Foundation
- */
+/// @title Witnet Board base data model. 
+/// @author The Witnet Foundation.
 abstract contract WitnetBoardData {  
 
-  struct SWitnetBoardData {
+  struct WitnetBoardState {
     address base;
-    address owner;
-    mapping (uint => SWitnetBoardDataRecord) records;
+    address owner;    
     uint256 numRecords;
+    mapping (uint => WitnetBoardDataRequest) requests;
   }
 
-  struct SWitnetBoardDataRecord {
-    WitnetData.Request request;
+  struct WitnetBoardDataRequest {
+    WitnetData.Query query;
     bytes result;
   }
 
   constructor() {
-    __data().owner = msg.sender;
+    _state().owner = msg.sender;
   }
 
-  modifier notDestroyed(uint256 id) {
-    require(id > 0 && id <= __data().numRecords, "WitnetBoardData: not yet posted");
-    require(__dataRequest(id).requestor != address(0), "WitnetBoardData: destroyed");
+  modifier notDestroyed(uint256 _id) {
+    require(_id > 0 && _id <= _state().numRecords, "WitnetBoardData: not yet posted");
+    require(_getRequestQuery(_id).requestor != address(0), "WitnetBoardData: destroyed");
     _;
   }
 
   modifier onlyOwner {
-    require(msg.sender == __data().owner, "WitnetBoardData: only owner");
+    require(msg.sender == _state().owner, "WitnetBoardData: only owner");
     _;    
   }
 
-  modifier resultNotYetReported(uint256 id) {
-    require(__dataRequest(id).txhash == 0, "WitnetBoardData: already solved");
+  modifier resultNotYetReported(uint256 _id) {
+    require(_getRequestQuery(_id).txhash == 0, "WitnetBoardData: already solved");
     _;
   }
 
-  modifier wasPosted(uint256 id) {
-    require(id > 0 && id <= __data().numRecords, "WitnetBoardData: not yet posted");
+  modifier wasPosted(uint256 _id) {
+    require(_id > 0 && _id <= _state().numRecords, "WitnetBoardData: not yet posted");
     _;
   }
 
-  /// @dev Gets admin/owner address.
+  /// Gets admin/owner address.
   function owner() public view returns (address) {
-    return __data().owner;
+    return _state().owner;
   }
 
-  function __data() internal pure returns (SWitnetBoardData storage _struct) {
+  /// Returns storage pointer to contents of 'WitnetBoardState' struct.
+  function _state()
+    internal pure
+    returns (WitnetBoardState storage _ptr)
+  {
     assembly {
-      _struct.slot := WITNET_BOARD_DATA_SLOTHASH
+      _ptr.slot := WITNET_BOARD_DATA_SLOTHASH
     }
   }
 
-  function __dataRequest(uint256 id) internal view returns (WitnetData.Request storage) {
-    return __data().records[id].request;
+  /// Gets WitnetData.Query struct contents of given request.
+  function _getRequestQuery(uint256 _requestId)
+    internal view
+    returns (WitnetData.Query storage)
+  {
+    return _state().requests[_requestId].query;
   }
   
   bytes32 internal constant WITNET_BOARD_DATA_SLOTHASH =

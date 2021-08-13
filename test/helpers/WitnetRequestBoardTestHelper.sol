@@ -31,22 +31,22 @@ contract WitnetRequestBoardTestHelper is WitnetRequestBoardV03 {
     public payable override returns(uint256 _id)
   {
     _id = super.postDataRequest(_requestAddress);
-    __data().records[_id].request.txhash = uint256(keccak256("hello"));
-    __data().records[_id].result = "hello";
+    _state().requests[_id].query.txhash = uint256(keccak256("hello"));
+    _state().requests[_id].result = "hello";
   }
 
   /// @dev Retrieves hash of the data request transaction in Witnet
   /// @param _id The unique identifier of the data request.
   /// @return The hash of the DataRequest transaction in Witnet
   function readDrTxHash(uint256 _id) external view override returns(uint256) {
-    return __dataRequest(_id).txhash;
+    return _getRequestQuery(_id).txhash;
   }
 
   /// @dev Retrieves the result (if already available) of one data request from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The result of the DR
   function readResult(uint256 _id) external view override returns (bytes memory) {
-    return __data().records[_id].result;
+    return _state().requests[_id].result;
   }
 
   /// @dev Estimate the amount of reward we need to insert for a given gas price.

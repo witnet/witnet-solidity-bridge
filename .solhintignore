@@ -1,5 +1,5 @@
 node_modules
-contracts/utils/Migrations.sol
+contracts/patterns/Migrations.sol
 contracts/flattened/Flattened.sol
 test/TestBuffer.sol
 test/TestActiveBridgeSet.sol

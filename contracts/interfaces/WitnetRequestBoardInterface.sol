@@ -2,23 +2,21 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-/**
- * @title Witnet Requests Board Interface
- * @notice Interface of a Witnet Request Board (WRB)
- * It defines how to interact with the WRB in order to support:
- *  - Post and upgrade a data request
- *  - Read the result of a dr
- * @author Witnet Foundation
- */
+/// @title Witnet Requests Board Interface
+/// @notice Interface of a Witnet Request Board (WRB)
+/// It defines how to interact with the WRB in order to support:
+///   - Post and upgrade a data request
+///   - Read the result of a dr
+/// @author The Witnet Foundation.
 interface WitnetRequestBoardInterface {
 
-  /// @notice Event emitted when a new DR is posted
+  /// Emits when a new DR is posted
   event PostedRequest(uint256 id, address from);
 
-  /// @notice Event emitted when a result is reported
+  /// Emits when a result is reported
   event PostedResult(uint256 id, address from);
 
-  /// @notice Event emitted when a result is destroyed
+  /// Emits when a result is destroyed
   event DestroyedResult(uint256 id, address from);
 
   /// @notice Estimate the amount of reward we need to insert for a given gas price.
@@ -36,7 +34,7 @@ interface WitnetRequestBoardInterface {
   /// @return The unique identifier of the data request.
   function postDataRequest(address _requestAddress) external payable returns (uint256);
 
-  /// @notice Retrieves the DR transaction hash of the id from the WRB.
+  /// @notice Retrieves the DR transaction hash of the _id from the WRB.
   /// @param _id The unique identifier of the data request.
   /// @return The hash of the DR transaction
   function readDrTxHash(uint256 _id) external view returns (uint256);

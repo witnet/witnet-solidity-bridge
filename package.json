@@ -1,6 +1,6 @@
 {
   "name": "witnet-ethereum-bridge",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Witnet Bridge for EVM-compatible blockchains",
   "main": "",
   "scripts": {
