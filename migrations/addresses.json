@@ -1,56 +1,56 @@
 {
   "default": {
     "ethereum.goerli" : {
-      "CBOR": "0x15Ba8794975388a9270dE37e18914F3f4a15A002",
-      "Witnet": "0x0533D2cD0797809ADCcbAe708331648347c62dc1",
-      "WitnetProxy": "0x739629E69C133F6042247Ebd264368a7ec04Ce7d",
-      "WitnetRequestBoard": "0xaEC0327ceCDA4CD898f9aCB79df037b732d17b59"
+      "WitnetDecoderLib": "",
+      "WitnetParserLib": "",
+      "WitnetProxy": "",
+      "WitnetRequestBoard": ""
     },
     "ethereum.kovan": {
-      "CBOR": "",
-      "Witnet": "",
+      "WitnetDecoderLib": "",
+      "WitnetParserLib": "",
       "WitnetProxy": "",
       "WitnetRequestBoard": ""
     },
     "ethereum.rinkeby" : {
-      "CBOR": "0xF37736c0fB08A4D9EcD74428e82890201c1368c1",
-      "Witnet": "0x1031aC9118D5F9B563Adc2379e56E7DAd024d4Dc",
-      "WitnetProxy": "0xeAB63c960781E25A1Bac3F8EEE12427E8Ef717B5",
-      "WitnetRequestBoard": "0x6FcFB926E36C0E8D48f050EF382EF741e77A163a"
+      "WitnetDecoderLib": "0x2ABc73071B785F5218fDCD5112d9857062Eedc3d",
+      "WitnetParserLib": "0x433aa81DE05D766dDcCe4E5BCBa836f3b0E405a8",
+      "WitnetProxy": "0x7ddceeEDdD4a4cB2bD7Ca9aAe8Ead5F051e19AD8",
+      "WitnetRequestBoard": "0x21d7319c9B4197C1dEb648DbE9FA71e605e72Ec7"
     },
     "ethereum.mainnet": {
-      "CBOR": "",
-      "Witnet": "",
+      "WitnetDecoderLib": "",
+      "WitnetParserLib": "",
       "WitnetProxy": "",
       "WitnetRequestBoard": ""
     }
   },
   "conflux": {
     "conflux.testnet": {
-      "CBOR": "0x8c50dd9fe54Fe15B21ffb9859999C27b1a1D814c",
-      "Witnet": "0x898383e9888cb323f1bf0CC162BFC726Fb423218",
-      "WitnetProxy": "0x8e1c9015c63E936188bc1ECBc7543Ec7B54E43e7",
-      "WitnetRequestBoard": "0x8551D5715D89D8F12E38Ea96079b17772A9F6F72"
+      "WitnetDecoderLib": "",
+      "WitnetParserLib": "",
+      "WitnetProxy": "",
+      "WitnetRequestBoard": ""
     },
     "conflux.tethys": {
-      "CBOR": "",
-      "Witnet": "",
+      "WitnetDecoderLib": "",
+      "WitnetParserLib": "",
       "WitnetProxy": "",
       "WitnetRequestBoard": ""
     }
   },
   "omgx": {
     "test": {
-      "CBOR": "0x27d62757747226B7F662FC3385c28BdE241B4D3c",
-      "Witnet": "0x88938A85FA2f331092A2f8918e0C008DF9Fc5E80",
-      "WitnetProxy": "0x6EdDCBDa4803D7B4C32AE1276C141128B1c84c31",
+      "WitnetDecoderLib": "",
+      "WitnetParserLib": "",
+      "WitnetProxy": "",
       "WitnetRequestBoard": ""
     },
     "omgx.rinkeby": {
-      "CBOR": "0x27d62757747226B7F662FC3385c28BdE241B4D3c",
-      "Witnet": "0x88938A85FA2f331092A2f8918e0C008DF9Fc5E80",
-      "WitnetProxy": "0x6EdDCBDa4803D7B4C32AE1276C141128B1c84c31",
-      "WitnetRequestBoard": "0x12177639eaBaB03576d5bD35a5F3855540D1B9de"
+      "WitnetDecoderLib": "",
+      "WitnetParserLib": "",
+      "WitnetProxy": "",
+      "WitnetRequestBoard": ""
     }
   }
 }

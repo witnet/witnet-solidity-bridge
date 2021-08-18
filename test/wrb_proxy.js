@@ -3,16 +3,16 @@ const settings = require("../migrations/settings")
 const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
 
-const Witnet = artifacts.require(settings.artifacts.default.Witnet)
+const WitnetParser = artifacts.require(settings.artifacts.default.WitnetParserLib)
 
-const WitnetRequest = artifacts.require("WitnetRequest")
+const WitnetRequest = artifacts.require("WitnetRequestTestHelper")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
 const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
 const TrojanHorseNotUpgradable = artifacts.require("WitnetRequestBoardTrojanHorseNotUpgradable")
 const TrojanHorseBadProxiable = artifacts.require("WitnetRequestBoardTrojanHorseBadProxiable")
 
-contract("Witnet Requests Board Proxy", accounts => {
-  describe("Witnet Requests Board Proxy test suite:", () => {
+contract("WitnetParser Requests Board Proxy", accounts => {
+  describe("WitnetParser Requests Board Proxy test suite:", () => {
     const contractOwner = accounts[0]
     const requestSender = accounts[1]
 
@@ -24,8 +24,8 @@ contract("Witnet Requests Board Proxy", accounts => {
     let wrb
 
     before(async () => {
-      witnet = await Witnet.deployed()
-      await WitnetRequestBoard.link(Witnet, witnet.address)
+      witnet = await WitnetParser.deployed()
+      await WitnetRequestBoard.link(WitnetParser, witnet.address)
       wrbInstance1 = await WitnetRequestBoard.new([contractOwner], true)
       wrbInstance2 = await WitnetRequestBoard.new([contractOwner], true)
       wrbInstance3 = await WitnetRequestBoard.new([contractOwner], false)
@@ -37,18 +37,18 @@ contract("Witnet Requests Board Proxy", accounts => {
     it("should revert when inserting id 0", async () => {
       // It should revert because of non-existent id 0
       await truffleAssert.reverts(
-        wrb.upgradeDataRequest(0, { from: requestSender }),
-        "not yet posted"
+        wrb.upgradeRequest(0, { from: requestSender }),
+        "not in Posted"
       )
     })
 
-    it("should post a data request and update the requestsCount meter", async () => {
+    it("should post a data request and update the getNextId meter", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await WitnetRequest.new(drBytes)
 
       // Post the data request through the Proxy
-      const tx1 = wrb.postDataRequest(request.address, {
+      const tx1 = wrb.postRequest(request.address, {
         from: requestSender,
         value: web3.utils.toWei("0.5", "ether"),
       })
@@ -57,7 +57,7 @@ contract("Witnet Requests Board Proxy", accounts => {
 
       // The id of the data request
       const id1 = parseInt(decodeWitnetLogs(txReceipt1.logs, 0).id)
-      const nextId = await wrb.requestsCount.call()
+      const nextId = await wrb.getNextId.call()
 
       // check the nextId has been updated in the Proxy when posting the data request
       assert.equal((id1 + 1).toString(), nextId.toString())
@@ -113,7 +113,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       const request = await WitnetRequest.new(drBytes)
 
       // Post the data request through the Proxy
-      const tx1 = wrb.postDataRequest(request.address, {
+      const tx1 = wrb.postRequest(request.address, {
         from: requestSender,
         value: web3.utils.toWei("0.5", "ether"),
       })
@@ -151,7 +151,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       const request = await WitnetRequest.new(drBytes)
 
       // The id of the data request
-      const id2 = await wrb.postDataRequest.call(request.address, {
+      const id2 = await wrb.postRequest.call(request.address, {
         from: requestSender,
         value: web3.utils.toWei("0.5", "ether"),
       })
@@ -159,14 +159,14 @@ contract("Witnet Requests Board Proxy", accounts => {
 
       // Post the data request through the Proxy
       await waitForHash(
-        wrb.postDataRequest(request.address, {
+        wrb.postRequest(request.address, {
           from: requestSender,
           value: web3.utils.toWei("0.5", "ether"),
         })
       )
 
       // Reading previous data request (<3) should work:
-      await wrb.readDr(2)
+      await wrb.readRequest(2)
     })
 
     it("should post a data request to WRB and read the result", async () => {
@@ -175,7 +175,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       const request = await WitnetRequest.new(drBytes)
 
       // The id of the data request with result "hello"
-      const id2 = await wrb.postDataRequest.call(request.address, {
+      const id2 = await wrb.postRequest.call(request.address, {
         from: requestSender,
         value: web3.utils.toWei("0.5", "ether"),
       })
@@ -183,14 +183,14 @@ contract("Witnet Requests Board Proxy", accounts => {
 
       // Post the data request through the Proxy
       await waitForHash(
-        wrb.postDataRequest(request.address, {
+        wrb.postRequest(request.address, {
           from: requestSender,
           value: web3.utils.toWei("0.5", "ether"),
         })
       )
 
       // Read the actual result of the DR
-      const result = await wrb.readResult.call(id2)
+      const result = await wrb.readResponseWitnetResult.call(id2)
       assert.equal(result, web3.utils.fromAscii("hello"))
     })
 
@@ -201,7 +201,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       })
 
       // Read the actual result of the DR
-      const result = await wrb.readResult.call(4)
+      const result = await wrb.readResponseWitnetResult.call(4)
       assert.equal(result, web3.utils.fromAscii("hello"))
     })
 
@@ -212,15 +212,17 @@ contract("Witnet Requests Board Proxy", accounts => {
 
       await truffleAssert.reverts(
         wrb.destroyResult(4, { from: contractOwner }),
-        "only actual requestor"
+        "only requestor"
       )
       const tx = await wrb.destroyResult(4, { from: requestSender }) // should work
       assert.equal(tx.logs[0].args[1], requestSender)
     })
 
-    it("gets empty bytecode from destroyed DRs", async () => {
-      const bytecode = await wrb.readDataRequest.call(4)
-      assert.equal(bytecode, null)
+    it("fails if trying to get bytecode from destroyed DRs", async () => {
+      await truffleAssert.reverts(
+        wrb.readRequestBytecode.call(4),
+        "destroyed"
+      )
     })
 
     it("fails if trying to upgrade a non upgradable implementation", async () => {

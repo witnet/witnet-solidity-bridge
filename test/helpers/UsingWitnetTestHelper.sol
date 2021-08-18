@@ -12,35 +12,44 @@ import "../../contracts/UsingWitnet.sol";
  * @author Witnet Foundation
  */
 contract UsingWitnetTestHelper is UsingWitnet {
-  using Witnet for WitnetData.Result;
+  using WitnetParserLib for Witnet.Result;
 
-  WitnetData.Result public result;
+  Witnet.Result public result;
 
-  constructor (address _wrbAddress) UsingWitnet(_wrbAddress) { }
+  constructor (WitnetRequestBoard _wrb)
+    UsingWitnet(_wrb)
+  {}
 
-  function _witnetPostRequest(WitnetRequest _request) external payable returns(uint256 id) {
-    return witnetPostRequest(_request);
+  function witnetPostRequest(IWitnetRadon _script)
+    external payable
+    returns(uint256 id)
+  {
+    return _witnetPostRequest(_script);
   }
 
-  function _witnetUpgradeRequest(uint256 _id) external payable {
-    witnetUpgradeRequest(_id);
+  function witnetUpgradeRequest(uint256 _id)
+    external payable
+  {
+    _witnetUpgradeRequest(_id);
   }
 
-  function _witnetReadResult(uint256 _requestId) external returns (WitnetData.Result memory) {
-    result = witnetReadResult(_requestId);
+  function witnetReadResult(uint256 _requestId)
+    external
+    returns (Witnet.Result memory)
+  {
+    result = _witnetReadResult(_requestId);
     return result;
   }
 
-  function _witnetEstimateGasCost(uint256 _gasPrice) external view returns(uint256) {
-    return witnetEstimateGasCost(_gasPrice);
+  function witnetEstimateGasCost(uint256 _gasPrice) external view returns (uint256) {
+    return _witnetEstimateGasCost(_gasPrice);
   }
 
-  function _witnetAsUint64() external view returns(uint64) {
+  function witnetAsUint64() external view returns (uint64) {
     return result.asUint64();
   }
 
-  function _witnetCheckRequestResolved(uint256 _id) external view returns (bool) {
-    // If the result of the data request in Witnet is not the default, then it means that it has been reported as resolved.
-    return WitnetRequestBoardInterface(_WRB).readDrTxHash(_id) != 0;
+  function witnetCheckRequestResolved(uint256 _id) external view returns (bool) {
+    return _witnetCheckRequestResolved(_id);
   }
 }

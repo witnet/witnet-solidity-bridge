@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./WitnetData.sol";
+import "./Witnet.sol";
 
 /// @title A convenient wrapper around the `bytes memory` type that exposes a buffer-like interface
 /// @notice The buffer has an inner cursor that tracks the final offset of every read, i.e. any subsequent read will
@@ -10,7 +10,8 @@ import "./WitnetData.sol";
 /// @dev `uint32` is used here for `cursor` because `uint16` would only enable seeking up to 8KB, which could in some
 /// theoretical use cases be exceeded. Conversely, `uint32` supports up to 512MB, which cannot credibly be exceeded.
 /// @author The Witnet Foundation.
-library BufferLib {
+library WitnetBuffer {
+
   // Ensures we access an existing index in an array
   modifier notOutOfBounds(uint32 index, uint256 length) {
     require(index < length, "Tried to read from a consumed Buffer (must rewind it first)");
@@ -18,10 +19,10 @@ library BufferLib {
   }
 
   /// @notice Read and consume a certain amount of bytes from the buffer.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @param _length How many bytes to read and consume from the buffer.
   /// @return A `bytes memory` containing the first `_length` bytes from the buffer, counting from the cursor position.
-  function read(WitnetData.Buffer memory _buffer, uint32 _length) internal pure returns (bytes memory) {
+  function read(Witnet.Buffer memory _buffer, uint32 _length) internal pure returns (bytes memory) {
     // Make sure not to read out of the bounds of the original bytes
     require(_buffer.cursor + _length <= _buffer.data.length, "Not enough bytes in buffer when reading");
 
@@ -50,21 +51,21 @@ library BufferLib {
   }
 
   /// @notice Read and consume the next byte from the buffer.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @return The next byte in the buffer counting from the cursor position.
-  function next(WitnetData.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor, _buffer.data.length) returns (bytes1) {
+  function next(Witnet.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor, _buffer.data.length) returns (bytes1) {
     // Return the byte at the position marked by the cursor and advance the cursor all at once
     return _buffer.data[_buffer.cursor++];
   }
 
   /// @notice Move the inner cursor of the buffer to a relative or absolute position.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @param _offset How many bytes to move the cursor forward.
   /// @param _relative Whether to count `_offset` from the last position of the cursor (`true`) or the beginning of the
   /// buffer (`true`).
   /// @return The final position of the cursor (will equal `_offset` if `_relative` is `false`).
   // solium-disable-next-line security/no-assign-params
-  function seek(WitnetData.Buffer memory _buffer, uint32 _offset, bool _relative) internal pure returns (uint32) {
+  function seek(Witnet.Buffer memory _buffer, uint32 _offset, bool _relative) internal pure returns (uint32) {
     // Deal with relative offsets
     if (_relative) {
       require(_offset + _buffer.cursor > _offset, "Integer overflow when seeking");
@@ -78,23 +79,23 @@ library BufferLib {
 
   /// @notice Move the inner cursor a number of bytes forward.
   /// @dev This is a simple wrapper around the relative offset case of `seek()`.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @param _relativeOffset How many bytes to move the cursor forward.
   /// @return The final position of the cursor.
-  function seek(WitnetData.Buffer memory _buffer, uint32 _relativeOffset) internal pure returns (uint32) {
+  function seek(Witnet.Buffer memory _buffer, uint32 _relativeOffset) internal pure returns (uint32) {
     return seek(_buffer, _relativeOffset, true);
   }
 
   /// @notice Move the inner cursor back to the first byte in the buffer.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
-  function rewind(WitnetData.Buffer memory _buffer) internal pure {
+  /// @param _buffer An instance of `Witnet.Buffer`.
+  function rewind(Witnet.Buffer memory _buffer) internal pure {
     _buffer.cursor = 0;
   }
 
   /// @notice Read and consume the next byte from the buffer as an `uint8`.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @return The `uint8` value of the next byte in the buffer counting from the cursor position.
-  function readUint8(WitnetData.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor, _buffer.data.length) returns (uint8) {
+  function readUint8(Witnet.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor, _buffer.data.length) returns (uint8) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint8 value;
@@ -107,9 +108,9 @@ library BufferLib {
   }
 
   /// @notice Read and consume the next 2 bytes from the buffer as an `uint16`.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @return The `uint16` value of the next 2 bytes in the buffer counting from the cursor position.
-  function readUint16(WitnetData.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 1, _buffer.data.length) returns (uint16) {
+  function readUint16(Witnet.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 1, _buffer.data.length) returns (uint16) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint16 value;
@@ -122,9 +123,9 @@ library BufferLib {
   }
 
   /// @notice Read and consume the next 4 bytes from the buffer as an `uint32`.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @return The `uint32` value of the next 4 bytes in the buffer counting from the cursor position.
-  function readUint32(WitnetData.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 3, _buffer.data.length) returns (uint32) {
+  function readUint32(Witnet.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 3, _buffer.data.length) returns (uint32) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint32 value;
@@ -137,9 +138,9 @@ library BufferLib {
   }
 
   /// @notice Read and consume the next 8 bytes from the buffer as an `uint64`.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @return The `uint64` value of the next 8 bytes in the buffer counting from the cursor position.
-  function readUint64(WitnetData.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 7, _buffer.data.length) returns (uint64) {
+  function readUint64(Witnet.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 7, _buffer.data.length) returns (uint64) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint64 value;
@@ -152,9 +153,9 @@ library BufferLib {
   }
 
   /// @notice Read and consume the next 16 bytes from the buffer as an `uint128`.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @return The `uint128` value of the next 16 bytes in the buffer counting from the cursor position.
-  function readUint128(WitnetData.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 15, _buffer.data.length) returns (uint128) {
+  function readUint128(Witnet.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 15, _buffer.data.length) returns (uint128) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint128 value;
@@ -168,8 +169,8 @@ library BufferLib {
 
   /// @notice Read and consume the next 32 bytes from the buffer as an `uint256`.
   /// @return The `uint256` value of the next 32 bytes in the buffer counting from the cursor position.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
-  function readUint256(WitnetData.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 31, _buffer.data.length) returns (uint256) {
+  /// @param _buffer An instance of `Witnet.Buffer`.
+  function readUint256(Witnet.Buffer memory _buffer) internal pure notOutOfBounds(_buffer.cursor + 31, _buffer.data.length) returns (uint256) {
     bytes memory bytesValue = _buffer.data;
     uint32 offset = _buffer.cursor;
     uint256 value;
@@ -187,9 +188,9 @@ library BufferLib {
   /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `float16`
   /// use cases. In other words, the integer output of this method is 10,000 times the actual value. The input bytes are
   /// expected to follow the 16-bit base-2 format (a.k.a. `binary16`) in the IEEE 754-2008 standard.
-  /// @param _buffer An instance of `WitnetData.Buffer`.
+  /// @param _buffer An instance of `Witnet.Buffer`.
   /// @return The `uint32` value of the next 4 bytes in the buffer counting from the cursor position.
-  function readFloat16(WitnetData.Buffer memory _buffer) internal pure returns (int32) {
+  function readFloat16(Witnet.Buffer memory _buffer) internal pure returns (int32) {
     uint32 bytesValue = readUint16(_buffer);
     // Get bit at position 0
     uint32 sign = bytesValue & 0x8000;

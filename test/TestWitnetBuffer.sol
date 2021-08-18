@@ -4,19 +4,19 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "truffle/Assert.sol";
-import "../contracts/libs/BufferLib.sol";
+import "../contracts/libs/WitnetBuffer.sol";
 
 
-contract TestBuffer {
+contract TestWitnetBuffer {
 
-  using BufferLib for WitnetData.Buffer;
+  using WitnetBuffer for Witnet.Buffer;
 
   event Log(string _topic, uint256 _value);
 
   function testReadUint8() external {
     uint8 expected = 31;
     bytes memory data = abi.encodePacked(expected);
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
     uint8 actual = buf.readUint8();
 
     Assert.equal(uint(actual), uint(expected), "Read Uint8 from a Buffer");
@@ -25,7 +25,7 @@ contract TestBuffer {
   function testReadUint16() external {
     uint16 expected = 31415;
     bytes memory data = abi.encodePacked(expected);
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
 
     uint16 actual = buf.readUint16();
     Assert.equal(uint(actual), uint(expected), "Read Uint16 from a Buffer");
@@ -34,7 +34,7 @@ contract TestBuffer {
   function testReadUint32() external {
     uint32 expected = 3141592653;
     bytes memory data = abi.encodePacked(expected);
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
 
     uint32 actual = buf.readUint32();
     Assert.equal(uint(actual), uint(expected), "Read Uint32 from a Buffer");
@@ -43,7 +43,7 @@ contract TestBuffer {
   function testReadUint64() external {
     uint64 expected = 3141592653589793238;
     bytes memory data = abi.encodePacked(expected);
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
 
     uint64 actual = buf.readUint64();
     Assert.equal(uint(actual), uint(expected), "Read Uint64 from a Buffer");
@@ -52,7 +52,7 @@ contract TestBuffer {
   function testReadUint128() external {
     uint128 expected = 314159265358979323846264338327950288419;
     bytes memory data = abi.encodePacked(expected);
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
 
     uint128 actual = buf.readUint128();
     Assert.equal(uint(actual), uint(expected), "Read Uint128 from a Buffer");
@@ -61,7 +61,7 @@ contract TestBuffer {
   function testReadUint256() external {
     uint256 expected = 31415926535897932384626433832795028841971693993751058209749445923078164062862;
     bytes memory data = abi.encodePacked(expected);
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
 
     uint256 actual = buf.readUint256();
     Assert.equal(uint(actual), uint(expected), "Read Uint64 from a Buffer");
@@ -71,7 +71,7 @@ contract TestBuffer {
     uint8 small = 31;
     uint64 big = 3141592653589793238;
     bytes memory data = abi.encodePacked(small, big);
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
 
     buf.readUint8();
     uint64 actualBig = buf.readUint64();
@@ -85,7 +85,7 @@ contract TestBuffer {
     uint8 input = 0xAA;
     bytes memory data = abi.encodePacked(input);
 
-    TestBuffer(address(throwProxy)).errorReadAsUint16(data);
+    TestWitnetBuffer(address(throwProxy)).errorReadAsUint16(data);
     (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint8 as uint16 should fail");
   }
@@ -97,7 +97,7 @@ contract TestBuffer {
     uint16 input = 0xAAAA;
     bytes memory data = abi.encodePacked(input);
 
-    TestBuffer(address(throwProxy)).errorReadAsUint32(data);
+    TestWitnetBuffer(address(throwProxy)).errorReadAsUint32(data);
     (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint16 as uint32 should fail");
   }
@@ -109,7 +109,7 @@ contract TestBuffer {
     uint32 input = 0xAAAAAAAA;
     bytes memory data = abi.encodePacked(input);
 
-    TestBuffer(address(throwProxy)).errorReadAsUint64(data);
+    TestWitnetBuffer(address(throwProxy)).errorReadAsUint64(data);
     (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint32 as uint64 should fail");
   }
@@ -121,7 +121,7 @@ contract TestBuffer {
     uint64 input = 0xAAAAAAAAAAAAAAAA;
     bytes memory data = abi.encodePacked(input);
 
-    TestBuffer(address(throwProxy)).errorReadAsUint128(data);
+    TestWitnetBuffer(address(throwProxy)).errorReadAsUint128(data);
     (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint64 as uint128 should fail");
   }
@@ -133,7 +133,7 @@ contract TestBuffer {
     uint128 input = 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;
     bytes memory data = abi.encodePacked(input);
 
-    TestBuffer(address(throwProxy)).errorReadAsUint256(data);
+    TestWitnetBuffer(address(throwProxy)).errorReadAsUint256(data);
     (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Reading uint128 as uint256 should fail");
   }
@@ -144,40 +144,40 @@ contract TestBuffer {
     bytes memory error;
     uint8 input = 0xAA;
     bytes memory data = abi.encodePacked(input);
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
     buf.next();
 
-    TestBuffer(address(throwProxy)).errorReadNext(buf);
+    TestWitnetBuffer(address(throwProxy)).errorReadNext(buf);
     (r, error) = throwProxy.execute{gas: 100000}();
     Assert.isFalse(r, "Next for out of bounds fail");
   }
 
   function errorReadAsUint16(bytes memory data) public {
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
     buf.readUint16();
   }
 
   function errorReadAsUint32(bytes memory data) public {
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
     buf.readUint32();
   }
 
   function errorReadAsUint64(bytes memory data) public {
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
     buf.readUint64();
   }
 
   function errorReadAsUint128(bytes memory data) public {
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
     buf.readUint128();
   }
 
   function errorReadAsUint256(bytes memory data) public {
-    WitnetData.Buffer memory buf = WitnetData.Buffer(data, 0);
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 0);
     buf.readUint256();
   }
 
-  function errorReadNext(WitnetData.Buffer memory buf) public {
+  function errorReadNext(Witnet.Buffer memory buf) public {
     buf.next();
   }
 
@@ -192,11 +192,14 @@ contract ThrowProxy {
     target = _target;
   }
 
-  fallback () external {
+  // solhint-disable payable-fallback
+  fallback () external {    
     data = msg.data;
   }
 
+
   function execute() public returns (bool, bytes memory) {
+    // solhint-disable-next-line
     return target.call(data);
   }
 }

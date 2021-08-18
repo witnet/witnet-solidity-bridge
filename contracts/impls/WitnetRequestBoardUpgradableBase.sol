@@ -10,11 +10,11 @@ import "../patterns/Proxiable.sol";
 import "../patterns/Upgradable.sol";
 
 // Eventual deployment dependencies:
-import "../WitnetProxy.sol";
+import "./WitnetProxy.sol";
 
-/// @title Witnet Board base contract, with an Upgradable (and Destructible) touch.
+/// @title Witnet Request Board base contract, with an Upgradable (and Destructible) touch.
 /// @author The Witnet Foundation.
-abstract contract WitnetBoardUpgradableBase
+abstract contract WitnetRequestBoardUpgradableBase
     is
         Proxiable,
         Upgradable,
@@ -33,7 +33,7 @@ abstract contract WitnetBoardUpgradableBase
 
     /// @dev Reverts if proxy delegatecalls to unexistent method.
     fallback() external payable {
-        revert("WitnetBoardUpgradableBase: not implemented");
+        revert("WitnetRequestBoardUpgradableBase: not implemented");
     }
 
     // ================================================================================================================

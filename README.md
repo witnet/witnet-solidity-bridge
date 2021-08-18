@@ -47,7 +47,7 @@ This table contains all the `WinetProxy` instances that act as entry-points for 
 
 The `WitnetRequestBoard` implements the following functionality:
 
-- **`estimateGasCost(uint256 _gasPrice)`**:
+- **`estimateReward(uint256 _gasPrice)`**:
   - _Description_: 
     - Estimates the minimal amount of reward needed to post a Witnet data request into the WRB, for a given gas price.
   - _Inputs_:
@@ -63,7 +63,7 @@ The `WitnetRequestBoard` implements the following functionality:
   - _Returns_:
     - The Witnet-solved result of the given data request, as CBOR-encoded `bytes`.
   
-- **`postDataRequest(address _witnetRequest)`**:
+- **`postRequest(address _witnetRequest)`**:
   - _Description_: 
     - Posts a Witnet data request into the WRB in the expectation that it will be eventually relayed and resolved 
   by Witnet, with `msg.value` as reward.
@@ -72,7 +72,7 @@ The `WitnetRequestBoard` implements the following functionality:
   - _Returns_:
     - *_id*: the unique identifier of the data request.
 
-- **`readDataRequest(uint256 _id)`**:
+- **`readRequestBytecode(uint256 _id)`**:
   - _Description_:
     - Retrieves the RADON script bytecode of a previously posted Witnet data request.
   - _Inputs_:
@@ -80,7 +80,7 @@ The `WitnetRequestBoard` implements the following functionality:
   - _Returns_:
     - The Witnet RADON script bytecode, as `bytes`.
 
-- **`readResult(uint256 _id)`**:
+- **`readResponseWitnetResult(uint256 _id)`**:
   - _Description_:
     - Retrieves the Witnet-solved result (if already available) of a previously posted Witnet request.
   - _Inputs_:
@@ -88,7 +88,7 @@ The `WitnetRequestBoard` implements the following functionality:
   - _Returns_:
     - The Witnet-solved result of the given data request, as CBOR-encoded `bytes`.
 
-- **`readDrTxHash(uint256 _id)`**:
+- **`readResponseWitnetProof(uint256 _id)`**:
   - _Description_:
     - Retrieves the unique hash of the Witnet tally transaction that actually solved the given data request. 
   - _Inputs_:
@@ -96,7 +96,7 @@ The `WitnetRequestBoard` implements the following functionality:
   - _Returns_:
     - The Witnet tally transaction hash, if already solved, or zero if not yet solved.
 
-- **`requestsCount()`**:
+- **`getNextId()`**:
   - _Description_: returns count of Witnet data requests that have been posted so far within the WRB.
 
 - **`reportResult(uint256 _id, uint256 _txhash, bytes _result)`**:
@@ -107,7 +107,7 @@ The `WitnetRequestBoard` implements the following functionality:
     - `_txHash`: the unique hash of the Witnet tally transaction that actually solved the given data request.
     - `_result`: the Witnet-solved result of the given data request (CBOR-encoded).
 
-- **`upgradeDataRequest(uint256 _id)`**:
+- **`upgradeRequest(uint256 _id)`**:
   - _Description_: increments the reward of a Witnet data request by 
   adding more value to it. The new data request reward will be increased by `msg.value`.
   - _Inputs_:
@@ -202,11 +202,11 @@ Please, have a look at the [`witnet/witnet-price-feed-examples`](https://github.
 ·······················|······················|·············|·············|·············|··············|
 |  WitnetRequestBoard  ·  initialize          ·          -  ·          -  ·      74032  ·          30  ·
 ·······················|······················|·············|·············|·············|··············|
-|  WitnetRequestBoard  ·  postDataRequest     ·     144465  ·     196232  ·     164083  ·          33  ·
+|  WitnetRequestBoard  ·  postRequest     ·     144465  ·     196232  ·     164083  ·          33  ·
 ·······················|······················|·············|·············|·············|··············|
 |  WitnetRequestBoard  ·  reportResult        ·      77019  ·      79145  ·      77643  ·          17  ·
 ·······················|······················|·············|·············|·············|··············|
-|  WitnetRequestBoard  ·  upgradeDataRequest  ·      30083  ·      35221  ·      33508  ·           6  ·
+|  WitnetRequestBoard  ·  upgradeRequest  ·      30083  ·      35221  ·      33508  ·           6  ·
 ·······················|······················|·············|·············|·············|··············|
 |  Deployments                                ·                                         ·  % of limit  ·
 ··············································|·············|·············|·············|··············|

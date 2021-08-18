@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.7.0 <0.9.0;
-import "../../contracts/libs/WitnetData.sol";
+import "../../contracts/impls/WitnetRadonBase.sol";
 
 /**
  * @title The serialized form of a Witnet data request
  */
-contract WitnetRequestTestHelper is WitnetRequest {
+contract WitnetRequestTestHelper is WitnetRadonBase {
 
  /**
   * @dev A `WitnetRequest` is constructed around a `bytes memory` value containing a well-formed Witnet data request serialized
@@ -16,7 +16,7 @@ contract WitnetRequestTestHelper is WitnetRequest {
   * mismatch and a data request could be resolved with the result of another.
   * @param _bytecode Witnet request in bytes.
   */
-  constructor(bytes memory _bytecode) WitnetRequest(_bytecode) {
+  constructor(bytes memory _bytecode) {
     bytecode = _bytecode;
   }
 

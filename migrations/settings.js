@@ -2,23 +2,23 @@ const packageJson = require("../package.json")
 module.exports = {
   artifacts: {
     default: {
-      CBOR: "CBOR",
-      Witnet: "Witnet",
+      WitnetDecoderLib: "WitnetDecoderLib",
+      WitnetParserLib: "WitnetParserLib",
       WitnetProxy: "WitnetProxy",
-      WitnetRequestBoard: "WitnetRequestBoardV03",
+      WitnetRequestBoard: "WitnetRequestBoardTrustableEVM",
     },
     omgx: {
-      WitnetRequestBoard: "WitnetRequestBoardV03OVM",
+      WitnetRequestBoard: "WitnetRequestBoardTrustableOVM",
     },
   },
   constructorParams: {
     default: {
-      WitnetRequestBoard: [true, fromAscii(packageJson.version)],
+      WitnetRequestBoard: [true, fromAscii(packageJson.version + "-trustable")],
     },
     omgx: {
       WitnetRequestBoard: [
         true, // _isUpgradable
-        fromAscii(packageJson.version), // _versionTag
+        fromAscii(packageJson.version + "-trustable-boba"), // _versionTag
         15000000, // _l2GasPrice
         "0x4200000000000000000000000000000000000006", // _OVM_ETH
       ],

@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../../contracts/WitnetProxy.sol";
+import "../../contracts/impls/WitnetProxy.sol";
 
 /**
  * @title Test Helper for the WitnetRequestBoardProxy contract

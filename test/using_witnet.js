@@ -4,16 +4,16 @@ const { expectRevert } = require("@openzeppelin/test-helpers")
 
 const WRB = artifacts.require(settings.artifacts.default.WitnetRequestBoard)
 const WRBProxy = artifacts.require(settings.artifacts.default.WitnetProxy)
-const Witnet = artifacts.require(settings.artifacts.default.Witnet)
+const WitnetParser = artifacts.require(settings.artifacts.default.WitnetParserLib)
 
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
-const WitnetRequest = artifacts.require("WitnetRequest")
+const WitnetRequest = artifacts.require("WitnetRequestTestHelper")
 
 const truffleAssert = require("truffle-assertions")
 
 contract("UsingWitnet", accounts => {
   describe("UsingWitnet \"happy path\" test case. " +
-    "This covers pretty much all the life cycle of a Witnet request:", () => {
+    "This covers pretty much all the life cycle of a WitnetParser request:", () => {
     const requestHex = "0x01"
     const resultHex = "0x1a002fefd8"
     const resultDecimal = 3141592
@@ -28,7 +28,7 @@ contract("UsingWitnet", accounts => {
     const reporterAccount = accounts[1]
 
     before(async () => {
-      witnet = await Witnet.deployed()
+      witnet = await WitnetParser.deployed()
       if (!proxy) {
         // create one and only proxy contract:
         proxy = await WRBProxy.new({ from: ownerAccount })
@@ -48,19 +48,19 @@ contract("UsingWitnet", accounts => {
         // ...from owner account.
         { from: ownerAccount }
       )
-      await UsingWitnetTestHelper.link(Witnet, witnet.address)
+      await UsingWitnetTestHelper.link(WitnetParser, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(proxy.address)
       lastAccount0Balance = await web3.eth.getBalance(accounts[0])
     })
 
-    it("should create a Witnet request", async () => {
+    it("should create a WitnetParser request", async () => {
       request = await WitnetRequest.new(requestHex)
       const internalBytes = await request.bytecode()
       assert.equal(internalBytes, requestHex)
     })
 
-    it("should post a Witnet request into the wrb", async () => {
-      requestId = await returnData(clientContract._witnetPostRequest(
+    it("should post a WitnetParser request into the wrb", async () => {
+      requestId = await returnData(clientContract.witnetPostRequest(
         request.address,
         {
           from: accounts[1],
@@ -71,13 +71,13 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should have posted and read the same bytes", async () => {
-      const internalBytes = await wrb.readDataRequest(requestId)
+      const internalBytes = await wrb.readRequestBytecode(requestId)
       assert.equal(internalBytes, requestHex)
     })
 
     it("should have set the correct rewards", async () => {
       // Retrieve rewards
-      const drInfo = await wrb.readDr(requestId)
+      const drInfo = await wrb.readRequest(requestId)
       const drReward = drInfo.reward.toString()
       assert.equal(drReward, reward)
     })
@@ -98,8 +98,8 @@ contract("UsingWitnet", accounts => {
       assert.equal(wrbBalance, reward)
     })
 
-    it("should upgrade the rewards of an existing Witnet request", async () => {
-      await returnData(clientContract._witnetUpgradeRequest(requestId, {
+    it("should upgrade the rewards of an existing WitnetParser request", async () => {
+      await returnData(clientContract.witnetUpgradeRequest(requestId, {
         from: accounts[1],
         value: reward,
       }))
@@ -107,7 +107,7 @@ contract("UsingWitnet", accounts => {
 
     it("should have upgraded the rewards correctly", async () => {
       // Retrieve reward
-      const drInfo = await wrb.readDr(requestId)
+      const drInfo = await wrb.readRequest(requestId)
       const drReward = drInfo.reward.toString()
       assert.equal(drReward, reward * 2)
     })
@@ -139,23 +139,23 @@ contract("UsingWitnet", accounts => {
       await returnData(wrb.reportResult(requestId, drTxHash, resultHex, {
         from: reporterAccount,
       }))
-      const result = await wrb.readResult(requestId)
+      const result = await wrb.readResponseWitnetResult(requestId)
       assert.equal(result, resultHex)
     })
 
     it("should check if the request is resolved", async () => {
-      assert.equal(await clientContract._witnetCheckRequestResolved(requestId), true)
+      assert.equal(await clientContract.witnetCheckRequestResolved(requestId), true)
     })
 
     it("should pull the result from the WRB back into the client contract", async () => {
-      await clientContract._witnetReadResult(requestId, { from: accounts[0] })
+      await clientContract.witnetReadResult(requestId, { from: accounts[0] })
       result = await clientContract.result()
       assert.equal(result.success, true)
       assert.equal(result.value.buffer.data, resultHex)
     })
 
     it("should decode result successfully", async () => {
-      const actualResultDecimal = await clientContract._witnetAsUint64.call()
+      const actualResultDecimal = await clientContract.witnetAsUint64.call()
       assert.equal(actualResultDecimal.toString(), resultDecimal.toString())
     })
   })
@@ -173,7 +173,7 @@ contract("UsingWitnet", accounts => {
     let witnet, clientContract, wrb, proxy, request, requestId, result
 
     before(async () => {
-      witnet = await Witnet.deployed()
+      witnet = await WitnetParser.deployed()
       if (!proxy) {
         // create one and only proxy contract:
         proxy = await WRBProxy.new()
@@ -191,18 +191,18 @@ contract("UsingWitnet", accounts => {
           { from: ownerAccount }
         )
       }
-      await UsingWitnetTestHelper.link(Witnet, witnet.address)
+      await UsingWitnetTestHelper.link(WitnetParser, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(wrb.address)
     })
 
-    it("should create a Witnet request", async () => {
+    it("should create a WitnetParser request", async () => {
       request = await WitnetRequest.new(requestHex)
       const internalBytes = await request.bytecode()
       assert.equal(internalBytes, requestHex)
     })
 
     it("should pass the data request to the wrb", async () => {
-      requestId = await returnData(clientContract._witnetPostRequest(
+      requestId = await returnData(clientContract.witnetPostRequest(
         request.address,
         {
           from: accounts[0],
@@ -213,7 +213,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should check the request is not yet resolved", async () => {
-      assert.equal(await clientContract._witnetCheckRequestResolved(requestId), false)
+      assert.equal(await clientContract.witnetCheckRequestResolved(requestId), false)
     })
 
     it("should fail if posting result from unauthorized reporter", async () => {
@@ -227,27 +227,27 @@ contract("UsingWitnet", accounts => {
       await returnData(wrb.reportResult(requestId, drTxHash, resultHex, {
         from: reporterAccount,
       }))
-      const result = await wrb.readResult(requestId)
+      const result = await wrb.readResponseWitnetResult(requestId)
       assert.equal(result, resultHex)
     })
 
     it("should pull the result from the WRB back to the client contract", async () => {
-      await clientContract._witnetReadResult(requestId, { from: accounts[1] })
+      await clientContract.witnetReadResult(requestId, { from: accounts[1] })
       result = await clientContract.result()
       assert.equal(result.value.buffer.data, resultHex)
     })
 
     it("should detect the result is false", async () => {
-      await clientContract._witnetReadResult(requestId, { from: accounts[1] })
+      await clientContract.witnetReadResult(requestId, { from: accounts[1] })
       result = await clientContract.result()
       assert.equal(result.success, false)
     })
 
     it("should be able to estimate gas cost and post the DR", async () => {
       const gasPrice = 20000
-      const estimatedReward = await clientContract._witnetEstimateGasCost.call(gasPrice)
+      const estimatedReward = await clientContract.witnetEstimateGasCost.call(gasPrice)
       await truffleAssert.passes(
-        clientContract._witnetPostRequest(request.address, {
+        clientContract.witnetPostRequest(request.address, {
           from: accounts[1],
           value: estimatedReward,
           gasPrice: gasPrice,

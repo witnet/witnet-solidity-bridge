@@ -5,39 +5,39 @@ const settings = require("../settings")
 const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
 
 module.exports = async function (deployer, network) {
-  let Witnet, CBOR
+  let WitnetParserLib, WitnetDecoderLib
   const addresses = require("../addresses")[realm][network.split("-")[0]]
 
-  // First: try to find CBOR artifact, and deploy it if not found in the addresses file:
+  // First: try to find WitnetDecoderLib artifact, and deploy it if not found in the addresses file:
   try {
-    CBOR = artifacts.require(artifactsName.CBOR)
+    WitnetDecoderLib = artifacts.require(artifactsName.WitnetDecoderLib)
   } catch {
-    console.log("\n   Skipped: 'CBOR' artifact not found.")
+    console.log("\n   Skipped: 'WitnetDecoderLib' artifact not found.")
     return
   }
-  if (!CBOR.isDeployed() || CBOR.address !== addresses.CBOR) {
-    if (addresses) CBOR.address = addresses.CBOR
+  if (!WitnetDecoderLib.isDeployed() || WitnetDecoderLib.address !== addresses.WitnetDecoderLib) {
+    if (addresses) WitnetDecoderLib.address = addresses.WitnetDecoderLib
   }
-  if (!CBOR.isDeployed() || isNullAddress(CBOR.address)) {
-    await deployer.deploy(CBOR)
+  if (!WitnetDecoderLib.isDeployed() || isNullAddress(WitnetDecoderLib.address)) {
+    await deployer.deploy(WitnetDecoderLib)
   } else {
-    console.log(`\n   Skipped: 'CBOR' deployed at ${CBOR.address}.`)
+    console.log(`\n   Skipped: 'WitnetDecoderLib' deployed at ${WitnetDecoderLib.address}.`)
   }
-  // Second: try to find Witnet artifact, and deploy it if not found in the addesses file:
+  // Second: try to find WitnetParserLib artifact, and deploy it if not found in the addesses file:
   try {
-    Witnet = artifacts.require(artifactsName.Witnet)
+    WitnetParserLib = artifacts.require(artifactsName.WitnetParserLib)
   } catch {
-    console.log("   Skipped: 'Witnet' artifact not found.\n")
+    console.log("   Skipped: 'WitnetParserLib' artifact not found.\n")
     return
   }
-  if (!Witnet.isDeployed() || Witnet.address !== addresses.Witnet) {
-    if (addresses) Witnet.address = addresses.Witnet
+  if (!WitnetParserLib.isDeployed() || WitnetParserLib.address !== addresses.WitnetParserLib) {
+    if (addresses) WitnetParserLib.address = addresses.WitnetParserLib
   }
-  if (!Witnet.isDeployed() || isNullAddress(Witnet.address)) {
-    await deployer.link(CBOR, Witnet)
-    await deployer.deploy(Witnet)
+  if (!WitnetParserLib.isDeployed() || isNullAddress(WitnetParserLib.address)) {
+    await deployer.link(WitnetDecoderLib, WitnetParserLib)
+    await deployer.deploy(WitnetParserLib)
   } else {
-    console.log(`   Skipped: 'Witnet' deployed at ${Witnet.address}.\n`)
+    console.log(`   Skipped: 'WitnetParserLib' deployed at ${WitnetParserLib.address}.\n`)
   }
 }
 
