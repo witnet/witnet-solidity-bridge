@@ -13,10 +13,10 @@
       "WitnetRequestBoard": ""
     },
     "ethereum.rinkeby" : {
-      "WitnetDecoderLib": "0x2ABc73071B785F5218fDCD5112d9857062Eedc3d",
-      "WitnetParserLib": "0x433aa81DE05D766dDcCe4E5BCBa836f3b0E405a8",
-      "WitnetProxy": "0x7ddceeEDdD4a4cB2bD7Ca9aAe8Ead5F051e19AD8",
-      "WitnetRequestBoard": "0x21d7319c9B4197C1dEb648DbE9FA71e605e72Ec7"
+      "WitnetDecoderLib": "0x86D1fc144678BE54eca868B4A604c017bCFC8F97",
+      "WitnetParserLib": "0x7D470A0dA6f1eDFe230168420f2ea118133B6C67",
+      "WitnetProxy": "0x32B3E31FAaF66186227CBD8d30545914959abF41",
+      "WitnetRequestBoard": "0x6626C8CB9F62271c62dafF55EEA9f15cA2886fc3"
     },
     "ethereum.mainnet": {
       "WitnetDecoderLib": "",

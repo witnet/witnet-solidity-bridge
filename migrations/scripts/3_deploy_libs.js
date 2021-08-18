@@ -1,12 +1,12 @@
 const { merge } = require("lodash")
 
 const realm = process.env.WITNET_EVM_REALM ? process.env.WITNET_EVM_REALM.toLowerCase() : "default"
-const settings = require("../settings")
+const settings = require("../settings.witnet")
 const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
 
 module.exports = async function (deployer, network) {
   let WitnetParserLib, WitnetDecoderLib
-  const addresses = require("../addresses")[realm][network.split("-")[0]]
+  const addresses = require("../addresses.witnet")[realm][network.split("-")[0]]
 
   // First: try to find WitnetDecoderLib artifact, and deploy it if not found in the addresses file:
   try {
@@ -23,7 +23,7 @@ module.exports = async function (deployer, network) {
   } else {
     console.log(`\n   Skipped: 'WitnetDecoderLib' deployed at ${WitnetDecoderLib.address}.`)
   }
-  // Second: try to find WitnetParserLib artifact, and deploy it if not found in the addesses file:
+  // Second: try to find WitnetParserLib artifact, and deploy it if not found in the addresses file:
   try {
     WitnetParserLib = artifacts.require(artifactsName.WitnetParserLib)
   } catch {

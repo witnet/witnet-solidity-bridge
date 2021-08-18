@@ -1,6 +1,6 @@
 require("dotenv").config()
 
-let addresses = require("../migrations/addresses")
+let addresses = require("../migrations/addresses.witnet")
 let realm, network
 
 if (process.argv.length >= 3) {

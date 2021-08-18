@@ -4,18 +4,20 @@
 
 This repository provides several deployable contracts:
 
-- `WitnetProxy`, that routes Witnet data requests to a currently active `WitnetRequestBoard` implementation.
-- `WitnetRequest`, used as a means to encapsulate CBOR-encoded Witnet RADON scripts.
-- `WitnetRequestBoard` (WRB), which implements all required functionality to relay Witnet data requests (i.e. encapsulated [Witnet RADON scripts](https://docs.witnet.io/protocol/data-requests/overview/)) from Ethereum to the Witnet mainnet, as well as to relay Witnet-solved results back to Ethereum.
+- `WitnetParseLib`, helper library useful for parsing Witnet-solved results to previously posted Witnet Data Requests.
+- `WitnetProxy`, a delegate-proxy contract that routes Witnet Data Requests to a currently active `WitnetRequestBoard` implementation.
+- Multiple implementations of the `WitnetRequestBoard` interface (WRB), which declares all required functionality to relay encapsulated [Witnet Data Requests](https://docs.witnet.io/protocol/data-requests/overview/) from Ethereum to the Witnet mainnet, as well as to relay Witnet-solved results back to Ethereum.
 
 The repository also provides:
 
 - `UsingWitnet`, an inheritable abstract contract that injects methods for conveniently interacting with the WRB.
+- `WitnetRequest`, used as a means to encapsulate unmodifiable Witnet Data Requests.
+- `WitnetRequestBase`, useful as a base contract to implement your own modifiable Witnet Data Requests.
 
 
-## WitnetProxy
+## **WitnetProxy**
 
-`WitnetProxy` is an upgradable delegate-proxy contract that routes Witnet data requests coming from a `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
+`WitnetProxy` is an upgradable delegate-proxy contract that routes Witnet Data Requests coming from a `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
 
 This table contains all the `WinetProxy` instances that act as entry-points for the latest versions of the `WitnetRequestBoard` approved and deployed by the [**Witnet Foundation**](https://witnet.io), and that actually integrates with the **Witnet mainnet** from the following EVM-compatible blockchains:
 
@@ -32,115 +34,183 @@ This table contains all the `WinetProxy` instances that act as entry-points for 
   |              | Mainnet   | `` 
   | ------------ | --------- | ---------------------
 
+## **IWitnetRequest**
 
-## WitnetRequest
-
- A `WitnetRequest` is constructed around a `bytes` value containing a well-formed Witnet RADON script data request serialized
- using Protocol Buffers. The `WitnetRequest` base contract provides one single method:
+Used as a means to encapsulate Witnet Data Requests, that can eventually be posted to a `WitnetRequestBoard` implementation. The `bytecode()` of a `IWitnetRequest` must be constructed from the CBOR-encoded serialization of a [Witnet Data Request](https://docs.witnet.io/protocol/data-requests/overview/). The `IWitnetRequest` interface defines two methods:
 
 - **`bytecode()`**:
   - _Description_:
-    - Returns Witnet RADON script as a CBOR-encoded `bytes`. 
+    - Returns Witnet Data Request as a CBOR-encoded `bytes`. 
 
+- **`codehash()`**:
+  - _Description_:
+    - Returns SHA256 hash of Witnet Data Request as CBOR-encoded bytes.
 
-## WitnetRequestBoard
+## **WitnetRequestBoard**
 
-The `WitnetRequestBoard` implements the following functionality:
+From the point of view of a `UsingWitnet` contract, any given `WitnetRequestBoard` will always support the following interfaces:
 
-- **`estimateReward(uint256 _gasPrice)`**:
+- **`IWitnetRequestBoardEvents`**
+- **`IWitnetRequestBoardRequestor`**
+- **`IWitnetRequestBoardView`**
+
+### IWitnetRequestBoardEvents:
+
+- Event **`PostedRequest(uint256 queryId, address from)`**:
   - _Description_: 
-    - Estimates the minimal amount of reward needed to post a Witnet data request into the WRB, for a given gas price.
-  - _Inputs_:
-    - `_gasPrice`: the request contract address which includes the Witnet RADON script bytecode.
-  - _Returns_:
-    - The minimal reward amount. 
+    - Emitted when a Witnet Data Request is posted to the WRB.
+  - _Arguments_:
+    - `queryId`: the query id assigned to this new posting.
+    - `from`: the address from which the Witnet Data Request was posted.
 
-- **`destroyResult(uint256 _id)`**:
+- Event **`PostedResult(uint256 queryId, address from)`**:
+  - _Description_: 
+    - Emitted when a Witnet-solved result is reported to the WRB.
+  - _Arguments_:
+    - `queryId`: the id of the query the result refers to.
+    - `from`: the address from which the result was reported.
+
+- Event **`DeletedQuery(uint256 queryId, address from)`**:
+  - _Description_: 
+    - Emitted when all data related to given query is deleted from the WRB.
+  - _Arguments_:
+    - `queryId`: the id of the query that has been deleted.
+    - `from`: the address from which the result was reported.    
+
+### IWitnetRequestBoardRequestor:
+
+- **`postRequest(IWitnetRequest _request)`**:
+  - _Description_: 
+    - Posts a Witnet Data Request into the WRB in the expectation that it will be eventually relayed and resolved 
+  by the Witnet decentralized oracle network, with `msg.value` as reward.
+  - _Inputs_:
+    - `_request`: the actual `IWitnetRequest` contract address which provided the Witnet Data Request bytecode.
+  - _Returns_:
+    - *_id*: the unique identifier of the data request.
+
+- **`upgradeReward(uint256 _id)`**:
+  - _Description_: increments the reward of a Witnet data request by 
+  adding more value to it. The new data request reward will be increased by `msg.value`.
+  - _Inputs_:
+    - `_id`: the unique identifier of a previously posted Witnet data request.
+
+- **`deleteQuery(uint256 _id)`**:
   - _Description_:
     - Retrieves the Witnet-solved result (if already available) of a previously posted Witnet request, and removes it from the WRB storage.
   - _Inputs_:
     - `_id`: the unique identifier of a previously posted Witnet data request.
   - _Returns_:
     - The Witnet-solved result of the given data request, as CBOR-encoded `bytes`.
-  
-- **`postRequest(address _witnetRequest)`**:
+
+### IWitnetRequestBoardView:
+
+- **`estimateReward(uint256 _gasPrice)`**:
   - _Description_: 
-    - Posts a Witnet data request into the WRB in the expectation that it will be eventually relayed and resolved 
-  by Witnet, with `msg.value` as reward.
+    - Estimates the minimal amount of reward needed to post a Witnet data request into the WRB, for a given gas price.
   - _Inputs_:
-    - `_witnetRequest`: the actual `WitnetRequest` contract address which provided the Witnet RADON script bytecode.
-  - _Returns_:
-    - *_id*: the unique identifier of the data request.
+    - `_gasPrice`: the gas price for which we need to calculate the rewards.
 
-- **`readRequestBytecode(uint256 _id)`**:
+- **`getNextQueryId()`**:
   - _Description_:
-    - Retrieves the RADON script bytecode of a previously posted Witnet data request.
-  - _Inputs_:
-    - `_id`: the unique identifier of a previously posted Witnet data request.
-  - _Returns_:
-    - The Witnet RADON script bytecode, as `bytes`.
+    - Returns next query id to be generated by the Witnet Request Board.
 
-- **`readResponseWitnetResult(uint256 _id)`**:
-  - _Description_:
-    - Retrieves the Witnet-solved result (if already available) of a previously posted Witnet request.
-  - _Inputs_:
-    - `_id`: the unique identifier of a previously posted Witnet data request.
-  - _Returns_:
-    - The Witnet-solved result of the given data request, as CBOR-encoded `bytes`.
-
-- **`readResponseWitnetProof(uint256 _id)`**:
-  - _Description_:
-    - Retrieves the unique hash of the Witnet tally transaction that actually solved the given data request. 
-  - _Inputs_:
-    - `_id`: the unique identifier of a previously posted Witnet data request.
-  - _Returns_:
-    - The Witnet tally transaction hash, if already solved, or zero if not yet solved.
-
-- **`getNextId()`**:
-  - _Description_: returns count of Witnet data requests that have been posted so far within the WRB.
-
-- **`reportResult(uint256 _id, uint256 _txhash, bytes _result)`**:
+- **`getQueryData(uint256 _queryId)`**:
   - _Description_: 
-    - Reports the Witnet-solved result of a previously posted Witnet data request.
+    - Gets the whole `Witnet.Query` record related to a previously posted Witnet Data Request.
   - _Inputs_:
-    - `_id`: the unique identifier of a previously posted data request.
-    - `_txHash`: the unique hash of the Witnet tally transaction that actually solved the given data request.
-    - `_result`: the Witnet-solved result of the given data request (CBOR-encoded).
+    - `_queryId`: the unique identifier of the query.
 
-- **`upgradeRequest(uint256 _id)`**:
-  - _Description_: increments the reward of a Witnet data request by 
-  adding more value to it. The new data request reward will be increased by `msg.value`.
+- **`getQueryStatus(uint256 _queryId)`**:
+  - _Description_: 
+    - Gets current status of the given query.
   - _Inputs_:
-    - `_id`: the unique identifier of a previously posted Witnet data request.
+    - `_queryId`: the unique identifier of the query.
 
+- **`readRequest(uint256 _queryId)`**:
+  - _Description_:
+    - Retrieves the whole `Witnet.Request` record referred to a previously posted Witnet Data Request.
+  - _Inputs_:
+    - `_queryId`: the unique identifier of the query.
 
-## UsingWitnet base contract
+- **`readRequestBytecode(uint256 _queryId)`**:
+  - _Description_:
+    - Retrieves the serialized bytecode of a previously posted Witnet Data Request.
+  - _Inputs_:
+    - `_queryId`: the unique identifier of the query.
+  - _Returns_:
+    - The Witnet Data Request bytecode, serialized as `bytes`.
+
+- **`readRequestGasPrice(uint256 _queryId)`**:
+  - _Description_:
+    - Retrieves the gas price that any assigned reporter will have to pay when reporting result to the referred query.
+  - _Inputs_:
+    - `_queryId`: the unique identifier of the query.
+
+- **`readRequestReward(uint256 _queryId)`**:
+  - _Description_:
+    - Retrieves the reward currently set for the referred query.
+  - _Inputs_:
+    - `_queryId`: the unique identifier of the query.
+
+- **`readResponse(uint256 _queryId)`**:
+  - _Description_:
+    - Retrieves the whole `Witnet.Response` record referred to a previously posted Witnet Data Request. Fails it the query has not been solved yet.
+  - _Inputs_:
+    - `_queryId`: the unique identifier of the query.
+
+- **`readResponseEpoch(uint256 _queryId)`**:
+  - _Description_:
+    - Retrieves the epoch in which the result to the referred query was solved by the Witnet DON. Fails it the query has not been solved yet.
+  - _Inputs_:
+    - `_queryId`: the unique identifier of a previously posted Witnet data request.
+
+- **`readResponseProof(uint256 _queryId)`**:
+  - _Description_:
+    - Retrieves the Witnet-provided proof of the result to the referred query. Fails it the query has not been solved yet.
+  - _Inputs_:
+    - `_queryId`: the unique identifier of the query.
+
+- **`readResponseReporter(uint256 _queryId)`**:
+  - _Description_:
+    - Retrieves the address from which the result to the referred query was actually reported.
+  - _Inputs_:
+    - `_queryId`: the unique identifier of a previously posted Witnet data request.
+
+- **`readResponseResult(uint256 _queryId)`**:
+  - _Description_:
+    - Retrieves the Witnet-provided CBOR-bytes result to the referred query. Fails it the query has not been solved yet.
+  - _Inputs_:
+    - `_queryId`: the unique identifier of the query.
+  - _Returns_:
+    - The Witnet-provided result to the given query, as CBOR-encoded `bytes`.
+
+## **UsingWitnet base contract**
 
 The `UsingWitnet` contract injects the following _internal methods_ into the contracts inheriting from it:
 
-- **`witnetPostRequest(WitnetRequest _request)`**:
+- **`_witnetPostRequest(IWitnetRequest _request)`**:
   - _Description_:
     - Method to be called for posting Witnet data request into the WRB, with provided `msg.value` as reward.
   - _Inputs_:
-    - `_witnetRequest`: the Witnet request contract address that provides the Witnet RADON script encoded bytecode.
+    - `_request`: the Witnet request contract address that provides the Witnet Data Request encoded bytecode.
   - _Returns_:
     - The unique identifier of the Witnet data request just posted to the WRB. 
 
-- **`witnetUpgradeRequest()`**:
+- **`_witnetUpgradeReward()`**:
   - _Description_:
     - Increments the reward of a previously posted Witnet data request by adding more value to it. The new request reward will be increased by `msg.value`.
   - _Inputs_:
     - `_id`: the unique identifier of a previously posted Witnet data request.
 
-- **`witnetCheckRequestResolved()`**:
+- **`_witnetCheckResultAvailability()`**:
   - _Description_: 
-    - Checks if a Witnet data request has already been soled by Witnet network.
+    - Checks if a Witnet data request has already been solved by Witnet network.
   - _Inputs_:
     - `_id`: the unique identifier of a previously posted Witnet data request.
   - _Returns_:
     - A boolean telling whether the Witnet data request has been already solved, or not.
 
-- **`witnetReadResult(uint256 _id)`**:
+- **`_witnetReadResult(uint256 _id)`**:
   - _Description_:
     - Retrieves the Witnet-solved result of a previously posted Witnet data request.
   - _Inputs_:
@@ -148,7 +218,7 @@ The `UsingWitnet` contract injects the following _internal methods_ into the con
   - _Returns_:
     - The Witnet-solved result of the given data request, as CBOR-encoded `bytes`.
 
-- **`witnetDestroyResult(uint256 _id)`**:
+- **`_witnetDeleteQuery(uint256 _id)`**:
   - _Description_:
     - Retrieves the Witnet-solved result (if already available) of a previously posted Witnet request, and removes it from the WRB storage. Works only if this `UsingWitnet` contract is the one that actually posted the given data request.
   - _Inputs_:
@@ -156,8 +226,9 @@ The `UsingWitnet` contract injects the following _internal methods_ into the con
   - _Returns_:
     - The Witnet-solved result of the given data request, as CBOR-encoded `bytes`.
 
+Besides, your contract will have access to the whole Witnet Request Board functionality by means of the immutable **`_WRB`** address field.
 
-## Usage: harness the power of the Witnet Decentralized Oracle Network
+## **Usage: harness the power of the Witnet Decentralized Oracle Network**
 
 In order to integrate your own smart contracts with the **Witnet** fully-decentralized blockchain, you just need to inherit from the `UsingWitnet` abstract contract:
 
@@ -166,15 +237,11 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "./UsingWitnet.sol";
 
-contract MyWitnetRequest is WitnetRequest {
-  constructor() WitnetRequest()
-}
-
 contract MyContract is UsingWitnet {
-  WitnetRequest myRequest;
+  IWitnetRequest myRequest;
 
-  constructor() UsingWitnet(/* WitnetProxy address provided by the Witnet Foundation */) {
-    myRequest = new WitnetRequest(hex"/* here goes the Witnet RADON script encoded as serialized bytes. */")
+  constructor() UsingWitnet(/* here comes the WitnetProxy address provided by the Witnet Foundation */) {
+    // TODO
   }
 
   function myOwnDrPost() public returns(uint256 _drTrackId) {
@@ -183,47 +250,46 @@ contract MyContract is UsingWitnet {
 }
 ```
 
-Please, have a look at the [`witnet/witnet-price-feed-examples`](https://github.com/witnet/witnet-price-feed-examples) repository to learn how to compose your own `WitnetRequest` contracts.
+Please, have a look at the [`witnet/truffle-box`](https://github.com/witnet/truffle-box) repository to learn how to compose your own `IWitnetRequest` contracts.
 
-
-## Gas cost benchmark
+## **Gas cost benchmark**
 
 ```bash
-·---------------------------------------------|---------------------------|----------------------------·
-|     Solc version: 0.8.6+commit.11564f7e     ·  Optimizer enabled: true  ·         Runs: 200          │
-··············································|···························|·····························
-|  Methods                                                                                             │
-·······················|······················|·············|·············|·············|···············
-|  Contract            ·  Method              ·  Min        ·  Max        ·  Avg        ·  # calls     ·
-·······················|······················|·············|·············|·············|··············|
-|  WitnetRequestBoard  ·  destroy             ·          -  ·          -  ·      13582  ·           2  ·
-·······················|······················|·············|·············|·············|··············|
-|  WitnetRequestBoard  ·  destroyResult       ·      32865  ·      33714  ·      33183  ·           8  ·
-·······················|······················|·············|·············|·············|··············|
-|  WitnetRequestBoard  ·  initialize          ·          -  ·          -  ·      74032  ·          30  ·
-·······················|······················|·············|·············|·············|··············|
-|  WitnetRequestBoard  ·  postRequest     ·     144465  ·     196232  ·     164083  ·          33  ·
-·······················|······················|·············|·············|·············|··············|
-|  WitnetRequestBoard  ·  reportResult        ·      77019  ·      79145  ·      77643  ·          17  ·
-·······················|······················|·············|·············|·············|··············|
-|  WitnetRequestBoard  ·  upgradeRequest  ·      30083  ·      35221  ·      33508  ·           6  ·
-·······················|······················|·············|·············|·············|··············|
-|  Deployments                                ·                                         ·  % of limit  ·
-··············································|·············|·············|·············|··············|
-|  CBOR                                       ·          -  ·          -  ·    1937979  ·      28.8 %  ·
-··············································|·············|·············|·············|··············|
-|  Witnet                                     ·          -  ·          -  ·    2580558  ·      38.4 %  ·
-··············································|·············|·············|·············|··············|
-|  WitnetProxy                                ·          -  ·          -  ·     489543  ·       7.3 %  ·
-··············································|·············|·············|·············|··············|
-|  WitnetRequest                              ·     173312  ·     317566  ·     288728  ·       4.3 %  ·
-··············································|·············|·············|·············|··············|
-|  WitnetRequestBoard                         ·          -  ·          -  ·    1684529  ·      25.1 %  ·
-·---------------------------------------------|-------------|-------------|-------------|--------------|
+·--------------------------------------------------------|---------------------------|-------------|----------------------------·
+|          Solc version: 0.8.6+commit.11564f7e           ·  Optimizer enabled: true  ·  Runs: 200  ·  Block limit: 6718946 gas  │
+·························································|···························|·············|·····························
+|  Methods                                                                                                                      │
+·······································|·················|·············|·············|·············|··············|··············
+|  Contract                            ·  Method         ·  Min        ·  Max        ·  Avg        ·  # calls     ·  usd (avg)  │
+·······································|·················|·············|·············|·············|··············|··············
+|  WitnetProxy                         ·  upgradeTo      ·          -  ·          -  ·     121007  ·           1  ·          -  │
+·······································|·················|·············|·············|·············|··············|··············
+|  WitnetRequestBoardTrustableDefault  ·  deleteQuery    ·      38363  ·      41644  ·      40414  ·           8  ·          -  │
+·······································|·················|·············|·············|·············|··············|··············
+|  WitnetRequestBoardTrustableDefault  ·  destroy        ·          -  ·          -  ·      13560  ·           2  ·          -  │
+·······································|·················|·············|·············|·············|··············|··············
+|  WitnetRequestBoardTrustableDefault  ·  initialize     ·          -  ·          -  ·      75004  ·          30  ·          -  │
+·······································|·················|·············|·············|·············|··············|··············
+|  WitnetRequestBoardTrustableDefault  ·  postRequest    ·     144525  ·     196359  ·     164155  ·          33  ·          -  │
+·······································|·················|·············|·············|·············|··············|··············
+|  WitnetRequestBoardTrustableDefault  ·  reportResult   ·     119164  ·     121313  ·     119760  ·          18  ·          -  │
+·······································|·················|·············|·············|·············|··············|··············
+|  WitnetRequestBoardTrustableDefault  ·  upgradeReward  ·      31319  ·      36462  ·      34748  ·           6  ·          -  │
+·······································|·················|·············|·············|·············|··············|··············
+|  Deployments                                           ·                                         ·  % of limit  ·             │
+·························································|·············|·············|·············|··············|··············
+|  WitnetDecoderLib                                      ·          -  ·          -  ·    1930600  ·      28.7 %  ·          -  │
+·························································|·············|·············|·············|··············|··············
+|  WitnetParserLib                                       ·          -  ·          -  ·    2570010  ·      38.3 %  ·          -  │
+·························································|·············|·············|·············|··············|··············
+|  WitnetProxy                                           ·          -  ·          -  ·     587730  ·       8.7 %  ·          -  │
+·························································|·············|·············|·············|··············|··············
+|  WitnetRequestBoardTrustableDefault                    ·          -  ·          -  ·    2487604  ·        37 %  ·          -  │
+·--------------------------------------------------------|-------------|-------------|-------------|--------------|-------------·
 ```
 
 
-## License
+## **License**
 
 `witnet-ethereum-bridge` is published under the [MIT license][license].
 

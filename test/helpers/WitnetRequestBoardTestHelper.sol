@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../contracts/impls/trustable/WitnetRequestBoardTrustableEVM.sol";
+import "../../contracts/impls/trustable/WitnetRequestBoardTrustableDefault.sol";
 
 /**
  * @title Witnet Requests Board Version 1
@@ -15,12 +15,12 @@ import "../../contracts/impls/trustable/WitnetRequestBoardTrustableEVM.sol";
  */
 contract WitnetRequestBoardTestHelper
   is
-    WitnetRequestBoardTrustableEVM
+    WitnetRequestBoardTrustableDefault
 {
   address public witnet;
 
   constructor (address[] memory _committee, bool _upgradable)
-    WitnetRequestBoardTrustableEVM(_upgradable, "WitnetRequestBoardTestHelper")
+    WitnetRequestBoardTrustableDefault(_upgradable, "WitnetRequestBoardTestHelper")
   {
     witnet = msg.sender;
     setReporters(_committee);
@@ -37,15 +37,15 @@ contract WitnetRequestBoardTestHelper
   }
 
   /// @dev Posts a data request into the WRB, with immediate mock result.
-  /// @param _script The contract containing the Witnet Radon bytecode.
+  /// @param _request The contract containing the Witnet Witnet data request actual bytecode.
   /// @return _id The unique identifier of the data request.
-  function postRequest(IWitnetRadon _script)
+  function postRequest(IWitnetRequest _request)
     public payable
     override
     returns(uint256 _id)
   {
-    _id = super.postRequest(_script);
-    _state().queries[_id].response.witnetProof = keccak256("hello");
-    _state().queries[_id].response.witnetResult = "hello";
+    _id = super.postRequest(_request);
+    _state().queries[_id].response.proof = keccak256("hello");
+    _state().queries[_id].response.result = "hello";
   }
 }

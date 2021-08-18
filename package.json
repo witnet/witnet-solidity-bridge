@@ -16,7 +16,7 @@
     "flatten:witnet:libs": "npm run flatten contracts/libs/WitnetDecoderLib.sol && npm run flatten contracts/libs/WitnetParserLib.sol",
     "flatten:witnet:proxy": "npm run flatten contracts/impls/WitnetProxy.sol",
     "flatten:witnet:board": "npm run flatten:witnet:board:trustable && npm run flatten:witnet:board:trustless",
-    "flatten:witnet:board:trustable": "npm run flatten contracts/impls/trustable/WitnetRequestBoardTrustableEVM.sol && npm run flatten contracts/impls/trustable/WitnetRequestBoardTrustableOVM.sol",
+    "flatten:witnet:board:trustable": "npm run flatten contracts/impls/trustable/WitnetRequestBoardTrustableDefault.sol && npm run flatten contracts/impls/trustable/WitnetRequestBoardTrustableOMGX.sol",
     "flatten:witnet:board:trustless": "npm run flatten contracts/impls/trustless/",
     "fmt:js": "eslint \"**/*.js\"",
     "fmt:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" && solhint \"test/**/*.sol\"",

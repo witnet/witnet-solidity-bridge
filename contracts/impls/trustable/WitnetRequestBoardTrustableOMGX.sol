@@ -16,7 +16,7 @@ import "../../interfaces/IERC20.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetRequestBoardTrustableOVM
+contract WitnetRequestBoardTrustableOMGX
     is
         Payable,
         WitnetRequestBoardTrustableBase
@@ -24,9 +24,11 @@ contract WitnetRequestBoardTrustableOVM
     uint256 internal lastBalance;
     uint256 internal immutable _OVM_GAS_PRICE;
 
-    modifier ovmPayable {
+    modifier ovmPayable virtual {
         _;
-        lastBalance = balanceOf(address(this));
+        // all calls to payable methods,
+        // MUST update internal 'lastBalance' value at the very end.
+        lastBalance = _balanceOf(address(this));
     }
             
     constructor(
@@ -37,22 +39,21 @@ contract WitnetRequestBoardTrustableOVM
         )
         WitnetRequestBoardTrustableBase(_upgradable, _versionTag, _oETH)
     {
-        require(address(_oETH) != address(0), "WitnetRequestBoardTrustableOVM: null currency");
+        require(address(_oETH) != address(0), "WitnetRequestBoardTrustableOMGX: null _CURRENCY");
         _OVM_GAS_PRICE = _layer2GasPrice;
+    }
+
+    /// Gets lastBalance of given address.
+    function _balanceOf(address _from)
+        internal view
+        returns (uint256)
+    {
+        return _CURRENCY.balanceOf(_from);
     }
 
 
     // ================================================================================================================
     // --- Overrides 'Payable' ----------------------------------------------------------------------------------------
-
-    /// Gets lastBalance of given address.
-    function balanceOf(address _from)
-        public view
-        override
-        returns (uint256)
-    {
-        return currency.balanceOf(_from);
-    }
 
     /// Gets current transaction price.
     function _getGasPrice()
@@ -70,7 +71,7 @@ contract WitnetRequestBoardTrustableOVM
         override
         returns (uint256)
     {
-        uint256 _newBalance = balanceOf(address(this));
+        uint256 _newBalance = _balanceOf(address(this));
         assert(_newBalance >= lastBalance);
         return _newBalance - lastBalance;
     }
@@ -83,15 +84,15 @@ contract WitnetRequestBoardTrustableOVM
         internal
         override
     {
-        uint256 _lastBalance = balanceOf(address(this));
-        require(_amount <= _lastBalance, "WitnetRequestBoardTrustableOVM: insufficient funds");
+        uint256 _lastBalance = _balanceOf(address(this));
+        require(_amount <= _lastBalance, "WitnetRequestBoardTrustableOMGX: insufficient funds");
         lastBalance = _lastBalance - _amount;
-        currency.transfer(_to, _amount);
+        _CURRENCY.transfer(_to, _amount);
     }
     
 
     // ================================================================================================================
-    // --- Overrides implementation of 'IWitnetRequestBoardView' -------------------------------------------------------------
+    // --- Overrides implementation of 'IWitnetRequestBoardView' ------------------------------------------------------
 
     /// @dev Estimate the minimal amount of reward we need to insert for a given gas price.
     /// @return The minimal reward to be included for the given gas price.
@@ -105,14 +106,23 @@ contract WitnetRequestBoardTrustableOVM
 
         
     // ================================================================================================================
-    // --- Overrides implementation of 'IWitnetRequestBoardRequestor' --------------------------------------------------------
+    // --- Overrides implementation of 'IWitnetRequestBoardRequestor' -------------------------------------------------
 
-    function postRequest(IWitnetRadon _script)
+    function postRequest(IWitnetRequest _request)
         public payable
+        virtual override
         ovmPayable
-        override
         returns (uint256)
     {
-        return super.postRequest(_script);
+        return WitnetRequestBoardTrustableBase.postRequest(_request);
+    }
+
+    function upgradeReward(uint256 _queryId)
+        public payable
+        virtual override
+        ovmPayable
+        inStatus(_queryId, Witnet.QueryStatus.Posted) 
+    {
+        WitnetRequestBoardTrustableBase.upgradeReward(_queryId);  
     }
 }

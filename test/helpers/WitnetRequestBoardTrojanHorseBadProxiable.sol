@@ -38,8 +38,9 @@ contract WitnetRequestBoardTrojanHorseBadProxiable is Initializable, Proxiable {
     }
   }
 
-  function initialize(bytes calldata) external override onlyOwner {
-    emit Initialized(msg.sender, _BASE, _CODEHASH, "trojan-horse-not-upgradable");
+  function initialize(bytes calldata) external override {
+      // WATCH OUT: any one could reset storage context after 
+      // upgrading the WRB to this implementation.
   }
 
   function isUpgradable() external pure returns (bool) {

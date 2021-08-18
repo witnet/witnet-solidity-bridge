@@ -1,4 +1,4 @@
-const settings = require("../migrations/settings")
+const settings = require("../migrations/settings.witnet")
 
 const { expectRevert } = require("@openzeppelin/test-helpers")
 
@@ -139,7 +139,7 @@ contract("UsingWitnet", accounts => {
       await returnData(wrb.reportResult(requestId, drTxHash, resultHex, {
         from: reporterAccount,
       }))
-      const result = await wrb.readResponseWitnetResult(requestId)
+      const result = await wrb.readResponseResult(requestId)
       assert.equal(result, resultHex)
     })
 
@@ -227,7 +227,7 @@ contract("UsingWitnet", accounts => {
       await returnData(wrb.reportResult(requestId, drTxHash, resultHex, {
         from: reporterAccount,
       }))
-      const result = await wrb.readResponseWitnetResult(requestId)
+      const result = await wrb.readResponseResult(requestId)
       assert.equal(result, resultHex)
     })
 

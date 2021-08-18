@@ -5,22 +5,25 @@ module.exports = {
       WitnetDecoderLib: "WitnetDecoderLib",
       WitnetParserLib: "WitnetParserLib",
       WitnetProxy: "WitnetProxy",
-      WitnetRequestBoard: "WitnetRequestBoardTrustableEVM",
+      WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
     },
     omgx: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableOVM",
+      WitnetRequestBoard: "WitnetRequestBoardTrustableOMGX",
     },
   },
   constructorParams: {
     default: {
-      WitnetRequestBoard: [true, fromAscii(packageJson.version + "-trustable")],
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+      ],
     },
     omgx: {
       WitnetRequestBoard: [
-        true, // _isUpgradable
-        fromAscii(packageJson.version + "-trustable-boba"), // _versionTag
-        15000000, // _l2GasPrice
-        "0x4200000000000000000000000000000000000006", // _OVM_ETH
+        /* _isUpgradable */ true,
+        /* _versionTag */ fromAscii(packageJson.version + "-trustable-boba"),
+        /* _l2GasPrice */ 15000000,
+        /* _OVM_ETH */ "0x4200000000000000000000000000000000000006",
       ],
     },
   },

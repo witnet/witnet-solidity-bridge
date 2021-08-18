@@ -13,6 +13,18 @@ abstract contract Upgradable is Initializable, Proxiable {
     bytes32 internal immutable _CODEHASH;
     bool internal immutable _UPGRADABLE;
 
+    /// Emitted every time the contract gets upgraded.
+    /// @param from The address who ordered the upgrading. Namely, the WRB operator in "trustable" implementations.
+    /// @param baseAddr The address of the new implementation contract.
+    /// @param baseCodehash The EVM-codehash of the new implementation contract.
+    /// @param versionTag Ascii-encoded version literal with which the implementation deployer decided to tag it.
+    event Upgraded(
+        address indexed from,
+        address indexed baseAddr,
+        bytes32 indexed baseCodehash,
+        bytes32 versionTag
+    );
+
     constructor (bool _isUpgradable) {
         address _base = address(this);
         bytes32 _codehash;        

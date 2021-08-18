@@ -83,7 +83,7 @@ library WitnetParserLib {
     } else if (errorCode == Witnet.ErrorCodes.SourceScriptNotArray && error.length >= 2) {
         errorMessage = abi.encodePacked("The CBOR value in script #", utoa(error[1]), " was not an Array of calls");
     } else if (errorCode == Witnet.ErrorCodes.SourceScriptNotRADON && error.length >= 2) {
-        errorMessage = abi.encodePacked("The CBOR value in script #", utoa(error[1]), " was not a valid RADON script");
+        errorMessage = abi.encodePacked("The CBOR value in script #", utoa(error[1]), " was not a valid Data Request");
     } else if (errorCode == Witnet.ErrorCodes.RequestTooManySources && error.length >= 2) {
         errorMessage = abi.encodePacked("The request contained too many sources (", utoa(error[1]), ")");
     } else if (errorCode == Witnet.ErrorCodes.ScriptTooManyCalls && error.length >= 4) {

@@ -7,9 +7,10 @@ import "./libs/WitnetParserLib.sol";
 import "./WitnetRequestBoard.sol";
 
 /// @title The UsingWitnet contract
-/// @dev Contract writers can inherit this contract in order to create Witnet data requests. 
+/// @dev Witnet-aware contracts can inherit from this contract in order to interact with Witnet.
 /// @author The Witnet Foundation.
 abstract contract UsingWitnet {
+
     using WitnetParserLib for bytes;
     WitnetRequestBoard internal immutable _WRB;
 
@@ -21,57 +22,57 @@ abstract contract UsingWitnet {
     }
 
     /// Provides a convenient way for client contracts extending this to block the execution of the main logic of the
-    /// contract until a particular request has been successfully resolved by Witnet
-    modifier witnetRequestResolved(uint256 _id) {
+    /// contract until a particular request has been successfully solved and reported by Witnet.
+    modifier WitnetRequestSolved(uint256 _id) {
         require(
-                _witnetCheckRequestResolved(_id),
-                "UsingWitnet: request not yet solved"
+                _witnetCheckResultAvailability(_id),
+                "UsingWitnet: request not solved"
             );
         _;
     }
 
-    /// @notice Check if a request has been resolved by Witnet.
+    /// Check if a data request has been solved and reported by Witnet.
     /// @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
-    /// parties) before this method returns `Witnet.QueryStatus.Reported`.
-    /// @param _id The unique identifier of a previously posted request.
-    /// @return A boolean telling if the request has been already resolved or not. Returns `false` if called after destroying the result (i.e. `destroyResult(uint256 _id).
-    function _witnetCheckRequestResolved(uint256 _id) internal view returns (bool) {
+    /// parties) before this method returns `true`.
+    /// @param _id The unique identifier of a previously posted data request.
+    /// @return A boolean telling if the request has been already resolved or not. Returns `false` also, if the result was deleted.
+    function _witnetCheckResultAvailability(uint256 _id) internal view returns (bool) {
         return _WRB.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
     }
 
-    /// @notice Retrieves result of a previously posted request, and removes the whole query from the WRB's storage.
+    /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
     /// @param _id The unique identifier of a previously posted request.
     /// @return The Witnet-provided result to the request.
-    function _witnetDestroyResult(uint256 _id) internal returns (Witnet.Result memory) {
-        return _WRB.destroyResult(_id).resultFromCborBytes();
+    function _witnetDeleteQuery(uint256 _id) internal returns (Witnet.Response memory) {
+        return _WRB.deleteQuery(_id);
     }
 
-    /// @notice Estimate the reward amount.
+    /// Estimate the reward amount.
     /// @param _gasPrice The gas price for which we want to retrieve the estimation.
     /// @return The reward to be included for the given gas price.
-    function _witnetEstimateGasCost(uint256 _gasPrice) internal view returns (uint256) {
+    function _witnetEstimateReward(uint256 _gasPrice) internal view returns (uint256) {
         return _WRB.estimateReward(_gasPrice);
     }
 
-    /// @notice Send a new request to the Witnet network with transaction value as result report reward.
-    /// @param _script An instance of `IWitnetRadon` contract.
-    /// @return Sequencial identifier for the request included in the WitnetRequestBoard.
-    function _witnetPostRequest(IWitnetRadon _script) internal returns (uint256) {
-        return _WRB.postRequest{value: msg.value}(_script);
+    /// Send a new request to the Witnet network with transaction value as a reward.
+    /// @param _request An instance of `IWitnetRequest` contract.
+    /// @return Sequential identifier for the request included in the WitnetRequestBoard.
+    function _witnetPostRequest(IWitnetRequest _request) internal returns (uint256) {
+        return _WRB.postRequest{value: msg.value}(_request);
     }
 
-    /// @notice Read the result of a resolved request.
+    /// Read the Witnet-provided result to a previously posted request.
     /// @param _id The unique identifier of a request that was posted to Witnet.
-    /// @return The result of the request as an instance of `Result`.
+    /// @return The result of the request as an instance of `Witnet.Result`.
     function _witnetReadResult(uint256 _id) internal view returns (Witnet.Result memory) {
-        return _WRB.readResponseWitnetResult(_id).resultFromCborBytes();
-    } 
+        return _WRB.readResponseResult(_id).resultFromCborBytes();
+    }
 
-    /// @notice Upgrade the reward for a previously posted request.
-    /// @dev Call to `upgradeRequest` function in the WitnetRequestBoard contract.
+    /// Upgrade the reward for a previously posted request.
+    /// @dev Call to `upgradeReward` function in the WitnetRequestBoard contract.
     /// @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
-    function _witnetUpgradeRequest(uint256 _id) internal {
-        _WRB.upgradeRequest{value: msg.value}(_id);
+    function _witnetUpgradeReward(uint256 _id) internal {
+        _WRB.upgradeReward{value: msg.value}(_id);
     }
 
 }

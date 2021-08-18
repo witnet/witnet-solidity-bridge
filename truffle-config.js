@@ -1,12 +1,12 @@
 // In order to load environment variables (e.g. API keys)
 require("dotenv").config()
 const { merge } = require("lodash")
-const settings = require("./migrations/settings")
+const settings = require("./migrations/settings.witnet")
 const realm = process.env.WITNET_EVM_REALM ? process.env.WITNET_EVM_REALM.toLowerCase() : "default"
 
 module.exports = {
   build_directory: `./build/${realm}/`,
-  contractrs_directory: "./contracts/",
+  contracts_directory: "./contracts/",
   migrations_directory: "./migrations/scripts/",
   networks: settings.networks[realm],
   compilers: merge(settings.compilers.default, settings.compilers[realm]),

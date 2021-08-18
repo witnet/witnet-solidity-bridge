@@ -11,7 +11,7 @@ import "../../patterns/Destructible.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetRequestBoardTrustableEVM
+contract WitnetRequestBoardTrustableDefault
     is 
         Destructible,
         WitnetRequestBoardTrustableBase
@@ -25,22 +25,13 @@ contract WitnetRequestBoardTrustableEVM
     // --- Overrides 'Destructible' -----------------------------------------------------------------------------------
 
     /// Destroys current instance. Only callable by the owner.
-    function destroy() external override onlyOwner {
+    function destruct() external override onlyOwner {
         selfdestruct(payable(msg.sender));
     }
 
 
     // ================================================================================================================
     // --- Overrides 'Payable' ----------------------------------------------------------------------------------------
-
-    /// Gets balance of given address.
-    function balanceOf(address _from)
-        public view
-        override
-        returns (uint256)
-    {
-        return _from.balance;
-    }
 
     /// Gets current transaction price.
     function _getGasPrice()

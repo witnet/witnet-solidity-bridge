@@ -9,8 +9,8 @@ import "../libs/Witnet.sol";
 abstract contract WitnetBoardData {  
 
     bytes32 internal constant _WITNET_BOARD_DATA_SLOTHASH =
-        /* keccak256("io.witnet.board.data") */
-        0x641d5bbf2c42118a382e660df7903a98dce7b5bb834d3ba9beae1890b2a72054;
+        /* keccak256("io.witnet.boards.data") */
+        0xf595240b351bc8f951c2f53b26f4e78c32cb62122cf76c19b7fdda7d4968e183;
 
     struct WitnetBoardState {
         address base;
@@ -60,8 +60,8 @@ abstract contract WitnetBoardData {
       else {
         Witnet.Query storage _query = _state().queries[_queryId];
         if (_query.request.requestor == address(0))
-          return Witnet.QueryStatus.Destroyed;
-        else if (_query.response.witnetProof != 0) 
+          return Witnet.QueryStatus.Deleted;
+        else if (_query.response.proof != 0) 
           return Witnet.QueryStatus.Reported;
         else
           return Witnet.QueryStatus.Posted;
@@ -76,8 +76,8 @@ abstract contract WitnetBoardData {
         return "WitnetBoardData: not in Posted status";
       } else if (_status == Witnet.QueryStatus.Reported) {
         return "WitnetBoardData: not in Reported status";
-      } else if (_status == Witnet.QueryStatus.Destroyed) {
-        return "WitnetBoardData: not in Destroyed status";
+      } else if (_status == Witnet.QueryStatus.Deleted) {
+        return "WitnetBoardData: not in Deleted status";
       } else {
         return "WitnetBoardData: bad mood";
       }

@@ -3,11 +3,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/IWitnetRadon.sol";
+import "../interfaces/IWitnetRequest.sol";
 
 library Witnet {
 
-    /// @notice Witnet lambda function that computes the hash of a CBOR-encoded RADON script.
+    /// @notice Witnet lambda function that computes the hash of a CBOR-encoded Data Request.
     /// @param _bytecode CBOR-encoded RADON.
     function computeCodehash(bytes memory _bytecode) internal pure returns (bytes32) {
         return sha256(_bytecode);
@@ -24,27 +24,28 @@ library Witnet {
         Unknown,
         Posted,
         Reported,
-        Destroyed
+        Deleted
     }
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct Request {
+        IWitnetRequest addr;    // The contract containing the Data Request which execution has been requested.
         address requestor;      // Address from which the request was posted.
-        IWitnetRadon script;    // The contract containing the Radon script which execution has been requested.        
-        bytes32 codehash;       // Codehash of the Radon script which execution has been requested.
+        bytes32 codehash;       // Codehash of the Data Request which execution has been requested.
         uint256 gasprice;       // Minimum gas price the DR resolver should pay on the solving tx.
         uint256 reward;         // escrow reward to by paid to the DR resolver.
     }
 
     /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
     struct Response {
-        bytes32 witnetProof;     // Witnet-provided validation proof of the reported result.
-        uint256 witnetEpoch;     // Witnet epoch in which the reported result was actually finalized.
-        address witnetReporter;  // Address from which the result was reported.
-        bytes   witnetResult;    // Witnet-provided result value, encoded as bytes array.
+        address reporter;       // Address from which the result was reported.
+        uint256 timestamp;      // EVM-provided timestamp in which the result was reported. 
+        bytes32 proof;          // Witnet-provided validation proof of the reported result.
+        uint256 epoch;          // Witnet epoch in which the reported result was actually finalized.        
+        bytes   result;         // Witnet-provided result value, encoded as bytes array.
     }
 
-    /// Data struct containing actual result data provided by the Witnet DON.
+    /// Data struct produced by the 'WitnetParserLib' when parsing a Witnet-provided raw result, encoded as bytes array.
     struct Result {
         bool success;           // Flag stating whether the request could get solved successfully, or not.
         CBOR value;             // Resulting value, in raw serialized bytes.
@@ -75,7 +76,7 @@ library Witnet {
         SourceScriptNotCBOR,
         /// 0x02: The CBOR value decoded from a source script is not an Array.
         SourceScriptNotArray,
-        /// 0x03: The Array value decoded form a source script is not a valid RADON script.
+        /// 0x03: The Array value decoded form a source script is not a valid Data Request.
         SourceScriptNotRADON,
         /// Unallocated
         ScriptFormat0x04,

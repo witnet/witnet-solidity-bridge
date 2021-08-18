@@ -208,7 +208,7 @@ contract TestWitnetParser {
     );
     Assert.equal(
       errorMessage0x03,
-      "The CBOR value in script #4 was not a valid RADON script",
+      "The CBOR value in script #4 was not a valid Data Request",
       "Error message for error code `0x03` (`Witnet.ErrorCodes.SourceScriptNotRADON`) should be properly formatted"
     );
     Assert.equal(

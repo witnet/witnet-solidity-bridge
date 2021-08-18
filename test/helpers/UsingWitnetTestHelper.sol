@@ -20,7 +20,7 @@ contract UsingWitnetTestHelper is UsingWitnet {
     UsingWitnet(_wrb)
   {}
 
-  function witnetPostRequest(IWitnetRadon _script)
+  function witnetPostRequest(IWitnetRequest _script)
     external payable
     returns(uint256 id)
   {
@@ -30,7 +30,7 @@ contract UsingWitnetTestHelper is UsingWitnet {
   function witnetUpgradeRequest(uint256 _id)
     external payable
   {
-    _witnetUpgradeRequest(_id);
+    _witnetUpgradeReward(_id);
   }
 
   function witnetReadResult(uint256 _requestId)
@@ -42,7 +42,7 @@ contract UsingWitnetTestHelper is UsingWitnet {
   }
 
   function witnetEstimateGasCost(uint256 _gasPrice) external view returns (uint256) {
-    return _witnetEstimateGasCost(_gasPrice);
+    return _witnetEstimateReward(_gasPrice);
   }
 
   function witnetAsUint64() external view returns (uint64) {
@@ -50,6 +50,6 @@ contract UsingWitnetTestHelper is UsingWitnet {
   }
 
   function witnetCheckRequestResolved(uint256 _id) external view returns (bool) {
-    return _witnetCheckRequestResolved(_id);
+    return _witnetCheckResultAvailability(_id);
   }
 }

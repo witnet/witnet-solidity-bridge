@@ -1,4 +1,4 @@
-const settings = require("../migrations/settings")
+const settings = require("../migrations/settings.witnet")
 
 const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
@@ -37,12 +37,12 @@ contract("WitnetParser Requests Board Proxy", accounts => {
     it("should revert when inserting id 0", async () => {
       // It should revert because of non-existent id 0
       await truffleAssert.reverts(
-        wrb.upgradeRequest(0, { from: requestSender }),
+        wrb.upgradeReward(0, { from: requestSender }),
         "not in Posted"
       )
     })
 
-    it("should post a data request and update the getNextId meter", async () => {
+    it("should post a data request and update the getNextQueryId meter", async () => {
       // The data request to be posted
       const drBytes = web3.utils.fromAscii("This is a DR")
       const request = await WitnetRequest.new(drBytes)
@@ -57,7 +57,7 @@ contract("WitnetParser Requests Board Proxy", accounts => {
 
       // The id of the data request
       const id1 = parseInt(decodeWitnetLogs(txReceipt1.logs, 0).id)
-      const nextId = await wrb.getNextId.call()
+      const nextId = await wrb.getNextQueryId.call()
 
       // check the nextId has been updated in the Proxy when posting the data request
       assert.equal((id1 + 1).toString(), nextId.toString())
@@ -124,7 +124,7 @@ contract("WitnetParser Requests Board Proxy", accounts => {
       const id1 = decodeWitnetLogs(txReceipt1.logs, 0).id
       assert.equal(id1, 2)
 
-      // Upgrade the WRB address to wrbInstance2 (destroying wrbInstace1)
+      // Upgrade the WRB address to wrbInstance2 (destroying wrbInstance1)
       await proxy.upgradeWitnetRequestBoard(wrbInstance2.address, { from: contractOwner })
 
       // The current wrb in the proxy should be equal to wrbInstance2
@@ -190,7 +190,7 @@ contract("WitnetParser Requests Board Proxy", accounts => {
       )
 
       // Read the actual result of the DR
-      const result = await wrb.readResponseWitnetResult.call(id2)
+      const result = await wrb.readResponseResult.call(id2)
       assert.equal(result, web3.utils.fromAscii("hello"))
     })
 
@@ -201,20 +201,20 @@ contract("WitnetParser Requests Board Proxy", accounts => {
       })
 
       // Read the actual result of the DR
-      const result = await wrb.readResponseWitnetResult.call(4)
+      const result = await wrb.readResponseResult.call(4)
       assert.equal(result, web3.utils.fromAscii("hello"))
     })
 
     it("a solved data request can only be destroyed by actual requestor", async () => {
       // Read the result of the DR just before destruction:
-      const result = await wrb.destroyResult.call(4, { from: requestSender })
-      assert.equal(result, web3.utils.fromAscii("hello"))
+      const response = await wrb.deleteQuery.call(4, { from: requestSender })
+      assert.equal(response.result, web3.utils.fromAscii("hello"))
 
       await truffleAssert.reverts(
-        wrb.destroyResult(4, { from: contractOwner }),
+        wrb.deleteQuery(4, { from: contractOwner }),
         "only requestor"
       )
-      const tx = await wrb.destroyResult(4, { from: requestSender }) // should work
+      const tx = await wrb.deleteQuery(4, { from: requestSender }) // should work
       assert.equal(tx.logs[0].args[1], requestSender)
     })
 
