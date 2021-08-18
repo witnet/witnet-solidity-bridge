@@ -12,12 +12,12 @@ import "../../data/WitnetBoardDataACLs.sol";
 // Uses:
 import "../../interfaces/IERC20.sol";
 
-/// @title Witnet Requests Board V03 - OVM.
+/// @title Witnet Requests Board V03 - OMGX/Boba.
 /// @notice Contract to bridge requests to Witnet Decenetralized Oracle Network.
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetRequestBoardV03OVM
+contract WitnetRequestBoardV03Boba
     is
         WitnetBoardUpgradableBase,
         WitnetBoardDataACLs
@@ -39,7 +39,7 @@ contract WitnetRequestBoardV03OVM
         WitnetBoardUpgradableBase(_upgradable, _versionTag)
     {
         _OVM_GAS_PRICE = _layer2GasPrice;        
-        require(address(_oETH) != address(0), "WitnetRequestBoardV03OVM: null currency");
+        require(address(_oETH) != address(0), "WitnetRequestBoardV03Boba: null currency");
         OVM_ETH = _oETH;        
     }
 
@@ -67,7 +67,7 @@ contract WitnetRequestBoardV03OVM
     /// @param _amount Amount of oETHs to transfer.
     function _safeTransferTo(address payable _to, uint256 _amount) internal {
         uint256 _balance = _balanceOf(address(this));
-        require(_amount <= _balance, "WitnetRequestBoardV03OVM: insufficient funds");
+        require(_amount <= _balance, "WitnetRequestBoardV03Boba: insufficient funds");
         lastBalance = _balance - _amount;
         OVM_ETH.transfer(_to, _amount);
     }

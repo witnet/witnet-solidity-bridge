@@ -7,7 +7,7 @@ import "../WitnetBoardDestructibleBase.sol";
 import "../../data/WitnetBoardDataACLs.sol";
 
 /// @title Witnet Requests Board V03.
-/// @notice Contract to bridge requests to Witnet Decenetralized Oracle Network.
+/// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation

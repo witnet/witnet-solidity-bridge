@@ -56,7 +56,7 @@ abstract contract WitnetBoardData {
     returns (WitnetBoardState storage _ptr)
   {
     assembly {
-      _ptr.slot := WITNET_BOARD_DATA_SLOTHASH
+      _ptr.slot := _WITNET_BOARD_DATA_SLOTHASH
     }
   }
 
@@ -68,7 +68,7 @@ abstract contract WitnetBoardData {
     return _state().requests[_requestId].query;
   }
   
-  bytes32 internal constant WITNET_BOARD_DATA_SLOTHASH =
+  bytes32 internal constant _WITNET_BOARD_DATA_SLOTHASH =
     /* keccak256("io.witnet.board.data") */
     0x641d5bbf2c42118a382e660df7903a98dce7b5bb834d3ba9beae1890b2a72054;
 }
