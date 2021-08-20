@@ -7,7 +7,7 @@ import "truffle/Assert.sol";
 import "../contracts/libs/WitnetDecoderLib.sol";
 
 
-contract TestWitnetDecoder {
+contract TestWitnetDecoderLib {
 
   using WitnetDecoderLib for Witnet.CBOR;
 

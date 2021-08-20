@@ -69,5 +69,5 @@ interface IWitnetRequestBoardView {
     /// Retrieves the Witnet-provided CBOR-bytes result of a previously posted request.
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier.
-    function readResponseResult(uint256 _queryId) external view returns (bytes memory);
+    function readResponseResult(uint256 _queryId) external view returns (Witnet.Result memory);
 }

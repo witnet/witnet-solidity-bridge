@@ -52,7 +52,7 @@ function flatten (basedir, filepath) {
   if (fs.existsSync(flattened)) {
     console.log(`Skipping ${filename}: already flattened as '${flattened}'...`)
   } else {
-    console.log(`Flattening ${filename} into '${flattened}...`)
+    console.log(`Flattening ${filename} into '${flattened}'...`)
     exec(`npx truffle-flattener ${basedir}/${filename} > ${flattened}`)
   }
 }

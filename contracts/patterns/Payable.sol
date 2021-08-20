@@ -5,13 +5,13 @@ pragma solidity >=0.6.0 <0.9.0;
 import "../interfaces/IERC20.sol";
 
 abstract contract Payable {
-    IERC20 public immutable _CURRENCY;
+    IERC20 public immutable currency;
 
     event Received(address from, uint256 amount);
     event Transfer(address to, uint256 amount);
 
     constructor(address _currency) {
-        _CURRENCY = IERC20(_currency);
+        currency = IERC20(_currency);
     }
 
     /// Gets current transaction price.

@@ -20,8 +20,8 @@ library WitnetDecoderLib {
 
   using WitnetBuffer for Witnet.Buffer;
 
-  uint32 constant internal UINT32_MAX = type(uint32).max;
-  uint64 constant internal UINT64_MAX = type(uint64).max;
+  uint32 constant internal _UINT32_MAX = type(uint32).max;
+  uint64 constant internal _UINT64_MAX = type(uint64).max;
 
   /// @notice Decode a `Witnet.CBOR` structure into a native `bool` value.
   /// @param _cborValue An instance of `Witnet.CBOR`.
@@ -43,15 +43,15 @@ library WitnetDecoderLib {
   /// @return The value represented by the input, as a `bytes` value.   
   function decodeBytes(Witnet.CBOR memory _cborValue) public pure returns(bytes memory) {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    if (_cborValue.len == UINT32_MAX) {
+    if (_cborValue.len == _UINT32_MAX) {
       bytes memory bytesData;
 
       // These checks look repetitive but the equivalent loop would be more expensive.
       uint32 itemLength = uint32(readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType));
-      if (itemLength < UINT32_MAX) {
+      if (itemLength < _UINT32_MAX) {
         bytesData = abi.encodePacked(bytesData, _cborValue.buffer.read(itemLength));
         itemLength = uint32(readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType));
-        if (itemLength < UINT32_MAX) {
+        if (itemLength < _UINT32_MAX) {
           bytesData = abi.encodePacked(bytesData, _cborValue.buffer.read(itemLength));
         }
       }
@@ -81,7 +81,7 @@ library WitnetDecoderLib {
     require(_cborValue.majorType == 4, "Tried to read `int128[]` from a `Witnet.CBOR` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(length < UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
+    require(length < _UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
 
     int32[] memory array = new int32[](length);
     for (uint64 i = 0; i < length; i++) {
@@ -114,7 +114,7 @@ library WitnetDecoderLib {
     require(_cborValue.majorType == 4, "Tried to read `int128[]` from a `Witnet.CBOR` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(length < UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
+    require(length < _UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
 
     int128[] memory array = new int128[](length);
     for (uint64 i = 0; i < length; i++) {
@@ -130,12 +130,12 @@ library WitnetDecoderLib {
   /// @return The value represented by the input, as a `string` value.
   function decodeString(Witnet.CBOR memory _cborValue) public pure returns(string memory) {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    if (_cborValue.len == UINT64_MAX) {
+    if (_cborValue.len == _UINT64_MAX) {
       bytes memory textData;
       bool done;
       while (!done) {
         uint64 itemLength = readIndefiniteStringLength(_cborValue.buffer, _cborValue.majorType);
-        if (itemLength < UINT64_MAX) {
+        if (itemLength < _UINT64_MAX) {
           textData = abi.encodePacked(textData, readText(_cborValue.buffer, itemLength / 4));
         } else {
           done = true;
@@ -154,7 +154,7 @@ library WitnetDecoderLib {
     require(_cborValue.majorType == 4, "Tried to read `string[]` from a `Witnet.CBOR` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(length < UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
+    require(length < _UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
 
     string[] memory array = new string[](length);
     for (uint64 i = 0; i < length; i++) {
@@ -180,7 +180,7 @@ library WitnetDecoderLib {
     require(_cborValue.majorType == 4, "Tried to read `uint64[]` from a `Witnet.CBOR` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(length < UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
+    require(length < _UINT64_MAX, "Indefinite-length CBOR arrays are not supported");
 
     uint64[] memory array = new uint64[](length);
     for (uint64 i = 0; i < length; i++) {
@@ -211,7 +211,7 @@ library WitnetDecoderLib {
     uint8 initialByte;
     uint8 majorType = 255;
     uint8 additionalInformation;
-    uint64 tag = UINT64_MAX;
+    uint64 tag = _UINT64_MAX;
 
     bool isTagged = true;
     while (isTagged) {
@@ -258,7 +258,7 @@ library WitnetDecoderLib {
       return _buffer.readUint64();
     }
     if (additionalInformation == 31) {
-      return UINT64_MAX;
+      return _UINT64_MAX;
     }
     revert("Invalid length encoding (non-existent additionalInformation value)");
   }
@@ -268,10 +268,10 @@ library WitnetDecoderLib {
   function readIndefiniteStringLength(Witnet.Buffer memory _buffer, uint8 majorType) private pure returns(uint64) {
     uint8 initialByte = _buffer.readUint8();
     if (initialByte == 0xff) {
-      return UINT64_MAX;
+      return _UINT64_MAX;
     }
     uint64 length = readLength(_buffer, initialByte & 0x1f);
-    require(length < UINT64_MAX && (initialByte >> 5) == majorType, "Invalid indefinite length");
+    require(length < _UINT64_MAX && (initialByte >> 5) == majorType, "Invalid indefinite length");
     return length;
   }
 

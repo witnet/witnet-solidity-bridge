@@ -1,4 +1,4 @@
-const settings = require("../migrations/settings.witnet")
+const settings = require("../migrations/witnet.settings")
 
 const {
   BN,
@@ -356,8 +356,8 @@ contract("WitnetRequestBoard", ([
     })
     it("anyone can read the data request result", async () => {
       // Read data request result from WitnetRequestBoard by `queryId`
-      const requestResultCall = await this.WitnetRequestBoard.readResponseResult(queryId, { from: requestor })
-      expect(requestResultCall).to.be.equal(resultHex)
+      const result = await this.WitnetRequestBoard.readResponseResult(queryId, { from: requestor })
+      expect(result.value.buffer.data).to.be.equal(resultHex)
     })
     it("fails if data request bytecode has been manipulated", async () => {
       // Change the bytecode of the request already posted

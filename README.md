@@ -226,7 +226,7 @@ The `UsingWitnet` contract injects the following _internal methods_ into the con
   - _Returns_:
     - The Witnet-solved result of the given data request, as CBOR-encoded `bytes`.
 
-Besides, your contract will have access to the whole Witnet Request Board functionality by means of the immutable **`_WRB`** address field.
+Besides, your contract will have access to the whole Witnet Request Board functionality by means of the immutable **`witnet`** address field.
 
 ## **Usage: harness the power of the Witnet Decentralized Oracle Network**
 

@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "truffle/Assert.sol";
 import "../contracts/libs/WitnetParserLib.sol";
 
-contract TestWitnetParser {
+contract TestWitnetParserLib {
 
   using WitnetParserLib for Witnet.Result;
 

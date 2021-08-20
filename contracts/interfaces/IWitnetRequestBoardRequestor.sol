@@ -25,7 +25,7 @@ interface IWitnetRequestBoardRequestor {
     /// @dev - provided reward is too low.
     /// @dev - provided script is zero address.
     /// @dev - provided script bytecode is empty.
-    /// @param _addr The address of a IWitnetRequest contract, containing the actual Data Request seralized bytecode.
+    /// @param _addr The address of the IWitnetRequest contract that can provide the actual Data Request bytecode.
     /// @return _queryId An unique query identifier.
     function postRequest(IWitnetRequest _addr) external payable returns (uint256 _queryId);
 

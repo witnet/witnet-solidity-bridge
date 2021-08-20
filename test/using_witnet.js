@@ -1,4 +1,4 @@
-const settings = require("../migrations/settings.witnet")
+const settings = require("../migrations/witnet.settings")
 
 const { expectRevert } = require("@openzeppelin/test-helpers")
 
@@ -13,7 +13,7 @@ const truffleAssert = require("truffle-assertions")
 
 contract("UsingWitnet", accounts => {
   describe("UsingWitnet \"happy path\" test case. " +
-    "This covers pretty much all the life cycle of a WitnetParser request:", () => {
+    "This covers pretty much all the life cycle of a Witnet request:", () => {
     const requestHex = "0x01"
     const resultHex = "0x1a002fefd8"
     const resultDecimal = 3141592
@@ -53,13 +53,13 @@ contract("UsingWitnet", accounts => {
       lastAccount0Balance = await web3.eth.getBalance(accounts[0])
     })
 
-    it("should create a WitnetParser request", async () => {
+    it("should create a data request", async () => {
       request = await WitnetRequest.new(requestHex)
       const internalBytes = await request.bytecode()
       assert.equal(internalBytes, requestHex)
     })
 
-    it("should post a WitnetParser request into the wrb", async () => {
+    it("should post a data request into the wrb", async () => {
       requestId = await returnData(clientContract.witnetPostRequest(
         request.address,
         {
@@ -98,7 +98,7 @@ contract("UsingWitnet", accounts => {
       assert.equal(wrbBalance, reward)
     })
 
-    it("should upgrade the rewards of an existing WitnetParser request", async () => {
+    it("should upgrade the rewards of an existing data request", async () => {
       await returnData(clientContract.witnetUpgradeRequest(requestId, {
         from: accounts[1],
         value: reward,
@@ -139,8 +139,8 @@ contract("UsingWitnet", accounts => {
       await returnData(wrb.reportResult(requestId, drTxHash, resultHex, {
         from: reporterAccount,
       }))
-      const result = await wrb.readResponseResult(requestId)
-      assert.equal(result, resultHex)
+      const result = await wrb.readResponseResult.call(requestId)
+      assert.equal(result.value.buffer.data, resultHex)
     })
 
     it("should check if the request is resolved", async () => {
@@ -195,7 +195,7 @@ contract("UsingWitnet", accounts => {
       clientContract = await UsingWitnetTestHelper.new(wrb.address)
     })
 
-    it("should create a WitnetParser request", async () => {
+    it("should create a data request", async () => {
       request = await WitnetRequest.new(requestHex)
       const internalBytes = await request.bytecode()
       assert.equal(internalBytes, requestHex)
@@ -228,7 +228,7 @@ contract("UsingWitnet", accounts => {
         from: reporterAccount,
       }))
       const result = await wrb.readResponseResult(requestId)
-      assert.equal(result, resultHex)
+      assert.equal(result.value.buffer.data, resultHex)
     })
 
     it("should pull the result from the WRB back to the client contract", async () => {

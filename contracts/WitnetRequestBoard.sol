@@ -7,6 +7,7 @@ import "./interfaces/IWitnetRequestBoardEvents.sol";
 import "./interfaces/IWitnetRequestBoardReporter.sol";
 import "./interfaces/IWitnetRequestBoardRequestor.sol";
 import "./interfaces/IWitnetRequestBoardView.sol";
+import "./interfaces/IWitnetRequestParser.sol";
 
 /// @title Witnet Request Board functionality base contract.
 /// @author The Witnet Foundation.
@@ -14,7 +15,8 @@ abstract contract WitnetRequestBoard is
     IWitnetRequestBoardEvents,
     IWitnetRequestBoardReporter,
     IWitnetRequestBoardRequestor,
-    IWitnetRequestBoardView
+    IWitnetRequestBoardView,
+    IWitnetRequestParser
 {
     receive() external payable {
         revert("WitnetRequestBoard: no transfers accepted");

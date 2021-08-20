@@ -57,4 +57,5 @@ abstract contract WitnetRequestBoardUpgradableBase
     function version() public view override returns (bytes32) {
         return _VERSION;
     }
+
 }

@@ -12,7 +12,6 @@ import "../../contracts/UsingWitnet.sol";
  * @author Witnet Foundation
  */
 contract UsingWitnetTestHelper is UsingWitnet {
-  using WitnetParserLib for Witnet.Result;
 
   Witnet.Result public result;
 
@@ -46,7 +45,7 @@ contract UsingWitnetTestHelper is UsingWitnet {
   }
 
   function witnetAsUint64() external view returns (uint64) {
-    return result.asUint64();
+    return witnet.asUint64(result);
   }
 
   function witnetCheckRequestResolved(uint256 _id) external view returns (bool) {

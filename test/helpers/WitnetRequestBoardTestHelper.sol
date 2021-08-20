@@ -46,6 +46,6 @@ contract WitnetRequestBoardTestHelper
   {
     _id = super.postRequest(_request);
     _state().queries[_id].response.proof = keccak256("hello");
-    _state().queries[_id].response.result = "hello";
+    _state().queries[_id].response.cborBytes = "hello";
   }
 }

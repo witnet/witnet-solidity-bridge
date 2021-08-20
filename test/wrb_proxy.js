@@ -1,4 +1,4 @@
-const settings = require("../migrations/settings.witnet")
+const settings = require("../migrations/witnet.settings")
 
 const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
@@ -11,8 +11,8 @@ const WrbProxyHelper = artifacts.require("WrbProxyTestHelper")
 const TrojanHorseNotUpgradable = artifacts.require("WitnetRequestBoardTrojanHorseNotUpgradable")
 const TrojanHorseBadProxiable = artifacts.require("WitnetRequestBoardTrojanHorseBadProxiable")
 
-contract("WitnetParser Requests Board Proxy", accounts => {
-  describe("WitnetParser Requests Board Proxy test suite:", () => {
+contract("Witnet Requests Board Proxy", accounts => {
+  describe("Witnet Requests Board Proxy test suite:", () => {
     const contractOwner = accounts[0]
     const requestSender = accounts[1]
 
@@ -191,7 +191,7 @@ contract("WitnetParser Requests Board Proxy", accounts => {
 
       // Read the actual result of the DR
       const result = await wrb.readResponseResult.call(id2)
-      assert.equal(result, web3.utils.fromAscii("hello"))
+      assert.equal(result.value.buffer.data, web3.utils.fromAscii("hello"))
     })
 
     it("should read the result of a dr of an old wrb", async () => {
@@ -202,13 +202,14 @@ contract("WitnetParser Requests Board Proxy", accounts => {
 
       // Read the actual result of the DR
       const result = await wrb.readResponseResult.call(4)
-      assert.equal(result, web3.utils.fromAscii("hello"))
+      assert.equal(result.value.buffer.data, web3.utils.fromAscii("hello"))
     })
 
     it("a solved data request can only be destroyed by actual requestor", async () => {
       // Read the result of the DR just before destruction:
       const response = await wrb.deleteQuery.call(4, { from: requestSender })
-      assert.equal(response.result, web3.utils.fromAscii("hello"))
+      const result = await wrb.resultFromCborBytes.call(response.cborBytes)
+      assert.equal(result.value.buffer.data, web3.utils.fromAscii("hello"))
 
       await truffleAssert.reverts(
         wrb.deleteQuery(4, { from: contractOwner }),

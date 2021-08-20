@@ -6,7 +6,10 @@ import "./WitnetBoardData.sol";
 
 /// @title Witnet Access Control Lists storage layout, for Witnet-trusted request boards.
 /// @author The Witnet Foundation.
-abstract contract WitnetBoardDataACLs is WitnetBoardData {
+abstract contract WitnetBoardDataACLs
+    is
+        WitnetBoardData
+{
 
     bytes32 internal constant WITNET_BOARD_ACLS_SLOTHASH =
         /* keccak256("io.witnet.boards.data.acls") */

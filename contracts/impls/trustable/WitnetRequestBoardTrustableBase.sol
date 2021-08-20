@@ -7,6 +7,7 @@ import "../WitnetRequestBoardUpgradableBase.sol";
 import "../../data/WitnetBoardDataACLs.sol";
 import "../../interfaces/IWitnetRequestBoardAdmin.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
+import "../../libs/WitnetParserLib.sol";
 import "../../patterns/Payable.sol";
 
 /// @title Witnet Request Board "trustable" base implementation contract.
@@ -23,7 +24,7 @@ abstract contract WitnetRequestBoardTrustableBase
         WitnetRequestBoardUpgradableBase        
 {
     using Witnet for bytes;
-    using Witnet for Witnet.Result;
+    using WitnetParserLib for Witnet.Result;
 
     uint256 internal constant _ESTIMATED_REPORT_RESULT_GAS = 102496;
     
@@ -147,46 +148,46 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Will assume `block.number` as the epoch number for the provided result.
     /// @dev Fails if:
     /// @dev - the `_queryId` is not in 'Posted' status.
-    /// @dev - provided `_proof` is zero;
-    /// @dev - length of provided `_result` is zero.
+    /// @dev - provided `_witnetProof` is zero;
+    /// @dev - length of provided `_cborBytes` is zero.
     /// @param _queryId The unique identifier of the data request.
-    /// @param _proof of the solving tally transaction in Witnet.
-    /// @param _result The result itself as bytes.
+    /// @param _witnetProof of the solving tally transaction in Witnet.
+    /// @param _cborBytes The result itself serialized as CBOR-bytes.
     function reportResult(
             uint256 _queryId,
-            bytes32 _proof,
-            bytes calldata _result
+            bytes32 _witnetProof,
+            bytes calldata _cborBytes
         )
         external
         override
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        _reportResult(_queryId, 0, _proof, _result);
+        _reportResult(_queryId, 0, _witnetProof, _cborBytes);
     }
 
     /// Reports the Witnet-provided result to a previously posted request.
     /// @dev Fails if:
     /// @dev - called from unauthorized address;
     /// @dev - the `_queryId` is not in 'Posted' status.
-    /// @dev - provided `_proof` is zero;
-    /// @dev - length of provided `_result` is zero.
+    /// @dev - provided `_witnetProof` is zero;
+    /// @dev - length of provided `_cborBytes` is zero.
     /// @param _queryId The unique query identifier
-    /// @param _epoch of the solving tally transaction in Witnet.
-    /// @param _proof of the solving tally transaction in Witnet.
-    /// @param _result The result itself as bytes.
+    /// @param _witnetEpoch of the solving tally transaction in Witnet.
+    /// @param _witnetProof of the solving tally transaction in Witnet.
+    /// @param _cborBytes The result itself serialized as CBOR-bytes.
     function reportResult(
             uint256 _queryId,
-            uint256 _epoch,
-            bytes32 _proof,
-            bytes calldata _result
+            uint256 _witnetEpoch,
+            bytes32 _witnetProof,
+            bytes calldata _cborBytes
         )
         external
         override
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        _reportResult(_queryId, _epoch, _proof, _result);
+        _reportResult(_queryId, _witnetEpoch, _witnetProof, _cborBytes);
     }
     
 
@@ -443,10 +444,204 @@ abstract contract WitnetRequestBoardTrustableBase
         external view
         override
         inStatus(_queryId, Witnet.QueryStatus.Reported)
-        returns (bytes memory)
+        returns (Witnet.Result memory)
     {
         Witnet.Response storage _response = _getResponseData(_queryId);
-        return _response.result;
+        return WitnetParserLib.resultFromCborBytes(_response.cborBytes);
+    }
+
+
+    // ================================================================================================================
+    // --- Full implementation of 'IWitnetRequestParser' interface ----------------------------------------------------
+
+    /// Decode raw CBOR bytes into a Witnet.Result instance.
+    /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
+    /// @return A `Witnet.Result` instance.
+    function resultFromCborBytes(bytes memory _cborBytes)
+        external pure
+        override
+        returns (Witnet.Result memory)
+    {
+        return WitnetParserLib.resultFromCborBytes(_cborBytes);
+    }
+
+    /// Decode a CBOR value into a Witnet.Result instance.
+    /// @param _cborValue An instance of `Witnet.CBOR`.
+    /// @return A `Witnet.Result` instance.
+    function resultFromCborValue(Witnet.CBOR memory _cborValue)
+        external pure
+        override
+        returns (Witnet.Result memory)
+    {
+        return WitnetParserLib.resultFromCborValue(_cborValue);
+    }
+
+    /// Tell if a Witnet.Result is successful.
+    /// @param _result An instance of Witnet.Result.
+    /// @return `true` if successful, `false` if errored.
+    function isOk(Witnet.Result memory _result)
+        external pure
+        override
+        returns (bool)
+    {
+        return _result.isOk();
+    }
+
+    /// Tell if a Witnet.Result is errored.
+    /// @param _result An instance of Witnet.Result.
+    /// @return `true` if errored, `false` if successful.
+    function isError(Witnet.Result memory _result)
+        external pure
+        override
+        returns (bool)
+    {
+        return _result.isError();
+    }
+
+    /// Decode a bytes value from a Witnet.Result as a `bytes` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `bytes` decoded from the Witnet.Result.
+    function asBytes(Witnet.Result memory _result)
+        external pure
+        override returns (bytes memory)
+    {
+        return _result.asBytes();
+    }
+
+    /// Decode an error code from a Witnet.Result as a member of `Witnet.ErrorCodes`.
+    /// @param _result An instance of `Witnet.Result`.
+    /// @return The `CBORValue.Error memory` decoded from the Witnet.Result.
+    function asErrorCode(Witnet.Result memory _result)
+        external pure
+        override
+        returns (Witnet.ErrorCodes)
+    {
+        return _result.asErrorCode();
+    }
+
+    /// Generate a suitable error message for a member of `Witnet.ErrorCodes` and its corresponding arguments.
+    /// @dev WARN: Note that client contracts should wrap this function into a try-catch foreseing potential errors generated in this function
+    /// @param _result An instance of `Witnet.Result`.
+    /// @return A tuple containing the `CBORValue.Error memory` decoded from the `Witnet.Result`, plus a loggable error message.
+    function asErrorMessage(Witnet.Result memory _result)
+        external pure
+        override
+        returns (Witnet.ErrorCodes, string memory)
+    {
+        return _result.asErrorMessage();
+    }
+
+    /// Decode a raw error from a `Witnet.Result` as a `uint64[]`.
+    /// @param _result An instance of `Witnet.Result`.
+    /// @return The `uint64[]` raw error as decoded from the `Witnet.Result`.
+    function asRawError(Witnet.Result memory _result)
+        external pure
+        override
+        returns(uint64[] memory)
+    {
+        return _result.asRawError();
+    }
+
+    /// Decode a boolean value from a Witnet.Result as an `bool` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `bool` decoded from the Witnet.Result.
+    function asBool(Witnet.Result memory _result)
+        external pure
+        override
+        returns (bool)
+    {
+        return _result.asBool();
+    }
+
+    /// Decode a fixed16 (half-precision) numeric value from a Witnet.Result as an `int32` value.
+    /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values.
+    /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`.
+    /// use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `int128` decoded from the Witnet.Result.
+    function asFixed16(Witnet.Result memory _result)
+        external pure
+        override
+        returns (int32)
+    {
+        return _result.asFixed16();
+    }
+
+    /// Decode an array of fixed16 values from a Witnet.Result as an `int128[]` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `int128[]` decoded from the Witnet.Result.
+    function asFixed16Array(Witnet.Result memory _result)
+        external pure
+        override
+        returns (int32[] memory)
+    {
+        return _result.asFixed16Array();
+    }
+
+    /// Decode a integer numeric value from a Witnet.Result as an `int128` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `int128` decoded from the Witnet.Result.
+    function asInt128(Witnet.Result memory _result)
+        external pure
+        override
+        returns (int128)
+    {
+        return _result.asInt128();
+    }
+
+    /// Decode an array of integer numeric values from a Witnet.Result as an `int128[]` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `int128[]` decoded from the Witnet.Result.
+    function asInt128Array(Witnet.Result memory _result)
+        external pure
+        override
+        returns (int128[] memory)
+    {
+        return _result.asInt128Array();
+    }
+
+    /// Decode a string value from a Witnet.Result as a `string` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `string` decoded from the Witnet.Result.
+    function asString(Witnet.Result memory _result)
+        external pure
+        override
+        returns (string memory)
+    {
+        return _result.asString();
+    }
+
+    /// Decode an array of string values from a Witnet.Result as a `string[]` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `string[]` decoded from the Witnet.Result.
+    function asStringArray(Witnet.Result memory _result)
+        external pure
+        override
+        returns (string[] memory)
+    {
+        return _result.asStringArray();
+    }
+
+    /// Decode a natural numeric value from a Witnet.Result as a `uint64` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `uint64` decoded from the Witnet.Result.
+    function asUint64(Witnet.Result memory _result)
+        external pure 
+        override
+        returns(uint64)
+    {
+        return _result.asUint64();
+    }
+
+    /// Decode an array of natural numeric values from a Witnet.Result as a `uint64[]` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `uint64[]` decoded from the Witnet.Result.
+    function asUint64Array(Witnet.Result memory _result)
+        external pure
+        override
+        returns (uint64[] memory)
+    {
+        return _result.asUint64Array();
     }
 
 
@@ -474,14 +669,14 @@ abstract contract WitnetRequestBoardTrustableBase
             uint256 _queryId,
             uint256 _epoch,
             bytes32 _proof,
-            bytes memory _result
+            bytes memory _cborBytes
         )
         internal
     {
         require(_proof != 0, "WitnetRequestBoardTrustableDefault: Witnet proof cannot be zero");
         // Ensures the result byes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
-        require(_result.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
+        require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
 
         Witnet.Query storage _query = _state().queries[_queryId];
         Witnet.Response storage _response = _query.response;
@@ -491,7 +686,7 @@ abstract contract WitnetRequestBoardTrustableBase
         _response.proof = _proof;
         _response.epoch = _epoch;
         _response.reporter = msg.sender;
-        _response.result = _result;
+        _response.cborBytes = _cborBytes;
 
         _safeTransferTo(payable(msg.sender), _query.request.reward);
         emit PostedResult(_queryId, msg.sender);

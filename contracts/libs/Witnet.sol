@@ -42,13 +42,13 @@ library Witnet {
         uint256 timestamp;      // EVM-provided timestamp in which the result was reported. 
         bytes32 proof;          // Witnet-provided validation proof of the reported result.
         uint256 epoch;          // Witnet epoch in which the reported result was actually finalized.        
-        bytes   result;         // Witnet-provided result value, encoded as bytes array.
+        bytes   cborBytes;      // Witnet-provided result CBOR-bytes to the queried Data Request.
     }
 
-    /// Data struct produced by the 'WitnetParserLib' when parsing a Witnet-provided raw result, encoded as bytes array.
+    /// Data struct containing the Witnet-provided result to a Data Request.
     struct Result {
         bool success;           // Flag stating whether the request could get solved successfully, or not.
-        CBOR value;             // Resulting value, in raw serialized bytes.
+        CBOR value;             // Resulting value, in CBOR-serialized bytes.
     }
 
     /// Data struct following the RFC-7049 standard: Concise Binary Object Representation.

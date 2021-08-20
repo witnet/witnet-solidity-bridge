@@ -39,7 +39,7 @@ contract WitnetRequestBoardTrustableOMGX
         )
         WitnetRequestBoardTrustableBase(_upgradable, _versionTag, _oETH)
     {
-        require(address(_oETH) != address(0), "WitnetRequestBoardTrustableOMGX: null _CURRENCY");
+        require(address(_oETH) != address(0), "WitnetRequestBoardTrustableOMGX: null currency");
         _OVM_GAS_PRICE = _layer2GasPrice;
     }
 
@@ -48,7 +48,7 @@ contract WitnetRequestBoardTrustableOMGX
         internal view
         returns (uint256)
     {
-        return _CURRENCY.balanceOf(_from);
+        return currency.balanceOf(_from);
     }
 
 
@@ -87,7 +87,7 @@ contract WitnetRequestBoardTrustableOMGX
         uint256 _lastBalance = _balanceOf(address(this));
         require(_amount <= _lastBalance, "WitnetRequestBoardTrustableOMGX: insufficient funds");
         lastBalance = _lastBalance - _amount;
-        _CURRENCY.transfer(_to, _amount);
+        currency.transfer(_to, _amount);
     }
     
 

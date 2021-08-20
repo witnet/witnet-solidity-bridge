@@ -1,0 +1,40 @@
+{
+  "default": {
+    "ethereum.goerli" : {
+      "WitnetParserLib": "0x52CbB9D63A50e79b05dEC3Ab73ff89ef5A8E35D7",
+      "WitnetRequestBoard": "0xD43e6D27D995bf9542F8CfE524c54Ad3A1Cd413A"
+    },
+    "ethereum.kovan": {
+      "WitnetParserLib": "",
+      "WitnetRequestBoard": ""
+    },
+    "ethereum.rinkeby" : {
+      "WitnetParserLib": "0xaEd3D82676F8a65651db59FeF43790A0f0c32e5c",
+      "WitnetRequestBoard": "0x8B520Bfa4B23C16472BB9C0a0A87AFcd22C84e83"
+    },
+    "ethereum.mainnet": {
+      "WitnetParserLib": "",
+      "WitnetRequestBoard": ""
+    }
+  },
+  "conflux": {
+    "conflux.testnet": {
+      "WitnetParserLib": "0x8b1251812F264dC0168729a49DEcd4288ab3Ca51",
+      "WitnetRequestBoard": "0x82BBEe2e459ed9d5e0CfCCB309De725257fCf9A2"
+    },
+    "conflux.tethys": {
+      "WitnetParserLib": "",
+      "WitnetRequestBoard": ""
+    }
+  },
+  "omgx": {
+    "test": {
+      "WitnetParserLib": "",
+      "WitnetRequestBoard": "0xB0ACfe9D4eed4EFc10378d2328ac279f071dBd1F"
+    },
+    "omgx.rinkeby": {
+      "WitnetParserLib": "",
+      "WitnetRequestBoard": "0xB0ACfe9D4eed4EFc10378d2328ac279f071dBd1F"
+    }
+  }
+}
