@@ -1,5 +1,1 @@
 node_modules
-contracts/UsingWitnet.sol
-contracts/patterns/Payable.sol
-test/TestBuffer.sol
-test/TestActiveBridgeSet.sol

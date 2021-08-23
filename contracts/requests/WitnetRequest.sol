@@ -11,6 +11,6 @@ contract WitnetRequest
     using Witnet for bytes;
     constructor(bytes memory _bytecode) {
         bytecode = _bytecode;
-        codehash = _bytecode.computeCodehash();
+        hash = _bytecode.hash();
     }
 }

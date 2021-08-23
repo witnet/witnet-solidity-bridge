@@ -10,5 +10,5 @@ interface IWitnetRequest {
     function bytecode() external view returns (bytes memory);
 
     /// Returns SHA256 hash of Witnet Data Request as CBOR-encoded bytes.
-    function codehash() external view returns (bytes32);
+    function hash() external view returns (bytes32);
 }

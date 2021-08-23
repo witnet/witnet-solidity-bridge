@@ -7,8 +7,8 @@ module.exports = {
       WitnetProxy: "WitnetProxy",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
     },
-    omgx: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableOMGX",
+    boba: {
+      WitnetRequestBoard: "WitnetRequestBoardTrustableBoba",
     },
   },
   constructorParams: {
@@ -18,7 +18,7 @@ module.exports = {
         /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
       ],
     },
-    omgx: {
+    boba: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
         /* _versionTag */ fromAscii(packageJson.version + "-trustable-boba"),
@@ -49,7 +49,7 @@ module.exports = {
         evmVersion: "petersburg",
       },
     },
-    omgx: {
+    boba: {
       solc: {
         version: "./node_modules/@eth-optimism/solc",
       },
@@ -102,7 +102,7 @@ module.exports = {
         skipDryRun: true,
       },
     },
-    omgx: {
+    boba: {
       test: {
         network_id: 28,
         host: "localhost",
@@ -111,7 +111,7 @@ module.exports = {
         gasPrice: 15000000,
         gasLimit: 150000000,
       },
-      "omgx.rinkeby": {
+      "boba.rinkeby": {
         network_id: 28,
         host: "localhost",
         port: 8539,

@@ -205,7 +205,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(result.value.buffer.data, web3.utils.fromAscii("hello"))
     })
 
-    it("a solved data request can only be destroyed by actual requestor", async () => {
+    it("a solved data request can only be deleted by actual requester", async () => {
       // Read the result of the DR just before destruction:
       const response = await wrb.deleteQuery.call(4, { from: requestSender })
       const result = await wrb.resultFromCborBytes.call(response.cborBytes)
@@ -213,16 +213,16 @@ contract("Witnet Requests Board Proxy", accounts => {
 
       await truffleAssert.reverts(
         wrb.deleteQuery(4, { from: contractOwner }),
-        "only requestor"
+        "only requester"
       )
       const tx = await wrb.deleteQuery(4, { from: requestSender }) // should work
       assert.equal(tx.logs[0].args[1], requestSender)
     })
 
-    it("fails if trying to get bytecode from destroyed DRs", async () => {
+    it("fails if trying to get bytecode from deleted DRs", async () => {
       await truffleAssert.reverts(
         wrb.readRequestBytecode.call(4),
-        "destroyed"
+        "deleted"
       )
     })
 

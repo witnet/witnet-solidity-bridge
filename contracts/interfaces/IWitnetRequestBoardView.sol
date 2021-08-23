@@ -22,26 +22,26 @@ interface IWitnetRequestBoardView {
     function getQueryStatus(uint256 _queryId) external view returns (Witnet.QueryStatus);
 
     /// Retrieves the whole `Witnet.Request` record referred to a previously posted Witnet Data Request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been destroyed,
+    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
     /// @dev or if the related script bytecode got changed after being posted.
     /// @param _queryId The unique query identifier.
     function readRequest(uint256 _queryId) external view returns (Witnet.Request memory);
 
     /// Retrieves the serialized bytecode of a previously posted Witnet Data Request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been destroyed,
+    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
     /// @dev or if the related script bytecode got changed after being posted.
     /// @param _queryId The unique query identifier.
     function readRequestBytecode(uint256 _queryId) external view returns (bytes memory);
 
     /// Retrieves the gas price that any assigned reporter will have to pay when reporting result 
     /// to the referred query.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been destroyed,
+    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
     /// @dev or if the related script bytecode got changed after being posted.
     /// @param _queryId The unique query identifier.
     function readRequestGasPrice(uint256 _queryId) external view returns (uint256);
 
     /// Retrieves the reward currently set for the referred query.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been destroyed,
+    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
     /// @dev or if the related script bytecode got changed after being posted.
     /// @param _queryId The unique query identifier.
     function readRequestReward(uint256 _queryId) external view returns (uint256);
@@ -51,15 +51,10 @@ interface IWitnetRequestBoardView {
     /// @param _queryId The unique query identifier.
     function readResponse(uint256 _queryId) external view returns (Witnet.Response memory);
 
-    /// Retrieves the epoch in which the result to the referred query was solved by the Witnet DON.
+    /// Retrieves the hash of the Witnet transaction hash that actually solved the referred query.
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier.
-    function readResponseEpoch(uint256 _queryId) external view returns (uint256);
-
-    /// Retrieves the Witnet-provided proof of the result to the referred query
-    /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier.
-    function readResponseProof(uint256 _queryId) external view returns (bytes32);
+    function readResponseDrTxHash(uint256 _queryId) external view returns (bytes32);    
 
     /// Retrieves the address that reported the result to a previously-posted request.
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
@@ -70,4 +65,9 @@ interface IWitnetRequestBoardView {
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier.
     function readResponseResult(uint256 _queryId) external view returns (Witnet.Result memory);
+
+    /// Retrieves the timestamp in which the result to the referred query was solved by the Witnet DON.
+    /// @dev Fails if the `_queryId` is not in 'Reported' status.
+    /// @param _queryId The unique query identifier.
+    function readResponseTimestamp(uint256 _queryId) external view returns (uint256);
 }

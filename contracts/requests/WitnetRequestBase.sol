@@ -12,5 +12,5 @@ abstract contract WitnetRequestBase
     bytes public override bytecode;
 
     /// Returns SHA256 hash of Witnet Data Request as CBOR-encoded bytes.
-    bytes32 public override codehash;
+    bytes32 public override hash;
 }

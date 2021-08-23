@@ -23,7 +23,7 @@ abstract contract WitnetBoardData {
         _state().owner = msg.sender;
     }
 
-
+    /// Asserts the given query is currently in the given status.
     modifier inStatus(uint256 _queryId, Witnet.QueryStatus _status) {
       require(
           _getQueryStatus(_queryId) == _status,
@@ -31,17 +31,21 @@ abstract contract WitnetBoardData {
         );
       _;
     }
-    modifier notDestroyed(uint256 _queryId) {
+
+    /// Asserts the given query was previously posted and that it was not yet deleted.
+    modifier notDeleted(uint256 _queryId) {
         require(_queryId > 0 && _queryId <= _state().numQueries, "WitnetBoardData: not yet posted");
-        require(_getRequestData(_queryId).requestor != address(0), "WitnetBoardData: destroyed");
+        require(_getRequestData(_queryId).requester != address(0), "WitnetBoardData: deleted");
         _;
     }
 
+    /// Asserts caller corresponds to the current owner. 
     modifier onlyOwner {
         require(msg.sender == _state().owner, "WitnetBoardData: only owner");
         _;    
     }
 
+    /// Asserts the give query was actually posted before calling this method.
     modifier wasPosted(uint256 _queryId) {
         require(_queryId > 0 && _queryId <= _state().numQueries, "WitnetBoardData: not yet posted");
         _;
@@ -59,9 +63,9 @@ abstract contract WitnetBoardData {
         return Witnet.QueryStatus.Unknown;
       else {
         Witnet.Query storage _query = _state().queries[_queryId];
-        if (_query.request.requestor == address(0))
+        if (_query.request.requester == address(0))
           return Witnet.QueryStatus.Deleted;
-        else if (_query.response.proof != 0) 
+        else if (_query.response.drTxHash != 0) 
           return Witnet.QueryStatus.Reported;
         else
           return Witnet.QueryStatus.Posted;

@@ -19,8 +19,8 @@ contract WitnetRequestTestHelper is IWitnetRequest {
 
     /// Applies Witnet-compatible hash function over the `bytecode()` in order to 
     /// uniquely identify every possible well-formed Data Request.
-    function codehash() public view override returns (bytes32) {
-        return bytecode.computeCodehash();
+    function hash() public view override returns (bytes32) {
+        return bytecode.hash();
     }
 
     /// Modifies the Witnet Data Request bytecode.

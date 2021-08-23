@@ -7,9 +7,9 @@ import "../interfaces/IWitnetRequest.sol";
 
 library Witnet {
 
-    /// @notice Witnet lambda function that computes the hash of a CBOR-encoded Data Request.
+    /// @notice Witnet function that computes the hash of a CBOR-encoded Data Request.
     /// @param _bytecode CBOR-encoded RADON.
-    function computeCodehash(bytes memory _bytecode) internal pure returns (bytes32) {
+    function hash(bytes memory _bytecode) internal pure returns (bytes32) {
         return sha256(_bytecode);
     }
 
@@ -30,18 +30,17 @@ library Witnet {
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct Request {
         IWitnetRequest addr;    // The contract containing the Data Request which execution has been requested.
-        address requestor;      // Address from which the request was posted.
-        bytes32 codehash;       // Codehash of the Data Request which execution has been requested.
+        address requester;      // Address from which the request was posted.
+        bytes32 hash;           // Hash of the Data Request whose execution has been requested.
         uint256 gasprice;       // Minimum gas price the DR resolver should pay on the solving tx.
-        uint256 reward;         // escrow reward to by paid to the DR resolver.
+        uint256 reward;         // Escrowed reward to be paid to the DR resolver.
     }
 
     /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
     struct Response {
         address reporter;       // Address from which the result was reported.
-        uint256 timestamp;      // EVM-provided timestamp in which the result was reported. 
-        bytes32 proof;          // Witnet-provided validation proof of the reported result.
-        uint256 epoch;          // Witnet epoch in which the reported result was actually finalized.        
+        uint256 timestamp;      // Timestamp of the Witnet-provided result.
+        bytes32 drTxHash;       // Hash of the Witnet transaction that solved the queried Data Request.
         bytes   cborBytes;      // Witnet-provided result CBOR-bytes to the queried Data Request.
     }
 

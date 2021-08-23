@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.7.0 <0.9.0;
+pragma experimental ABIEncoderV2;
 
 import "../libs/Witnet.sol";
 
@@ -12,7 +13,7 @@ import "../libs/Witnet.sol";
 ///   - remove from storage all data related to past and solved data requests, and results.
 /// @author The Witnet Foundation.
 interface IWitnetRequestBoardRequestor {
-    /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
+    /// Retrieves a copy of all Witnet-provided data related to a previously posted request, removing the whole query from the WRB storage.
     /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
     /// @dev the one that actually posted the given request.
     /// @param _queryId The unique query identifier.

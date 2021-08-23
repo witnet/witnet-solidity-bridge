@@ -16,7 +16,7 @@ import "../../interfaces/IERC20.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetRequestBoardTrustableOMGX
+contract WitnetRequestBoardTrustableBoba
     is
         Payable,
         WitnetRequestBoardTrustableBase
@@ -39,7 +39,7 @@ contract WitnetRequestBoardTrustableOMGX
         )
         WitnetRequestBoardTrustableBase(_upgradable, _versionTag, _oETH)
     {
-        require(address(_oETH) != address(0), "WitnetRequestBoardTrustableOMGX: null currency");
+        require(address(_oETH) != address(0), "WitnetRequestBoardTrustableBoba: null currency");
         _OVM_GAS_PRICE = _layer2GasPrice;
     }
 
@@ -85,7 +85,7 @@ contract WitnetRequestBoardTrustableOMGX
         override
     {
         uint256 _lastBalance = _balanceOf(address(this));
-        require(_amount <= _lastBalance, "WitnetRequestBoardTrustableOMGX: insufficient funds");
+        require(_amount <= _lastBalance, "WitnetRequestBoardTrustableBoba: insufficient funds");
         lastBalance = _lastBalance - _amount;
         currency.transfer(_to, _amount);
     }

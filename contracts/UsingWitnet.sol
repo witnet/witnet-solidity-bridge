@@ -22,7 +22,7 @@ abstract contract UsingWitnet {
 
     /// Provides a convenient way for client contracts extending this to block the execution of the main logic of the
     /// contract until a particular request has been successfully solved and reported by Witnet.
-    modifier WitnetRequestSolved(uint256 _id) {
+    modifier witnetRequestSolved(uint256 _id) {
         require(
                 _witnetCheckResultAvailability(_id),
                 "UsingWitnet: request not solved"

@@ -28,7 +28,7 @@ jobs:
         npm run fmt
     - name: Compile solidity contracts
       run: |
-        npm run compile-contracts
+        npm run compile
     - name: Run tests
       run: |
         npm run test

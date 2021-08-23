@@ -42,7 +42,7 @@ Used as a means to encapsulate Witnet Data Requests, that can eventually be post
   - _Description_:
     - Returns Witnet Data Request as a CBOR-encoded `bytes`. 
 
-- **`codehash()`**:
+- **`hash()`**:
   - _Description_:
     - Returns SHA256 hash of Witnet Data Request as CBOR-encoded bytes.
 
@@ -96,7 +96,7 @@ From the point of view of a `UsingWitnet` contract, any given `WitnetRequestBoar
 
 - **`deleteQuery(uint256 _id)`**:
   - _Description_:
-    - Retrieves the Witnet-solved result (if already available) of a previously posted Witnet request, and removes it from the WRB storage.
+    - Retrieves copy of all Witnet-provided data related to a previously posted request, removing the whole query from the WRB storage.
   - _Inputs_:
     - `_id`: the unique identifier of a previously posted Witnet data request.
   - _Returns_:
@@ -158,15 +158,15 @@ From the point of view of a `UsingWitnet` contract, any given `WitnetRequestBoar
   - _Inputs_:
     - `_queryId`: the unique identifier of the query.
 
-- **`readResponseEpoch(uint256 _queryId)`**:
+- **`readResponseTimestamp(uint256 _queryId)`**:
   - _Description_:
-    - Retrieves the epoch in which the result to the referred query was solved by the Witnet DON. Fails it the query has not been solved yet.
+    - Retrieves the timestamp in which the result to the referred query was solved by the Witnet DON.
   - _Inputs_:
     - `_queryId`: the unique identifier of a previously posted Witnet data request.
 
-- **`readResponseProof(uint256 _queryId)`**:
+- **`readResponseDrTxHash(uint256 _queryId)`**:
   - _Description_:
-    - Retrieves the Witnet-provided proof of the result to the referred query. Fails it the query has not been solved yet.
+    - Retrieves the hash of the Witnet transaction hash that actually solved the referred query.
   - _Inputs_:
     - `_queryId`: the unique identifier of the query.
 
@@ -262,29 +262,29 @@ Please, have a look at the [`witnet/truffle-box`](https://github.com/witnet/truf
 ·······································|·················|·············|·············|·············|··············|··············
 |  Contract                            ·  Method         ·  Min        ·  Max        ·  Avg        ·  # calls     ·  usd (avg)  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetProxy                         ·  upgradeTo      ·          -  ·          -  ·     121007  ·           1  ·          -  │
+|  WitnetProxy                         ·  upgradeTo      ·          -  ·          -  ·     121146  ·           1  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  deleteQuery    ·      38363  ·      41644  ·      40414  ·           8  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  deleteQuery    ·      38352  ·      41633  ·      40403  ·           8  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  destroy        ·          -  ·          -  ·      13560  ·           2  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  destruct       ·          -  ·          -  ·      13582  ·           2  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  initialize     ·          -  ·          -  ·      75004  ·          30  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  initialize     ·          -  ·          -  ·      75077  ·          30  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  postRequest    ·     144525  ·     196359  ·     164155  ·          33  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  postRequest    ·     144650  ·     196484  ·     164280  ·          33  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  reportResult   ·     119164  ·     121313  ·     119760  ·          18  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  reportResult   ·     119210  ·     121359  ·     119806  ·          18  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  upgradeReward  ·      31319  ·      36462  ·      34748  ·           6  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  upgradeReward  ·      31341  ·      36484  ·      34770  ·           6  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
 |  Deployments                                           ·                                         ·  % of limit  ·             │
 ·························································|·············|·············|·············|··············|··············
 |  WitnetDecoderLib                                      ·          -  ·          -  ·    1930600  ·      28.7 %  ·          -  │
 ·························································|·············|·············|·············|··············|··············
-|  WitnetParserLib                                       ·          -  ·          -  ·    2570010  ·      38.3 %  ·          -  │
+|  WitnetParserLib                                       ·          -  ·          -  ·    2594996  ·      38.6 %  ·          -  │
 ·························································|·············|·············|·············|··············|··············
 |  WitnetProxy                                           ·          -  ·          -  ·     587730  ·       8.7 %  ·          -  │
 ·························································|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault                    ·          -  ·          -  ·    2487604  ·        37 %  ·          -  │
+|  WitnetRequestBoardTrustableDefault                    ·          -  ·          -  ·    3699603  ·      55.1 %  ·          -  │
 ·--------------------------------------------------------|-------------|-------------|-------------|--------------|-------------·
 ```
 

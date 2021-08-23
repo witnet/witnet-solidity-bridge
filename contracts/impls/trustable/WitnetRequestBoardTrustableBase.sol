@@ -26,7 +26,7 @@ abstract contract WitnetRequestBoardTrustableBase
     using Witnet for bytes;
     using WitnetParserLib for Witnet.Result;
 
-    uint256 internal constant _ESTIMATED_REPORT_RESULT_GAS = 102496;
+    uint256 internal constant _ESTIMATED_REPORT_RESULT_GAS = 120547;
     
     constructor(bool _upgradable, bytes32 _versionTag, address _currency)
         Payable(_currency)
@@ -145,17 +145,17 @@ abstract contract WitnetRequestBoardTrustableBase
     // --- Full implementation of 'IWitnetRequestBoardReporter' -------------------------------------------------------
 
     /// Reports the Witnet-provided result to a previously posted request. 
-    /// @dev Will assume `block.number` as the epoch number for the provided result.
+    /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
     /// @dev Fails if:
     /// @dev - the `_queryId` is not in 'Posted' status.
-    /// @dev - provided `_witnetProof` is zero;
-    /// @dev - length of provided `_cborBytes` is zero.
+    /// @dev - provided `_drTxHash` is zero;
+    /// @dev - length of provided `_result` is zero.
     /// @param _queryId The unique identifier of the data request.
-    /// @param _witnetProof of the solving tally transaction in Witnet.
-    /// @param _cborBytes The result itself serialized as CBOR-bytes.
+    /// @param _drTxHash The hash of the solving tally transaction in Witnet.
+    /// @param _cborBytes The result itself as bytes.
     function reportResult(
             uint256 _queryId,
-            bytes32 _witnetProof,
+            bytes32 _drTxHash,
             bytes calldata _cborBytes
         )
         external
@@ -163,23 +163,24 @@ abstract contract WitnetRequestBoardTrustableBase
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        _reportResult(_queryId, 0, _witnetProof, _cborBytes);
+        // solhint-disable not-rely-on-time
+        _reportResult(_queryId, block.timestamp, _drTxHash, _cborBytes);
     }
 
     /// Reports the Witnet-provided result to a previously posted request.
     /// @dev Fails if:
     /// @dev - called from unauthorized address;
     /// @dev - the `_queryId` is not in 'Posted' status.
-    /// @dev - provided `_witnetProof` is zero;
-    /// @dev - length of provided `_cborBytes` is zero.
+    /// @dev - provided `_drTxHash` is zero;
+    /// @dev - length of provided `_result` is zero.
     /// @param _queryId The unique query identifier
-    /// @param _witnetEpoch of the solving tally transaction in Witnet.
-    /// @param _witnetProof of the solving tally transaction in Witnet.
-    /// @param _cborBytes The result itself serialized as CBOR-bytes.
+    /// @param _timestamp The timestamp of the solving tally transaction in Witnet.
+    /// @param _drTxHash The hash of the solving tally transaction in Witnet.
+    /// @param _cborBytes The result itself as bytes.
     function reportResult(
             uint256 _queryId,
-            uint256 _witnetEpoch,
-            bytes32 _witnetProof,
+            uint256 _timestamp,
+            bytes32 _drTxHash,
             bytes calldata _cborBytes
         )
         external
@@ -187,7 +188,7 @@ abstract contract WitnetRequestBoardTrustableBase
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        _reportResult(_queryId, _witnetEpoch, _witnetProof, _cborBytes);
+        _reportResult(_queryId, _timestamp, _drTxHash, _cborBytes);
     }
     
 
@@ -206,8 +207,8 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         Witnet.Query storage _query = _state().queries[_queryId];
         require(
-            msg.sender == _query.request.requestor,
-            "WitnetRequestBoardTrustableBase: only requestor"
+            msg.sender == _query.request.requester,
+            "WitnetRequestBoardTrustableBase: only requester"
         );
         _response = _query.response;
         delete _state().queries[_queryId];
@@ -243,9 +244,9 @@ abstract contract WitnetRequestBoardTrustableBase
         _queryId = ++ _state().numQueries;
 
         Witnet.Request storage _request = _getRequestData(_queryId);
-        _request.requestor = msg.sender;
+        _request.requester = msg.sender;
         _request.addr = _addr;
-        _request.codehash = _bytecode.computeCodehash();
+        _request.hash = _bytecode.hash();
         _request.gasprice = _gasPrice;
         _request.reward = _value;
 
@@ -327,36 +328,36 @@ abstract contract WitnetRequestBoardTrustableBase
     }
 
     /// Retrieves the whole Request record posted to the Witnet Request Board.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been destroyed,
+    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
     /// @dev or if the related script bytecode got changed after being posted.
     /// @param _queryId The unique identifier of a previously posted query.
     function readRequest(uint256 _queryId)
         external view
         override
-        notDestroyed(_queryId)
+        notDeleted(_queryId)
         returns (Witnet.Request memory)
     {
         return _checkRequest(_queryId);
     }
     
     /// Retrieves the Witnet data request actual bytecode of a previously posted request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been destroyed,
+    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
     /// @dev or if the related script bytecode got changed after being posted.
     /// @param _queryId The unique identifier of the request query.
     function readRequestBytecode(uint256 _queryId)
         external view
         override
-        notDestroyed(_queryId)
+        notDeleted(_queryId)
         returns (bytes memory _bytecode)
     {
         Witnet.Request storage _request = _getRequestData(_queryId);
         if (address(_request.addr) != address(0)) {
             // if DR's request contract address is not zero,
-            // we assume the DR has not been destroyed, so
+            // we assume the DR has not been deleted, so
             // DR's bytecode can still be fetched:
             _bytecode = _request.addr.bytecode();
             require(
-                _bytecode.computeCodehash() == _request.codehash,
+                _bytecode.hash() == _request.hash,
                 "WitnetRequestBoardTrustableBase: bytecode changed after posting"
             );
         } 
@@ -364,26 +365,26 @@ abstract contract WitnetRequestBoardTrustableBase
 
     /// Retrieves the gas price that any assigned reporter will have to pay when reporting 
     /// result to a previously posted Witnet data request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been destroyed,
+    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
     /// @dev or if the related script bytecode got changed after being posted.
     /// @param _queryId The unique query identifier
     function readRequestGasPrice(uint256 _queryId)
         external view
         override
-        notDestroyed(_queryId)
+        notDeleted(_queryId)
         returns (uint256)
     {
         return _checkRequest(_queryId).gasprice;
     }
 
     /// Retrieves the reward currently set for a previously posted request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been destroyed,
+    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
     /// @dev or if the related script bytecode got changed after being posted.
     /// @param _queryId The unique query identifier
     function readRequestReward(uint256 _queryId)
         external view
         override
-        notDestroyed(_queryId)
+        notDeleted(_queryId)
         returns (uint256)
     {
         return _checkRequest(_queryId).reward;
@@ -401,28 +402,16 @@ abstract contract WitnetRequestBoardTrustableBase
         return _getResponseData(_queryId);
     }
 
-    /// Retrieves Witnet-provided epoch in which a previously posted request was actually solved by the Witnet DON.
+    /// Retrieves the hash of the Witnet transaction that actually solved the referred query.
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier
-    function readResponseEpoch(uint256 _queryId)
-        external view
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
-        returns (uint256)
-    {
-        return _getResponseData(_queryId).epoch;
-    }
-
-    /// Retrieves the Witnet-provided proof of the reported solution to a previously posted request.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier
-    function readResponseProof(uint256 _queryId)
+    /// @param _queryId The unique query identifier.
+    function readResponseDrTxHash(uint256 _queryId)
         external view        
         override
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (bytes32)
     {
-        return _getResponseData(_queryId).proof;
+        return _getResponseData(_queryId).drTxHash;
     }
 
     /// Retrieves the address that reported the result to a previously-posted request.
@@ -448,6 +437,18 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         Witnet.Response storage _response = _getResponseData(_queryId);
         return WitnetParserLib.resultFromCborBytes(_response.cborBytes);
+    }
+
+    /// Retrieves the timestamp in which the result to the referred query was solved by the Witnet DON.
+    /// @dev Fails if the `_queryId` is not in 'Reported' status.
+    /// @param _queryId The unique query identifier.
+    function readResponseTimestamp(uint256 _queryId)
+        external view
+        override
+        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        returns (uint256)
+    {
+        return _getResponseData(_queryId).timestamp;
     }
 
 
@@ -655,11 +656,11 @@ abstract contract WitnetRequestBoardTrustableBase
         _request = _getRequestData(_queryId);
         if (address(_request.addr) != address(0)) {
             // if the script contract address is not zero,
-            // we assume the query has not been destroyed, so
+            // we assume the query has not been deleted, so
             // the request script bytecode can still be fetched:
             bytes memory _bytecode = _request.addr.bytecode();
             require(
-                _bytecode.computeCodehash() == _request.codehash,
+                _bytecode.hash() == _request.hash,
                 "WitnetRequestBoardTrustableBase: bytecode changed after posting"
             );
         }
@@ -667,13 +668,13 @@ abstract contract WitnetRequestBoardTrustableBase
 
     function _reportResult(
             uint256 _queryId,
-            uint256 _epoch,
-            bytes32 _proof,
+            uint256 _timestamp,
+            bytes32 _drTxHash,
             bytes memory _cborBytes
         )
         internal
     {
-        require(_proof != 0, "WitnetRequestBoardTrustableDefault: Witnet proof cannot be zero");
+        require(_drTxHash != 0, "WitnetRequestBoardTrustableDefault: Witnet drTxHash cannot be zero");
         // Ensures the result byes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
@@ -682,9 +683,8 @@ abstract contract WitnetRequestBoardTrustableBase
         Witnet.Response storage _response = _query.response;
 
         // solhint-disable not-rely-on-time
-        _response.timestamp = block.timestamp;
-        _response.proof = _proof;
-        _response.epoch = _epoch;
+        _response.timestamp = _timestamp;
+        _response.drTxHash = _drTxHash;
         _response.reporter = msg.sender;
         _response.cborBytes = _cborBytes;
 

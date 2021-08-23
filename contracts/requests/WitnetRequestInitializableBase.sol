@@ -20,6 +20,6 @@ abstract contract WitnetRequestInitializableBase
             "WitnetRequestInitializableBase: cannot change bytecode"
         );
         bytecode = _bytecode;
-        codehash = _bytecode.computeCodehash();
+        hash = _bytecode.hash();
     }
 }
