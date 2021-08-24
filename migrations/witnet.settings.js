@@ -103,14 +103,6 @@ module.exports = {
       },
     },
     boba: {
-      test: {
-        network_id: 28,
-        host: "localhost",
-        port: 7545,
-        networkCheckTimeout: 1000,
-        gasPrice: 15000000,
-        gasLimit: 150000000,
-      },
       "boba.rinkeby": {
         network_id: 28,
         host: "localhost",

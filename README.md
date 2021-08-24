@@ -4,7 +4,7 @@
 
 This repository provides several deployable contracts:
 
-- `WitnetParseLib`, helper library useful for parsing Witnet-solved results to previously posted Witnet Data Requests.
+- `WitnetParserLib`, helper library useful for parsing Witnet-solved results to previously posted Witnet Data Requests.
 - `WitnetProxy`, a delegate-proxy contract that routes Witnet Data Requests to a currently active `WitnetRequestBoard` implementation.
 - Multiple implementations of the `WitnetRequestBoard` interface (WRB), which declares all required functionality to relay encapsulated [Witnet Data Requests](https://docs.witnet.io/protocol/data-requests/overview/) from Ethereum to the Witnet mainnet, as well as to relay Witnet-solved results back to Ethereum.
 
@@ -19,18 +19,18 @@ The repository also provides:
 
 `WitnetProxy` is an upgradable delegate-proxy contract that routes Witnet Data Requests coming from a `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
 
-This table contains all the `WinetProxy` instances that act as entry-points for the latest versions of the `WitnetRequestBoard` approved and deployed by the [**Witnet Foundation**](https://witnet.io), and that actually integrates with the **Witnet mainnet** from the following EVM-compatible blockchains:
+The following table contains all the `WinetProxy` instances that act as entry-points for the latest versions of the `WitnetRequestBoard` approved and deployed by the [**Witnet Foundation**](https://witnet.foundation), and that actually integrates with the **Witnet mainnet** from the currently supported EVM-compatible blockchains.
 
-  | Blockchain   | Network   | `WitnetProxy` address
-  | ------------ | --------- | ---------------------
-  | **Ethereum** | Rinkeby   | `` 
-  |              | Göerli    | `` 
+  | Blockchain   | Network   | `WitnetProxy` |
+  | ------------ | --------- | :-----------: |
+  | **Ethereum** | Rinkeby   | `0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4` 
+  |              | Göerli    | `0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8` 
   |              | Mainnet   | `` 
   | ------------ | --------- | ---------------------
-  | **Conflux**  | Testnet   | `` 
+  | **Conflux**  | Testnet   | `cfxtest:acfnpy71hjhamy075xyps56124zje5154ux9nte7vt` 
   |              | Mainnet   | `` 
   | ------------ | --------- | ---------------------
-  | **OMGX.L2**  | Rinkeby   | `` 
+  | **BOBA.L2**  | Rinkeby   | `0xA2F4f5290F9cfD3a17Cfa82f2a2fD3E5c05d1442` 
   |              | Mainnet   | `` 
   | ------------ | --------- | ---------------------
 
@@ -244,7 +244,7 @@ contract MyContract is UsingWitnet {
     // TODO
   }
 
-  function myOwnDrPost() public returns(uint256 _drTrackId) {
+  function myOwnDrPost() public payable returns (uint256 _drTrackId) {
     _drTrackId = witnetPostRequest{value: msg.value}(myRequest);
   }
 }
@@ -262,17 +262,17 @@ Please, have a look at the [`witnet/truffle-box`](https://github.com/witnet/truf
 ·······································|·················|·············|·············|·············|··············|··············
 |  Contract                            ·  Method         ·  Min        ·  Max        ·  Avg        ·  # calls     ·  usd (avg)  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetProxy                         ·  upgradeTo      ·          -  ·          -  ·     121146  ·           1  ·          -  │
+|  WitnetProxy                         ·  upgradeTo      ·          -  ·          -  ·     121057  ·           1  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  deleteQuery    ·      38352  ·      41633  ·      40403  ·           8  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  deleteQuery    ·          -  ·          -  ·      40769  ·           8  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  destruct       ·          -  ·          -  ·      13582  ·           2  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  destruct       ·          -  ·          -  ·      13593  ·           2  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  initialize     ·          -  ·          -  ·      75077  ·          30  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  initialize     ·          -  ·          -  ·      75099  ·          30  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  postRequest    ·     144650  ·     196484  ·     164280  ·          33  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  postRequest    ·     144650  ·     196484  ·     172132  ·          33  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault  ·  reportResult   ·     119210  ·     121359  ·     119806  ·          18  ·          -  │
+|  WitnetRequestBoardTrustableDefault  ·  reportResult   ·     120535  ·     120547  ·     120542  ·          18  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
 |  WitnetRequestBoardTrustableDefault  ·  upgradeReward  ·      31341  ·      36484  ·      34770  ·           6  ·          -  │
 ·······································|·················|·············|·············|·············|··············|··············
@@ -284,7 +284,7 @@ Please, have a look at the [`witnet/truffle-box`](https://github.com/witnet/truf
 ·························································|·············|·············|·············|··············|··············
 |  WitnetProxy                                           ·          -  ·          -  ·     587730  ·       8.7 %  ·          -  │
 ·························································|·············|·············|·············|··············|··············
-|  WitnetRequestBoardTrustableDefault                    ·          -  ·          -  ·    3699603  ·      55.1 %  ·          -  │
+|  WitnetRequestBoardTrustableDefault                    ·          -  ·          -  ·    3690955  ·      54.9 %  ·          -  │
 ·--------------------------------------------------------|-------------|-------------|-------------|--------------|-------------·
 ```
 
