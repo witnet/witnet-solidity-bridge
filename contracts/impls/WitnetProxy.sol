@@ -7,7 +7,6 @@ import "../patterns/Upgradable.sol";
 
 /// @title WitnetProxy: upgradable delegate-proxy contract that routes Witnet data requests coming from a 
 /// `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
-/// https://github.com/witnet/witnet-ethereum-bridge/tree/0.3.x
 /// @author The Witnet Foundation.
 contract WitnetProxy {
 
@@ -15,7 +14,7 @@ contract WitnetProxy {
         address implementation;
     }
 
-    /// Event emitted when a new DR is posted.
+    /// Event emitted every time the implementation gets updated.
     event Upgraded(address indexed implementation);  
 
     /// Constructor with no params as to ease eventual support of Singleton pattern (i.e. ERC-2470).

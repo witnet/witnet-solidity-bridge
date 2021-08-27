@@ -1,11 +1,14 @@
 const { merge } = require("lodash")
 
-const realm = process.env.WITNET_EVM_REALM ? process.env.WITNET_EVM_REALM.toLowerCase() : "default"
 const settings = require("../witnet.settings")
-const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
 
 module.exports = async function (deployer, network, accounts) {
-  const addresses = require("../witnet.addresses")[realm][network.split("-")[0]]
+  const realm = network === "test"
+    ? "default"
+    : process.env.WITNET_EVM_REALM ? process.env.WITNET_EVM_REALM.toLowerCase() : "default"
+
+  const addresses = require("../witnet.addresses")[realm][network = network.split("-")[0]]
+  const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
 
   let WitnetParserLib, WitnetDecoderLib
   let WitnetProxy, WitnetRequestBoard

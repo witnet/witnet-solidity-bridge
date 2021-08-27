@@ -54,6 +54,11 @@ module.exports = {
         version: "./node_modules/@eth-optimism/solc",
       },
     },
+    celo: {
+      solc: {
+        version: "0.8.7",
+      },
+    },
   },
   networks: {
     default: {
@@ -109,6 +114,14 @@ module.exports = {
         port: 8539,
         gasPrice: 15000000,
         gas: 150000000,
+        skipDryRun: true,
+      },
+    },
+    celo: {
+      "celo.alfajores": {
+        network_id: 44787,
+        host: "localhost",
+        port: 8538,
         skipDryRun: true,
       },
     },

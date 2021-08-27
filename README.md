@@ -19,20 +19,22 @@ The repository also provides:
 
 `WitnetProxy` is an upgradable delegate-proxy contract that routes Witnet Data Requests coming from a `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
 
-The following table contains all the `WinetProxy` instances that act as entry-points for the latest versions of the `WitnetRequestBoard` approved and deployed by the [**Witnet Foundation**](https://witnet.foundation), and that actually integrates with the **Witnet mainnet** from the currently supported EVM-compatible blockchains.
+The following table contains the addresses that point to the the latest deployed versions of the `WitnetRequestBoard`, approved by the [**Witnet Foundation**](https://witnet.foundation), and that actually integrates with the **Witnet mainnet** from the currently supported EVM-compatible blockchains.
 
-  | Blockchain   | Network   | `WitnetProxy` |
-  | ------------ | --------- | :-----------: |
-  | **Ethereum** | Rinkeby   | `0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4` 
-  |              | Göerli    | `0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8` 
-  |              | Mainnet   | `` 
+  | Chain        | Network   | Entrypoint address | Version tag 
+  | ------------ | --------- | :----------------- | :----------
+  | **Ethereum** | Rinkeby   | `0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4` | `0.4.2-trustable`
+  |              | Göerli    | `0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8` | `0.4.2-trustable`
+  |              | Mainnet   | |
   | ------------ | --------- | ---------------------
-  | **Conflux**  | Testnet   | `cfxtest:acfnpy71hjhamy075xyps56124zje5154ux9nte7vt` 
-  |              | Mainnet   | `` 
+  | **Conflux**  | Testnet   | `cfxtest:acfnpy71hjhamy075xyps56124zje5154ux9nte7vt` | `0.4.2-trustable`
+  |              | Mainnet   | | 
   | ------------ | --------- | ---------------------
-  | **BOBA.L2**  | Rinkeby   | `0xA2F4f5290F9cfD3a17Cfa82f2a2fD3E5c05d1442` 
-  |              | Mainnet   | `` 
+  | **BOBA.L2**  | Rinkeby   | `0xA2F4f5290F9cfD3a17Cfa82f2a2fD3E5c05d1442`  | `0.4.2-trustable-boba`
+  |              | Mainnet   | | 
   | ------------ | --------- | ---------------------
+  | **CELO**     | Alfajores | `0x8e0F6f18DA49e548eBf845aFb6Ca98d43CBc8744`  | `0.4.2-trustable`
+  |              | Mainnet   | |   
 
 ## **IWitnetRequest**
 
