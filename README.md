@@ -190,6 +190,20 @@ From the point of view of a `UsingWitnet` contract, any given `WitnetRequestBoar
 
 The `UsingWitnet` contract injects the following _internal methods_ into the contracts inheriting from it:
 
+- **`_witnetEstimateReward()`**:
+  - _Description_:
+    - Estimates the reward amount, considering current transaction's gas price.
+  - _Returns_:
+    - The reward to be included when either posting a new request, or upgrading the reward of a previously posted one.
+
+- **`_witnetEstimateReward(uint256 _gasPrice)`**:
+  - _Description_:
+    - Estimates the reward amount, considering the given gas price is used when either posting or upgrading a request.
+  - _Inputs_:
+    - `_gasPrice`: the gas price for which we want to retrieve the estimation.
+  - _Returns_:
+    - The reward to be included when either posting a new request, or upgrading the reward of a previously posted one.
+
 - **`_witnetPostRequest(IWitnetRequest _request)`**:
   - _Description_:
     - Method to be called for posting Witnet data request into the WRB, with provided `msg.value` as reward.
@@ -242,7 +256,7 @@ import "./UsingWitnet.sol";
 contract MyContract is UsingWitnet {
   IWitnetRequest myRequest;
 
-  constructor() UsingWitnet(/* here comes the WitnetProxy address provided by the Witnet Foundation */) {
+  constructor() UsingWitnet(/* here comes the entrypoint address provided by the Witnet Foundation */) {
     // TODO
   }
 

@@ -37,6 +37,7 @@ abstract contract UsingWitnet {
     /// @return A boolean telling if the request has been already resolved or not. Returns `false` also, if the result was deleted.
     function _witnetCheckResultAvailability(uint256 _id)
         internal view
+        virtual
         returns (bool)
     {
         return witnet.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
@@ -44,31 +45,55 @@ abstract contract UsingWitnet {
 
     /// Estimate the reward amount.
     /// @param _gasPrice The gas price for which we want to retrieve the estimation.
-    /// @return The reward to be included for the given gas price.
+    /// @return The reward to be included when either posting a new request, or upgrading the reward of a previously posted one.
     function _witnetEstimateReward(uint256 _gasPrice)
         internal view
+        virtual
         returns (uint256)
     {
         return witnet.estimateReward(_gasPrice);
     }
 
-    /// Send a new request to the Witnet network with transaction value as a reward.
-    /// @param _request An instance of `IWitnetRequest` contract.
-    /// @return Sequential identifier for the request included in the WitnetRequestBoard.
-    function _witnetPostRequest(IWitnetRequest _request)
-        internal
+    /// Estimates the reward amount, considering current transaction gas price.
+    /// @return The reward to be included when either posting a new request, or upgrading the reward of a previously posted one.
+    function _witnetEstimateReward()
+        internal view
+        virtual
         returns (uint256)
     {
-        return witnet.postRequest{value: msg.value}(_request);
+        return witnet.estimateReward(tx.gasprice);
+    }
+
+    /// Send a new request to the Witnet network with transaction value as a reward.
+    /// @param _request An instance of `IWitnetRequest` contract.
+    /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
+    /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
+    function _witnetPostRequest(IWitnetRequest _request)
+        internal
+        virtual
+        returns (uint256 _id, uint256 _reward)
+    {
+        _reward = _witnetEstimateReward();
+        _id = witnet.postRequest{value: _reward}(_request);
     }
 
     /// Upgrade the reward for a previously posted request.
     /// @dev Call to `upgradeReward` function in the WitnetRequestBoard contract.
     /// @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
+    /// @return Amount in which the reward has been increased.
     function _witnetUpgradeReward(uint256 _id)
         internal
+        virtual
+        returns (uint256)
     {
-        witnet.upgradeReward{value: msg.value}(_id);
+        uint256 _currentReward = witnet.readRequestReward(_id);        
+        uint256 _newReward = _witnetEstimateReward();
+        uint256 _fundsToAdd = 0;
+        if (_newReward > _currentReward) {
+            _fundsToAdd = (_newReward - _currentReward);
+        }
+        witnet.upgradeReward{value: _fundsToAdd}(_id); // Let Request.gasPrice be updated
+        return _fundsToAdd;
     }
 
     /// Read the Witnet-provided result to a previously posted request.
@@ -76,6 +101,7 @@ abstract contract UsingWitnet {
     /// @return The result of the request as an instance of `Witnet.Result`.
     function _witnetReadResult(uint256 _id)
         internal view
+        virtual
         returns (Witnet.Result memory)
     {
         return witnet.readResponseResult(_id);
@@ -86,6 +112,7 @@ abstract contract UsingWitnet {
     /// @return The Witnet-provided result to the request.
     function _witnetDeleteQuery(uint256 _id)
         internal
+        virtual
         returns (Witnet.Response memory)
     {
         return witnet.deleteQuery(_id);

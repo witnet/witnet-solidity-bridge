@@ -19,10 +19,8 @@ contract("UsingWitnet", accounts => {
     const resultDecimal = 3141592
     const drTxHash = "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
-    const reward = web3.utils.toWei("1", "ether")
-
     let witnet, clientContract, wrb, proxy, request, requestId, result
-    let lastAccount0Balance
+    let lastAccount1Balance, lastReward
 
     const ownerAccount = accounts[0]
     const reporterAccount = accounts[1]
@@ -50,7 +48,7 @@ contract("UsingWitnet", accounts => {
       )
       await UsingWitnetTestHelper.link(WitnetParser, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(proxy.address)
-      lastAccount0Balance = await web3.eth.getBalance(accounts[0])
+      lastAccount1Balance = await web3.eth.getBalance(accounts[1])
     })
 
     it("should create a data request", async () => {
@@ -60,11 +58,15 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should post a data request into the wrb", async () => {
+      lastReward = await clientContract.witnetEstimateReward({ gasPrice: 1e9 })
       requestId = await returnData(clientContract.witnetPostRequest(
         request.address,
         {
           from: accounts[1],
-          value: reward,
+          value: lastReward * 2,
+          // even though lastReward*2 is sent, only lastReward should be consumed,
+          // and the rest be paid back to sender (according to UsingWitnetTestHelper implementation).
+          gasPrice: 1e9,
         }
       ))
       assert.equal(requestId, 1)
@@ -79,13 +81,13 @@ contract("UsingWitnet", accounts => {
       // Retrieve rewards
       const drInfo = await wrb.readRequest(requestId)
       const drReward = drInfo.reward.toString()
-      assert.equal(drReward, reward)
+      assert.equal(drReward, lastReward)
     })
 
     it("requester balance should decrease", async () => {
-      const afterBalance = await web3.eth.getBalance(accounts[0])
-      assert(afterBalance < lastAccount0Balance)
-      lastAccount0Balance = afterBalance
+      const afterBalance = await web3.eth.getBalance(accounts[1])
+      assert(parseInt(afterBalance) < parseInt(lastAccount1Balance))
+      lastAccount1Balance = afterBalance
     })
 
     it("client contract balance should remain stable", async () => {
@@ -93,29 +95,31 @@ contract("UsingWitnet", accounts => {
       assert.equal(usingWitnetBalance, 0)
     })
 
-    it("WRB balance should increase", async () => {
+    it("WRB balance should have increased in the exact fare", async () => {
       const wrbBalance = await web3.eth.getBalance(wrb.address)
-      assert.equal(wrbBalance, reward)
+      assert.equal(wrbBalance, lastReward)
     })
 
     it("should upgrade the rewards of an existing data request", async () => {
-      await returnData(clientContract.witnetUpgradeRequest(requestId, {
+      lastReward = await clientContract.witnetEstimateReward({ gasPrice: 2e9 })
+      const currentReward = await clientContract.witnetCurrentReward.call(requestId)
+      await returnData(clientContract.witnetUpgradeReward(requestId, {
         from: accounts[1],
-        value: reward,
+        value: (lastReward - currentReward) * 2,
+        gasPrice: 2e9,
       }))
     })
 
     it("should have upgraded the rewards correctly", async () => {
       // Retrieve reward
       const drInfo = await wrb.readRequest(requestId)
-      const drReward = drInfo.reward.toString()
-      assert.equal(drReward, reward * 2)
+      assert.equal(drInfo.reward.toString(), lastReward.toString())
     })
 
     it("requester balance should decrease after rewards upgrade", async () => {
       const afterBalance = await web3.eth.getBalance(accounts[1])
-      assert(afterBalance < lastAccount0Balance - reward)
-      lastAccount0Balance = afterBalance
+      assert(parseInt(afterBalance) < parseInt(lastAccount1Balance))
+      lastAccount1Balance = afterBalance
     })
 
     it("client contract balance should remain stable after rewards upgrade", async () => {
@@ -125,7 +129,7 @@ contract("UsingWitnet", accounts => {
 
     it("WRB balance should increase after rewards upgrade", async () => {
       const wrbBalance = await web3.eth.getBalance(wrb.address)
-      assert.equal(wrbBalance, reward * 2)
+      assert.equal(wrbBalance, lastReward)
     })
 
     it("should fail if posting result from unauthorized reporter", async () => {
@@ -244,13 +248,11 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should be able to estimate gas cost and post the DR", async () => {
-      const gasPrice = 20000
-      const estimatedReward = await clientContract.witnetEstimateGasCost.call(gasPrice)
+      const estimatedReward = await clientContract.witnetEstimateReward.call()
       await truffleAssert.passes(
         clientContract.witnetPostRequest(request.address, {
           from: accounts[1],
           value: estimatedReward,
-          gasPrice: gasPrice,
         }),
         "Estimated rewards should cover the gas costs"
       )

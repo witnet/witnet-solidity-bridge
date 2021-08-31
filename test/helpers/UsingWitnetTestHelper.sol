@@ -19,17 +19,25 @@ contract UsingWitnetTestHelper is UsingWitnet {
     UsingWitnet(_wrb)
   {}
 
-  function witnetPostRequest(IWitnetRequest _script)
+  function witnetPostRequest(IWitnetRequest _request)
     external payable
-    returns(uint256 id)
+    returns(uint256 _id)
   {
-    return _witnetPostRequest(_script);
+    uint256 _reward;
+    (_id, _reward) = _witnetPostRequest(_request);
+    if (_reward < msg.value) {
+      payable(msg.sender).transfer(msg.value - _reward);
+    }
   }
 
-  function witnetUpgradeRequest(uint256 _id)
+  function witnetUpgradeReward(uint256 _id)
     external payable
   {
-    _witnetUpgradeReward(_id);
+    uint256 _value = msg.value;
+    uint256 _used = _witnetUpgradeReward(_id);
+    if (_used < _value) {
+      payable(msg.sender).transfer(_value - _used);
+    }
   }
 
   function witnetReadResult(uint256 _requestId)
@@ -40,8 +48,15 @@ contract UsingWitnetTestHelper is UsingWitnet {
     return result;
   }
 
-  function witnetEstimateGasCost(uint256 _gasPrice) external view returns (uint256) {
-    return _witnetEstimateReward(_gasPrice);
+  function witnetCurrentReward(uint256 _requestId)
+    external view
+    returns (uint256)
+  {
+    return witnet.readRequestReward(_requestId);
+  }
+
+  function witnetEstimateReward() external view returns (uint256) {
+    return _witnetEstimateReward();
   }
 
   function witnetAsUint64() external view returns (uint64) {
