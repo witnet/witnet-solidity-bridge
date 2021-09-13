@@ -3,10 +3,13 @@ const settings = require("./migrations/witnet.settings")
 const utils = require("./scripts/utils")
 
 const rn = utils.getRealmNetworkFromArgs()
-const realm = rn[0], network = rn[1]
-if (!settings.networks[realm] || !settings.networks[realm][network]) {  
+const realm = rn[0]; const network = rn[1]
+if (!settings.networks[realm] || !settings.networks[realm][network]) {
   if (network !== "development" && network !== "test") {
-    console.error(`Fatal: network "${realm}:${network}" configuration not found in "./migrations/witnet.settings.js#networks"`)
+    console.error(
+      `Fatal: network "${realm}:${network}"`,
+      "configuration not found in \"./migrations/witnet.settings.js#networks\""
+    )
     process.exit(1)
   }
 }

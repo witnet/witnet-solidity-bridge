@@ -22,7 +22,7 @@ if (process.argv.length < 3) {
 }
 
 const rn = utils.getRealmNetworkFromNetwork(process.argv[2])
-const realm = rn[0], network = rn[1]
+const realm = rn[0]; const network = rn[1]
 
 if (!settings.networks[realm] || !settings.networks[realm][network]) {
   console.error(`\n!!! Network "${network}" not found.\n`)
@@ -30,9 +30,9 @@ if (!settings.networks[realm] || !settings.networks[realm][network]) {
     console.error(`> Available networks in realm "${realm}":`)
     console.error(settings.networks[realm])
   } else {
-    console.error(`> Available networks:`)
+    console.error("> Available networks:")
     console.error(settings.networks)
-  }  
+  }
   process.exit(1)
 }
 

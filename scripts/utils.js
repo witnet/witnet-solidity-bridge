@@ -2,10 +2,10 @@ require("dotenv").config()
 
 module.exports = {
   getRealmNetworkFromArgs,
-  getRealmNetworkFromNetwork
+  getRealmNetworkFromNetwork,
 }
 
-function getRealmNetworkFromArgs() {
+function getRealmNetworkFromArgs () {
   let realm = process.env.WITNET_EVM_REALM
     ? process.env.WITNET_EVM_REALM.toLowerCase()
     : "default"
@@ -20,7 +20,7 @@ function getRealmNetworkFromArgs() {
   return [realm, network]
 }
 
-function getRealmNetworkFromNetwork(network) {
+function getRealmNetworkFromNetwork (network) {
   network = network || "development"
   let realm = "default"
   if (!network.split(".")[1]) {
