@@ -6,7 +6,7 @@
 require("dotenv").config()
 
 const settings = require("../migrations/witnet.settings")
-const realm = process.env.WITNET_EVM_REALM || "default"
+const utils = require("./utils")
 
 const exec = require("child_process").exec
 const fs = require("fs")
@@ -21,12 +21,19 @@ if (process.argv.length < 3) {
   process.exit(0)
 }
 
-const network = process.argv[2]
-if (!settings.networks[realm][network]) {
-  console.error(`\n!!! Network "${realm}:${network}" not found.\n`)
-  console.error(`> Available networks in realm "${realm}":`)
-  console.error(settings.networks[realm])
-  process.exit(0)
+const rn = utils.getRealmNetworkFromNetwork(process.argv[2])
+const realm = rn[0], network = rn[1]
+
+if (!settings.networks[realm] || !settings.networks[realm][network]) {
+  console.error(`\n!!! Network "${network}" not found.\n`)
+  if (settings.networks[realm]) {
+    console.error(`> Available networks in realm "${realm}":`)
+    console.error(settings.networks[realm])
+  } else {
+    console.error(`> Available networks:`)
+    console.error(settings.networks)
+  }  
+  process.exit(1)
 }
 
 const artifact = (settings.artifacts[realm] && settings.artifacts[realm].WitnetRequestBoard) ||

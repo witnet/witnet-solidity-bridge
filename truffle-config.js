@@ -1,9 +1,18 @@
-// In order to load environment variables (e.g. API keys)
-require("dotenv").config()
 const { merge } = require("lodash")
 const settings = require("./migrations/witnet.settings")
-const realm = process.env.WITNET_EVM_REALM ? process.env.WITNET_EVM_REALM.toLowerCase() : "default"
+const utils = require("./scripts/utils")
 
+const rn = utils.getRealmNetworkFromArgs()
+const realm = rn[0], network = rn[1]
+if (!settings.networks[realm] || !settings.networks[realm][network]) {  
+  if (network !== "development" && network !== "test") {
+    console.error(`Fatal: network "${realm}:${network}" configuration not found in "./migrations/witnet.settings.js#networks"`)
+    process.exit(1)
+  }
+}
+console.info(`
+> Targetting "${realm.toUpperCase()}" realm
+=====================${"=".repeat(realm.length)}`)
 module.exports = {
   build_directory: `./build/${realm}/`,
   contracts_directory: "./contracts/",
