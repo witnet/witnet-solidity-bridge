@@ -1,6 +1,6 @@
 {
   "name": "witnet-ethereum-bridge",
-  "version": "0.4.5",
+  "version": "0.4.4",
   "description": "Witnet Bridge Solidity contracts for EVM-compatible networks",
   "main": "",
   "scripts": {
@@ -30,7 +30,7 @@
   "author": "Witnet Foundation <info@witnet.foundation>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/witnet/witnet-ethereum-bridge.git"
+    "url": "https://github.com/witnet/witnet-solidity-bridge.git"
   },
   "keywords": [
     "bridge",
