@@ -16,9 +16,25 @@ contract WitnetRequestBoardTrustableDefault
         Destructible,
         WitnetRequestBoardTrustableBase
 {  
+    uint256 internal constant _ESTIMATED_REPORT_RESULT_GAS = 120547;
+
     constructor(bool _upgradable, bytes32 _versionTag)
         WitnetRequestBoardTrustableBase(_upgradable, _versionTag, address(0))
     {}
+
+
+    // ================================================================================================================
+    // --- Overrides implementation of 'IWitnetRequestBoardView' ------------------------------------------------------
+
+    /// Estimates the amount of reward we need to insert for a given gas price.
+    /// @param _gasPrice The gas price for which we need to calculate the rewards.
+    function estimateReward(uint256 _gasPrice)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return _gasPrice * _ESTIMATED_REPORT_RESULT_GAS;
+    }
 
 
     // ================================================================================================================

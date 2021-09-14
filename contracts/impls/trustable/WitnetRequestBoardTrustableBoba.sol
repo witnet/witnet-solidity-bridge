@@ -23,6 +23,7 @@ contract WitnetRequestBoardTrustableBoba
 {
     uint256 internal lastBalance;
     uint256 internal immutable _OVM_GAS_PRICE;
+    uint256 internal constant _ESTIMATED_REPORT_RESULT_GAS = 1263223;
 
     modifier ovmPayable virtual {
         _;
@@ -97,7 +98,7 @@ contract WitnetRequestBoardTrustableBoba
     /// @dev Estimate the minimal amount of reward we need to insert for a given gas price.
     /// @return The minimal reward to be included for the given gas price.
     function estimateReward(uint256)
-        external view
+        public view
         virtual override
         returns (uint256)
     {

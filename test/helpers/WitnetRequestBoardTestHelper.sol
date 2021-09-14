@@ -29,7 +29,7 @@ contract WitnetRequestBoardTestHelper
   /// @dev Estimate the amount of reward we need to insert for a given gas price.
   /// @return The rewards to be included for the given gas price as inclusionReward, resultReward, blockReward.
   function estimateReward(uint256)
-    external pure
+    public pure
     override
     returns(uint256)
   {
