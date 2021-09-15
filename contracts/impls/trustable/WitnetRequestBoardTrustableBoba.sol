@@ -23,7 +23,7 @@ contract WitnetRequestBoardTrustableBoba
 {
     uint256 internal lastBalance;
     uint256 internal immutable _OVM_GAS_PRICE;
-    uint256 internal constant _ESTIMATED_REPORT_RESULT_GAS = 1263223;
+    uint256 internal immutable _OVM_ESTIMATED_REPORT_RESULT_GAS;
 
     modifier ovmPayable virtual {
         _;
@@ -36,12 +36,14 @@ contract WitnetRequestBoardTrustableBoba
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _layer2GasPrice,
+            uint256 _layer2ReportResultGasLimit,
             address _oETH
         )
         WitnetRequestBoardTrustableBase(_upgradable, _versionTag, _oETH)
     {
         require(address(_oETH) != address(0), "WitnetRequestBoardTrustableBoba: null currency");
         _OVM_GAS_PRICE = _layer2GasPrice;
+        _OVM_ESTIMATED_REPORT_RESULT_GAS = _layer2ReportResultGasLimit;
     }
 
     /// Gets lastBalance of given address.
@@ -102,7 +104,7 @@ contract WitnetRequestBoardTrustableBoba
         virtual override
         returns (uint256)
     {
-        return _OVM_GAS_PRICE * _ESTIMATED_REPORT_RESULT_GAS;
+        return _OVM_GAS_PRICE * _OVM_ESTIMATED_REPORT_RESULT_GAS;
     }
 
         
