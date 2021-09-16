@@ -35,7 +35,7 @@ module.exports = {
         /* _l2ReportResultGasLimit */ 1870000,
         /* _OVM_ETH */ "0x4200000000000000000000000000000000000006",
       ],
-    }
+    },
   },
   compilers: {
     default: {
@@ -89,16 +89,16 @@ module.exports = {
         host: "localhost",
         port: 9545,
       },
-      "ethereum.ropsten": {
-        network_id: 3,
-        host: "localhost",
-        port: 8543,
-      },
       "ethereum.rinkeby": {
         network_id: 4,
         host: "localhost",
         port: 8544,
         skipDryRun: true,
+      },
+      "ethereum.ropsten": {
+        network_id: 3,
+        host: "localhost",
+        port: 8543,
       },
     },
     boba: {
