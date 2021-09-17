@@ -35,8 +35,8 @@ contract WitnetRequestBoardTrustableBoba
     constructor(
             bool _upgradable,
             bytes32 _versionTag,
-            uint256 _layer2GasPrice,
             uint256 _layer2ReportResultGasLimit,
+            uint256 _layer2GasPrice,            
             address _oETH
         )
         WitnetRequestBoardTrustableBase(_upgradable, _versionTag, _oETH)

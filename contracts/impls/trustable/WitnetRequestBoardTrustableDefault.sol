@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+/* solhint-disable var-name-mixedcase */
+
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
@@ -16,11 +18,17 @@ contract WitnetRequestBoardTrustableDefault
         Destructible,
         WitnetRequestBoardTrustableBase
 {  
-    uint256 internal constant _ESTIMATED_REPORT_RESULT_GAS = 120547;
+    uint256 internal immutable _ESTIMATED_REPORT_RESULT_GAS;
 
-    constructor(bool _upgradable, bytes32 _versionTag)
+    constructor(
+        bool _upgradable,
+        bytes32 _versionTag,
+        uint256 _reportResultGasLimit
+    )
         WitnetRequestBoardTrustableBase(_upgradable, _versionTag, address(0))
-    {}
+    {
+        _ESTIMATED_REPORT_RESULT_GAS = _reportResultGasLimit;
+    }
 
 
     // ================================================================================================================

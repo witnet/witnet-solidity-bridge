@@ -16,14 +16,22 @@ module.exports = {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
         /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 120547,
+      ],
+    },
+    celo: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 134371,
       ],
     },
     boba: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
         /* _versionTag */ fromAscii(packageJson.version + "-trustable-boba"),
+        /* _reportResultGasLimit */ 870000,
         /* _l2GasPrice */ 15000000,
-        /* _l2ReportResultGasLimit */ 870000,
         /* _OVM_ETH */ "0x4200000000000000000000000000000000000006",
       ],
     },
