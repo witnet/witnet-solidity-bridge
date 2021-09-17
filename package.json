@@ -1,6 +1,6 @@
 {
   "name": "witnet-ethereum-bridge",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Witnet Bridge Solidity contracts for EVM-compatible networks",
   "main": "",
   "scripts": {

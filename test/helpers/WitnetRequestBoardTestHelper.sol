@@ -20,7 +20,7 @@ contract WitnetRequestBoardTestHelper
   address public witnet;
 
   constructor (address[] memory _committee, bool _upgradable)
-    WitnetRequestBoardTrustableDefault(_upgradable, "WitnetRequestBoardTestHelper")
+    WitnetRequestBoardTrustableDefault(_upgradable, "WitnetRequestBoardTestHelper", 120547)
   {
     witnet = msg.sender;
     setReporters(_committee);
