@@ -27,6 +27,9 @@ function getRealmNetworkFromNetwork (network) {
     network = `ethereum.${network}`
   } else {
     realm = network.split(".")[0]
+    if (realm === "ethereum") {
+      realm = "default"
+    }
   }
   return [realm, network]
 }
