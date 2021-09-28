@@ -15,13 +15,13 @@ const cli = new cli_func()
 if (process.argv.length < 3) {
   console.log()
   console.log("\n\
-    Usage: yarn migrate <Network>\n\
-       or: npm run migrate <Network>\n\n\
+    Usage: yarn migrate <[Realm.]Network>\n\
+       or: npm run migrate <[Realm.]Network>\n\n\
   ")
   process.exit(0)
 }
 
-const rn = utils.getRealmNetworkFromNetwork(process.argv[2])
+const rn = utils.getRealmNetworkFromString(process.argv[2])
 const realm = rn[0]; const network = rn[1]
 
 if (!settings.networks[realm] || !settings.networks[realm][network]) {
@@ -49,7 +49,7 @@ if (!fs.existsSync(`${process.env.FLATTENED_DIRECTORY}/Flattened${artifact}.sol`
 
 migrateFlattened(network)
 
-/// /////////////////////////////////////////////////////////////////////////////
+/// //////////////////////////////////////////////////////////////////////////////
 
 async function migrateFlattened (network) {
   console.log(
