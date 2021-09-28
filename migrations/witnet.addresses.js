@@ -15,8 +15,8 @@ module.exports = {
   },
   boba: {
     "boba.mainnet": {
-      WitnetParserLib: "",
-      WitnetRequestBoard: "",
+      WitnetParserLib: "0xF2712e7114A237625EFC8bBA6a6ed1Bb8b6029c9",
+      WitnetRequestBoard: "0xd653fbd7c736838289262F0F41A458f35393C88a",
     },
     "boba.rinkeby": {
       WitnetParserLib: "0xdF4Df677F645Fe603a883Ad3f2Db03EDFDd75F5C",
@@ -25,8 +25,8 @@ module.exports = {
   },
   celo: {
     "celo.alfajores": {
-      WitnetParserLib: "0x1C402c521C8dbF8aCF769d8445dC69c09E3505a5",
-      WitnetRequestBoard: "0x8e0F6f18DA49e548eBf845aFb6Ca98d43CBc8744",
+      WitnetParserLib: "0x5477fF017EDb0e6e8596b6B5Cb78FCc547A5966a",
+      WitnetRequestBoard: "0x1AEC0089168Fd1c70B5df8b590c86FAdD62d0f2d",
     },
   },
   conflux: {
