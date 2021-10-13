@@ -237,13 +237,14 @@ library WitnetBuffer {
       _dest += 32;
       _src += 32;
     }
-
-    // Copy remaining bytes
-    uint mask = 256 ** (32 - _len) - 1;
-    assembly {
-      let srcpart := and(mload(_src), not(mask))
-      let destpart := and(mload(_dest), mask)
-      mstore(_dest, or(destpart, srcpart))
+    if (_len > 0) {
+      // Copy remaining bytes
+      uint mask = 256 ** (32 - _len) - 1;
+      assembly {
+        let srcpart := and(mload(_src), not(mask))
+        let destpart := and(mload(_dest), mask)
+        mstore(_dest, or(destpart, srcpart))
+      }
     }
   }
 
