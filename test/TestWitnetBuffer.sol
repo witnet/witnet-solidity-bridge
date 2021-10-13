@@ -13,6 +13,30 @@ contract TestWitnetBuffer {
 
   event Log(string _topic, uint256 _value);
 
+  function testRead31bytes() external {
+    bytes memory data = hex"58207eadcf3ba9a9a860b4421ee18caa6dca4738fef266aa7b3668a2ff97304cfcab";
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 1);
+    bytes memory actual = buf.read(31);
+    
+    Assert.equal(31, actual.length, "Read 31 bytes from a Buffer");
+  }
+
+  function testRead32bytes() external {
+    bytes memory data = hex"58207eadcf3ba9a9a860b4421ee18caa6dca4738fef266aa7b3668a2ff97304cfcab";
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 1);
+    bytes memory actual = buf.read(32);
+    
+    Assert.equal(32, actual.length, "Read 32 bytes from a Buffer");
+  }
+
+  function testRead33bytes() external {
+    bytes memory data = hex"58207eadcf3ba9a9a860b4421ee18caa6dca4738fef266aa7b3668a2ff97304cfcabff";
+    Witnet.Buffer memory buf = Witnet.Buffer(data, 1);
+    bytes memory actual = buf.read(33);
+    
+    Assert.equal(33, actual.length, "Read 33 bytes from a Buffer");
+  }
+
   function testReadUint8() external {
     uint8 expected = 31;
     bytes memory data = abi.encodePacked(expected);
