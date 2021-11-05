@@ -170,21 +170,21 @@ abstract contract WitnetRequestMalleableBase
         // Count the number of groups of 7 bits
         // We need this pre-processing step since Solidity doesn't allow dynamic memory resizing
         uint64 tmp = n;
-        uint64 num_bytes = 2;
+        uint64 numBytes = 2;
         while (tmp > 0x7F) {
             tmp = tmp >> 7;
-            num_bytes += 1;
+            numBytes += 1;
         }
-        bytes memory buf = new bytes(num_bytes);
+        bytes memory buf = new bytes(numBytes);
         tmp = n;
         buf[0] = t;
-        for (uint64 i = 1; i < num_bytes; i++) {
+        for (uint64 i = 1; i < numBytes; i++) {
             // Set the first bit in the byte for each group of 7 bits
             buf[i] = bytes1(0x80 | uint8(tmp & 0x7F));
             tmp = tmp >> 7;
         }
         // Unset the first bit of the last byte
-        buf[num_bytes - 1] &= 0x7F;
+        buf[numBytes - 1] &= 0x7F;
         return buf;
     }
 
