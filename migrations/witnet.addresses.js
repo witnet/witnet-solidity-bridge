@@ -1,7 +1,7 @@
 module.exports = {
   default: {
     "ethereum.goerli": {
-      WitnetParserLib: "0x7fbFAA0cA6B098e234135a9D813f735762fEF601",
+      WitnetParserLib: "0x3F1f3F024bA451F738a49DB21055b1BC4604A31C",
       WitnetRequestBoard: "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8",
     },
     "ethereum.mainnet": {
