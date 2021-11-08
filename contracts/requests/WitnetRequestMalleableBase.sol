@@ -28,7 +28,7 @@ abstract contract WitnetRequestMalleableBase
     uint64 public witnessingReward;
 
     /// Amount of nanowits that will be earned by Witnet miners for each each valid commit/reveal transaction they include in a block.
-    uint64 public witnetUnitaryFee;
+    uint64 public witnessingUnitaryFee;
     
     constructor(bytes memory _template)
     {
@@ -49,7 +49,7 @@ abstract contract WitnetRequestMalleableBase
     }
 
     /// Set amount of nanowits that a witness solving the request will be required to collateralize in the commitment transaction.
-    function setCollateral(uint64 _witnessingCollateral)
+    function setWitnessingCollateral(uint64 _witnessingCollateral)
         public
         virtual
         onlyOwner
@@ -60,27 +60,27 @@ abstract contract WitnetRequestMalleableBase
             minWitnessingConsensus,
             _witnessingCollateral,
             witnessingReward,
-            witnetUnitaryFee
+            witnessingUnitaryFee
         );
     }
 
     /// Specifies how much you want to pay for rewarding each of the Witnet nodes.
     /// @param _witnessingReward Amount of nanowits that every request-solving witness will be rewarded with.
-    /// @param _witnetUnitaryFee Amount of nanowits that will be earned by Witnet miners for each each valid 
+    /// @param _witnessingUnitaryFee Amount of nanowits that will be earned by Witnet miners for each each valid 
     /// commit/reveal transaction they include in a block.
-    function setFees(uint64 _witnessingReward, uint64 _witnetUnitaryFee)
+    function setWitnessingFees(uint64 _witnessingReward, uint64 _witnessingUnitaryFee)
         public
         virtual
         onlyOwner
     {
         witnessingReward = _witnessingReward;
-        witnetUnitaryFee = _witnetUnitaryFee;
+        witnessingUnitaryFee = _witnessingUnitaryFee;
         _malleateBytecode(
             numWitnesses,
             minWitnessingConsensus,
             witnessingCollateral,
             _witnessingReward,
-            _witnetUnitaryFee
+            _witnessingUnitaryFee
         );
     }
 
@@ -88,7 +88,7 @@ abstract contract WitnetRequestMalleableBase
     /// @param _numWitnesses Number of witnesses required to be involved for solving this Witnet Data Request.
     /// @param _minWitnessingConsensus /// Threshold percentage for aborting resolution of a request if the witnessing 
     /// nodes did not arrive to a broad consensus.
-    function setQuorum(uint8 _numWitnesses, uint8 _minWitnessingConsensus)
+    function setWitnessingQuorum(uint8 _numWitnesses, uint8 _minWitnessingConsensus)
         public
         virtual
         onlyOwner
@@ -100,12 +100,12 @@ abstract contract WitnetRequestMalleableBase
             _minWitnessingConsensus,
             witnessingCollateral,
             witnessingReward,
-            witnetUnitaryFee
+            witnessingUnitaryFee
         );
     }
 
     /// Returns total amount of nanowits that witnessing nodes will have to collateralize all together.
-    function totalCollateral()
+    function totalWitnessingCollateral()
         external view
         returns (uint128)
     {
@@ -113,11 +113,11 @@ abstract contract WitnetRequestMalleableBase
     }
 
     /// Return total amount of nanowits that will have to be paid in total for this request to be solved.
-    function totalFees()
+    function totalWitnessingFee()
         external view
         returns (uint128)
     {
-        return numWitnesses * (2 * witnetUnitaryFee + witnessingReward);
+        return numWitnesses * (2 * witnessingUnitaryFee + witnessingReward);
     }
 
     // ================================================================================================================
@@ -129,7 +129,7 @@ abstract contract WitnetRequestMalleableBase
             uint8 _minWitnessingConsensus,
             uint64 _witnessingCollateral,
             uint64 _witnessingReward,
-            uint64 _witnetUnitaryFee
+            uint64 _witnessingUnitaryFee
         )
         internal
         virtual
@@ -151,7 +151,7 @@ abstract contract WitnetRequestMalleableBase
             template,
             _witnessingReward > 0 ? _uint64varint(bytes1(0x10), _witnessingReward) : bytes(""),
             _uint8varint(bytes1(0x18), _numWitnesses),
-            _uint64varint(0x20, _witnetUnitaryFee),
+            _uint64varint(0x20, _witnessingUnitaryFee),
             _uint8varint(0x28, _minWitnessingConsensus),
             _uint64varint(0x30, _witnessingCollateral)
         );
