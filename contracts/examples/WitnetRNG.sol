@@ -28,7 +28,7 @@ contract WitnetRNG
 
     /// Gets randomness generated upon latest request.
     /// @dev Returns 0x00...00 if not yet solved, or 0xff...ff if randomness could not get solved by Witnet for any 
-    /// @dev unexpected reason.
+    /// @dev unexpected reason. Fails if `randomize()` was never called before.
     function getRandomness()
         public view
         returns (bytes32 _randomness)
@@ -59,8 +59,8 @@ contract WitnetRNG
     {
         uint256 _queryId = _lastQueryId().value;
         return (
-            _queryId > 0
-                && _witnetCheckResultAvailability(_queryId)
+            _queryId == 0
+                || _witnetCheckResultAvailability(_queryId)
         );
     }
 
