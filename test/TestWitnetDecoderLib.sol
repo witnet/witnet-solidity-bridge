@@ -121,6 +121,18 @@ contract TestWitnetDecoderLib {
     );
   }
 
+  function testBytes32DecodeValueFrom31bytes() external {
+    // TODO
+  }
+
+  function testBytes32DecodeValueFrom32bytes() external {
+    // TODO
+  }
+
+  function testBytes32DecodeValueFrom33bytes() external {
+    // TODO
+  }
+
   function testStringDecodeDiscriminant() external {
     Witnet.CBOR memory decoded = WitnetDecoderLib.valueFromBytes(hex"6449455446");
     Assert.equal(uint(decoded.majorType), 3, "CBOR-encoded String value should be decoded into a Witnet.CBOR with major type 3");

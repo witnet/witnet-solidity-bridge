@@ -69,6 +69,17 @@ library WitnetParserLib {
         return _result.value.decodeBytes();
     }
 
+    /// @notice Decode a bytes value from a Witnet.Result as a `bytes32` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `bytes32` decoded from the Witnet.Result.
+    function asBytes32(Witnet.Result memory _result)
+        external pure
+        returns(bytes32)
+    {
+        require(_result.success, "WitnetParserLib: tried to read bytes32 value from errored Witnet.Result");
+        return _result.value.decodeBytes32();
+    }
+
     /// @notice Decode an error code from a Witnet.Result as a member of `Witnet.ErrorCodes`.
     /// @param _result An instance of `Witnet.Result`.
     /// @return The `CBORValue.Error memory` decoded from the Witnet.Result.

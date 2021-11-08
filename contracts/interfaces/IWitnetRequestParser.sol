@@ -37,6 +37,11 @@ interface IWitnetRequestParser {
     /// @return The `bytes` decoded from the Witnet.Result.
     function asBytes(Witnet.Result memory _result) external pure returns (bytes memory);
 
+    /// Decode a bytes value from a Witnet.Result as a `bytes32` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `bytes32` decoded from the Witnet.Result.
+    function asBytes32(Witnet.Result memory _result) external pure returns (bytes32);
+
     /// Decode an error code from a Witnet.Result as a member of `Witnet.ErrorCodes`.
     /// @param _result An instance of `Witnet.Result`.
     /// @return The `CBORValue.Error memory` decoded from the Witnet.Result.

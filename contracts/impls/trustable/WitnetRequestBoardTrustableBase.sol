@@ -499,9 +499,21 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @return The `bytes` decoded from the Witnet.Result.
     function asBytes(Witnet.Result memory _result)
         external pure
-        override returns (bytes memory)
+        override
+        returns (bytes memory)
     {
         return _result.asBytes();
+    }
+
+    /// Decode a bytes value from a Witnet.Result as a `bytes32` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `bytes32` decoded from the Witnet.Result.
+    function asBytes32(Witnet.Result memory _result)
+        external pure
+        override
+        returns (bytes32)
+    {
+        return _result.asBytes32();
     }
 
     /// Decode an error code from a Witnet.Result as a member of `Witnet.ErrorCodes`.

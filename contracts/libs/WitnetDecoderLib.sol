@@ -61,6 +61,17 @@ library WitnetDecoderLib {
     }
   }
 
+  /// @notice Decode a `Witnet.CBOR` structure into a native `bytes32` value.
+  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @return _bytes32 The value represented by the input, as a `bytes32` value.
+  function decodeBytes32(Witnet.CBOR memory _cborValue) public pure returns(bytes32 _bytes32) {
+    bytes memory _bb = decodeBytes(_cborValue);
+    uint _len = _bb.length > 32 ? 32 : _bb.length;
+    for (uint _i = 0; _i < _len; _i ++) {
+        _bytes32 |= bytes32(_bb[_i] & 0xff) >> (_i * 8);
+    }
+  }
+
   /// @notice Decode a `Witnet.CBOR` structure into a `fixed16` value.
   /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
   /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`
