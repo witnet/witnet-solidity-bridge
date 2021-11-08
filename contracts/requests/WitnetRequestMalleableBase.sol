@@ -52,14 +52,16 @@ abstract contract WitnetRequestMalleableBase
         RequestWitnessingParams storage _params = _state().params;
         _params.numWitnesses = 2;
         _params.minWitnessingConsensus = 51;
-        _params.witnessingCollateral = 10 ** 9;
+        _params.witnessingCollateral = 10 ** 9;      // 1 WIT
+        _params.witnessingReward = 5 * 10 ** 5;      // 0.5 milliWITs
+        _params.witnessingUnitaryFee = 25 * 10 ** 4; // 0.25 milliWITs
         
         _malleateBytecode(
             _params.numWitnesses,
             _params.minWitnessingConsensus,
             _params.witnessingCollateral,
-            0,
-            0
+            _params.witnessingReward,
+            _params.witnessingUnitaryFee
         );
     }
 
@@ -213,6 +215,10 @@ abstract contract WitnetRequestMalleableBase
         virtual
     {
         require(
+            _witnessingReward > 0,
+            "WitnetRequestMalleableBase: no reward"
+        );
+        require(
             _numWitnesses >= 1 && _numWitnesses <= 127,
             "WitnetRequestMalleableBase: number of witnesses out of range"
         );
@@ -227,7 +233,7 @@ abstract contract WitnetRequestMalleableBase
 
         _state().bytecode = abi.encodePacked(
             _state().template,
-            _witnessingReward > 0 ? _uint64varint(bytes1(0x10), _witnessingReward) : bytes(""),
+            _uint64varint(bytes1(0x10), _witnessingReward),
             _uint8varint(bytes1(0x18), _numWitnesses),
             _uint64varint(0x20, _witnessingUnitaryFee),
             _uint8varint(0x28, _minWitnessingConsensus),
