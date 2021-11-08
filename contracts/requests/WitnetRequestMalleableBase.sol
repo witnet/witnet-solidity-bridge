@@ -49,14 +49,15 @@ abstract contract WitnetRequestMalleableBase
         assert(_template.length > 0);
         _state().template = _template;
 
-        _params().numWitnesses = 2;
-        _params().minWitnessingConsensus = 51;
-        _params().witnessingCollateral = 10 ** 9;
+        RequestWitnessingParams storage _params = _state().params;
+        _params.numWitnesses = 2;
+        _params.minWitnessingConsensus = 51;
+        _params.witnessingCollateral = 10 ** 9;
         
         _malleateBytecode(
-            _params().numWitnesses,
-            _params().minWitnessingConsensus,
-            _params().witnessingCollateral,
+            _params.numWitnesses,
+            _params.minWitnessingConsensus,
+            _params.witnessingCollateral,
             0,
             0
         );
@@ -86,13 +87,14 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        _params().witnessingCollateral = _witnessingCollateral;
+        RequestWitnessingParams storage _params = _state().params;
+        _params.witnessingCollateral = _witnessingCollateral;
         _malleateBytecode(
-            _params().numWitnesses,
-            _params().minWitnessingConsensus,
+            _params.numWitnesses,
+            _params.minWitnessingConsensus,
             _witnessingCollateral,
-            _params().witnessingReward,
-            _params().witnessingUnitaryFee
+            _params.witnessingReward,
+            _params.witnessingUnitaryFee
         );
     }
 
@@ -105,12 +107,13 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        _params().witnessingReward = _witnessingReward;
-        _params().witnessingUnitaryFee = _witnessingUnitaryFee;
+        RequestWitnessingParams storage _params = _state().params;
+        _params.witnessingReward = _witnessingReward;
+        _params.witnessingUnitaryFee = _witnessingUnitaryFee;
         _malleateBytecode(
-            _params().numWitnesses,
-            _params().minWitnessingConsensus,
-            _params().witnessingCollateral,
+            _params.numWitnesses,
+            _params.minWitnessingConsensus,
+            _params.witnessingCollateral,
             _witnessingReward,
             _witnessingUnitaryFee
         );
@@ -125,14 +128,15 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        _params().numWitnesses = _numWitnesses;
-        _params().minWitnessingConsensus = _minWitnessingConsensus;
+        RequestWitnessingParams storage _params = _state().params;
+        _params.numWitnesses = _numWitnesses;
+        _params.minWitnessingConsensus = _minWitnessingConsensus;
         _malleateBytecode(
             _numWitnesses,
             _minWitnessingConsensus,
-            _params().witnessingCollateral,
-            _params().witnessingReward,
-            _params().witnessingUnitaryFee
+            _params.witnessingCollateral,
+            _params.witnessingReward,
+            _params.witnessingUnitaryFee
         );
     }
 
@@ -141,8 +145,8 @@ abstract contract WitnetRequestMalleableBase
         external view
         returns (uint128)
     {
-        
-        return _params().numWitnesses * _params().witnessingCollateral;
+        RequestWitnessingParams storage _params = _state().params;
+        return _params.numWitnesses * _params.witnessingCollateral;
     }
 
     /// Return total amount of nanowits that will have to be paid in total for this request to be solved.
@@ -150,7 +154,8 @@ abstract contract WitnetRequestMalleableBase
         external view
         returns (uint128)
     {
-        return _params().numWitnesses * (2 * _params().witnessingUnitaryFee + _params().witnessingReward);
+        RequestWitnessingParams storage _params = _state().params;
+        return _params.numWitnesses * (2 * _params.witnessingUnitaryFee + _params.witnessingReward);
     }
 
 
@@ -229,15 +234,6 @@ abstract contract WitnetRequestMalleableBase
             _uint64varint(0x30, _witnessingCollateral)
         );
         _state().hash = _state().bytecode.hash();
-    }
-
-    /// Returns pointer to storage slot where WitnessingParams struct is located.
-    function _params()
-        internal pure
-        virtual
-        returns (RequestWitnessingParams storage)
-    {
-        return _state().params;
     }
 
     /// Return pointer to storage slot where State struct is located.
