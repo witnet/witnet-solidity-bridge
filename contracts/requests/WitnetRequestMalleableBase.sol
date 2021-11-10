@@ -16,7 +16,7 @@ abstract contract WitnetRequestMalleableBase
 {   
     using Witnet for *;
 
-    struct RequestState {
+    struct WitnetRequestMalleableBaseContext {
         /// Contract owner address.
         address owner;
         /// Immutable bytecode template.
@@ -48,12 +48,12 @@ abstract contract WitnetRequestMalleableBase
 
     /// Returns current Witnet Data Request bytecode, encoded using Protocol Buffers.
     function bytecode() external view override returns (bytes memory) {
-        return _state().bytecode;
+        return _request().bytecode;
     }
 
     /// Returns SHA256 hash of current Witnet Data Request bytecode.
     function hash() external view override returns (bytes32) {
-        return _state().hash;
+        return _request().hash;
     }
 
     /// Returns witnessing parameters of current Witnet Data Request.
@@ -61,7 +61,7 @@ abstract contract WitnetRequestMalleableBase
         external view
         returns (RequestWitnessingParams memory)
     {
-        return _state().params;
+        return _request().params;
     }
 
     /// Sets amount of nanowits that a witness solving the request will be required to collateralize in the commitment transaction.
@@ -70,7 +70,7 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        RequestWitnessingParams storage _params = _state().params;
+        RequestWitnessingParams storage _params = _request().params;
         _params.witnessingCollateral = _witnessingCollateral;
         _malleateBytecode(
             _params.numWitnesses,
@@ -90,7 +90,7 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        RequestWitnessingParams storage _params = _state().params;
+        RequestWitnessingParams storage _params = _request().params;
         _params.witnessingReward = _witnessingReward;
         _params.witnessingUnitaryFee = _witnessingUnitaryFee;
         _malleateBytecode(
@@ -111,7 +111,7 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        RequestWitnessingParams storage _params = _state().params;
+        RequestWitnessingParams storage _params = _request().params;
         _params.numWitnesses = _numWitnesses;
         _params.minWitnessingConsensus = _minWitnessingConsensus;
         _malleateBytecode(
@@ -128,7 +128,7 @@ abstract contract WitnetRequestMalleableBase
         external view
         returns (uint128)
     {
-        RequestWitnessingParams storage _params = _state().params;
+        RequestWitnessingParams storage _params = _request().params;
         return _params.numWitnesses * _params.witnessingCollateral;
     }
 
@@ -137,7 +137,7 @@ abstract contract WitnetRequestMalleableBase
         external view
         returns (uint128)
     {
-        RequestWitnessingParams storage _params = _state().params;
+        RequestWitnessingParams storage _params = _request().params;
         return _params.numWitnesses * (2 * _params.witnessingUnitaryFee + _params.witnessingReward);
     }
 
@@ -149,7 +149,7 @@ abstract contract WitnetRequestMalleableBase
         public
         virtual override
     {
-        require(_state().template.length == 0, "WitnetRequestMalleableBase: already initialized");
+        require(_request().template.length == 0, "WitnetRequestMalleableBase: already initialized");
         _initialize(_template);
         _transferOwnership(_msgSender());
     }
@@ -163,7 +163,7 @@ abstract contract WitnetRequestMalleableBase
         virtual override
         returns (address)
     {
-        return _state().owner;
+        return _request().owner;
     }
 
     /// @dev Transfers ownership of the contract to a new account (`newOwner`).
@@ -172,8 +172,8 @@ abstract contract WitnetRequestMalleableBase
         internal
         virtual override
     {
-        address oldOwner = _state().owner;
-        _state().owner = newOwner;
+        address oldOwner = _request().owner;
+        _request().owner = newOwner;
         emit OwnershipTransferred(oldOwner, newOwner);
     }
 
@@ -201,9 +201,9 @@ abstract contract WitnetRequestMalleableBase
         internal
     {
         assert(_template.length > 0);
-        _state().template = _template;
+        _request().template = _template;
 
-        RequestWitnessingParams storage _params = _state().params;
+        RequestWitnessingParams storage _params = _request().params;
         _params.numWitnesses = 2;
         _params.minWitnessingConsensus = 51;
         _params.witnessingCollateral = 10 ** 9;      // 1 WIT
@@ -247,27 +247,27 @@ abstract contract WitnetRequestMalleableBase
             "WitnetRequestMalleableBase: witnessing collateral below 1 WIT"
         );
 
-        _state().bytecode = abi.encodePacked(
-            _state().template,
+        _request().bytecode = abi.encodePacked(
+            _request().template,
             _uint64varint(bytes1(0x10), _witnessingReward),
             _uint8varint(bytes1(0x18), _numWitnesses),
             _uint64varint(0x20, _witnessingUnitaryFee),
             _uint8varint(0x28, _minWitnessingConsensus),
             _uint64varint(0x30, _witnessingCollateral)
         );
-        _state().hash = _state().bytecode.hash();
+        _request().hash = _request().bytecode.hash();
     }
 
     /// Return pointer to storage slot where State struct is located.
-    function _state()
+    function _request()
         internal pure
         virtual
-        returns (RequestState storage _ptr)
+        returns (WitnetRequestMalleableBaseContext storage _ptr)
     {
         assembly {
             _ptr.slot :=
-                /* keccak256("io.witnet.requests.malleable.state") */
-                0xf35ef70bf77c836ff490bec16a682d32deb0baa15e4ecd19280856af5e08c11c
+                /* keccak256("io.witnet.requests.malleable.context") */
+                0x375930152e1d0d102998be6e496b0cee86c9ecd0efef01014ecff169b17dfba7
         }
     }
 
