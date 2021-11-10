@@ -3,12 +3,14 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../libs/Witnet.sol";
+import "../patterns/Initializable.sol";
 import "../patterns/Ownable.sol";
 import "../patterns/Proxiable.sol";
 
 abstract contract WitnetRequestMalleableBase
     is
         IWitnetRequest,
+        Initializable,
         Ownable,
         Proxiable
 {   
@@ -44,25 +46,8 @@ abstract contract WitnetRequestMalleableBase
         uint64 witnessingUnitaryFee;
     }
 
-    constructor(bytes memory _template)
-    {
-        assert(_template.length > 0);
-        _state().template = _template;
-
-        RequestWitnessingParams storage _params = _state().params;
-        _params.numWitnesses = 2;
-        _params.minWitnessingConsensus = 51;
-        _params.witnessingCollateral = 10 ** 9;      // 1 WIT
-        _params.witnessingReward = 5 * 10 ** 5;      // 0.5 milliWITs
-        _params.witnessingUnitaryFee = 25 * 10 ** 4; // 0.25 milliWITs
-        
-        _malleateBytecode(
-            _params.numWitnesses,
-            _params.minWitnessingConsensus,
-            _params.witnessingCollateral,
-            _params.witnessingReward,
-            _params.witnessingUnitaryFee
-        );
+    constructor(bytes memory _template) {
+        _initialize(_template);
     }
 
     /// Returns current Witnet Data Request bytecode, encoded using Protocol Buffers.
@@ -162,6 +147,18 @@ abstract contract WitnetRequestMalleableBase
 
 
     // ================================================================================================================
+    // --- 'Initializable' overriden functions ------------------------------------------------------------------------
+
+    function initialize(bytes memory _template)
+        public
+        virtual override
+    {
+        require(_state().template.length == 0, "WitnetRequestMalleableBase: already initialized");
+        _initialize(_template);
+        _transferOwnership(_msgSender());
+    }
+
+    // ================================================================================================================
     // --- 'Ownable' overriden functions ------------------------------------------------------------------------------
 
     /// Returns the address of the current owner.
@@ -202,6 +199,29 @@ abstract contract WitnetRequestMalleableBase
 
     // ================================================================================================================
     // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------    
+
+    /// @dev Initializes witnessing params and template bytecode.
+    function _initialize(bytes memory _template)
+        internal
+    {
+        assert(_template.length > 0);
+        _state().template = _template;
+
+        RequestWitnessingParams storage _params = _state().params;
+        _params.numWitnesses = 2;
+        _params.minWitnessingConsensus = 51;
+        _params.witnessingCollateral = 10 ** 9;      // 1 WIT
+        _params.witnessingReward = 5 * 10 ** 5;      // 0.5 milliWITs
+        _params.witnessingUnitaryFee = 25 * 10 ** 4; // 0.25 milliWITs
+        
+        _malleateBytecode(
+            _params.numWitnesses,
+            _params.minWitnessingConsensus,
+            _params.witnessingCollateral,
+            _params.witnessingReward,
+            _params.witnessingUnitaryFee
+        );
+    }
 
     /// Serialize new `bytecode` by combining immutable template with given parameters.
     function _malleateBytecode(
