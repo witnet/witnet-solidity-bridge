@@ -116,31 +116,34 @@ contract WitnetRNG
     }
 
     /// Requests Witnet oracle to generate new EVM-agnostic and trustless randomness.
-    /// @dev Fails if a previous request was not yet completed.
-    /// @dev Only callable by owner.
+    /// @dev Only callable by owner. If the latest request was not yet solved, upgrade the Witnet fee in case current
+    /// @dev tx gas price is higher than the last time the Witnet fee was set.
     /// @return _queryId Witnet Request Board's unique query identifier.
     function randomize()
         external payable
         virtual
-        notPending
         onlyOwner
         returns (uint256 _queryId)
     {
-        // If any, remove previous query and result from the WRB storage:
-        _queryId = _lastRandomizeId().value;
-        if (_queryId > 0) {
-            witnet.deleteQuery(_queryId);
+        uint256 _unusedFee = _msgValue();
+        // Read latest query id, if any:
+        _queryId = _context().lastQueryId;
+        if (isReady()) {
+            if (_queryId > 0) {
+                // If any, remove previous query and result from the WRB storage:
+                _witnetDeleteQuery(_queryId);
+            }
+            // Post the Witnet request:
+            uint256 _randomnessFee;
+            (_queryId, _randomnessFee) = _witnetPostRequest(this);
+            _context().lastQueryId = _queryId;
+            _unusedFee -= _randomnessFee;
+        } else {
+            // Upgrade Witnet fee of currently pending request, if necessary:
+            _unusedFee -= _witnetUpgradeReward(_queryId);
         }
-
-        // Estimates Witnet fee as for current tx gas price:
-        uint256 _randomnessFee = getRandomnessFee(tx.gasprice);
-
-        // Post the Witnet request:
-        _queryId = witnet.postRequest{value: _randomnessFee}(this);
-        _lastRandomizeId().value = _queryId;
-
-        // Transfer back unused tx funds:
-        payable(msg.sender).transfer(msg.value - _randomnessFee);
+        // Transfer back unused tx value:
+        payable(msg.sender).transfer(_unusedFee);
     }
 
 

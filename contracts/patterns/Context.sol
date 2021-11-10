@@ -16,4 +16,8 @@ abstract contract Context {
     function _msgData() internal view virtual returns (bytes calldata) {
         return msg.data;
     }
+
+    function _msgValue() internal view virtual returns (uint256) {
+        return msg.value;
+    }
 }
