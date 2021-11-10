@@ -27,20 +27,18 @@ contract WitnetRNG
         _;
     }
 
-    /// Gets randomness generated upon latest request.
-    /// @dev Returns 0x0...0 if not yet solved, or 0xf...f if randomness could not get solved by Witnet for any 
-    /// @dev unexpected reason. Fails if `randomize()` was never called before.
+    /// Gets randomness generated upon resolution to latest randomize request. 
+    /// @dev Fails if `randomize()` was not ever called before, if the latest `randomize()` was not yet solved, and also if
+    /// @dev for whatever reason the Witnet oracle could not manage to solve latest randomize request.
+    /// @return _randomness Returns random value provided by the Witnet oracle upon the latest randomize request.
     function getRandomness()
         public view
+        notPending
         returns (bytes32 _randomness)
     {
-        if (isReady()) {
-            Witnet.Result memory _result = _witnetReadResult(lastRandomizeId());
-            _randomness = (witnet.isOk(_result)
-                ? witnet.asBytes32(_result)
-                : bytes32(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
-            );
-        }
+        Witnet.Result memory _result = _witnetReadResult(lastRandomizeId());
+        require(witnet.isOk(_result), "WitnetRNG: randomize failed");
+        return witnet.asBytes32(_result);
     }
 
     /// Returns amount of weis required to be paid as a fee when requesting randomness with a tx gas price as 
@@ -93,13 +91,7 @@ contract WitnetRNG
         public view
         returns (uint32)
     {
-        bytes32 _seed = getRandomness();
-        require(
-            _seed != bytes32(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
-                && _seed !=  bytes32(0x0),
-            "WitnetRNG: not randomized"
-        );
-        return random(_range, _nonce, _seed);
+        return random(_range, _nonce, getRandomness());
     }
 
     /// Generates pseudo-random number uniformly distributed within the range [0 .. _range), by using 
