@@ -6,14 +6,17 @@ pragma experimental ABIEncoderV2;
 import "../UsingWitnet.sol";
 import "../requests/WitnetRequestRandomness.sol";
 
-/// @title WitnetRNG: EVM-agnostic trustless random number generator, based on the Witnet oracle. 
+/// @title WitnetRNG: A trustless random number generator, based on the Witnet oracle. 
 /// @author The Witnet Foundation.
 contract WitnetRNG
     is
         UsingWitnet,
         WitnetRequestRandomness
 {
-    uint256 internal nonce;
+    struct WitnetRNGContext {
+        uint256 lastQueryId;
+        uint256 nonce;
+    }
 
     /// Include an address to specify the immutable WitnetRequestBoard entrypoint address.
     /// @param _wrb The WitnetRequestBoard immutable entrypoint address.
@@ -36,7 +39,7 @@ contract WitnetRNG
         notPending
         returns (bytes32 _randomness)
     {
-        Witnet.Result memory _result = _witnetReadResult(lastRandomizeId());
+        Witnet.Result memory _result = _witnetReadResult(lastQueryId());
         require(witnet.isOk(_result), "WitnetRNG: randomize failed");
         return witnet.asBytes32(_result);
     }
@@ -50,25 +53,25 @@ contract WitnetRNG
         return _witnetEstimateReward(_gasPrice);
     }
 
-    /// Returns `true` only when latest randomness request (i.e. `lastRandomizeId()`) gets solved by the Witnet
+    /// Returns `true` only when latest randomness request (i.e. `lastQueryId()`) gets solved by the Witnet
     /// oracle, and reported back to the EVM.
     function isReady()
         public view
         returns (bool)
     {
-        uint256 _queryId = _lastRandomizeId().value;
+        uint256 _queryId = _context().lastQueryId;
         return (
             _queryId == 0
                 || _witnetCheckResultAvailability(_queryId)
         );
     }
 
-    /// Returns unique identifier of the last query successfully posted to the Witnet Request Board.
-    function lastRandomizeId()
+    /// Returns unique identifier of the last randomize request successfully posted to the Witnet Request Board.
+    function lastQueryId()
         public view
         returns (uint256)
     {
-        return _lastRandomizeId().value;
+        return _context().lastQueryId;
     }
 
     /// Generates pseudo-random number uniformly distributed within the range [0 .. _range), by using 
@@ -79,7 +82,7 @@ contract WitnetRNG
         external
         returns (uint32)
     {
-        return random(_range, nonce ++);
+        return random(_range, _context().nonce ++);
     }
 
     /// Generates pseudo-random number uniformly distributed within the range [0 .. _range), by using 
@@ -188,18 +191,14 @@ contract WitnetRNG
     // ================================================================================================================
     // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------
 
-    struct Uint256Slot {
-        uint256 value;
-    }
-
-    /// @dev Returns storage pointer to struct that contains last randomization request id. 
-    function _lastRandomizeId()
+    /// @dev Returns storage pointer to struct that contains WitnetRNG context data
+    function _context()
         internal pure virtual
-        returns (Uint256Slot storage _ptr)
+        returns (WitnetRNGContext storage _ptr)
     {
         assembly {
-            /* keccak256("io.witnet.randomness.lastRandomizeId") */
-            _ptr.slot := 0x20dc1df6b123540f1c0e901d3c8adf732910d9e546a76e815915d7804dab279d
+            /* keccak256("io.witnet.randomness.context") */
+            _ptr.slot := 0x2fdaa36d67c639f5a4035f7f2effb6ae958c13fcb848d0e1bab18cafd5a40ffe
         }
     }
 
