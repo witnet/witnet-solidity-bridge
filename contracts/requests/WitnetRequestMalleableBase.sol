@@ -3,14 +3,14 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../libs/Witnet.sol";
-import "../patterns/Initializable.sol";
+import "../patterns/Clonable.sol";
 import "../patterns/Ownable.sol";
 import "../patterns/Proxiable.sol";
 
 abstract contract WitnetRequestMalleableBase
     is
         IWitnetRequest,
-        Initializable,
+        Clonable,
         Ownable,
         Proxiable
 {   
@@ -139,6 +139,37 @@ abstract contract WitnetRequestMalleableBase
     {
         RequestWitnessingParams storage _params = _request().params;
         return _params.numWitnesses * (2 * _params.witnessingUnitaryFee + _params.witnessingReward);
+    }
+
+
+    // ================================================================================================================
+    // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
+
+    /// Deploys and returns the address of a minimal proxy clone that replicates contract
+    /// behaviour while using its own EVM storage.
+    /// @dev This function should always provide a new address, no matter how many times 
+    /// @dev is actually called from the same `msg.sender`.
+    function clone()
+        public
+        virtual override
+        returns (Clonable _instance)
+    {
+        _instance = super.clone();
+        _instance.initialize(_request().template);
+    }
+
+    /// Deploys and returns the address of a minimal proxy clone that replicates contract 
+    /// behaviour while using its own EVM storage.
+    /// @dev This function uses the CREATE2 opcode and a `_salt` to deterministically deploy
+    /// @dev the clone. Using the same `_salt` multiple time will revert, since
+    /// @dev the clones cannot be deployed twice at the same address.
+    function cloneDeterministic(bytes32 _salt)
+        public
+        virtual override
+        returns (Clonable _instance)
+    {
+        _instance = super.cloneDeterministic(_salt);
+        _instance.initialize(_request().template);
     }
 
 
