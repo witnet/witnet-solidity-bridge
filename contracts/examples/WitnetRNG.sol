@@ -94,7 +94,16 @@ contract WitnetRNG
         public view
         returns (uint32)
     {
-        return random(_range, _nonce, getRandomness());
+        return random(
+            _range,
+            _nonce,
+            keccak256(
+                abi.encode(
+                    msg.sender,
+                    getRandomness()
+                )
+            )
+        );
     }
 
     /// Generates pseudo-random number uniformly distributed within the range [0 .. _range), by using 
