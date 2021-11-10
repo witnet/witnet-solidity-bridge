@@ -46,10 +46,6 @@ abstract contract WitnetRequestMalleableBase
         uint64 witnessingUnitaryFee;
     }
 
-    constructor(bytes memory _template) {
-        _initialize(_template);
-    }
-
     /// Returns current Witnet Data Request bytecode, encoded using Protocol Buffers.
     function bytecode() external view override returns (bytes memory) {
         return _state().bytecode;
