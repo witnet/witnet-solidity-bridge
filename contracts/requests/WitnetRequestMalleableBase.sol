@@ -155,14 +155,8 @@ abstract contract WitnetRequestMalleableBase
         returns (Clonable _instance)
     {
         _instance = super.clone();
-        // solhint-disable-next-line
-        (bool _initialized,) = address(_instance).delegatecall(
-            abi.encodeWithSignature(
-                "initialize(bytes)",
-                _request().template
-            )
-        );
-        require(_initialized, "WitnetRequestMalleableBase: uninitialized clone");
+        _instance.initialize(_request().template);
+        Ownable(address(_instance)).transferOwnership(msg.sender);
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract 
@@ -176,14 +170,8 @@ abstract contract WitnetRequestMalleableBase
         returns (Clonable _instance)
     {
         _instance = super.cloneDeterministic(_salt);
-        // solhint-disable-next-line
-        (bool _initialized,) = address(_instance).delegatecall(
-            abi.encodeWithSignature(
-                "initialize(bytes)",
-                _request().template
-            )
-        );
-        require(_initialized, "WitnetRequestMalleableBase: uninitialized clone");
+        _instance.initialize(_request().template);
+        Ownable(address(_instance)).transferOwnership(msg.sender);
     }
 
 
@@ -209,17 +197,6 @@ abstract contract WitnetRequestMalleableBase
         returns (address)
     {
         return _request().owner;
-    }
-
-    /// @dev Transfers ownership of the contract to a new account (`newOwner`).
-    /// Internal function without access restriction.
-    function _transferOwnership(address newOwner)
-        internal
-        virtual override
-    {
-        address oldOwner = _request().owner;
-        _request().owner = newOwner;
-        emit OwnershipTransferred(oldOwner, newOwner);
     }
 
 
@@ -264,7 +241,7 @@ abstract contract WitnetRequestMalleableBase
         );
     }
 
-    /// Serialize new `bytecode` by combining immutable template with given parameters.
+    /// @dev Serializes new `bytecode` by combining immutable template with given parameters.
     function _malleateBytecode(
             uint8 _numWitnesses,
             uint8 _minWitnessingConsensus,
@@ -303,7 +280,7 @@ abstract contract WitnetRequestMalleableBase
         _request().hash = _request().bytecode.hash();
     }
 
-    /// Return pointer to storage slot where State struct is located.
+    /// @dev Returns pointer to storage slot where State struct is located.
     function _request()
         internal pure
         virtual
@@ -315,6 +292,18 @@ abstract contract WitnetRequestMalleableBase
                 0x375930152e1d0d102998be6e496b0cee86c9ecd0efef01014ecff169b17dfba7
         }
     }
+
+    /// @dev Transfers ownership of the contract to a new account (`newOwner`).
+    /// Internal function without access restriction.
+    function _transferOwnership(address newOwner)
+        internal
+        virtual override
+    {
+        address oldOwner = _request().owner;
+        _request().owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
+
 
     /// Encode uint64 into tagged varint.
     /// @dev https://developers.google.com/protocol-buffers/docs/encoding#varints
