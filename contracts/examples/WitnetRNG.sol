@@ -14,6 +14,7 @@ contract WitnetRNG
         WitnetRequestRandomness
 {
     struct WitnetRNGContext {
+        uint256 lastQueryBlock;
         uint256 lastQueryId;
         uint256 nonce;
     }
@@ -64,6 +65,14 @@ contract WitnetRNG
             _queryId == 0
                 || _witnetCheckResultAvailability(_queryId)
         );
+    }
+
+    /// Returns EVM's block number in which last randomize request successfully posted to the Witnet Request Board.
+    function lastQueryBlock()
+        public view
+        returns (uint256)
+    {
+        return _context().lastQueryBlock;
     }
 
     /// Returns unique identifier of the last randomize request successfully posted to the Witnet Request Board.
@@ -145,6 +154,7 @@ contract WitnetRNG
             // Post the Witnet request:
             uint256 _randomnessFee;
             (_queryId, _randomnessFee) = _witnetPostRequest(this);
+            _context().lastQueryBlock = block.number;
             _context().lastQueryId = _queryId;
             _unusedFee -= _randomnessFee;
         } else {
