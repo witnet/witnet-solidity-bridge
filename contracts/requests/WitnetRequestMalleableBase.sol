@@ -155,7 +155,14 @@ abstract contract WitnetRequestMalleableBase
         returns (Clonable _instance)
     {
         _instance = super.clone();
-        _instance.initialize(_request().template);
+        // solhint-disable-next-line
+        (bool _initialized,) = address(_instance).delegatecall(
+            abi.encodeWithSignature(
+                "initialize(bytes)",
+                _request().template
+            )
+        );
+        require(_initialized, "WitnetRequestMalleableBase: uninitialized clone");
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract 
@@ -169,7 +176,14 @@ abstract contract WitnetRequestMalleableBase
         returns (Clonable _instance)
     {
         _instance = super.cloneDeterministic(_salt);
-        _instance.initialize(_request().template);
+        // solhint-disable-next-line
+        (bool _initialized,) = address(_instance).delegatecall(
+            abi.encodeWithSignature(
+                "initialize(bytes)",
+                _request().template
+            )
+        );
+        require(_initialized, "WitnetRequestMalleableBase: uninitialized clone");
     }
 
 
