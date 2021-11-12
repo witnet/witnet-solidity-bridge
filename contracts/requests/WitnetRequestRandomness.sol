@@ -8,7 +8,7 @@ contract WitnetRequestRandomness is WitnetRequestMalleableBase {
     bytes internal constant _WITNET_RANDOMNESS_BYTECODE_TEMPLATE = hex"0a0f120508021a01801a0210022202100b";
 
     constructor() {
-        super.initialize(_WITNET_RANDOMNESS_BYTECODE_TEMPLATE);
+        initialize(bytes(""));
     }
 
     function initialize(bytes memory)
