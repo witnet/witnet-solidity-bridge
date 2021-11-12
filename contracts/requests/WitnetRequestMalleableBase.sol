@@ -26,10 +26,10 @@ abstract contract WitnetRequestMalleableBase
         /// Current request hash.
         bytes32 hash;
         /// Current request witnessing params.
-        RequestWitnessingParams params;
+        WitnetRequestWitnessingParams params;
     }
 
-    struct RequestWitnessingParams {
+    struct WitnetRequestWitnessingParams {
         /// Number of witnesses required to be involved for solving this Witnet Data Request.
         uint8 numWitnesses;
 
@@ -59,7 +59,7 @@ abstract contract WitnetRequestMalleableBase
     /// Returns witnessing parameters of current Witnet Data Request.
     function params()
         external view
-        returns (RequestWitnessingParams memory)
+        returns (WitnetRequestWitnessingParams memory)
     {
         return _request().params;
     }
@@ -70,7 +70,7 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        RequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = _request().params;
         _params.witnessingCollateral = _witnessingCollateral;
         _malleateBytecode(
             _params.numWitnesses,
@@ -90,7 +90,7 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        RequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = _request().params;
         _params.witnessingReward = _witnessingReward;
         _params.witnessingUnitaryFee = _witnessingUnitaryFee;
         _malleateBytecode(
@@ -104,14 +104,14 @@ abstract contract WitnetRequestMalleableBase
 
     /// Sets how many Witnet nodes will be "hired" for resolving the request.
     /// @param _numWitnesses Number of witnesses required to be involved for solving this Witnet Data Request.
-    /// @param _minWitnessingConsensus /// Threshold percentage for aborting resolution of a request if the witnessing 
+    /// @param _minWitnessingConsensus Threshold percentage for aborting resolution of a request if the witnessing 
     /// nodes did not arrive to a broad consensus.
     function setWitnessingQuorum(uint8 _numWitnesses, uint8 _minWitnessingConsensus)
         public
         virtual
         onlyOwner
     {
-        RequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = _request().params;
         _params.numWitnesses = _numWitnesses;
         _params.minWitnessingConsensus = _minWitnessingConsensus;
         _malleateBytecode(
@@ -123,21 +123,21 @@ abstract contract WitnetRequestMalleableBase
         );
     }
 
-    /// Returns total amount of nanowits that witnessing nodes will have to collateralize all together.
+    /// Returns total amount of nanowits that witnessing nodes will need to collateralize all together.
     function totalWitnessingCollateral()
         external view
         returns (uint128)
     {
-        RequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = _request().params;
         return _params.numWitnesses * _params.witnessingCollateral;
     }
 
-    /// Return total amount of nanowits that will have to be paid in total for this request to be solved.
+    /// Returns total amount of nanowits that will have to be paid in total for this request to be solved.
     function totalWitnessingFee()
         external view
         returns (uint128)
     {
-        RequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = _request().params;
         return _params.numWitnesses * (2 * _params.witnessingUnitaryFee + _params.witnessingReward);
     }
 
@@ -163,7 +163,7 @@ abstract contract WitnetRequestMalleableBase
     /// behaviour while using its own EVM storage.
     /// @dev This function uses the CREATE2 opcode and a `_salt` to deterministically deploy
     /// @dev the clone. Using the same `_salt` multiple time will revert, since
-    /// @dev the clones cannot be deployed twice at the same address.
+    /// @dev no contract can be deployed more than once at the same address.
     function cloneDeterministic(bytes32 _salt)
         public
         virtual override
@@ -178,6 +178,7 @@ abstract contract WitnetRequestMalleableBase
     // ================================================================================================================
     // --- 'Initializable' overriden functions ------------------------------------------------------------------------
 
+    /// @dev Initializes contract's storage context.
     function initialize(bytes memory _template)
         public
         virtual override
@@ -199,10 +200,21 @@ abstract contract WitnetRequestMalleableBase
         return _request().owner;
     }
 
+    /// @dev Transfers ownership of the contract to a new account (`newOwner`).
+    function _transferOwnership(address newOwner)
+        internal
+        virtual override
+    {
+        address oldOwner = _request().owner;
+        _request().owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
 
     // ================================================================================================================
     // --- 'Proxiable 'overriden functions ----------------------------------------------------------------------------
 
+    /// @dev Complying with EIP-1822: Universal Upgradable Proxy Standard (UUPS)
+    /// @dev See https://eips.ethereum.org/EIPS/eip-1822.
     function proxiableUUID()
         external pure
         virtual override
@@ -225,7 +237,7 @@ abstract contract WitnetRequestMalleableBase
         assert(_template.length > 0);
         _request().template = _template;
 
-        RequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = _request().params;
         _params.numWitnesses = 2;
         _params.minWitnessingConsensus = 51;
         _params.witnessingCollateral = 10 ** 9;      // 1 WIT
@@ -293,20 +305,8 @@ abstract contract WitnetRequestMalleableBase
         }
     }
 
-    /// @dev Transfers ownership of the contract to a new account (`newOwner`).
-    /// Internal function without access restriction.
-    function _transferOwnership(address newOwner)
-        internal
-        virtual override
-    {
-        address oldOwner = _request().owner;
-        _request().owner = newOwner;
-        emit OwnershipTransferred(oldOwner, newOwner);
-    }
-
-
-    /// Encode uint64 into tagged varint.
-    /// @dev https://developers.google.com/protocol-buffers/docs/encoding#varints
+    /// @dev Encode uint64 into tagged varint.
+    /// @dev See https://developers.google.com/protocol-buffers/docs/encoding#varints.
     /// @param t Tag
     /// @param n Number
     /// @return Marshaled bytes
@@ -335,7 +335,7 @@ abstract contract WitnetRequestMalleableBase
         return buf;
     }
 
-    /// Encode uint8 into tagged varint.
+    /// @dev Encode uint8 into tagged varint.
     /// @param t Tag
     /// @param n Number
     /// @return Marshaled bytes
