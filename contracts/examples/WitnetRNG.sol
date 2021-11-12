@@ -31,7 +31,7 @@ contract WitnetRNG
         _;
     }
 
-    /// Gets randomness generated upon resolution to latest randomize request. 
+    /// Gets randomness generated upon resolution to the latest randomize request. 
     /// @dev Fails if `randomize()` was not ever called before, if the latest `randomize()` was not yet solved, and also if
     /// @dev for whatever reason the Witnet oracle could not manage to solve latest randomize request.
     /// @return _randomness Returns random value provided by the Witnet oracle upon the latest randomize request.
@@ -46,7 +46,7 @@ contract WitnetRNG
     }
 
     /// Returns amount of weis required to be paid as a fee when requesting randomness with a tx gas price as 
-    /// the one given. 
+    /// the one given.
     function getRandomnessFee(uint256 _gasPrice)
         public view
         returns (uint256)
@@ -55,7 +55,7 @@ contract WitnetRNG
     }
 
     /// Returns `true` only when latest randomness request (i.e. `lastQueryId()`) gets solved by the Witnet
-    /// oracle, and reported back to the EVM.
+    /// oracle and reported back to the EVM, or if `randomize()` was never called before.
     function isReady()
         public view
         returns (bool)
@@ -67,7 +67,8 @@ contract WitnetRNG
         );
     }
 
-    /// Returns EVM's block number in which last randomize request successfully posted to the Witnet Request Board.
+    /// Returns EVM's block number in which the last randomize request that was successfully posted
+    /// to the Witnet Request Board.
     function lastQueryBlock()
         public view
         returns (uint256)
@@ -75,7 +76,8 @@ contract WitnetRNG
         return _context().lastQueryBlock;
     }
 
-    /// Returns unique identifier of the last randomize request successfully posted to the Witnet Request Board.
+    /// Returns the unique identifier of the last randomize request that was successfully poste
+    /// to the Witnet Request Board.
     function lastQueryId()
         public view
         returns (uint256)
@@ -83,7 +85,7 @@ contract WitnetRNG
         return _context().lastQueryId;
     }
 
-    /// Generates pseudo-random number uniformly distributed within the range [0 .. _range), by using 
+    /// Generates a pseudo-random number uniformly distributed within the range [0 .. _range), by using 
     /// the contract's self-incremented nonce value and the latest Witnet-provided randomness value. 
     /// @dev Fails if the contract was not ever randomized, or if last randomization request was not yet solved.
     /// @param _range Range within which the uniformly-distributed random number will be generated.
@@ -94,7 +96,7 @@ contract WitnetRNG
         return random(_range, _context().nonce ++);
     }
 
-    /// Generates pseudo-random number uniformly distributed within the range [0 .. _range), by using 
+    /// Generates a pseudo-random number uniformly distributed within the range [0 .. _range), by using 
     /// the given `_nonce` value and the latest Witnet-provided randomness value.
     /// @dev Fails if the contract was not ever randomized, or if last randomization request was not yet solved.
     /// @param _range Range within which the uniformly-distributed random number will be generated.
@@ -133,8 +135,9 @@ contract WitnetRNG
         return uint32((_number * _range) >> _flagBits);
     }
 
-    /// Requests Witnet oracle to generate new EVM-agnostic and trustless randomness.
-    /// @dev Only callable by owner. If the latest request was not yet solved, upgrade the Witnet fee in case current
+    /// Requests Witnet oracle to generate an EVM-agnostic and trustless source of randomness.
+    /// @dev Only callable by the contract's owner. 
+    /// @dev If the latest request was not yet solved, upgrade the Witnet fee in case current
     /// @dev tx gas price is higher than the last time the Witnet fee was set.
     /// @return _queryId Witnet Request Board's unique query identifier.
     function randomize()
