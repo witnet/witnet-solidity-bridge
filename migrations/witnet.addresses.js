@@ -19,8 +19,8 @@ module.exports = {
       WitnetRequestBoard: "",
     },
     "boba.rinkeby": {
-      WitnetParserLib: "",
-      WitnetRequestBoard: "",
+      WitnetParserLib: "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
+      WitnetRequestBoard: "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
     },
   },
   celo: {
