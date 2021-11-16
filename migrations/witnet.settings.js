@@ -7,9 +7,6 @@ module.exports = {
       WitnetProxy: "WitnetProxy",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
     },
-    boba: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableBoba",
-    },
   },
   constructorParams: {
     default: {
@@ -19,36 +16,25 @@ module.exports = {
         /* _reportResultGasLimit */ 120547,
       ],
     },
-    celo: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 134371,
-      ],
-    },
     boba: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
         /* _versionTag */ fromAscii(packageJson.version + "-trustable-boba"),
-        /* _reportResultGasLimit */ 870000,
-        /* _l2GasPrice */ 15000000,
-        /* _OVM_ETH */ "0x4200000000000000000000000000000000000006",
+        /* _reportResultGasLimit */ 134771,
       ],
     },
-    "boba.mainnet": {
+    celo: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
-        /* _versionTag */ fromAscii(packageJson.version + "-trustable-boba"),
-        /* _l2GasPrice */ 15000000,
-        /* _l2ReportResultGasLimit */ 1870000,
-        /* _OVM_ETH */ "0x4200000000000000000000000000000000000006",
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable-celo"),
+        /* _reportResultGasLimit */ 134371,
       ],
     },
   },
   compilers: {
     default: {
       solc: {
-        version: "0.8.6",
+        version: "0.8.9",
         settings: {
           optimizer: {
             enabled: true,
@@ -65,16 +51,6 @@ module.exports = {
     conflux: {
       solc: {
         evmVersion: "petersburg",
-      },
-    },
-    boba: {
-      solc: {
-        version: "./node_modules/@eth-optimism/solc",
-      },
-    },
-    celo: {
-      solc: {
-        version: "0.8.7",
       },
     },
   },
