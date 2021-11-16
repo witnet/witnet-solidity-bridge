@@ -106,6 +106,12 @@ module.exports = {
         port: 8538,
         skipDryRun: true,
       },
+      "celo.mainnet": {
+        network_id: 42220,
+        host: "localhost",
+        port: 9538,
+        skipDryRun: true,
+      }
     },
     conflux: {
       "conflux.testnet": {
