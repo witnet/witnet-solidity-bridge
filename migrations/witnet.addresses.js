@@ -39,8 +39,8 @@ module.exports = {
       WitnetRequestBoard: "0x8aB653B73a0e0552dDdce8c76F97c6AA826EFbD4",
     },
     "conflux.tethys": {
-      WitnetParserLib: "",
-      WitnetRequestBoard: "",
+      WitnetParserLib: "0x844B5eB747EaEdC63F3Ce45edFa7101730E33f19",
+      WitnetRequestBoard: "0x84C708bfd79bBC83Ad8753dAb1852EfE9D6712CC",
     },
   },
 }
