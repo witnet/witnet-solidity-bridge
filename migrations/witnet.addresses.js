@@ -31,7 +31,7 @@ module.exports = {
     "celo.mainnet": {
       WitnetParserLib: "0xa893FEcDA45E378FB4C7CD50342f19a4222536a8",
       WitnetRequestBoard: "0x03E709E6422E30C033456FCde38C70A12553E468",
-    }
+    },
   },
   conflux: {
     "conflux.testnet": {

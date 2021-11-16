@@ -111,7 +111,7 @@ module.exports = {
         host: "localhost",
         port: 9538,
         skipDryRun: true,
-      }
+      },
     },
     conflux: {
       "conflux.testnet": {
