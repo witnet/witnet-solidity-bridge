@@ -181,8 +181,8 @@ contract("WitnetRequest implementations", accounts => {
         rng = await WitnetRequestRandomness.new({ from: master })
       })
       describe("master copy", async () => {
-        it("params() concurs with expected default values", async () => {
-          const params = await rng.params.call()
+        it("witnessingParams() concurs with expected default values", async () => {
+          const params = await rng.witnessingParams.call()
           // console.log(params)
           assert.equal(2, params.numWitnesses)
           assert.equal(51, params.minWitnessingConsensus)
@@ -206,7 +206,7 @@ contract("WitnetRequest implementations", accounts => {
               { from: master }
             )
             assert.equal(
-              (await rng.params.call()).witnessingCollateral,
+              (await rng.witnessingParams.call()).witnessingCollateral,
               "1000000000000000000"
             )
           })
@@ -245,7 +245,7 @@ contract("WitnetRequest implementations", accounts => {
               50 * 10 ** 4,
               { from: master }
             )
-            const params = await rng.params.call()
+            const params = await rng.witnessingParams.call()
             assert.equal(params.witnessingReward, "1000000")
             assert.equal(params.witnessingUnitaryFee, "500000")
           })
@@ -273,7 +273,7 @@ contract("WitnetRequest implementations", accounts => {
           })
           it("owner can change witnessing to quorum to acceptable values", async () => {
             await rng.setWitnessingQuorum(7, 67, { from: master })
-            const params = await rng.params.call()
+            const params = await rng.witnessingParams.call()
             assert.equal(7, params.numWitnesses)
             assert.equal(67, params.minWitnessingConsensus)
           })
@@ -316,10 +316,10 @@ contract("WitnetRequest implementations", accounts => {
           const tx = await rng.clone({ from: cloner })
           const args = getEventArgs(tx.logs, "Cloned")
           clone = await WitnetRequestRandomness.at(args.clone)
-          // console.log(await rng.params.call())
+          // console.log(await rng.witnessingParams.call())
         })
-        it("params() concurs with expected default values", async () => {
-          const params = await clone.params.call()
+        it("witnessingParams() concurs with expected default values", async () => {
+          const params = await clone.witnessingParams.call()
           // console.log(params)
           assert.equal(2, params.numWitnesses)
           assert.equal(51, params.minWitnessingConsensus)
@@ -343,7 +343,7 @@ contract("WitnetRequest implementations", accounts => {
               { from: cloner }
             )
             assert.equal(
-              (await clone.params.call()).witnessingCollateral,
+              (await clone.witnessingParams.call()).witnessingCollateral,
               "1000000000000000000"
             )
           })
@@ -382,7 +382,7 @@ contract("WitnetRequest implementations", accounts => {
               50 * 10 ** 4,
               { from: cloner }
             )
-            const params = await clone.params.call()
+            const params = await clone.witnessingParams.call()
             assert.equal(params.witnessingReward, "1000000000")
             assert.equal(params.witnessingUnitaryFee, "500000")
           })
@@ -416,7 +416,7 @@ contract("WitnetRequest implementations", accounts => {
           })
           it("owner can change witnessing to quorum to acceptable values", async () => {
             await clone.setWitnessingQuorum(7, 67, { from: cloner })
-            const params = await clone.params.call()
+            const params = await clone.witnessingParams.call()
             assert.equal(7, params.numWitnesses)
             assert.equal(67, params.minWitnessingConsensus)
           })

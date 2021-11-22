@@ -16,6 +16,15 @@ abstract contract WitnetRequestMalleableBase
 {   
     using Witnet for *;
 
+    event WitnessingParamsChanged(
+        address indexed by,
+        uint8 numWitnesses,
+        uint8 minWitnessingConsensus,
+        uint64 witnssingCollateral,
+        uint64 witnessingReward,
+        uint64 witnessingUnitaryFee
+    );
+
     struct WitnetRequestMalleableBaseContext {
         /// Contract owner address.
         address owner;
@@ -57,7 +66,7 @@ abstract contract WitnetRequestMalleableBase
     }
 
     /// Returns witnessing parameters of current Witnet Data Request.
-    function params()
+    function witnessingParams()
         external view
         returns (WitnetRequestWitnessingParams memory)
     {
