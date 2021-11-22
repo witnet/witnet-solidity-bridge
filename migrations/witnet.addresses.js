@@ -3,6 +3,7 @@ module.exports = {
     "ethereum.goerli": {
       WitnetParserLib: "0x3F1f3F024bA451F738a49DB21055b1BC4604A31C",
       WitnetRequestBoard: "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8",
+      WitnetRNG: "0xc8b69195c7d04555942C724d524f19122da10574",
     },
     "ethereum.mainnet": {
       WitnetParserLib: "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",

@@ -6,6 +6,8 @@ module.exports = {
       WitnetParserLib: "WitnetParserLib",
       WitnetProxy: "WitnetProxy",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
+      WitnetRequestRandomness: "WitnetRequestRandomness",
+      WitnetRNG: "WitnetRNG"
     },
   },
   constructorParams: {
