@@ -290,6 +290,14 @@ abstract contract WitnetRequestMalleableBase
             _uint64varint(0x30, _witnessingCollateral)
         );
         _request().hash = _request().bytecode.hash();
+        emit WitnessingParamsChanged(
+            msg.sender,
+            _numWitnesses,
+            _minWitnessingConsensus,
+            _witnessingCollateral,
+            _witnessingReward,
+            _witnessingUnitaryFee
+        );
     }
 
     /// @dev Returns pointer to storage slot where State struct is located.
