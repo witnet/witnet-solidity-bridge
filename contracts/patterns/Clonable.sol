@@ -9,7 +9,7 @@ abstract contract Clonable is Initializable {
     /// @dev Differs from `address(this)` when reached within a DELEGATECALL.
     address immutable public self = address(this);
 
-    event Cloned(address indexed by, Clonable indexed clone);
+    event Cloned(address indexed by, Clonable indexed self, Clonable indexed clone);
 
     /// Tells whether this contract is a clone of another (i.e. `self()`)
     function cloned()
@@ -45,14 +45,14 @@ abstract contract Clonable is Initializable {
             _instance := create(0, ptr, 0x37)
         }        
         require(address(_instance) != address(0), "Clonable: CREATE failed");
-        emit Cloned(msg.sender, _instance);
+        emit Cloned(msg.sender, Clonable(self), _instance);
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract 
     /// behaviour while using its own EVM storage.
     /// @dev This function uses the CREATE2 opcode and a `_salt` to deterministically deploy
-    /// @dev the clone. Using the same `_salt` multiple time will revert, since
-    /// @dev the clones cannot be deployed twice at the same address.
+    /// @dev the clone. Using the same `_salt` multiple times will revert, since
+    /// @dev no contract can be deployed more than once at the same address.
     /// @dev See https://eips.ethereum.org/EIPS/eip-1167.
     /// @dev See https://blog.openzeppelin.com/deep-dive-into-the-minimal-proxy-contract/.
     function cloneDeterministic(bytes32 _salt)
@@ -72,6 +72,6 @@ abstract contract Clonable is Initializable {
             _instance := create2(0, ptr, 0x37, _salt)
         }
         require(address(_instance) != address(0), "Clonable: CREATE2 failed");
-        emit Cloned(msg.sender, _instance);
+        emit Cloned(msg.sender, Clonable(self), _instance);
     }
 }
