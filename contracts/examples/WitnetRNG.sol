@@ -4,105 +4,150 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../UsingWitnet.sol";
+import "../interfaces/IWitnetRNG.sol";
 import "../requests/WitnetRequestRandomness.sol";
 
-/// @title WitnetRNG: A trustless random number generator, based on the Witnet oracle. 
+/// @title WitnetRNG: A trustless random number generator and registry, based on the Witnet oracle. 
 /// @author The Witnet Foundation.
 contract WitnetRNG
     is
+        IWitnetRNG,
         UsingWitnet,
-        WitnetRequestRandomness
+        Clonable
 {
-    struct WitnetRNGContext {
-        uint256 lastQueryBlock;
-        uint256 lastQueryId;
-        uint256 nonce;
+    WitnetRequestRandomness public witnetRandomnessRequest;
+    uint256 public override latestRandomizeBlock;
+
+    mapping (uint256 => RandomizeData) internal __randomize_;
+    struct RandomizeData {
+        address from;
+        uint256 prevBlock;
+        uint256 nextBlock;
+        uint256 witnetQueryId;
     }
 
     /// Include an address to specify the immutable WitnetRequestBoard entrypoint address.
     /// @param _wrb The WitnetRequestBoard immutable entrypoint address.
     constructor(WitnetRequestBoard _wrb)
         UsingWitnet(_wrb)
-    {}
-
-    /// @dev Modifier: makes sure latest request was already solved.
-    modifier notPending {
-        require(isReady(), "WitnetRNG: pending randomize");
-        _;
-    }
-
-    /// Gets randomness generated upon resolution to the latest randomize request. 
-    /// @dev Fails if `randomize()` was not ever called before, if the latest `randomize()` was not yet solved, and also if
-    /// @dev for whatever reason the Witnet oracle could not manage to solve latest randomize request.
-    /// @return _randomness Returns random value provided by the Witnet oracle upon the latest randomize request.
-    function getRandomness()
-        public view
-        notPending
-        returns (bytes32 _randomness)
     {
-        Witnet.Result memory _result = _witnetReadResult(lastQueryId());
-        require(witnet.isOk(_result), "WitnetRNG: randomize failed");
-        return witnet.asBytes32(_result);
+        witnetRandomnessRequest = new WitnetRequestRandomness();
+        witnetRandomnessRequest.transferOwnership(msg.sender);
     }
 
-    /// Returns amount of weis required to be paid as a fee when requesting randomness with a tx gas price as 
-    /// the one given.
-    function getRandomnessFee(uint256 _gasPrice)
+    /// Returns amount of weis required to be paid as a fee when requesting randomness with a 
+    /// tx gas price as the one given.
+    function estimateRandomizeFee(uint256 _gasPrice)
         public view
+        virtual override
         returns (uint256)
     {
         return _witnetEstimateReward(_gasPrice);
     }
 
-    /// Returns `true` only when latest randomness request (i.e. `lastQueryId()`) gets solved by the Witnet
-    /// oracle and reported back to the EVM, or if `randomize()` was never called before.
-    function isReady()
-        public view
-        returns (bool)
+    /// Gets data of the randomness request that got successfully posted to the WRB within given block.
+    /// @dev Returns zero values if no randomness request was actually posted within given block.
+    /// @param _block Block number whose randomness request is beign queried.
+    /// @return _from Address from which the latest randomness request was posted.
+    /// @return _id Unique request identifier as provided by the WRB.
+    /// @return _fee Request's total paid fee.
+    /// @return _prevBlock Block number in which a randomness request got posted just before this one. 0 if none.
+    /// @return _nextBlock Block number in which a randomness request got posted just after this one, 0 if none.
+    function getRandomizeData(uint256 _block)
+        external view
+        override
+        returns (
+            address _from,
+            uint256 _id,
+            uint256 _fee,
+            uint256 _prevBlock,
+            uint256 _nextBlock
+        )
     {
-        uint256 _queryId = _context().lastQueryId;
-        return (
-            _queryId == 0
-                || _witnetCheckResultAvailability(_queryId)
+        RandomizeData storage _data = __randomize_[_block];
+        _id = _data.witnetQueryId;
+        _fee = witnet.readRequestReward(_id);
+        _from = _data.from;
+        _prevBlock = _data.prevBlock;
+        _nextBlock = _data.nextBlock;
+    }
+
+    /// Gets randomness generated upon resolution to the request that was posted within given block,
+    /// if any, or to the _first_ request posted after that block, otherwise.
+    /// @dev Fails if:
+    /// @dev   i.   no `randomize()` was ever called in either the given block, or afterwards.
+    /// @dev   ii.  a request posted in/after given block exists, but no result has yet been provided.
+    /// @dev   iii. the implicit request could not be solved by the Witnet oracle, for whatever reason.
+    /// @param _block Block number from which the search will start.
+    function getRandomnessAfter(uint256 _block)
+        public view
+        virtual override
+        returns (bytes32)
+    {
+        if (__randomize_[_block].from == address(0)) {
+            _block = getRandomnessNextBlock(_block);
+        }
+        require(isRandomized(_block), "WitnetRNG: not randomized");
+        Witnet.Result memory _witnetResult = _witnetReadResult(__randomize_[_block].witnetQueryId);
+        require(witnet.isOk(_witnetResult), "WitnetRNG: randomize failed");
+        return witnet.asBytes32(_witnetResult);
+    }
+
+    /// Gets next block in which a new randomness request was posted after the given one. 
+    /// @param _block Block number from which the search will start.
+    /// @return First block found after the given one, or `0` otherwise.
+    function getRandomnessNextBlock(uint256 _block)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return ((__randomize_[_block].from != address(0))
+            ? __randomize_[_block].nextBlock
+            // start search from the latest block
+            : _searchNextBlock(_block, latestRandomizeBlock)
         );
     }
 
-    /// Returns EVM's block number in which the last randomize request that was successfully posted
-    /// to the Witnet Request Board.
-    function lastQueryBlock()
+    /// Gets previous block in which a randomness request was posted before the given one.
+    /// @param _block Block number from which the search will start. Cannot be zero.
+    /// @return First block found before the given one, or `0` otherwise.
+    function getRandomnessPrevBlock(uint256 _block)
         public view
+        virtual override
         returns (uint256)
     {
-        return _context().lastQueryBlock;
+        assert(_block > 0);
+        uint256 _latest = latestRandomizeBlock;
+        return ((_block > _latest)
+            ? _latest
+            // start search from the latest block
+            : _searchPrevBlock(_block, __randomize_[_latest].prevBlock)
+        );
     }
 
-    /// Returns the unique identifier of the last randomize request that was successfully poste
-    /// to the Witnet Request Board.
-    function lastQueryId()
+    /// Returns `true` only when the randomness request that got posted within given block was already
+    /// reported back from the Witnet oracle, either successfully or with an error of any kind.
+    function isRandomized(uint256 _block)
         public view
-        returns (uint256)
+        virtual override
+        returns (bool)
     {
-        return _context().lastQueryId;
+        RandomizeData storage _data = __randomize_[_block];
+        return (
+            _data.witnetQueryId != 0 
+                && _witnetCheckResultAvailability(_data.witnetQueryId)
+        );
     }
 
     /// Generates a pseudo-random number uniformly distributed within the range [0 .. _range), by using 
-    /// the contract's self-incremented nonce value and the latest Witnet-provided randomness value. 
-    /// @dev Fails if the contract was not ever randomized, or if last randomization request was not yet solved.
-    /// @param _range Range within which the uniformly-distributed random number will be generated.
-    function random(uint32 _range)
-        external
-        returns (uint32)
-    {
-        return random(_range, _context().nonce ++);
-    }
-
-    /// Generates a pseudo-random number uniformly distributed within the range [0 .. _range), by using 
-    /// the given `_nonce` value and the latest Witnet-provided randomness value.
-    /// @dev Fails if the contract was not ever randomized, or if last randomization request was not yet solved.
+    /// the given `_nonce` value and the randomness returned by `getRandomnessAfter(_block)`. 
+    /// @dev Fails under same conditions as `getRandomnessAfter(uint256)` may do.
     /// @param _range Range within which the uniformly-distributed random number will be generated.
     /// @param _nonce Nonce value enabling multiple random numbers from the same randomness value.
-    function random(uint32 _range, uint256 _nonce)
-        public view
+    /// @param _block Block number from which the search will start.
+    function random(uint32 _range, uint256 _nonce, uint256 _block)
+        external view
+        virtual override
         returns (uint32)
     {
         return random(
@@ -111,19 +156,20 @@ contract WitnetRNG
             keccak256(
                 abi.encode(
                     msg.sender,
-                    getRandomness()
+                    getRandomnessAfter(_block)
                 )
             )
         );
     }
 
-    /// Generates pseudo-random number uniformly distributed within the range [0 .. _range), by using 
+    /// Generates a pseudo-random number uniformly distributed within the range [0 .. _range), by using 
     /// the given `_nonce` value and the given `_seed` as a source of entropy.
     /// @param _range Range within which the uniformly-distributed random number will be generated.
     /// @param _nonce Nonce value enabling multiple random numbers from the same randomness value.
     /// @param _seed Seed value used as entropy source.
     function random(uint32 _range, uint256 _nonce, bytes32 _seed)
         public pure
+        virtual override
         returns (uint32)
     {
         uint8 _flagBits = uint8(255 - _msbDeBruijn32(_range));
@@ -135,96 +181,117 @@ contract WitnetRNG
         return uint32((_number * _range) >> _flagBits);
     }
 
-    /// Requests Witnet oracle to generate an EVM-agnostic and trustless source of randomness.
-    /// @dev Only callable by the contract's owner. 
-    /// @dev If the latest request was not yet solved, upgrade the Witnet fee in case current
-    /// @dev tx gas price is higher than the last time the Witnet fee was set.
-    /// @return _queryId Witnet Request Board's unique query identifier.
+    /// Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
+    /// Only one randomness request per block will be actually posted to the WRB. Should there 
+    /// already be a posted request within current block, all received funds shall be transfered
+    /// back to the tx sender.
     function randomize()
         external payable
-        virtual
-        onlyOwner
-        returns (uint256 _queryId)
+        virtual override
+        returns (uint256 _id)
     {
-        uint256 _unusedFee = _msgValue();
-        // Read latest query id, if any:
-        _queryId = _context().lastQueryId;
-        if (isReady()) {
-            if (_queryId > 0) {
-                // If any, remove previous query and result from the WRB storage:
-                _witnetDeleteQuery(_queryId);
-            }
-            // Post the Witnet request:
-            uint256 _randomnessFee;
-            (_queryId, _randomnessFee) = _witnetPostRequest(this);
-            _context().lastQueryBlock = block.number;
-            _context().lastQueryId = _queryId;
-            _unusedFee -= _randomnessFee;
-        } else {
-            // Upgrade Witnet fee of currently pending request, if necessary:
-            _unusedFee -= _witnetUpgradeReward(_queryId);
+        uint256 _unusedFee = msg.value;
+        if (latestRandomizeBlock < block.number) {
+            // Post the Witnet Randomness request:
+            uint256 _fee;
+            (_id, _fee) = _witnetPostRequest(witnetRandomnessRequest);
+            // Keep Randomize data in storage:
+            RandomizeData storage _data = __randomize_[block.number];
+            _data.witnetQueryId = _id;
+            _data.from = msg.sender;
+            // Update block links:
+            uint256 _prevBlock = latestRandomizeBlock;
+            _data.prevBlock = _prevBlock;
+            __randomize_[_prevBlock].nextBlock = block.number;
+            latestRandomizeBlock = block.number;
+            // Throw event:
+            emit Randomized(
+                msg.sender,
+                _prevBlock,
+                _data.witnetQueryId,
+                witnetRandomnessRequest.hash()
+            );
+            _unusedFee -= _fee;
         }
         // Transfer back unused tx value:
         payable(msg.sender).transfer(_unusedFee);
     }
 
+    /// Increases Witnet fee related to a pending-to-be-solved randomness request, as much as it
+    /// may be required in proportion to how much bigger the current tx gas price is with respect the 
+    /// highest gas price that was paid in either previous fee upgrades, or when the given randomness 
+    /// request was posted.
+    function upgradeRandomizeFee(uint256 _block)
+        external payable
+        virtual override
+    {
+        RandomizeData storage _data = __randomize_[_block];
+        if (_data.witnetQueryId != 0) {
+            uint256 _fundsToAdd = _witnetUpgradeReward(_data.witnetQueryId);
+            if (_fundsToAdd > 0) {
+                payable(msg.sender).transfer(msg.value - _fundsToAdd);
+            }
+        }
+    }
+
 
     // ================================================================================================================
-    // --- 'WitnetRequestMallableBase' overriden functions ------------------------------------------------------------
+    // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
 
-    /// Sets amount of nanowits that a witness solving the request will be required to collateralize in the 
-    /// commitment transaction.
-    /// @dev Fails if called while a randomize request is being solved.
-    function setWitnessingCollateral(uint64 _witnessingCollateral)
-        public 
-        virtual override
-        notPending
-        onlyOwner
-    {
-        super.setWitnessingCollateral(_witnessingCollateral);
-    }
-
-    /// Specifies how much you want to pay for rewarding each of the Witnet nodes.
-    /// @dev Fails if called while a randomize request is being solved.
-    /// @param _witnessingReward Amount of nanowits that every request-solving witness will be rewarded with.
-    /// @param _witnessingUnitaryFee Amount of nanowits that will be earned by Witnet miners for each each valid 
-    /// commit/reveal transaction they include in a block.
-    function setWitnessingFees(uint64 _witnessingReward, uint64 _witnessingUnitaryFee)
+    /// Deploys and returns the address of a minimal proxy clone that replicates contract
+    /// behaviour while using its own EVM storage.
+    /// @dev This function should always provide a new address, no matter how many times 
+    /// @dev is actually called from the same `msg.sender`.
+    function clone()
         public
         virtual override
-        notPending
-        onlyOwner
+        returns (Clonable _newInstance)
     {
-        super.setWitnessingFees(_witnessingReward, _witnessingUnitaryFee);
+        _newInstance = super.clone();
+        _clone(_newInstance);
     }
 
-    /// Sets how many Witnet nodes will be "hired" for resolving the request.
-    /// @dev Fails if called while a randomize request is being solved.
-    /// @param _numWitnesses Number of witnesses required to be involved for solving this Witnet Data Request.
-    /// @param _minWitnessingConsensus /// Threshold percentage for aborting resolution of a request if the witnessing 
-    /// nodes did not arrive to a broad consensus.
-    function setWitnessingQuorum(uint8 _numWitnesses, uint8 _minWitnessingConsensus)
+    /// Deploys and returns the address of a minimal proxy clone that replicates contract 
+    /// behaviour while using its own EVM storage.
+    /// @dev This function uses the CREATE2 opcode and a `_salt` to deterministically deploy
+    /// @dev the clone. Using the same `_salt` multiple time will revert, since
+    /// @dev no contract can be deployed more than once at the same address.
+    function cloneDeterministic(bytes32 _salt)
         public
         virtual override
-        notPending
-        onlyOwner
+        returns (Clonable _newInstance)
     {
-        super.setWitnessingQuorum(_numWitnesses, _minWitnessingConsensus);
+        _newInstance = super.cloneDeterministic(_salt);
+        _clone(_newInstance);
+    }
+
+
+    // ================================================================================================================
+    // --- 'Initializable' overriden functions ------------------------------------------------------------------------
+
+    /// @dev Initializes contract's storage context.
+    function initialize(bytes memory _initData)
+        public
+        virtual override
+    {
+        require(address(witnetRandomnessRequest) == address(0), "WitnetRNG: already initialized");
+        witnetRandomnessRequest = WitnetRequestRandomness(
+            abi.decode(
+                _initData,
+                (address)
+            )
+        );
     }
 
 
     // ================================================================================================================
     // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------
 
-    /// @dev Returns storage pointer to struct that contains WitnetRNG context data
-    function _context()
-        internal pure virtual
-        returns (WitnetRNGContext storage _ptr)
-    {
-        assembly {
-            /* keccak256("io.witnet.randomness.context") */
-            _ptr.slot := 0x2fdaa36d67c639f5a4035f7f2effb6ae958c13fcb848d0e1bab18cafd5a40ffe
-        }
+    /// @dev Common steps for both deterministic and non-deterministic cloning.
+    function _clone(Clonable _instance) internal {
+        address _request = address(witnetRandomnessRequest.clone());
+        Ownable(_request).transferOwnership(msg.sender);
+        _instance.initialize(abi.encode(_request));
     }
 
     /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.
@@ -246,5 +313,24 @@ contract WitnetRNG
         return _bitPosition[
             uint32(_v * uint256(0x07c4acdd)) >> 27
         ];
+    }
+
+    /// @dev Recursively searches for first block after the given one in which a Witnet Randomness request was casted.
+    /// @dev Returns 0 if none found.
+    function _searchNextBlock(uint256 _target, uint256 _latest) internal view returns (uint256) {
+        return ((_target >= _latest) 
+            ? __randomize_[_latest].nextBlock
+            : _searchNextBlock(_target, __randomize_[_latest].prevBlock)
+        );
+    }
+
+    /// @dev Recursively searches for first block before the given one in which a Witnet Randomness request was casted.
+    /// @dev Returns 0 if none found.
+
+    function _searchPrevBlock(uint256 _target, uint256 _latest) internal view returns (uint256) {
+        return ((_target > _latest)
+            ? _latest
+            : _searchPrevBlock(_target, __randomize_[_latest].prevBlock)
+        );
     }
 }
