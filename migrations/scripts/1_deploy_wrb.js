@@ -1,4 +1,5 @@
 const { merge } = require("lodash")
+const prompt = require("prompt-sync")({ sigint: true })
 
 const settings = require("../witnet.settings")
 const utils = require("../../scripts/utils")
@@ -84,6 +85,16 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   /* Deploy new instance of target 'WitnetRequestBoard' implementation */
+  
+  if (upgradeProxy) {
+    // But ask operator first, if this was a proxiable implementation:
+    let answer = prompt(`\n   ? Do you wish to upgrade the proxy ? [y/N] `).toLowerCase().trim()
+    if (!["y", "yes"].includes(answer)) {
+      console.log(`\n   Skipped: cancelled by user.`)
+      return
+    }
+  }
+  
   await deployer.link(WitnetParserLib, WitnetRequestBoard)
   await deployer.deploy(
     WitnetRequestBoard,
@@ -104,6 +115,7 @@ module.exports = async function (deployer, network, accounts) {
 
   /* Upgrade 'WitnetProxy' instance, if neccesary */
   if (upgradeProxy) {
+
     const proxy = await WitnetProxy.deployed()
     const wrb = await WitnetRequestBoard.deployed()
 
