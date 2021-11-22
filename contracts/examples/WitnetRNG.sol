@@ -87,9 +87,11 @@ contract WitnetRNG
         if (__randomize_[_block].from == address(0)) {
             _block = getRandomnessNextBlock(_block);
         }
-        require(isRandomized(_block), "WitnetRNG: not randomized");
-        Witnet.Result memory _witnetResult = _witnetReadResult(__randomize_[_block].witnetQueryId);
-        require(witnet.isOk(_witnetResult), "WitnetRNG: randomize failed");
+        uint256 _queryId = __randomize_[_block].witnetQueryId;
+        require(_queryId != 0, "WitnetRNG: not randomized");
+        require(_witnetCheckResultAvailability(_queryId), "WitnetRNG: pending randomize");
+        Witnet.Result memory _witnetResult = _witnetReadResult(_queryId);
+        require(witnet.isOk(_witnetResult), "WitnetRNG: failed randomize");
         return witnet.asBytes32(_witnetResult);
     }
 
