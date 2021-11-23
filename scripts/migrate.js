@@ -36,8 +36,8 @@ if (!settings.networks[realm] || !settings.networks[realm][network]) {
 
 const artifact = (settings.artifacts[realm] && settings.artifacts[realm].WitnetRequestBoard) ||
   settings.artifacts.default.WitnetRequestBoard
-process.env.FLATTENED_DIRECTORY = `./flattened/${artifact}/`
-if (!fs.existsSync(`${process.env.FLATTENED_DIRECTORY}/Flattened${artifact}.sol`)) {
+
+  if (!fs.existsSync(`./flattened/${artifact}/Flattened${artifact}.sol`)) {
   console.log("\n\
     > Please, flatten Witnet artifacts first. E.g.:\n\
       $ yarn flatten:witnet\n\n\
@@ -51,16 +51,15 @@ migrateFlattened(network)
 
 async function migrateFlattened (network) {
   console.log(
-    `> Migrating from ${process.env.FLATTENED_DIRECTORY} into "${realm}:${network}"...`
+    `> Migrating into "${realm}:${network}"...`
   )  
-  await new Promise((resolve, reject) => {
+  await new Promise((resolve, _reject) => {
     let subprocess = require("child_process").spawn(
       "truffle",
       [
         "migrate",
+        "--compile-all",
         "--reset",
-        "--config",
-        "truffle-config.flattened.js",
         "--network",
         network
       ],
