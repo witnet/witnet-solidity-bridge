@@ -1,6 +1,6 @@
-# witnet-ethereum-bridge [![](https://travis-ci.com/witnet/witnet-ethereum-bridge.svg?branch=master)](https://travis-ci.com/witnet/witnet-ethereum-bridge)
+# witnet-solidity-bridge [![](https://travis-ci.com/witnet/witnet-solidity-bridge.svg?branch=master)](https://travis-ci.com/witnet/witnet-solidity-bridge)
 
-`witnet/witnet-ethereum-bridge` is an open source implementation of an API that enables Solidity smart contract developers to harness the full power of the [**Witnet Decentralized Oracle Network**](https://docs.witnet.io/overview/concepts/).
+`witnet/witnet-solidity-bridge` is an open source implementation of an API that enables Solidity smart contract developers to harness the full power of the [**Witnet Decentralized Oracle Network**](https://docs.witnet.io/overview/concepts/).
 
 This repository provides several deployable contracts:
 
@@ -292,6 +292,6 @@ Please, have a look at the [`witnet/truffle-box`](https://github.com/witnet/truf
 
 ## **License**
 
-`witnet-ethereum-bridge` is published under the [MIT license][license].
+`witnet-solidity-bridge` is published under the [MIT license][license].
 
-[license]: https://github.com/witnet/witnet-ethereum-bridge/blob/master/LICENSE
+[license]: https://github.com/witnet/witnet-solidity-bridge/blob/master/LICENSE
