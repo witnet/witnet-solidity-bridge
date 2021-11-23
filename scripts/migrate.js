@@ -8,9 +8,7 @@ require("dotenv").config()
 const settings = require("../migrations/witnet.settings")
 const utils = require("./utils")
 
-const exec = require("child_process").exec
 const fs = require("fs")
-const cli = new cli_func()
 
 if (process.argv.length < 3) {
   console.log()
@@ -49,29 +47,36 @@ if (!fs.existsSync(`${process.env.FLATTENED_DIRECTORY}/Flattened${artifact}.sol`
 
 migrateFlattened(network)
 
-/// //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 async function migrateFlattened (network) {
   console.log(
-    `> Migrating from ${process.env.FLATTENED_DIRECTORY} into "${realm}:${network}"..."`
-  )
-  await cli.exec(`truffle migrate --reset --config truffle-config.flattened.js --network ${network}`)
-    .catch(err => {
-      console.error(err)
-      process.exit(1)
+    `> Migrating from ${process.env.FLATTENED_DIRECTORY} into "${realm}:${network}"...`
+  )  
+  await new Promise((resolve, reject) => {
+    let subprocess = require("child_process").spawn(
+      "truffle",
+      [
+        "migrate",
+        "--reset",
+        "--config",
+        "truffle-config.flattened.js",
+        "--network",
+        network
+      ],
+      {
+        shell: true,
+        stdin: "inherit"
+      }
+    )
+    process.stdin.pipe(subprocess.stdin)
+    subprocess.stdout.pipe(process.stdout)
+    subprocess.stderr.pipe(process.stderr)
+    subprocess.on('close', (code) => {
+      if (code !== 0) {
+        process.exit(code)
+      }
+      resolve(subprocess.stdout)
     })
-}
-
-function cli_func () {
-  this.exec = async function (cmd) {
-    return new Promise((resolve, reject) => {
-      exec(cmd, (error, stdout, stderr) => {
-        if (error) {
-          reject(error)
-          return
-        }
-        resolve(stdout)
-      }).stdout.pipe(process.stdout)
-    })
-  }
+  })
 }
