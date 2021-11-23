@@ -37,7 +37,7 @@ if (!settings.networks[realm] || !settings.networks[realm][network]) {
 const artifact = (settings.artifacts[realm] && settings.artifacts[realm].WitnetRequestBoard) ||
   settings.artifacts.default.WitnetRequestBoard
 
-  if (!fs.existsSync(`./flattened/${artifact}/Flattened${artifact}.sol`)) {
+if (!fs.existsSync(`./flattened/${artifact}/Flattened${artifact}.sol`)) {
   console.log("\n\
     > Please, flatten Witnet artifacts first. E.g.:\n\
       $ yarn flatten:witnet\n\n\
@@ -47,31 +47,31 @@ const artifact = (settings.artifacts[realm] && settings.artifacts[realm].WitnetR
 
 migrateFlattened(network)
 
-//////////////////////////////////////////////////////////////////////////////////
+/// ///////////////////////////////////////////////////////////////////////////////
 
 async function migrateFlattened (network) {
   console.log(
     `> Migrating into "${realm}:${network}"...`
-  )  
-  await new Promise((resolve, _reject) => {
-    let subprocess = require("child_process").spawn(
+  )
+  await new Promise((resolve) => {
+    const subprocess = require("child_process").spawn(
       "truffle",
       [
         "migrate",
         "--compile-all",
         "--reset",
         "--network",
-        network
+        network,
       ],
       {
         shell: true,
-        stdin: "inherit"
+        stdin: "inherit",
       }
     )
     process.stdin.pipe(subprocess.stdin)
     subprocess.stdout.pipe(process.stdout)
     subprocess.stderr.pipe(process.stderr)
-    subprocess.on('close', (code) => {
+    subprocess.on("close", (code) => {
       if (code !== 0) {
         process.exit(code)
       }

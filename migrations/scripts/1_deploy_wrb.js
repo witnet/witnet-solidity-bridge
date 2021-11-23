@@ -87,25 +87,25 @@ module.exports = async function (deployer, network, accounts) {
   /* Deploy new instance of target 'WitnetRequestBoard' implementation */
   if (upgradeProxy) {
     // But ask operator first, if this was a proxiable implementation:
-    
+
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
     })
     await new Promise((resolve) => {
       rl.question(
         "\n   > Do you wish to upgrade the proxy ? [y/N] ",
-        function(answer) {
+        function (answer) {
           if (!["y", "yes"].includes(answer?.toLowerCase().trim())) {
             upgradeProxy = false
           }
           rl.close()
         })
-      rl.on("close", function() {
+      rl.on("close", function () {
         resolve()
       })
     })
-    if (!upgradeProxy){
+    if (!upgradeProxy) {
       return
     }
   }
