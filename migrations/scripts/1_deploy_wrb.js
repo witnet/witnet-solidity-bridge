@@ -84,10 +84,9 @@ module.exports = async function (deployer, network, accounts) {
     console.log(`\n   Skipped: '${artifactsName.WitnetParserLib}' deployed at ${WitnetParserLib.address}.`)
   }
 
-  /* Deploy new instance of target 'WitnetRequestBoard' implementation */
-  if (upgradeProxy) {
-    // But ask operator first, if this was a proxiable implementation:
-
+  // Should the WRB be proxiable, and this migration not be within testing process:
+  if (upgradeProxy && network !== "test") {
+    // Ask the user whether to proceed with the upgrade process:
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -110,6 +109,7 @@ module.exports = async function (deployer, network, accounts) {
     }
   }
 
+  /* Deploy new instance of target 'WitnetRequestBoard' implementation */
   await deployer.link(WitnetParserLib, WitnetRequestBoard)
   await deployer.deploy(
     WitnetRequestBoard,
