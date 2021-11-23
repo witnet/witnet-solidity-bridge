@@ -96,7 +96,7 @@ module.exports = async function (deployer, network, accounts) {
       rl.question(
         "\n   > Do you wish to upgrade the proxy ? [y/N] ",
         function (answer) {
-          if (!["y", "yes"].includes(answer?.toLowerCase().trim())) {
+          if (!["y", "yes"].includes(answer.toLowerCase().trim())) {
             upgradeProxy = false
           }
           rl.close()

@@ -12,6 +12,7 @@ module.exports = {
     "ethereum.rinkeby": {
       WitnetParserLib: "0x2E499f44d2977945d52B7BD7834B2C5195d9CE84",
       WitnetRequestBoard: "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4",
+      WitnetRNG: "0xB28B2148CdD68D35e4B8dC4dD4b4233c1c147Fa5",
     },
   },
   boba: {

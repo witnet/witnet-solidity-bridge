@@ -7,7 +7,7 @@ module.exports = {
       WitnetProxy: "WitnetProxy",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
       WitnetRequestRandomness: "WitnetRequestRandomness",
-      WitnetRNG: "WitnetRNG"
+      WitnetRNG: "WitnetRNG",
     },
   },
   constructorParams: {
