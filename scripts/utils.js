@@ -1,8 +1,10 @@
+const web3 = require("web3")
 require("dotenv").config()
 
 module.exports = {
   getRealmNetworkFromArgs,
   getRealmNetworkFromString,
+  isNullAddress,
 }
 
 function getRealmNetworkFromArgs () {
@@ -51,4 +53,10 @@ function getRealmNetworkFromString (network) {
     }
   }
   return [realm, network]
+}
+
+function isNullAddress (addr) {
+  return !addr ||
+      addr === "0x0000000000000000000000000000000000000000" ||
+      !web3.utils.isAddress(addr)
 }
