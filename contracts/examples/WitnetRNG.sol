@@ -190,13 +190,11 @@ contract WitnetRNG
     function randomize()
         external payable
         virtual override
-        returns (uint256 _id)
     {
         uint256 _unusedFee = msg.value;
         if (latestRandomizeBlock < block.number) {
             // Post the Witnet Randomness request:
-            uint256 _fee;
-            (_id, _fee) = _witnetPostRequest(witnetRandomnessRequest);
+            (uint256 _id, uint256 _fee) = _witnetPostRequest(witnetRandomnessRequest);
             // Keep Randomize data in storage:
             RandomizeData storage _data = __randomize_[block.number];
             _data.witnetQueryId = _id;
@@ -210,7 +208,7 @@ contract WitnetRNG
             emit Randomized(
                 msg.sender,
                 _prevBlock,
-                _data.witnetQueryId,
+                _id,
                 witnetRandomnessRequest.hash()
             );
             _unusedFee -= _fee;

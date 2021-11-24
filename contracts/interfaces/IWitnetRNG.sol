@@ -79,7 +79,7 @@ interface IWitnetRNG {
     /// Only one randomness request per block will be actually posted to the WRB. Should there 
     /// already be a posted request within current block, all received funds shall be transfered
     /// back to the tx sender.
-    function randomize() external payable returns (uint256 _id);
+    function randomize() external payable;
 
     /// Increases Witnet fee related to a pending-to-be-solved randomness request, as much as it
     /// may be required in proportion to how much bigger the current tx gas price is with respect the 
