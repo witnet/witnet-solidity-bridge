@@ -15,8 +15,8 @@ module.exports = {
   },
   boba: {
     "boba.mainnet": {
-      WitnetParserLib: "",
-      WitnetRequestBoard: "",
+      WitnetParserLib: "0x886CeCB28b5Cea0602f0B81A541d2e9992055a00",
+      WitnetRequestBoard: "0xd3AD9a4b26527E3bA5Fc60B75Eb002D47D98e292",
     },
     "boba.rinkeby": {
       WitnetParserLib: "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
