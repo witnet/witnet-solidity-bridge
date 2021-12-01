@@ -1,6 +1,6 @@
 {
   "name": "witnet-solidity-bridge",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Witnet Solidity Bridge contracts for EVM-compatible networks",
   "main": "",
   "scripts": {
@@ -16,6 +16,7 @@
     "flatten:witnet:rng": "npm run flatten contracts/examples/WitnetRandomness.sol && npm run flatten contracts/requests/WitnetRequestRandomness.sol",
     "flatten:witnet:libs": "npm run flatten contracts/libs/WitnetDecoderLib.sol && npm run flatten contracts/libs/WitnetParserLib.sol",
     "flatten:witnet:proxy": "npm run flatten contracts/impls/WitnetProxy.sol",
+    "flatten:witnet:registry": "npm run flatten contracts/examples/WitnetPriceRegistry.sol",
     "flatten:witnet:boards": "npm run flatten:witnet:boards:trustable",
     "flatten:witnet:boards:trustable": "npm run flatten contracts/impls/trustable/",
     "fmt:js": "eslint \"**/*.js\"",
@@ -40,8 +41,9 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "ado-contracts": "^1.0.0",
     "@eth-optimism/solc": "^0.7.6-alpha.1",
-    "@openzeppelin/contracts": "3.2.0",
+    "@openzeppelin/contracts": "^4.1.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
