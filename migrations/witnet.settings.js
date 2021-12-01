@@ -4,10 +4,10 @@ module.exports = {
     default: {
       WitnetDecoderLib: "WitnetDecoderLib",
       WitnetParserLib: "WitnetParserLib",
+      WitnetPriceRouter: "WitnetPriceRouter",
       WitnetProxy: "WitnetProxy",
-      WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
-      WitnetRequestRandomness: "WitnetRequestRandomness",
       WitnetRandomness: "WitnetRandomness",
+      WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
     },
   },
   constructorParams: {
