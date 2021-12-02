@@ -2,27 +2,20 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-// Inherits from:
+import "../interfaces/IWitnetPriceRegistry.sol";
 import "ado-contracts/contracts/interfaces/IERC2362.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// Uses:
 import "../interfaces/IWitnetPricePoller.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract WitnetPriceRegistry
     is
         IERC2362,
+        IWitnetPriceRegistry,
         Ownable
 {
     using Strings for uint256;
-
-    event PricePairSet(
-        bytes32 indexed erc2362ID,
-        IWitnetPricePoller witnetPricePoller
-    );
-
-    bytes32[] public supportedPricePairs;
     
     struct PricePair {
         address poller;
@@ -30,26 +23,35 @@ contract WitnetPriceRegistry
         string  base;
         string  quote;
     }    
+
     mapping (bytes32 => PricePair) internal _pairs;
     mapping (address => bytes32) internal _pollers;
 
+    bytes32[] internal _pricePairs;
+
+    // ========================================================================
+    // --- Implementation of 'IWitnetPriceRegistry' ---------------------------    
+
     function getPricePoller(bytes32 _erc2362id)
         public view
-        returns (IWitnetPricePoller)
+        virtual override
+        returns (IERC165)
     {
-        return IWitnetPricePoller(_pairs[_erc2362id].poller);
+        return IERC165(_pairs[_erc2362id].poller);
     }
 
-    function getPricePollerCaption(address _poller) 
+    function getPricePollerCaption(IERC165 _poller) 
         public view
+        virtual override
         returns (string memory)
     {
-        require(supportedPricePoller(_poller), "WitnetPriceRegistry: unknown");
-        return lookupERC2362ID(_pollers[_poller]);
+        require(supportsPricePoller(_poller), "WitnetPriceRegistry: unknown");
+        return lookupERC2362ID(_pollers[address(_poller)]);
     }
 
-    function hashCaption(string memory _caption)
+    function hashPriceCaption(string memory _caption)
         public pure
+        virtual override
         returns (bytes32)
     {
         return keccak256(bytes(_caption));
@@ -57,6 +59,7 @@ contract WitnetPriceRegistry
 
     function lookupERC2362ID(bytes32 _erc2362id)
         public view
+        virtual override
         returns (string memory _caption)
     {
         PricePair storage _pair = _pairs[_erc2362id];
@@ -76,17 +79,18 @@ contract WitnetPriceRegistry
     }
 
     function setPricePoller(
-            address _poller,
+            IERC165 _poller,
             uint256 _decimals,
             string calldata _base,
             string calldata _quote
         )
-        external
+        public 
+        virtual override
         onlyOwner
     {
-        if (_poller != address(0)) {
+        if (address(_poller) != address(0)) {
             require(
-                IWitnetPricePoller(_poller).supportsInterface(type(IWitnetPricePoller).interfaceId),
+                IERC165(_poller).supportsInterface(type(IWitnetPricePoller).interfaceId),
                 "WitnetPriceRegistry: non-compliant"
             );
         }
@@ -105,31 +109,45 @@ contract WitnetPriceRegistry
             _record.base = _base;
             _record.quote = _quote;
             _record.decimals = _decimals;
-            supportedPricePairs.push(_erc2362id);
+            _pricePairs.push(_erc2362id);
         }
         else if (_currentPoller != address(0)) {
             _pollers[_currentPoller] = bytes32(0);
         }
-        if (_poller != _currentPoller) {
-            _pollers[_poller] = _erc2362id;
+        if (address(_poller) != _currentPoller) {
+            _pollers[address(_poller)] = _erc2362id;
         }
-        _record.poller = _poller;
-        emit PricePairSet(_erc2362id, IWitnetPricePoller(_poller));
+        _record.poller = address(_poller);
+        emit PricePairSet(_erc2362id, _poller);
     }
 
-    function supportedPricePair(bytes32 _erc2362id)
+    function supportedPricePairs()
+        external view
+        virtual override
+        returns (bytes32[] memory)
+    {
+        return _pricePairs;
+    }
+
+    function supportsPricePair(bytes32 _erc2362id)
         public view
+        virtual override
         returns (bool)
     {
         return _pairs[_erc2362id].poller != address(0);
     }
 
-    function supportedPricePoller(address _poller)
+    function supportsPricePoller(IERC165 _poller)
         public view
+        virtual override
         returns (bool)
     {
-        return _pairs[_pollers[_poller]].poller == _poller;
+        return _pairs[_pollers[address(_poller)]].poller == address(_poller);
     }
+
+
+    // ========================================================================
+    // --- Implementation of 'IERC2362' ---------------------------------------
 
     /// Exposed function pertaining to EIP standards
 	/// @param _erc2362id bytes32 ID of the query
@@ -142,7 +160,7 @@ contract WitnetPriceRegistry
             uint256 _status
         )
     {
-        IWitnetPricePoller _poller = getPricePoller(_erc2362id);
+        IWitnetPricePoller _poller = IWitnetPricePoller(address(getPricePoller(_erc2362id)));
         if (address(_poller) != address(0)) {
             bytes32 _proof;
             (_value, _timestamp, _proof) = _poller.lastValue();
@@ -153,5 +171,5 @@ contract WitnetPriceRegistry
         } else {
             _status = 400; // not found
         }
-    }
+    }    
 }

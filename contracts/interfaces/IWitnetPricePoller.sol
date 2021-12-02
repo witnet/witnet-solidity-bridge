@@ -19,5 +19,4 @@ interface IWitnetPricePoller {
     function requestUpdate() external payable;
 
     function supportsInterface(bytes4) external view returns (bool);
-
 }
