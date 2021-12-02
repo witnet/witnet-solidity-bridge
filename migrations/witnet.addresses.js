@@ -2,9 +2,9 @@ module.exports = {
   default: {
     "ethereum.goerli": {
       WitnetParserLib: "0x3F1f3F024bA451F738a49DB21055b1BC4604A31C",
-      WitnetRequestBoard: "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8",
+      WitnetPriceRegistry: "0xAbA8e82A6EA4aF47195c89b9E373029a7bE54F54",
       WitnetRandomness: "0xc8b69195c7d04555942C724d524f19122da10574",
-      WitnetPriceRegistry: "0x05091eb0Ea60cDDF36A4360C76D7f0Cb5E956C3F",
+      WitnetRequestBoard: "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8",
     },
     "ethereum.mainnet": {
       WitnetParserLib: "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",
@@ -12,9 +12,9 @@ module.exports = {
     },
     "ethereum.rinkeby": {
       WitnetParserLib: "0x2E499f44d2977945d52B7BD7834B2C5195d9CE84",
-      WitnetRequestBoard: "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4",
+      WitnetPriceRegistry: "0x00590c7909110Daa229d7dc0AeBf36d9BC8b0D8E",
       WitnetRandomness: "0xB28B2148CdD68D35e4B8dC4dD4b4233c1c147Fa5",
-      WitnetPriceRegistry: "0x75ff327fc00BdF125363C5F6Dc71A566355Fc7B2",
+      WitnetRequestBoard: "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4",
     },
   },
   boba: {

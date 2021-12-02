@@ -40,6 +40,21 @@ contract WitnetPriceRegistry
         return IWitnetPricePoller(_pairs[_erc2362id].poller);
     }
 
+    function getPricePollerCaption(address _poller) 
+        public view
+        returns (string memory)
+    {
+        require(supportedPricePoller(_poller), "WitnetPriceRegistry: unknown");
+        return lookupERC2362ID(_pollers[_poller]);
+    }
+
+    function hashCaption(string memory _caption)
+        public pure
+        returns (bytes32)
+    {
+        return keccak256(bytes(_caption));
+    }
+
     function lookupERC2362ID(bytes32 _erc2362id)
         public view
         returns (string memory _caption)
