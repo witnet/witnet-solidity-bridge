@@ -4,9 +4,9 @@ pragma experimental ABIEncoderV2;
 
 import "../WitnetRequestBoard.sol";
 
-interface IWitnetPricePoller {
+interface IWitnetPriceFeed {
 
-    event PricePolling(address indexed from, uint256 queryId, uint256 extraFee);
+    event PriceFeeding(address indexed from, uint256 queryId, uint256 extraFee);
 
     function estimateUpdateFee(uint256) external view returns (uint256);
 

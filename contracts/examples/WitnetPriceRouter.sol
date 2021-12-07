@@ -6,7 +6,7 @@ import "../interfaces/IWitnetPriceRouter.sol";
 import "ado-contracts/contracts/interfaces/IERC2362.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "../interfaces/IWitnetPricePoller.sol";
+import "../interfaces/IWitnetPriceFeed.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract WitnetPriceRouter
@@ -18,35 +18,35 @@ contract WitnetPriceRouter
     using Strings for uint256;
     
     struct PricePair {
-        address poller;
+        IERC165 feed;
         uint256 decimals;
         string  base;
         string  quote;
     }    
 
     mapping (bytes32 => PricePair) internal _pairs;
-    mapping (address => bytes32) internal _pollers;
+    mapping (address => bytes32) internal _feedId_;
 
     bytes32[] internal _pricePairs;
 
     // ========================================================================
     // --- Implementation of 'IWitnetPriceRouter' ---------------------------    
 
-    function getPricePoller(bytes32 _erc2362id)
+    function getPriceFeed(bytes32 _erc2362id)
         public view
         virtual override
         returns (IERC165)
     {
-        return IERC165(_pairs[_erc2362id].poller);
+        return _pairs[_erc2362id].feed;
     }
 
-    function getPricePollerCaption(IERC165 _poller) 
+    function getPriceFeedCaption(IERC165 _feed) 
         public view
         virtual override
         returns (string memory)
     {
-        require(supportsPricePoller(_poller), "WitnetPriceRouter: unknown");
-        return lookupERC2362ID(_pollers[address(_poller)]);
+        require(supportsPriceFeed(_feed), "WitnetPriceRouter: unknown");
+        return lookupERC2362ID(_feedId_[address(_feed)]);
     }
 
     function hashPriceCaption(string memory _caption)
@@ -78,8 +78,8 @@ contract WitnetPriceRouter
         }
     }
 
-    function setPricePoller(
-            IERC165 _poller,
+    function setPriceFeed(
+            IERC165 _feed,
             uint256 _decimals,
             string calldata _base,
             string calldata _quote
@@ -88,9 +88,9 @@ contract WitnetPriceRouter
         virtual override
         onlyOwner
     {
-        if (address(_poller) != address(0)) {
+        if (address(_feed) != address(0)) {
             require(
-                IERC165(_poller).supportsInterface(type(IWitnetPricePoller).interfaceId),
+                _feed.supportsInterface(type(IWitnetPriceFeed).interfaceId),
                 "WitnetPriceRouter: non-compliant"
             );
         }
@@ -104,21 +104,21 @@ contract WitnetPriceRouter
         );
         bytes32 _erc2362id = keccak256(_caption);
         PricePair storage _record = _pairs[_erc2362id];
-        address _currentPoller = _record.poller;
+        address _currentFeed = address(_record.feed);
         if (bytes(_record.base).length == 0) {
             _record.base = _base;
             _record.quote = _quote;
             _record.decimals = _decimals;
             _pricePairs.push(_erc2362id);
         }
-        else if (_currentPoller != address(0)) {
-            _pollers[_currentPoller] = bytes32(0);
+        else if (_currentFeed != address(0)) {
+            _feedId_[_currentFeed] = bytes32(0);
         }
-        if (address(_poller) != _currentPoller) {
-            _pollers[address(_poller)] = _erc2362id;
+        if (address(_feed) != _currentFeed) {
+            _feedId_[address(_feed)] = _erc2362id;
         }
-        _record.poller = address(_poller);
-        emit PricePairSet(_erc2362id, _poller);
+        _record.feed = _feed;
+        emit PricePairSet(_erc2362id, _feed);
     }
 
     function supportedPricePairs()
@@ -134,15 +134,15 @@ contract WitnetPriceRouter
         virtual override
         returns (bool)
     {
-        return _pairs[_erc2362id].poller != address(0);
+        return address(_pairs[_erc2362id].feed) != address(0);
     }
 
-    function supportsPricePoller(IERC165 _poller)
+    function supportsPriceFeed(IERC165 _feed)
         public view
         virtual override
         returns (bool)
     {
-        return _pairs[_pollers[address(_poller)]].poller == address(_poller);
+        return _pairs[_feedId_[address(_feed)]].feed == _feed;
     }
 
 
@@ -160,10 +160,10 @@ contract WitnetPriceRouter
             uint256 _status
         )
     {
-        IWitnetPricePoller _poller = IWitnetPricePoller(address(getPricePoller(_erc2362id)));
-        if (address(_poller) != address(0)) {
+        IWitnetPriceFeed _feed = IWitnetPriceFeed(address(getPriceFeed(_erc2362id)));
+        if (address(_feed) != address(0)) {
             bytes32 _proof;
-            (_value, _timestamp, _proof) = _poller.lastValue();
+            (_value, _timestamp, _proof) = _feed.lastValue();
             _status = (_proof == bytes32(0)
                 ? 404   // bad value
                 : 200   // ok
