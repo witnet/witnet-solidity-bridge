@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "./IERC165.sol";
 
-interface IWitnetPriceRegistry
+interface IWitnetPriceRouter
 {
     event PricePairSet(bytes32 indexed erc2362ID, IERC165 pricePoller);
 

@@ -2,17 +2,17 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/IWitnetPriceRegistry.sol";
+import "../interfaces/IWitnetPriceRouter.sol";
 import "ado-contracts/contracts/interfaces/IERC2362.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../interfaces/IWitnetPricePoller.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract WitnetPriceRegistry
+contract WitnetPriceRouter
     is
         IERC2362,
-        IWitnetPriceRegistry,
+        IWitnetPriceRouter,
         Ownable
 {
     using Strings for uint256;
@@ -30,7 +30,7 @@ contract WitnetPriceRegistry
     bytes32[] internal _pricePairs;
 
     // ========================================================================
-    // --- Implementation of 'IWitnetPriceRegistry' ---------------------------    
+    // --- Implementation of 'IWitnetPriceRouter' ---------------------------    
 
     function getPricePoller(bytes32 _erc2362id)
         public view
@@ -45,7 +45,7 @@ contract WitnetPriceRegistry
         virtual override
         returns (string memory)
     {
-        require(supportsPricePoller(_poller), "WitnetPriceRegistry: unknown");
+        require(supportsPricePoller(_poller), "WitnetPriceRouter: unknown");
         return lookupERC2362ID(_pollers[address(_poller)]);
     }
 
@@ -91,7 +91,7 @@ contract WitnetPriceRegistry
         if (address(_poller) != address(0)) {
             require(
                 IERC165(_poller).supportsInterface(type(IWitnetPricePoller).interfaceId),
-                "WitnetPriceRegistry: non-compliant"
+                "WitnetPriceRouter: non-compliant"
             );
         }
         bytes memory _caption = abi.encodePacked(

@@ -16,7 +16,7 @@
     "flatten:witnet:rng": "npm run flatten contracts/examples/WitnetRandomness.sol && npm run flatten contracts/requests/WitnetRequestRandomness.sol",
     "flatten:witnet:libs": "npm run flatten contracts/libs/WitnetDecoderLib.sol && npm run flatten contracts/libs/WitnetParserLib.sol",
     "flatten:witnet:proxy": "npm run flatten contracts/impls/WitnetProxy.sol",
-    "flatten:witnet:registry": "npm run flatten contracts/examples/WitnetPriceRegistry.sol",
+    "flatten:witnet:registry": "npm run flatten contracts/examples/WitnetPriceRouter.sol",
     "flatten:witnet:boards": "npm run flatten:witnet:boards:trustable",
     "flatten:witnet:boards:trustable": "npm run flatten contracts/impls/trustable/",
     "fmt:js": "eslint \"**/*.js\"",

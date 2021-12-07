@@ -4,7 +4,7 @@ module.exports = {
       WitnetParserLib: "0x7fbFAA0cA6B098e234135a9D813f735762fEF601",
       WitnetRandomness: "0xc8b69195c7d04555942C724d524f19122da10574",
       WitnetRequestBoard: "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8",
-      WitnetPriceRegistry: "0x1735266FC0E433911d08daFbDdc0279e637039b9",
+      WitnetPriceRouter: "0x1735266FC0E433911d08daFbDdc0279e637039b9",
     },
     "ethereum.mainnet": {
       WitnetParserLib: "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",
@@ -12,7 +12,7 @@ module.exports = {
     },
     "ethereum.rinkeby": {
       WitnetParserLib: "0x2E499f44d2977945d52B7BD7834B2C5195d9CE84",
-      WitnetPriceRegistry: "",
+      WitnetPriceRouter: "",
       WitnetRandomness: "0xB28B2148CdD68D35e4B8dC4dD4b4233c1c147Fa5",
       WitnetRequestBoard: "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4",
     },
