@@ -77,13 +77,16 @@ interface IWitnetRNG {
 
     /// Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
     /// Only one randomness request per block will be actually posted to the WRB. Should there 
-    /// already be a posted request within current block, all received funds shall be transfered
-    /// back to the tx sender.
-    function randomize() external payable;
+    /// already be a posted request within current block, it will try to upgrade Witnet fee of current's 
+    /// block randomness request according to current gas price. In both cases, all unused funds shall 
+    /// be transfered back to the tx sender.
+    /// @return _usedFunds Amount of funds actually used from those provided by the tx sender.
+    function randomize() external payable returns (uint256 _usedFunds);
 
     /// Increases Witnet fee related to a pending-to-be-solved randomness request, as much as it
     /// may be required in proportion to how much bigger the current tx gas price is with respect the 
     /// highest gas price that was paid in either previous fee upgrades, or when the given randomness 
-    /// request was posted.
-    function upgradeRandomizeFee(uint256 _block) external payable;
+    /// request was posted. All unused funds shall be transferred back to the tx sender.
+    /// @return _usedFunds Amount of dunds actually used from those provided by the tx sender.
+    function upgradeRandomizeFee(uint256 _block) external payable returns (uint256 _usedFunds);
 }

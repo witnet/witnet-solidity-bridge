@@ -185,19 +185,22 @@ contract WitnetRNG
 
     /// Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
     /// Only one randomness request per block will be actually posted to the WRB. Should there 
-    /// already be a posted request within current block, all received funds shall be transfered
-    /// back to the tx sender.
+    /// already be a posted request within current block, it will try to upgrade Witnet fee of current's 
+    /// block randomness request according to current gas price. In both cases, all unused funds shall 
+    /// be transfered back to the tx sender.
+    /// @return _usedFunds Amount of funds actually used from those provided by the tx sender.
     function randomize()
         external payable
         virtual override
+        returns (uint256 _usedFunds)
     {
-        uint256 _unusedFee = msg.value;
         if (latestRandomizeBlock < block.number) {
             // Post the Witnet Randomness request:
-            (uint256 _id, uint256 _fee) = _witnetPostRequest(witnetRandomnessRequest);
+            uint _queryId;
+            (_queryId, _usedFunds) = _witnetPostRequest(witnetRandomnessRequest);
             // Keep Randomize data in storage:
             RandomizeData storage _data = __randomize_[block.number];
-            _data.witnetQueryId = _id;
+            _data.witnetQueryId = _queryId;
             _data.from = msg.sender;
             // Update block links:
             uint256 _prevBlock = latestRandomizeBlock;
@@ -208,28 +211,33 @@ contract WitnetRNG
             emit Randomized(
                 msg.sender,
                 _prevBlock,
-                _id,
+                _queryId,
                 witnetRandomnessRequest.hash()
             );
-            _unusedFee -= _fee;
+            // Transfer back unused tx value:
+            if (_usedFunds < msg.value) {
+                payable(msg.sender).transfer(msg.value - _usedFunds);
+            }
+        } else {
+            return upgradeRandomizeFee(block.number);
         }
-        // Transfer back unused tx value:
-        payable(msg.sender).transfer(_unusedFee);
     }
 
     /// Increases Witnet fee related to a pending-to-be-solved randomness request, as much as it
     /// may be required in proportion to how much bigger the current tx gas price is with respect the 
     /// highest gas price that was paid in either previous fee upgrades, or when the given randomness 
-    /// request was posted.
+    /// request was posted. All unused funds shall be transferred back to the tx sender.
+    /// @return _usedFunds Amount of dunds actually used from those provided by the tx sender.
     function upgradeRandomizeFee(uint256 _block)
-        external payable
+        public payable
         virtual override
+        returns (uint256 _usedFunds)
     {
         RandomizeData storage _data = __randomize_[_block];
         if (_data.witnetQueryId != 0) {
-            uint256 _fundsToAdd = _witnetUpgradeReward(_data.witnetQueryId);
-            if (_fundsToAdd > 0) {
-                payable(msg.sender).transfer(msg.value - _fundsToAdd);
+            _usedFunds = _witnetUpgradeReward(_data.witnetQueryId);
+            if (_usedFunds > 0) {
+                payable(msg.sender).transfer(msg.value - _usedFunds);
             }
         }
     }
