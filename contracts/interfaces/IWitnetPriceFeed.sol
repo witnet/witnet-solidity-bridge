@@ -25,14 +25,15 @@ interface IWitnetPriceFeed {
     /// Returns the EVM-timestamp when last valid price was reported back from the Witnet oracle.
     function lastTimestamp() external view returns (uint256);    
 
-    /// Returns tuple containing last valid price, timestamp, and hash of the Witnet Data Request that solved the price update.
+    /// Returns tuple containing last valid price and timestamp, as well as status code of latest update
+    /// request that got posted to the Witnet Request Board.
     /// @return _lastPrice Last valid price reported back from the Witnet oracle.
     /// @return _lastTimestamp EVM-timestamp of the last valid price.
-    /// @return _lastDrTxHash Hash of the Witnet Data Request that solved the last valid price.
+    /// @return _latestUpdateStatus Status code of the latest update request.
     function lastValue() external view returns (
         int _lastPrice,
         uint _lastTimestamp,
-        bytes32 _lastDrTxHash
+        uint _latestUpdateStatus
     );
 
     /// Returns identifier of the latest update request posted to the Witnet Request Board.

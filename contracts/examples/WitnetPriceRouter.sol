@@ -155,21 +155,13 @@ contract WitnetPriceRouter
         external view
         virtual override
         returns (
-            int256 _value,
-            uint256 _timestamp,
-            uint256 _status
+            int256 _lastPrice,
+            uint256 _lastTimestamp,
+            uint256 _latestUpdateStatus
         )
     {
         IWitnetPriceFeed _feed = IWitnetPriceFeed(address(getPriceFeed(_erc2362id)));
-        if (address(_feed) != address(0)) {
-            bytes32 _proof;
-            (_value, _timestamp, _proof) = _feed.lastValue();
-            _status = (_proof == bytes32(0)
-                ? 404   // bad value
-                : 200   // ok
-            );
-        } else {
-            _status = 400; // not found
-        }
-    }    
+        require(address(_feed) != address(0), "WitnetPriceRouter: not currently supported");
+        return _feed.lastValue();
+    }
 }

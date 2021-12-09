@@ -4,7 +4,7 @@ module.exports = {
       WitnetParserLib: "0x7fbFAA0cA6B098e234135a9D813f735762fEF601",
       WitnetRandomness: "0xc8b69195c7d04555942C724d524f19122da10574",
       WitnetRequestBoard: "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8",
-      WitnetPriceRouter: "0x4060c2916F4e4277dd310296e13885120571e5E1",
+      WitnetPriceRouter: "0x573A5Ac0E1446b746F8e7FB4f0A6F850505c219e",
     },
     "ethereum.mainnet": {
       WitnetParserLib: "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",
