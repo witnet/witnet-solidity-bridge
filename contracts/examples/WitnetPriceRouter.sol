@@ -17,24 +17,24 @@ contract WitnetPriceRouter
 {
     using Strings for uint256;
     
-    struct PricePair {
-        IERC165 feed;
+    struct Pair {
+        IERC165 pricefeed;
         uint256 decimals;
         string  base;
         string  quote;
     }    
 
-    mapping (bytes32 => PricePair) internal __pairs;
-    mapping (address => bytes32) internal __feedId_;
+    mapping (bytes32 => Pair) internal __pairs;
+    mapping (address => bytes32) internal __pricefeedId_;
 
-    bytes32[] internal __supportedPricePairs;
+    bytes32[] internal __supportedCurrencyPairs;
 
     // ========================================================================
     // --- Implementation of 'IERC2362' ---------------------------------------
 
     /// Returns last valid price value and timestamp, as well as status of
     /// the latest update request that got posted to the Witnet Request Board. 
-    /// @dev Fails if the given price pair is not currently supported.
+    /// @dev Fails if the given currency pair is not currently supported.
     /// @param _erc2362id Price pair identifier as specified in https://github.com/adoracles/ADOIPs/blob/main/adoip-0010.md
     /// @return _lastPrice Last valid price reported back from the Witnet oracle.
     /// @return _lastTimestamp EVM-timestamp of the last valid price.
@@ -51,40 +51,17 @@ contract WitnetPriceRouter
             uint256 _latestUpdateStatus
         )
     {
-        IWitnetPriceFeed _feed = IWitnetPriceFeed(address(getPriceFeed(_erc2362id)));
-        require(address(_feed) != address(0), "WitnetPriceRouter: not currently supported");
-        return _feed.lastValue();
+        IWitnetPriceFeed _pricefeed = IWitnetPriceFeed(address(getPriceFeed(_erc2362id)));
+        require(address(_pricefeed) != address(0), "WitnetPriceRouter: unsupported currency pair");
+        return _pricefeed.lastValue();
     }
 
 
     // ========================================================================
     // --- Implementation of 'IWitnetPriceRouter' ---------------------------    
 
-    /// Returns the ERC-165-compliant price feed contract currently attending 
-    /// updates on the given price pair.
-    function getPriceFeed(bytes32 _erc2362id)
-        public view
-        virtual override
-        returns (IERC165)
-    {
-        return __pairs[_erc2362id].feed;
-    }
-
-    /// Returns human-readable ERC2362-based caption of the price pair being
-    /// attended by the given price feed contract address. 
-    /// @dev Fails if the given price feed contract address is not currently
-    /// @dev supported by the router.
-    function getPriceFeedCaption(IERC165 _feed) 
-        public view
-        virtual override
-        returns (string memory)
-    {
-        require(supportsPriceFeed(_feed), "WitnetPriceRouter: unknown");
-        return lookupERC2362ID(__feedId_[address(_feed)]);
-    }
-
-    /// Helper pure function: returns hash of the provided ERC2362-compliant price pair caption.
-    function hashPriceCaption(string memory _caption)
+    /// Helper pure function: returns hash of the provided ERC2362-compliant currency pair caption (aka ID).
+    function currencyPairId(string memory _caption)
         public pure
         virtual override
         returns (bytes32)
@@ -92,13 +69,36 @@ contract WitnetPriceRouter
         return keccak256(bytes(_caption));
     }
 
-    /// Returns human-readable caption of the ERC2362-based price pair identifier, if known.
+    /// Returns the ERC-165-compliant price feed contract currently attending 
+    /// updates on the given currency pair.
+    function getPriceFeed(bytes32 _erc2362id)
+        public view
+        virtual override
+        returns (IERC165)
+    {
+        return __pairs[_erc2362id].pricefeed;
+    }
+
+    /// Returns human-readable ERC2362-based caption of the currency pair being
+    /// served by the given price feed contract address. 
+    /// @dev Fails if the given price feed contract address is not currently
+    /// @dev registered in the router.
+    function getPriceFeedCaption(IERC165 _pricefeed) 
+        public view
+        virtual override
+        returns (string memory)
+    {
+        require(supportsPriceFeed(_pricefeed), "WitnetPriceRouter: unknown");
+        return lookupERC2362ID(__pricefeedId_[address(_pricefeed)]);
+    }
+
+    /// Returns human-readable caption of the ERC2362-based currency pair identifier, if known.
     function lookupERC2362ID(bytes32 _erc2362id)
         public view
         virtual override
         returns (string memory _caption)
     {
-        PricePair storage _pair = __pairs[_erc2362id];
+        Pair storage _pair = __pairs[_erc2362id];
         if (
             bytes(_pair.base).length > 0 
                 && bytes(_pair.quote).length > 0
@@ -114,11 +114,12 @@ contract WitnetPriceRouter
         }
     }
 
-    /// Sets price feed contract attached to given price pair identifier.
-    /// @dev Setting zero address to a price pair implies that it will not be attended any longer.
-    /// @dev Otherwise, fails if the price feed contract does not support the `IWitnetPriceFeed` interface.
+    /// Register a price feed contract that will serve updates for the given currency pair.
+    /// @dev Setting zero address to a currency pair implies that it will not be served any longer.
+    /// @dev Otherwise, fails if the price feed contract does not support the `IWitnetPriceFeed` interface,
+    /// @dev or if given price feed is already serving another currency pair (within this WitnetPriceRouter instance).
     function setPriceFeed(
-            IERC165 _feed,
+            IERC165 _pricefeed,
             uint256 _decimals,
             string calldata _base,
             string calldata _quote
@@ -127,10 +128,14 @@ contract WitnetPriceRouter
         virtual override
         onlyOwner
     {
-        if (address(_feed) != address(0)) {
+        if (address(_pricefeed) != address(0)) {
             require(
-                _feed.supportsInterface(type(IWitnetPriceFeed).interfaceId),
+                _pricefeed.supportsInterface(type(IWitnetPriceFeed).interfaceId),
                 "WitnetPriceRouter: non-compliant"
+            );
+            require(
+                __pricefeedId_[address(_pricefeed)] == bytes32(0),
+                "WitnetPriceRouter: already serving a currency pair"
             );
         }
         bytes memory _caption = abi.encodePacked(
@@ -142,48 +147,49 @@ contract WitnetPriceRouter
             _decimals.toString()
         );
         bytes32 _erc2362id = keccak256(_caption);
-        PricePair storage _record = __pairs[_erc2362id];
-        address _currentFeed = address(_record.feed);
+        
+        Pair storage _record = __pairs[_erc2362id];
+        address _currentPriceFeed = address(_record.pricefeed);
         if (bytes(_record.base).length == 0) {
             _record.base = _base;
             _record.quote = _quote;
             _record.decimals = _decimals;
-            __supportedPricePairs.push(_erc2362id);
+            __supportedCurrencyPairs.push(_erc2362id);
         }
-        else if (_currentFeed != address(0)) {
-            __feedId_[_currentFeed] = bytes32(0);
+        else if (_currentPriceFeed != address(0)) {
+            __pricefeedId_[_currentPriceFeed] = bytes32(0);
         }
-        if (address(_feed) != _currentFeed) {
-            __feedId_[address(_feed)] = _erc2362id;
+        if (address(_pricefeed) != _currentPriceFeed) {
+            __pricefeedId_[address(_pricefeed)] = _erc2362id;
         }
-        _record.feed = _feed;
-        emit PricePairSet(_erc2362id, _feed);
+        _record.pricefeed = _pricefeed;
+        emit CurrencyPairSet(_erc2362id, _pricefeed);
     }
 
-    /// Returns list of known price pairs identifiers.
-    function supportedPricePairs()
+    /// Returns list of known currency pairs IDs.
+    function supportedCurrencyPairs()
         external view
         virtual override
         returns (bytes32[] memory)
     {
-        return __supportedPricePairs;
+        return __supportedCurrencyPairs;
     }
 
-    /// Returns `true` if given price pair is currently attached to a compliant price feed contract.
-    function supportsPricePair(bytes32 _erc2362id)
+    /// Returns `true` if given pair is currently being served by a compliant price feed contract.
+    function supportsCurrencyPair(bytes32 _erc2362id)
         public view
         virtual override
         returns (bool)
     {
-        return address(__pairs[_erc2362id].feed) != address(0);
+        return address(__pairs[_erc2362id].pricefeed) != address(0);
     }
 
-    /// Returns `true` if given price feed contract is currently attached to a known price pair. 
-    function supportsPriceFeed(IERC165 _feed)
+    /// Returns `true` if given price feed contract is currently serving updates to any known currency pair. 
+    function supportsPriceFeed(IERC165 _pricefeed)
         public view
         virtual override
         returns (bool)
     {
-        return __pairs[__feedId_[address(_feed)]].feed == _feed;
+        return __pairs[__pricefeedId_[address(_pricefeed)]].pricefeed == _pricefeed;
     }
 }
