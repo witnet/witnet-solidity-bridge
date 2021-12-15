@@ -404,11 +404,11 @@ contract("WitnetRequestBoard", ([
   describe("estimate gas cost", async () => {
     it("anyone can estime a data request gas cost", async () => {
       // Gas price = 1
-      const maxResRe = new BN(120547)
+      const maxResRe = new BN(135000)
       const reward = await this.WitnetRequestBoard.estimateReward.call(1)
       expect(
-        reward.eq(maxResRe),
-        `The estimated maximum gas cost for result reward should be ${maxResRe.toString()}`
+        reward.lte(maxResRe),
+        `The estimated maximum gas cost for result reward should be less than ${maxResRe.toString()}`
       ).to.equal(true)
     }
     )
