@@ -65,7 +65,7 @@ library WitnetParserLib {
         external pure
         returns(bytes memory)
     {
-        require(_result.success, "WitnetParserLib: tried to read bytes value from errored Witnet.Result");
+        require(_result.success, "WitnetParserLib: Tried to read bytes value from errored Witnet.Result");
         return _result.value.decodeBytes();
     }
 
@@ -110,13 +110,29 @@ library WitnetParserLib {
         bytes memory errorMessage;
 
         if (errorCode == Witnet.ErrorCodes.SourceScriptNotCBOR && error.length >= 2) {
-            errorMessage = abi.encodePacked("Source script #", _utoa(error[1]), " was not a valid CBOR value");
+            errorMessage = abi.encodePacked(
+                "Source script #",
+                _utoa(error[1]),
+                " was not a valid CBOR value"
+            );
         } else if (errorCode == Witnet.ErrorCodes.SourceScriptNotArray && error.length >= 2) {
-            errorMessage = abi.encodePacked("The CBOR value in script #", _utoa(error[1]), " was not an Array of calls");
+            errorMessage = abi.encodePacked(
+                "The CBOR value in script #",
+                _utoa(error[1]),
+                " was not an Array of calls"
+            );
         } else if (errorCode == Witnet.ErrorCodes.SourceScriptNotRADON && error.length >= 2) {
-            errorMessage = abi.encodePacked("The CBOR value in script #", _utoa(error[1]), " was not a valid Data Request");
+            errorMessage = abi.encodePacked(
+                "The CBOR value in script #",
+                _utoa(error[1]),
+                " was not a valid Data Request"
+            );
         } else if (errorCode == Witnet.ErrorCodes.RequestTooManySources && error.length >= 2) {
-            errorMessage = abi.encodePacked("The request contained too many sources (", _utoa(error[1]), ")");
+            errorMessage = abi.encodePacked(
+                "The request contained too many sources (", 
+                _utoa(error[1]), 
+                ")"
+            );
         } else if (errorCode == Witnet.ErrorCodes.ScriptTooManyCalls && error.length >= 4) {
             errorMessage = abi.encodePacked(
                 "Script #",
@@ -130,7 +146,7 @@ library WitnetParserLib {
         } else if (errorCode == Witnet.ErrorCodes.UnsupportedOperator && error.length >= 5) {
             errorMessage = abi.encodePacked(
                 "Operator code 0x",
-                utohex(error[4]),
+                _utohex(error[4]),
                 " found at call #",
                 _utoa(error[3]),
                 " in script #",
@@ -157,7 +173,7 @@ library WitnetParserLib {
         } else if (errorCode == Witnet.ErrorCodes.Underflow && error.length >= 5) {
               errorMessage = abi.encodePacked(
                 "Underflow at operator code 0x",
-                utohex(error[4]),
+                _utohex(error[4]),
                 " found at call #",
                 _utoa(error[3]),
                 " in script #",
@@ -169,7 +185,7 @@ library WitnetParserLib {
         } else if (errorCode == Witnet.ErrorCodes.Overflow && error.length >= 5) {
             errorMessage = abi.encodePacked(
                 "Overflow at operator code 0x",
-                utohex(error[4]),
+                _utohex(error[4]),
                 " found at call #",
                 _utoa(error[3]),
                 " in script #",
@@ -181,7 +197,7 @@ library WitnetParserLib {
         } else if (errorCode == Witnet.ErrorCodes.DivisionByZero && error.length >= 5) {
             errorMessage = abi.encodePacked(
                 "Division by zero at operator code 0x",
-                utohex(error[4]),
+                _utohex(error[4]),
                 " found at call #",
                 _utoa(error[3]),
                 " in script #",
@@ -197,7 +213,7 @@ library WitnetParserLib {
         } else if (errorCode == Witnet.ErrorCodes.BridgeOversizedResult) {
             errorMessage = "The request result length exceeds a bridge contract defined limit";
         } else {
-            errorMessage = abi.encodePacked("Unknown error (0x", utohex(error[0]), ")");
+            errorMessage = abi.encodePacked("Unknown error (0x", _utohex(error[0]), ")");
         }
         return (errorCode, string(errorMessage));
     }
@@ -209,7 +225,10 @@ library WitnetParserLib {
         public pure
         returns(uint64[] memory)
     {
-        require(!_result.success, "WitnetParserLib: Tried to read error code from successful Witnet.Result");
+        require(
+            !_result.success,
+            "WitnetParserLib: Tried to read error code from successful Witnet.Result"
+        );
         return _result.value.decodeUint64Array();
     }
 
@@ -372,7 +391,7 @@ library WitnetParserLib {
     /// @notice Convert a `uint64` into a 2 characters long `string` representing its two less significant hexadecimal values.
     /// @param _u A `uint64` value.
     /// @return The `string` representing its hexadecimal value.
-    function utohex(uint64 _u)
+    function _utohex(uint64 _u)
         private pure
         returns (string memory)
     {

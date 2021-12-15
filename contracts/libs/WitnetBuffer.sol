@@ -14,7 +14,7 @@ library WitnetBuffer {
 
   // Ensures we access an existing index in an array
   modifier notOutOfBounds(uint32 index, uint256 length) {
-    require(index < length, "Tried to read from a consumed Buffer (must rewind it first)");
+    require(index < length, "WitnetBuffer: Tried to read from a consumed Buffer (must rewind it first)");
     _;
   }
 
@@ -24,7 +24,7 @@ library WitnetBuffer {
   /// @return A `bytes memory` containing the first `_length` bytes from the buffer, counting from the cursor position.
   function read(Witnet.Buffer memory _buffer, uint32 _length) internal pure returns (bytes memory) {
     // Make sure not to read out of the bounds of the original bytes
-    require(_buffer.cursor + _length <= _buffer.data.length, "Not enough bytes in buffer when reading");
+    require(_buffer.cursor + _length <= _buffer.data.length, "WitnetBuffer: Not enough bytes in buffer when reading");
 
     // Create a new `bytes memory destination` value
     bytes memory destination = new bytes(_length);
@@ -68,11 +68,11 @@ library WitnetBuffer {
   function seek(Witnet.Buffer memory _buffer, uint32 _offset, bool _relative) internal pure returns (uint32) {
     // Deal with relative offsets
     if (_relative) {
-      require(_offset + _buffer.cursor > _offset, "Integer overflow when seeking");
+      require(_offset + _buffer.cursor > _offset, "WitnetBuffer: Integer overflow when seeking");
       _offset += _buffer.cursor;
     }
     // Make sure not to read out of the bounds of the original bytes
-    require(_offset <= _buffer.data.length, "Not enough bytes in buffer when seeking");
+    require(_offset <= _buffer.data.length, "WitnetBuffer: Not enough bytes in buffer when seeking");
     _buffer.cursor = _offset;
     return _buffer.cursor;
   }
@@ -227,7 +227,7 @@ library WitnetBuffer {
   /// @param _len How many bytes to copy.
   // solium-disable-next-line security/no-assign-params
   function memcpy(uint _dest, uint _src, uint _len) private pure {
-    require(_len > 0, "Cannot copy 0 bytes");
+    require(_len > 0, "WitnetBuffer: Cannot copy 0 bytes");
 
     // Copy word-length chunks while possible
     for (; _len >= 32; _len -= 32) {

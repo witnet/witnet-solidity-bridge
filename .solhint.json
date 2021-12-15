@@ -19,7 +19,7 @@
     "reason-string": [
       "warn",
       {
-        "maxLength": 80
+        "maxLength": 128
       }
     ]
   }
