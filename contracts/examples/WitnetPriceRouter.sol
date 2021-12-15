@@ -3,7 +3,6 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../interfaces/IWitnetPriceRouter.sol";
-import "ado-contracts/contracts/interfaces/IERC2362.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../interfaces/IWitnetPriceFeed.sol";
@@ -11,7 +10,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract WitnetPriceRouter
     is
-        IERC2362,
         IWitnetPriceRouter,
         Ownable
 {

@@ -126,6 +126,14 @@ module.exports = {
         skipDryRun: true,
       },
     },
+    metis: {
+      "metis.rinkeby": {
+        host: "localhost",
+        port: 8536,
+        network_id: 588,
+        skipDryRun: true,
+      },
+    },
   },
 }
 
