@@ -536,7 +536,15 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (Witnet.ErrorCodes, string memory)
     {
-        return _result.asErrorMessage();
+        try _result.asErrorMessage() returns (Witnet.ErrorCodes _code, string memory _message) {
+            return (_code, _message);
+        } 
+        catch Error(string memory _reason) {
+            return (Witnet.ErrorCodes.Unknown, _reason);
+        }
+        catch (bytes memory) {
+            return (Witnet.ErrorCodes.UnhandledIntercept, "WitnetRequestBoardTrustableBase: failing assert");
+        }
     }
 
     /// Decode a raw error from a `Witnet.Result` as a `uint64[]`.
