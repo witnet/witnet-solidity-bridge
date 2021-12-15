@@ -117,6 +117,15 @@ module.exports = {
         skipDryRun: true,
       },
     },
+    kcc: {
+      "kcc.testnet": {
+        host: "localhost",
+        port: 8537,
+        network_id: 322,
+        gasPrice: 10 ** 10,
+        skipDryRun: true,
+      },
+    },
   },
 }
 
