@@ -65,14 +65,6 @@ abstract contract WitnetRequestMalleableBase
         return _request().hash;
     }
 
-    /// Returns witnessing parameters of current Witnet Data Request.
-    function witnessingParams()
-        external view
-        returns (WitnetRequestWitnessingParams memory)
-    {
-        return _request().params;
-    }
-
     /// Sets amount of nanowits that a witness solving the request will be required to collateralize in the commitment transaction.
     function setWitnessingCollateral(uint64 _witnessingCollateral)
         public
@@ -132,6 +124,15 @@ abstract contract WitnetRequestMalleableBase
         );
     }
 
+    /// Returns immutable template bytecode: actual CBOR-encoded data request at the Witnet protocol
+    /// level, including no witnessing parameters at all.
+    function template()
+        external view
+        returns (bytes memory)
+    {
+        return _request().template;
+    }
+
     /// Returns total amount of nanowits that witnessing nodes will need to collateralize all together.
     function totalWitnessingCollateral()
         external view
@@ -148,6 +149,14 @@ abstract contract WitnetRequestMalleableBase
     {
         WitnetRequestWitnessingParams storage _params = _request().params;
         return _params.numWitnesses * (2 * _params.witnessingUnitaryFee + _params.witnessingReward);
+    }
+
+    /// Returns witnessing parameters of current Witnet Data Request.
+    function witnessingParams()
+        external view
+        returns (WitnetRequestWitnessingParams memory)
+    {
+        return _request().params;
     }
 
 
