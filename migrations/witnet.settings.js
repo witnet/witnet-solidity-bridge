@@ -18,6 +18,13 @@ module.exports = {
         /* _reportResultGasLimit */ 135000,
       ],
     },
+    "metis.rinkeby": {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 170000,
+      ],
+    },
   },
   compilers: {
     default: {
@@ -132,6 +139,7 @@ module.exports = {
         port: 8536,
         network_id: 588,
         skipDryRun: true,
+        gas: 30000000,
       },
     },
   },

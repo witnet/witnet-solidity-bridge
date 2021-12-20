@@ -47,5 +47,12 @@
       "WitnetPriceRouter": "0x291D9B29055e81E1aACB7a40c4530866E29C7bF2",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     }
+  },
+  "metis": {
+    "metis.rinkeby": {
+      "WitnetParserLib": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425",
+      "WitnetPriceRouter": "0xB4B2E2e00e9d6E5490d55623E4F403EC84c6D33f",
+      "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
+    }
   }
 }
