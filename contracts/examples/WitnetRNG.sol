@@ -73,11 +73,14 @@ contract WitnetRNG
     }
 
     /// Gets randomness generated upon resolution to the request that was posted within given block,
-    /// if any, or to the _first_ request posted after that block, otherwise.
+    /// if any, or to the _first_ request posted after that block, otherwise. Should the intended 
+    /// request happen to be finalized with errors (in the Witnet oracle network side), this function 
+    /// will recursively try to return randomness from the next non-faulty randomize request found 
+    /// in storage, if any. 
     /// @dev Fails if:
     /// @dev   i.   no `randomize()` was ever called in either the given block, or afterwards.
     /// @dev   ii.  a request posted in/after given block exists, but no result has yet been provided.
-    /// @dev   iii. the implicit request could not be solved by the Witnet oracle, for whatever reason.
+    /// @dev   iii. all so-far posted requests in/after the given block were solved with errors.
     /// @param _block Block number from which the search will start.
     function getRandomnessAfter(uint256 _block)
         public view
@@ -91,8 +94,13 @@ contract WitnetRNG
         require(_queryId != 0, "WitnetRNG: not randomized");
         require(_witnetCheckResultAvailability(_queryId), "WitnetRNG: pending randomize");
         Witnet.Result memory _witnetResult = _witnetReadResult(_queryId);
-        require(witnet.isOk(_witnetResult), "WitnetRNG: failed randomize");
-        return witnet.asBytes32(_witnetResult);
+        if (witnet.isOk(_witnetResult)) {
+            return witnet.asBytes32(_witnetResult);
+        } else {
+            uint256 _nextRandomizeBlock = __randomize_[_block].nextBlock;
+            require(_nextRandomizeBlock != 0, "WitnetRNG: faulty randomize");
+            return getRandomnessAfter(_nextRandomizeBlock);
+        }
     }
 
     /// Gets next block in which a new randomness request was posted after the given one. 
