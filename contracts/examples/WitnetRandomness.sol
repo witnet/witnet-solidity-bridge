@@ -4,14 +4,14 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../UsingWitnet.sol";
-import "../interfaces/IWitnetRNG.sol";
+import "../interfaces/IWitnetRandomness.sol";
 import "../requests/WitnetRequestRandomness.sol";
 
-/// @title WitnetRNG: A trustless randomness generator and registry, based on the Witnet oracle. 
+/// @title WitnetRandomness: A trustless randomness generator and registry, based on the Witnet oracle. 
 /// @author Witnet Foundation.
-contract WitnetRNG
+contract WitnetRandomness
     is
-        IWitnetRNG,
+        IWitnetRandomness,
         UsingWitnet,
         Clonable
 {
@@ -91,14 +91,14 @@ contract WitnetRNG
             _block = getRandomnessNextBlock(_block);
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
-        require(_queryId != 0, "WitnetRNG: not randomized");
-        require(_witnetCheckResultAvailability(_queryId), "WitnetRNG: pending randomize");
+        require(_queryId != 0, "WitnetRandomness: not randomized");
+        require(_witnetCheckResultAvailability(_queryId), "WitnetRandomness: pending randomize");
         Witnet.Result memory _witnetResult = _witnetReadResult(_queryId);
         if (witnet.isOk(_witnetResult)) {
             return witnet.asBytes32(_witnetResult);
         } else {
             uint256 _nextRandomizeBlock = __randomize_[_block].nextBlock;
-            require(_nextRandomizeBlock != 0, "WitnetRNG: faulty randomize");
+            require(_nextRandomizeBlock != 0, "WitnetRandomness: faulty randomize");
             return getRandomnessAfter(_nextRandomizeBlock);
         }
     }
@@ -290,7 +290,7 @@ contract WitnetRNG
         public
         virtual override
     {
-        require(address(witnetRandomnessRequest) == address(0), "WitnetRNG: already initialized");
+        require(address(witnetRandomnessRequest) == address(0), "WitnetRandomness: already initialized");
         witnetRandomnessRequest = WitnetRequestRandomness(
             abi.decode(
                 _initData,

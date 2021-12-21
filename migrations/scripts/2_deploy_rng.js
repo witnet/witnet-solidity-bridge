@@ -12,18 +12,18 @@ module.exports = async function (deployer, network, accounts) {
   const addresses = require("../witnet.addresses")[realm][network = network.split("-")[0]]
   const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
 
-  if (addresses && addresses.WitnetRNG !== undefined) {
+  if (addresses && addresses.WitnetRandomness !== undefined) {
     assert(!utils.isNullAddress(addresses.WitnetRequestBoard), "\n  Skipped: no 'WitnetRequestBoard' was deployed.")
 
-    /* Deploy WitnetRNG if not done yet */
-    const WitnetRNG = artifacts.require(artifactsName.WitnetRNG)
-    if (utils.isNullAddress(addresses.WitnetRNG)) {
+    /* Deploy WitnetRandomness if not done yet */
+    const WitnetRandomness = artifacts.require(artifactsName.WitnetRandomness)
+    if (utils.isNullAddress(addresses.WitnetRandomness)) {
       await deployer.deploy(
-        WitnetRNG,
+        WitnetRandomness,
         addresses.WitnetRequestBoard
       )
     } else {
-      console.log(`\n   Skipped: '${artifactsName.WitnetRNG}' deployed at ${addresses.WitnetRNG}.`)
+      console.log(`\n   Skipped: '${artifactsName.WitnetRandomness}' deployed at ${addresses.WitnetRandomness}.`)
     }
   }
 }

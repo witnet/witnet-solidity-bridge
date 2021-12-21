@@ -3,7 +3,7 @@ module.exports = {
     "ethereum.goerli": {
       WitnetParserLib: "0x3F1f3F024bA451F738a49DB21055b1BC4604A31C",
       WitnetRequestBoard: "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8",
-      WitnetRNG: "0xc8b69195c7d04555942C724d524f19122da10574",
+      WitnetRandomness: "0xc8b69195c7d04555942C724d524f19122da10574",
     },
     "ethereum.mainnet": {
       WitnetParserLib: "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",
@@ -12,7 +12,7 @@ module.exports = {
     "ethereum.rinkeby": {
       WitnetParserLib: "0x2E499f44d2977945d52B7BD7834B2C5195d9CE84",
       WitnetRequestBoard: "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4",
-      WitnetRNG: "0xB28B2148CdD68D35e4B8dC4dD4b4233c1c147Fa5",
+      WitnetRandomness: "0xB28B2148CdD68D35e4B8dC4dD4b4233c1c147Fa5",
     },
   },
   boba: {

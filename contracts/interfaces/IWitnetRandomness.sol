@@ -6,7 +6,7 @@ import "../libs/Witnet.sol";
 
 /// @title The Witnet Randomness generator interface.
 /// @author Witnet Foundation.
-interface IWitnetRNG {
+interface IWitnetRandomness {
 
     /// Thrown every time a new WitnetRandomnessRequest gets succesfully posted to the WitnetRequestBoard.
     /// @param from Address from which the randomize() function was called. 
