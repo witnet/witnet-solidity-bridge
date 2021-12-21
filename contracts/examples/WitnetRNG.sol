@@ -7,8 +7,8 @@ import "../UsingWitnet.sol";
 import "../interfaces/IWitnetRNG.sol";
 import "../requests/WitnetRequestRandomness.sol";
 
-/// @title WitnetRNG: A trustless random number generator and registry, based on the Witnet oracle. 
-/// @author The Witnet Foundation.
+/// @title WitnetRNG: A trustless randomness generator and registry, based on the Witnet oracle. 
+/// @author Witnet Foundation.
 contract WitnetRNG
     is
         IWitnetRNG,
@@ -35,8 +35,8 @@ contract WitnetRNG
         witnetRandomnessRequest.transferOwnership(msg.sender);
     }
 
-    /// Returns amount of weis required to be paid as a fee when requesting randomness with a 
-    /// tx gas price as the one given.
+    /// Returns amount of wei required to be paid as a fee when requesting randomization with a 
+    /// transaction gas price as the one given.
     function estimateRandomizeFee(uint256 _gasPrice)
         public view
         virtual override
@@ -45,9 +45,9 @@ contract WitnetRNG
         return _witnetEstimateReward(_gasPrice);
     }
 
-    /// Gets data of the randomness request that got successfully posted to the WRB within given block.
-    /// @dev Returns zero values if no randomness request was actually posted within given block.
-    /// @param _block Block number whose randomness request is beign queried.
+    /// Retrieves data of a randomization request that got successfully posted to the WRB within a given block.
+    /// @dev Returns zero values if no randomness request was actually posted within a given block.
+    /// @param _block Block number whose randomness request is being queried for.
     /// @return _from Address from which the latest randomness request was posted.
     /// @return _id Unique request identifier as provided by the WRB.
     /// @return _fee Request's total paid fee.
@@ -72,15 +72,15 @@ contract WitnetRNG
         _nextBlock = _data.nextBlock;
     }
 
-    /// Gets randomness generated upon resolution to the request that was posted within given block,
+    /// Retrieves the randomness generated upon solving a request that was posted within a given block,
     /// if any, or to the _first_ request posted after that block, otherwise. Should the intended 
-    /// request happen to be finalized with errors (in the Witnet oracle network side), this function 
-    /// will recursively try to return randomness from the next non-faulty randomize request found 
+    /// request happen to be finalized with errors on the Witnet oracle network side, this function 
+    /// will recursively try to return randomness from the next non-faulty randomization request found 
     /// in storage, if any. 
     /// @dev Fails if:
-    /// @dev   i.   no `randomize()` was ever called in either the given block, or afterwards.
-    /// @dev   ii.  a request posted in/after given block exists, but no result has yet been provided.
-    /// @dev   iii. all so-far posted requests in/after the given block were solved with errors.
+    /// @dev   i.   no `randomize()` was not called in either the given block, or afterwards.
+    /// @dev   ii.  a request posted in/after given block does exist, but no result has been provided yet.
+    /// @dev   iii. all requests in/after the given block were solved with errors.
     /// @param _block Block number from which the search will start.
     function getRandomnessAfter(uint256 _block)
         public view
@@ -103,9 +103,9 @@ contract WitnetRNG
         }
     }
 
-    /// Gets next block in which a new randomness request was posted after the given one. 
+    /// Tells what is the number of the next block in which a randomization request was posted after the given one. 
     /// @param _block Block number from which the search will start.
-    /// @return First block found after the given one, or `0` otherwise.
+    /// @return Number of the first block found after the given one, or `0` otherwise.
     function getRandomnessNextBlock(uint256 _block)
         public view
         virtual override
@@ -331,7 +331,7 @@ contract WitnetRNG
         ];
     }
 
-    /// @dev Recursively searches for first block after the given one in which a Witnet Randomness request was casted.
+    /// @dev Recursively searches for the number of the first block after the given one in which a Witnet randomization request was posted.
     /// @dev Returns 0 if none found.
     function _searchNextBlock(uint256 _target, uint256 _latest) internal view returns (uint256) {
         return ((_target >= _latest) 
@@ -340,7 +340,7 @@ contract WitnetRNG
         );
     }
 
-    /// @dev Recursively searches for first block before the given one in which a Witnet Randomness request was casted.
+    /// @dev Recursively searches for the number of the first block before the given one in which a Witnet randomization request was posted.
     /// @dev Returns 0 if none found.
 
     function _searchPrevBlock(uint256 _target, uint256 _latest) internal view returns (uint256) {

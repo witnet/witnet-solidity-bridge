@@ -4,8 +4,8 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../libs/Witnet.sol";
 
-/// @title The Witnet Random Number Generation provider interface.
-/// @author The Witnet Foundation.
+/// @title The Witnet Randomness generator interface.
+/// @author Witnet Foundation.
 interface IWitnetRNG {
 
     /// Thrown every time a new WitnetRandomnessRequest gets succesfully posted to the WitnetRequestBoard.
@@ -20,12 +20,13 @@ interface IWitnetRNG {
         bytes32 witnetRequestHash
     );
 
-    /// Returns amount of weis required to be paid as a fee when requesting randomness with a 
-    /// tx gas price as the one given.
+    /// Returns amount of wei required to be paid as a fee when requesting randomization with a 
+    /// transaction gas price as the one given.
     function estimateRandomizeFee(uint256 _gasPrice) external view returns (uint256);
 
-    /// Gets data of the randomness request that got successfully posted to the WRB within given block.
-    /// @dev Returns zero values if no randomness request was actually posted within given block.
+    /// Retrieves data of a randomization request that got successfully posted to the WRB within a given block.
+    /// @dev Returns zero values if no randomness request was actually posted within a given block.
+    /// @param _block Block number whose randomness request is being queried for.
     /// @return _from Address from which the latest randomness request was posted.
     /// @return _id Unique request identifier as provided by the WRB.
     /// @return _fee Request's total paid fee.
@@ -34,18 +35,21 @@ interface IWitnetRNG {
     function getRandomizeData(uint256 _block)
         external view returns (address _from, uint256 _id, uint256 _fee, uint256 _prevBlock, uint256 _nextBlock);
 
-    /// Gets randomness generated upon resolution to the request that was posted within given block,
-    /// if any, or to the _first_ request posted after that block, otherwise.
+    /// Retrieves the randomness generated upon solving a request that was posted within a given block,
+    /// if any, or to the _first_ request posted after that block, otherwise. Should the intended 
+    /// request happen to be finalized with errors on the Witnet oracle network side, this function 
+    /// will recursively try to return randomness from the next non-faulty randomization request found 
+    /// in storage, if any. 
     /// @dev Fails if:
-    /// @dev   i.   no `randomize()` was ever called in either the given block, or afterwards.
-    /// @dev   ii.  a request posted in/after given block exists, but no result has yet been provided.
-    /// @dev   iii. the implicit request could not be solved by the Witnet oracle, for whatever reason.
+    /// @dev   i.   no `randomize()` was not called in either the given block, or afterwards.
+    /// @dev   ii.  a request posted in/after given block does exist, but no result has been provided yet.
+    /// @dev   iii. all requests in/after the given block were solved with errors.
     /// @param _block Block number from which the search will start.
     function getRandomnessAfter(uint256 _block) external view returns (bytes32); 
 
-    /// Gets next block in which a new randomness request was posted after the given one. 
+    /// Tells what is the number of the next block in which a randomization request was posted after the given one. 
     /// @param _block Block number from which the search will start.
-    /// @return First block found after the given one, or `0` otherwise.
+    /// @return Number of the first block found after the given one, or `0` otherwise.
     function getRandomnessNextBlock(uint256 _block) external view returns (uint256); 
 
     /// Gets previous block in which a randomness request was posted before the given one.
