@@ -122,15 +122,24 @@ contract TestWitnetDecoderLib {
   }
 
   function testBytes32DecodeValueFrom31bytes() external {
-    // TODO
+    bytes memory encoded = hex"581f01020304050607080910111213141516171819202122232425262728293031";
+    bytes32 decoded = WitnetDecoderLib.decodeBytes32(WitnetDecoderLib.valueFromBytes(encoded));
+    bytes32 expected = 0x0102030405060708091011121314151617181920212223242526272829303100;
+    Assert.equal(decoded, expected, "CBOR-encoded 31-byte array should be decoded into a bytes32 with right padded zeros");
   }
 
   function testBytes32DecodeValueFrom32bytes() external {
-    // TODO
+    bytes memory encoded = hex"58200102030405060708091011121314151617181920212223242526272829303132";
+    bytes32 decoded = WitnetDecoderLib.decodeBytes32(WitnetDecoderLib.valueFromBytes(encoded));
+    bytes32 expected = 0x0102030405060708091011121314151617181920212223242526272829303132;
+    Assert.equal(decoded, expected, "CBOR-encoded 32-byte array should be decoded into a bytes32");
   }
 
   function testBytes32DecodeValueFrom33bytes() external {
-    // TODO
+    bytes memory encoded = hex"5821010203040506070809101112131415161718192021222324252627282930313233";
+    bytes32 decoded = WitnetDecoderLib.decodeBytes32(WitnetDecoderLib.valueFromBytes(encoded));
+    bytes32 expected = 0x0102030405060708091011121314151617181920212223242526272829303132;
+    Assert.equal(decoded, expected, "CBOR-encoded 33-byte array should be decoded left-aligned into a bytes32");
   }
 
   function testStringDecodeDiscriminant() external {
