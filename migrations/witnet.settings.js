@@ -142,6 +142,15 @@ module.exports = {
         gas: 30000000,
       },
     },
+    polygon: {
+      "polygon.mumbai": {
+        host: "localhost",
+        port: 8535,
+        network_id: 80001,
+        skipDryRun: true,
+        gasPrice: 30 * 10 ** 9
+      },
+    },
   },
 }
 
