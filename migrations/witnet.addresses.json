@@ -41,6 +41,13 @@
       "WitnetRequestBoard": ""
     }
   },
+  "harmony": {
+    "harmony.testnet#0": {
+      "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
+      "WitnetPriceRouter": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
+      "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
+    }
+  },
   "kcc": {
     "kcc.testnet": {
       "WitnetParserLib": "0x11C895819df771896aB7073d5E7eb5410F1AF265",

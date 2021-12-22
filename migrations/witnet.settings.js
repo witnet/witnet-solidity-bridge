@@ -29,7 +29,7 @@ module.exports = {
   compilers: {
     default: {
       solc: {
-        version: "0.8.9",
+        version: "0.8.11",
         settings: {
           optimizer: {
             enabled: true,
@@ -121,6 +121,14 @@ module.exports = {
         port: 9540,
         network_id: 1029,
         gasPrice: 1,
+        skipDryRun: true,
+      },
+    },
+    harmony: {
+      "harmony.testnet#0": {
+        host: "localhost",
+        port: 8534,
+        network_id: 1666700000,
         skipDryRun: true,
       },
     },
