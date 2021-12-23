@@ -20,7 +20,7 @@ abstract contract IWitnetPriceRouter
     /// Helper pure function: returns hash of the provided ERC2362-compliant currency pair caption (aka ID).
     function currencyPairId(string memory) external pure virtual returns (bytes32);
 
-    /// Returns the ERC-165-compliant price feed contract currently attending 
+    /// Returns the ERC-165-compliant price feed contract currently serving 
     /// updates on the given currency pair.
     function getPriceFeed(bytes32 _erc2362id) external view virtual returns (IERC165);
 

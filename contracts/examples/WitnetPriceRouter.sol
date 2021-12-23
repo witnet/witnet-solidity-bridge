@@ -67,7 +67,7 @@ contract WitnetPriceRouter
         return keccak256(bytes(_caption));
     }
 
-    /// Returns the ERC-165-compliant price feed contract currently attending 
+    /// Returns the ERC-165-compliant price feed contract currently serving 
     /// updates on the given currency pair.
     function getPriceFeed(bytes32 _erc2362id)
         public view
@@ -129,7 +129,7 @@ contract WitnetPriceRouter
         if (address(_pricefeed) != address(0)) {
             require(
                 _pricefeed.supportsInterface(type(IWitnetPriceFeed).interfaceId),
-                "WitnetPriceRouter: non-compliant"
+                "WitnetPriceRouter: feed contract is not compliant with IWitnetPriceFeed"
             );
             require(
                 __pricefeedId_[address(_pricefeed)] == bytes32(0),
