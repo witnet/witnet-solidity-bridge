@@ -359,20 +359,6 @@ contract("WitnetRequestBoard", ([
       const result = await this.WitnetRequestBoard.readResponseResult(queryId, { from: requester })
       expect(result.value.buffer.data).to.be.equal(resultHex)
     })
-    it("fails if data request bytecode has been manipulated", async () => {
-      // Change the bytecode of the request already posted
-      const newDrBytes = web3.utils.fromAscii("This is a different DR")
-      await requestTestHelper.modifyBytecode(newDrBytes)
-
-      // Should revert when reading the request since the bytecode has changed
-      await expectRevert(
-        this.WitnetRequestBoard.readRequestBytecode(queryId, {
-          from: other,
-          gasPrice: 1,
-        }),
-        "bytecode changed after posting"
-      )
-    })
     it("should revert reading data for non-existent Ids", async () => {
       await expectRevert(this.WitnetRequestBoard.readRequestBytecode.call(200), "not yet posted")
       await expectRevert(this.WitnetRequestBoard.readResponseDrTxHash.call(200), "not in Reported status")
