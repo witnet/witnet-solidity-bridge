@@ -156,7 +156,7 @@ module.exports = {
         port: 8535,
         network_id: 80001,
         skipDryRun: true,
-        gasPrice: 30 * 10 ** 9
+        gasPrice: 30 * 10 ** 9,
       },
     },
   },

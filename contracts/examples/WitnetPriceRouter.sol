@@ -51,7 +51,7 @@ contract WitnetPriceRouter
     {
         IWitnetPriceFeed _pricefeed = IWitnetPriceFeed(address(getPriceFeed(_erc2362id)));
         require(address(_pricefeed) != address(0), "WitnetPriceRouter: unsupported currency pair");
-        return _pricefeed.lastValue();
+        (_lastPrice, _lastTimestamp,, _latestUpdateStatus) = _pricefeed.lastValue();
     }
 
 
