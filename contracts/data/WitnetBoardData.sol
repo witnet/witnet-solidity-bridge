@@ -35,7 +35,7 @@ abstract contract WitnetBoardData {
     /// Asserts the given query was previously posted and that it was not yet deleted.
     modifier notDeleted(uint256 _queryId) {
         require(_queryId > 0 && _queryId <= _state().numQueries, "WitnetBoardData: not yet posted");
-        require(_getRequestData(_queryId).requester != address(0), "WitnetBoardData: deleted");
+        require(_getRequester(_queryId) != address(0), "WitnetBoardData: deleted");
         _;
     }
 
@@ -63,10 +63,10 @@ abstract contract WitnetBoardData {
         return Witnet.QueryStatus.Unknown;
       else {
         Witnet.Query storage _query = _state().queries[_queryId];
-        if (_query.request.requester == address(0))
-          return Witnet.QueryStatus.Deleted;
-        else if (_query.response.drTxHash != 0) 
+        if (_query.response.drTxHash != 0) 
           return Witnet.QueryStatus.Reported;
+        else if (_query.requester == address(0))
+          return Witnet.QueryStatus.Deleted;
         else
           return Witnet.QueryStatus.Posted;
       }
@@ -85,6 +85,14 @@ abstract contract WitnetBoardData {
       } else {
         return "WitnetBoardData: bad mood";
       }
+    }
+
+    /// Gets requester of a given query.
+    function _getRequester(uint256 _queryId)
+      internal view
+      returns (address)
+    {
+      return _state().queries[_queryId].requester;
     }
 
     /// Gets the Witnet.Request part of a given query.

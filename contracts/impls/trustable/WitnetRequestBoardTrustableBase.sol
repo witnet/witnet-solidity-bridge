@@ -203,12 +203,12 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (Witnet.Response memory _response)
     {
-        Witnet.Query storage _query = _state().queries[_queryId];
+        Witnet.Query storage __query = _state().queries[_queryId];
         require(
-            msg.sender == _query.request.requester,
+            msg.sender == __query.requester,
             "WitnetRequestBoardTrustableBase: only requester"
         );
-        _response = _query.response;
+        _response = __query.response;
         delete _state().queries[_queryId];
         emit DeletedQuery(_queryId, msg.sender);
     }
@@ -240,9 +240,9 @@ abstract contract WitnetRequestBoardTrustableBase
         require(_bytecode.length > 0, "WitnetRequestBoardTrustableBase: empty script");
 
         _queryId = ++ _state().numQueries;
+        _state().queries[_queryId].requester = msg.sender;
 
         Witnet.Request storage _request = _getRequestData(_queryId);
-        _request.requester = msg.sender;
         _request.addr = _addr;
         _request.hash = _bytecode.hash();
         _request.gasprice = _gasPrice;
@@ -694,16 +694,18 @@ abstract contract WitnetRequestBoardTrustableBase
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
 
-        Witnet.Query storage _query = _state().queries[_queryId];
-        Witnet.Response storage _response = _query.response;
+        Witnet.Query storage __query = _state().queries[_queryId];
+        Witnet.Response storage __response = __query.response;
 
         // solhint-disable not-rely-on-time
-        _response.timestamp = _timestamp;
-        _response.drTxHash = _drTxHash;
-        _response.reporter = msg.sender;
-        _response.cborBytes = _cborBytes;
+        __response.timestamp = _timestamp;
+        __response.drTxHash = _drTxHash;
+        __response.reporter = msg.sender;
+        __response.cborBytes = _cborBytes;
 
-        _safeTransferTo(payable(msg.sender), _query.request.reward);
+        _safeTransferTo(payable(msg.sender), __query.request.reward);
         emit PostedResult(_queryId, msg.sender);
+
+        delete __query.request;
     }
 }
