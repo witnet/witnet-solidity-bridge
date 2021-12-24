@@ -22,7 +22,7 @@ contract WitnetPriceRouter
         string  quote;
     }    
 
-    mapping (bytes32 => Pair) internal __pairs;
+    mapping (bytes4 => Pair) internal __pairs;
     mapping (address => bytes32) internal __pricefeedId_;
 
     bytes32[] internal __supportedCurrencyPairs;
@@ -74,7 +74,7 @@ contract WitnetPriceRouter
         virtual override
         returns (IERC165)
     {
-        return __pairs[_erc2362id].pricefeed;
+        return __pairs[bytes4(_erc2362id)].pricefeed;
     }
 
     /// Returns human-readable ERC2362-based caption of the currency pair being
@@ -96,7 +96,7 @@ contract WitnetPriceRouter
         virtual override
         returns (string memory _caption)
     {
-        Pair storage _pair = __pairs[_erc2362id];
+        Pair storage _pair = __pairs[bytes4(_erc2362id)];
         if (
             bytes(_pair.base).length > 0 
                 && bytes(_pair.quote).length > 0
@@ -146,7 +146,7 @@ contract WitnetPriceRouter
         );
         bytes32 _erc2362id = keccak256(_caption);
         
-        Pair storage _record = __pairs[_erc2362id];
+        Pair storage _record = __pairs[bytes4(_erc2362id)];
         address _currentPriceFeed = address(_record.pricefeed);
         if (bytes(_record.base).length == 0) {
             _record.base = _base;
@@ -179,7 +179,7 @@ contract WitnetPriceRouter
         virtual override
         returns (bool)
     {
-        return address(__pairs[_erc2362id].pricefeed) != address(0);
+        return address(__pairs[bytes4(_erc2362id)].pricefeed) != address(0);
     }
 
     /// Returns `true` if given price feed contract is currently serving updates to any known currency pair. 
@@ -188,6 +188,6 @@ contract WitnetPriceRouter
         virtual override
         returns (bool)
     {
-        return __pairs[__pricefeedId_[address(_pricefeed)]].pricefeed == _pricefeed;
+        return __pairs[bytes4(__pricefeedId_[address(_pricefeed)])].pricefeed == _pricefeed;
     }
 }
