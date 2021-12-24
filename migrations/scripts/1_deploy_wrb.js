@@ -1,5 +1,5 @@
 const { merge } = require("lodash")
-
+const readline = require("readline")
 const settings = require("../witnet.settings")
 const utils = require("../../scripts/utils")
 
