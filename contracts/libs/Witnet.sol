@@ -15,9 +15,9 @@ library Witnet {
 
     /// Struct containing both request and response data related to every query posted to the Witnet Request Board
     struct Query {
-        address requester;      // Address from which the request was posted.
         Request request;
         Response response;
+        address from;      // Address from which the request was posted.
     }
 
     /// Possible status of a Witnet query.
@@ -31,6 +31,7 @@ library Witnet {
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct Request {
         IWitnetRequest addr;    // The contract containing the Data Request which execution has been requested.
+        address requester;      // Address from which the request was posted.
         bytes32 hash;           // Hash of the Data Request whose execution has been requested.
         uint256 gasprice;       // Minimum gas price the DR resolver should pay on the solving tx.
         uint256 reward;         // Escrowed reward to be paid to the DR resolver.

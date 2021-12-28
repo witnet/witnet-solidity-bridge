@@ -205,7 +205,7 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         Witnet.Query storage __query = _state().queries[_queryId];
         require(
-            msg.sender == __query.requester,
+            msg.sender == __query.from,
             "WitnetRequestBoardTrustableBase: only requester"
         );
         _response = __query.response;
@@ -240,7 +240,7 @@ abstract contract WitnetRequestBoardTrustableBase
         require(_bytecode.length > 0, "WitnetRequestBoardTrustableBase: empty script");
 
         _queryId = ++ _state().numQueries;
-        _state().queries[_queryId].requester = msg.sender;
+        _state().queries[_queryId].from = msg.sender;
 
         Witnet.Request storage _request = _getRequestData(_queryId);
         _request.addr = _addr;

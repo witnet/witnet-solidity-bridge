@@ -65,7 +65,7 @@ abstract contract WitnetBoardData {
         Witnet.Query storage _query = _state().queries[_queryId];
         if (_query.response.drTxHash != 0) 
           return Witnet.QueryStatus.Reported;
-        else if (_query.requester == address(0))
+        else if (_query.from == address(0))
           return Witnet.QueryStatus.Deleted;
         else
           return Witnet.QueryStatus.Posted;
@@ -87,12 +87,12 @@ abstract contract WitnetBoardData {
       }
     }
 
-    /// Gets requester of a given query.
+    /// Gets from of a given query.
     function _getRequester(uint256 _queryId)
       internal view
       returns (address)
     {
-      return _state().queries[_queryId].requester;
+      return _state().queries[_queryId].from;
     }
 
     /// Gets the Witnet.Request part of a given query.
