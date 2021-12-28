@@ -1,12 +1,12 @@
 require("dotenv").config()
 const readline = require("readline")
-const web3 = require("web3") 
+const web3 = require("web3")
 
 module.exports = {
   getRealmNetworkFromArgs,
   getRealmNetworkFromString,
   isNullAddress,
-  prompt
+  prompt,
 }
 
 function getRealmNetworkFromArgs () {

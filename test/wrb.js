@@ -148,15 +148,15 @@ contract("WitnetRequestBoard", ([
         "reward too low."
       )
     })
-    it("reading bytecode from unsolved query works if the request was not modified before the query being solved", async () => {
-      await this.WitnetRequestBoard.postRequest(this.WitnetRequest.address, {from: requester, value: ether("1")})
+    it("reading bytecode from unsolved query works if the request was not modified before being solved", async () => {
+      await this.WitnetRequestBoard.postRequest(this.WitnetRequest.address, { from: requester, value: ether("1") })
       assert.equal(
         await this.WitnetRequest.bytecode.call(),
         await this.WitnetRequestBoard.readRequestBytecode.call(1)
       )
     })
-    it("reading bytecode from unsolved query fails if the request gets modified before the query being solved", async () => {
-      await this.WitnetRequestBoard.postRequest(this.WitnetRequest.address, {from: requester, value: ether("1")})
+    it("reading bytecode from unsolved query fails if the request gets modified before being solved", async () => {
+      await this.WitnetRequestBoard.postRequest(this.WitnetRequest.address, { from: requester, value: ether("1") })
       const newDrBytes = web3.utils.fromAscii("This is a different DR")
       await this.WitnetRequest.modifyBytecode(newDrBytes)
       await expectRevert(

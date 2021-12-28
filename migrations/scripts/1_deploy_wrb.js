@@ -87,7 +87,7 @@ module.exports = async function (deployer, network, accounts) {
   if (upgradeProxy && network !== "test") {
     // But ask operator first, if this was a proxiable implementation:
     // eslint-disable-next-line no-undef
-    let answer = await utils.prompt("\n   > Do you wish to upgrade the proxy ? [y/N] ")
+    const answer = await utils.prompt("\n   > Do you wish to upgrade the proxy ? [y/N] ")
     if (!["y", "yes"].includes(answer.toLowerCase().trim())) {
       upgradeProxy = false
       return
