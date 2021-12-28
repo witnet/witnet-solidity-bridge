@@ -25,7 +25,7 @@ module.exports = async function (deployer, network, accounts) {
       // 'WitnetRequestBoard' artifact in the addresses file:
       if (addresses) WitnetProxy.address = addresses.WitnetRequestBoard
     }
-    if (!WitnetProxy.isDeployed() || isNullAddress(WitnetProxy.address)) {
+    if (!WitnetProxy.isDeployed() || utils.isNullAddress(WitnetProxy.address)) {
       await deployer.deploy(WitnetProxy)
     } else {
       console.log(`\n   Skipped: '${artifactsName.WitnetProxy}' deployed at ${WitnetProxy.address}.`)
@@ -45,7 +45,7 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   if (!upgradeProxy) {
-    if (!WitnetRequestBoard.isDeployed() || isNullAddress(WitnetRequestBoard.address)) {
+    if (!WitnetRequestBoard.isDeployed() || utils.isNullAddress(WitnetRequestBoard.address)) {
       // Read implementation address from file only if the implementation requires no proxy
       if (addresses) WitnetRequestBoard.address = addresses.WitnetRequestBoard
     }
@@ -64,7 +64,7 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   /* Deploy new instance of 'WitnetParserLib', and 'WitnetDecoderLib', if neccesary */
-  if (!WitnetParserLib.isDeployed() || isNullAddress(WitnetParserLib.address)) {
+  if (!WitnetParserLib.isDeployed() || utils.isNullAddress(WitnetParserLib.address)) {
     // Fetch the 'WitnetDecoderLib' artifact:
     try {
       WitnetDecoderLib = artifacts.require(artifactsName.WitnetDecoderLib)
@@ -84,27 +84,12 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   /* Deploy new instance of target 'WitnetRequestBoard' implementation */
-  if (upgradeProxy) {
+  if (upgradeProxy && network !== "test") {
     // But ask operator first, if this was a proxiable implementation:
     // eslint-disable-next-line no-undef
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    })
-    await new Promise((resolve) => {
-      rl.question(
-        "\n   > Do you wish to upgrade the proxy ? [y/N] ",
-        function (answer) {
-          if (!["y", "yes"].includes(answer.toLowerCase().trim())) {
-            upgradeProxy = false
-          }
-          rl.close()
-        })
-      rl.on("close", function () {
-        resolve()
-      })
-    })
-    if (!upgradeProxy) {
+    let answer = await utils.prompt("\n   > Do you wish to upgrade the proxy ? [y/N] ")
+    if (!["y", "yes"].includes(answer.toLowerCase().trim())) {
+      upgradeProxy = false
       return
     }
   }
@@ -134,7 +119,7 @@ module.exports = async function (deployer, network, accounts) {
 
     const oldAddr = await proxy.implementation.call()
     let oldCodehash, oldVersion
-    if (!isNullAddress(oldAddr)) {
+    if (!utils.isNullAddress(oldAddr)) {
       const oldWrb = await WitnetRequestBoard.at(oldAddr)
       oldCodehash = await oldWrb.codehash.call()
       oldVersion = await oldWrb.version.call()
@@ -148,7 +133,7 @@ module.exports = async function (deployer, network, accounts) {
       )
     )
     console.log(`   >> WRB owner address:  ${await wrb.owner.call()}`)
-    if (isNullAddress(oldAddr)) {
+    if (utils.isNullAddress(oldAddr)) {
       console.log(`   >> WRB address:        ${await proxy.implementation.call()}`)
       console.log(`   >> WRB proxiableUUID:  ${await wrb.proxiableUUID.call()}`)
       console.log(`   >> WRB codehash:       ${await wrb.codehash.call()}`)
@@ -166,10 +151,4 @@ module.exports = async function (deployer, network, accounts) {
   } else {
     console.log(`\n   Skipped: '${artifactsName.WitnetRequestBoard}' deployed at ${WitnetRequestBoard.address}.`)
   }
-}
-
-function isNullAddress (addr) {
-  return !addr ||
-      addr === "0x0000000000000000000000000000000000000000" ||
-      !web3.utils.isAddress(addr)
 }

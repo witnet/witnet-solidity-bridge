@@ -1,10 +1,12 @@
-const web3 = require("web3")
 require("dotenv").config()
+const readline = require("readline")
+const web3 = require("web3") 
 
 module.exports = {
   getRealmNetworkFromArgs,
   getRealmNetworkFromString,
   isNullAddress,
+  prompt
 }
 
 function getRealmNetworkFromArgs () {
@@ -59,4 +61,24 @@ function isNullAddress (addr) {
   return !addr ||
       addr === "0x0000000000000000000000000000000000000000" ||
       !web3.utils.isAddress(addr)
+}
+
+async function prompt (text) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+  let answer
+  await new Promise((resolve) => {
+    rl.question(
+      text,
+      function (input) {
+        answer = input
+        rl.close()
+      })
+    rl.on("close", function () {
+      resolve()
+    })
+  })
+  return answer
 }
