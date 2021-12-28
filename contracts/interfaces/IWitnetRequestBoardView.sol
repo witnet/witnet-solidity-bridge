@@ -21,28 +21,28 @@ interface IWitnetRequestBoardView {
     /// Gets current status of given query.
     function getQueryStatus(uint256 _queryId) external view returns (Witnet.QueryStatus);
 
-    /// Retrieves the whole `Witnet.Request` record referred to a previously posted Witnet Data Request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
-    /// @dev or if the related script bytecode got changed after being posted.
-    /// @param _queryId The unique query identifier.
+    /// Retrieves the whole Request record posted to the Witnet Request Board.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been reported
+    /// @dev or deleted.
+    /// @param _queryId The unique identifier of a previously posted query.
     function readRequest(uint256 _queryId) external view returns (Witnet.Request memory);
 
     /// Retrieves the serialized bytecode of a previously posted Witnet Data Request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
-    /// @dev or if the related script bytecode got changed after being posted.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been reported,
+    /// @dev or deleted, or if the related script bytecode got changed after being posted.
     /// @param _queryId The unique query identifier.
     function readRequestBytecode(uint256 _queryId) external view returns (bytes memory);
 
-    /// Retrieves the gas price that any assigned reporter will have to pay when reporting result 
-    /// to the referred query.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
-    /// @dev or if the related script bytecode got changed after being posted.
-    /// @param _queryId The unique query identifier.
+    /// Retrieves the gas price that any assigned reporter will have to pay when reporting 
+    /// result to a previously posted Witnet data request.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
+    /// @dev reported, or deleted. 
+    /// @param _queryId The unique query identifie
     function readRequestGasPrice(uint256 _queryId) external view returns (uint256);
 
     /// Retrieves the reward currently set for the referred query.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
-    /// @dev or if the related script bytecode got changed after being posted.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
+    /// @dev reported, or deleted. 
     /// @param _queryId The unique query identifier.
     function readRequestReward(uint256 _queryId) external view returns (uint256);
 

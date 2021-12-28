@@ -148,6 +148,22 @@ contract("WitnetRequestBoard", ([
         "reward too low."
       )
     })
+    it("reading bytecode from unsolved query works if the request was not modified before the query being solved", async () => {
+      await this.WitnetRequestBoard.postRequest(this.WitnetRequest.address, {from: requester, value: ether("1")})
+      assert.equal(
+        await this.WitnetRequest.bytecode.call(),
+        await this.WitnetRequestBoard.readRequestBytecode.call(1)
+      )
+    })
+    it("reading bytecode from unsolved query fails if the request gets modified before the query being solved", async () => {
+      await this.WitnetRequestBoard.postRequest(this.WitnetRequest.address, {from: requester, value: ether("1")})
+      const newDrBytes = web3.utils.fromAscii("This is a different DR")
+      await this.WitnetRequest.modifyBytecode(newDrBytes)
+      await expectRevert(
+        this.WitnetRequestBoard.readRequestBytecode.call(1),
+        "bytecode changed after posting"
+      )
+    })
   })
 
   describe("upgrade data request", async () => {
@@ -337,6 +353,16 @@ contract("WitnetRequestBoard", ([
         "not in Posted status"
       )
     })
+    it("fails if trying to read bytecode from solved data request", async () => {
+      await this.WitnetRequestBoard.reportResult(
+        queryId, drTxHash, resultHex,
+        { from: owner, gasPrice: 1 }
+      )
+      await expectRevert(
+        this.WitnetRequestBoard.readRequestBytecode(queryId),
+        "not in Posted status"
+      )
+    })
   })
 
   describe("read data request result", async () => {
@@ -360,7 +386,7 @@ contract("WitnetRequestBoard", ([
       expect(result.value.buffer.data).to.be.equal(resultHex)
     })
     it("should revert reading data for non-existent Ids", async () => {
-      await expectRevert(this.WitnetRequestBoard.readRequestBytecode.call(200), "not yet posted")
+      await expectRevert(this.WitnetRequestBoard.readRequestBytecode.call(200), "not in Posted status")
       await expectRevert(this.WitnetRequestBoard.readResponseDrTxHash.call(200), "not in Reported status")
       await expectRevert(this.WitnetRequestBoard.readResponseResult.call(200), "not in Reported status")
     })
@@ -458,7 +484,7 @@ contract("WitnetRequestBoard", ([
       await this.WitnetRequestBoard.deleteQuery(drId, { from: requester })
       await expectRevert(
         this.WitnetRequestBoard.readRequestBytecode(drId),
-        "deleted"
+        "not in Posted status"
       )
     })
   })

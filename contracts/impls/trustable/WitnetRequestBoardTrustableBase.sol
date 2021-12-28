@@ -323,26 +323,30 @@ abstract contract WitnetRequestBoardTrustableBase
     }
 
     /// Retrieves the whole Request record posted to the Witnet Request Board.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
-    /// @dev or if the related script bytecode got changed after being posted.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been reported
+    /// @dev or deleted.
     /// @param _queryId The unique identifier of a previously posted query.
     function readRequest(uint256 _queryId)
         external view
         override
-        notDeleted(_queryId)
-        returns (Witnet.Request memory)
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
+        returns (Witnet.Request memory _request)
     {
-        return _checkRequest(_queryId);
+        Witnet.Query storage __query = _state().queries[_queryId];
+        _request = __query.request;
+        if (__query.from != address(0)) {
+            _request.requester = __query.from;
+        }
     }
     
-    /// Retrieves the Witnet data request actual bytecode of a previously posted request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
-    /// @dev or if the related script bytecode got changed after being posted.
-    /// @param _queryId The unique identifier of the request query.
+    /// Retrieves the serialized bytecode of a previously posted Witnet Data Request.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been reported,
+    /// @dev or deleted, or if the related script bytecode got changed after being posted.
+    /// @param _queryId The unique query identifier.
     function readRequestBytecode(uint256 _queryId)
         external view
         override
-        notDeleted(_queryId)
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (bytes memory _bytecode)
     {
         Witnet.Request storage _request = _getRequestData(_queryId);
@@ -360,29 +364,29 @@ abstract contract WitnetRequestBoardTrustableBase
 
     /// Retrieves the gas price that any assigned reporter will have to pay when reporting 
     /// result to a previously posted Witnet data request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
-    /// @dev or if the related script bytecode got changed after being posted.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
+    /// @dev reported, or deleted. 
     /// @param _queryId The unique query identifier
     function readRequestGasPrice(uint256 _queryId)
         external view
         override
-        notDeleted(_queryId)
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (uint256)
     {
-        return _checkRequest(_queryId).gasprice;
+        return _state().queries[_queryId].request.gasprice;
     }
 
     /// Retrieves the reward currently set for a previously posted request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has been deleted,
-    /// @dev or if the related script bytecode got changed after being posted.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
+    /// @dev reported, or deleted. 
     /// @param _queryId The unique query identifier
     function readRequestReward(uint256 _queryId)
         external view
         override
-        notDeleted(_queryId)
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (uint256)
     {
-        return _checkRequest(_queryId).reward;
+        return _state().queries[_queryId].request.reward;
     }
 
     /// Retrieves the Witnet-provided result, and metadata, to a previously posted request.    
@@ -663,23 +667,6 @@ abstract contract WitnetRequestBoardTrustableBase
 
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
-
-    function _checkRequest(uint256 _queryId)
-        internal view
-        returns (Witnet.Request storage _request)
-    {
-        _request = _getRequestData(_queryId);
-        if (address(_request.addr) != address(0)) {
-            // if the script contract address is not zero,
-            // we assume the query has not been deleted, so
-            // the request script bytecode can still be fetched:
-            bytes memory _bytecode = _request.addr.bytecode();
-            require(
-                _bytecode.hash() == _request.hash,
-                "WitnetRequestBoardTrustableBase: bytecode changed after posting"
-            );
-        }
-    }
 
     function _reportResult(
             uint256 _queryId,
