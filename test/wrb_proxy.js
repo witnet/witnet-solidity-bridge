@@ -165,8 +165,8 @@ contract("Witnet Requests Board Proxy", accounts => {
         })
       )
 
-      // Reading previous data request (<3) should work:
-      await wrb.readRequest(2)
+      // Reading previous query (<3) should work:
+      await wrb.getQueryData.call(2)
     })
 
     it("should post a data request to WRB and read the result", async () => {
@@ -222,7 +222,7 @@ contract("Witnet Requests Board Proxy", accounts => {
     it("fails if trying to get bytecode from deleted DRs", async () => {
       await truffleAssert.reverts(
         wrb.readRequestBytecode.call(4),
-        "deleted"
+        "not in Posted status"
       )
     })
 
