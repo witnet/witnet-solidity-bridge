@@ -59,16 +59,31 @@ abstract contract WitnetBoardData {
       internal view
       returns (Witnet.QueryStatus)
     {
-      if (_queryId == 0 || _queryId > _state().numQueries)
+      if (_queryId == 0 || _queryId > _state().numQueries) {
+        // "Unknown" status if queryId is out of range:
         return Witnet.QueryStatus.Unknown;
+      }
       else {
         Witnet.Query storage _query = _state().queries[_queryId];
-        if (_query.response.drTxHash != 0) 
+        if (_query.response.drTxHash != 0) {
+          // Query is in "Reported" status as soon as the hash of the
+          // Witnet transaction that solved the query is reported
+          // back from a Witnet bridge:
           return Witnet.QueryStatus.Reported;
-        else if (_query.from == address(0))
-          return Witnet.QueryStatus.Deleted;
-        else
+        }
+        else if (
+          _query.from != address(0)
+            || _query.request.requester != address(0) // (avoids breaking change when upgrading from 0.5.3 to 0.5.4)
+        ) {
+          // Otherwise, while address from which the query was posted
+          // is kept in storage, the query remains in "Posted" status:
           return Witnet.QueryStatus.Posted;
+        }
+        else {
+          // Requester's address is removed from storage only if
+          // the query gets "Deleted" by its requester.
+          return Witnet.QueryStatus.Deleted;
+        }
       }
     }
 

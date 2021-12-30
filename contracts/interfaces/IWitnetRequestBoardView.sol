@@ -28,8 +28,9 @@ interface IWitnetRequestBoardView {
     function readRequest(uint256 _queryId) external view returns (Witnet.Request memory);
 
     /// Retrieves the serialized bytecode of a previously posted Witnet Data Request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has already been reported,
-    /// @dev or deleted, or if the related script bytecode got changed after being posted.
+    /// @dev Fails if the `_queryId` is not valid, or if the related script bytecode 
+    /// @dev got changed after being posted. Returns empty array once it gets reported, 
+    /// @dev or deleted.
     /// @param _queryId The unique query identifier.
     function readRequestBytecode(uint256 _queryId) external view returns (bytes memory);
 

@@ -219,11 +219,9 @@ contract("Witnet Requests Board Proxy", accounts => {
       assert.equal(tx.logs[0].args[1], requestSender)
     })
 
-    it("fails if trying to get bytecode from deleted DRs", async () => {
-      await truffleAssert.reverts(
-        wrb.readRequestBytecode.call(4),
-        "not in Posted status"
-      )
+    it("retrieves null array if trying to get bytecode from deleted DRs", async () => {
+      const bytecode = await wrb.readRequestBytecode.call(4)
+      assert(bytecode == null)
     })
 
     it("fails if trying to upgrade a non upgradable implementation", async () => {

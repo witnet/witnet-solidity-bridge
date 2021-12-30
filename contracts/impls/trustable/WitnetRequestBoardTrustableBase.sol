@@ -205,7 +205,9 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         Witnet.Query storage __query = _state().queries[_queryId];
         require(
-            msg.sender == __query.from,
+            msg.sender == __query.from
+                // (avoids breaking change when upgrading from 0.5.3 to 0.5.4)
+                || msg.sender == __query.request.requester,
             "WitnetRequestBoardTrustableBase: only requester"
         );
         _response = __query.response;
@@ -340,15 +342,19 @@ abstract contract WitnetRequestBoardTrustableBase
     }
     
     /// Retrieves the serialized bytecode of a previously posted Witnet Data Request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has already been reported,
-    /// @dev or deleted, or if the related script bytecode got changed after being posted.
+    /// @dev Fails if the `_queryId` is not valid, or if the related script bytecode 
+    /// @dev got changed after being posted. Returns empty array once it gets reported, 
+    /// @dev or deleted.
     /// @param _queryId The unique query identifier.
     function readRequestBytecode(uint256 _queryId)
         external view
         override
-        inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (bytes memory _bytecode)
     {
+        require(
+            _getQueryStatus(_queryId) != Witnet.QueryStatus.Unknown,
+            "WitnetRequestBoardTrustableBase: not yet posted"
+        );
         Witnet.Request storage _request = _getRequestData(_queryId);
         if (address(_request.addr) != address(0)) {
             // if DR's request contract address is not zero,
@@ -693,6 +699,9 @@ abstract contract WitnetRequestBoardTrustableBase
         _safeTransferTo(payable(msg.sender), __query.request.reward);
         emit PostedResult(_queryId, msg.sender);
 
-        delete __query.request;
+        __query.request.addr = IWitnetRequest(address(0));
+        __query.request.hash = 0;
+        __query.request.gasprice = 0;
+        __query.request.reward = 0;
     }
 }

@@ -28,7 +28,7 @@ module.exports = async function (deployer, network, accounts) {
       console.log(`\n   Skipped: '${artifactsName.WitnetPriceRouter}' deployed at ${addresses.WitnetPriceRouter}.`)
     }
   } else {
-    console.log(`\n   Not to be deployed into '${network}'`)
+    console.log(`\n   WitnetPriceRouter: Not to be deployed into '${network}'`)
   }
 }
 

@@ -7,7 +7,7 @@ const {
   balance,
   ether,
 } = require("@openzeppelin/test-helpers")
-const { expect } = require("chai")
+const { expect, assert } = require("chai")
 
 // Contracts
 const WRB = artifacts.require(settings.artifacts.default.WitnetRequestBoard)
@@ -353,15 +353,13 @@ contract("WitnetRequestBoard", ([
         "not in Posted status"
       )
     })
-    it("fails if trying to read bytecode from solved data request", async () => {
+    it("retrieves null array if trying to read bytecode from solved data request", async () => {
       await this.WitnetRequestBoard.reportResult(
         queryId, drTxHash, resultHex,
         { from: owner, gasPrice: 1 }
       )
-      await expectRevert(
-        this.WitnetRequestBoard.readRequestBytecode(queryId),
-        "not in Posted status"
-      )
+      const bytecode = await this.WitnetRequestBoard.readRequestBytecode.call(queryId)
+      assert(bytecode == null)
     })
   })
 
@@ -386,7 +384,7 @@ contract("WitnetRequestBoard", ([
       expect(result.value.buffer.data).to.be.equal(resultHex)
     })
     it("should revert reading data for non-existent Ids", async () => {
-      await expectRevert(this.WitnetRequestBoard.readRequestBytecode.call(200), "not in Posted status")
+      await expectRevert(this.WitnetRequestBoard.readRequestBytecode.call(200), "not yet posted")
       await expectRevert(this.WitnetRequestBoard.readResponseDrTxHash.call(200), "not in Reported status")
       await expectRevert(this.WitnetRequestBoard.readResponseResult.call(200), "not in Reported status")
     })
@@ -476,16 +474,14 @@ contract("WitnetRequestBoard", ([
         "not in Posted status"
       )
     })
-    it("fails if trying to read bytecode from deleted data request", async () => {
+    it("retrieves null array if trying to read bytecode from deleted data request", async () => {
       await this.WitnetRequestBoard.reportResult(
         drId, drTxHash, resultHex,
         { from: owner, gasPrice: 1 }
       )
       await this.WitnetRequestBoard.deleteQuery(drId, { from: requester })
-      await expectRevert(
-        this.WitnetRequestBoard.readRequestBytecode(drId),
-        "not in Posted status"
-      )
+      const bytecode = await this.WitnetRequestBoard.readRequestBytecode.call(drId)
+      assert(bytecode == null)
     })
   })
 
