@@ -1,8 +1,7 @@
 {
   "default": {
     "ethereum.goerli": {
-      "WitnetParserLib": "0x7fbFAA0cA6B098e234135a9D813f735762fEF601",
-      "WitnetPriceRouter": "",
+      "WitnetParserLib": "0xd80ffbc599ad5f2Bb6b33AEaAC5E4Fac3cfaf0D1",
       "WitnetRequestBoard": "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8"
     },
     "ethereum.mainnet": {
@@ -10,8 +9,7 @@
       "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA"
     },
     "ethereum.rinkeby": {
-      "WitnetParserLib": "0x2E499f44d2977945d52B7BD7834B2C5195d9CE84",
-      "WitnetPriceRouter": "",
+      "WitnetParserLib": "0xF4fE7fA5c5e6CCa213377F10fD98b6b0DC00cd70",
       "WitnetRequestBoard": "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4"
     }
   },

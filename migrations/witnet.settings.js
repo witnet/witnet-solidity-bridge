@@ -15,7 +15,7 @@ module.exports = {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
         /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 135000,
+        /* _reportResultGasLimit */ 133000,
       ],
     },
     boba: {
