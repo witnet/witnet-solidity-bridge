@@ -51,7 +51,7 @@
   },
   "kcc": {
     "kcc.testnet": {
-      "WitnetParserLib": "0x11C895819df771896aB7073d5E7eb5410F1AF265",
+      "WitnetParserLib": "0x351cEe820E3A393dCF126FbEE60928a80E99C2e1",
       "WitnetPriceRouter": "0x291D9B29055e81E1aACB7a40c4530866E29C7bF2",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     }

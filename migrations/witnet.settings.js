@@ -46,6 +46,13 @@ module.exports = {
         /* _reportResultGasLimit */ 530000,
       ],
     },
+    kcc: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 92500,
+      ],
+    },
     "metis.rinkeby": {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
