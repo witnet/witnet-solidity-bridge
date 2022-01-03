@@ -31,7 +31,7 @@
   },
   "conflux": {
     "conflux.testnet": {
-      "WitnetParserLib": "0x8d683e88E85f785180c68953933bA7752d1b1Dd3",
+      "WitnetParserLib": "0x88E443F2CB310B24dd505AeBECA23e7aBA562326",
       "WitnetRequestBoard": "0x8aB653B73a0e0552dDdce8c76F97c6AA826EFbD4"
     },
     "conflux.tethys": {

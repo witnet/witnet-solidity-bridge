@@ -32,6 +32,13 @@ module.exports = {
         /* _reportResultGasLimit */ 114000,
       ],
     },
+    conflux: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 78500,
+      ],
+    },
     "metis.rinkeby": {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
