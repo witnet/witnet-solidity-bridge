@@ -53,11 +53,11 @@ module.exports = {
         /* _reportResultGasLimit */ 92500,
       ],
     },
-    "metis.rinkeby": {
+    metis: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
         /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 170000,
+        /* _reportResultGasLimit */ 134800,
       ],
     },
   },

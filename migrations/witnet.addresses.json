@@ -58,7 +58,7 @@
   },
   "metis": {
     "metis.rinkeby": {
-      "WitnetParserLib": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425",
+      "WitnetParserLib": "0xAec43b0DED0148B8456B355Ec2dA3930b42bFA08",
       "WitnetPriceRouter": "0xB4B2E2e00e9d6E5490d55623E4F403EC84c6D33f",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     }
