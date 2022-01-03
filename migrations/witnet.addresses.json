@@ -2,6 +2,7 @@
   "default": {
     "ethereum.goerli": {
       "WitnetParserLib": "0xd80ffbc599ad5f2Bb6b33AEaAC5E4Fac3cfaf0D1",
+      "WitnetPriceRouter": "0x33ac5ABb4d4cBD757F32E00505b9efd18d475fD7",
       "WitnetRequestBoard": "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8"
     },
     "ethereum.mainnet": {
@@ -10,6 +11,7 @@
     },
     "ethereum.rinkeby": {
       "WitnetParserLib": "0xF4fE7fA5c5e6CCa213377F10fD98b6b0DC00cd70",
+      "WitnetPriceRouter": "0x62d9c01a5c2eA0f344FBcFd5A2fB056360582Dba",
       "WitnetRequestBoard": "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4"
     }
   },
@@ -32,6 +34,7 @@
   "conflux": {
     "conflux.testnet": {
       "WitnetParserLib": "0x88E443F2CB310B24dd505AeBECA23e7aBA562326",
+      "WitnetPriceRouter": "0x8DC9edc33655e54C6bE6f1Dd4363FCB297474c2F",
       "WitnetRequestBoard": "0x8aB653B73a0e0552dDdce8c76F97c6AA826EFbD4"
     },
     "conflux.tethys": {
@@ -41,7 +44,7 @@
   },
   "harmony": {
     "harmony.testnet#0": {
-      "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
+      "WitnetParserLib": "0x315cfa2F1108d1B490302d79AB4a5A99452e5800",
       "WitnetPriceRouter": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     }
