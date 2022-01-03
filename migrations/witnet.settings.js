@@ -25,6 +25,13 @@ module.exports = {
         /* _reportResultGasLimit */ 97000,
       ],
     },
+    celo: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 114000,
+      ],
+    },
     "metis.rinkeby": {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,

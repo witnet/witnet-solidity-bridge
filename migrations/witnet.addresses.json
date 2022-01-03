@@ -25,8 +25,8 @@
   },
   "celo": {
     "celo.alfajores": {
-      "WitnetParserLib": "0xfBFdDb3FeC361C6179d2A0deFAFD963735669EaA",
-      "WitnetRequestBoard": "0x1AEC0089168Fd1c70B5df8b590c86FAdD62d0f2d"
+      "WitnetParserLib": "0x1A58F1dAD4592814733913Dd59CcEbf55c45C6e1",
+      "WitnetRequestBoard": "0x99a0B5eb260Fe3BfcF9d658850e3dD6d6B69183A"
     }
   },
   "conflux": {
