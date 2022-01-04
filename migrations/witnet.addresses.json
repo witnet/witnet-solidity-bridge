@@ -19,8 +19,10 @@
   },
   "boba": {
     "boba.mainnet": {
-      "WitnetParserLib": "0x886CeCB28b5Cea0602f0B81A541d2e9992055a00",
-      "WitnetRequestBoard": "0xd3AD9a4b26527E3bA5Fc60B75Eb002D47D98e292"
+      "WitnetParserLib": "0x6473063EBEabC0606A4159b7d9F79BB306ED0D2A",
+      "WitnetPriceRouter": "0x93f61D0D5F623144e7C390415B70102A9Cc90bA5",
+      "WitnetRandomness": "0x11C073F17f018Bc1B372c7283fDe0608003823D5",
+      "WitnetRequestBoard": "0xd3AD9a4b26527E3bA5Fc60B75Eb002D47D98e292"      
     },
     "boba.rinkeby": {
       "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
