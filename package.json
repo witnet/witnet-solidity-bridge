@@ -12,7 +12,7 @@
     "console": "truffle console",
     "coverage": "solidity-coverage",
     "flatten": "node ./scripts/flatten.js 2>&1",
-    "flatten:witnet": "npm run clean && npm run flatten:witnet:libs && npm run flatten:witnet:proxy && npm run flatten:witnet:boards && npm run flatten:witnet:rng",
+    "flatten:witnet": "npm run clean && npm run flatten:witnet:libs && npm run flatten:witnet:proxy && npm run flatten:witnet:boards && npm run flatten:witnet:rng && npm run flatten:witnet:registry",
     "flatten:witnet:rng": "npm run flatten contracts/examples/WitnetRandomness.sol && npm run flatten contracts/requests/WitnetRequestRandomness.sol",
     "flatten:witnet:libs": "npm run flatten contracts/libs/WitnetDecoderLib.sol && npm run flatten contracts/libs/WitnetParserLib.sol",
     "flatten:witnet:proxy": "npm run flatten contracts/impls/WitnetProxy.sol",
