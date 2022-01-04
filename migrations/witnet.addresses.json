@@ -64,8 +64,8 @@
     }
   },
   "polygon": {
-    "polygon.mumbai": {
-      "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
+    "polygon.goerli": {
+      "WitnetParserLib": "0x70767887abBF23291B24620dE6bcEBe8d8F1e6F3",
       "WitnetPriceRouter": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     }

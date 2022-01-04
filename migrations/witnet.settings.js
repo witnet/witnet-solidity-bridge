@@ -186,7 +186,7 @@ module.exports = {
       },
     },
     polygon: {
-      "polygon.mumbai": {
+      "polygon.goerli": {
         host: "localhost",
         port: 8535,
         network_id: 80001,
