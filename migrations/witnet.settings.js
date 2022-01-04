@@ -175,6 +175,13 @@ module.exports = {
         gasPrice: 10 ** 10,
         skipDryRun: true,
       },
+      "kcc.mainnet": {
+        host: "localhost",
+        port: 9537,
+        network_id: 321,
+        gasPrice: 10 ** 10,
+        skipDryRun: true,
+      },
     },
     metis: {
       "metis.rinkeby": {
