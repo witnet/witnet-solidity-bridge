@@ -46,9 +46,11 @@
       "WitnetRandomness": "0x83817e19B37A167a7CCE3C209d6643523C48eD2b",
       "WitnetRequestBoard": "0x8aB653B73a0e0552dDdce8c76F97c6AA826EFbD4"
     },
-    "conflux.tethys": {
-      "WitnetParserLib": "",
-      "WitnetRequestBoard": ""
+    "conflux.mainnet": {
+      "WitnetParserLib": "0x8A026e6956B4DB3E81bb113401798e59cFBEA4C6",
+      "WitnetPriceRouter": "0x806c8dFd322EE2d52b188CC472e0814F64304C32",
+      "WitnetRandomness": "0x8484bf5eF4E9c7A30d417407B204e9D1648C1F17",
+      "WitnetRequestBoard": "0x84C708bfd79bBC83Ad8753dAb1852EfE9D6712CC"
     }
   },
   "harmony": {

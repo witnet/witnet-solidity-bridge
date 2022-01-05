@@ -151,11 +151,11 @@ module.exports = {
         gasPrice: 10,
         skipDryRun: true,
       },
-      "conflux.tethys": {
+      "conflux.mainnet": {
         host: "localhost",
         port: 9540,
         network_id: 1029,
-        gasPrice: 1,
+        gasPrice: 10,
         skipDryRun: true,
       },
     },
