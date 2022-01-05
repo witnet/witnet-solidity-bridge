@@ -37,6 +37,12 @@
       "WitnetPriceRouter": "0x6f8A7E2bBc1eDb8782145cD1089251f6e2C738AE",
       "WitnetRequestBoard": "0x99a0B5eb260Fe3BfcF9d658850e3dD6d6B69183A",
       "WitnetRandomness": "0xEF6e3B26c5307E6dE38b1e8e11Ee051186BEe11b"
+    },
+    "celo.mainnet": {
+      "WitnetParserLib": "0x46FF6e05fd0a5fb4D794B99eCAE41c43f4D62d15",
+      "WitnetPriceRouter": "0x931673904eB6E69D775e35F522c0EA35575297Cb",
+      "WitnetRandomness": "0xeA943c149b05a7897a0bf7c7cB4541D50b18f3f6",
+      "WitnetRequestBoard": "0x03E709E6422E30C033456FCde38C70A12553E468"
     }
   },
   "conflux": {
