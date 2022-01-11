@@ -1,5 +1,4 @@
 const { merge } = require("lodash")
-const readline = require("readline")
 const settings = require("../witnet.settings")
 const utils = require("../../scripts/utils")
 
@@ -98,7 +97,6 @@ module.exports = async function (deployer, network, accounts) {
   await deployer.deploy(
     WitnetRequestBoard,
     ...(
-
       settings.constructorParams[network] && settings.constructorParams[network].WitnetRequestBoard
       // if defined, use network-specific constructor parameters:
         ? settings.constructorParams[network].WitnetRequestBoard

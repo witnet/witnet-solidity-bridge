@@ -184,6 +184,12 @@ module.exports = {
       },
     },
     metis: {
+      "metis.mainnet": {
+        host: "localhost",
+        port: 9536,
+        network_id: 1088,
+        skipDryRun: true,
+      },
       "metis.rinkeby": {
         host: "localhost",
         port: 8536,
