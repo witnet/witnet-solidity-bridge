@@ -8,6 +8,8 @@
     },
     "ethereum.mainnet": {
       "WitnetParserLib": "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",
+      "WitnetPriceRouter": "0x83A757eAe821Ad7B520D9A74952337138A80b2AF",
+      "WitnetRandomness": "0x2BE5D85F97C490E7ed7396d79Fe194Ab922D16eE",
       "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA"
     },
     "ethereum.rinkeby": {
