@@ -206,6 +206,13 @@ module.exports = {
         skipDryRun: true,
         gasPrice: 30 * 10 ** 9,
       },
+      "polygon.mainnet": {
+        host: "localhost",
+        port: 9535,
+        network_id: 137,
+        skipDryRun: true,
+        gasPrice: 30 * 10 ** 9,
+      },
     },
   },
 }

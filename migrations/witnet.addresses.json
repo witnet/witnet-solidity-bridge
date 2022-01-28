@@ -102,6 +102,12 @@
       "WitnetPriceRouter": "0x6d5544ca5b35bf2e7a78ace4E7B8d191fe5C9FAb",
       "WitnetRandomness": "0x96f327C9F15AeFebFc26eAf7b86a579c81336172",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
+    },
+    "polygon.mainnet": {
+      "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
+      "WitnetPriceRouter": "0x3806311c7138ddF2bAF2C2093ff3633E5A73AbD4",
+      "WitnetRandomness": "0xE22f48DDdcb34BD34489fE224d7fFC1b0a361D87",
+      "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   }
 }
