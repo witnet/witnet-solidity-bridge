@@ -2,8 +2,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../WitnetRequestBoard.sol";
-
 /// @title The Witnet Price Feed basic interface.
 /// @dev Guides implementation of active price feed polling contracts.
 /// @author The Witnet Foundation.
