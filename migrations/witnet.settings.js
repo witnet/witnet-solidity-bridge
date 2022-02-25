@@ -119,13 +119,13 @@ module.exports = {
       "avalanche.mainnet": {
         network_id: 43114,
         host: "localhost",
-        port: 8533,
+        port: 9533,
         skipDryRun: true,
       },
       "avalanche.testnet": {
         network_id: 43113,
         host: "localhost",
-        port: 9533,
+        port: 8533,
         skipDryRun: true,
         gasPrice: 30 * 10 ** 9,
       },
