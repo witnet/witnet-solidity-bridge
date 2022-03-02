@@ -188,6 +188,57 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         _reportResult(_queryId, _timestamp, _drTxHash, _cborBytes);
     }
+
+    /// Reports Witnet-provided results to multiple requests within a single EVM tx.
+    /// @dev Fails if called from unauthorized address.
+    /// @param _batchResultReport_ Array of BatchResultReport structs, every one containing:
+    ///         - unique query identifier;
+    ///         - timestamp of the solving tally txs in Witnet. If zero is provided, EVM-timestamp will be used instead;
+    ///         - hash of the corresponding data request tx at the Witnet side-chain level;
+    ///         - data request result in raw bytes.
+    /// @return _batchReportResult_ Array describing report status of every provided _batchResultReport_, containing:
+    ///         - success flag indicating whether the result was admitted and saved in storage;
+    ///         - error string message describing the reason why the provided result could not saved in storage:
+    ///           -> the provided query is not in 'Posted' status
+    ///           -> the provided witnet data request hash is zero
+    ///           -> length of provided result is zero
+    function reportResultBatch(
+            BatchResultReport[] memory _batchResultReport_
+        )
+        external
+        override
+        onlyReporters
+        returns (BatchReportResult[] memory _batchReportResult_)
+    {
+        if (_batchResultReport_.length > 0) {
+            _batchReportResult_ = new BatchReportResult[](_batchResultReport_.length);
+            for (uint _i = 0; _i < _batchResultReport_.length; _i ++) {
+                BatchResultReport memory _report = _batchResultReport_[_i];
+                if (_getQueryStatus(_report.queryId) != Witnet.QueryStatus.Posted) {
+                    _batchReportResult_[_i] = BatchReportResult({
+                        reported: false,
+                        error: "WitnetRequestBoardTrustableBase: bad queryId"
+                    });
+                } else if (_report.drTxHash == 0) {
+                    _batchReportResult_[_i] = BatchReportResult({
+                        reported: false,
+                        error: "WitnetRequestBoardTrustableBase: bad drTxHash"
+                    });
+                } else if (_report.cborBytes.length == 0) {
+                    _batchReportResult_[_i] = BatchReportResult({
+                        reported: false,
+                        error: "WitnetRequestBoardTrustableBase: bad result"
+                    });
+                } else {
+                    _reportResult(_report.queryId, _report.timestamp, _report.drTxHash, _report.cborBytes);
+                    _batchReportResult_[_i] = BatchReportResult({
+                        reported: true,
+                        error: ""
+                    });
+                }
+            }
+        }
+    }
     
 
     // ================================================================================================================
