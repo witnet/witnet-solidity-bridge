@@ -161,8 +161,21 @@ abstract contract WitnetRequestBoardTrustableBase
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
+        require(_drTxHash != 0, "WitnetRequestBoardTrustableDefault: Witnet drTxHash cannot be zero");
+        // Ensures the result bytes do not have zero length
+        // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
+        require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
         // solhint-disable not-rely-on-time
-        _reportResult(_queryId, block.timestamp, _drTxHash, _cborBytes);
+        _safeTransferTo(
+            payable(msg.sender),
+            __reportResult(
+                _queryId,
+                block.timestamp,
+                _drTxHash,
+                _cborBytes
+            )
+        );
+        emit PostedResult(_queryId, msg.sender);
     }
 
     /// Reports the Witnet-provided result to a previously posted request.
@@ -186,57 +199,91 @@ abstract contract WitnetRequestBoardTrustableBase
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        _reportResult(_queryId, _timestamp, _drTxHash, _cborBytes);
+        require(_timestamp <= block.timestamp, "WitnetRequestBoardTrustableDefault: bad timestamp");
+        require(_drTxHash != 0, "WitnetRequestBoardTrustableDefault: Witnet drTxHash cannot be zero");
+        // Ensures the result bytes do not have zero length
+        // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
+        require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
+        _safeTransferTo(
+            payable(msg.sender),
+            __reportResult(
+                _queryId,
+                _timestamp,
+                _drTxHash,
+                _cborBytes
+            )
+        );
+        emit PostedResult(_queryId, msg.sender);
     }
 
     /// Reports Witnet-provided results to multiple requests within a single EVM tx.
     /// @dev Fails if called from unauthorized address.
-    /// @param _batchResultReport_ Array of BatchResultReport structs, every one containing:
+    /// @dev Emits a PostedResult event for every succesfully reported result, if any.
+    /// @param _batchResults Array of BatchedResult structs, every one containing:
     ///         - unique query identifier;
     ///         - timestamp of the solving tally txs in Witnet. If zero is provided, EVM-timestamp will be used instead;
     ///         - hash of the corresponding data request tx at the Witnet side-chain level;
     ///         - data request result in raw bytes.
-    /// @return _batchReportResult_ Array describing report status of every provided _batchResultReport_, containing:
-    ///         - success flag indicating whether the result was admitted and saved in storage;
-    ///         - error string message describing the reason why the provided result could not saved in storage:
-    ///           -> the provided query is not in 'Posted' status
-    ///           -> the provided witnet data request hash is zero
-    ///           -> length of provided result is zero
+    /// @param _verbose If true, emits a BatchReportError event for every failing report, if any. 
     function reportResultBatch(
-            BatchResultReport[] memory _batchResultReport_
+            BatchResult[] memory _batchResults,
+            bool _verbose
         )
         external
         override
         onlyReporters
-        returns (BatchReportResult[] memory _batchReportResult_)
     {
-        if (_batchResultReport_.length > 0) {
-            _batchReportResult_ = new BatchReportResult[](_batchResultReport_.length);
-            for (uint _i = 0; _i < _batchResultReport_.length; _i ++) {
-                BatchResultReport memory _report = _batchResultReport_[_i];
-                if (_getQueryStatus(_report.queryId) != Witnet.QueryStatus.Posted) {
-                    _batchReportResult_[_i] = BatchReportResult({
-                        reported: false,
-                        error: "WitnetRequestBoardTrustableBase: bad queryId"
-                    });
-                } else if (_report.drTxHash == 0) {
-                    _batchReportResult_[_i] = BatchReportResult({
-                        reported: false,
-                        error: "WitnetRequestBoardTrustableBase: bad drTxHash"
-                    });
-                } else if (_report.cborBytes.length == 0) {
-                    _batchReportResult_[_i] = BatchReportResult({
-                        reported: false,
-                        error: "WitnetRequestBoardTrustableBase: bad result"
-                    });
-                } else {
-                    _reportResult(_report.queryId, _report.timestamp, _report.drTxHash, _report.cborBytes);
-                    _batchReportResult_[_i] = BatchReportResult({
-                        reported: true,
-                        error: ""
-                    });
+        uint _batchReward;
+        uint _batchSize = _batchResults.length;
+        for ( uint _i = 0; _i < _batchSize; _i ++) {
+            BatchResult memory _result = _batchResults[_i];
+            if (_getQueryStatus(_result.queryId) != Witnet.QueryStatus.Posted) {
+                if (_verbose) {
+                    emit BatchReportError(
+                        _result.queryId,
+                        "WitnetRequestBoardTrustableBase: bad queryId"
+                    );
                 }
+            } else if (_result.drTxHash == 0) {
+                if (_verbose) {
+                    emit BatchReportError(
+                        _result.queryId,
+                        "WitnetRequestBoardTrustableBase: bad drTxHash"
+                    );
+                }
+            } else if (_result.cborBytes.length == 0) {
+                if (_verbose) {
+                    emit BatchReportError(
+                        _result.queryId, 
+                        "WitnetRequestBoardTrustableBase: bad cborBytes"
+                    );
+                }
+            } else if (_result.timestamp > 0 && _result.timestamp > block.timestamp) {
+                if (_verbose) {
+                    emit BatchReportError(
+                        _result.queryId,
+                        "WitnetRequestBoardTrustableBase: bad timestamp"
+                    );
+                }
+            } else {
+                _batchReward += __reportResult(
+                    _result.queryId,
+                    _result.timestamp == 0 ? block.timestamp : _result.timestamp,
+                    _result.drTxHash,
+                    _result.cborBytes
+                );
+                emit PostedResult(
+                    _result.queryId,
+                    msg.sender
+                );
             }
+        }   
+        // Transfer all successful rewards in one single shot to the authorized reporter, if any:
+        if (_batchReward > 0) {
+            _safeTransferTo(
+                payable(msg.sender),
+                _batchReward
+            );
         }
     }
     
@@ -725,20 +772,17 @@ abstract contract WitnetRequestBoardTrustableBase
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
 
-    function _reportResult(
+    function __reportResult(
             uint256 _queryId,
             uint256 _timestamp,
             bytes32 _drTxHash,
             bytes memory _cborBytes
         )
         internal
+        returns (uint256 _reward)
     {
-        require(_drTxHash != 0, "WitnetRequestBoardTrustableDefault: Witnet drTxHash cannot be zero");
-        // Ensures the result byes do not have zero length
-        // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
-        require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
-
         Witnet.Query storage __query = _state().queries[_queryId];
+        Witnet.Request storage __request = __query.request;
         Witnet.Response storage __response = __query.response;
 
         // solhint-disable not-rely-on-time
@@ -747,12 +791,10 @@ abstract contract WitnetRequestBoardTrustableBase
         __response.reporter = msg.sender;
         __response.cborBytes = _cborBytes;
 
-        _safeTransferTo(payable(msg.sender), __query.request.reward);
-        emit PostedResult(_queryId, msg.sender);
+        // return request latest reward
+        _reward = __request.reward;
 
-        __query.request.addr = IWitnetRequest(address(0));
-        __query.request.hash = 0;
-        __query.request.gasprice = 0;
-        __query.request.reward = 0;
+        // Request data won't be needed anymore, so it can just get deleted right now:  
+        delete __query.request;
     }
 }

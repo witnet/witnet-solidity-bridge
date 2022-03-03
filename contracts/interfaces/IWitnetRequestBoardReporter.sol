@@ -38,30 +38,21 @@ interface IWitnetRequestBoardReporter {
         ) external;
 
     /// Reports Witnet-provided results to multiple requests within a single EVM tx.
-    /// @dev Fails if called from unauthorized address.
-    /// @param _batchResultReport_ Array of BatchResultReport structs, every one containing:
+    /// @dev Must emit a PostedResult event for every succesfully reported result.
+    /// @param _batchResults Array of BatchResult structs, every one containing:
     ///         - unique query identifier;
     ///         - timestamp of the solving tally txs in Witnet. If zero is provided, EVM-timestamp will be used instead;
     ///         - hash of the corresponding data request tx at the Witnet side-chain level;
     ///         - data request result in raw bytes.
-    /// @return Array describing report status of every provided _batchResultReport_, containing:
-    ///         - success flag indicating whether the result was admitted and saved in storage;
-    ///         - error string message describing the reason why the provided result could not saved in storage:
-    ///           -> the provided query is not in 'Posted' status
-    ///           -> the provided witnet data request hash is zero
-    ///           -> length of provided result is zero
-    function reportResultBatch(BatchResultReport[] calldata _batchResultReport_)
-        external returns (BatchReportResult[] memory);
+    /// @param _verbose If true, must emit a BatchReportError event for every failing report, if any. 
+    function reportResultBatch(BatchResult[] calldata _batchResults, bool _verbose) external;
         
-        struct BatchResultReport {
+        struct BatchResult {
             uint256 queryId;
             uint256 timestamp;
             bytes32 drTxHash;
             bytes   cborBytes;
         }
 
-        struct BatchReportResult {
-            bool reported;
-            string error;
-        }
+        event BatchReportError(uint256 queryId, string reason);
 }
