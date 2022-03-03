@@ -60,7 +60,7 @@ contract WitnetRequestBoardTrustableDefault
     /// Gets current transaction price.
     function _getGasPrice()
         internal view
-        override
+        virtual override
         returns (uint256)
     {
         return tx.gasprice;
@@ -69,7 +69,7 @@ contract WitnetRequestBoardTrustableDefault
     /// Gets current payment value.
     function _getMsgValue()
         internal view
-        override
+        virtual override
         returns (uint256)
     {
         return msg.value;
@@ -80,7 +80,7 @@ contract WitnetRequestBoardTrustableDefault
     /// @param _amount Amount of ETHs to transfer.
     function _safeTransferTo(address payable _to, uint256 _amount)
         internal
-        override
+        virtual override
     {
         payable(_to).transfer(_amount);
     }   

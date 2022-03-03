@@ -9,6 +9,9 @@ module.exports = {
       WitnetRandomness: "WitnetRandomness",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
     },
+    reef: {
+      WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
+    }
   },
   constructorParams: {
     default: {
@@ -107,13 +110,6 @@ module.exports = {
         /* _isUpgradable */ true,
         /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
         /* _reportResultGasLimit */ 115000,
-      ],
-    },
-    okxchain: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 145000,
       ],
     },
   },
@@ -425,6 +421,14 @@ module.exports = {
         gasPrice: 30 * 10 ** 9,
       },
     },
+    reef: {
+      "reef.testnet": {
+        host: "localhost",
+        port: 8532,
+        network_id: 13939,
+        skipDryRun: true,
+      }
+    },
     smartbch: {
       "smartbch.amber": {
         host: "localhost",
@@ -446,7 +450,7 @@ module.exports = {
         network_id: 5700,
         skipDryRun: true,
       }
-    }
+    },
   },
 }
 
