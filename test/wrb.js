@@ -364,8 +364,8 @@ contract("WitnetRequestBoard", ([
   })
 
   describe("batch report multiple results", async () => {
-    beforeEach(async() => {
-      for (let j = 0; j < 3; j ++) {
+    beforeEach(async () => {
+      for (let j = 0; j < 3; j++) {
         await this.WitnetRequestBoard.postRequest(
           this.WitnetRequest.address, {
             from: requester,
@@ -379,9 +379,9 @@ contract("WitnetRequestBoard", ([
       await expectRevert(
         this.WitnetRequestBoard.reportResultBatch(
           [
-            [ 1, 0, drTxHash, resultHex ],
-            [ 2, 0, drTxHash, resultHex ],
-            [ 3, 0, drTxHash, resultHex ]
+            [1, 0, drTxHash, resultHex],
+            [2, 0, drTxHash, resultHex],
+            [3, 0, drTxHash, resultHex],
           ],
           true,
           { from: other, gasPrice: 1 }
@@ -399,9 +399,9 @@ contract("WitnetRequestBoard", ([
       // Report data request result from Witnet to WitnetRequestBoard
       const tx = await this.WitnetRequestBoard.reportResultBatch(
         [
-          [ 1, 0, drTxHash, resultHex ],
-          [ 2, 0, drTxHash, resultHex ],
-          [ 3, 0, drTxHash, resultHex ]
+          [1, 0, drTxHash, resultHex],
+          [2, 0, drTxHash, resultHex],
+          [3, 0, drTxHash, resultHex],
         ],
         false,
         { from: owner, gasPrice: 1 }
@@ -425,174 +425,178 @@ contract("WitnetRequestBoard", ([
 
       // Check number of PostedResult events
       expect(
-        tx.logs.filter(log => { if (log.event === "PostedResult") return log }).length,
+        tx.logs.filter(log => log.event === "PostedResult").length,
         "PostedResult event should have been emitted three times"
       ).to.equal(3)
     })
-    it("trying to verbose batch report same query twice, should pay reward once and emit error event once", async () => {
+    it(
+      "trying to verbose batch report same query twice, should pay reward once and emit error event once",
+      async () => {
       // Initial balances
-      const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
-      const ownerBalanceTracker = await balance.tracker(owner)
-      const contractInitialBalance = await contractBalanceTracker.get()
-      const ownerInitialBalance = await ownerBalanceTracker.get()
+        const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
+        const ownerBalanceTracker = await balance.tracker(owner)
+        const contractInitialBalance = await contractBalanceTracker.get()
+        const ownerInitialBalance = await ownerBalanceTracker.get()
 
-      // Report data request result from Witnet to WitnetRequestBoard
-      const tx = await this.WitnetRequestBoard.reportResultBatch(
-        [
-          [ 3, 0, drTxHash, resultHex ],
-          [ 3, 0, drTxHash, resultHex ]
-        ],
-        true,
-        { from: owner, gasPrice: 1 }
-      )
+        // Report data request result from Witnet to WitnetRequestBoard
+        const tx = await this.WitnetRequestBoard.reportResultBatch(
+          [
+            [3, 0, drTxHash, resultHex],
+            [3, 0, drTxHash, resultHex],
+          ],
+          true,
+          { from: owner, gasPrice: 1 }
+        )
 
-      // Check balances (contract decreased and claimer increased)
-      const contractFinalBalance = await contractBalanceTracker.get()
-      const ownerFinalBalance = await ownerBalanceTracker.get()
-      expect(
-        contractFinalBalance.eq(contractInitialBalance
-          .sub(ether("1"))
-        ),
-        "contract balance should have decreased after reporting dr request result by 3 eth",
-      ).to.equal(true)
-      expect(
-        ownerFinalBalance.eq(ownerInitialBalance
-          .add(ether("1")).sub(new BN(tx.receipt.gasUsed))
-        ),
-        "Owner balance should have increased after reporting result",
-      ).to.equal(true)
+        // Check balances (contract decreased and claimer increased)
+        const contractFinalBalance = await contractBalanceTracker.get()
+        const ownerFinalBalance = await ownerBalanceTracker.get()
+        expect(
+          contractFinalBalance.eq(contractInitialBalance
+            .sub(ether("1"))
+          ),
+          "contract balance should have decreased after reporting dr request result by 3 eth",
+        ).to.equal(true)
+        expect(
+          ownerFinalBalance.eq(ownerInitialBalance
+            .add(ether("1")).sub(new BN(tx.receipt.gasUsed))
+          ),
+          "Owner balance should have increased after reporting result",
+        ).to.equal(true)
 
-      // Check number of emitted PostedResult events:
-      expect(
-        tx.logs.filter(log => { if (log.event === "PostedResult") return log }).length,
-        "PostedResult event should have been emitted once"
-      ).to.equal(1)
+        // Check number of emitted PostedResult events:
+        expect(
+          tx.logs.filter(log => log.event === "PostedResult").length,
+          "PostedResult event should have been emitted once"
+        ).to.equal(1)
 
-      // Check number and quality of BatchReportError events:
-      const errors = tx.logs.filter(log => { if (log.event === "BatchReportError") return log })
-      expect(
-        errors.length,
-        "BatchReportResult event should have been emitted just once"
-      ).to.equal(1)
-      expect(
-        errors[0].args.queryId.toString(),
-        "BatchReportResult event refers unexpected query id"
-      ).to.equal("3")
-      expect(
-        errors[0].args.reason,
-        "BatchReportResult manifest wrong reason"
-      ).to.contain("bad queryId")
-    })
-    it("trying to report bad drTxHash within non-verbose batch, should pay rewards only for valid results, and emit no error event", async () => {
+        // Check number and quality of BatchReportError events:
+        const errors = tx.logs.filter(log => log.event === "BatchReportError")
+        expect(
+          errors.length,
+          "BatchReportResult event should have been emitted just once"
+        ).to.equal(1)
+        expect(
+          errors[0].args.queryId.toString(),
+          "BatchReportResult event refers unexpected query id"
+        ).to.equal("3")
+        expect(
+          errors[0].args.reason,
+          "BatchReportResult manifest wrong reason"
+        ).to.contain("bad queryId")
+      })
+    it(
+      "reporting bad drTxHash within non-verbose batch, should pay rewards for valid results and emit no error event",
+      async () => {
       // Initial balances
-      const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
-      const ownerBalanceTracker = await balance.tracker(owner)
-      const contractInitialBalance = await contractBalanceTracker.get()
-      const ownerInitialBalance = await ownerBalanceTracker.get()
+        const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
+        const ownerBalanceTracker = await balance.tracker(owner)
+        const contractInitialBalance = await contractBalanceTracker.get()
+        const ownerInitialBalance = await ownerBalanceTracker.get()
 
-      // Report data request result from Witnet to WitnetRequestBoard
-      const tx = await this.WitnetRequestBoard.reportResultBatch(
-        [
-          [ 1, 0, drTxHash, resultHex ],
-          [ 2, 0, "0x0000000000000000000000000000000000000000000000000000000000000000", resultHex ],
-          [ 3, 0, drTxHash, resultHex ],
-        ],
-        false,
-        { from: owner, gasPrice: 1 }
-      )
+        // Report data request result from Witnet to WitnetRequestBoard
+        const tx = await this.WitnetRequestBoard.reportResultBatch(
+          [
+            [1, 0, drTxHash, resultHex],
+            [2, 0, "0x0000000000000000000000000000000000000000000000000000000000000000", resultHex],
+            [3, 0, drTxHash, resultHex],
+          ],
+          false,
+          { from: owner, gasPrice: 1 }
+        )
 
-      // Check balances (contract decreased and claimer increased)
-      const contractFinalBalance = await contractBalanceTracker.get()
-      const ownerFinalBalance = await ownerBalanceTracker.get()
-      expect(
-        contractFinalBalance.eq(contractInitialBalance
-          .sub(ether("2"))
-        ),
-        "contract balance should have decreased after reporting dr request result by 2 eth",
-      ).to.equal(true)
-      expect(
-        ownerFinalBalance.eq(ownerInitialBalance
-          .add(ether("2")).sub(new BN(tx.receipt.gasUsed))
-        ),
-        "Owner balance should have increased after reporting result",
-      ).to.equal(true)
+        // Check balances (contract decreased and claimer increased)
+        const contractFinalBalance = await contractBalanceTracker.get()
+        const ownerFinalBalance = await ownerBalanceTracker.get()
+        expect(
+          contractFinalBalance.eq(contractInitialBalance
+            .sub(ether("2"))
+          ),
+          "contract balance should have decreased after reporting dr request result by 2 eth",
+        ).to.equal(true)
+        expect(
+          ownerFinalBalance.eq(ownerInitialBalance
+            .add(ether("2")).sub(new BN(tx.receipt.gasUsed))
+          ),
+          "Owner balance should have increased after reporting result",
+        ).to.equal(true)
 
-      // Check number of emitted PostedResult events:
-      expect(
-        tx.logs.filter(log => { if (log.event === "PostedResult") return log }).length,
-        "PostedResult event should have been emitted three times"
-      ).to.equal(2)
+        // Check number of emitted PostedResult events:
+        expect(
+          tx.logs.filter(log => log.event === "PostedResult").length,
+          "PostedResult event should have been emitted three times"
+        ).to.equal(2)
 
-      // Check number of BatchReportError events:
-      const errors = tx.logs.filter(log => { if (log.event === "BatchReportError") return log })
-      expect(
-        errors.length,
-        "No BatchReportResult events should have been emitted"
-      ).to.equal(0)
-    })
-    it("trying to report bad results within verbose batch, should pay no reward and emit no PostedResult events, while emitting valid error events", async () => {
+        // Check number of BatchReportError events:
+        const errors = tx.logs.filter(log => log.event === "BatchReportError")
+        expect(
+          errors.length,
+          "No BatchReportResult events should have been emitted"
+        ).to.equal(0)
+      })
+    it(
+      "reporting bad results within verbose batch, should pay no reward and emit no PostedResult events", async () => {
       // Initial balances
-      const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
-      const ownerBalanceTracker = await balance.tracker(owner)
-      const contractInitialBalance = await contractBalanceTracker.get()
+        const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
+        const contractInitialBalance = await contractBalanceTracker.get()
 
-      // Report data request result from Witnet to WitnetRequestBoard
-      const tx = await this.WitnetRequestBoard.reportResultBatch(
-        [
-          [ 1, 0, drTxHash, '0x' ],
-          [ 3, 0, "0x0000000000000000000000000000000000000000000000000000000000000000", resultHex ],
-          [ 2, 4070905200 /* 2099-01-01 00:00:00 UTC */, drTxHash, resultHex ],
-        ],
-        true,
-        { from: owner, gasPrice: 1 }
-      )
+        // Report data request result from Witnet to WitnetRequestBoard
+        const tx = await this.WitnetRequestBoard.reportResultBatch(
+          [
+            [1, 0, drTxHash, "0x"],
+            [3, 0, "0x0000000000000000000000000000000000000000000000000000000000000000", resultHex],
+            [2, 4070905200 /* 2099-01-01 00:00:00 UTC */, drTxHash, resultHex],
+          ],
+          true,
+          { from: owner, gasPrice: 1 }
+        )
 
-      // Check balances (contract decreased and claimer increased)
-      const contractFinalBalance = await contractBalanceTracker.get()
-      expect(
-        contractFinalBalance.eq(
-          contractInitialBalance
-        ),
-        "contract balance should have not changed",
-      ).to.equal(true)
+        // Check balances (contract decreased and claimer increased)
+        const contractFinalBalance = await contractBalanceTracker.get()
+        expect(
+          contractFinalBalance.eq(
+            contractInitialBalance
+          ),
+          "contract balance should have not changed",
+        ).to.equal(true)
 
-      // Check number of emitted PostedResult events:
-      expect(
-        tx.logs.filter(log => { if (log.event === "PostedResult") return log }).length,
-        "Should have not emitted any PostedResult event"
-      ).to.equal(0)
+        // Check number of emitted PostedResult events:
+        expect(
+          tx.logs.filter(log => log.event === "PostedResult").length,
+          "Should have not emitted any PostedResult event"
+        ).to.equal(0)
 
-      // Check number and quality of BatchReportError events:
-      const errors = tx.logs.filter(log => { if (log.event === "BatchReportError") return log })
-      expect(
-        errors.length,
-        "Three BatchReportResult events should have been emitted"
-      ).to.equal(3)
-      expect(
-        errors[0].args.queryId.toString(),
-        "First BatchReportResult event refers to unexpected query id"
-      ).to.equal("1")
-      expect(
-        errors[0].args.reason,
-        "First BatchReportResult manifests wrong reason"
-      ).to.contain("bad cborBytes")
-      expect(
-        errors[1].args.queryId.toString(),
-        "Second BatchReportResult event refers to unexpected query id"
-      ).to.equal("3")
-      expect(
-        errors[1].args.reason,
-        "Second BatchReportResult manifests wrong reason"
-      ).to.contain("bad drTxHash")
-      expect(
-        errors[2].args.queryId.toString(),
-        "Third BatchReportResult event refers to unexpected query id"
-      ).to.equal("2")
-      expect(
-        errors[2].args.reason,
-        "Third BatchReportResult manifests wrong reason"
-      ).to.contain("bad timestamp")
-    })
+        // Check number and quality of BatchReportError events:
+        const errors = tx.logs.filter(log => log.event === "BatchReportError")
+        expect(
+          errors.length,
+          "Three BatchReportResult events should have been emitted"
+        ).to.equal(3)
+        expect(
+          errors[0].args.queryId.toString(),
+          "First BatchReportResult event refers to unexpected query id"
+        ).to.equal("1")
+        expect(
+          errors[0].args.reason,
+          "First BatchReportResult manifests wrong reason"
+        ).to.contain("bad cborBytes")
+        expect(
+          errors[1].args.queryId.toString(),
+          "Second BatchReportResult event refers to unexpected query id"
+        ).to.equal("3")
+        expect(
+          errors[1].args.reason,
+          "Second BatchReportResult manifests wrong reason"
+        ).to.contain("bad drTxHash")
+        expect(
+          errors[2].args.queryId.toString(),
+          "Third BatchReportResult event refers to unexpected query id"
+        ).to.equal("2")
+        expect(
+          errors[2].args.reason,
+          "Third BatchReportResult manifests wrong reason"
+        ).to.contain("bad timestamp")
+      })
   })
 
   describe("read data request result", async () => {
