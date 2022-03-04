@@ -71,10 +71,7 @@ abstract contract WitnetBoardData {
           // back from a Witnet bridge:
           return Witnet.QueryStatus.Reported;
         }
-        else if (
-          _query.from != address(0)
-            || _query.request.requester != address(0) // (avoids breaking change when upgrading from 0.5.3 to 0.5.4)
-        ) {
+        else if (_query.from != address(0)) {
           // Otherwise, while address from which the query was posted
           // is kept in storage, the query remains in "Posted" status:
           return Witnet.QueryStatus.Posted;

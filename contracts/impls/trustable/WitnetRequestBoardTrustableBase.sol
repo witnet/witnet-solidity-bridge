@@ -303,9 +303,7 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         Witnet.Query storage __query = _state().queries[_queryId];
         require(
-            msg.sender == __query.from
-                // (avoids breaking change when upgrading from 0.5.3 to 0.5.4)
-                || msg.sender == __query.request.requester,
+            msg.sender == __query.from,
             "WitnetRequestBoardTrustableBase: only requester"
         );
         _response = __query.response;
