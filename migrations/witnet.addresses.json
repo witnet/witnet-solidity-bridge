@@ -110,6 +110,14 @@
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
+  "moonbeam": {
+    "moonbeam.moonbase": {
+      "WitnetParserLib": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
+      "WitnetPriceRouter": "0x56834Ff8D4b27db647Da97CA3bd8540f7fA0e89D",
+      "WitnetRandomness": "0x9E943Ab1FD0D35B3BaDe31AA78D60C485EA1a604",
+      "WitnetRequestBoard": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425"
+    }
+  },
   "polygon": {
     "polygon.goerli": {
       "WitnetParserLib": "0x70767887abBF23291B24620dE6bcEBe8d8F1e6F3",

@@ -66,7 +66,7 @@ module.exports = {
         /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
         /* _reportResultGasLimit */ 115000,
       ],
-    }
+    },
   },
   compilers: {
     default: {
@@ -225,7 +225,7 @@ module.exports = {
         host: "localhost",
         port: 9531,
         network_id: 1284,
-        skipDryRun: true
+        skipDryRun: true,
       },
       "moonbeam.testnet": {
         host: "localhost",
