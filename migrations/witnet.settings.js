@@ -60,6 +60,13 @@ module.exports = {
         /* _reportResultGasLimit */ 134800,
       ],
     },
+    moonbeam: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 115000,
+      ],
+    }
   },
   compilers: {
     default: {
@@ -211,6 +218,21 @@ module.exports = {
         network_id: 588,
         skipDryRun: true,
         gas: 30000000,
+      },
+    },
+    moonbeam: {
+      "moonbeam.mainnet": {
+        host: "localhost",
+        port: 9531,
+        network_id: 1284,
+        skipDryRun: true
+      },
+      "moonbeam.testnet": {
+        host: "localhost",
+        port: 8531,
+        network_id: 1287,
+        skipDryRun: true,
+        gasPrice: 3 * 10 ** 9,
       },
     },
     polygon: {
