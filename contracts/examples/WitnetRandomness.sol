@@ -55,7 +55,7 @@ contract WitnetRandomness
     /// @return _nextBlock Block number in which a randomness request got posted just after this one, 0 if none.
     function getRandomizeData(uint256 _block)
         external view
-        override
+        virtual override
         returns (
             address _from,
             uint256 _id,
