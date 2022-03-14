@@ -244,9 +244,9 @@ contract WitnetRandomness
         RandomizeData storage _data = __randomize_[_block];
         if (_data.witnetQueryId != 0) {
             _usedFunds = _witnetUpgradeReward(_data.witnetQueryId);
-            if (_usedFunds > 0) {
-                payable(msg.sender).transfer(msg.value - _usedFunds);
-            }
+        }
+        if (_usedFunds > 0) {
+            payable(msg.sender).transfer(msg.value - _usedFunds);
         }
     }
 
