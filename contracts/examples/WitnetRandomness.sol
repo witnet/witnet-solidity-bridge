@@ -245,7 +245,7 @@ contract WitnetRandomness
         if (_data.witnetQueryId != 0) {
             _usedFunds = _witnetUpgradeReward(_data.witnetQueryId);
         }
-        if (_usedFunds > 0) {
+        if (_usedFunds < msg.value) {
             payable(msg.sender).transfer(msg.value - _usedFunds);
         }
     }

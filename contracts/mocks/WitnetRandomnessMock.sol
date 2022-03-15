@@ -113,8 +113,9 @@ contract WitnetRandomnessMock
         returns (uint256 _usedFunds)
     {
         if (latestRandomizeBlock < block.number) {
+            _usedFunds = __mockRandomizeFee;
             require(
-                msg.value >= __mockRandomizeFee,
+                msg.value >= _usedFunds,
                 "WitnetRandomnessMock: reward too low"
             );
             // Post the Witnet Randomness request:
@@ -134,10 +135,10 @@ contract WitnetRandomnessMock
                 _queryId,
                 witnetRandomnessRequest.hash()
             );
-            // Transfer back unused tx value:
-            if (_usedFunds < msg.value) {
-                payable(msg.sender).transfer(msg.value - _usedFunds);
-            }
+        }
+        // Transfer back unused tx value:
+        if (_usedFunds < msg.value) {
+            payable(msg.sender).transfer(msg.value - _usedFunds);
         }
     }
 
