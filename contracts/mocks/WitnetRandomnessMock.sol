@@ -3,8 +3,14 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../examples/WitnetRandomness.sol";
+import "../apps/WitnetRandomness.sol";
 
+/// @title WitnetRandomness mock contract implementation. 
+/// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
+/// @dev ON SUPPORTED TESTNETS, PLEASE USE THE `WitnetRandomness`
+/// @dev CONTRACT ADDRESS PROVIDED BY THE WITNET FOUNDATION.
+/// @dev SEE: https://docs.witnet.io/smart-contracts/witnet-randomness-oracle/contract-addresses
+/// @author Witnet Foundation.
 contract WitnetRandomnessMock
     is
         WitnetRandomness
