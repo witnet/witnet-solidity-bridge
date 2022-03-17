@@ -21,10 +21,10 @@
   },
   "avalanche": {
     "avalanche.mainnet": {
-      "WitnetParserLib": "",
-      "WitnetPriceRouter": "",
-      "WitnetRandomness": "",
-      "WitnetRequestBoard": ""
+      "WitnetParserLib": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
+      "WitnetPriceRouter": "0xBaaF31F4AAc5ab5334b6E239a83bf4E855C55ea7",
+      "WitnetRandomness": "0xe9Bf601869A8c391CecbF5C979D06b0b4640499c",
+      "WitnetRequestBoard": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079"
     },
     "avalanche.testnet": {
       "WitnetParserLib": "0x56834Ff8D4b27db647Da97CA3bd8540f7fA0e89D",
