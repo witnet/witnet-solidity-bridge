@@ -150,7 +150,7 @@ contract WitnetRandomnessMock
 
     /// Mocks by ignoring any fee increase on a pending-to-be-solved randomness request.
     /// @dev The whole `msg.value` shall be transferred back to the tx sender.
-    /// @return _usedFunds Amount of dunds actually used from those provided by the tx sender.
+    /// @return _usedFunds Amount of funds actually used from those provided by the tx sender.
     function upgradeRandomizeFee(uint256)
         public payable
         virtual override
