@@ -18,6 +18,13 @@ module.exports = {
         /* _reportResultGasLimit */ 133000,
       ],
     },
+    avalanche: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 155000,
+      ],
+    },
     boba: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
@@ -128,6 +135,7 @@ module.exports = {
         host: "localhost",
         port: 9533,
         skipDryRun: true,
+        gasPrice: 75 * 10 ** 9,
       },
       "avalanche.testnet": {
         network_id: 43113,
