@@ -74,6 +74,10 @@ abstract contract UsingWitnet {
         returns (uint256 _id, uint256 _reward)
     {
         _reward = _witnetEstimateReward();
+        require(
+            _reward <= msg.value,
+            "UsingWitnet: reward too low"
+        );
         _id = witnet.postRequest{value: _reward}(_request);
     }
 
