@@ -194,7 +194,7 @@ module.exports = {
         host: "localhost",
         port: 8530,
         network_id: 338,
-        skipDryRun: true
+        skipDryRun: true,
       },
     },
     harmony: {

@@ -75,6 +75,14 @@
       "WitnetRequestBoard": "0x84C708bfd79bBC83Ad8753dAb1852EfE9D6712CC"
     }
   },
+  "cronos": {
+    "cronos.testnet": {
+      "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
+      "WitnetPriceRouter": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
+      "WitnetRandomness": "0xB4B2E2e00e9d6E5490d55623E4F403EC84c6D33f",
+      "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
+    }
+  },
   "harmony": {
     "harmony.testnet#0": {
       "WitnetParserLib": "0x315cfa2F1108d1B490302d79AB4a5A99452e5800",
