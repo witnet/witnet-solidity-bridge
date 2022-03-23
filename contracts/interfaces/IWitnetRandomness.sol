@@ -29,11 +29,10 @@ interface IWitnetRandomness {
     /// @param _block Block number whose randomness request is being queried for.
     /// @return _from Address from which the latest randomness request was posted.
     /// @return _id Unique request identifier as provided by the WRB.
-    /// @return _fee Request's total paid fee.
     /// @return _prevBlock Block number in which a randomness request got posted just before this one. 0 if none.
     /// @return _nextBlock Block number in which a randomness request got posted just after this one, 0 if none.
     function getRandomizeData(uint256 _block)
-        external view returns (address _from, uint256 _id, uint256 _fee, uint256 _prevBlock, uint256 _nextBlock);
+        external view returns (address _from, uint256 _id, uint256 _prevBlock, uint256 _nextBlock);
 
     /// Retrieves the randomness generated upon solving a request that was posted within a given block,
     /// if any, or to the _first_ request posted after that block, otherwise. Should the intended 

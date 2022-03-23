@@ -46,7 +46,6 @@ contract WitnetRandomnessMock
     /// @param _block Block number whose randomness request is being queried for.
     /// @return _from Address from which the latest randomness request was posted.
     /// @return _id Unique request identifier as provided by the WRB.
-    /// @return _fee Request's total paid fee.
     /// @return _prevBlock Block number in which a randomness request got posted just before this one. 0 if none.
     /// @return _nextBlock Block number in which a randomness request got posted just after this one, 0 if none.
     function getRandomizeData(uint256 _block)
@@ -55,16 +54,12 @@ contract WitnetRandomnessMock
         returns (
             address _from,
             uint256 _id,
-            uint256 _fee,
             uint256 _prevBlock,
             uint256 _nextBlock
         )
     {
         RandomizeData storage _data = __randomize_[_block];
         _id = _data.witnetQueryId;
-        if (_id != 0) {
-            _fee = __mockRandomizeFee;
-        }
         _from = _data.from;
         _prevBlock = _data.prevBlock;
         _nextBlock = _data.nextBlock;
