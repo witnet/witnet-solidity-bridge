@@ -122,7 +122,7 @@
     "polygon.goerli": {
       "WitnetParserLib": "0x70767887abBF23291B24620dE6bcEBe8d8F1e6F3",
       "WitnetPriceRouter": "0x6d5544ca5b35bf2e7a78ace4E7B8d191fe5C9FAb",
-      "WitnetRandomness": "0x96f327C9F15AeFebFc26eAf7b86a579c81336172",
+      "WitnetRandomness": "0x72BD9271Dbb870AFd995c732DCB06742FB94bC48",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     },
     "polygon.mainnet": {
