@@ -196,6 +196,12 @@ module.exports = {
         network_id: 338,
         skipDryRun: true,
       },
+      "cronos.mainnet": {
+        host: "localhost",
+        port: 9530,
+        network_id: 25,
+        skipDryRun: true,
+      },
     },
     harmony: {
       "harmony.testnet#0": {
