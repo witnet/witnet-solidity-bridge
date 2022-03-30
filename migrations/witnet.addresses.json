@@ -3,20 +3,20 @@
     "ethereum.goerli": {
       "WitnetParserLib": "0xd80ffbc599ad5f2Bb6b33AEaAC5E4Fac3cfaf0D1",
       "WitnetPriceRouter": "0x1cF3Aa9DBF4880d797945726B94B9d29164211BE",
-      "WitnetRandomness": "0xD533438959DB06edc11dc4c51c123860d5873A4c",
+      "WitnetRandomness": "0x6Eb87EcCe6218Cd0e97299331D2aa5d2e53da5cD",
       "WitnetRequestBoard": "0xb58D05247d16b3F1BD6B59c52f7f61fFef02BeC8"
-    },
-    "ethereum.mainnet": {
-      "WitnetParserLib": "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",
-      "WitnetPriceRouter": "0x83A757eAe821Ad7B520D9A74952337138A80b2AF",
-      "WitnetRandomness": "0x2BE5D85F97C490E7ed7396d79Fe194Ab922D16eE",
-      "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA"
     },
     "ethereum.rinkeby": {
       "WitnetParserLib": "0xF4fE7fA5c5e6CCa213377F10fD98b6b0DC00cd70",
       "WitnetPriceRouter": "0xa50b17C2fc373c247C3b603f83df6A7800cB0DC9",
-      "WitnetRandomness": "0xd72b1a10f8261A174b8861a13159A468A166B708",
+      "WitnetRandomness": "0x50F742Fbf9a445AE6B2136F5987414A4c5aeE921",
       "WitnetRequestBoard": "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4"
+    },
+    "ethereum.mainnet": {
+      "WitnetParserLib": "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",
+      "WitnetPriceRouter": "0x83A757eAe821Ad7B520D9A74952337138A80b2AF",
+      "WitnetRandomness": "",
+      "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA"
     }
   },
   "avalanche": {
