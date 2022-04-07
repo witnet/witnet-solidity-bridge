@@ -46,6 +46,20 @@ module.exports = {
         /* _reportResultGasLimit */ 78500,
       ],
     },
+    "conflux.espace.testnet": {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 225000,
+      ],
+    },
+    "conflux.espace.mainnet": {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 225000,
+      ],
+    },
     harmony: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
@@ -188,6 +202,22 @@ module.exports = {
         gasPrice: 10,
         skipDryRun: true,
       },
+      "conflux.espace.testnet": {
+        host: "localhost",
+        port: 8529,
+        network_id: 71,
+        skipDryRun: true,
+        networkCheckTimeout: 999999,
+        gas: 15000000,
+      },
+      "conflux.espace.mainnet": {
+        host: "localhost",
+        port: 9529,
+        network_id: 1030,
+        skipDryRun: true,
+        networkCheckTimeout: 999999,
+        gas: 15000000,
+      }
     },
     cronos: {
       "cronos.testnet": {
