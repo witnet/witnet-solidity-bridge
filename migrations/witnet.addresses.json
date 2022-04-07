@@ -62,13 +62,13 @@
     }
   },
   "conflux": {
-    "conflux.testnet": {
+    "conflux.core.testnet": {
       "WitnetParserLib": "0x88E443F2CB310B24dd505AeBECA23e7aBA562326",
       "WitnetPriceRouter": "0x8F61C7b18F69bB87D6151B8a5D733E1945ea6c25",
       "WitnetRandomness": "0x887bC8Db7D91413D1575071925Ee8d77fE2CBc81",
       "WitnetRequestBoard": "0x8aB653B73a0e0552dDdce8c76F97c6AA826EFbD4"
     },
-    "conflux.mainnet": {
+    "conflux.core.mainnet": {
       "WitnetParserLib": "0x8A026e6956B4DB3E81bb113401798e59cFBEA4C6",
       "WitnetPriceRouter": "0x806c8dFd322EE2d52b188CC472e0814F64304C32",
       "WitnetRandomness": "",

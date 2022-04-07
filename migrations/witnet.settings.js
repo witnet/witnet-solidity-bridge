@@ -174,14 +174,14 @@ module.exports = {
       },
     },
     conflux: {
-      "conflux.testnet": {
+      "conflux.core.testnet": {
         host: "localhost",
         port: 8540,
         network_id: 1,
         gasPrice: 10,
         skipDryRun: true,
       },
-      "conflux.mainnet": {
+      "conflux.core.mainnet": {
         host: "localhost",
         port: 9540,
         network_id: 1029,
