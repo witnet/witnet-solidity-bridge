@@ -79,7 +79,7 @@
     "cronos.testnet": {
       "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
       "WitnetPriceRouter": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
-      "WitnetRandomness": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
+      "WitnetRandomness": "0x0017A464A86f48B342Cae3b8Fe29cFCDaA7b0643",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     }
   },
@@ -108,13 +108,13 @@
     "metis.rinkeby": {
       "WitnetParserLib": "0xAec43b0DED0148B8456B355Ec2dA3930b42bFA08",
       "WitnetPriceRouter": "0x5134EAF08bcf8cE1922991150AAad1774e93751f",
-      "WitnetRandomness": "",
+      "WitnetRandomness": "0x7b0D67739b5B9480080817E5b921EbbA714236ca",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     },
     "metis.mainnet": {
       "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
       "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
-      "WitnetRandomness": "0x7b0D67739b5B9480080817E5b921EbbA714236ca",
+      "WitnetRandomness": "",
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
