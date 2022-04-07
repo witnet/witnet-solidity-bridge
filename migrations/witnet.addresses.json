@@ -73,6 +73,18 @@
       "WitnetPriceRouter": "0x806c8dFd322EE2d52b188CC472e0814F64304C32",
       "WitnetRandomness": "",
       "WitnetRequestBoard": "0x84C708bfd79bBC83Ad8753dAb1852EfE9D6712CC"
+    },
+    "conflux.espace.testnet": {
+      "WitnetParserLib": "0x2881F0106A1894add7600B4B147e715078Fded03",
+      "WitnetPriceRouter": "0x49C0BCce51a8B28f92d008394F06d5B259657F33",
+      "WitnetRandomness": "0xa784093826e2894Ab3Db315f4e05F0F26407BBfF",
+      "WitnetRequestBoard": "0x0C4be6AA667df48de54BA174bE7948875fdf152B"
+    },
+    "conflux.espace.mainnet": {
+      "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
+      "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
+      "WitnetRandomness": "0x1ebD93231a7fE551E1d6405404Df34909eff4c2C",
+      "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
   "cronos": {
