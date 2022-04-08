@@ -217,7 +217,7 @@ module.exports = {
         skipDryRun: true,
         networkCheckTimeout: 999999,
         gas: 15000000,
-      }
+      },
     },
     cronos: {
       "cronos.testnet": {
