@@ -142,6 +142,18 @@
       "WitnetPriceRouter": "0x56834Ff8D4b27db647Da97CA3bd8540f7fA0e89D",
       "WitnetRandomness": "0x45111778a7db1356DaAB576cBe73681F0745182c",
       "WitnetRequestBoard": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425"
+  "okxchain": {
+    "okxchain.testnet": {
+      "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
+      "WitnetPriceRouter": "0xB4B2E2e00e9d6E5490d55623E4F403EC84c6D33f",
+      "WitnetRandomness": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
+      "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
+    },
+    "okxchain.mainnet": {
+      "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
+      "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
+      "WitnetRandomness": "0x1ebD93231a7fE551E1d6405404Df34909eff4c2C",
+      "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
   "polygon": {
