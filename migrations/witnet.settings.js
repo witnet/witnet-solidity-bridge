@@ -88,6 +88,13 @@ module.exports = {
         /* _reportResultGasLimit */ 115000,
       ],
     },
+    okxchain: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 145000,
+      ],
+    }
   },
   compilers: {
     default: {
@@ -286,6 +293,20 @@ module.exports = {
         skipDryRun: true,
         gasPrice: 3 * 10 ** 9,
       },
+    },
+    okxchain: {
+      "okxchain.testnet": {
+        host: "localhost",
+        port: 8528,
+        network_id: 65,
+        skipDyRun: true
+      },
+      "okxchain.mainnet": {
+        host: "localhost",
+        port: 9528,
+        network_id: 66,
+        skipDyRun: true
+      }
     },
     polygon: {
       "polygon.goerli": {
