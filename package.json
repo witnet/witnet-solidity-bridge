@@ -41,8 +41,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "ado-contracts": "^1.0.0",
-    "@eth-optimism/solc": "^0.7.6-alpha.1",
+    "ado-contracts": "1.0.0",
+    "@eth-optimism/solc": "0.7.6-alpha.1",
     "@openzeppelin/contracts": "^4.1.0",
     "lodash": "^4.17.21"
   },
