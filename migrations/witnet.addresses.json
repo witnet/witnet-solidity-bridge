@@ -143,6 +143,12 @@
       "WitnetRandomness": "0x45111778a7db1356DaAB576cBe73681F0745182c",
       "WitnetRequestBoard": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425"
     },
+    "moonbeam.moonriver": {
+      "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
+      "WitnetPriceRouter": "0xE22f48DDdcb34BD34489fE224d7fFC1b0a361D87",
+      "WitnetRandomness": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
+      "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
+    },
     "moonbeam.mainnet": {
       "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
       "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
