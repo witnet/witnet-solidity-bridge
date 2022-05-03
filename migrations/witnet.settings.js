@@ -286,6 +286,12 @@ module.exports = {
         network_id: 1284,
         skipDryRun: true,
       },
+      "moonbeam.moonriver": {
+        host: "localhost",
+        port: 7531,
+        network_id: 1285,
+        skipDrynRun: true,
+      },
       "moonbeam.moonbase": {
         host: "localhost",
         port: 8531,
