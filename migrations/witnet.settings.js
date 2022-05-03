@@ -74,6 +74,13 @@ module.exports = {
         /* _reportResultGasLimit */ 92500,
       ],
     },
+    klaytn: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 105000,
+      ],
+    },
     metis: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
@@ -262,6 +269,22 @@ module.exports = {
         network_id: 321,
         gasPrice: 10 ** 10,
         skipDryRun: true,
+      },
+    },
+    klaytn: {
+      "klaytn.testnet": {
+        host: "localhost",
+        port: 8527,
+        network_id: 1001,
+        skipDryRun: true,
+        gasPrice: 0,
+      },
+      "klaytn.mainnet": {
+        host: "localhost",
+        port: 9527,
+        network_id: 8217,
+        skipDrynRun: true,
+        gasPrice: 0,
       },
     },
     metis: {
