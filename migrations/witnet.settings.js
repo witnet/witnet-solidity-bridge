@@ -29,7 +29,7 @@ module.exports = {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
         /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 97000,
+        /* _reportResultGasLimit */ 225000,
       ],
     },
     celo: {
