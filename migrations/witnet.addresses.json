@@ -15,7 +15,7 @@
     "ethereum.mainnet": {
       "WitnetParserLib": "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",
       "WitnetPriceRouter": "0x83A757eAe821Ad7B520D9A74952337138A80b2AF",
-      "WitnetRandomness": "",
+      "WitnetRandomness": "0x894907c7Ab64C1092620B5c8Ba039BB6E611eba8",
       "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA"
     }
   },
@@ -29,7 +29,7 @@
     "avalanche.mainnet": {
       "WitnetParserLib": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
       "WitnetPriceRouter": "0xBaaF31F4AAc5ab5334b6E239a83bf4E855C55ea7",
-      "WitnetRandomness": "",
+      "WitnetRandomness": "0xa4A73a2A32320282a4d7dDe6a7467AeFA3B7950F",
       "WitnetRequestBoard": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079"
     }
   },
@@ -43,7 +43,7 @@
     "boba.mainnet": {
       "WitnetParserLib": "0x6473063EBEabC0606A4159b7d9F79BB306ED0D2A",
       "WitnetPriceRouter": "0x93f61D0D5F623144e7C390415B70102A9Cc90bA5",
-      "WitnetRandomness": "",
+      "WitnetRandomness": "0x3D7Ccf6518deBE3d2fd20c4b6AEc3FD904c0Ad29",
       "WitnetRequestBoard": "0xd3AD9a4b26527E3bA5Fc60B75Eb002D47D98e292"      
     }
   },
@@ -57,7 +57,7 @@
     "celo.mainnet": {
       "WitnetParserLib": "0x46FF6e05fd0a5fb4D794B99eCAE41c43f4D62d15",
       "WitnetPriceRouter": "0x931673904eB6E69D775e35F522c0EA35575297Cb",
-      "WitnetRandomness": "",
+      "WitnetRandomness": "0x3D7Ccf6518deBE3d2fd20c4b6AEc3FD904c0Ad29",
       "WitnetRequestBoard": "0x03E709E6422E30C033456FCde38C70A12553E468"
     }
   },
@@ -71,7 +71,7 @@
     "conflux.core.mainnet": {
       "WitnetParserLib": "0x8A026e6956B4DB3E81bb113401798e59cFBEA4C6",
       "WitnetPriceRouter": "0x806c8dFd322EE2d52b188CC472e0814F64304C32",
-      "WitnetRandomness": "",
+      "WitnetRandomness": "0x8C3824A9A6C3F5B0ac107E2c7dBc8d88c14aF6D9",
       "WitnetRequestBoard": "0x84C708bfd79bBC83Ad8753dAb1852EfE9D6712CC"
     },
     "conflux.espace.testnet": {
@@ -83,7 +83,7 @@
     "conflux.espace.mainnet": {
       "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
       "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
-      "WitnetRandomness": "0x1ebD93231a7fE551E1d6405404Df34909eff4c2C",
+      "WitnetRandomness": "0x1ebd93231a7fe551e1d6405404df34909eff4c2c",
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
@@ -97,7 +97,7 @@
     "cronos.mainnet": {
       "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
       "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
-      "WitnetRandomness": "0x1ebD93231a7fE551E1d6405404Df34909eff4c2C",
+      "WitnetRandomness": "0x3737be6FcFf5B3B0f9DCc9a9ae1Da56561D0d0d3",
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
@@ -118,7 +118,7 @@
     "kcc.mainnet": {
       "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
       "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
-      "WitnetRandomness": "",
+      "WitnetRandomness": "0x1ebd93231a7fe551e1d6405404df34909eff4c2c",
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
@@ -146,7 +146,7 @@
     "metis.mainnet": {
       "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
       "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
-      "WitnetRandomness": "",
+      "WitnetRandomness": "0xB280e3B785f615C000A8BeBb55C35eCD2376F2eb",
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
@@ -194,7 +194,7 @@
     "polygon.mainnet": {
       "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
       "WitnetPriceRouter": "0x3806311c7138ddF2bAF2C2093ff3633E5A73AbD4",
-      "WitnetRandomness": "",
+      "WitnetRandomness": "0xc8c0d4dB2D7801D6E2A863934597cFD31689f7D5",
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   }
