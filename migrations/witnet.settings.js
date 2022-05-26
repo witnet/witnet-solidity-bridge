@@ -328,13 +328,13 @@ module.exports = {
         host: "localhost",
         port: 8528,
         network_id: 65,
-        skipDyRun: true,
+        skipDryRun: true,
       },
       "okxchain.mainnet": {
         host: "localhost",
         port: 9528,
         network_id: 66,
-        skipDyRun: true,
+        skipDryRun: true,
       },
     },
     polygon: {
