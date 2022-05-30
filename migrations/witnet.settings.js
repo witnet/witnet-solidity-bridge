@@ -32,6 +32,13 @@ module.exports = {
         /* _reportResultGasLimit */ 225000,
       ],
     },
+    "boba.mainnet": {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 245000,
+      ],
+    },
     celo: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
