@@ -367,6 +367,14 @@ module.exports = {
         gasPrice: 30 * 10 ** 9,
       },
     },
+    smartbch: {
+      "smartbch.amber": {
+        host: "localhost",
+        port: 8525,
+        network_id: 10001,
+        skipDryRun: true,
+      }
+    }
   },
 }
 
