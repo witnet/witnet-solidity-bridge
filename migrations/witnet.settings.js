@@ -262,6 +262,12 @@ module.exports = {
         network_id: 2221,
         skipDryRun: true,
       },
+      "kava.mainnet": {
+        host: "localhost",
+        port: 9526,
+        network_id: 2222,
+        skipDryRun: true
+      }
     },
     kcc: {
       "kcc.testnet": {
