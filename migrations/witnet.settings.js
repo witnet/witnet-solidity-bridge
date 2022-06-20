@@ -373,6 +373,12 @@ module.exports = {
         port: 8525,
         network_id: 10001,
         skipDryRun: true,
+      },
+      "smartbch.mainnet": {
+        host: "localhost",
+        port: 9525,
+        network_id: 10000,
+        skipDryRun: true
       }
     }
   },
