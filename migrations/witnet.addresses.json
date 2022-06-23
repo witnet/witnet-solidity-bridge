@@ -108,6 +108,14 @@
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     }
   },
+  "hsc": {
+    "hsc.testnet": {
+      "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
+      "WitnetPriceRouter": "0xB4B2E2e00e9d6E5490d55623E4F403EC84c6D33f",
+      "WitnetRandomness": "0xe1330491bdC37fc4E8801843Bb3015815822F8A8",
+      "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
+    }
+  },
   "kava": {
     "kava.testnet": {
       "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
