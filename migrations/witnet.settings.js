@@ -67,6 +67,13 @@ module.exports = {
         /* _reportResultGasLimit */ 530000,
       ],
     },
+    hsc: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 85000,
+      ],
+    },
     kcc: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
@@ -252,6 +259,20 @@ module.exports = {
         host: "localhost",
         port: 8534,
         network_id: 1666700000,
+        skipDryRun: true,
+      },
+    },
+    hsc: {
+      "hsc.testnet": {
+        host: "localhost",
+        port: 8524,
+        network_id: 170,
+        skipDryRun: true,
+      },
+      "hsc.mainnet": {
+        host: "localhost",
+        port: 9524,
+        network_id: 70,
         skipDryRun: true,
       },
     },
