@@ -44,7 +44,7 @@
       "WitnetParserLib": "0x6473063EBEabC0606A4159b7d9F79BB306ED0D2A",
       "WitnetPriceRouter": "0x93f61D0D5F623144e7C390415B70102A9Cc90bA5",
       "WitnetRandomness": "0x3D7Ccf6518deBE3d2fd20c4b6AEc3FD904c0Ad29",
-      "WitnetRequestBoard": "0xd3AD9a4b26527E3bA5Fc60B75Eb002D47D98e292"      
+      "WitnetRequestBoard": "0xd3AD9a4b26527E3bA5Fc60B75Eb002D47D98e292"
     }
   },
   "celo": {
@@ -156,6 +156,14 @@
       "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
       "WitnetRandomness": "0x1ebD93231a7fE551E1d6405404Df34909eff4c2C",
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
+    }
+  },
+  "meter": {
+    "meter.testnet": {
+      "WitnetParserLib": "0x3a46EF336f619e69dcDCa36A6772596E0fD800B3",
+      "WitnetPriceRouter": "0xBbDB82a16d7b66bb076879f766042b914F1C7572",
+      "WitnetRandomness": "0x89de43D6295D960Af1F2029a66CE680c7f798fC1",
+      "WitnetRequestBoard": "0xCd4D275f88d526959D69107BB4f9FB16c5B95a9b"
     }
   },
   "metis": {

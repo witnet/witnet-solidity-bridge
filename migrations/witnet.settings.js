@@ -322,6 +322,14 @@ module.exports = {
         gasPrice: 0,
       },
     },
+    meter: {
+      "meter.testnet": {
+        host: "localhost",
+        port: 8546,
+        network_id: 83,
+        skipDryRun: true,
+      },
+    },
     metis: {
       "metis.mainnet": {
         host: "localhost",
