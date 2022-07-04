@@ -254,6 +254,14 @@ module.exports = {
         skipDryRun: true,
       },
     },
+    cube: {
+      "cube.testnet": {
+        host: "localhost",
+        port: 8522,
+        network_id: 1819,
+        skipDryRun: true,
+      },
+    },
     harmony: {
       "harmony.testnet#0": {
         host: "localhost",
