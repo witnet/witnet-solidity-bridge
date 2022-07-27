@@ -166,6 +166,20 @@
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
+  "meter": {
+    "meter.testnet": {
+      "WitnetParserLib": "0x3a46EF336f619e69dcDCa36A6772596E0fD800B3",
+      "WitnetPriceRouter": "0xBbDB82a16d7b66bb076879f766042b914F1C7572",
+      "WitnetRandomness": "0x89de43D6295D960Af1F2029a66CE680c7f798fC1",
+      "WitnetRequestBoard": "0xF99883aa51Fb76E37De6aC37854230d2337D2752"
+    },
+    "meter.mainnet": {
+      "WitnetParserLib": "0x60507Ef497EC61d407cD6Fa1c65FE820620bfA88",
+      "WitnetPriceRouter": "0xA0Ea8C99159843afdAE9eD092E8eaec0368e8A20",
+      "WitnetRandomness": "0xE189B1D26dAAB45cd344452f29Db8E93B5C7FaF1",
+      "WitnetRequestBoard": "0x4e645446799776B9670D18E1ecBCad059987eaCa"
+    }
+  },
   "metis": {
     "metis.rinkeby": {
       "WitnetParserLib": "0xAec43b0DED0148B8456B355Ec2dA3930b42bFA08",
