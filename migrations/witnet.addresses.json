@@ -13,7 +13,7 @@
       "WitnetRequestBoard": "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4"
     },
     "ethereum.mainnet": {
-      "WitnetParserLib": "0xfAB822EcFEdC440D505F731e78786C4a6b39B553",
+      "WitnetParserLib": "0xaD18Fd3CC724A11c2B0D8cc7f1B108d8A3388416",
       "WitnetPriceRouter": "0x83A757eAe821Ad7B520D9A74952337138A80b2AF",
       "WitnetRandomness": "0x894907c7Ab64C1092620B5c8Ba039BB6E611eba8",
       "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA"
