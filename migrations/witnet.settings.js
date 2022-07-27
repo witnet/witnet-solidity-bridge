@@ -88,6 +88,13 @@ module.exports = {
         /* _reportResultGasLimit */ 105000,
       ],
     },
+    meter: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 85000,
+      ],
+    },
     metis: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
@@ -343,6 +350,20 @@ module.exports = {
         network_id: 588,
         skipDryRun: true,
         gas: 30000000,
+      },
+    },
+    meter: {
+      "meter.testnet": {
+        host: "localhost",
+        port: 8523,
+        network_id: 83,
+        skipDryRun: true,
+      },
+      "meter.mainnet": {
+        host: "localhost",
+        port: 9523,
+        network_id: 82,
+        skipDryRun: true,
       },
     },
     moonbeam: {
