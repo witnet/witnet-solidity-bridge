@@ -1,12 +1,12 @@
-# witnet-solidity-bridge [![](https://travis-ci.com/witnet/witnet-solidity-bridge.svg?branch=master)](https://travis-ci.com/witnet/witnet-solidity-bridge)
+# witnet-solidity-bridge
 
-`witnet/witnet-solidity-bridge` is an open source implementation of an API that enables Solidity smart contract developers to harness the full power of the [**Witnet Decentralized Oracle Network**](https://docs.witnet.io/overview/concepts/).
+`witnet/witnet-solidity-bridge` is an open source implementation of an API that enables Solidity smart contract developers to harness the full power of the [**Witnet Decentralized Oracle Network**](https://docs.witnet.io/intro/about/).
 
 This repository provides several deployable contracts:
 
 - `WitnetParserLib`, helper library useful for parsing Witnet-solved results to previously posted Witnet Data Requests.
 - `WitnetProxy`, a delegate-proxy contract that routes Witnet Data Requests to a currently active `WitnetRequestBoard` implementation.
-- Multiple implementations of the `WitnetRequestBoard` interface (WRB), which declares all required functionality to relay encapsulated [Witnet Data Requests](https://docs.witnet.io/protocol/data-requests/overview/) from Ethereum to the Witnet mainnet, as well as to relay Witnet-solved results back to Ethereum.
+- Multiple implementations of the `WitnetRequestBoard` interface (WRB), which declares all required functionality to relay encapsulated [Witnet Data Requests](https://docs.witnet.io/intro/about/architecture#capabilities-of-data-requests/) from an EVM compatible chain to the Witnet mainnet, as well as to relay Witnet-solved results back to Ethereum.
 
 The repository also provides:
 
@@ -19,11 +19,11 @@ The repository also provides:
 
 `WitnetProxy` is an upgradable delegate-proxy contract that routes Witnet Data Requests coming from a `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
 
-To find the entry-point address of the latest deployed version of the `WitnetRequestBoard` contract in every supported chain, please visit the [Witnet documentation website](https://docs.witnet.io).
+To find the entry-point address of the latest deployed version of the `WitnetRequestBoard` contract in every supported chain, please visit the [Witnet Data Feeds Explorer](https://feeds.witnet.io/).
 
 ## **IWitnetRequest**
 
-Used as a means to encapsulate Witnet Data Requests, that can eventually be posted to a `WitnetRequestBoard` implementation. The `bytecode()` of a `IWitnetRequest` must be constructed from the CBOR-encoded serialization of a [Witnet Data Request](https://docs.witnet.io/protocol/data-requests/overview/). The `IWitnetRequest` interface defines two methods:
+Used as a means to encapsulate Witnet Data Requests, that can eventually be posted to a `WitnetRequestBoard` implementation. The `bytecode()` of a `IWitnetRequest` must be constructed from the CBOR-encoded serialization of a [Witnet Data Request](https://docs.witnet.io/intro/about/architecture#capabilities-of-data-requests/). The `IWitnetRequest` interface defines two methods:
 
 - **`bytecode()`**:
   - _Description_:
