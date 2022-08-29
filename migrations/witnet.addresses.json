@@ -107,6 +107,12 @@
       "WitnetPriceRouter": "0xB4B2E2e00e9d6E5490d55623E4F403EC84c6D33f",
       "WitnetRandomness": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
+    },
+    "cube.mainnet": {
+      "WitnetParserLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
+      "WitnetPriceRouter": "0xE22f48DDdcb34BD34489fE224d7fFC1b0a361D87",
+      "WitnetRandomness": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
+      "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
   "harmony": {
