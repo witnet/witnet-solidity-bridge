@@ -268,6 +268,14 @@ module.exports = {
         network_id: 1819,
         skipDryRun: true,
       },
+      "cube.mainnet": {
+        host: "localhost",
+        port: 9522,
+        network_id: 1818,
+        skipDryRun: true,
+        gas: 6000000,
+        gasPrice: 250 * 10 ** 9, 
+      },
     },
     harmony: {
       "harmony.testnet#0": {
