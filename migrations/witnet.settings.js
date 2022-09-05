@@ -438,6 +438,14 @@ module.exports = {
         network_id: 10000,
         skipDryRun: true
       }
+    },
+    syscoin: {
+      "syscoin.testnet": {
+        host: "localhost",
+        port: 8521,
+        network_id: 5700,
+        skipDryRun: true,
+      }
     }
   },
 }

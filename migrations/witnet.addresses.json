@@ -261,5 +261,11 @@
       "WitnetRandomness": "0x1ebD93231a7fE551E1d6405404Df34909eff4c2C",
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
+  },
+  "syscoin": {
+    "syscoin.testnet": {
+      "WitnetParserLib": "",
+      "WitnetRequestBoard": ""
+    }
   }
 }
