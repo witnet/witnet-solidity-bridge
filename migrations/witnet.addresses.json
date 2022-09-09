@@ -264,8 +264,10 @@
   },
   "syscoin": {
     "syscoin.testnet": {
-      "WitnetParserLib": "",
-      "WitnetRequestBoard": ""
+      "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
+      "WitnetPriceRouter": "0x9E943Ab1FD0D35B3BaDe31AA78D60C485EA1a604",
+      "WitnetRandomness": "0x56834Ff8D4b27db647Da97CA3bd8540f7fA0e89D",
+      "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     }
   }
 }
