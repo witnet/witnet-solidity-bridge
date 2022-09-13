@@ -9,9 +9,12 @@ module.exports = {
       WitnetRandomness: "WitnetRandomness",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
     },
+    optimism: {
+      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+    },
     reef: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
-    }
+    },
   },
   constructorParams: {
     default: {
@@ -110,6 +113,20 @@ module.exports = {
         /* _isUpgradable */ true,
         /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
         /* _reportResultGasLimit */ 115000,
+      ],
+    },
+    okxchain: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 145000,
+      ],
+    },
+    optimism: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 135000,
       ],
     },
   },
@@ -402,6 +419,14 @@ module.exports = {
         host: "localhost",
         port: 9528,
         network_id: 66,
+        skipDryRun: true,
+      },
+    },
+    optimism: {
+      "optimism.goerli": {
+        host: "localhost",
+        port: 8521,
+        network_id: 420,
         skipDryRun: true,
       },
     },
