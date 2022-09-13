@@ -234,6 +234,14 @@
       "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
     }
   },
+  "optimism": {
+    "optimism.goerli": {
+      "WitnetParserLib": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425",
+      "WitnetPriceRouter": "0xD9465D38f50f364b3263Cb219e58d4dB2D584530",
+      "WitnetRandomness": "0x9E943Ab1FD0D35B3BaDe31AA78D60C485EA1a604",
+      "WitnetRequestBoard": "0x0985FDe9f424fe4f5AC516F66bAf5591e18aCBEb"
+    }
+  },
   "polygon": {
     "polygon.goerli": {
       "WitnetParserLib": "0x70767887abBF23291B24620dE6bcEBe8d8F1e6F3",

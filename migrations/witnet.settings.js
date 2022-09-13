@@ -425,7 +425,7 @@ module.exports = {
     optimism: {
       "optimism.goerli": {
         host: "localhost",
-        port: 8521,
+        port: 8520,
         network_id: 420,
         skipDryRun: true,
       },
