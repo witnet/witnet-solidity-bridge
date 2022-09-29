@@ -429,6 +429,12 @@ module.exports = {
         network_id: 420,
         skipDryRun: true,
       },
+      "optimism.mainnet": {
+        host: "localhost",
+        port: 9520,
+        network_id: 10,
+        skipDryRun: true,
+      }
     },
     polygon: {
       "polygon.goerli": {
