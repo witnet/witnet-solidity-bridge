@@ -129,6 +129,13 @@ module.exports = {
         /* _reportResultGasLimit */ 135000,
       ],
     },
+    reef: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ "0x3100A1CAC7EF19DC",
+      ],
+    },
   },
   compilers: {
     default: {
