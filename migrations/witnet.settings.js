@@ -487,7 +487,13 @@ module.exports = {
         port: 8521,
         network_id: 5700,
         skipDryRun: true,
-      }
+      },
+      "syscoin.mainnet": {
+        host: "localhost",
+        port: 9521,
+        network_id: 57,
+        skipDryRun: true,
+      },
     },
   },
 }
