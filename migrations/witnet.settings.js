@@ -297,6 +297,14 @@ module.exports = {
         gasPrice: 250 * 10 ** 9, 
       },
     },
+    dogechain: {
+      "dogechain.testnet": {
+        host: "localhost",
+        port: 8520,
+        network_id: 568,
+        skipDryRun: true,
+      },
+    },
     harmony: {
       "harmony.testnet#0": {
         host: "localhost",
