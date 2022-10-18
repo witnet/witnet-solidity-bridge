@@ -66,6 +66,13 @@ module.exports = {
         /* _reportResultGasLimit */ 225000,
       ],
     },
+    dogechain: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 85000,
+      ],
+    },
     harmony: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
