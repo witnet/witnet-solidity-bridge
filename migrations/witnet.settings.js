@@ -300,7 +300,7 @@ module.exports = {
     dogechain: {
       "dogechain.testnet": {
         host: "localhost",
-        port: 8520,
+        port: 8519,
         network_id: 568,
         skipDryRun: true,
       },
