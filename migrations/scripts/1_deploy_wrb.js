@@ -97,16 +97,12 @@ module.exports = async function (deployer, network, accounts) {
   await deployer.deploy(
     WitnetRequestBoard,
     ...(
-      settings.constructorParams[network] && settings.constructorParams[network].WitnetRequestBoard
       // if defined, use network-specific constructor parameters:
-        ? settings.constructorParams[network].WitnetRequestBoard
-        : settings.constructorParams[realm] && settings.constructorParams[realm].WitnetRequestBoard
+      settings.constructorParams[network]?.WitnetRequestBoard
         // otherwise, use realm-specific parameters, if any:
-          ? settings.constructorParams[realm].WitnetRequestBoard
-          : settings.constructorParams.default && settings.constructorParams.default.WitnetRequestBoard
-          // or, default defined parameters for WRBs, if any:
-            ? settings.constructorParams.default.WitnetRequestBoard
-            : null
+        || settings.constructorParams[realm]?.WitnetRequestBoard
+        // or, default defined parameters for WRBs, if any:
+        ||  settings.constructorParams?.default?.WitnetRequestBoard
     )
   )
 
