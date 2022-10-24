@@ -92,6 +92,7 @@ contract("WitnetRandomnesMock", accounts => {
       )
     })
     it("fetching random number from solved randomize, works", async () => {
+      await myContract.nextBlock()
       await myContract.fetchRandomNumber()
     })
     let randomizingblock2

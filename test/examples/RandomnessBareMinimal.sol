@@ -17,6 +17,8 @@ contract RandomnessBareMinimal {
 
     receive () external payable {}
 
+    function nextBlock() external {}
+
     function requestRandomNumber() external payable {
         latestRandomizingBlock = block.number;
         uint _usedFunds = witnet.randomize{ value: msg.value }();
