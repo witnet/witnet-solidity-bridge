@@ -58,15 +58,14 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should post a data request into the wrb", async () => {
+      const gasPrice = 1e9
       lastReward = await clientContract.witnetEstimateReward({ gasPrice: 1e9 })
       requestId = await returnData(clientContract.witnetPostRequest(
         request.address,
         {
           from: accounts[1],
           value: lastReward * 2,
-          // even though lastReward*2 is sent, only lastReward should be consumed,
-          // and the rest be paid back to sender (according to UsingWitnetTestHelper implementation).
-          gasPrice: 1e9,
+          gasPrice
         }
       ))
       assert.equal(requestId, 1)
@@ -101,12 +100,13 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should upgrade the rewards of an existing data request", async () => {
+      const gasPrice = 2e9
       lastReward = await clientContract.witnetEstimateReward({ gasPrice: 2e9 })
       const currentReward = await clientContract.witnetCurrentReward.call(requestId)
       await returnData(clientContract.witnetUpgradeReward(requestId, {
         from: accounts[1],
         value: (lastReward - currentReward) * 2,
-        gasPrice: 2e9,
+        gasPrice,
       }))
     })
 
@@ -174,6 +174,8 @@ contract("UsingWitnet", accounts => {
     const ownerAccount = accounts[0]
     const reporterAccount = accounts[1]
 
+    const gasPrice = 1e9
+
     let witnet, clientContract, wrb, proxy, request, requestId, result
 
     before(async () => {
@@ -211,6 +213,7 @@ contract("UsingWitnet", accounts => {
         {
           from: accounts[0],
           value: reward,
+          gasPrice
         }
       ))
       assert.equal(requestId, 1)
@@ -253,6 +256,7 @@ contract("UsingWitnet", accounts => {
         clientContract.witnetPostRequest(request.address, {
           from: accounts[1],
           value: estimatedReward,
+          gasPrice
         }),
         "Estimated rewards should cover the gas costs"
       )

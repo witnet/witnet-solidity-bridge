@@ -15,6 +15,8 @@ contract("WitnetRandomnesMock", accounts => {
   const deployer = accounts[0]
   const stranger = accounts[1]
   const fee = 10 ** 15
+  const gasPrice = 1e9
+  
   before(async () => {
     witnet = await WitnetRandomnessMock.new(
       2, // _mockRandomizeLatencyBlock
@@ -69,7 +71,7 @@ contract("WitnetRandomnesMock", accounts => {
       const tx = await myContract.requestRandomNumber({
         value: 10 ** 18,
         from: deployer,
-        gasPrice: 1,
+        gasPrice,
       })
       const finalBalance = await balanceTracker.get()
       expect(
@@ -107,7 +109,7 @@ contract("WitnetRandomnesMock", accounts => {
         {
           value: 10 ** 18,
           from: stranger,
-          gasPrice: 1,
+          gasPrice,
         }
       )
       const finalBalance = await balanceTracker.get()

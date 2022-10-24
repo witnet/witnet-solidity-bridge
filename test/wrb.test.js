@@ -167,13 +167,14 @@ contract("WitnetRequestBoard", ([
   })
 
   describe("upgrade data request", async () => {
+
     beforeEach(async () => {
       await this.WitnetRequestBoard.postRequest(
         this.WitnetRequest.address,
         {
           from: requester,
           value: ether("1"),
-          gasPrice: 2,
+          gasPrice: 1e9,
         }
       )
     })
@@ -186,7 +187,7 @@ contract("WitnetRequestBoard", ([
       await this.WitnetRequestBoard.upgradeReward(queryId, {
         from: other,
         value: ether("1"),
-        gasPrice: 3,
+        gasPrice: 2e9,
       })
 
       // Check contract balance (increased by reward)
@@ -203,7 +204,7 @@ contract("WitnetRequestBoard", ([
       await this.WitnetRequestBoard.upgradeReward(queryId, {
         from: other,
         value: ether("1"),
-        gasPrice: 3,
+        gasPrice: 3e9,
       })
 
       // Read data request gas price from WitnetRequestBoard by `queryId`
@@ -211,8 +212,8 @@ contract("WitnetRequestBoard", ([
 
       // Check that gas price has been updated to 3 wei
       expect(
-        gasPrice.eq(new BN("3")),
-        "data request gas price should have been set to 3 wei",
+        gasPrice.eq(new BN(3e9)),
+        "data request gas price should have been set to 3 gwei",
       ).to.equal(true)
     })
     it("creator cannot decrease existing data request gas price", async () => {
@@ -220,16 +221,14 @@ contract("WitnetRequestBoard", ([
       await this.WitnetRequestBoard.upgradeReward(queryId, {
         from: requester,
         value: ether("1"),
-        gasPrice: 1,
+        gasPrice: 3e9
       })
-
       // Read data request gas price from WitnetRequestBoard by `queryId`
-      const gasPrice = await this.WitnetRequestBoard.readRequestGasPrice.call(queryId, { from: other })
-
+      gasPrice = await this.WitnetRequestBoard.readRequestGasPrice.call(queryId, { from: other })      
       // Check that gas price has not been updated to 1 wei
       expect(
-        gasPrice.eq(new BN("2")),
-        "data request gas price should not have been set to 1 wei",
+        gasPrice.eq(new BN(3e9)),
+        "data request gas price should not have been set to 1 gwei",
       ).to.equal(true)
     })
     it("fails if anyone upgrades DR with new gas price that decreases reward below gas limit", async () => {
@@ -247,14 +246,14 @@ contract("WitnetRequestBoard", ([
     it("fails if result is already reported", async () => {
       await this.WitnetRequestBoard.reportResult(
         queryId, drTxHash, resultHex,
-        { from: owner, gasPrice: 1 }
+        { from: owner, gasPrice: 1e9 }
       )
       // Update data request (increased reward)
       await expectRevert(
         this.WitnetRequestBoard.upgradeReward(queryId, {
           from: requester,
           value: ether("1"),
-          gasPrice: 3,
+          gasPrice: 3e9,
         }),
         "not in Posted status"
       )
@@ -267,10 +266,10 @@ contract("WitnetRequestBoard", ([
       await this.WitnetRequestBoard.postRequest(this.WitnetRequest.address, {
         from: requester,
         value: ether("1"),
-        gasPrice: 1,
+        gasPrice: 1e9,
       })
     })
-    it("committee members can report a request result from Witnet and it should receive the tallyReward", async () => {
+    it("committee members can report a request result from Witnet and it should receive the reward", async () => {
       // Initial balances
       const contractBalanceTracker = await balance.tracker(this.WitnetRequestBoard.address)
       const ownerBalanceTracker = await balance.tracker(owner)
@@ -280,7 +279,7 @@ contract("WitnetRequestBoard", ([
       // Report data request result from Witnet to WitnetRequestBoard
       const reportResultTx = await this.WitnetRequestBoard.reportResult(
         queryId, drTxHash, resultHex,
-        { from: owner, gasPrice: 1 }
+        { from: owner, gasPrice: 1e9 }
       )
 
       // Check `PostedRequest` event
@@ -304,9 +303,7 @@ contract("WitnetRequestBoard", ([
         "contract balance should have decreased after reporting dr request result by 1 eth",
       ).to.equal(true)
       expect(
-        ownerFinalBalance.eq(ownerInitialBalance
-          .add(ether("1")).sub(new BN(reportResultTx.receipt.gasUsed))
-        ),
+        ownerFinalBalance.gt(ownerInitialBalance),
         "Owner balance should have increased after reporting result",
       ).to.equal(true)
     })
@@ -314,7 +311,7 @@ contract("WitnetRequestBoard", ([
       await expectRevert(
         this.WitnetRequestBoard.reportResult(queryId, drTxHash, resultHex, {
           from: other,
-          gasPrice: 1,
+          gasPrice: 1e9,
         }),
         "unauthorized reporter"
       )
@@ -323,7 +320,7 @@ contract("WitnetRequestBoard", ([
       await expectRevert(
         this.WitnetRequestBoard.reportResult(
           queryId, "0x0", resultHex,
-          { from: owner, gasPrice: 1 }
+          { from: owner, gasPrice: 1e9 }
         ),
         "drTxHash cannot be zero"
       )
@@ -332,14 +329,14 @@ contract("WitnetRequestBoard", ([
       // Report data request result from Witnet to WitnetRequestBoard
       await this.WitnetRequestBoard.reportResult(
         queryId, drTxHash, resultHex,
-        { from: owner, gasPrice: 1 }
+        { from: owner, gasPrice: 1e9 }
       )
 
       // Try to report the result of the previous data request
       await expectRevert(
         this.WitnetRequestBoard.reportResult(queryId, drTxHash, resultHex, {
           from: committeeMember,
-          gasPrice: 1,
+          gasPrice: 1e9,
         }),
         "not in Posted status"
       )
@@ -348,7 +345,7 @@ contract("WitnetRequestBoard", ([
       await expectRevert(
         this.WitnetRequestBoard.reportResult(
           queryId.add(new BN(1)), drTxHash, resultHex,
-          { from: owner, gasPrice: 1 }
+          { from: owner, gasPrice: 1e9 }
         ),
         "not in Posted status"
       )
@@ -356,7 +353,7 @@ contract("WitnetRequestBoard", ([
     it("retrieves null array if trying to read bytecode from solved data request", async () => {
       await this.WitnetRequestBoard.reportResult(
         queryId, drTxHash, resultHex,
-        { from: owner, gasPrice: 1 }
+        { from: owner, gasPrice: 1e9 }
       )
       const bytecode = await this.WitnetRequestBoard.readRequestBytecode.call(queryId)
       assert(bytecode == null)
@@ -370,7 +367,7 @@ contract("WitnetRequestBoard", ([
           this.WitnetRequest.address, {
             from: requester,
             value: ether("1"),
-            gasPrice: 1,
+            gasPrice: 1e9,
           }
         )
       }
@@ -384,7 +381,7 @@ contract("WitnetRequestBoard", ([
             [3, 0, drTxHash, resultHex],
           ],
           true,
-          { from: other, gasPrice: 1 }
+          { from: other, gasPrice: 1e9 }
         ),
         "unauthorized reporter"
       )
@@ -404,7 +401,7 @@ contract("WitnetRequestBoard", ([
           [3, 0, drTxHash, resultHex],
         ],
         false,
-        { from: owner, gasPrice: 1 }
+        { from: owner, gasPrice: 1e9 }
       )
 
       // Check balances (contract decreased and claimer increased)
@@ -417,9 +414,7 @@ contract("WitnetRequestBoard", ([
         "contract balance should have decreased after reporting dr request result by 3 eth",
       ).to.equal(true)
       expect(
-        ownerFinalBalance.eq(ownerInitialBalance
-          .add(ether("3")).sub(new BN(tx.receipt.gasUsed))
-        ),
+        ownerFinalBalance.gt(ownerInitialBalance),
         "Owner balance should have increased after reporting result",
       ).to.equal(true)
 
@@ -445,7 +440,7 @@ contract("WitnetRequestBoard", ([
             [3, 0, drTxHash, resultHex],
           ],
           true,
-          { from: owner, gasPrice: 1 }
+          { from: owner, gasPrice: 1e9 }
         )
 
         // Check balances (contract decreased and claimer increased)
@@ -458,9 +453,7 @@ contract("WitnetRequestBoard", ([
           "contract balance should have decreased after reporting dr request result by 3 eth",
         ).to.equal(true)
         expect(
-          ownerFinalBalance.eq(ownerInitialBalance
-            .add(ether("1")).sub(new BN(tx.receipt.gasUsed))
-          ),
+          ownerFinalBalance.gt(ownerInitialBalance),
           "Owner balance should have increased after reporting result",
         ).to.equal(true)
 
@@ -502,7 +495,7 @@ contract("WitnetRequestBoard", ([
             [3, 0, drTxHash, resultHex],
           ],
           false,
-          { from: owner, gasPrice: 1 }
+          { from: owner, gasPrice: 1e9 }
         )
 
         // Check balances (contract decreased and claimer increased)
@@ -515,9 +508,7 @@ contract("WitnetRequestBoard", ([
           "contract balance should have decreased after reporting dr request result by 2 eth",
         ).to.equal(true)
         expect(
-          ownerFinalBalance.eq(ownerInitialBalance
-            .add(ether("2")).sub(new BN(tx.receipt.gasUsed))
-          ),
+          ownerFinalBalance.gt(ownerInitialBalance),
           "Owner balance should have increased after reporting result",
         ).to.equal(true)
 
@@ -548,7 +539,7 @@ contract("WitnetRequestBoard", ([
             [2, 4070905200 /* 2099-01-01 00:00:00 UTC */, drTxHash, resultHex],
           ],
           true,
-          { from: owner, gasPrice: 1 }
+          { from: owner, gasPrice: 1e9 }
         )
 
         // Check balances (contract decreased and claimer increased)
@@ -611,7 +602,7 @@ contract("WitnetRequestBoard", ([
       // Report data request result from Witnet to WitnetRequestBoard
       await this.WitnetRequestBoard.reportResult(queryId, drTxHash, resultHex, {
         from: committeeMember,
-        gasPrice: 1,
+        gasPrice: 1e9,
       })
     })
     it("anyone can read the data request result", async () => {
@@ -633,7 +624,7 @@ contract("WitnetRequestBoard", ([
         {
           from: requester,
           value: ether("1"),
-          gasPrice: 1,
+          gasPrice: 1e9,
         }
       )
     })
@@ -641,8 +632,8 @@ contract("WitnetRequestBoard", ([
       // Read data request gas price from WitnetRequestBoard by `queryId`
       const gasPrice = await this.WitnetRequestBoard.readRequestGasPrice.call(queryId, { from: other })
       expect(
-        gasPrice.eq(new BN("1")),
-        "data request gas price should have been set to 1 wei",
+        gasPrice.eq(new BN(1e9)),
+        "data request gas price should have been set to 1 gwei",
       ).to.equal(true)
     })
   })
@@ -668,7 +659,7 @@ contract("WitnetRequestBoard", ([
         {
           from: requester,
           value: ether("0.1"),
-          gasPrice: 1,
+          gasPrice: 1e9,
         }
       )
       drId = tx.logs[0].args[0]
@@ -676,7 +667,7 @@ contract("WitnetRequestBoard", ([
     it("fails if trying to delete data request from non requester address", async () => {
       await this.WitnetRequestBoard.reportResult(
         drId, drTxHash, resultHex,
-        { from: owner, gasPrice: 1 }
+        { from: owner, gasPrice: 1e9 }
       )
       await expectRevert(
         this.WitnetRequestBoard.deleteQuery(drId, { from: other }),
@@ -692,20 +683,20 @@ contract("WitnetRequestBoard", ([
     it("requester can delete solved data request", async () => {
       await this.WitnetRequestBoard.reportResult(
         drId, drTxHash, resultHex,
-        { from: owner, gasPrice: 1 }
+        { from: owner, gasPrice: 1e9 }
       )
       await this.WitnetRequestBoard.deleteQuery(drId, { from: requester })
     })
     it("fails if reporting result on deleted data request", async () => {
       await this.WitnetRequestBoard.reportResult(
         drId, drTxHash, resultHex,
-        { from: owner, gasPrice: 1 }
+        { from: owner, gasPrice: 1e9 }
       )
       await this.WitnetRequestBoard.deleteQuery(drId, { from: requester })
       await expectRevert(
         this.WitnetRequestBoard.reportResult(
           drId, drTxHash, resultHex,
-          { from: owner, gasPrice: 1 }
+          { from: owner, gasPrice: 1e9 }
         ),
         "not in Posted status"
       )
@@ -713,7 +704,7 @@ contract("WitnetRequestBoard", ([
     it("retrieves null array if trying to read bytecode from deleted data request", async () => {
       await this.WitnetRequestBoard.reportResult(
         drId, drTxHash, resultHex,
-        { from: owner, gasPrice: 1 }
+        { from: owner, gasPrice: 1e9 }
       )
       await this.WitnetRequestBoard.deleteQuery(drId, { from: requester })
       const bytecode = await this.WitnetRequestBoard.readRequestBytecode.call(drId)
