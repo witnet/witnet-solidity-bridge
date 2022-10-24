@@ -41,7 +41,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@eth-optimism/solc": "0.7.6-alpha.1",
     "@openzeppelin/contracts": "^4.1.0",
     "ado-contracts": "1.0.0",
     "lodash": "^4.17.21"
@@ -50,11 +49,12 @@
     "@openzeppelin/test-helpers": "0.5.5",
     "chai": "4.3.6",
     "dotenv": "8.2.0",
-    "eslint": "7.24.0",
+    "eslint": "^8.26.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.3.0",
     "eslint-plugin-promise": "^6.1.1",
+    "eth-gas-reporter": "0.2.25",
     "js-sha256": "0.9.0",
     "solhint": "3.3.4",
     "solidity-coverage": "0.7.16",
