@@ -19,6 +19,8 @@ contract UsingWitnetTestHelper is UsingWitnet {
     UsingWitnet(_wrb)
   {}
 
+  receive() external payable {}
+
   function witnetPostRequest(IWitnetRequest _request)
     external payable
     returns(uint256 _id)
@@ -55,8 +57,8 @@ contract UsingWitnetTestHelper is UsingWitnet {
     return witnet.readRequestReward(_requestId);
   }
 
-  function witnetEstimateReward() external view returns (uint256) {
-    return _witnetEstimateReward();
+  function witnetEstimateReward(uint256 _gasPrice) external view returns (uint256) {
+    return witnet.estimateReward(_gasPrice);
   }
 
   function witnetAsUint64() external view returns (uint64) {

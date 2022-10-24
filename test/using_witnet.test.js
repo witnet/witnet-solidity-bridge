@@ -59,7 +59,7 @@ contract("UsingWitnet", accounts => {
 
     it("should post a data request into the wrb", async () => {
       const gasPrice = 1e9
-      lastReward = await clientContract.witnetEstimateReward({ gasPrice: 1e9 })
+      lastReward = await clientContract.witnetEstimateReward(gasPrice)
       requestId = await returnData(clientContract.witnetPostRequest(
         request.address,
         {
@@ -101,7 +101,7 @@ contract("UsingWitnet", accounts => {
 
     it("should upgrade the rewards of an existing data request", async () => {
       const gasPrice = 2e9
-      lastReward = await clientContract.witnetEstimateReward({ gasPrice: 2e9 })
+      lastReward = await clientContract.witnetEstimateReward(gasPrice)
       const currentReward = await clientContract.witnetCurrentReward.call(requestId)
       await returnData(clientContract.witnetUpgradeReward(requestId, {
         from: accounts[1],
@@ -251,7 +251,7 @@ contract("UsingWitnet", accounts => {
     })
 
     it("should be able to estimate gas cost and post the DR", async () => {
-      const estimatedReward = await clientContract.witnetEstimateReward.call()
+      const estimatedReward = await clientContract.witnetEstimateReward.call(gasPrice)
       await truffleAssert.passes(
         clientContract.witnetPostRequest(request.address, {
           from: accounts[1],
