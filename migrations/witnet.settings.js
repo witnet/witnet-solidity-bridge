@@ -301,7 +301,7 @@ module.exports = {
         network_id: 1818,
         skipDryRun: true,
         gas: 6000000,
-        gasPrice: 250 * 10 ** 9, 
+        gasPrice: 250 * 10 ** 9,
       },
     },
     dogechain: {
@@ -345,8 +345,8 @@ module.exports = {
         host: "localhost",
         port: 9526,
         network_id: 2222,
-        skipDryRun: true
-      }
+        skipDryRun: true,
+      },
     },
     kcc: {
       "kcc.testnet": {
@@ -456,7 +456,7 @@ module.exports = {
         port: 9520,
         network_id: 10,
         skipDryRun: true,
-      }
+      },
     },
     polygon: {
       "polygon.goerli": {
@@ -480,7 +480,7 @@ module.exports = {
         port: 8532,
         network_id: 13939,
         skipDryRun: true,
-      }
+      },
     },
     smartbch: {
       "smartbch.amber": {
@@ -493,8 +493,8 @@ module.exports = {
         host: "localhost",
         port: 9525,
         network_id: 10000,
-        skipDryRun: true
-      }
+        skipDryRun: true,
+      },
     },
     syscoin: {
       "syscoin.testnet": {

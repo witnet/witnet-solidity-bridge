@@ -65,7 +65,7 @@ contract("UsingWitnet", accounts => {
         {
           from: accounts[1],
           value: lastReward * 2,
-          gasPrice
+          gasPrice,
         }
       ))
       assert.equal(requestId, 1)
@@ -213,7 +213,7 @@ contract("UsingWitnet", accounts => {
         {
           from: accounts[0],
           value: reward,
-          gasPrice
+          gasPrice,
         }
       ))
       assert.equal(requestId, 1)
@@ -256,7 +256,7 @@ contract("UsingWitnet", accounts => {
         clientContract.witnetPostRequest(request.address, {
           from: accounts[1],
           value: estimatedReward,
-          gasPrice
+          gasPrice,
         }),
         "Estimated rewards should cover the gas costs"
       )

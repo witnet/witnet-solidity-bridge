@@ -16,7 +16,7 @@ contract("WitnetRandomnesMock", accounts => {
   const stranger = accounts[1]
   const fee = 10 ** 15
   const gasPrice = 1e9
-  
+
   before(async () => {
     witnet = await WitnetRandomnessMock.new(
       2, // _mockRandomizeLatencyBlock

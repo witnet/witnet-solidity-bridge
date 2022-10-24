@@ -71,7 +71,7 @@ contract("WitnetRequestBoard", ([
         postDataRequestTx,
         "PostedRequest",
         {
-          queryId: queryId,
+          queryId,
         }
       )
       expect(postDataRequestTx.logs[0].args.queryId, "match data request id").to.be.bignumber.equal(queryId)
@@ -105,7 +105,7 @@ contract("WitnetRequestBoard", ([
         postDataRequestTx1,
         "PostedRequest",
         {
-          queryId: queryId,
+          queryId,
         })
       expect(postDataRequestTx1.logs[0].args.queryId, "match data request id").to.be.bignumber.equal(queryId)
       // Check `PostedRequest` events
@@ -167,7 +167,6 @@ contract("WitnetRequestBoard", ([
   })
 
   describe("upgrade data request", async () => {
-
     beforeEach(async () => {
       await this.WitnetRequestBoard.postRequest(
         this.WitnetRequest.address,
@@ -221,10 +220,10 @@ contract("WitnetRequestBoard", ([
       await this.WitnetRequestBoard.upgradeReward(queryId, {
         from: requester,
         value: ether("1"),
-        gasPrice: 3e9
+        gasPrice: 3e9,
       })
       // Read data request gas price from WitnetRequestBoard by `queryId`
-      gasPrice = await this.WitnetRequestBoard.readRequestGasPrice.call(queryId, { from: other })      
+      const gasPrice = await this.WitnetRequestBoard.readRequestGasPrice.call(queryId, { from: other })
       // Check that gas price has not been updated to 1 wei
       expect(
         gasPrice.eq(new BN(3e9)),
@@ -287,7 +286,7 @@ contract("WitnetRequestBoard", ([
         reportResultTx,
         "PostedResult",
         {
-          queryId: queryId,
+          queryId,
         },
       )
       expect(reportResultTx.logs[0].args.queryId, "match data request id").to.be.bignumber.equal(queryId)
