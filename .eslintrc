@@ -4,13 +4,18 @@
     "browser": false,
     "node": true,
     "jest": true,
-    "mocha": true
+    "mocha": true,
+    "es2021": true
   },
   "globals" : {
     "artifacts": false,
     "contract": false,
     "assert": false,
     "web3": false
+  },
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
   },
   "rules": {
     "comma-dangle": ["error", {
