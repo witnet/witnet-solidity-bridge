@@ -7,6 +7,7 @@ pragma experimental ABIEncoderV2;
 
 import "./WitnetRequestBoardTrustableDefault.sol";
 
+// solhint-disable-next-line
 interface OVM_GasPriceOracle {
     function getL1Fee(bytes calldata _data) external view returns (uint256);
 }
