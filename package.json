@@ -1,7 +1,7 @@
 {
   "name": "witnet-solidity-bridge",
-  "version": "0.5.7",
-  "description": "Witnet Solidity Bridge contracts for EVM-compatible networks",
+  "version": "0.6.0",
+  "description": "Witnet Solidity Bridge contracts for EVM-compatible chains",
   "main": "",
   "scripts": {
     "addresses": "node ./scripts/addresses.js 2>&1",
