@@ -17,7 +17,6 @@ import "./WitnetProxy.sol";
 /// @author The Witnet Foundation.
 abstract contract WitnetRequestBoardUpgradableBase
     is
-        Proxiable,
         Upgradable,
         WitnetRequestBoard
 {

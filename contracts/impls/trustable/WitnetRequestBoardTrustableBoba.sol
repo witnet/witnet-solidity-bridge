@@ -18,8 +18,7 @@ import "../../interfaces/IERC20.sol";
 /// @author The Witnet Foundation
 contract WitnetRequestBoardTrustableBoba
     is
-        Payable,
-        WitnetRequestBoardTrustableBase
+    WitnetRequestBoardTrustableBase
 {
     uint256 internal lastBalance;
     uint256 internal immutable _OVM_GAS_PRICE;
