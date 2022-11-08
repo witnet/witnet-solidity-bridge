@@ -31,7 +31,7 @@ module.exports = {
       excludeContracts: ["Migrations"],
       src: "contracts",
     },
-    timeout: 100000,
+    timeout: 300000,
     useColors: true,
   },
 }

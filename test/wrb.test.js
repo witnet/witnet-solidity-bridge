@@ -737,7 +737,7 @@ contract("WitnetRequestBoard", ([
       it("fails if trying to destruct from non owner address", async () => {
         await expectRevert(
           this.WitnetRequestBoard.destruct({ from: other }),
-          "only owner"
+          "not the owner"
         )
       })
       it("instance gets actually destructed", async () => {
