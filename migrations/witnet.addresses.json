@@ -121,6 +121,12 @@
       "WitnetPriceRouter": "0x9E943Ab1FD0D35B3BaDe31AA78D60C485EA1a604",
       "WitnetRandomness": "0xD9465D38f50f364b3263Cb219e58d4dB2D584530",      
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
+    },
+    "dogechain.mainnet": {
+      "WitnetParserLib": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
+      "WitnetPriceRouter": "0xD7f7933992c25A504e9Ddf7e76a3c1D6c432b25D",
+      "WitnetRandomness": "0x7FdB9CDe98967140a5627dA5221DBC03Bd8e8ad5",
+      "WitnetRequestBoard": "0xF2712e7114A237625EFC8bBA6a6ed1Bb8b6029c9"
     }
   },
   "harmony": {

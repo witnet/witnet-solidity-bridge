@@ -311,6 +311,12 @@ module.exports = {
         network_id: 568,
         skipDryRun: true,
       },
+      "dogechain.mainnet": {
+        host: "localhost",
+        port: 9519,
+        network_id: 2000,
+        skipDryRun: true,
+      },
     },
     harmony: {
       "harmony.testnet#0": {
