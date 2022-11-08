@@ -6,7 +6,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "./WitnetRequestBoardTrustableBase.sol";
-import "../../patterns/Destructible.sol";
+import "../../../patterns/Destructible.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.

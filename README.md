@@ -4,7 +4,7 @@
 
 This repository provides several deployable contracts:
 
-- `WitnetParserLib`, helper library useful for parsing Witnet-solved results to previously posted Witnet Data Requests.
+- `WitnetLib`, helper library useful for parsing Witnet-solved results to previously posted Witnet Data Requests.
 - `WitnetProxy`, a delegate-proxy contract that routes Witnet Data Requests to a currently active `WitnetRequestBoard` implementation.
 - Multiple implementations of the `WitnetRequestBoard` interface (WRB), which declares all required functionality to relay encapsulated [Witnet Data Requests](https://docs.witnet.io/intro/about/architecture#capabilities-of-data-requests/) from an EVM compatible chain to the Witnet mainnet, as well as to relay Witnet-solved results back to Ethereum.
 
@@ -295,9 +295,9 @@ Please, have a look at the [`witnet/truffle-box`](https://github.com/witnet/truf
 ·······································|···························|·············|·············|·············|··············|··············
 |  Deployments                                                     ·                                         ·  % of limit  ·             │
 ···································································|·············|·············|·············|··············|··············
-|  WitnetDecoderLib                                                ·          -  ·          -  ·    2036059  ·      30.3 %  ·          -  │
+|  WitnetCBOR                                                ·          -  ·          -  ·    2036059  ·      30.3 %  ·          -  │
 ···································································|·············|·············|·············|··············|··············
-|  WitnetParserLib                                                 ·          -  ·          -  ·    2627933  ·      39.1 %  ·          -  │
+|  WitnetLib                                                 ·          -  ·          -  ·    2627933  ·      39.1 %  ·          -  │
 ···································································|·············|·············|·············|··············|··············
 |  WitnetProxy                                                     ·          -  ·          -  ·     574794  ·       8.6 %  ·          -  │
 ···································································|·············|·············|·············|··············|··············

@@ -10,7 +10,7 @@ module.exports = async function (deployer, network, accounts) {
   const addresses = require("../witnet.addresses")[realm][network = network.split("-")[0]]
   const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
 
-  let WitnetParserLib, WitnetDecoderLib
+  let WitnetLib
   let WitnetProxy, WitnetRequestBoard
   let upgradeProxy = false
 
@@ -50,36 +50,23 @@ module.exports = async function (deployer, network, accounts) {
     }
   }
 
-  /* Try to find 'WitnetParserLib' artifact, and deployed address if any */
+  /* Try to find 'WitnetLib' artifact, and deployed address if any */
   try {
-    WitnetParserLib = artifacts.require(artifactsName.WitnetParserLib)
-    if (!WitnetParserLib.isDeployed() || WitnetParserLib.address !== addresses.WitnetParserLib) {
-      // If the 'WitnetParserLib' is found, try to read deployed address from addresses file:
-      if (addresses) WitnetParserLib.address = addresses.WitnetParserLib
+    WitnetLib = artifacts.require(artifactsName.WitnetLib)
+    if (!WitnetLib.isDeployed() || WitnetLib.address !== addresses.Witnetib) {
+      // If the 'WitnetLib' is found, try to read deployed address from addresses file:
+      if (addresses) WitnetLib.address = addresses.WitnetLib
     }
   } catch {
-    console.error(`\n   Fatal: '${artifactsName.WitnetParserLib}' artifact not found.\n`)
+    console.error(`\n   Fatal: '${artifactsName.WitnetLib}' artifact not found.\n`)
     process.exit(1)
   }
 
-  /* Deploy new instance of 'WitnetParserLib', and 'WitnetDecoderLib', if neccesary */
-  if (!WitnetParserLib.isDeployed() || utils.isNullAddress(WitnetParserLib.address)) {
-    // Fetch the 'WitnetDecoderLib' artifact:
-    try {
-      WitnetDecoderLib = artifacts.require(artifactsName.WitnetDecoderLib)
-    } catch {
-      console.error(`\n   Fatal: '${artifactsName.WitnetDecoderLib}' artifact not found.\n`)
-      process.exit(1)
-    }
-    // Deploy the 'WitnetDecoderLib' artifact first, if not done yet:
-    if (!WitnetDecoderLib.isDeployed()) {
-      await deployer.deploy(WitnetDecoderLib)
-      // and link the just-deployed 'WitnetDecoderLib' to the 'WitnetParserLib' artifact:
-      await deployer.link(WitnetDecoderLib, WitnetParserLib)
-    }
-    await deployer.deploy(WitnetParserLib)
+  /* Deploy new instance of 'WitnetLib', if neccesary */
+  if (!WitnetLib.isDeployed() || utils.isNullAddress(WitnetLib.address)) {
+    await deployer.deploy(WitnetLib)
   } else {
-    console.log(`\n   Skipped: '${artifactsName.WitnetParserLib}' deployed at ${WitnetParserLib.address}.`)
+    console.log(`\n   Skipped: '${artifactsName.WitnetLib}' deployed at ${WitnetLib.address}.`)
   }
 
   /* Deploy new instance of target 'WitnetRequestBoard' implementation */
@@ -93,7 +80,7 @@ module.exports = async function (deployer, network, accounts) {
     }
   }
 
-  await deployer.link(WitnetParserLib, WitnetRequestBoard)
+  await deployer.link(WitnetLib, WitnetRequestBoard)
   await deployer.deploy(
     WitnetRequestBoard,
     ...(
@@ -131,7 +118,7 @@ module.exports = async function (deployer, network, accounts) {
       console.log(`   >> WRB address:        ${await proxy.implementation.call()}`)
       console.log(`   >> WRB proxiableUUID:  ${await wrb.proxiableUUID.call()}`)
       console.log(`   >> WRB codehash:       ${await wrb.codehash.call()}`)
-      console.log(`   >> WRB version tag:    ${web3.utils.hexToString(await wrb.version.call())}`)
+      console.log(`   >> WRB version tag:    ${await wrb.version.call()}`)
     } else {
       console.log(`   >> WRB addresses:      ${oldAddr} => ${await proxy.implementation.call()}`)
       console.log(`   >> WRB proxiableUUID:  ${await wrb.proxiableUUID.call()}`)

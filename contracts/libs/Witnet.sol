@@ -3,6 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
+import "./WitnetCBOR.sol";
 import "../interfaces/IWitnetRequest.sol";
 
 library Witnet {
@@ -48,23 +49,7 @@ library Witnet {
     /// Data struct containing the Witnet-provided result to a Data Request.
     struct Result {
         bool success;           // Flag stating whether the request could get solved successfully, or not.
-        CBOR value;             // Resulting value, in CBOR-serialized bytes.
-    }
-
-    /// Data struct following the RFC-7049 standard: Concise Binary Object Representation.
-    struct CBOR {
-        Buffer buffer;
-        uint8 initialByte;
-        uint8 majorType;
-        uint8 additionalInformation;
-        uint64 len;
-        uint64 tag;
-    }
-
-    /// Iterable bytes buffer.
-    struct Buffer {
-        bytes data;
-        uint32 cursor;
+        WitnetCBOR.CBOR value;             // Resulting value, in CBOR-serialized bytes.
     }
 
     /// Witnet error codes table.

@@ -7,8 +7,8 @@ import "../interfaces/IERC20.sol";
 abstract contract Payable {
     IERC20 public immutable currency;
 
-    event Received(address from, uint256 amount);
-    event Transfer(address to, uint256 amount);
+    event Received(address from, uint256 value);
+    event Transfer(address to, uint256 value);
 
     constructor(address _currency) {
         currency = IERC20(_currency);
