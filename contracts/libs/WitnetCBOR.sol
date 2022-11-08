@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitnetBuffer.sol";
 
@@ -16,32 +15,42 @@ import "./WitnetBuffer.sol";
 /// TODO: add support for Float32 (majorType = 7, additionalInformation = 26)
 /// TODO: add support for Float64 (majorType = 7, additionalInformation = 27) 
 
-library WitnetDecoderLib {
+library WitnetCBOR {
 
-  using WitnetBuffer for Witnet.Buffer;
+  using WitnetBuffer for WitnetBuffer.Buffer;
+
+  /// Data struct following the RFC-7049 standard: Concise Binary Object Representation.
+  struct CBOR {
+      WitnetBuffer.Buffer buffer;
+      uint8 initialByte;
+      uint8 majorType;
+      uint8 additionalInformation;
+      uint64 len;
+      uint64 tag;
+  }
 
   uint32 constant internal _UINT32_MAX = type(uint32).max;
   uint64 constant internal _UINT64_MAX = type(uint64).max;
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `bool` value.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @notice Decode a `CBOR` structure into a native `bool` value.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as a `bool` value.
-  function decodeBool(Witnet.CBOR memory _cborValue) public pure returns(bool) {
+  function decodeBool(CBOR memory _cborValue) internal pure returns(bool) {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(_cborValue.majorType == 7, "WitnetDecoderLib: Tried to read a `bool` value from a `Witnet.CBOR` with majorType != 7");
+    require(_cborValue.majorType == 7, "WitnetCBOR: Tried to read a `bool` value from a `CBOR` with majorType != 7");
     if (_cborValue.len == 20) {
       return false;
     } else if (_cborValue.len == 21) {
       return true;
     } else {
-      revert("WitnetDecoderLib: Tried to read `bool` from a `Witnet.CBOR` with len different than 20 or 21");
+      revert("WitnetCBOR: Tried to read `bool` from a `CBOR` with len different than 20 or 21");
     }
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `bytes` value.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @notice Decode a `CBOR` structure into a native `bytes` value.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as a `bytes` value.   
-  function decodeBytes(Witnet.CBOR memory _cborValue) public pure returns(bytes memory) {
+  function decodeBytes(CBOR memory _cborValue) internal pure returns(bytes memory) {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
     if (_cborValue.len == _UINT32_MAX) {
       bytes memory bytesData;
@@ -61,10 +70,10 @@ library WitnetDecoderLib {
     }
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `bytes32` value.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @notice Decode a `CBOR` structure into a native `bytes32` value.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return _bytes32 The value represented by the input, as a `bytes32` value.
-  function decodeBytes32(Witnet.CBOR memory _cborValue) public pure returns(bytes32 _bytes32) {
+  function decodeBytes32(CBOR memory _cborValue) internal pure returns(bytes32 _bytes32) {
     bytes memory _bb = decodeBytes(_cborValue);
     uint _len = _bb.length > 32 ? 32 : _bb.length;
     for (uint _i = 0; _i < _len; _i ++) {
@@ -72,41 +81,41 @@ library WitnetDecoderLib {
     }
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a `fixed16` value.
+  /// @notice Decode a `CBOR` structure into a `fixed16` value.
   /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
   /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`
   /// use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as an `int128` value.
-  function decodeFixed16(Witnet.CBOR memory _cborValue) public pure returns(int32) {
-    require(_cborValue.majorType == 7, "WitnetDecoderLib: Tried to read a `fixed` value from a `WT.CBOR` with majorType != 7");
-    require(_cborValue.additionalInformation == 25, "WitnetDecoderLib: Tried to read `fixed16` from a `WT.CBOR` with additionalInformation != 25");
+  function decodeFixed16(CBOR memory _cborValue) internal pure returns(int32) {
+    require(_cborValue.majorType == 7, "WitnetCBOR: Tried to read a `fixed` value from a `WT.CBOR` with majorType != 7");
+    require(_cborValue.additionalInformation == 25, "WitnetCBOR: Tried to read `fixed16` from a `WT.CBOR` with additionalInformation != 25");
     return _cborValue.buffer.readFloat16();
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `int128[]` value whose inner values follow the same convention.
+  /// @notice Decode a `CBOR` structure into a native `int128[]` value whose inner values follow the same convention.
   /// as explained in `decodeFixed16`.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as an `int128[]` value.
-  function decodeFixed16Array(Witnet.CBOR memory _cborValue) external pure returns(int32[] memory) {
-    require(_cborValue.majorType == 4, "WitnetDecoderLib: Tried to read `int128[]` from a `Witnet.CBOR` with majorType != 4");
+  function decodeFixed16Array(CBOR memory _cborValue) internal pure returns(int32[] memory) {
+    require(_cborValue.majorType == 4, "WitnetCBOR: Tried to read `int128[]` from a `CBOR` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(length < _UINT64_MAX, "WitnetDecoderLib: Indefinite-length CBOR arrays are not supported");
+    require(length < _UINT64_MAX, "WitnetCBOR: Indefinite-length CBOR arrays are not supported");
 
     int32[] memory array = new int32[](length);
     for (uint64 i = 0; i < length; i++) {
-      Witnet.CBOR memory item = valueFromBuffer(_cborValue.buffer);
+      CBOR memory item = valueFromBuffer(_cborValue.buffer);
       array[i] = decodeFixed16(item);
     }
 
     return array;
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `int128` value.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @notice Decode a `CBOR` structure into a native `int128` value.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as an `int128` value.
-  function decodeInt128(Witnet.CBOR memory _cborValue) public pure returns(int128) {
+  function decodeInt128(CBOR memory _cborValue) internal pure returns(int128) {
     if (_cborValue.majorType == 1) {
       uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
       return int128(-1) - int128(uint128(length));
@@ -115,31 +124,31 @@ library WitnetDecoderLib {
       // a uniform API for positive and negative numbers
       return int128(uint128(decodeUint64(_cborValue)));
     }
-    revert("WitnetDecoderLib: Tried to read `int128` from a `Witnet.CBOR` with majorType not 0 or 1");
+    revert("WitnetCBOR: Tried to read `int128` from a `CBOR` with majorType not 0 or 1");
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `int128[]` value.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @notice Decode a `CBOR` structure into a native `int128[]` value.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as an `int128[]` value.
-  function decodeInt128Array(Witnet.CBOR memory _cborValue) external pure returns(int128[] memory) {
-    require(_cborValue.majorType == 4, "WitnetDecoderLib: Tried to read `int128[]` from a `Witnet.CBOR` with majorType != 4");
+  function decodeInt128Array(CBOR memory _cborValue) internal pure returns(int128[] memory) {
+    require(_cborValue.majorType == 4, "WitnetCBOR: Tried to read `int128[]` from a `CBOR` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(length < _UINT64_MAX, "WitnetDecoderLib: Indefinite-length CBOR arrays are not supported");
+    require(length < _UINT64_MAX, "WitnetCBOR: Indefinite-length CBOR arrays are not supported");
 
     int128[] memory array = new int128[](length);
     for (uint64 i = 0; i < length; i++) {
-      Witnet.CBOR memory item = valueFromBuffer(_cborValue.buffer);
+      CBOR memory item = valueFromBuffer(_cborValue.buffer);
       array[i] = decodeInt128(item);
     }
 
     return array;
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `string` value.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @notice Decode a `CBOR` structure into a native `string` value.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as a `string` value.
-  function decodeString(Witnet.CBOR memory _cborValue) public pure returns(string memory) {
+  function decodeString(CBOR memory _cborValue) internal pure returns(string memory) {
     _cborValue.len = readLength(_cborValue.buffer, _cborValue.additionalInformation);
     if (_cborValue.len == _UINT64_MAX) {
       bytes memory textData;
@@ -158,66 +167,66 @@ library WitnetDecoderLib {
     }
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `string[]` value.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @notice Decode a `CBOR` structure into a native `string[]` value.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as an `string[]` value.
-  function decodeStringArray(Witnet.CBOR memory _cborValue) external pure returns(string[] memory) {
-    require(_cborValue.majorType == 4, "WitnetDecoderLib: Tried to read `string[]` from a `Witnet.CBOR` with majorType != 4");
+  function decodeStringArray(CBOR memory _cborValue) internal pure returns(string[] memory) {
+    require(_cborValue.majorType == 4, "WitnetCBOR: Tried to read `string[]` from a `CBOR` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(length < _UINT64_MAX, "WitnetDecoderLib: Indefinite-length CBOR arrays are not supported");
+    require(length < _UINT64_MAX, "WitnetCBOR: Indefinite-length CBOR arrays are not supported");
 
     string[] memory array = new string[](length);
     for (uint64 i = 0; i < length; i++) {
-      Witnet.CBOR memory item = valueFromBuffer(_cborValue.buffer);
+      CBOR memory item = valueFromBuffer(_cborValue.buffer);
       array[i] = decodeString(item);
     }
 
     return array;
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `uint64` value.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @notice Decode a `CBOR` structure into a native `uint64` value.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as an `uint64` value.
-  function decodeUint64(Witnet.CBOR memory _cborValue) public pure returns(uint64) {
-    require(_cborValue.majorType == 0, "WitnetDecoderLib: Tried to read `uint64` from a `Witnet.CBOR` with majorType != 0");
+  function decodeUint64(CBOR memory _cborValue) internal pure returns(uint64) {
+    require(_cborValue.majorType == 0, "WitnetCBOR: Tried to read `uint64` from a `CBOR` with majorType != 0");
     return readLength(_cborValue.buffer, _cborValue.additionalInformation);
   }
 
-  /// @notice Decode a `Witnet.CBOR` structure into a native `uint64[]` value.
-  /// @param _cborValue An instance of `Witnet.CBOR`.
+  /// @notice Decode a `CBOR` structure into a native `uint64[]` value.
+  /// @param _cborValue An instance of `CBOR`.
   /// @return The value represented by the input, as an `uint64[]` value.
-  function decodeUint64Array(Witnet.CBOR memory _cborValue) external pure returns(uint64[] memory) {
-    require(_cborValue.majorType == 4, "WitnetDecoderLib: Tried to read `uint64[]` from a `Witnet.CBOR` with majorType != 4");
+  function decodeUint64Array(CBOR memory _cborValue) internal pure returns(uint64[] memory) {
+    require(_cborValue.majorType == 4, "WitnetCBOR: Tried to read `uint64[]` from a `CBOR` with majorType != 4");
 
     uint64 length = readLength(_cborValue.buffer, _cborValue.additionalInformation);
-    require(length < _UINT64_MAX, "WitnetDecoderLib: Indefinite-length CBOR arrays are not supported");
+    require(length < _UINT64_MAX, "WitnetCBOR: Indefinite-length CBOR arrays are not supported");
 
     uint64[] memory array = new uint64[](length);
     for (uint64 i = 0; i < length; i++) {
-      Witnet.CBOR memory item = valueFromBuffer(_cborValue.buffer);
+      CBOR memory item = valueFromBuffer(_cborValue.buffer);
       array[i] = decodeUint64(item);
     }
 
     return array;
   }
 
-  /// @notice Decode a Witnet.CBOR structure from raw bytes.
-  /// @dev This is the main factory for Witnet.CBOR instances, which can be later decoded into native EVM types.
+  /// @notice Decode a CBOR structure from raw bytes.
+  /// @dev This is the main factory for CBOR instances, which can be later decoded into native EVM types.
   /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
-  /// @return A `Witnet.CBOR` instance containing a partially decoded value.
-  function valueFromBytes(bytes memory _cborBytes) external pure returns(Witnet.CBOR memory) {
-    Witnet.Buffer memory buffer = Witnet.Buffer(_cborBytes, 0);
+  /// @return A `CBOR` instance containing a partially decoded value.
+  function valueFromBytes(bytes memory _cborBytes) internal pure returns(CBOR memory) {
+    WitnetBuffer.Buffer memory buffer = WitnetBuffer.Buffer(_cborBytes, 0);
 
     return valueFromBuffer(buffer);
   }
 
-  /// @notice Decode a Witnet.CBOR structure from raw bytes.
-  /// @dev This is an alternate factory for Witnet.CBOR instances, which can be later decoded into native EVM types.
+  /// @notice Decode a CBOR structure from raw bytes.
+  /// @dev This is an alternate factory for CBOR instances, which can be later decoded into native EVM types.
   /// @param _buffer A Buffer structure representing a CBOR-encoded value.
-  /// @return A `Witnet.CBOR` instance containing a partially decoded value.
-  function valueFromBuffer(Witnet.Buffer memory _buffer) public pure returns(Witnet.CBOR memory) {
-    require(_buffer.data.length > 0, "WitnetDecoderLib: Found empty buffer when parsing CBOR value");
+  /// @return A `CBOR` instance containing a partially decoded value.
+  function valueFromBuffer(WitnetBuffer.Buffer memory _buffer) internal pure returns(CBOR memory) {
+    require(_buffer.data.length > 0, "WitnetCBOR: Found empty buffer when parsing CBOR value");
 
     uint8 initialByte;
     uint8 majorType = 255;
@@ -239,9 +248,9 @@ library WitnetDecoderLib {
       }
     }
 
-    require(majorType <= 7, "WitnetDecoderLib: Invalid CBOR major type");
+    require(majorType <= 7, "WitnetCBOR: Invalid CBOR major type");
 
-    return Witnet.CBOR(
+    return CBOR(
       _buffer,
       initialByte,
       majorType,
@@ -252,7 +261,7 @@ library WitnetDecoderLib {
 
   /// Reads the length of the next CBOR item from a buffer, consuming a different number of bytes depending on the
   /// value of the `additionalInformation` argument.
-  function readLength(Witnet.Buffer memory _buffer, uint8 additionalInformation) private pure returns(uint64) {
+  function readLength(WitnetBuffer.Buffer memory _buffer, uint8 additionalInformation) private pure returns(uint64) {
     if (additionalInformation < 24) {
       return additionalInformation;
     }
@@ -271,25 +280,25 @@ library WitnetDecoderLib {
     if (additionalInformation == 31) {
       return _UINT64_MAX;
     }
-    revert("WitnetDecoderLib: Invalid length encoding (non-existent additionalInformation value)");
+    revert("WitnetCBOR: Invalid length encoding (non-existent additionalInformation value)");
   }
 
   /// Read the length of a CBOR indifinite-length item (arrays, maps, byte strings and text) from a buffer, consuming
   /// as many bytes as specified by the first byte.
-  function readIndefiniteStringLength(Witnet.Buffer memory _buffer, uint8 majorType) private pure returns(uint64) {
+  function readIndefiniteStringLength(WitnetBuffer.Buffer memory _buffer, uint8 majorType) private pure returns(uint64) {
     uint8 initialByte = _buffer.readUint8();
     if (initialByte == 0xff) {
       return _UINT64_MAX;
     }
     uint64 length = readLength(_buffer, initialByte & 0x1f);
-    require(length < _UINT64_MAX && (initialByte >> 5) == majorType, "WitnetDecoderLib: Invalid indefinite length");
+    require(length < _UINT64_MAX && (initialByte >> 5) == majorType, "WitnetCBOR: Invalid indefinite length");
     return length;
   }
 
   /// Read a text string of a given length from a buffer. Returns a `bytes memory` value for the sake of genericness,
   /// but it can be easily casted into a string with `string(result)`.
   // solium-disable-next-line security/no-assign-params
-  function readText(Witnet.Buffer memory _buffer, uint64 _length) private pure returns(bytes memory) {
+  function readText(WitnetBuffer.Buffer memory _buffer, uint64 _length) private pure returns(bytes memory) {
     bytes memory result;
     for (uint64 index = 0; index < _length; index++) {
       uint8 value = _buffer.readUint8();

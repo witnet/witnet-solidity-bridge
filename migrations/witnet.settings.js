@@ -2,8 +2,7 @@ const packageJson = require("../package.json")
 module.exports = {
   artifacts: {
     default: {
-      WitnetDecoderLib: "WitnetDecoderLib",
-      WitnetParserLib: "WitnetParserLib",
+      WitnetLib: "WitnetLib",
       WitnetPriceRouter: "WitnetPriceRouter",
       WitnetProxy: "WitnetProxy",
       WitnetRandomness: "WitnetRandomness",

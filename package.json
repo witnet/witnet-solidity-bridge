@@ -14,7 +14,7 @@
     "flatten": "node ./scripts/flatten.js 2>&1",
     "flatten:witnet": "npm run clean && npm run flatten:witnet:libs && npm run flatten:witnet:proxy && npm run flatten:witnet:boards && npm run flatten:witnet:rng && npm run flatten:witnet:registry",
     "flatten:witnet:rng": "npm run flatten contracts/apps/WitnetRandomness.sol && npm run flatten contracts/requests/WitnetRequestRandomness.sol",
-    "flatten:witnet:libs": "npm run flatten contracts/libs/WitnetDecoderLib.sol && npm run flatten contracts/libs/WitnetParserLib.sol",
+    "flatten:witnet:libs": "npm run flatten contracts/libs/WitnetLib.sol",
     "flatten:witnet:proxy": "npm run flatten contracts/impls/WitnetProxy.sol",
     "flatten:witnet:registry": "npm run flatten contracts/apps/WitnetPriceRouter.sol",
     "flatten:witnet:boards": "npm run flatten:witnet:boards:trustable",
@@ -41,8 +41,9 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.7.3",
     "ado-contracts": "1.0.0",
+    "@eth-optimism/solc": "0.7.6-alpha.1",
+    "@openzeppelin/contracts": "~4.8.0-rc.2",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

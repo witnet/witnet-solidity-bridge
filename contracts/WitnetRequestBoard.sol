@@ -17,8 +17,4 @@ abstract contract WitnetRequestBoard is
     IWitnetRequestBoardRequestor,
     IWitnetRequestBoardView,
     IWitnetRequestParser
-{
-    receive() external payable {
-        revert("WitnetRequestBoard: no transfers accepted");
-    }
-}
+{}
