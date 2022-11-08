@@ -9,7 +9,7 @@ pragma experimental ABIEncoderV2;
 import "./WitnetRequestBoardTrustableBase.sol";
 
 // Uses:
-import "../../interfaces/IERC20.sol";
+import "../../../interfaces/IERC20.sol";
 
 /// @title Witnet Request Board OVM-compatible (Optimism) "trustable" implementation.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.

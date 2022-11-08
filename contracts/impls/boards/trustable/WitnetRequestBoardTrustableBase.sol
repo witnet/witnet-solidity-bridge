@@ -3,12 +3,12 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../WitnetRequestBoardUpgradableBase.sol";
-import "../../data/WitnetBoardDataACLs.sol";
-import "../../interfaces/IWitnetRequestBoardAdmin.sol";
-import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
-import "../../libs/WitnetParserLib.sol";
-import "../../patterns/Payable.sol";
+import "../../WitnetUpgradableBase.sol";
+import "../../../WitnetRequestBoard.sol";
+import "../../../data/WitnetBoardDataACLs.sol";
+import "../../../interfaces/IWitnetRequestBoardAdminACLs.sol";
+import "../../../libs/WitnetLib.sol";
+import "../../../patterns/Payable.sol";
 
 /// @title Witnet Request Board "trustable" base implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -17,19 +17,42 @@ import "../../patterns/Payable.sol";
 /// @author The Witnet Foundation
 abstract contract WitnetRequestBoardTrustableBase
     is 
-        Payable,
-        IWitnetRequestBoardAdmin,
-        IWitnetRequestBoardAdminACLs,        
+        WitnetUpgradableBase,
+        WitnetRequestBoard,
         WitnetBoardDataACLs,
-        WitnetRequestBoardUpgradableBase        
+        IWitnetRequestBoardAdminACLs,
+        Payable 
 {
     using Witnet for bytes;
-    using WitnetParserLib for Witnet.Result;
+    using WitnetLib for Witnet.Result;
     
-    constructor(bool _upgradable, bytes32 _versionTag, address _currency)
+    constructor(
+            bool _upgradable,
+            bytes32 _versionTag,
+            address _currency
+        )
         Payable(_currency)
-        WitnetRequestBoardUpgradableBase(_upgradable, _versionTag)
+        WitnetUpgradableBase(_upgradable, _versionTag, "io.witnet.proxiable.board")
     {}
+
+    receive() external payable override {
+        revert("WitnetRequestBoardTrustableBase: no transfers accepted");
+    }
+
+
+    // ================================================================================================================
+    // --- Overrides IERC165 interface --------------------------------------------------------------------------------
+
+    /// @dev See {IERC165-supportsInterface}.
+    function supportsInterface(bytes4 _interfaceId)
+      public view
+      virtual override
+      returns (bool)
+    {
+        return _interfaceId == type(WitnetRequestBoard).interfaceId
+            || _interfaceId == type(IWitnetRequestBoardAdminACLs).interfaceId
+            || super.supportsInterface(_interfaceId);
+    }
 
 
     // ================================================================================================================
@@ -85,7 +108,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
     /// Transfers ownership.
     function transferOwnership(address _newOwner)
-        external
+        public
         virtual override
         onlyOwner
     {
@@ -226,7 +249,7 @@ abstract contract WitnetRequestBoardTrustableBase
     ///         - data request result in raw bytes.
     /// @param _verbose If true, emits a BatchReportError event for every failing report, if any. 
     function reportResultBatch(
-            BatchResult[] memory _batchResults,
+            IWitnetRequestBoardReporter.BatchResult[] memory _batchResults,
             bool _verbose
         )
         external
@@ -537,7 +560,7 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (Witnet.Result memory)
     {
         Witnet.Response storage _response = _getResponseData(_queryId);
-        return WitnetParserLib.resultFromCborBytes(_response.cborBytes);
+        return WitnetLib.resultFromCborBytes(_response.cborBytes);
     }
 
     /// Retrieves the timestamp in which the result to the referred query was solved by the Witnet DON.
@@ -564,18 +587,18 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (Witnet.Result memory)
     {
-        return WitnetParserLib.resultFromCborBytes(_cborBytes);
+        return WitnetLib.resultFromCborBytes(_cborBytes);
     }
 
     /// Decode a CBOR value into a Witnet.Result instance.
     /// @param _cborValue An instance of `Witnet.CBOR`.
     /// @return A `Witnet.Result` instance.
-    function resultFromCborValue(Witnet.CBOR memory _cborValue)
+    function resultFromCborValue(WitnetCBOR.CBOR memory _cborValue)
         external pure
         override
         returns (Witnet.Result memory)
     {
-        return WitnetParserLib.resultFromCborValue(_cborValue);
+        return WitnetLib.resultFromCborValue(_cborValue);
     }
 
     /// Tell if a Witnet.Result is successful.

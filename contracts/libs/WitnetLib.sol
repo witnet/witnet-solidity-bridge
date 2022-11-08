@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
-import "./WitnetDecoderLib.sol";
+import "./Witnet.sol";
 
 /// @title A library for decoding Witnet request results
 /// @notice The library exposes functions to check the Witnet request success.
 /// and retrieve Witnet results from CBOR values into solidity types.
 /// @author The Witnet Foundation.
-library WitnetParserLib {
+library WitnetLib {
 
-    using WitnetDecoderLib for bytes;
-    using WitnetDecoderLib for Witnet.CBOR;
+    using WitnetCBOR for bytes;
+    using WitnetCBOR for WitnetCBOR.CBOR;
 
     /// @notice Decode raw CBOR bytes into a Witnet.Result instance.
     /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
@@ -21,14 +20,14 @@ library WitnetParserLib {
         external pure
         returns (Witnet.Result memory)
     {
-        Witnet.CBOR memory cborValue = _cborBytes.valueFromBytes();
+        WitnetCBOR.CBOR memory cborValue = _cborBytes.valueFromBytes();
         return resultFromCborValue(cborValue);
     }
 
     /// @notice Decode a CBOR value into a Witnet.Result instance.
     /// @param _cborValue An instance of `Witnet.Value`.
     /// @return A `Witnet.Result` instance.
-    function resultFromCborValue(Witnet.CBOR memory _cborValue)
+    function resultFromCborValue(WitnetCBOR.CBOR memory _cborValue)
         public pure
         returns (Witnet.Result memory)    
     {
@@ -65,7 +64,7 @@ library WitnetParserLib {
         external pure
         returns(bytes memory)
     {
-        require(_result.success, "WitnetParserLib: Tried to read bytes value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read bytes value from errored Witnet.Result");
         return _result.value.decodeBytes();
     }
 
@@ -76,7 +75,7 @@ library WitnetParserLib {
         external pure
         returns(bytes32)
     {
-        require(_result.success, "WitnetParserLib: tried to read bytes32 value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: tried to read bytes32 value from errored Witnet.Result");
         return _result.value.decodeBytes32();
     }
 
@@ -227,7 +226,7 @@ library WitnetParserLib {
     {
         require(
             !_result.success,
-            "WitnetParserLib: Tried to read error code from successful Witnet.Result"
+            "WitnetLib: Tried to read error code from successful Witnet.Result"
         );
         return _result.value.decodeUint64Array();
     }
@@ -239,7 +238,7 @@ library WitnetParserLib {
         external pure
         returns (bool)
     {
-        require(_result.success, "WitnetParserLib: Tried to read `bool` value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read `bool` value from errored Witnet.Result");
         return _result.value.decodeBool();
     }
 
@@ -253,7 +252,7 @@ library WitnetParserLib {
         external pure
         returns (int32)
     {
-        require(_result.success, "WitnetParserLib: Tried to read `fixed16` value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read `fixed16` value from errored Witnet.Result");
         return _result.value.decodeFixed16();
     }
 
@@ -264,7 +263,7 @@ library WitnetParserLib {
         external pure
         returns (int32[] memory)
     {
-        require(_result.success, "WitnetParserLib: Tried to read `fixed16[]` value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read `fixed16[]` value from errored Witnet.Result");
         return _result.value.decodeFixed16Array();
     }
 
@@ -275,7 +274,7 @@ library WitnetParserLib {
       external pure
       returns (int128)
     {
-        require(_result.success, "WitnetParserLib: Tried to read `int128` value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read `int128` value from errored Witnet.Result");
         return _result.value.decodeInt128();
     }
 
@@ -286,7 +285,7 @@ library WitnetParserLib {
         external pure
         returns (int128[] memory)
     {
-        require(_result.success, "WitnetParserLib: Tried to read `int128[]` value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read `int128[]` value from errored Witnet.Result");
         return _result.value.decodeInt128Array();
     }
 
@@ -297,7 +296,7 @@ library WitnetParserLib {
         external pure
         returns(string memory)
     {
-        require(_result.success, "WitnetParserLib: Tried to read `string` value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read `string` value from errored Witnet.Result");
         return _result.value.decodeString();
     }
 
@@ -308,7 +307,7 @@ library WitnetParserLib {
         external pure
         returns (string[] memory)
     {
-        require(_result.success, "WitnetParserLib: Tried to read `string[]` value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read `string[]` value from errored Witnet.Result");
         return _result.value.decodeStringArray();
     }
 
@@ -319,7 +318,7 @@ library WitnetParserLib {
         external pure
         returns(uint64)
     {
-        require(_result.success, "WitnetParserLib: Tried to read `uint64` value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read `uint64` value from errored Witnet.Result");
         return _result.value.decodeUint64();
     }
 
@@ -330,7 +329,7 @@ library WitnetParserLib {
         external pure
         returns (uint64[] memory)
     {
-        require(_result.success, "WitnetParserLib: Tried to read `uint64[]` value from errored Witnet.Result");
+        require(_result.success, "WitnetLib: Tried to read `uint64[]` value from errored Witnet.Result");
         return _result.value.decodeUint64Array();
     }
 

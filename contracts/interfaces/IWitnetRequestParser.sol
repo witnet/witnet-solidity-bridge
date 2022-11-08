@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../libs/Witnet.sol";
+import "../libs/WitnetCBOR.sol";
 
 /// @title The Witnet interface for decoding Witnet-provided request to Data Requests.
 /// This interface exposes functions to check for the success/failure of
@@ -20,7 +21,7 @@ interface IWitnetRequestParser {
     /// Decode a CBOR value into a Witnet.Result instance.
     /// @param _cborValue An instance of `Witnet.CBOR`.
     /// @return A `Witnet.Result` instance.
-    function resultFromCborValue(Witnet.CBOR memory _cborValue) external pure returns (Witnet.Result memory);
+    function resultFromCborValue(WitnetCBOR.CBOR memory _cborValue) external pure returns (Witnet.Result memory);
 
     /// Tell if a Witnet.Result is successful.
     /// @param _result An instance of Witnet.Result.

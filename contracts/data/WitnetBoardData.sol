@@ -39,12 +39,6 @@ abstract contract WitnetBoardData {
         _;
     }
 
-    /// Asserts caller corresponds to the current owner. 
-    modifier onlyOwner {
-        require(msg.sender == _state().owner, "WitnetBoardData: only owner");
-        _;    
-    }
-
     /// Asserts the give query was actually posted before calling this method.
     modifier wasPosted(uint256 _queryId) {
         require(_queryId > 0 && _queryId <= _state().numQueries, "WitnetBoardData: not yet posted");

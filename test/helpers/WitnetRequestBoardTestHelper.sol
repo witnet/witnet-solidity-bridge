@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../contracts/impls/trustable/WitnetRequestBoardTrustableDefault.sol";
+import "../../contracts/impls/boards/trustable/WitnetRequestBoardTrustableDefault.sol";
 
 /**
  * @title Witnet Requests Board Version 1

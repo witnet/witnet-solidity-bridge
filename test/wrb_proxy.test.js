@@ -3,7 +3,7 @@ const settings = require("../migrations/witnet.settings")
 const { assert } = require("chai")
 const truffleAssert = require("truffle-assertions")
 
-const WitnetParser = artifacts.require(settings.artifacts.default.WitnetParserLib)
+const WitnetLib = artifacts.require(settings.artifacts.default.WitnetLib)
 
 const WitnetRequest = artifacts.require("WitnetRequestTestHelper")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoardTestHelper")
@@ -24,8 +24,8 @@ contract("Witnet Requests Board Proxy", accounts => {
     let wrb
 
     before(async () => {
-      witnet = await WitnetParser.deployed()
-      await WitnetRequestBoard.link(WitnetParser, witnet.address)
+      witnet = await WitnetLib.deployed()
+      await WitnetRequestBoard.link(WitnetLib, witnet.address)
       wrbInstance1 = await WitnetRequestBoard.new([contractOwner], true)
       wrbInstance2 = await WitnetRequestBoard.new([contractOwner], true)
       wrbInstance3 = await WitnetRequestBoard.new([contractOwner], false)

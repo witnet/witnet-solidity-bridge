@@ -2,8 +2,7 @@ const packageJson = require("../package.json")
 module.exports = {
   artifacts: {
     default: {
-      WitnetDecoderLib: "WitnetDecoderLib",
-      WitnetParserLib: "WitnetParserLib",
+      WitnetLib: "WitnetLib",
       WitnetPriceRouter: "WitnetPriceRouter",
       WitnetProxy: "WitnetProxy",
       WitnetRandomness: "WitnetRandomness",
@@ -309,6 +308,12 @@ module.exports = {
         host: "localhost",
         port: 8519,
         network_id: 568,
+        skipDryRun: true,
+      },
+      "dogechain.mainnet": {
+        host: "localhost",
+        port: 9519,
+        network_id: 2000,
         skipDryRun: true,
       },
     },
