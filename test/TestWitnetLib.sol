@@ -4,36 +4,36 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "truffle/Assert.sol";
-import "../contracts/libs/WitnetParserLib.sol";
+import "../contracts/libs/WitnetLib.sol";
 
-contract TestWitnetParserLib {
+contract TestWitnetLib {
 
-  using WitnetParserLib for Witnet.Result;
+  using WitnetLib for Witnet.Result;
 
-  // Test the `WitnetParserLib.stageNames` pure method, which gives strings with the names for the different Witnet request
+  // Test the `WitnetLib.stageNames` pure method, which gives strings with the names for the different Witnet request
   // stages
   function testStageNames() external {
-    Assert.equal(WitnetParserLib.stageName(0), "retrieval", "Stage name for stage #1 should be \"retrieval\"");
-    Assert.equal(WitnetParserLib.stageName(1), "aggregation", "Stage name for stage #1 should be \"aggregation\"");
-    Assert.equal(WitnetParserLib.stageName(2), "tally", "Stage name for stage #1 should be \"tally\"");
+    Assert.equal(WitnetLib.stageName(0), "retrieval", "Stage name for stage #1 should be \"retrieval\"");
+    Assert.equal(WitnetLib.stageName(1), "aggregation", "Stage name for stage #1 should be \"aggregation\"");
+    Assert.equal(WitnetLib.stageName(2), "tally", "Stage name for stage #1 should be \"tally\"");
     
   }
 
   // Test decoding of `RadonError` error codes
   function testErrorCodes1() external {
-    Witnet.ErrorCodes errorCodeEmpty = WitnetParserLib.resultFromCborBytes(hex"D82780").asErrorCode();
-    Witnet.ErrorCodes errorCode0x00 = WitnetParserLib.resultFromCborBytes(hex"D8278100").asErrorCode();
-    Witnet.ErrorCodes errorCode0x01 = WitnetParserLib.resultFromCborBytes(hex"D8278101").asErrorCode();
-    Witnet.ErrorCodes errorCode0x02 = WitnetParserLib.resultFromCborBytes(hex"D8278102").asErrorCode();
-    Witnet.ErrorCodes errorCode0x03 = WitnetParserLib.resultFromCborBytes(hex"D8278103").asErrorCode();
-    Witnet.ErrorCodes errorCode0x10 = WitnetParserLib.resultFromCborBytes(hex"D8278110").asErrorCode();
-    Witnet.ErrorCodes errorCode0x11 = WitnetParserLib.resultFromCborBytes(hex"D8278111").asErrorCode();
-    Witnet.ErrorCodes errorCode0x20 = WitnetParserLib.resultFromCborBytes(hex"D827811820").asErrorCode();
-    Witnet.ErrorCodes errorCode0x30 = WitnetParserLib.resultFromCborBytes(hex"D827811830").asErrorCode();
-    Witnet.ErrorCodes errorCode0x31 = WitnetParserLib.resultFromCborBytes(hex"D827811831").asErrorCode();
-    Witnet.ErrorCodes errorCode0x40 = WitnetParserLib.resultFromCborBytes(hex"D827811840").asErrorCode();
-    Witnet.ErrorCodes errorCode0x41 = WitnetParserLib.resultFromCborBytes(hex"D827811841").asErrorCode();
-    Witnet.ErrorCodes errorCode0x42 = WitnetParserLib.resultFromCborBytes(hex"D827811842").asErrorCode();
+    Witnet.ErrorCodes errorCodeEmpty = WitnetLib.resultFromCborBytes(hex"D82780").asErrorCode();
+    Witnet.ErrorCodes errorCode0x00 = WitnetLib.resultFromCborBytes(hex"D8278100").asErrorCode();
+    Witnet.ErrorCodes errorCode0x01 = WitnetLib.resultFromCborBytes(hex"D8278101").asErrorCode();
+    Witnet.ErrorCodes errorCode0x02 = WitnetLib.resultFromCborBytes(hex"D8278102").asErrorCode();
+    Witnet.ErrorCodes errorCode0x03 = WitnetLib.resultFromCborBytes(hex"D8278103").asErrorCode();
+    Witnet.ErrorCodes errorCode0x10 = WitnetLib.resultFromCborBytes(hex"D8278110").asErrorCode();
+    Witnet.ErrorCodes errorCode0x11 = WitnetLib.resultFromCborBytes(hex"D8278111").asErrorCode();
+    Witnet.ErrorCodes errorCode0x20 = WitnetLib.resultFromCborBytes(hex"D827811820").asErrorCode();
+    Witnet.ErrorCodes errorCode0x30 = WitnetLib.resultFromCborBytes(hex"D827811830").asErrorCode();
+    Witnet.ErrorCodes errorCode0x31 = WitnetLib.resultFromCborBytes(hex"D827811831").asErrorCode();
+    Witnet.ErrorCodes errorCode0x40 = WitnetLib.resultFromCborBytes(hex"D827811840").asErrorCode();
+    Witnet.ErrorCodes errorCode0x41 = WitnetLib.resultFromCborBytes(hex"D827811841").asErrorCode();
+    Witnet.ErrorCodes errorCode0x42 = WitnetLib.resultFromCborBytes(hex"D827811842").asErrorCode();
     Assert.equal(
       uint(errorCodeEmpty),
       uint(Witnet.ErrorCodes.Unknown),
@@ -102,17 +102,17 @@ contract TestWitnetParserLib {
   }
 
   function testErrorCodes2() external {
-    Witnet.ErrorCodes errorCode0x50 = WitnetParserLib.resultFromCborBytes(hex"D827811850").asErrorCode();
-    Witnet.ErrorCodes errorCode0x51 = WitnetParserLib.resultFromCborBytes(hex"D827811851").asErrorCode();
-    Witnet.ErrorCodes errorCode0x52 = WitnetParserLib.resultFromCborBytes(hex"D827811852").asErrorCode();
-    Witnet.ErrorCodes errorCode0x53 = WitnetParserLib.resultFromCborBytes(hex"D827811853").asErrorCode();
-    Witnet.ErrorCodes errorCode0x60 = WitnetParserLib.resultFromCborBytes(hex"D827811860").asErrorCode();
-    Witnet.ErrorCodes errorCode0x70 = WitnetParserLib.resultFromCborBytes(hex"D827811870").asErrorCode();
-    Witnet.ErrorCodes errorCode0x71 = WitnetParserLib.resultFromCborBytes(hex"D827811871").asErrorCode();
-    Witnet.ErrorCodes errorCode0xE0 = WitnetParserLib.resultFromCborBytes(hex"D8278118E0").asErrorCode();
-    Witnet.ErrorCodes errorCode0xE1 = WitnetParserLib.resultFromCborBytes(hex"D8278118E1").asErrorCode();
-    Witnet.ErrorCodes errorCode0xE2 = WitnetParserLib.resultFromCborBytes(hex"D8278118E2").asErrorCode();
-    Witnet.ErrorCodes errorCode0xFF = WitnetParserLib.resultFromCborBytes(hex"D8278118FF").asErrorCode();
+    Witnet.ErrorCodes errorCode0x50 = WitnetLib.resultFromCborBytes(hex"D827811850").asErrorCode();
+    Witnet.ErrorCodes errorCode0x51 = WitnetLib.resultFromCborBytes(hex"D827811851").asErrorCode();
+    Witnet.ErrorCodes errorCode0x52 = WitnetLib.resultFromCborBytes(hex"D827811852").asErrorCode();
+    Witnet.ErrorCodes errorCode0x53 = WitnetLib.resultFromCborBytes(hex"D827811853").asErrorCode();
+    Witnet.ErrorCodes errorCode0x60 = WitnetLib.resultFromCborBytes(hex"D827811860").asErrorCode();
+    Witnet.ErrorCodes errorCode0x70 = WitnetLib.resultFromCborBytes(hex"D827811870").asErrorCode();
+    Witnet.ErrorCodes errorCode0x71 = WitnetLib.resultFromCborBytes(hex"D827811871").asErrorCode();
+    Witnet.ErrorCodes errorCode0xE0 = WitnetLib.resultFromCborBytes(hex"D8278118E0").asErrorCode();
+    Witnet.ErrorCodes errorCode0xE1 = WitnetLib.resultFromCborBytes(hex"D8278118E1").asErrorCode();
+    Witnet.ErrorCodes errorCode0xE2 = WitnetLib.resultFromCborBytes(hex"D8278118E2").asErrorCode();
+    Witnet.ErrorCodes errorCode0xFF = WitnetLib.resultFromCborBytes(hex"D8278118FF").asErrorCode();
     Assert.equal(
       uint(errorCode0x50),
       uint(Witnet.ErrorCodes.NoReveals),
@@ -172,20 +172,20 @@ contract TestWitnetParserLib {
 
   // Test decoding of `RadonError` error messages
   function testErrorMessages() external {
-    (, string memory errorMessageEmpty) = WitnetParserLib.resultFromCborBytes(hex"D82780").asErrorMessage();
-    (, string memory errorMessage0x00) = WitnetParserLib.resultFromCborBytes(hex"D8278100").asErrorMessage();
-    (, string memory errorMessage0x01) = WitnetParserLib.resultFromCborBytes(hex"D827820102").asErrorMessage();
-    (, string memory errorMessage0x02) = WitnetParserLib.resultFromCborBytes(hex"D827820203").asErrorMessage();
-    (, string memory errorMessage0x03) = WitnetParserLib.resultFromCborBytes(hex"D827820304").asErrorMessage();
-    (, string memory errorMessage0x10) = WitnetParserLib.resultFromCborBytes(hex"D827821005").asErrorMessage();
-    (, string memory errorMessage0x11) = WitnetParserLib.resultFromCborBytes(hex"D8278411000708").asErrorMessage();
-    (, string memory errorMessage0x20) = WitnetParserLib.resultFromCborBytes(hex"D8278518200108090A").asErrorMessage();
-    (, string memory errorMessage0x30) = WitnetParserLib.resultFromCborBytes(hex"D82783183008190141").asErrorMessage();
-    (, string memory errorMessage0x31) = WitnetParserLib.resultFromCborBytes(hex"D82782183109").asErrorMessage();
-    (, string memory errorMessage0x40) = WitnetParserLib.resultFromCborBytes(hex"D82785184002090A0B").asErrorMessage();
-    (, string memory errorMessage0x41) = WitnetParserLib.resultFromCborBytes(hex"D827851841000A0B0C").asErrorMessage();
-    (, string memory errorMessage0x42) = WitnetParserLib.resultFromCborBytes(hex"D827851842010B0C0D").asErrorMessage();
-    (, string memory errorMessage0xFF) = WitnetParserLib.resultFromCborBytes(hex"D8278118FF").asErrorMessage();
+    (, string memory errorMessageEmpty) = WitnetLib.resultFromCborBytes(hex"D82780").asErrorMessage();
+    (, string memory errorMessage0x00) = WitnetLib.resultFromCborBytes(hex"D8278100").asErrorMessage();
+    (, string memory errorMessage0x01) = WitnetLib.resultFromCborBytes(hex"D827820102").asErrorMessage();
+    (, string memory errorMessage0x02) = WitnetLib.resultFromCborBytes(hex"D827820203").asErrorMessage();
+    (, string memory errorMessage0x03) = WitnetLib.resultFromCborBytes(hex"D827820304").asErrorMessage();
+    (, string memory errorMessage0x10) = WitnetLib.resultFromCborBytes(hex"D827821005").asErrorMessage();
+    (, string memory errorMessage0x11) = WitnetLib.resultFromCborBytes(hex"D8278411000708").asErrorMessage();
+    (, string memory errorMessage0x20) = WitnetLib.resultFromCborBytes(hex"D8278518200108090A").asErrorMessage();
+    (, string memory errorMessage0x30) = WitnetLib.resultFromCborBytes(hex"D82783183008190141").asErrorMessage();
+    (, string memory errorMessage0x31) = WitnetLib.resultFromCborBytes(hex"D82782183109").asErrorMessage();
+    (, string memory errorMessage0x40) = WitnetLib.resultFromCborBytes(hex"D82785184002090A0B").asErrorMessage();
+    (, string memory errorMessage0x41) = WitnetLib.resultFromCborBytes(hex"D827851841000A0B0C").asErrorMessage();
+    (, string memory errorMessage0x42) = WitnetLib.resultFromCborBytes(hex"D827851842010B0C0D").asErrorMessage();
+    (, string memory errorMessage0xFF) = WitnetLib.resultFromCborBytes(hex"D8278118FF").asErrorMessage();
     Assert.equal(
       errorMessageEmpty,
       "Unknown error (no error code)",
@@ -259,9 +259,9 @@ contract TestWitnetParserLib {
   }
 
   function testBridgeErrorMessages() external { 
-    (, string memory errorMessage0xE0) = WitnetParserLib.resultFromCborBytes(hex"D8278118E0").asErrorMessage();
-    (, string memory errorMessage0xE1) = WitnetParserLib.resultFromCborBytes(hex"D8278118E1").asErrorMessage();
-    (, string memory errorMessage0xE2) = WitnetParserLib.resultFromCborBytes(hex"D8278118E2").asErrorMessage();  
+    (, string memory errorMessage0xE0) = WitnetLib.resultFromCborBytes(hex"D8278118E0").asErrorMessage();
+    (, string memory errorMessage0xE1) = WitnetLib.resultFromCborBytes(hex"D8278118E1").asErrorMessage();
+    (, string memory errorMessage0xE2) = WitnetLib.resultFromCborBytes(hex"D8278118E2").asErrorMessage();  
 
     Assert.equal(
       errorMessage0xE0,

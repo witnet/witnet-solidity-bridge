@@ -22,7 +22,7 @@ abstract contract Upgradable is Initializable, Proxiable {
         address indexed from,
         address indexed baseAddr,
         bytes32 indexed baseCodehash,
-        bytes32 versionTag
+        string  versionTag
     );
 
     constructor (bool _isUpgradable) {
@@ -38,7 +38,6 @@ abstract contract Upgradable is Initializable, Proxiable {
 
     /// @dev Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address from) virtual external view returns (bool);
-
 
     /// TODO: the following methods should be all declared as pure 
     ///       whenever this Solidity's PR gets merged and released: 
@@ -62,5 +61,5 @@ abstract contract Upgradable is Initializable, Proxiable {
     }
 
     /// @dev Retrieves human-redable named version of current implementation.
-    function version() virtual public view returns (bytes32); 
+    function version() virtual public view returns (string memory); 
 }

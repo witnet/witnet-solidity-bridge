@@ -4,7 +4,7 @@ const { expectRevert } = require("@openzeppelin/test-helpers")
 
 const WRB = artifacts.require(settings.artifacts.default.WitnetRequestBoard)
 const WRBProxy = artifacts.require(settings.artifacts.default.WitnetProxy)
-const WitnetParser = artifacts.require(settings.artifacts.default.WitnetParserLib)
+const WitnetLib = artifacts.require(settings.artifacts.default.WitnetLib)
 
 const UsingWitnetTestHelper = artifacts.require("UsingWitnetTestHelper")
 const WitnetRequest = artifacts.require("WitnetRequestTestHelper")
@@ -26,7 +26,7 @@ contract("UsingWitnet", accounts => {
     const reporterAccount = accounts[1]
 
     before(async () => {
-      witnet = await WitnetParser.deployed()
+      witnet = await WitnetLib.deployed()
       if (!proxy) {
         // create one and only proxy contract:
         proxy = await WRBProxy.new({ from: ownerAccount })
@@ -46,7 +46,7 @@ contract("UsingWitnet", accounts => {
         // ...from owner account.
         { from: ownerAccount }
       )
-      await UsingWitnetTestHelper.link(WitnetParser, witnet.address)
+      await UsingWitnetTestHelper.link(WitnetLib, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(proxy.address)
       lastAccount1Balance = await web3.eth.getBalance(accounts[1])
     })
@@ -179,7 +179,7 @@ contract("UsingWitnet", accounts => {
     let witnet, clientContract, wrb, proxy, request, requestId, result
 
     before(async () => {
-      witnet = await WitnetParser.deployed()
+      witnet = await WitnetLib.deployed()
       if (!proxy) {
         // create one and only proxy contract:
         proxy = await WRBProxy.new()
@@ -197,7 +197,7 @@ contract("UsingWitnet", accounts => {
           { from: ownerAccount }
         )
       }
-      await UsingWitnetTestHelper.link(WitnetParser, witnet.address)
+      await UsingWitnetTestHelper.link(WitnetLib, witnet.address)
       clientContract = await UsingWitnetTestHelper.new(wrb.address)
     })
 

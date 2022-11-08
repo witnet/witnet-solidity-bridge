@@ -3,10 +3,20 @@ const readline = require("readline")
 const web3 = require("web3")
 
 module.exports = {
+  fromAscii,
   getRealmNetworkFromArgs,
   getRealmNetworkFromString,
   isNullAddress,
   prompt,
+}
+
+function fromAscii (str) {
+  const arr1 = []
+  for (let n = 0, l = str.length; n < l; n++) {
+    const hex = Number(str.charCodeAt(n)).toString(16)
+    arr1.push(hex)
+  }
+  return "0x" + arr1.join("")
 }
 
 function getRealmNetworkFromArgs () {
