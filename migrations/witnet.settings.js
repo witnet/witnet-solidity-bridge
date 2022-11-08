@@ -215,13 +215,13 @@ module.exports = {
       },
     },
     boba: {
-      "boba.mainnet": {
+      "boba.ethereum.mainnet": {
         network_id: 288,
         host: "localhost",
         port: 9539,
         skipDryRun: true,
       },
-      "boba.rinkeby": {
+      "boba.ethereum.rinkeby": {
         network_id: 28,
         host: "localhost",
         port: 8539,

@@ -34,13 +34,13 @@
     }
   },
   "boba": {
-    "boba.rinkeby": {
+    "boba.ethereum.rinkeby": {
       "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
       "WitnetPriceRouter": "0x36928Aeedaaf7D85bcA39aDfB2A39ec529ce221a",
       "WitnetRandomness": "0xeAcAcC48eDD5221EC7182E1789d8bFa9dF801dFF",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
     },
-    "boba.mainnet": {
+    "boba.ethereum.mainnet": {
       "WitnetParserLib": "0x6473063EBEabC0606A4159b7d9F79BB306ED0D2A",
       "WitnetPriceRouter": "0x93f61D0D5F623144e7C390415B70102A9Cc90bA5",
       "WitnetRandomness": "0x3D7Ccf6518deBE3d2fd20c4b6AEc3FD904c0Ad29",
