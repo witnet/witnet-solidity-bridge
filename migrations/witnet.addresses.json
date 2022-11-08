@@ -34,6 +34,12 @@
     }
   },
   "boba": {
+    "boba.moonbeam.bobabase": {
+      "WitnetParserLib": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425",
+      "WitnetPriceRouter": "0xD9465D38f50f364b3263Cb219e58d4dB2D584530",
+      "WitnetRandomness": "0xB4B2E2e00e9d6E5490d55623E4F403EC84c6D33f",
+      "WitnetRequestBoard": "0x0985FDe9f424fe4f5AC516F66bAf5591e18aCBEb"
+    },
     "boba.ethereum.rinkeby": {
       "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
       "WitnetPriceRouter": "0x36928Aeedaaf7D85bcA39aDfB2A39ec529ce221a",

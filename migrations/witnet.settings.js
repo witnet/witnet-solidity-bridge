@@ -215,6 +215,12 @@ module.exports = {
       },
     },
     boba: {
+      "boba.moonbeam.bobabase": {
+        network_id: 1297,
+        host: "localhost",
+        port: 8518,
+        skipDryRun: true,
+      },
       "boba.ethereum.mainnet": {
         network_id: 288,
         host: "localhost",
