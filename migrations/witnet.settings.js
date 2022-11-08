@@ -147,7 +147,7 @@ module.exports = {
   compilers: {
     default: {
       solc: {
-        version: "0.8.17",
+        version: "0.8.13",
         settings: {
           optimizer: {
             enabled: true,
