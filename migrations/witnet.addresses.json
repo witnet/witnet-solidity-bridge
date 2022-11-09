@@ -19,6 +19,14 @@
       "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA"
     }
   },
+  "arbitrum": {
+    "arbitrum.goerli": {
+      "WitnetParserLib": "0x7d0a71D7D797b7b2637F682e4cB47f66602e59F3",
+      "WitnetPriceRouter": "0xAafb2D27E2E0f83dcE501a2879aaD710ec377403",
+      "WitnetRandomness": "0xB0C5d40A7658b2ab28360aFa6eB5bAeb2fFe86c3",
+      "WitnetRequestBoard": "0xa6a6b2cBE9Ce5B8fF94729F1eC402efc5042AbBF"
+    }
+  },
   "avalanche": {
     "avalanche.testnet": {
       "WitnetParserLib": "0x62B1BB81E57E9c0E22A0dc6FdeE456146a7D7083",
