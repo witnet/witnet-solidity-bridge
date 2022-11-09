@@ -9,6 +9,9 @@ module.exports = {
       WitnetRandomness: "WitnetRandomness",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
     },
+    boba: {
+      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+    },
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
@@ -29,13 +32,6 @@ module.exports = {
         /* _isUpgradable */ true,
         /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
         /* _reportResultGasLimit */ 155000,
-      ],
-    },
-    boba: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 225000,
       ],
     },
     celo: {
