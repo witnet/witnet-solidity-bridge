@@ -1,6 +1,6 @@
 {
   "name": "witnet-solidity-bridge",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Witnet Solidity Bridge contracts for EVM-compatible chains",
   "main": "",
   "scripts": {
@@ -41,13 +41,13 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "ado-contracts": "1.0.0",
     "@openzeppelin/contracts": "^4.7.3",
+    "ado-contracts": "1.0.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@openzeppelin/test-helpers": "0.5.5",
-    "@witnet/truffle-flattener-single-experimental": "^0.1.0",  
+    "@witnet/truffle-flattener-single-experimental": "^0.1.0",
     "chai": "4.3.6",
     "dotenv": "8.2.0",
     "eslint": "^8.26.0",
