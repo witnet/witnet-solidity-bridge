@@ -8,6 +8,9 @@ import "../interfaces/IWitnetRequest.sol";
 
 library Witnet {
 
+    /// ===============================================================================================================
+    /// --- Witnet internal methods -----------------------------------------------------------------------------------
+
     /// @notice Witnet function that computes the hash of a CBOR-encoded Data Request.
     /// @param _bytecode CBOR-encoded RADON.
     function hash(bytes memory _bytecode) internal pure returns (bytes32) {
@@ -52,7 +55,9 @@ library Witnet {
         WitnetCBOR.CBOR value;             // Resulting value, in CBOR-serialized bytes.
     }
 
-    /// Witnet error codes table.
+    /// ===============================================================================================================
+    /// --- Witnet error codes table ----------------------------------------------------------------------------------
+
     enum ErrorCodes {
         // 0x00: Unknown error. Something went really bad!
         Unknown,
@@ -355,4 +360,5 @@ library Witnet {
         /// 0xFF: Some tally error is not intercepted but should
         UnhandledIntercept
     }
+
 }
