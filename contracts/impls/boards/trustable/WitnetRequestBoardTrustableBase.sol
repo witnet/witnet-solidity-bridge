@@ -69,7 +69,7 @@ abstract contract WitnetRequestBoardTrustableBase
         } else {
             // only owner can initialize:
             require(msg.sender == _owner, "WitnetRequestBoardTrustableBase: only owner");
-        }        
+        }
 
         if (_state().base != address(0)) {
             // current implementation cannot be initialized more than once:
@@ -590,17 +590,6 @@ abstract contract WitnetRequestBoardTrustableBase
         return WitnetLib.resultFromCborBytes(_cborBytes);
     }
 
-    /// Decode a CBOR value into a Witnet.Result instance.
-    /// @param _cborValue An instance of `Witnet.CBOR`.
-    /// @return A `Witnet.Result` instance.
-    function resultFromCborValue(WitnetCBOR.CBOR memory _cborValue)
-        external pure
-        override
-        returns (Witnet.Result memory)
-    {
-        return WitnetLib.resultFromCborValue(_cborValue);
-    }
-
     /// Tell if a Witnet.Result is successful.
     /// @param _result An instance of Witnet.Result.
     /// @return `true` if successful, `false` if errored.
@@ -609,7 +598,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (bool)
     {
-        return _result.isOk();
+        return _result.succeeded();
     }
 
     /// Tell if a Witnet.Result is errored.
@@ -620,7 +609,18 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (bool)
     {
-        return _result.isError();
+        return _result.failed();
+    }
+
+    /// Decode a boolean value from a Witnet.Result as an `bool` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The `bool` decoded from the Witnet.Result.
+    function asBool(Witnet.Result memory _result)
+        external pure
+        override
+        returns (bool)
+    {
+        return _result.asBool();
     }
 
     /// Decode a bytes value from a Witnet.Result as a `bytes` value.
@@ -644,7 +644,7 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         return _result.asBytes32();
     }
-
+    
     /// Decode an error code from a Witnet.Result as a member of `Witnet.ErrorCodes`.
     /// @param _result An instance of `Witnet.Result`.
     /// @return The `CBORValue.Error memory` decoded from the Witnet.Result.
@@ -665,37 +665,26 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (Witnet.ErrorCodes, string memory)
     {
-        try _result.asErrorMessage() returns (Witnet.ErrorCodes _code, string memory _message) {
+        try _result.asErrorMessage()
+            returns (
+                Witnet.ErrorCodes _code,
+                string memory _message
+            )
+        {
             return (_code, _message);
         } 
         catch Error(string memory _reason) {
-            return (Witnet.ErrorCodes.Unknown, _reason);
+            return (
+                Witnet.ErrorCodes.Unknown,
+                _reason
+            );
         }
         catch (bytes memory) {
-            return (Witnet.ErrorCodes.UnhandledIntercept, "WitnetRequestBoardTrustableBase: failing assert");
+            return (
+                Witnet.ErrorCodes.UnhandledIntercept,
+                "WitnetRequestBoardTrustableBase: failing assert"
+            );
         }
-    }
-
-    /// Decode a raw error from a `Witnet.Result` as a `uint64[]`.
-    /// @param _result An instance of `Witnet.Result`.
-    /// @return The `uint64[]` raw error as decoded from the `Witnet.Result`.
-    function asRawError(Witnet.Result memory _result)
-        external pure
-        override
-        returns(uint64[] memory)
-    {
-        return _result.asRawError();
-    }
-
-    /// Decode a boolean value from a Witnet.Result as an `bool` value.
-    /// @param _result An instance of Witnet.Result.
-    /// @return The `bool` decoded from the Witnet.Result.
-    function asBool(Witnet.Result memory _result)
-        external pure
-        override
-        returns (bool)
-    {
-        return _result.asBool();
     }
 
     /// Decode a fixed16 (half-precision) numeric value from a Witnet.Result as an `int32` value.
@@ -723,26 +712,26 @@ abstract contract WitnetRequestBoardTrustableBase
         return _result.asFixed16Array();
     }
 
-    /// Decode a integer numeric value from a Witnet.Result as an `int128` value.
+    /// Decode a integer numeric value from a Witnet.Result as an `int` value.
     /// @param _result An instance of Witnet.Result.
-    /// @return The `int128` decoded from the Witnet.Result.
+    /// @return The `int` decoded from the Witnet.Result.
     function asInt128(Witnet.Result memory _result)
         external pure
         override
-        returns (int128)
+        returns (int)
     {
-        return _result.asInt128();
+        return _result.asInt();
     }
 
-    /// Decode an array of integer numeric values from a Witnet.Result as an `int128[]` value.
+    /// Decode an array of integer numeric values from a Witnet.Result as an `int[]` value.
     /// @param _result An instance of Witnet.Result.
     /// @return The `int128[]` decoded from the Witnet.Result.
     function asInt128Array(Witnet.Result memory _result)
         external pure
         override
-        returns (int128[] memory)
+        returns (int[] memory)
     {
-        return _result.asInt128Array();
+        return _result.asIntArray();
     }
 
     /// Decode a string value from a Witnet.Result as a `string` value.
@@ -767,26 +756,26 @@ abstract contract WitnetRequestBoardTrustableBase
         return _result.asStringArray();
     }
 
-    /// Decode a natural numeric value from a Witnet.Result as a `uint64` value.
+    /// Decode a natural numeric value from a Witnet.Result as a `uint` value.
     /// @param _result An instance of Witnet.Result.
-    /// @return The `uint64` decoded from the Witnet.Result.
+    /// @return The `uint` decoded from the Witnet.Result.
     function asUint64(Witnet.Result memory _result)
         external pure 
         override
-        returns(uint64)
+        returns (uint)
     {
-        return _result.asUint64();
+        return _result.asUint();
     }
 
-    /// Decode an array of natural numeric values from a Witnet.Result as a `uint64[]` value.
+    /// Decode an array of natural numeric values from a Witnet.Result as a `uint[]` value.
     /// @param _result An instance of Witnet.Result.
-    /// @return The `uint64[]` decoded from the Witnet.Result.
+    /// @return The `uint[]` decoded from the Witnet.Result.
     function asUint64Array(Witnet.Result memory _result)
         external pure
         override
-        returns (uint64[] memory)
+        returns (uint[] memory)
     {
-        return _result.asUint64Array();
+        return _result.asUintArray();
     }
 
 
