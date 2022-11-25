@@ -1,0 +1,27 @@
+{
+    "default": {
+        "ethereum.goerli": [
+            "Price-BTC/USD-6",
+            "Price-ETH/USD-6",
+            "Price-NATION/USDT-6"
+        ],
+        "ethereum.mainnet": [
+            "Price-ETH/USD-6"
+        ]
+    },
+    "arbitrum": {
+        "arbitrum.goerli": [
+            "Price-ETH/USD-6"
+        ]
+    },
+    "avalanche": {
+        "avalanche.testnet": [
+            "Price-AVAX/USD-6",
+            "Price-BTC/USD-6",
+            "Price-ETH/USD-6"
+        ],
+        "avalanche.mainnet": [
+            "Price-AVAX/USD-6"
+        ]
+    }
+}

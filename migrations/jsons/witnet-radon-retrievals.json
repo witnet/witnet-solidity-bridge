@@ -1,0 +1,22 @@
+{
+    "Price-BTC/USD-6": {
+        "hash": "0x",
+        "id4": "0x",
+        "sources": [
+            [ "api.binance.us#ticker", [ "BTC", "USD" ] ],
+            [ "api.bitfinex.com#ticker", [ "btc", "usd" ] ],
+            [ "api.bittrex.com#ticker", [ "BTC", "USD" ] ],
+            [ "api.coinbase.com#exchange-rates", [ "BTC", "USD" ] ],
+            [ "api.kraken.com#ticker", [ "BTC", "USD" ]  ],
+            [ "www.bitstamp.net#ticker", [ "btc", "usd" ] ]
+        ],
+        "aggregator": "avg_stdev_15",
+        "tally": "avg_stdev_25"
+    },
+    "Randomness": {
+        "hash": "0x",
+        "sources": [ "witnet.eth#randomness" ],
+        "aggregator": "Concat-And-Hash",
+        "tally": "Concat-And-Hash"
+    }
+}

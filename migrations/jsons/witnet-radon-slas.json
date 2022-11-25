@@ -1,0 +1,10 @@
+{
+    "Vanilla": {
+        "hash": "0x",
+        "witnessReward": 1000000,
+        "numWitnesses": 10,
+        "commitRevealFee": 1000000,
+        "minConsensusPercentage": 51,
+        "collateral": 5000000000
+    }
+}
