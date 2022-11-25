@@ -282,7 +282,7 @@ abstract contract WitnetRequestBoardTrustlessBase
     {
         return (
             estimateReportFee(_drRadHash, _gasPrice)
-                + __board().bytecodes.lookupDrSlaReward(_drSlaHash) * _witPrice
+                + __board().bytecodes.lookupRadonSLAReward(_drSlaHash) * _witPrice
         );
     }
 
@@ -329,7 +329,7 @@ abstract contract WitnetRequestBoardTrustlessBase
         drPostNotDeleted(_drHash)
         returns (bytes memory)
     {
-        return __drPostResponse(_drHash).drTallyResultBytes;
+        return __drPostResponse(_drHash).drTallyResultCborBytes;
     }
 
     function serviceStats()
@@ -471,7 +471,7 @@ abstract contract WitnetRequestBoardTrustlessBase
             uint256 _drCommitTxEpoch,
             uint256 _drTallyTxEpoch,
             bytes32 _drTallyTxHash,
-            bytes calldata _drTallyResultBytes
+            bytes calldata _drTallyResultCborBytes
         )
         external payable
         virtual override
@@ -507,7 +507,7 @@ abstract contract WitnetRequestBoardTrustlessBase
         //     drCommitTxEpoch: _drCommitTxEpoch,
         //     drTallyTxEpoch: _drTallyTxEpoch,
         //     drTallyTxHash: _drTallyTxHash,
-        //     drTallyResultBytes: _drTallyResultBytes
+        //     drTallyResultCborBytes: _drTallyResultCborBytes
         // });
         // __board().serviceStats.totalReports ++;
     }

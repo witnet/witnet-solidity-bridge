@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../libs/WitnetV2.sol";
+import "../../libs/Witnet.sol";
 
 /// @title The Witnet interface for decoding Witnet-provided request to Data Requests.
 /// This interface exposes functions to check for the success/failure of
@@ -23,40 +23,40 @@ interface IWitnetDecoder {
     /// Decode a boolean value from a Witnet.Result as an `bool` value.
     /// @param _result An instance of Witnet.Result.
     /// @return The `bool` decoded from the Witnet.Result.
-    function toBool(Witnet.Result memory _result) external pure returns (bool);
+    function asBool(Witnet.Result memory _result) external pure returns (bool);
 
     /// Decode a bytes value from a Witnet.Result as a `bytes` value.
     /// @param _result An instance of Witnet.Result.
     /// @return The `bytes` decoded from the Witnet.Result.
-    function toBytes(Witnet.Result memory _result) external pure returns (bytes memory);
+    function asBytes(Witnet.Result memory _result) external pure returns (bytes memory);
 
     /// Decode a bytes value from a Witnet.Result as a `bytes32` value.
     /// @param _result An instance of Witnet.Result.
     /// @return The `bytes32` decoded from the Witnet.Result.
-    function toBytes32(Witnet.Result memory _result) external pure returns (bytes32);
+    function asBytes32(Witnet.Result memory _result) external pure returns (bytes32);
 
     /// Decode a fixed16 (half-precision) numeric value from a Witnet.Result as an `int32` value.
     /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values.
     /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`.
     /// use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
     /// @param _result An instance of Witnet.Result.
-    /// @return The `int128` decoded from the Witnet.Result.
-    function toInt32(Witnet.Result memory _result) external pure returns (int32);
+    /// @return The `int32` decoded from the Witnet.Result.
+    function asFixedFloat16(Witnet.Result memory _result) external pure returns (int32);
 
-    /// Decode an array of fixed16 values from a Witnet.Result as an `int128[]` value.
+    /// Decode an array of fixed16 values from a Witnet.Result as an `int32[]` value.
     /// @param _result An instance of Witnet.Result.
-    /// @return The `int128[]` decoded from the Witnet.Result.
-    function toInt32Array(Witnet.Result memory _result) external pure returns (int32[] memory);
+    /// @return The `int32[]` decoded from the Witnet.Result.
+    function asFixedFloat16Array(Witnet.Result memory _result) external pure returns (int32[] memory);
 
-    /// Decode a integer numeric value from a Witnet.Result as an `int128` value.
+    /// Decode a integer numeric value from a Witnet.Result as an `int` value.
     /// @param _result An instance of Witnet.Result.
-    /// @return The `int128` decoded from the Witnet.Result.
-    function toInt128(Witnet.Result memory _result) external pure returns (int128);
+    /// @return The `int` decoded from the Witnet.Result.
+    function toInt(Witnet.Result memory _result) external pure returns (int);
 
-    /// Decode an array of integer numeric values from a Witnet.Result as an `int128[]` value.
+    /// Decode an array of integer numeric values from a Witnet.Result as an `int[]` value.
     /// @param _result An instance of Witnet.Result.
-    /// @return The `int128[]` decoded from the Witnet.Result.
-    function toInt128Array(Witnet.Result memory _result) external pure returns (int128[] memory);
+    /// @return The `int[]` decoded from the Witnet.Result.
+    function toIntArray(Witnet.Result memory _result) external pure returns (int[] memory);
 
     /// Decode a string value from a Witnet.Result as a `string` value.
     /// @param _result An instance of Witnet.Result.
@@ -68,15 +68,15 @@ interface IWitnetDecoder {
     /// @return The `string[]` decoded from the Witnet.Result.
     function toStringArray(Witnet.Result memory _result) external pure returns (string[] memory);
 
-    /// Decode a natural numeric value from a Witnet.Result as a `uint64` value.
+    /// Decode a natural numeric value from a Witnet.Result as a `uint` value.
     /// @param _result An instance of Witnet.Result.
-    /// @return The `uint64` decoded from the Witnet.Result.
-    function toUint64(Witnet.Result memory _result) external pure returns(uint64);
+    /// @return The `uint` decoded from the Witnet.Result.
+    function toUint(Witnet.Result memory _result) external pure returns(uint);
 
-    /// Decode an array of natural numeric values from a Witnet.Result as a `uint64[]` value.
+    /// Decode an array of natural numeric values from a Witnet.Result as a `uint[]` value.
     /// @param _result An instance of Witnet.Result.
-    /// @return The `uint64[]` decoded from the Witnet.Result.
-    function toUint64Array(Witnet.Result memory _result) external pure returns (uint64[] memory);
+    /// @return The `uint[]` decoded from the Witnet.Result.
+    function toUintArray(Witnet.Result memory _result) external pure returns (uint64[] memory);
 
     /// Decode an error code from a Witnet.Result as a member of `WitnetV2.ErrorCodes`.
     /// @param _result An instance of `Witnet.Result`.
@@ -89,19 +89,15 @@ interface IWitnetDecoder {
     /// @return A tuple containing the `CBORValue.Error memory` decoded from the `Witnet.Result`, plus a loggable error message.
     function getErrorMessage(Witnet.Result memory _result) external pure returns (Witnet.ErrorCodes, string memory);
 
-    /// Decode a raw error from a `Witnet.Result` as a `uint64[]`.
-    /// @param _result An instance of `Witnet.Result`.
-    /// @return The `uint64[]` raw error as decoded from the `Witnet.Result`.
-    function getRawError(Witnet.Result memory _result) external pure returns(uint64[] memory);
 
-    function isArray(Witnet.Result memory _result) external pure returns (bool);
-    function getArrayLength(Witnet.Result memory _result) external pure returns (bool);
-    function getTypeAndSize(Witnet.Result memory _result) external pure returns (WitnetV2.Types, uint);
-    function getAddressAt(Witnet.Result memory _result, uint _indexes) external pure returns (address);
-    function getBoolAt(Witnet.Result memory _result, uint _indexes) external pure returns (bool);
-    function getBytesAt(Witnet.Result memory _result, uint _indexes) external pure returns (bytes memory);
-    function getInt256At(Witnet.Result memory _result, uint _indexes) external pure returns (int256);
-    function getStringAt(Witnet.Result memory _result, uint _indexes) external pure returns (string memory);
-    function getUint256At(Witnet.Result memory _result, uint _indexes) external pure returns (uint256);    
-    function toAddress(Witnet.Result memory _result) external pure returns (address);    
+    // function isArray(Witnet.Result memory _result) external pure returns (bool);
+    // function getArrayLength(Witnet.Result memory _result) external pure returns (bool);
+    // function getTypeAndSize(Witnet.Result memory _result) external pure returns (WitnetV2.RadonDataTypes, uint);
+    // function getAddressAt(Witnet.Result memory _result, uint _indexes) external pure returns (address);
+    // function getBoolAt(Witnet.Result memory _result, uint _indexes) external pure returns (bool);
+    // function getBytesAt(Witnet.Result memory _result, uint _indexes) external pure returns (bytes memory);
+    // function getInt256At(Witnet.Result memory _result, uint _indexes) external pure returns (int256);
+    // function getStringAt(Witnet.Result memory _result, uint _indexes) external pure returns (string memory);
+    // function getUint256At(Witnet.Result memory _result, uint _indexes) external pure returns (uint256);    
+    // function toAddress(Witnet.Result memory _result) external pure returns (address);    
 }

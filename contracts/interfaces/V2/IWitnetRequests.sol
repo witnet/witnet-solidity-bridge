@@ -51,7 +51,7 @@ interface IWitnetRequests {
             uint256 _drCommitTxEpoch,
             uint256 _drTallyTxEpoch,
             bytes32 _drTallyTxHash,
-            bytes calldata _drTallyResultBytes
+            bytes calldata _drTallyResultCborBytes
         ) external payable;
     function upgradeDrPostReward(bytes32 _drHash) external payable;
     function verifyDrPost(
