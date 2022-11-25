@@ -649,23 +649,15 @@ library WitnetLib {
         );
     }
 
-    /// @notice Convert a `uint64` into a 2 characters long `string` representing its two less significant hexadecimal values.
-    /// @param _u A `uint64` value.
-    /// @return The `string` representing its hexadecimal value.
-    function _utohex(uint64 _u)
-        private pure
-        returns (string memory)
+    function replaceCborBytesWildcards(
+            bytes memory _cborBytes,
+            string[] memory _args
+        )
+        public pure
+        returns (WitnetCBOR.CBOR memory _cbor)
     {
-        bytes memory b2 = new bytes(2);
-        uint8 d0 = uint8(_u / 16) + 48;
-        uint8 d1 = uint8(_u % 16) + 48;
-        if (d0 > 57)
-            d0 += 7;
-        if (d1 > 57)
-            d1 += 7;
-        b2[0] = bytes1(d0);
-        b2[1] = bytes1(d1);
-        return string(b2);
+        _cbor = WitnetCBOR.valueFromBytes(_cborBytes);
+        _cbor.readArray().replaceWildcards(_args);
     }
 
     /// @notice Decode raw CBOR bytes into a Witnet.Result instance.
