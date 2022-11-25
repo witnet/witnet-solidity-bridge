@@ -10,15 +10,6 @@ contract TestWitnetLib {
 
   using WitnetLib for Witnet.Result;
 
-  // Test the `WitnetLib.stageNames` pure method, which gives strings with the names for the different Witnet request
-  // stages
-  function testStageNames() external {
-    Assert.equal(WitnetLib.stageName(0), "retrieval", "Stage name for stage #1 should be \"retrieval\"");
-    Assert.equal(WitnetLib.stageName(1), "aggregation", "Stage name for stage #1 should be \"aggregation\"");
-    Assert.equal(WitnetLib.stageName(2), "tally", "Stage name for stage #1 should be \"tally\"");
-    
-  }
-
   // Test decoding of `RadonError` error codes
   function testErrorCodes1() external {
     Witnet.ErrorCodes errorCodeEmpty = WitnetLib.resultFromCborBytes(hex"D82780").asErrorCode();
@@ -188,7 +179,7 @@ contract TestWitnetLib {
     (, string memory errorMessage0xFF) = WitnetLib.resultFromCborBytes(hex"D8278118FF").asErrorMessage();
     Assert.equal(
       errorMessageEmpty,
-      "Unknown error (no error code)",
+      "Unknown error: no error code.",
       "Empty error message `[]` should be properly formatted"
     );
     Assert.equal(
