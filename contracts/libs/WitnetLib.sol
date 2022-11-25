@@ -543,58 +543,110 @@ library WitnetLib {
         return _result.value.readUintArray();
     }
 
-    /// @notice Convert a stage index number into the name of the matching Witnet request stage.
-    /// @param _stageIndex A `uint64` identifying the index of one of the Witnet request stages.
-    /// @return The name of the matching stage.
-    function stageName(uint64 _stageIndex)
+    /// ----------------------------- public encoding methods ---------------------------------------------------------
+
+    /// @dev Encode uint64 into tagged varint.
+    /// @dev See https://developers.google.com/protocol-buffers/docs/encoding#varints.
+    /// @param n Number
+    /// @param t Tag
+    /// @return buf Marshaled bytes
+    function encode(uint64 n, bytes1 t)
         public pure
-        returns (string memory)
+        returns (bytes memory buf)
     {
-        if (_stageIndex == 0) {
-            return "retrieval";
-        } else if (_stageIndex == 1) {
-            return "aggregation";
-        } else if (_stageIndex == 2) {
-            return "tally";
-        } else {
-            return "unknown";
+        unchecked {
+            // Count the number of groups of 7 bits
+            // We need this pre-processing step since Solidity doesn't allow dynamic memory resizing
+            uint64 tmp = n;
+            uint64 numBytes = 2;
+            while (tmp > 0x7F) {
+                tmp = tmp >> 7;
+                numBytes += 1;
+            }
+            buf = new bytes(numBytes);
+            tmp = n;
+            buf[0] = t;
+            for (uint64 i = 1; i < numBytes; i++) {
+                // Set the first bit in the byte for each group of 7 bits
+                buf[i] = bytes1(0x80 | uint8(tmp & 0x7F));
+                tmp = tmp >> 7;
+            }
+            // Unset the first bit of the last byte
+            buf[numBytes - 1] &= 0x7F;
         }
     }
 
-    /// @notice Get an `Witnet.ErrorCodes` item from its `uint64` discriminant.
-    /// @param _discriminant The numeric identifier of an error.
-    /// @return A member of `Witnet.ErrorCodes`.
-    function _supportedErrorOrElseUnknown(uint64 _discriminant)
-        private pure
-        returns (Witnet.ErrorCodes)
+    function encode(WitnetV2.DataSource memory _dds)
+        public pure
+        returns (bytes memory)
     {
-        return Witnet.ErrorCodes(_discriminant);
+        assert(_dds.headers[0].length == _dds.headers[1].length);
+        bytes memory _encodedMethod = encode(uint64(_dds.method), bytes1(0x08));
+        bytes memory _encodedUrl;
+        if (bytes(_dds.url).length > 0) {
+            _encodedUrl = abi.encodePacked(
+                encode(uint64(bytes(_dds.url).length), bytes1(0x12)),
+                bytes(_dds.url)
+            );
+        }
+        bytes memory _encodedScript;
+        if (_dds.script.length > 0) {
+            _encodedScript = abi.encodePacked(
+                encode(uint64(_dds.script.length), bytes1(0x1a)),
+                _dds.script
+            );
+        }
+        bytes memory _encodedBody;
+        if (bytes(_dds.body).length > 0) {
+            _encodedBody = abi.encodePacked(
+                encode(uint64(bytes(_dds.body).length), bytes1(0x22))
+            );
+        }
+        bytes memory _encodedHeaders;
+        if (_dds.headers[0].length > 0) {
+            bytes memory _partials;
+            for (uint _ix = 0; _ix < _dds.headers[0].length; ) {
+                _partials = abi.encodePacked(
+                    _partials,
+                    encode(uint64(bytes(_dds.headers[0][_ix]).length), bytes1(0x0a)),
+                    bytes(_dds.headers[0][_ix]),
+                    encode(uint64(bytes(_dds.headers[1][_ix]).length), bytes1(0x12)),
+                    bytes(_dds.headers[1][_ix])
+                );
+            }
+            _encodedHeaders = abi.encodePacked(
+                encode(uint64(_partials.length), bytes1(0x2a)),
+                _partials
+            );
+        }
+        uint _innerSize = (
+            _encodedMethod.length
+                + _encodedUrl.length
+                + _encodedScript.length
+                + _encodedBody.length
+                + _encodedHeaders.length
+        );
+        return abi.encodePacked(
+            encode(uint64(_innerSize), bytes1(0x12)),
+            _encodedMethod,
+            _encodedUrl,
+            _encodedScript,
+            _encodedBody,
+            _encodedHeaders
+        );
     }
 
-    /// @notice Convert a `uint64` into a 1, 2 or 3 characters long `string` representing its.
-    /// three less significant decimal values.
-    /// @param _u A `uint64` value.
-    /// @return The `string` representing its decimal value.
-    function _utoa(uint64 _u)
-        private pure
-        returns (string memory)
+    function encode(WitnetV2.RadonSLA memory _sla)
+        public pure
+        returns (bytes memory)
     {
-        if (_u < 10) {
-            bytes memory b1 = new bytes(1);
-            b1[0] = bytes1(uint8(_u) + 48);
-            return string(b1);
-        } else if (_u < 100) {
-            bytes memory b2 = new bytes(2);
-            b2[0] = bytes1(uint8(_u / 10) + 48);
-            b2[1] = bytes1(uint8(_u % 10) + 48);
-            return string(b2);
-        } else {
-            bytes memory b3 = new bytes(3);
-            b3[0] = bytes1(uint8(_u / 100) + 48);
-            b3[1] = bytes1(uint8(_u % 100 / 10) + 48);
-            b3[2] = bytes1(uint8(_u % 10) + 48);
-            return string(b3);
-        }
+        return abi.encodePacked(
+            encode(uint64(_sla.witnessReward), bytes1(0x10)),
+            encode(uint64(_sla.numWitnesses), bytes1(0x18)),
+            encode(uint64(_sla.commitRevealFee), bytes1(0x20)),
+            encode(uint64(_sla.minConsensusPercentage), bytes1(0x28)),
+            encode(uint64(_sla.collateral), bytes1(0x30))
+        );
     }
 
     /// @notice Convert a `uint64` into a 2 characters long `string` representing its two less significant hexadecimal values.
