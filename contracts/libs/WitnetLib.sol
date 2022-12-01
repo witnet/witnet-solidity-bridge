@@ -740,13 +740,13 @@ library WitnetLib {
     {
         uint _rewind = self.len;
         uint _start = self.buffer.cursor;
-        bytes memory _current_text = bytes(self.readString());
-        uint _current_cbor_length = _current_text.length + _rewind;
-        bytes memory _new_text = WitnetBuffer.replace(bytes(_current_text), args);
-        if (keccak256(_new_text) != keccak256(bytes(_current_text))) {
-            bytes memory _new_cbor_pokes = encode(string(_new_text));
+        bytes memory _currentText = bytes(self.readString());
+        uint _currentCborLength = _currentText.length + _rewind;
+        bytes memory _newText = WitnetBuffer.replace(bytes(_currentText), args);
+        if (keccak256(_newText) != keccak256(bytes(_currentText))) {
+            bytes memory _newCborPokes = encode(string(_newText));
             self.buffer.cursor = _start - _rewind;
-            self.buffer.mutate(_current_cbor_length, _new_cbor_pokes);
+            self.buffer.mutate(_currentCborLength, _newCborPokes);
         }
         self.buffer.cursor = _start;
         self.skip();
