@@ -13,6 +13,20 @@ contract TestWitnetBuffer {
 
   event Log(string _topic, uint256 _value);
 
+  function testMutate() external {
+    WitnetBuffer.Buffer memory buff = WitnetBuffer.Buffer(
+      hex"00000000000000000000000000000000000000000000635C305C0102030405060708090a",
+      23
+    );
+    emit Log(string(buff.data), buff.data.length);
+    buff.mutate(3, bytes("token1Price"));
+    emit Log(string(buff.data), buff.data.length);
+    Assert.equal(
+      keccak256(buff.data),
+      keccak256(hex"0000000000000000000000000000000000000000000063746F6B656E3150726963650102030405060708090a"),
+      "Wildcards replacement not good :/"
+    );
+  }
 
   function testConcatShortStrings() external {
     bytes[] memory strs = new bytes[](4);
