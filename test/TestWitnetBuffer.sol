@@ -13,6 +13,62 @@ contract TestWitnetBuffer {
 
   event Log(string _topic, uint256 _value);
 
+  function testReplace0Args() external {
+    string memory input = "In a village of La Mancha, the name of which I have no desire to call to mind, there lived not long since one of those gentlemen that keep a lance in the lance-rack, an old buckler, a lean hack, and a greyhound for coursing";
+    string[] memory args = new string[](1);
+    args[0] = "Don Quixote";
+    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
+    emit Log(string(phrase), phrase.length);
+    Assert.equal(
+      keccak256(phrase),
+      keccak256(bytes(input)),
+      "String replacement not good :/"
+    );
+  }
+
+  function testReplace1Args() external {
+    string memory input = "\\0\\";
+    string[] memory args = new string[](1);
+    args[0] = "Hello!";
+    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
+    emit Log(string(phrase), phrase.length);
+    Assert.equal(
+      keccak256(phrase),
+      keccak256(bytes("Hello!")),
+      "String replacement not good :/"
+    );
+  }
+
+  function testReplace4Args() external {
+    string memory input = "Test: \\0\\ \\1\\ \\2\\!";
+    string[] memory args = new string[](3);
+    args[0] = "Hello";
+    args[1] = "decentralized";
+    args[2] = "world";
+    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
+    emit Log(string(phrase), phrase.length);
+    Assert.equal(
+      keccak256(phrase),
+      keccak256(bytes("Test: Hello decentralized world!")),
+      "String replacement not good :/"
+    );
+  }
+
+  function testReplace4ArgsUnordered() external {
+    string memory input = "Test: \\2\\ \\0\\ \\3\\!";
+    string[] memory args = new string[](4);
+    args[2] = "Hello";
+    args[0] = "decentralized";
+    args[3] = "world";
+    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
+    emit Log(string(phrase), phrase.length);
+    Assert.equal(
+      keccak256(phrase),
+      keccak256(bytes("Test: Hello decentralized world!")),
+      "String replacement not good :/"
+    );
+  }
+
   function testRead31bytes() external {
     bytes memory data = hex"58207eadcf3ba9a9a860b4421ee18caa6dca4738fef266aa7b3668a2ff97304cfcab";
     WitnetBuffer.Buffer memory buf = WitnetBuffer.Buffer(data, 1);
