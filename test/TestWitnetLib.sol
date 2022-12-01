@@ -10,6 +10,22 @@ contract TestWitnetLib {
 
   using WitnetLib for Witnet.Result;
 
+  event Log(bytes data, uint256 length);
+
+  function testReplaceCborStringsFromBytes() external {
+    bytes memory radon = hex"861877821866646461746182186664706F6F6C821864635C305C8218571A000F4240185B";
+    emit Log(radon, radon.length);
+    string[] memory args = new string[](1);
+    args[0] = "token1Price";
+    WitnetCBOR.CBOR memory cbor = WitnetLib.replaceCborStringsFromBytes(radon, args);  
+    emit Log(cbor.buffer.data, cbor.buffer.data.length);
+    Assert.equal(
+      keccak256(cbor.buffer.data),
+      keccak256(hex'861877821866646461746182186664706F6F6C8218646B746F6B656E3150726963658218571A000F4240185B'),
+      "not good :/"
+    );    
+  }
+
   // Test decoding of `RadonError` error codes
   function testErrorCodes1() external {
     Witnet.ErrorCodes errorCodeEmpty = WitnetLib.resultFromCborBytes(hex"D82780").asErrorCode();
