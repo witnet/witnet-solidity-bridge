@@ -13,6 +13,26 @@ contract TestWitnetBuffer {
 
   event Log(string _topic, uint256 _value);
 
+  function testFork() external {
+    WitnetBuffer.Buffer memory buff = WitnetBuffer.Buffer(
+      hex"00000000000000000000000000000000000000000000635C305C0102030405060708090a",
+      0
+    );
+    WitnetBuffer.Buffer memory fork = buff.fork();
+    buff.data[0] = 0xff;
+    fork.next();
+    Assert.notEqual(
+      buff.cursor,
+      fork.cursor,
+      "not forked :/"
+    );
+    Assert.equal(
+      uint(uint8(buff.data[0])),
+      uint(uint8(fork.data[0])),
+      "bad fork :/"
+    );    
+  }
+
   function testMutate() external {
     WitnetBuffer.Buffer memory buff = WitnetBuffer.Buffer(
       hex"00000000000000000000000000000000000000000000635C305C0102030405060708090a",
