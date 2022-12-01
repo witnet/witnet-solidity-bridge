@@ -17,7 +17,7 @@ abstract contract WitnetBytecodesData
         /* keccak256("io.witnet.bytecodes.data") */
         0x673359bdfd0124f9962355e7aed2d07d989b0d4bc4cbe2c94c295e0f81427dec;
 
-    bytes internal constant _WITNET_BYTECODES_RADON_OPCODES_RESULT_TYPE =
+    bytes internal constant _WITNET_BYTECODES_RADON_OPCODES_RESULT_TYPES =
         hex"00ffffffffffffffffffffffffffffff0401ff010203050406070101ff01ffff07ff02ffffffffffffffffffffffffff0703ffffffffffffffffffffffffffff05070404020205050505ff04ff04ffff0405070202ff04040404ffffffffffff010203050406070101ffffffffffffff02ff050404000106060707ffffffffff";
 
     struct Bytecodes {
@@ -38,7 +38,6 @@ abstract contract WitnetBytecodesData
         mapping (bytes32 => bytes) reducersBytecode;
         mapping (bytes32 => bytes) retrievalsBytecode;
         mapping (bytes32 => bytes) slasBytecode;
-        // mapping (bytes32 => bytes) sourceBytecodes;
         
         mapping (bytes32 => IWitnetBytecodes.RadonRetrieval) retrievals;
         mapping (bytes32 => WitnetV2.RadonReducer) reducers;
@@ -50,11 +49,11 @@ abstract contract WitnetBytecodesData
         internal pure
         returns (WitnetV2.RadonDataTypes)
     {
-        if (_opcode >= _WITNET_BYTECODES_RADON_OPCODES_RESULT_TYPE.length) {
+        if (_opcode >= _WITNET_BYTECODES_RADON_OPCODES_RESULT_TYPES.length) {
             revert IWitnetBytecodes.UnsupportedRadonScriptOpcode(_opcode);
         } else {
             uint8 _resultType = uint8(
-                _WITNET_BYTECODES_RADON_OPCODES_RESULT_TYPE[_opcode]
+                _WITNET_BYTECODES_RADON_OPCODES_RESULT_TYPES[_opcode]
             );
             if (_resultType == 0xff) {
                 revert IWitnetBytecodes.UnsupportedRadonScriptOpcode(_opcode);
