@@ -13,6 +13,37 @@ contract TestWitnetBuffer {
 
   event Log(string _topic, uint256 _value);
 
+
+  function testConcatShortStrings() external {
+    bytes[] memory strs = new bytes[](4);
+    strs[0] = bytes("Hello ");
+    strs[1] = bytes("decentralized ");
+    strs[2] = bytes("world");
+    strs[3] = bytes("!");
+    bytes memory phrase = WitnetBuffer.concat(strs);
+    emit Log(string(phrase), phrase.length);
+    Assert.equal(
+      keccak256(phrase),
+      keccak256(bytes("Hello decentralized world!")),
+      "Concat of strings not good :/"
+    );
+  }
+
+  function testConcatLongStrings() external {
+    bytes[] memory strs = new bytes[](4);
+    strs[0] = bytes("0123456789012345678901234567890123456789012345678901234567890123");
+    strs[1] = bytes("01234567890123456789012345678901234567890123456789012345678901234");
+    strs[2] = bytes("012345678901234567890123456789012345678901234567890123456789012345");
+    strs[3] = bytes("0123456789012345678901234567890123456789012345678901234567890123456");
+    bytes memory phrase = WitnetBuffer.concat(strs);
+    emit Log(string(phrase), phrase.length);
+    Assert.equal(
+      keccak256(phrase),
+      keccak256(bytes("0123456789012345678901234567890123456789012345678901234567890123012345678901234567890123456789012345678901234567890123456789012340123456789012345678901234567890123456789012345678901234567890123450123456789012345678901234567890123456789012345678901234567890123456")),
+      "Concat of strings not good :/"
+    );
+  }
+
   function testReplace0Args() external {
     string memory input = "In a village of La Mancha, the name of which I have no desire to call to mind, there lived not long since one of those gentlemen that keep a lance in the lance-rack, an old buckler, a lean hack, and a greyhound for coursing";
     string[] memory args = new string[](1);
