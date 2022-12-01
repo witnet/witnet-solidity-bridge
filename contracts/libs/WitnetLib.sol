@@ -10,6 +10,7 @@ import "./WitnetV2.sol";
 /// @author The Witnet Foundation.
 library WitnetLib {
 
+    using WitnetBuffer for WitnetBuffer.Buffer;
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
     using WitnetLib for bytes;
@@ -186,7 +187,7 @@ library WitnetLib {
             _result.success,
             "WitnetLib: tried to read `address` from errored result."
         );
-        if (_result.value.majorType == uint8(WitnetCBOR.MajorTypes.Bytes)) {
+        if (_result.value.majorType == uint8(WitnetCBOR.MAJOR_TYPE_BYTES)) {
             return _result.value.readBytes().toAddress();
         } else {
             revert("WitnetLib: reading address from string not yet supported.");
@@ -543,7 +544,75 @@ library WitnetLib {
         return _result.value.readUintArray();
     }
 
+    /// @notice Decode raw CBOR bytes into a Witnet.Result instance.
+    /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
+    /// @return A `Witnet.Result` instance.
+    function resultFromCborBytes(bytes memory _cborBytes)
+        public pure
+        returns (Witnet.Result memory)
+    {
+        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.valueFromBytes(_cborBytes);
+        return _resultFromCborValue(cborValue);
+    }
+
     /// ----------------------------- public encoding methods ---------------------------------------------------------
+
+    /// @notice Encode bytes array into given major type (UTF-8 not yet supported)
+    /// @param buf Bytes array
+    /// @return Marshaled bytes
+    function encode(bytes memory buf, uint majorType)
+        public pure
+        returns (bytes memory)
+    {
+        uint len = buf.length;
+        if (len < 23) {
+            return abi.encodePacked(
+                uint8((majorType << 5) | uint8(len)),
+                buf
+            );
+        } else {
+            uint8 buf0 = uint8((majorType << 5));
+            bytes memory buf1;
+            if (len <= 0xff) {
+                buf0 |= 24;
+                buf1 = abi.encodePacked(uint8(len));                
+            } else if (len <= 0xffff) {
+                buf0 |= 25;
+                buf1 = abi.encodePacked(uint16(len));
+            } else if (len <= 0xffffffff) {
+                buf0 |= 26;
+                buf1 = abi.encodePacked(uint32(len));
+            } else {
+                buf0 |= 27;
+                buf1 = abi.encodePacked(uint64(len));
+            }
+            return abi.encodePacked(
+                buf0,
+                buf1,
+                buf
+            );
+        }
+    }
+
+    /// @notice Encode bytes array.
+    /// @param buf Bytes array
+    /// @return Mashaled bytes
+    function encode(bytes memory buf)
+        public pure
+        returns (bytes memory)
+    {
+        return encode(buf, WitnetCBOR.MAJOR_TYPE_BYTES);
+    } 
+
+    /// @notice Encode string array (UTF-8 not yet supported).
+    /// @param str String bytes.
+    /// @return Mashaled bytes
+    function encode(string memory str)
+        public pure
+        returns (bytes memory)
+    {
+        return encode(bytes(str), WitnetCBOR.MAJOR_TYPE_STRING);
+    }
 
     /// @dev Encode uint64 into tagged varint.
     /// @dev See https://developers.google.com/protocol-buffers/docs/encoding#varints.
@@ -649,26 +718,38 @@ library WitnetLib {
         );
     }
 
-    function replaceCborBytesWildcards(
-            bytes memory _cborBytes,
-            string[] memory _args
+    function replaceCborStringsFromBytes(
+            bytes memory data,
+            string[] memory args
         )
         public pure
-        returns (WitnetCBOR.CBOR memory _cbor)
+        returns (WitnetCBOR.CBOR memory cbor)
     {
-        _cbor = WitnetCBOR.valueFromBytes(_cborBytes);
-        _cbor.readArray().replaceWildcards(_args);
+        cbor = WitnetCBOR.valueFromBytes(data);
+        while (!cbor.eof()) {
+            if (cbor.majorType == WitnetCBOR.MAJOR_TYPE_STRING) {
+                _replaceWildcards(cbor, args);
+            } else {
+                cbor.skip();
+            }
+        }
     }
 
-    /// @notice Decode raw CBOR bytes into a Witnet.Result instance.
-    /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
-    /// @return A `Witnet.Result` instance.
-    function resultFromCborBytes(bytes memory _cborBytes)
-        public pure
-        returns (Witnet.Result memory)
+    function _replaceWildcards(WitnetCBOR.CBOR memory self, string[] memory args)
+        private pure
     {
-        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.valueFromBytes(_cborBytes);
-        return _resultFromCborValue(cborValue);
+        uint _rewind = self.len;
+        uint _start = self.buffer.cursor;
+        bytes memory _current_text = bytes(self.readString());
+        uint _current_cbor_length = _current_text.length + _rewind;
+        bytes memory _new_text = WitnetBuffer.replace(bytes(_current_text), args);
+        if (keccak256(_new_text) != keccak256(bytes(_current_text))) {
+            bytes memory _new_cbor_pokes = encode(string(_new_text));
+            self.buffer.cursor = _start - _rewind;
+            self.buffer.mutate(_current_cbor_length, _new_cbor_pokes);
+        }
+        self.buffer.cursor = _start;
+        self.skip();
     }
 
 }

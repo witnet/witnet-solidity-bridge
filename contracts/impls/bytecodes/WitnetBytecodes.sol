@@ -498,9 +498,9 @@ contract WitnetBytecodes
         virtual
         returns (WitnetV2.DataSource memory)
     {
-        _ds.url = string(WitnetBuffer.replaceWildcards(bytes(_ds.url), _args));
-        _ds.body = string(WitnetBuffer.replaceWildcards(bytes(_ds.url), _args));
-        WitnetCBOR.CBOR memory _cborScript = WitnetLib.replaceCborBytesWildcards(_ds.script, _args);
+        _ds.url = string(WitnetBuffer.replace(bytes(_ds.url), _args));
+        _ds.body = string(WitnetBuffer.replace(bytes(_ds.url), _args));
+        WitnetCBOR.CBOR memory _cborScript = WitnetLib.replaceCborStringsFromBytes(_ds.script, _args);
         _ds.script = _cborScript.buffer.data;
         return _ds;
     }
@@ -589,9 +589,9 @@ contract WitnetBytecodes
     {
         if (_cbor.majorType == 4) {
             WitnetCBOR.CBOR[] memory _items = _cbor.readArray();
-            if (_items.length > 0) {
+            if (_items.length > 1) {
                 return _verifyDataSourceCborScript(
-                    _items[_items.length - 1]
+                    _items[_items.length - 2]
                 );
             } else {
                 return WitnetV2.RadonDataTypes.Any;
