@@ -111,67 +111,67 @@ library WitnetLib {
     }
 
     /// @notice Returns true if Witnet.Result contains an error.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return `true` if errored, `false` if successful.
-    function failed(Witnet.Result memory _result)
+    function failed(Witnet.Result memory result)
       internal pure
       returns (bool)
     {
-        return !_result.success;
+        return !result.success;
     }
 
     /// @notice Returns true if Witnet.Result contains valid result.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return `true` if errored, `false` if successful.
-    function succeeded(Witnet.Result memory _result)
+    function succeeded(Witnet.Result memory result)
       internal pure
       returns (bool)
     {
-        return _result.success;
+        return result.success;
     }
 
     /// ===============================================================================================================
     /// --- WitnetLib private methods ---------------------------------------------------------------------------------
 
     /// @notice Decode an errored `Witnet.Result` as a `uint[]`.
-    /// @param _result An instance of `Witnet.Result`.
+    /// @param result An instance of `Witnet.Result`.
     /// @return The `uint[]` error parameters as decoded from the `Witnet.Result`.
-    function _errorsFromResult(Witnet.Result memory _result)
+    function _errorsFromResult(Witnet.Result memory result)
         private pure
         returns(uint[] memory)
     {
         require(
-            failed(_result),
+            failed(result),
             "WitnetLib: no actual error"
         );
-        return _result.value.readUintArray();
+        return result.value.readUintArray();
     }
 
     /// @notice Decode a CBOR value into a Witnet.Result instance.
-    /// @param _cborValue An instance of `Witnet.Value`.
+    /// @param cbor An instance of `Witnet.Value`.
     /// @return A `Witnet.Result` instance.
-    function _resultFromCborValue(WitnetCBOR.CBOR memory _cborValue)
+    function _resultFromCborValue(WitnetCBOR.CBOR memory cbor)
         private pure
         returns (Witnet.Result memory)    
     {
         // Witnet uses CBOR tag 39 to represent RADON error code identifiers.
         // [CBOR tag 39] Identifiers for CBOR: https://github.com/lucas-clemente/cbor-specs/blob/master/id.md
-        bool success = _cborValue.tag != 39;
-        return Witnet.Result(success, _cborValue);
+        bool success = cbor.tag != 39;
+        return Witnet.Result(success, cbor);
     }
 
     /// @notice Convert a stage index number into the name of the matching Witnet request stage.
-    /// @param _stageIndex A `uint64` identifying the index of one of the Witnet request stages.
+    /// @param stageIndex A `uint64` identifying the index of one of the Witnet request stages.
     /// @return The name of the matching stage.
-    function _stageName(uint64 _stageIndex)
+    function _stageName(uint64 stageIndex)
         private pure
         returns (string memory)
     {
-        if (_stageIndex == 0) {
+        if (stageIndex == 0) {
             return "retrieval";
-        } else if (_stageIndex == 1) {
+        } else if (stageIndex == 1) {
             return "aggregation";
-        } else if (_stageIndex == 2) {
+        } else if (stageIndex == 2) {
             return "tally";
         } else {
             return "unknown";
@@ -182,256 +182,254 @@ library WitnetLib {
     /// ===============================================================================================================
     /// --- WitnetLib public methods (if used library will have to linked to calling contracts) -----------------------
 
-    /// ----------------------------- public decoding methods ---------------------------------------------------------
-
-    function asAddress(Witnet.Result memory _result)
+    function asAddress(Witnet.Result memory result)
         public pure
         returns (address)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `address` from errored result."
         );
-        if (_result.value.majorType == uint8(WitnetCBOR.MAJOR_TYPE_BYTES)) {
-            return _result.value.readBytes().toAddress();
+        if (result.value.majorType == uint8(WitnetCBOR.MAJOR_TYPE_BYTES)) {
+            return result.value.readBytes().toAddress();
         } else {
             revert("WitnetLib: reading address from string not yet supported.");
         }
     }
 
     /// @notice Decode a boolean value from a Witnet.Result as an `bool` value.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `bool` decoded from the Witnet.Result.
-    function asBool(Witnet.Result memory _result)
+    function asBool(Witnet.Result memory result)
         public pure
         returns (bool)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `bool` value from errored result."
         );
-        return _result.value.readBool();
+        return result.value.readBool();
     }
 
     /// @notice Decode a bytes value from a Witnet.Result as a `bytes` value.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `bytes` decoded from the Witnet.Result.
-    function asBytes(Witnet.Result memory _result)
+    function asBytes(Witnet.Result memory result)
         public pure
         returns(bytes memory)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: Tried to read bytes value from errored Witnet.Result"
         );
-        return _result.value.readBytes();
+        return result.value.readBytes();
     }
 
-    function asBytes4(Witnet.Result memory _result)
+    function asBytes4(Witnet.Result memory result)
         public pure
         returns (bytes4)
     {
-        return asBytes(_result).toBytes4();
+        return asBytes(result).toBytes4();
     }
 
     /// @notice Decode a bytes value from a Witnet.Result as a `bytes32` value.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `bytes32` decoded from the Witnet.Result.
-    function asBytes32(Witnet.Result memory _result)
+    function asBytes32(Witnet.Result memory result)
         public pure
         returns (bytes32)
     {
-        return asBytes(_result).toBytes32();
+        return asBytes(result).toBytes32();
     }
 
     /// @notice Decode an error code from a Witnet.Result as a member of `Witnet.ErrorCodes`.
-    /// @param _result An instance of `Witnet.Result`.
-    function asErrorCode(Witnet.Result memory _result)
+    /// @param result An instance of `Witnet.Result`.
+    function asErrorCode(Witnet.Result memory result)
         public pure
         returns (Witnet.ErrorCodes)
     {
-        uint[] memory _errors = _errorsFromResult(_result);
-        if (_errors.length == 0) {
+        uint[] memory errors = _errorsFromResult(result);
+        if (errors.length == 0) {
             return Witnet.ErrorCodes.Unknown;
         } else {
-            return Witnet.ErrorCodes(_errors[0]);
+            return Witnet.ErrorCodes(errors[0]);
         }
     }
 
     /// @notice Generate a suitable error message for a member of `Witnet.ErrorCodes` and its corresponding arguments.
     /// @dev WARN: Note that client contracts should wrap this function into a try-catch foreseing potential errors generated in this function
-    /// @param _result An instance of `Witnet.Result`.
-    /// @return _errorCode Decoded error code.
-    /// @return _errorString Decoded error message.
-    function asErrorMessage(Witnet.Result memory _result)
+    /// @param result An instance of `Witnet.Result`.
+    /// @return errorCode Decoded error code.
+    /// @return errorString Decoded error message.
+    function asErrorMessage(Witnet.Result memory result)
         public pure
         returns (
-            Witnet.ErrorCodes _errorCode,
-            string memory _errorString
+            Witnet.ErrorCodes errorCode,
+            string memory errorString
         )
     {
-        uint[] memory _errors = _errorsFromResult(_result);
-        if (_errors.length == 0) {
+        uint[] memory errors = _errorsFromResult(result);
+        if (errors.length == 0) {
             return (
                 Witnet.ErrorCodes.Unknown,
                 "Unknown error: no error code."
             );
         }
         else {
-            _errorCode = Witnet.ErrorCodes(_errors[0]);
+            errorCode = Witnet.ErrorCodes(errors[0]);
         }
         if (
-            _errorCode == Witnet.ErrorCodes.SourceScriptNotCBOR
-                && _errors.length >= 2
+            errorCode == Witnet.ErrorCodes.SourceScriptNotCBOR
+                && errors.length >= 2
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "Source script #",
-                toString(uint8(_errors[1])),
+                toString(uint8(errors[1])),
                 " was not a valid CBOR value"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.SourceScriptNotArray
-                && _errors.length >= 2
+            errorCode == Witnet.ErrorCodes.SourceScriptNotArray
+                && errors.length >= 2
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "The CBOR value in script #",
-                toString(uint8(_errors[1])),
+                toString(uint8(errors[1])),
                 " was not an Array of calls"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.SourceScriptNotRADON
-                && _errors.length >= 2
+            errorCode == Witnet.ErrorCodes.SourceScriptNotRADON
+                && errors.length >= 2
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "The CBOR value in script #",
-                toString(uint8(_errors[1])),
+                toString(uint8(errors[1])),
                 " was not a valid Data Request"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.RequestTooManySources
-                && _errors.length >= 2
+            errorCode == Witnet.ErrorCodes.RequestTooManySources
+                && errors.length >= 2
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "The request contained too many sources (", 
-                toString(uint8(_errors[1])), 
+                toString(uint8(errors[1])), 
                 ")"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.ScriptTooManyCalls
-                && _errors.length >= 4
+            errorCode == Witnet.ErrorCodes.ScriptTooManyCalls
+                && errors.length >= 4
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "Script #",
-                toString(uint8(_errors[2])),
+                toString(uint8(errors[2])),
                 " from the ",
-                _stageName(uint8(_errors[1])),
+                _stageName(uint8(errors[1])),
                 " stage contained too many calls (",
-                toString(uint8(_errors[3])),
+                toString(uint8(errors[3])),
                 ")"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.UnsupportedOperator
-                && _errors.length >= 5
+            errorCode == Witnet.ErrorCodes.UnsupportedOperator
+                && errors.length >= 5
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "Operator code 0x",
-                toHexString(uint8(_errors[4])),
+                toHexString(uint8(errors[4])),
                 " found at call #",
-                toString(uint8(_errors[3])),
+                toString(uint8(errors[3])),
                 " in script #",
-                toString(uint8(_errors[2])),
+                toString(uint8(errors[2])),
                 " from ",
-                _stageName(uint8(_errors[1])),
+                _stageName(uint8(errors[1])),
                 " stage is not supported"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.HTTP
-                && _errors.length >= 3
+            errorCode == Witnet.ErrorCodes.HTTP
+                && errors.length >= 3
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "Source #",
-                toString(uint8(_errors[1])),
+                toString(uint8(errors[1])),
                 " could not be retrieved. Failed with HTTP error code: ",
-                toString(uint8(_errors[2] / 100)),
-                toString(uint8(_errors[2] % 100 / 10)),
-                toString(uint8(_errors[2] % 10))
+                toString(uint8(errors[2] / 100)),
+                toString(uint8(errors[2] % 100 / 10)),
+                toString(uint8(errors[2] % 10))
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.RetrievalTimeout
-                && _errors.length >= 2
+            errorCode == Witnet.ErrorCodes.RetrievalTimeout
+                && errors.length >= 2
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "Source #",
-                toString(uint8(_errors[1])),
+                toString(uint8(errors[1])),
                 " could not be retrieved because of a timeout"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.Underflow
-                && _errors.length >= 5
+            errorCode == Witnet.ErrorCodes.Underflow
+                && errors.length >= 5
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "Underflow at operator code 0x",
-                toHexString(uint8(_errors[4])),
+                toHexString(uint8(errors[4])),
                 " found at call #",
-                toString(uint8(_errors[3])),
+                toString(uint8(errors[3])),
                 " in script #",
-                toString(uint8(_errors[2])),
+                toString(uint8(errors[2])),
                 " from ",
-                _stageName(uint8(_errors[1])),
+                _stageName(uint8(errors[1])),
                 " stage"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.Overflow
-                && _errors.length >= 5
+            errorCode == Witnet.ErrorCodes.Overflow
+                && errors.length >= 5
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "Overflow at operator code 0x",
-                toHexString(uint8(_errors[4])),
+                toHexString(uint8(errors[4])),
                 " found at call #",
-                toString(uint8(_errors[3])),
+                toString(uint8(errors[3])),
                 " in script #",
-                toString(uint8(_errors[2])),
+                toString(uint8(errors[2])),
                 " from ",
-                _stageName(uint8(_errors[1])),
+                _stageName(uint8(errors[1])),
                 " stage"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.DivisionByZero
-                && _errors.length >= 5
+            errorCode == Witnet.ErrorCodes.DivisionByZero
+                && errors.length >= 5
         ) {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "Division by zero at operator code 0x",
-                toHexString(uint8(_errors[4])),
+                toHexString(uint8(errors[4])),
                 " found at call #",
-                toString(uint8(_errors[3])),
+                toString(uint8(errors[3])),
                 " in script #",
-                toString(uint8(_errors[2])),
+                toString(uint8(errors[2])),
                 " from ",
-                _stageName(uint8(_errors[1])),
+                _stageName(uint8(errors[1])),
                 " stage"
             ));
         } else if (
-            _errorCode == Witnet.ErrorCodes.BridgeMalformedRequest
+            errorCode == Witnet.ErrorCodes.BridgeMalformedRequest
         ) {
-            _errorString = "The structure of the request is invalid and it cannot be parsed";
+            errorString = "The structure of the request is invalid and it cannot be parsed";
         } else if (
-            _errorCode == Witnet.ErrorCodes.BridgePoorIncentives
+            errorCode == Witnet.ErrorCodes.BridgePoorIncentives
         ) {
-            _errorString = "The request has been rejected by the bridge node due to poor incentives";
+            errorString = "The request has been rejected by the bridge node due to poor incentives";
         } else if (
-            _errorCode == Witnet.ErrorCodes.BridgeOversizedResult
+            errorCode == Witnet.ErrorCodes.BridgeOversizedResult
         ) {
-            _errorString = "The request result length exceeds a bridge contract defined limit";
+            errorString = "The request result length exceeds a bridge contract defined limit";
         } else {
-            _errorString = string(abi.encodePacked(
+            errorString = string(abi.encodePacked(
                 "Unknown error (0x",
-                toHexString(uint8(_errors[0])),
+                toHexString(uint8(errors[0])),
                 ")"
             ));
         }
         return (
-            _errorCode,
-            _errorString
+            errorCode,
+            errorString
         );
     }
 
@@ -439,124 +437,124 @@ library WitnetLib {
     /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values.
     /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`.
     /// use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `int128` decoded from the Witnet.Result.
-    function asFixed16(Witnet.Result memory _result)
+    function asFixed16(Witnet.Result memory result)
         public pure
         returns (int32)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `fixed16` value from errored result."
         );
-        return _result.value.readFloat16();
+        return result.value.readFloat16();
     }
 
     /// @notice Decode an array of fixed16 values from a Witnet.Result as an `int32[]` array.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `int128[]` decoded from the Witnet.Result.
-    function asFixed16Array(Witnet.Result memory _result)
+    function asFixed16Array(Witnet.Result memory result)
         public pure
         returns (int32[] memory)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `fixed16[]` value from errored result."
         );
-        return _result.value.readFloat16Array();
+        return result.value.readFloat16Array();
     }
 
     /// @notice Decode a integer numeric value from a Witnet.Result as an `int128` value.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `int` decoded from the Witnet.Result.
-    function asInt(Witnet.Result memory _result)
+    function asInt(Witnet.Result memory result)
       public pure
       returns (int)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `int` value from errored result."
         );
-        return _result.value.readInt();
+        return result.value.readInt();
     }
 
     /// @notice Decode an array of integer numeric values from a Witnet.Result as an `int[]` array.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `int[]` decoded from the Witnet.Result.
-    function asIntArray(Witnet.Result memory _result)
+    function asIntArray(Witnet.Result memory result)
         public pure
         returns (int[] memory)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `int[]` value from errored result."
         );
-        return _result.value.readIntArray();
+        return result.value.readIntArray();
     }
 
     /// @notice Decode a string value from a Witnet.Result as a `string` value.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `string` decoded from the Witnet.Result.
-    function asString(Witnet.Result memory _result)
+    function asString(Witnet.Result memory result)
         public pure
         returns(string memory)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `string` value from errored result."
         );
-        return _result.value.readString();
+        return result.value.readString();
     }
 
     /// @notice Decode an array of string values from a Witnet.Result as a `string[]` value.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `string[]` decoded from the Witnet.Result.
-    function asStringArray(Witnet.Result memory _result)
+    function asStringArray(Witnet.Result memory result)
         public pure
         returns (string[] memory)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `string[]` value from errored result.");
-        return _result.value.readStringArray();
+        return result.value.readStringArray();
     }
 
     /// @notice Decode a natural numeric value from a Witnet.Result as a `uint` value.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `uint` decoded from the Witnet.Result.
-    function asUint(Witnet.Result memory _result)
+    function asUint(Witnet.Result memory result)
         public pure
         returns(uint)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `uint64` value from errored result"
         );
-        return _result.value.readUint();
+        return result.value.readUint();
     }
 
     /// @notice Decode an array of natural numeric values from a Witnet.Result as a `uint[]` value.
-    /// @param _result An instance of Witnet.Result.
+    /// @param result An instance of Witnet.Result.
     /// @return The `uint[]` decoded from the Witnet.Result.
-    function asUintArray(Witnet.Result memory _result)
+    function asUintArray(Witnet.Result memory result)
         public pure
         returns (uint[] memory)
     {
         require(
-            _result.success,
+            result.success,
             "WitnetLib: tried to read `uint[]` value from errored result."
         );
-        return _result.value.readUintArray();
+        return result.value.readUintArray();
     }
 
     /// @notice Decode raw CBOR bytes into a Witnet.Result instance.
-    /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
+    /// @param bytecode Raw bytes representing a CBOR-encoded value.
     /// @return A `Witnet.Result` instance.
-    function resultFromCborBytes(bytes memory _cborBytes)
+    function resultFromCborBytes(bytes memory bytecode)
         public pure
         returns (Witnet.Result memory)
     {
-        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.valueFromBytes(_cborBytes);
+        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(bytecode);
         return _resultFromCborValue(cborValue);
     }
 
