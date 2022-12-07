@@ -48,17 +48,17 @@ library WitnetCBOR {
   error UnsupportedMajorType(uint unexpected);  
 
   modifier isMajorType(
-      WitnetCBOR.CBOR memory _cbor,
-      uint8 _expected
+      WitnetCBOR.CBOR memory cbor,
+      uint8 expected
   ) {
-    if (_cbor.majorType != _expected) {
-      revert UnexpectedMajorType(_cbor.majorType, _expected);
+    if (cbor.majorType != expected) {
+      revert UnexpectedMajorType(cbor.majorType, expected);
     }
     _;
   }
 
-  modifier notEmpty(WitnetBuffer.Buffer memory _buf) {
-    if (_buf.data.length == 0) {
+  modifier notEmpty(WitnetBuffer.Buffer memory buffer) {
+    if (buffer.data.length == 0) {
       revert WitnetBuffer.EmptyBuffer();
     }
     _;
@@ -73,281 +73,118 @@ library WitnetCBOR {
 
   /// @notice Decode a CBOR structure from raw bytes.
   /// @dev This is the main factory for CBOR instances, which can be later decoded into native EVM types.
-  /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
+  /// @param bytecode Raw bytes representing a CBOR-encoded value.
   /// @return A `CBOR` instance containing a partially decoded value.
-  function valueFromBytes(bytes memory _cborBytes)
+  function fromBytes(bytes memory bytecode)
     internal pure
     returns (CBOR memory)
   {
-    WitnetBuffer.Buffer memory buffer = WitnetBuffer.Buffer(_cborBytes, 0);
-    return valueFromBuffer(buffer);
+    WitnetBuffer.Buffer memory buffer = WitnetBuffer.Buffer(bytecode, 0);
+    return fromBuffer(buffer);
   }
 
   /// @notice Decode a CBOR structure from raw bytes.
   /// @dev This is an alternate factory for CBOR instances, which can be later decoded into native EVM types.
-  /// @param _buffer A Buffer structure representing a CBOR-encoded value.
+  /// @param buffer A Buffer structure representing a CBOR-encoded value.
   /// @return A `CBOR` instance containing a partially decoded value.
-  function valueFromBuffer(WitnetBuffer.Buffer memory _buffer)
+  function fromBuffer(WitnetBuffer.Buffer memory buffer)
     internal pure
-    notEmpty(_buffer)
+    notEmpty(buffer)
     returns (CBOR memory)
   {
-    uint8 _initialByte;
-    uint8 _majorType = 255;
-    uint8 _additionalInformation;
-    uint64 _tag = UINT64_MAX;
-    uint256 _len;
-
-    bool _isTagged = true;
-    while (_isTagged) {
+    uint8 initialByte;
+    uint8 majorType = 255;
+    uint8 additionalInformation;
+    uint64 tag = UINT64_MAX;
+    uint256 len;
+    bool isTagged = true;
+    while (isTagged) {
       // Extract basic CBOR properties from input bytes
-      _initialByte = _buffer.readUint8();
-      _len ++;
-      _majorType = _initialByte >> 5;
-      _additionalInformation = _initialByte & 0x1f;
+      initialByte = buffer.readUint8();
+      len ++;
+      majorType = initialByte >> 5;
+      additionalInformation = initialByte & 0x1f;
       // Early CBOR tag parsing.
-      if (_majorType == MAJOR_TYPE_TAG) {
-        uint _cursor = _buffer.cursor;
-        _tag = readLength(_buffer, _additionalInformation);
-        _len += _buffer.cursor - _cursor;
+      if (majorType == MAJOR_TYPE_TAG) {
+        uint _cursor = buffer.cursor;
+        tag = readLength(buffer, additionalInformation);
+        len += buffer.cursor - _cursor;
       } else {
-        _isTagged = false;
+        isTagged = false;
       }
     }
-    if (_majorType > MAJOR_TYPE_CONTENT_FREE) {
-      revert UnsupportedMajorType(_majorType);
+    if (majorType > MAJOR_TYPE_CONTENT_FREE) {
+      revert UnsupportedMajorType(majorType);
     }
     return CBOR(
-      _buffer,
-      _initialByte,
-      _majorType,
-      _additionalInformation,
-      uint64(_len),
-      _tag
+      buffer,
+      initialByte,
+      majorType,
+      additionalInformation,
+      uint64(len),
+      tag
     );
   }
 
-  /// @notice Decode a CBOR structure from raw bytes.
-  /// @dev This is an alternate factory for CBOR instances, which can be later decoded into native EVM types.
-  /// @param _buffer A Buffer structure representing a CBOR-encoded value.
-  /// @return _value A `CBOR` instance containing a partially decoded value.
-  function _valueFromForkedBuffer(WitnetBuffer.Buffer memory _buffer)
-    private pure
-    notEmpty(_buffer)
-    returns (CBOR memory _value)
-  {
-    uint8 _initialByte;
-    uint8 _majorType = 255;
-    uint8 _additionalInformation;
-    uint64 _tag = UINT64_MAX;
-    uint256 _len = 0;
-
-    WitnetBuffer.Buffer memory _newBuffer = _buffer.fork();
-    bool _isTagged = true;
-    while (_isTagged) {
-      // Extract basic CBOR properties from input bytes
-      _initialByte = _newBuffer.readUint8();
-      _len ++;
-      _majorType = _initialByte >> 5;
-      _additionalInformation = _initialByte & 0x1f;
-      // Early CBOR tag parsing.
-      if (_majorType == MAJOR_TYPE_TAG) {
-        uint _cursor = _newBuffer.cursor;
-        _tag = readLength(_newBuffer, _additionalInformation);
-        _len += _newBuffer.cursor - _cursor;
-
-      } else {
-        _isTagged = false;
-      }
-    }
-    if (_majorType > MAJOR_TYPE_CONTENT_FREE) {
-      revert UnsupportedMajorType(_majorType);
-    }
-    _value.buffer = _newBuffer;
-    _value.initialByte = _initialByte;
-    _value.majorType = _majorType;
-    _value.additionalInformation = _additionalInformation;
-    _value.len = uint64(_len);
-    _value.tag = _tag;
-  }
-
-  /// Read the length of a CBOR indifinite-length item (arrays, maps, byte strings and text) from a buffer, consuming
-  /// as many bytes as specified by the first byte.
-  function _readIndefiniteStringLength(
-      WitnetBuffer.Buffer memory _buffer,
-      uint8 _majorType
-    )
-    private pure
-    returns (uint64 _length)
-  {
-    uint8 _initialByte = _buffer.readUint8();
-    if (_initialByte == 0xff) {
-      return UINT64_MAX;
-    }
-    _length = readLength(
-      _buffer,
-      _initialByte & 0x1f
-    );
-    if (_length >= UINT64_MAX) {
-      revert InvalidLengthEncoding(_length);
-    } else if (_majorType != (_initialByte >> 5)) {
-      revert UnexpectedMajorType((_initialByte >> 5), _majorType);
-    }
-  }
-
-  function _seekNext(WitnetCBOR.CBOR memory _cbor)
-    private pure
+  function fork(WitnetCBOR.CBOR memory self)
+    internal pure
     returns (WitnetCBOR.CBOR memory)
   {
-    if (_cbor.majorType == MAJOR_TYPE_INT || _cbor.majorType == MAJOR_TYPE_NEGATIVE_INT) {
-      readInt(_cbor);
-    } else if (_cbor.majorType == MAJOR_TYPE_BYTES) {
-      readBytes(_cbor);
-    } else if (_cbor.majorType == MAJOR_TYPE_STRING) {
-      readString(_cbor);
-    } else if (_cbor.majorType == MAJOR_TYPE_ARRAY) {
-      CBOR[] memory _items = readArray(_cbor);
-      _cbor = _items[_items.length - 1];
-    } else {
-      revert UnsupportedMajorType(_cbor.majorType);
-    }
-    return _cbor;
+    return CBOR({
+      buffer: self.buffer.fork(),
+      initialByte: self.initialByte,
+      majorType: self.majorType,
+      additionalInformation: self.additionalInformation,
+      len: self.len,
+      tag: self.tag
+    });
   }
 
-  function _skipArray(CBOR memory _cbor)
-    private pure
-    isMajorType(_cbor, MAJOR_TYPE_ARRAY)
-    returns (CBOR memory _next)
-  {
-    _next = _valueFromForkedBuffer(_cbor.buffer);
-    CBOR[] memory _items = readArray(_cbor);
-    if (_items.length == 0) {
-      revert EmptyArray();
-    }
-  }
-
-  function _skipBytes(CBOR memory _cbor)
-    internal pure
-    isMajorType(_cbor, MAJOR_TYPE_BYTES)
-    returns (CBOR memory)
-  {
-    _cbor.len = readLength(_cbor.buffer, _cbor.additionalInformation);
-    if (_cbor.len < UINT32_MAX) {
-      _cbor.buffer.seek(_cbor.len);
-      return _valueFromForkedBuffer(_cbor.buffer);
-    } 
-    // TODO: support skipping indefitine length bytes array
-    revert InvalidLengthEncoding(_cbor.len);
-  }
-
-  function _skipInt(CBOR memory _cbor)
-    private pure
-    returns (CBOR memory _next)
-  {
-    if (_cbor.majorType == MAJOR_TYPE_INT || _cbor.majorType == MAJOR_TYPE_NEGATIVE_INT) {
-      _next = _valueFromForkedBuffer(_cbor.buffer);
-    } else {
-      revert UnexpectedMajorType(_cbor.majorType, 1);
-    }
-  }
-
-  function _skipPrimitive(CBOR memory _cbor)
-    private pure
-    isMajorType(_cbor, MAJOR_TYPE_CONTENT_FREE)
-    returns (WitnetCBOR.CBOR memory)
-  {
-    if (_cbor.additionalInformation == 25) {
-      _cbor.buffer.seek(2);
-      
-    } else if (
-      _cbor.additionalInformation != 20
-        && _cbor.additionalInformation != 21
-    ) {
-      revert UnsupportedPrimitive(_cbor.additionalInformation);
-    }
-    return _valueFromForkedBuffer(_cbor.buffer);
-  }
-
-  function _skipText(CBOR memory _cbor)
-    internal pure
-    isMajorType(_cbor, MAJOR_TYPE_STRING)
-    returns (CBOR memory)
-  {
-    _cbor.len = readLength(_cbor.buffer, _cbor.additionalInformation);
-    if (_cbor.len < UINT64_MAX) {
-      _cbor.buffer.seek(_cbor.len);
-      return valueFromBuffer(_cbor.buffer);
-    }
-    // TODO: support skipping indefitine length text array
-    revert InvalidLengthEncoding(_cbor.len);  
-  }
-
-  function next(CBOR memory self)
+  function settle(CBOR memory self)
       internal pure
+      returns (WitnetCBOR.CBOR memory)
   {
-    uint8 _initialByte;
-    uint8 _majorType = 255;
-    uint8 _additionalInformation;
-    uint64 _tag = UINT64_MAX;
-    uint256 _len = 0;
-    bool _isTagged = true;
-    while (_isTagged) {
-      // Extract basic CBOR properties from input bytes
-      _initialByte = self.buffer.readUint8();
-      _len ++;
-      _majorType = _initialByte >> 5;
-      _additionalInformation = _initialByte & 0x1f;
-      // Early CBOR tag parsing.
-      if (_majorType == MAJOR_TYPE_TAG) {
-        uint _cursor = self.buffer.cursor;
-        _tag = readLength(self.buffer, _additionalInformation);
-        _len += self.buffer.cursor - _cursor;
-
-      } else {
-        _isTagged = false;
-      }
+    if (!self.eof()) {
+      return fromBuffer(self.buffer);
+    } else {
+      return self;
     }
-    if (_majorType > MAJOR_TYPE_CONTENT_FREE) {
-      revert UnsupportedMajorType(_majorType);
-    }
-    self.initialByte = _initialByte;
-    self.majorType = _majorType;
-    self.additionalInformation = _additionalInformation;
-    self.len = uint64(_len);
-    self.tag = _tag;
   }
 
   function skip(CBOR memory self)
       internal pure
+      returns (WitnetCBOR.CBOR memory)
   {
     if (
       self.majorType == MAJOR_TYPE_INT
         || self.majorType == MAJOR_TYPE_NEGATIVE_INT
     ) {
-      self.buffer.cursor += self.length();
+      self.buffer.cursor += self.peekLength();
     } else if (
         self.majorType == MAJOR_TYPE_STRING
           || self.majorType == MAJOR_TYPE_BYTES
     ) {
-      self.buffer.cursor += readLength(self.buffer, self.additionalInformation);
+      uint64 len = readLength(self.buffer, self.additionalInformation);
+      self.buffer.cursor += len;
     } else if (
       self.majorType == MAJOR_TYPE_ARRAY
     ) { 
-      readLength(self.buffer, self.additionalInformation);      
-    } else if (
-      self.majorType != MAJOR_TYPE_CONTENT_FREE
-    ) {
+      self.len = readLength(self.buffer, self.additionalInformation);      
+    // } else if (
+    //   self.majorType == MAJOR_TYPE_CONTENT_FREE
+    // ) {
+      // TODO
+    } else {
       revert UnsupportedMajorType(self.majorType);
     }
-    if (!self.eof()) {
-      self.next();
-    }
+    return self;
   }
 
-  function length(CBOR memory self)
+  function peekLength(CBOR memory self)
     internal pure
     returns (uint64)
   {
+    assert(1 << 0 == 1);
     if (self.additionalInformation < 24) {
       return self.additionalInformation;
     } else if (self.additionalInformation > 27) {
@@ -357,103 +194,120 @@ library WitnetCBOR {
     }
   }
 
+  // event Array(uint cursor, uint items);
+  // event Log2(uint index, bytes data, uint cursor, uint major, uint addinfo, uint len);
   function readArray(CBOR memory self)
     internal pure
     isMajorType(self, MAJOR_TYPE_ARRAY)
     returns (CBOR[] memory items)
   {
     uint64 len = readLength(self.buffer, self.additionalInformation);
+    // emit Array(self.buffer.cursor, len);
     items = new CBOR[](len + 1);
-    for (uint _ix = 0; _ix < len; _ix ++) {
-      items[_ix] = _valueFromForkedBuffer(self.buffer);
-      self.buffer.cursor = items[_ix].buffer.cursor;
-      self.majorType = items[_ix].majorType;
-      self.additionalInformation = items[_ix].additionalInformation;
-      self = _seekNext(self);
+    for (uint ix = 0; ix < len; ix ++) {
+      items[ix] = self.fork().settle();
+      // emit Log2(
+      //   ix,
+      //   items[ix].buffer.data,
+      //   items[ix].buffer.cursor,
+      //   items[ix].majorType,
+      //   items[ix].additionalInformation,
+      //   items[ix].len
+      // );
+      self.buffer.cursor = items[ix].buffer.cursor;
+      self.majorType = items[ix].majorType;
+      self.additionalInformation = items[ix].additionalInformation;
+      self.len = items[ix].len;
+      if (self.majorType == MAJOR_TYPE_ARRAY) {
+        CBOR[] memory subitems = self.readArray();
+        self = subitems[subitems.length - 1];
+      } else {
+        self.skip();
+      }
     }
     items[len] = self;
   }
 
-  /// Reads the length of the next CBOR item from a buffer, consuming a different number of bytes depending on the
+  /// Reads the length of the settle CBOR item from a buffer, consuming a different number of bytes depending on the
   /// value of the `additionalInformation` argument.
   function readLength(
-      WitnetBuffer.Buffer memory _buffer,
-      uint8 _additionalInformation
+      WitnetBuffer.Buffer memory buffer,
+      uint8 additionalInformation
     ) 
     internal pure
     returns (uint64)
   {
-    if (_additionalInformation < 24) {
-      return _additionalInformation;
+    if (additionalInformation < 24) {
+      return additionalInformation;
     }
-    if (_additionalInformation == 24) {
-      return _buffer.readUint8();
+    if (additionalInformation == 24) {
+      return buffer.readUint8();
     }
-    if (_additionalInformation == 25) {
-      return _buffer.readUint16();
+    if (additionalInformation == 25) {
+      return buffer.readUint16();
     }
-    if (_additionalInformation == 26) {
-      return _buffer.readUint32();
+    if (additionalInformation == 26) {
+      return buffer.readUint32();
     }
-    if (_additionalInformation == 27) {
-      return _buffer.readUint64();
+    if (additionalInformation == 27) {
+      return buffer.readUint64();
     }
-    if (_additionalInformation == 31) {
+    if (additionalInformation == 31) {
       return UINT64_MAX;
     }
-    revert InvalidLengthEncoding(_additionalInformation);
+    revert InvalidLengthEncoding(additionalInformation);
   }
 
   /// @notice Read a `CBOR` structure into a native `bool` value.
-  /// @param _cbor An instance of `CBOR`.
+  /// @param cbor An instance of `CBOR`.
   /// @return The value represented by the input, as a `bool` value.
-  function readBool(CBOR memory _cbor)
+  function readBool(CBOR memory cbor)
     internal pure
-    isMajorType(_cbor, MAJOR_TYPE_CONTENT_FREE)
+    isMajorType(cbor, MAJOR_TYPE_CONTENT_FREE)
     returns (bool)
   {
-    if (_cbor.additionalInformation == 20) {
+    if (cbor.additionalInformation == 20) {
       return false;
-    } else if (_cbor.additionalInformation == 21) {
+    } else if (cbor.additionalInformation == 21) {
       return true;
     } else {
-      revert UnsupportedPrimitive(_cbor.additionalInformation);
+      revert UnsupportedPrimitive(cbor.additionalInformation);
     }
   }
 
   /// @notice Decode a `CBOR` structure into a native `bytes` value.
-  /// @param _cbor An instance of `CBOR`.
-  /// @return _output The value represented by the input, as a `bytes` value.   
-  function readBytes(CBOR memory _cbor)
+  /// @param cbor An instance of `CBOR`.
+  /// @return output The value represented by the input, as a `bytes` value.   
+  function readBytes(CBOR memory cbor)
     internal pure
-    isMajorType(_cbor, MAJOR_TYPE_BYTES)
-    returns (bytes memory _output)
+    isMajorType(cbor, MAJOR_TYPE_BYTES)
+    returns (bytes memory output)
   {
-    _cbor.len = readLength(
-      _cbor.buffer,
-      _cbor.additionalInformation
+    cbor.len = readLength(
+      cbor.buffer,
+      cbor.additionalInformation
     );
-    if (_cbor.len == UINT32_MAX) {
+    if (cbor.len == UINT32_MAX) {
       // These checks look repetitive but the equivalent loop would be more expensive.
-      uint32 _length = uint32(_readIndefiniteStringLength(
-        _cbor.buffer,
-        _cbor.majorType
+      uint32 length = uint32(_readIndefiniteStringLength(
+        cbor.buffer,
+        cbor.majorType
       ));
-      if (_length < UINT32_MAX) {
-        _output = abi.encodePacked(_cbor.buffer.read(_length));
-        _length = uint32(_readIndefiniteStringLength(
-          _cbor.buffer,
-          _cbor.majorType
+      if (length < UINT32_MAX) {
+        output = abi.encodePacked(cbor.buffer.read(length));
+        length = uint32(_readIndefiniteStringLength(
+          cbor.buffer,
+          cbor.majorType
         ));
-        if (_length < UINT32_MAX) {
-          _output = abi.encodePacked(
-            _output,
-            _cbor.buffer.read(_length)
+        if (length < UINT32_MAX) {
+          output = abi.encodePacked(
+            output,
+            cbor.buffer.read(length)
           );
         }
       }
     } else {
-      return _cbor.buffer.read(uint32(_cbor.len));
+      return cbor.buffer.read(uint32(cbor.len));
     }
   }
 
@@ -461,177 +315,201 @@ library WitnetCBOR {
   /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
   /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`
   /// use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
-  /// @param _cbor An instance of `CBOR`.
+  /// @param cbor An instance of `CBOR`.
   /// @return The value represented by the input, as an `int128` value.
-  function readFloat16(CBOR memory _cbor)
+  function readFloat16(CBOR memory cbor)
     internal pure
-    isMajorType(_cbor, MAJOR_TYPE_CONTENT_FREE)
+    isMajorType(cbor, MAJOR_TYPE_CONTENT_FREE)
     returns (int32)
   {
-    if (_cbor.additionalInformation == 25) {
-      return _cbor.buffer.readFloat16();
+    if (cbor.additionalInformation == 25) {
+      return cbor.buffer.readFloat16();
     } else {
-      revert UnsupportedPrimitive(_cbor.additionalInformation);
+      revert UnsupportedPrimitive(cbor.additionalInformation);
     }
   }
 
   /// @notice Decode a `CBOR` structure into a native `int128[]` value whose inner values follow the same convention 
   /// @notice as explained in `decodeFixed16`.
-  /// @param _cbor An instance of `CBOR`.
-  function readFloat16Array(CBOR memory _cbor)
+  /// @param cbor An instance of `CBOR`.
+  function readFloat16Array(CBOR memory cbor)
     internal pure
-    isMajorType(_cbor, MAJOR_TYPE_ARRAY)
-    returns (int32[] memory _values)
+    isMajorType(cbor, MAJOR_TYPE_ARRAY)
+    returns (int32[] memory values)
   {
-    uint64 _length = readLength(_cbor.buffer, _cbor.additionalInformation);
-    if (_length < UINT64_MAX) {
-      _values = new int32[](_length);
-      for (uint64 _i = 0; _i < _length; ) {
-        CBOR memory _item = valueFromBuffer(_cbor.buffer);
-        _values[_i] = readFloat16(_item);
+    uint64 length = readLength(cbor.buffer, cbor.additionalInformation);
+    if (length < UINT64_MAX) {
+      values = new int32[](length);
+      for (uint64 i = 0; i < length; ) {
+        CBOR memory item = fromBuffer(cbor.buffer);
+        values[i] = readFloat16(item);
         unchecked {
-          _i ++;
+          i ++;
         }
       }
     } else {
-      revert InvalidLengthEncoding(_length);
+      revert InvalidLengthEncoding(length);
     }
   }
 
   /// @notice Decode a `CBOR` structure into a native `int128` value.
-  /// @param _cbor An instance of `CBOR`.
+  /// @param cbor An instance of `CBOR`.
   /// @return The value represented by the input, as an `int128` value.
-  function readInt(CBOR memory _cbor)
+  function readInt(CBOR memory cbor)
     internal pure
     returns (int)
   {
-    if (_cbor.majorType == 1) {
+    if (cbor.majorType == 1) {
       uint64 _value = readLength(
-        _cbor.buffer,
-        _cbor.additionalInformation
+        cbor.buffer,
+        cbor.additionalInformation
       );
       return int(-1) - int(uint(_value));
-    } else if (_cbor.majorType == 0) {
+    } else if (cbor.majorType == 0) {
       // Any `uint64` can be safely casted to `int128`, so this method supports majorType 1 as well so as to have offer
       // a uniform API for positive and negative numbers
-      return int(readUint(_cbor));
+      return int(readUint(cbor));
     }
     else {
-      revert UnexpectedMajorType(_cbor.majorType, 1);
+      revert UnexpectedMajorType(cbor.majorType, 1);
     }
   }
 
   /// @notice Decode a `CBOR` structure into a native `int[]` value.
-  /// @param _cbor instance of `CBOR`.
-  /// @return _array The value represented by the input, as an `int[]` value.
-  function readIntArray(CBOR memory _cbor)
+  /// @param cbor instance of `CBOR`.
+  /// @return array The value represented by the input, as an `int[]` value.
+  function readIntArray(CBOR memory cbor)
     internal pure
-    isMajorType(_cbor, MAJOR_TYPE_ARRAY)
-    returns (int[] memory _array)
+    isMajorType(cbor, MAJOR_TYPE_ARRAY)
+    returns (int[] memory array)
   {
-    uint64 _length = readLength(_cbor.buffer, _cbor.additionalInformation);
-    if (_length < UINT64_MAX) {
-      _array = new int[](_length);
-      for (uint _i = 0; _i < _length; ) {
-        CBOR memory _item = valueFromBuffer(_cbor.buffer);
-        _array[_i] = readInt(_item);
+    uint64 length = readLength(cbor.buffer, cbor.additionalInformation);
+    if (length < UINT64_MAX) {
+      array = new int[](length);
+      for (uint i = 0; i < length; ) {
+        CBOR memory item = fromBuffer(cbor.buffer);
+        array[i] = readInt(item);
         unchecked {
-          _i ++;
+          i ++;
         }
       }
     } else {
-      revert InvalidLengthEncoding(_length);
+      revert InvalidLengthEncoding(length);
     }
   }
 
   /// @notice Decode a `CBOR` structure into a native `string` value.
-  /// @param _cbor An instance of `CBOR`.
-  /// @return _text The value represented by the input, as a `string` value.
-  function readString(CBOR memory _cbor)
+  /// @param cbor An instance of `CBOR`.
+  /// @return text The value represented by the input, as a `string` value.
+  function readString(CBOR memory cbor)
     internal pure
-    isMajorType(_cbor, MAJOR_TYPE_STRING)
-    returns (string memory _text)
+    isMajorType(cbor, MAJOR_TYPE_STRING)
+    returns (string memory text)
   {
-    _cbor.len = readLength(_cbor.buffer, _cbor.additionalInformation);
-    if (_cbor.len == UINT64_MAX) {
+    cbor.len = readLength(cbor.buffer, cbor.additionalInformation);
+    if (cbor.len == UINT64_MAX) {
       bool _done;
       while (!_done) {
-        uint64 _length = _readIndefiniteStringLength(
-          _cbor.buffer,
-          _cbor.majorType
+        uint64 length = _readIndefiniteStringLength(
+          cbor.buffer,
+          cbor.majorType
         );
-        if (_length < UINT64_MAX) {
-          _text = string(abi.encodePacked(
-            _text,
-            _cbor.buffer.readText(_length / 4)
+        if (length < UINT64_MAX) {
+          text = string(abi.encodePacked(
+            text,
+            cbor.buffer.readText(length / 4)
           ));
         } else {
           _done = true;
         }
       }
     } else {
-      return string(_cbor.buffer.readText(_cbor.len));
+      return string(cbor.buffer.readText(cbor.len));
     }
   }
 
   /// @notice Decode a `CBOR` structure into a native `string[]` value.
-  /// @param _cbor An instance of `CBOR`.
-  /// @return _strings The value represented by the input, as an `string[]` value.
-  function readStringArray(CBOR memory _cbor)
+  /// @param cbor An instance of `CBOR`.
+  /// @return strings The value represented by the input, as an `string[]` value.
+  function readStringArray(CBOR memory cbor)
     internal pure
-    isMajorType(_cbor, MAJOR_TYPE_ARRAY)
-    returns (string[] memory _strings)
+    isMajorType(cbor, MAJOR_TYPE_ARRAY)
+    returns (string[] memory strings)
   {
-    uint _length = readLength(_cbor.buffer, _cbor.additionalInformation);
-    if (_length < UINT64_MAX) {
-      _strings = new string[](_length);
-      for (uint _i = 0; _i < _length; ) {
-        CBOR memory _item = valueFromBuffer(_cbor.buffer);
-        _strings[_i] = readString(_item);
+    uint length = readLength(cbor.buffer, cbor.additionalInformation);
+    if (length < UINT64_MAX) {
+      strings = new string[](length);
+      for (uint i = 0; i < length; ) {
+        CBOR memory item = fromBuffer(cbor.buffer);
+        strings[i] = readString(item);
         unchecked {
-          _i ++;
+          i ++;
         }
       }
     } else {
-      revert InvalidLengthEncoding(_length);
+      revert InvalidLengthEncoding(length);
     }
   }
 
   /// @notice Decode a `CBOR` structure into a native `uint64` value.
-  /// @param _cbor An instance of `CBOR`.
+  /// @param cbor An instance of `CBOR`.
   /// @return The value represented by the input, as an `uint64` value.
-  function readUint(CBOR memory _cbor)
+  function readUint(CBOR memory cbor)
     internal pure
-    isMajorType(_cbor, MAJOR_TYPE_INT)
+    isMajorType(cbor, MAJOR_TYPE_INT)
     returns (uint)
   {
     return readLength(
-      _cbor.buffer,
-      _cbor.additionalInformation
+      cbor.buffer,
+      cbor.additionalInformation
     );
   }
 
   /// @notice Decode a `CBOR` structure into a native `uint64[]` value.
-  /// @param _cbor An instance of `CBOR`.
-  /// @return _values The value represented by the input, as an `uint64[]` value.
-  function readUintArray(CBOR memory _cbor)
+  /// @param cbor An instance of `CBOR`.
+  /// @return values The value represented by the input, as an `uint64[]` value.
+  function readUintArray(CBOR memory cbor)
     internal pure
-    isMajorType(_cbor, MAJOR_TYPE_ARRAY)
-    returns (uint[] memory _values)
+    isMajorType(cbor, MAJOR_TYPE_ARRAY)
+    returns (uint[] memory values)
   {
-    uint64 _length = readLength(_cbor.buffer, _cbor.additionalInformation);
-    if (_length < UINT64_MAX) {
-      _values = new uint[](_length);
-      for (uint _ix = 0; _ix < _length; ) {
-        CBOR memory _item = valueFromBuffer(_cbor.buffer);
-        _values[_ix] = readUint(_item);
+    uint64 length = readLength(cbor.buffer, cbor.additionalInformation);
+    if (length < UINT64_MAX) {
+      values = new uint[](length);
+      for (uint ix = 0; ix < length; ) {
+        CBOR memory item = fromBuffer(cbor.buffer);
+        values[ix] = readUint(item);
         unchecked {
-          _ix ++;
+          ix ++;
         }
       }
     } else {
-      revert InvalidLengthEncoding(_length);
+      revert InvalidLengthEncoding(length);
     }
   }  
+
+  /// Read the length of a CBOR indifinite-length item (arrays, maps, byte strings and text) from a buffer, consuming
+  /// as many bytes as specified by the first byte.
+  function _readIndefiniteStringLength(
+      WitnetBuffer.Buffer memory buffer,
+      uint8 majorType
+    )
+    private pure
+    returns (uint64 len)
+  {
+    uint8 initialByte = buffer.readUint8();
+    if (initialByte == 0xff) {
+      return UINT64_MAX;
+    }
+    len = readLength(
+      buffer,
+      initialByte & 0x1f
+    );
+    if (len >= UINT64_MAX) {
+      revert InvalidLengthEncoding(len);
+    } else if (majorType != (initialByte >> 5)) {
+      revert UnexpectedMajorType((initialByte >> 5), majorType);
+    }
+  }
  
 }
