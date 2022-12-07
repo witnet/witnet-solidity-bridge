@@ -21,180 +21,182 @@ library WitnetBuffer {
   }
 
   // Ensures we access an existing index in an array
-  modifier withinRange(uint _index, uint _range) {
-    if (_index >= _range) {
-      revert IndexOutOfBounds(_index, _range);
+  modifier withinRange(uint index, uint _range) {
+    if (index >= _range) {
+      revert IndexOutOfBounds(index, _range);
     }
     _;
   }
 
   /// @notice Concatenate undefinite number of bytes chunks.
-  /// @dev Faster than looping on `abi.encodePacked(_output, _buffs[_ix])`.
+  /// @dev Faster than looping on `abi.encodePacked(output, _buffs[ix])`.
   function concat(bytes[] memory _buffs)
     internal pure
-    returns (bytes memory _output)
+    returns (bytes memory output)
   {
     unchecked {
-      uint _destinationPointer;
-      uint _destinationLength;
+      uint destinationPointer;
+      uint destinationLength;
       assembly {
         // get safe scratch location
-        _output := mload(0x40)
+        output := mload(0x40)
         // set starting destination pointer
-        _destinationPointer := add(_output, 32)
+        destinationPointer := add(output, 32)
       }      
-      for (uint _ix = 1; _ix <= _buffs.length; _ix ++) {  
-        uint _source;
-        uint _sourceLength;
-        uint _sourcePointer;        
+      for (uint ix = 1; ix <= _buffs.length; ix ++) {  
+        uint source;
+        uint sourceLength;
+        uint sourcePointer;        
         assembly {
           // load source length pointer
-          _source := mload(add(_buffs, mul(_ix, 32)))
+          source := mload(add(_buffs, mul(ix, 32)))
           // load source length
-          _sourceLength := mload(_source)
+          sourceLength := mload(source)
           // sets source memory pointer
-          _sourcePointer := add(_source, 32)
+          sourcePointer := add(source, 32)
         }
         _memcpy(
-          _destinationPointer,
-          _sourcePointer,
-          _sourceLength
+          destinationPointer,
+          sourcePointer,
+          sourceLength
         );
         assembly {          
           // increase total destination length
-          _destinationLength := add(_destinationLength, _sourceLength)
+          destinationLength := add(destinationLength, sourceLength)
           // sets destination memory pointer
-          _destinationPointer := add(_destinationPointer, _sourceLength)
+          destinationPointer := add(destinationPointer, sourceLength)
         }
       }
       assembly {
         // protect output bytes
-        mstore(_output, _destinationLength)
+        mstore(output, destinationLength)
         // set final output length
-        mstore(0x40, add(mload(0x40), add(_destinationLength, 32)))
+        mstore(0x40, add(mload(0x40), add(destinationLength, 32)))
       }
     }
   }
 
-  function fork(WitnetBuffer.Buffer memory _buffer)
+  function fork(WitnetBuffer.Buffer memory buffer)
     internal pure
-    returns (WitnetBuffer.Buffer memory _forked)
+    returns (WitnetBuffer.Buffer memory)
   {
-    _forked.data = _buffer.data;
-    _forked.cursor = _buffer.cursor;
+    return Buffer(
+      buffer.data,
+      buffer.cursor
+    );
   }
 
   function mutate(
-      WitnetBuffer.Buffer memory _buffer,
-      uint _peekLength,
-      bytes memory _pokeBytes
+      WitnetBuffer.Buffer memory buffer,
+      uint length,
+      bytes memory pokes
     )
     internal pure
-    withinRange(_peekLength, _buffer.data.length - _buffer.cursor)
+    withinRange(length, buffer.data.length - buffer.cursor)
   {
-    bytes[] memory _parts = new bytes[](3);
-    _parts[0] = peek(
-      _buffer,
+    bytes[] memory parts = new bytes[](3);
+    parts[0] = peek(
+      buffer,
       0,
-      _buffer.cursor
+      buffer.cursor
     );
-    _parts[1] = _pokeBytes;
-    _parts[2] = peek(
-      _buffer,
-      _buffer.cursor + _peekLength,
-      _buffer.data.length - _buffer.cursor - _peekLength
+    parts[1] = pokes;
+    parts[2] = peek(
+      buffer,
+      buffer.cursor + length,
+      buffer.data.length - buffer.cursor - length
     );
-    _buffer.data = concat(_parts);
+    buffer.data = concat(parts);
   }
 
   /// @notice Read and consume the next byte from the buffer.
-  /// @param _buffer An instance of `Buffer`.
+  /// @param buffer An instance of `Buffer`.
   /// @return The next byte in the buffer counting from the cursor position.
-  function next(Buffer memory _buffer)
+  function next(Buffer memory buffer)
     internal pure
-    withinRange(_buffer.cursor, _buffer.data.length)
+    withinRange(buffer.cursor, buffer.data.length)
     returns (bytes1)
   {
     // Return the byte at the position marked by the cursor and advance the cursor all at once
-    return _buffer.data[_buffer.cursor ++];
+    return buffer.data[buffer.cursor ++];
   }
 
   function peek(
-      WitnetBuffer.Buffer memory _buffer,
-      uint _offset,
-      uint _length
+      WitnetBuffer.Buffer memory buffer,
+      uint offset,
+      uint length
     )
     internal pure
-    withinRange(_offset + _length, _buffer.data.length + 1)
+    withinRange(offset + length, buffer.data.length + 1)
     returns (bytes memory)
   {
-    bytes memory _data = _buffer.data;
-    bytes memory _peek = new bytes(_length);
-    uint _destinationPointer;
-    uint _sourcePointer;
+    bytes memory data = buffer.data;
+    bytes memory peeks = new bytes(length);
+    uint destinationPointer;
+    uint sourcePointer;
     assembly {
-      _destinationPointer := add(_peek, 32)
-      _sourcePointer := add(add(_data, 32), _offset)
+      destinationPointer := add(peeks, 32)
+      sourcePointer := add(add(data, 32), offset)
     }
     _memcpy(
-      _destinationPointer,
-      _sourcePointer,
-      _length
+      destinationPointer,
+      sourcePointer,
+      length
     );
-    return _peek;
+    return peeks;
   }
 
   // @notice Extract bytes array from buffer starting from current cursor.
-  /// @param _buffer An instance of `Buffer`.
-  /// @param _length How many bytes to peek from the Buffer.
+  /// @param buffer An instance of `Buffer`.
+  /// @param length How many bytes to peek from the Buffer.
   // solium-disable-next-line security/no-assign-params
   function peek(
-      WitnetBuffer.Buffer memory _buffer,
-      uint _length
+      WitnetBuffer.Buffer memory buffer,
+      uint length
     )
     internal pure
-    withinRange(_length, _buffer.data.length - _buffer.cursor)
+    withinRange(length, buffer.data.length - buffer.cursor)
     returns (bytes memory)
   {
     return peek(
-      _buffer,
-      _buffer.cursor,
-      _length
+      buffer,
+      buffer.cursor,
+      length
     );
   }
 
   /// @notice Read and consume a certain amount of bytes from the buffer.
-  /// @param _buffer An instance of `Buffer`.
-  /// @param _length How many bytes to read and consume from the buffer.
-  /// @return _output A `bytes memory` containing the first `_length` bytes from the buffer, counting from the cursor position.
-  function read(Buffer memory _buffer, uint _length)
+  /// @param buffer An instance of `Buffer`.
+  /// @param length How many bytes to read and consume from the buffer.
+  /// @return output A `bytes memory` containing the first `length` bytes from the buffer, counting from the cursor position.
+  function read(Buffer memory buffer, uint length)
     internal pure
-    withinRange(_buffer.cursor + _length, _buffer.data.length + 1)
-    returns (bytes memory _output)
+    withinRange(buffer.cursor + length, buffer.data.length + 1)
+    returns (bytes memory output)
   {
     // Create a new `bytes memory destination` value
-    _output = new bytes(_length);
+    output = new bytes(length);
     // Early return in case that bytes length is 0
-    if (_length > 0) {
-      bytes memory _input = _buffer.data;
-      uint _offset = _buffer.cursor;
+    if (length > 0) {
+      bytes memory input = buffer.data;
+      uint offset = buffer.cursor;
       // Get raw pointers for source and destination
-      uint _sourcePointer;
-      uint _destinationPointer;
+      uint sourcePointer;
+      uint destinationPointer;
       assembly {
-        _sourcePointer := add(add(_input, 32), _offset)
-        _destinationPointer := add(_output, 32)
+        sourcePointer := add(add(input, 32), offset)
+        destinationPointer := add(output, 32)
       }
-      // Copy `_length` bytes from source to destination
+      // Copy `length` bytes from source to destination
       _memcpy(
-        _destinationPointer,
-        _sourcePointer,
-        _length
+        destinationPointer,
+        sourcePointer,
+        length
       );
-      // Move the cursor forward by `_length` bytes
+      // Move the cursor forward by `length` bytes
       seek(
-        _buffer,
-        _length,
+        buffer,
+        length,
         true
       );
     }
@@ -206,40 +208,40 @@ library WitnetBuffer {
   /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `float16`
   /// use cases. In other words, the integer output of this method is 10,000 times the actual value. The input bytes are
   /// expected to follow the 16-bit base-2 format (a.k.a. `binary16`) in the IEEE 754-2008 standard.
-  /// @param _buffer An instance of `Buffer`.
-  /// @return _result The `int32` value of the next 4 bytes in the buffer counting from the cursor position.
-  function readFloat16(Buffer memory _buffer)
+  /// @param buffer An instance of `Buffer`.
+  /// @return result The `int32` value of the next 4 bytes in the buffer counting from the cursor position.
+  function readFloat16(Buffer memory buffer)
     internal pure
-    returns (int32 _result)
+    returns (int32 result)
   {
-    uint32 _value = readUint16(_buffer);
+    uint32 value = readUint16(buffer);
     // Get bit at position 0
-    uint32 _sign = _value & 0x8000;
+    uint32 sign = value & 0x8000;
     // Get bits 1 to 5, then normalize to the [-14, 15] range so as to counterweight the IEEE 754 exponent bias
-    int32 _exponent = (int32(_value & 0x7c00) >> 10) - 15;
+    int32 exponent = (int32(value & 0x7c00) >> 10) - 15;
     // Get bits 6 to 15
-    int32 _significand = int32(_value & 0x03ff);
+    int32 significand = int32(value & 0x03ff);
     // Add 1024 to the fraction if the exponent is 0
-    if (_exponent == 15) {
-      _significand |= 0x400;
+    if (exponent == 15) {
+      significand |= 0x400;
     }
     // Compute `2 ^ exponent · (1 + fraction / 1024)`
-    if (_exponent >= 0) {
-      _result = (
-        int32((int256(1 << uint256(int256(_exponent)))
+    if (exponent >= 0) {
+      result = (
+        int32((int256(1 << uint256(int256(exponent)))
           * 10000
-          * int256(uint256(int256(_significand)) | 0x400)) >> 10)
+          * int256(uint256(int256(significand)) | 0x400)) >> 10)
       );
     } else {
-      _result = (int32(
-        ((int256(uint256(int256(_significand)) | 0x400) * 10000)
-          / int256(1 << uint256(int256(- _exponent))))
+      result = (int32(
+        ((int256(uint256(int256(significand)) | 0x400) * 10000)
+          / int256(1 << uint256(int256(- exponent))))
           >> 10
       ));
     }
     // Make the result negative if the sign bit is not 0
-    if (_sign != 0) {
-      _result *= -1;
+    if (sign != 0) {
+      result *= -1;
     }
   }
 
@@ -247,268 +249,268 @@ library WitnetBuffer {
   /// but it can be easily casted into a string with `string(result)`.
   // solium-disable-next-line security/no-assign-params
   function readText(
-      WitnetBuffer.Buffer memory _buffer,
-      uint64 _length
+      WitnetBuffer.Buffer memory buffer,
+      uint64 length
     )
     internal pure
-    returns (bytes memory _text)
+    returns (bytes memory text)
   {
-    _text = new bytes(_length);
+    text = new bytes(length);
     unchecked {
-      for (uint64 _index = 0; _index < _length; _index ++) {
-        uint8 _char = readUint8(_buffer);
-        if (_char & 0x80 != 0) {
-          if (_char < 0xe0) {
-            _char = (_char & 0x1f) << 6
-              | (readUint8(_buffer) & 0x3f);
-            _length -= 1;
-          } else if (_char < 0xf0) {
-            _char  = (_char & 0x0f) << 12
-              | (readUint8(_buffer) & 0x3f) << 6
-              | (readUint8(_buffer) & 0x3f);
-            _length -= 2;
+      for (uint64 index = 0; index < length; index ++) {
+        uint8 char = readUint8(buffer);
+        if (char & 0x80 != 0) {
+          if (char < 0xe0) {
+            char = (char & 0x1f) << 6
+              | (readUint8(buffer) & 0x3f);
+            length -= 1;
+          } else if (char < 0xf0) {
+            char  = (char & 0x0f) << 12
+              | (readUint8(buffer) & 0x3f) << 6
+              | (readUint8(buffer) & 0x3f);
+            length -= 2;
           } else {
-            _char = (_char & 0x0f) << 18
-              | (readUint8(_buffer) & 0x3f) << 12
-              | (readUint8(_buffer) & 0x3f) << 6  
-              | (readUint8(_buffer) & 0x3f);
-            _length -= 3;
+            char = (char & 0x0f) << 18
+              | (readUint8(buffer) & 0x3f) << 12
+              | (readUint8(buffer) & 0x3f) << 6  
+              | (readUint8(buffer) & 0x3f);
+            length -= 3;
           }
         }
-        _text[_index] = bytes1(_char);
+        text[index] = bytes1(char);
       }
       // Adjust text to actual length:
       assembly {
-        mstore(_text, _length)
+        mstore(text, length)
       }
     }
   }
 
   /// @notice Read and consume the next byte from the buffer as an `uint8`.
-  /// @param _buffer An instance of `Buffer`.
-  /// @return _value The `uint8` value of the next byte in the buffer counting from the cursor position.
-  function readUint8(Buffer memory _buffer)
+  /// @param buffer An instance of `Buffer`.
+  /// @return value The `uint8` value of the next byte in the buffer counting from the cursor position.
+  function readUint8(Buffer memory buffer)
     internal pure
-    withinRange(_buffer.cursor, _buffer.data.length)
-    returns (uint8 _value)
+    withinRange(buffer.cursor, buffer.data.length)
+    returns (uint8 value)
   {
-    bytes memory _data = _buffer.data;
-    uint _offset = _buffer.cursor;
+    bytes memory data = buffer.data;
+    uint offset = buffer.cursor;
     assembly {
-      _value := mload(add(add(_data, 1), _offset))
+      value := mload(add(add(data, 1), offset))
     }
-    _buffer.cursor ++;
+    buffer.cursor ++;
   }
 
   /// @notice Read and consume the next 2 bytes from the buffer as an `uint16`.
-  /// @param _buffer An instance of `Buffer`.
-  /// @return _value The `uint16` value of the next 2 bytes in the buffer counting from the cursor position.
-  function readUint16(Buffer memory _buffer)
+  /// @param buffer An instance of `Buffer`.
+  /// @return value The `uint16` value of the next 2 bytes in the buffer counting from the cursor position.
+  function readUint16(Buffer memory buffer)
     internal pure
-    withinRange(_buffer.cursor + 1, _buffer.data.length)
-    returns (uint16 _value)
+    withinRange(buffer.cursor + 1, buffer.data.length)
+    returns (uint16 value)
   {
-    bytes memory _data = _buffer.data;
-    uint _offset = _buffer.cursor;
+    bytes memory data = buffer.data;
+    uint offset = buffer.cursor;
     assembly {
-      _value := mload(add(add(_data, 2), _offset))
+      value := mload(add(add(data, 2), offset))
     }
-    _buffer.cursor += 2;
+    buffer.cursor += 2;
   }
 
   /// @notice Read and consume the next 4 bytes from the buffer as an `uint32`.
-  /// @param _buffer An instance of `Buffer`.
-  /// @return _value The `uint32` value of the next 4 bytes in the buffer counting from the cursor position.
-  function readUint32(Buffer memory _buffer)
+  /// @param buffer An instance of `Buffer`.
+  /// @return value The `uint32` value of the next 4 bytes in the buffer counting from the cursor position.
+  function readUint32(Buffer memory buffer)
     internal pure
-    withinRange(_buffer.cursor + 3, _buffer.data.length)
-    returns (uint32 _value)
+    withinRange(buffer.cursor + 3, buffer.data.length)
+    returns (uint32 value)
   {
-    bytes memory _data = _buffer.data;
-    uint _offset = _buffer.cursor;
+    bytes memory data = buffer.data;
+    uint offset = buffer.cursor;
     assembly {
-      _value := mload(add(add(_data, 4), _offset))
+      value := mload(add(add(data, 4), offset))
     }
-    _buffer.cursor += 4;
+    buffer.cursor += 4;
   }
 
   /// @notice Read and consume the next 8 bytes from the buffer as an `uint64`.
-  /// @param _buffer An instance of `Buffer`.
-  /// @return _value The `uint64` value of the next 8 bytes in the buffer counting from the cursor position.
-  function readUint64(Buffer memory _buffer)
+  /// @param buffer An instance of `Buffer`.
+  /// @return value The `uint64` value of the next 8 bytes in the buffer counting from the cursor position.
+  function readUint64(Buffer memory buffer)
     internal pure
-    withinRange(_buffer.cursor + 7, _buffer.data.length)
-    returns (uint64 _value)
+    withinRange(buffer.cursor + 7, buffer.data.length)
+    returns (uint64 value)
   {
-    bytes memory _data = _buffer.data;
-    uint _offset = _buffer.cursor;
+    bytes memory data = buffer.data;
+    uint offset = buffer.cursor;
     assembly {
-      _value := mload(add(add(_data, 8), _offset))
+      value := mload(add(add(data, 8), offset))
     }
-    _buffer.cursor += 8;
+    buffer.cursor += 8;
   }
 
   /// @notice Read and consume the next 16 bytes from the buffer as an `uint128`.
-  /// @param _buffer An instance of `Buffer`.
-  /// @return _value The `uint128` value of the next 16 bytes in the buffer counting from the cursor position.
-  function readUint128(Buffer memory _buffer)
+  /// @param buffer An instance of `Buffer`.
+  /// @return value The `uint128` value of the next 16 bytes in the buffer counting from the cursor position.
+  function readUint128(Buffer memory buffer)
     internal pure
-    withinRange(_buffer.cursor + 15, _buffer.data.length)
-    returns (uint128 _value)
+    withinRange(buffer.cursor + 15, buffer.data.length)
+    returns (uint128 value)
   {
-    bytes memory _data = _buffer.data;
-    uint _offset = _buffer.cursor;
+    bytes memory data = buffer.data;
+    uint offset = buffer.cursor;
     assembly {
-      _value := mload(add(add(_data, 16), _offset))
+      value := mload(add(add(data, 16), offset))
     }
-    _buffer.cursor += 16;
+    buffer.cursor += 16;
   }
 
   /// @notice Read and consume the next 32 bytes from the buffer as an `uint256`.
-  /// @param _buffer An instance of `Buffer`.
-  /// @return _value The `uint256` value of the next 32 bytes in the buffer counting from the cursor position.
-  function readUint256(Buffer memory _buffer)
+  /// @param buffer An instance of `Buffer`.
+  /// @return value The `uint256` value of the next 32 bytes in the buffer counting from the cursor position.
+  function readUint256(Buffer memory buffer)
     internal pure
-    withinRange(_buffer.cursor + 31, _buffer.data.length)
-    returns (uint256 _value)
+    withinRange(buffer.cursor + 31, buffer.data.length)
+    returns (uint256 value)
   {
-    bytes memory _data = _buffer.data;
-    uint _offset = _buffer.cursor;
+    bytes memory data = buffer.data;
+    uint offset = buffer.cursor;
     assembly {
-      _value := mload(add(add(_data, 32), _offset))
+      value := mload(add(add(data, 32), offset))
     }
-    _buffer.cursor += 32;
+    buffer.cursor += 32;
   }
 
   /// @notice Replace bytecode indexed wildcards by correspondent string.
   /// @dev Wildcard format: "\#\", with # in ["0".."9"].
-  /// @param _input Bytes array containing strings.
-  /// @param _args String values for replacing existing indexed wildcards in _input.
-  function replace(bytes memory _input, string[] memory _args)
+  /// @param input Bytes array containing strings.
+  /// @param args String values for replacing existing indexed wildcards in input.
+  function replace(bytes memory input, string[] memory args)
     internal pure
-    returns (bytes memory _output)
+    returns (bytes memory output)
   {
-    uint _ix = 0; uint _lix = 0;
-    uint _inputLength;
-    uint _inputPointer;
-    uint _outputLength;
-    uint _outputPointer;    
-    uint _source;
-    uint _sourceLength;
-    uint _sourcePointer;
+    uint ix = 0; uint lix = 0;
+    uint inputLength;
+    uint inputPointer;
+    uint outputLength;
+    uint outputPointer;    
+    uint source;
+    uint sourceLength;
+    uint sourcePointer;
     
     assembly {
       // set starting input pointer
-      _inputPointer := add(_input, 32)
+      inputPointer := add(input, 32)
       // get safe output location
-      _output := mload(0x40)
+      output := mload(0x40)
       // set starting output pointer
-      _outputPointer := add(_output, 32)
+      outputPointer := add(output, 32)
     }         
 
     unchecked {
-      uint _length = _input.length - 2;
-      for (; _ix < _length; ) {
+      uint length = input.length - 2;
+      for (; ix < length; ) {
         if (
-          _input[_ix] == bytes1("\\")
-            && _input[_ix + 2] == bytes1("\\")
-            && _input[_ix + 1] >= bytes1("0")
-            && _input[_ix + 1] <= bytes1("9")
+          input[ix] == bytes1("\\")
+            && input[ix + 2] == bytes1("\\")
+            && input[ix + 1] >= bytes1("0")
+            && input[ix + 1] <= bytes1("9")
         ) {
-          if (_ix > _lix) {
-            _inputLength = (_ix - _lix);
+          if (ix > lix) {
+            inputLength = (ix - lix);
             _memcpy(
-              _outputPointer,
-              _inputPointer,
-              _inputLength
+              outputPointer,
+              inputPointer,
+              inputLength
             );
-            _inputPointer += _inputLength + 3;
-            _outputPointer += _inputLength;
+            inputPointer += inputLength + 3;
+            outputPointer += inputLength;
           }    
-          uint _ax = uint(uint8(_input[_ix + 1]) - uint8(bytes1("0")));
-          if (_ax >= _args.length) {
-            revert MissingArgs(_ax, _args);
+          uint ax = uint(uint8(input[ix + 1]) - uint8(bytes1("0")));
+          if (ax >= args.length) {
+            revert MissingArgs(ax, args);
           }
           assembly {
-            _source := mload(add(_args, mul(32, add(_ax, 1))))
-            _sourceLength := mload(_source)
-            _sourcePointer := add(_source, 32)      
+            source := mload(add(args, mul(32, add(ax, 1))))
+            sourceLength := mload(source)
+            sourcePointer := add(source, 32)      
           }        
           _memcpy(
-            _outputPointer,
-            _sourcePointer,
-            _sourceLength
+            outputPointer,
+            sourcePointer,
+            sourceLength
           );
-          _outputLength += _inputLength + _sourceLength;
-          _outputPointer += _sourceLength;
-          _ix += 3;
-          _lix = _ix;
+          outputLength += inputLength + sourceLength;
+          outputPointer += sourceLength;
+          ix += 3;
+          lix = ix;
         } else {
-          _ix ++;
+          ix ++;
         }
       }
-      _ix = _input.length;    
+      ix = input.length;    
     }
-    if (_outputLength > 0) {
-      if (_ix > _lix ) {
+    if (outputLength > 0) {
+      if (ix > lix ) {
         _memcpy(
-          _outputPointer,
-          _inputPointer,
-          _ix - _lix
+          outputPointer,
+          inputPointer,
+          ix - lix
         );
-        _outputLength += (_ix - _lix);
+        outputLength += (ix - lix);
       }
       assembly {
         // set final output length
-        mstore(_output, _outputLength)
+        mstore(output, outputLength)
         // protect output bytes
-        mstore(0x40, add(mload(0x40), add(_outputLength, 32)))
+        mstore(0x40, add(mload(0x40), add(outputLength, 32)))
       }
     }
     else {
-      return _input;
+      return input;
     }
   }
 
   /// @notice Move the inner cursor of the buffer to a relative or absolute position.
-  /// @param _buffer An instance of `Buffer`.
-  /// @param _offset How many bytes to move the cursor forward.
-  /// @param _relative Whether to count `_offset` from the last position of the cursor (`true`) or the beginning of the
+  /// @param buffer An instance of `Buffer`.
+  /// @param offset How many bytes to move the cursor forward.
+  /// @param relative Whether to count `offset` from the last position of the cursor (`true`) or the beginning of the
   /// buffer (`true`).
-  /// @return The final position of the cursor (will equal `_offset` if `_relative` is `false`).
+  /// @return The final position of the cursor (will equal `offset` if `relative` is `false`).
   // solium-disable-next-line security/no-assign-params
   function seek(
-      Buffer memory _buffer,
-      uint _offset,
-      bool _relative
+      Buffer memory buffer,
+      uint offset,
+      bool relative
     )
     internal pure
-    withinRange(_offset, _buffer.data.length + 1)
+    withinRange(offset, buffer.data.length + 1)
     returns (uint)
   {
     // Deal with relative offsets
-    if (_relative) {
-      _offset += _buffer.cursor;
+    if (relative) {
+      offset += buffer.cursor;
     }
-    _buffer.cursor = _offset;
-    return _offset;
+    buffer.cursor = offset;
+    return offset;
   }
 
   /// @notice Move the inner cursor a number of bytes forward.
   /// @dev This is a simple wrapper around the relative offset case of `seek()`.
-  /// @param _buffer An instance of `Buffer`.
-  /// @param _relativeOffset How many bytes to move the cursor forward.
+  /// @param buffer An instance of `Buffer`.
+  /// @param relativeOffset How many bytes to move the cursor forward.
   /// @return The final position of the cursor.
   function seek(
-      Buffer memory _buffer,
-      uint _relativeOffset
+      Buffer memory buffer,
+      uint relativeOffset
     )
     internal pure
     returns (uint)
   {
     return seek(
-      _buffer,
-      _relativeOffset,
+      buffer,
+      relativeOffset,
       true
     );
   }
@@ -516,33 +518,33 @@ library WitnetBuffer {
   /// @notice Copy bytes from one memory address into another.
   /// @dev This function was borrowed from Nick Johnson's `solidity-stringutils` lib, and reproduced here under the terms
   /// of [Apache License 2.0](https://github.com/Arachnid/solidity-stringutils/blob/master/LICENSE).
-  /// @param _dest Address of the destination memory.
-  /// @param _src Address to the source memory.
-  /// @param _len How many bytes to copy.
+  /// @param dest Address of the destination memory.
+  /// @param src Address to the source memory.
+  /// @param len How many bytes to copy.
   // solium-disable-next-line security/no-assign-params
   function _memcpy(
-      uint _dest,
-      uint _src,
-      uint _len
+      uint dest,
+      uint src,
+      uint len
     )
     private pure
   {
     unchecked {
       // Copy word-length chunks while possible
-      for (; _len >= 32; _len -= 32) {
+      for (; len >= 32; len -= 32) {
         assembly {
-          mstore(_dest, mload(_src))
+          mstore(dest, mload(src))
         }
-        _dest += 32;
-        _src += 32;
+        dest += 32;
+        src += 32;
       }
-      if (_len > 0) {
+      if (len > 0) {
         // Copy remaining bytes
-        uint _mask = 256 ** (32 - _len) - 1;
+        uint _mask = 256 ** (32 - len) - 1;
         assembly {
-          let _srcpart := and(mload(_src), not(_mask))
-          let _destpart := and(mload(_dest), _mask)
-          mstore(_dest, or(_destpart, _srcpart))
+          let srcpart := and(mload(src), not(_mask))
+          let destpart := and(mload(dest), _mask)
+          mstore(dest, or(destpart, srcpart))
         }
       }
     }
