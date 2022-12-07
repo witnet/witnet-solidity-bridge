@@ -9,7 +9,24 @@ library WitnetV2 {
     error IndexOutOfBounds(uint256 index, uint256 range);
     error InsufficientBalance(uint256 weiBalance, uint256 weiExpected);
     error InsufficientFee(uint256 weiProvided, uint256 weiExpected);
-    error Unauthorized(address violator);    
+    error Unauthorized(address violator);
+
+    error RadonRetrievalNoSources();
+    error RadonRetrievalArgsMismatch(string[][] args);
+    error RadonRetrievalResultsMismatch(uint index, uint8 read, uint8 expected);
+
+    error RadonSlaNoReward();
+    error RadonSlaNoWitnesses();
+    error RadonSlaTooManyWitnesses(uint256 numWitnesses);
+    error RadonSlaConsensusOutOfRange(uint256 percentage);
+    error RadonSlaLowCollateral(uint256 collateral);
+
+    error UnsupportedDataRequestMethod(uint8 method, string schema, string body, string[2][] headers);
+    error UnsupportedRadonDataType(uint8 datatype, uint256 maxlength);
+    error UnsupportedRadonFilter(uint8 filter, bytes args);
+    error UnsupportedRadonReducer(uint8 reducer);
+    error UnsupportedRadonScript(bytes script, uint256 offset);
+    error UnsupportedRadonScriptOpcode(bytes script, uint256 cursor, uint8 opcode);
 
     function toEpoch(uint _timestamp) internal pure returns (uint) {
         return 1 + (_timestamp - 11111) / 15;
@@ -86,7 +103,7 @@ library WitnetV2 {
     struct DataProvider {
         string  fqdn;
         uint256 totalSources;
-        uint256 totalRetrievals;
+        mapping (uint256 => bytes32) sources;
     }
 
     enum DataRequestMethods {
@@ -98,7 +115,7 @@ library WitnetV2 {
 
     struct DataSource {
         DataRequestMethods method;
-        RadonDataTypes resultType;
+        RadonDataTypes resultDataType;
         string url;
         string body;
         string[2][] headers;
@@ -106,19 +123,25 @@ library WitnetV2 {
     }
 
     enum RadonDataTypes {
-        /* 0x0 */ Any, 
-        /* 0x1 */ Array,
-        /* 0x2 */ Bool,
-        /* 0x3 */ Bytes,
-        /* 0x4 */ Integer,
-        /* 0x5 */ Float,
-        /* 0x6 */ Map,
-        /* 0x7 */ String
+        /* 0x00 */ Any, 
+        /* 0x01 */ Array,
+        /* 0x02 */ Bool,
+        /* 0x03 */ Bytes,
+        /* 0x04 */ Integer,
+        /* 0x05 */ Float,
+        /* 0x06 */ Map,
+        /* 0x07 */ String,
+        Unused0x08, Unused0x09, Unused0x0A, Unused0x0B,
+        Unused0x0C, Unused0x0D, Unused0x0E, Unused0x0F,
+        /* 0x10 */ Same,
+        /* 0x11 */ Inner,
+        /* 0x12 */ Match,
+        /* 0x13 */ Subscript
     }
 
     struct RadonFilter {
-        RadonFilterOpcodes op;
-        bytes cborArgs;
+        RadonFilterOpcodes opcode;
+        bytes args;
     }
 
     enum RadonFilterOpcodes {
@@ -135,7 +158,7 @@ library WitnetV2 {
     }
 
     struct RadonReducer {
-        RadonReducerOpcodes op;
+        RadonReducerOpcodes opcode;
         RadonFilter[] filters;
     }
 
