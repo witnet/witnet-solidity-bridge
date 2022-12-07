@@ -15,8 +15,8 @@ contract TestWitnetCBOR {
   event Log(string _topic, bytes _value);
 
   function testBoolDecode() external {
-    bool decodedFalse = WitnetCBOR.valueFromBytes(hex"f4").readBool();
-    bool decodedTrue = WitnetCBOR.valueFromBytes(hex"f5").readBool();
+    bool decodedFalse = WitnetCBOR.fromBytes(hex"f4").readBool();
+    bool decodedTrue = WitnetCBOR.fromBytes(hex"f5").readBool();
     Assert.equal(
       decodedFalse,
       false,
@@ -30,7 +30,7 @@ contract TestWitnetCBOR {
   }
 
   function helperDecodeBoolRevert() public pure {
-    WitnetCBOR.valueFromBytes(hex"f6").readBool();
+    WitnetCBOR.fromBytes(hex"f6").readBool();
   }
 
   function testBoolDecodeRevert() external {
@@ -41,12 +41,12 @@ contract TestWitnetCBOR {
   }
 
   function testUint64DecodeDiscriminant() external {
-    WitnetCBOR.CBOR memory decoded = WitnetCBOR.valueFromBytes(hex"1b0020000000000000");
+    WitnetCBOR.CBOR memory decoded = WitnetCBOR.fromBytes(hex"1b0020000000000000");
     Assert.equal(uint(decoded.majorType), 0, "CBOR-encoded Uint64 value should be decoded into a WitnetCBOR.CBOR with major type 0");
   }
 
   function testUint64DecodeValue() external {
-    uint64 decoded = uint64(WitnetCBOR.valueFromBytes(hex"1b0020000000000000").readUint());
+    uint64 decoded = uint64(WitnetCBOR.fromBytes(hex"1b0020000000000000").readUint());
     Assert.equal(
       uint(decoded),
       9007199254740992,
@@ -55,12 +55,12 @@ contract TestWitnetCBOR {
   }
 
   function testInt128DecodeDiscriminant() external {
-    WitnetCBOR.CBOR memory decoded = WitnetCBOR.valueFromBytes(hex"3bfffffffffffffffe");
+    WitnetCBOR.CBOR memory decoded = WitnetCBOR.fromBytes(hex"3bfffffffffffffffe");
     Assert.equal(uint(decoded.majorType), 1, "CBOR-encoded Int128 value should be decoded into a WitnetCBOR.CBOR with major type 1");
   }
 
   function testInt128DecodeValue() external {
-    int128 decoded = int128(WitnetCBOR.valueFromBytes(hex"3bfffffffffffffffe").readInt());
+    int128 decoded = int128(WitnetCBOR.fromBytes(hex"3bfffffffffffffffe").readInt());
     Assert.equal(
       int(decoded),
       -18446744073709551615,
@@ -69,29 +69,29 @@ contract TestWitnetCBOR {
   }
 
   function testInt128DecodeZeroValue() external {
-    int128 decoded = int128(WitnetCBOR.valueFromBytes(hex"00").readInt());
+    int128 decoded = int128(WitnetCBOR.fromBytes(hex"00").readInt());
     Assert.equal(int(decoded), 0, "CBOR-encoded Int128 value should be decoded into a WitnetCBOR.CBOR containing the correct Uint64 value");
   }
 
   function testBytes0DecodeDiscriminant() external {
-    WitnetCBOR.CBOR memory decoded = WitnetCBOR.valueFromBytes(hex"40");
+    WitnetCBOR.CBOR memory decoded = WitnetCBOR.fromBytes(hex"40");
     Assert.equal(uint(decoded.majorType), 2, "Empty CBOR-encoded Bytes value should be decoded into a WitnetCBOR.CBOR with major type 2");
   }
 
   function testBytes0DecodeValue() external {
     bytes memory encoded = hex"40";
-    bytes memory decoded = WitnetCBOR.valueFromBytes(encoded).readBytes();
+    bytes memory decoded = WitnetCBOR.fromBytes(encoded).readBytes();
     Assert.equal(decoded.length, 0, "Empty CBOR-encoded Bytes value should be decoded into an empty WitnetCBOR.CBOR containing an empty bytes value");
   }
 
   function testBytes4BDecodeDiscriminant() external {
-    WitnetCBOR.CBOR memory decoded = WitnetCBOR.valueFromBytes(hex"4401020304");
+    WitnetCBOR.CBOR memory decoded = WitnetCBOR.fromBytes(hex"4401020304");
     Assert.equal(uint(decoded.majorType), 2, "CBOR-encoded Bytes value should be decoded into a WitnetCBOR.CBOR with major type 2");
   }
 
   function testBytes4DecodeValue() external {
     bytes memory encoded = hex"4401020304";
-    bytes memory decoded = WitnetCBOR.valueFromBytes(encoded).readBytes();
+    bytes memory decoded = WitnetCBOR.fromBytes(encoded).readBytes();
     bytes memory expected = abi.encodePacked(
       uint8(1),
       uint8(2),
@@ -123,7 +123,7 @@ contract TestWitnetCBOR {
 
   function testBytes32DecodeValueFrom31bytes() external {
     bytes memory encoded = hex"581f01020304050607080910111213141516171819202122232425262728293031";
-    bytes32 decoded = WitnetLib.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.valueFromBytes(encoded)));
+    bytes32 decoded = WitnetLib.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.fromBytes(encoded)));
     bytes32 expected = 0x0102030405060708091011121314151617181920212223242526272829303100;
     Assert.equal(
       decoded,
@@ -134,7 +134,7 @@ contract TestWitnetCBOR {
 
   function testBytes32DecodeValueFrom32bytes() external {
     bytes memory encoded = hex"58200102030405060708091011121314151617181920212223242526272829303132";
-    bytes32 decoded = WitnetLib.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.valueFromBytes(encoded)));
+    bytes32 decoded = WitnetLib.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.fromBytes(encoded)));
     bytes32 expected = 0x0102030405060708091011121314151617181920212223242526272829303132;
     Assert.equal(
       decoded,
@@ -145,7 +145,7 @@ contract TestWitnetCBOR {
 
   function testBytes32DecodeValueFrom33bytes() external {
     bytes memory encoded = hex"5821010203040506070809101112131415161718192021222324252627282930313233";
-    bytes32 decoded = WitnetLib.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.valueFromBytes(encoded)));
+    bytes32 decoded = WitnetLib.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.fromBytes(encoded)));
     bytes32 expected = 0x0102030405060708091011121314151617181920212223242526272829303132;
     Assert.equal(
       decoded,
@@ -155,7 +155,7 @@ contract TestWitnetCBOR {
   }
 
   function testStringDecodeDiscriminant() external {
-    WitnetCBOR.CBOR memory decoded = WitnetCBOR.valueFromBytes(hex"6449455446");
+    WitnetCBOR.CBOR memory decoded = WitnetCBOR.fromBytes(hex"6449455446");
     Assert.equal(
       uint(decoded.majorType),
       3,
@@ -165,7 +165,7 @@ contract TestWitnetCBOR {
 
   function testStringDecodeValue() external {
     bytes memory encoded = hex"6449455446";
-    string memory decoded = WitnetCBOR.valueFromBytes(encoded).readString();
+    string memory decoded = WitnetCBOR.fromBytes(encoded).readString();
     string memory expected = "IETF";
     Assert.equal(
       decoded,
@@ -175,7 +175,7 @@ contract TestWitnetCBOR {
   }
 
   function testFloatDecodeDiscriminant() external {
-    WitnetCBOR.CBOR memory decoded = WitnetCBOR.valueFromBytes(hex"f90001");
+    WitnetCBOR.CBOR memory decoded = WitnetCBOR.fromBytes(hex"f90001");
     Assert.equal(
       uint(decoded.majorType),
       7,
@@ -185,7 +185,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeSmallestSubnormal() external {
     bytes memory encoded = hex"f90001";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 0;
     Assert.equal(
       decoded,
@@ -196,7 +196,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeLargestSubnormal() external {
     bytes memory encoded = hex"f903ff";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 0;
     Assert.equal(
       decoded,
@@ -207,7 +207,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeSmallestPositiveNormal() external {
     bytes memory encoded = hex"f90400";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 0;
     Assert.equal(
       decoded,
@@ -218,7 +218,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeLargestNormal() external {
     bytes memory encoded = hex"f97bff";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 655040000;
     Assert.equal(
       decoded,
@@ -229,7 +229,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeLargestLessThanOne() external {
     bytes memory encoded = hex"f93bff";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 9995;
     Assert.equal(
       decoded,
@@ -240,7 +240,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeOne() external {
     bytes memory encoded = hex"f93c00";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 10000;
     Assert.equal(
       decoded,
@@ -251,7 +251,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeSmallestGreaterThanOne() external {
     bytes memory encoded = hex"f93c01";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 10009;
     Assert.equal(
       decoded,
@@ -262,7 +262,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeOneThird() external {
     bytes memory encoded = hex"f93555";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 3332;
     Assert.equal(
       decoded,
@@ -273,7 +273,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeMinusTwo() external {
     bytes memory encoded = hex"f9c000";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = -20000;
     Assert.equal(
       decoded,
@@ -284,7 +284,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeZero() external {
     bytes memory encoded = hex"f90000";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 0;
     Assert.equal(
       decoded,
@@ -295,7 +295,7 @@ contract TestWitnetCBOR {
 
   function testFloatDecodeMinusZero() external {
     bytes memory encoded = hex"f98000";
-    int32 decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16();
+    int32 decoded = WitnetCBOR.fromBytes(encoded).readFloat16();
     int32 expected = 0;
     Assert.equal(
       decoded,
@@ -306,7 +306,7 @@ contract TestWitnetCBOR {
 
   function testUintArrayDecode() external {
     bytes memory encoded = hex"840102031a002fefd8";
-    uint[] memory decoded = WitnetCBOR.valueFromBytes(encoded).readUintArray();
+    uint[] memory decoded = WitnetCBOR.fromBytes(encoded).readUintArray();
     uint[4] memory expected = [
       uint(1),
       uint(2),
@@ -337,7 +337,7 @@ contract TestWitnetCBOR {
 
   function testIntArrayDecode() external {
     bytes memory encoded = hex"840121033a002fefd7";
-    int[] memory decoded = WitnetCBOR.valueFromBytes(encoded).readIntArray();
+    int[] memory decoded = WitnetCBOR.fromBytes(encoded).readIntArray();
     int[4] memory expected = [
       int(1),
       int(-2),
@@ -368,7 +368,7 @@ contract TestWitnetCBOR {
 
   function testFixed16ArrayDecode() external {
     bytes memory encoded = hex"84f93c80f9c080f94290f9C249";
-    int32[] memory decoded = WitnetCBOR.valueFromBytes(encoded).readFloat16Array();
+    int32[] memory decoded = WitnetCBOR.fromBytes(encoded).readFloat16Array();
     int32[4] memory expected = [
       int32(11250),
       int32(-22500),
@@ -399,7 +399,7 @@ contract TestWitnetCBOR {
 
   function testStringArrayDecode() external {
     bytes memory encoded = hex"846548656c6c6f6d646563656e7472616c697a656465776f726c646121";
-    string[] memory decoded = WitnetCBOR.valueFromBytes(encoded).readStringArray();
+    string[] memory decoded = WitnetCBOR.fromBytes(encoded).readStringArray();
     string[4] memory expected = [
       "Hello",
       "decentralized",
