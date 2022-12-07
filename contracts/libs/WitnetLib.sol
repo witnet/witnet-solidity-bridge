@@ -18,19 +18,6 @@ library WitnetLib {
     /// ===============================================================================================================
     /// --- WitnetLib internal methods --------------------------------------------------------------------------------
 
-    function size(WitnetV2.RadonDataTypes _type) internal pure returns (uint) {
-        if (_type == WitnetV2.RadonDataTypes.Integer
-            || _type == WitnetV2.RadonDataTypes.Float
-        ) {
-            return 9;
-        } else if (_type == WitnetV2.RadonDataTypes.Bool) {
-            return 1;
-        } else {
-            // undetermined
-            return 0; 
-        }
-    }
-
     function toAddress(bytes memory _value) internal pure returns (address) {
         return address(toBytes20(_value));
     }
@@ -103,6 +90,24 @@ library WitnetLib {
             b3[2] = bytes1(uint8(_u % 10) + 48);
             return string(b3);
         }
+    }
+
+    function tryUint(string memory str)
+        internal pure
+        returns (uint res, bool)
+    {
+        unchecked {
+            for (uint256 i = 0; i < bytes(str).length; i++) {
+                if (
+                    (uint8(bytes(str)[i]) - 48) < 0
+                        || (uint8(bytes(str)[i]) - 48) > 9
+                ) {
+                    return (0, false);
+                }
+                res += (uint8(bytes(str)[i]) - 48) * 10 ** (bytes(str).length - i - 1);
+            }
+            return (res, true);
+        }   
     }
 
     /// @notice Returns true if Witnet.Result contains an error.
@@ -553,203 +558,6 @@ library WitnetLib {
     {
         WitnetCBOR.CBOR memory cborValue = WitnetCBOR.valueFromBytes(_cborBytes);
         return _resultFromCborValue(cborValue);
-    }
-
-    /// ----------------------------- public encoding methods ---------------------------------------------------------
-
-    /// @notice Encode bytes array into given major type (UTF-8 not yet supported)
-    /// @param buf Bytes array
-    /// @return Marshaled bytes
-    function encode(bytes memory buf, uint majorType)
-        public pure
-        returns (bytes memory)
-    {
-        uint len = buf.length;
-        if (len < 23) {
-            return abi.encodePacked(
-                uint8((majorType << 5) | uint8(len)),
-                buf
-            );
-        } else {
-            uint8 buf0 = uint8((majorType << 5));
-            bytes memory buf1;
-            if (len <= 0xff) {
-                buf0 |= 24;
-                buf1 = abi.encodePacked(uint8(len));                
-            } else if (len <= 0xffff) {
-                buf0 |= 25;
-                buf1 = abi.encodePacked(uint16(len));
-            } else if (len <= 0xffffffff) {
-                buf0 |= 26;
-                buf1 = abi.encodePacked(uint32(len));
-            } else {
-                buf0 |= 27;
-                buf1 = abi.encodePacked(uint64(len));
-            }
-            return abi.encodePacked(
-                buf0,
-                buf1,
-                buf
-            );
-        }
-    }
-
-    /// @notice Encode bytes array.
-    /// @param buf Bytes array
-    /// @return Mashaled bytes
-    function encode(bytes memory buf)
-        public pure
-        returns (bytes memory)
-    {
-        return encode(buf, WitnetCBOR.MAJOR_TYPE_BYTES);
-    } 
-
-    /// @notice Encode string array (UTF-8 not yet supported).
-    /// @param str String bytes.
-    /// @return Mashaled bytes
-    function encode(string memory str)
-        public pure
-        returns (bytes memory)
-    {
-        return encode(bytes(str), WitnetCBOR.MAJOR_TYPE_STRING);
-    }
-
-    /// @dev Encode uint64 into tagged varint.
-    /// @dev See https://developers.google.com/protocol-buffers/docs/encoding#varints.
-    /// @param n Number
-    /// @param t Tag
-    /// @return buf Marshaled bytes
-    function encode(uint64 n, bytes1 t)
-        public pure
-        returns (bytes memory buf)
-    {
-        unchecked {
-            // Count the number of groups of 7 bits
-            // We need this pre-processing step since Solidity doesn't allow dynamic memory resizing
-            uint64 tmp = n;
-            uint64 numBytes = 2;
-            while (tmp > 0x7F) {
-                tmp = tmp >> 7;
-                numBytes += 1;
-            }
-            buf = new bytes(numBytes);
-            tmp = n;
-            buf[0] = t;
-            for (uint64 i = 1; i < numBytes; i++) {
-                // Set the first bit in the byte for each group of 7 bits
-                buf[i] = bytes1(0x80 | uint8(tmp & 0x7F));
-                tmp = tmp >> 7;
-            }
-            // Unset the first bit of the last byte
-            buf[numBytes - 1] &= 0x7F;
-        }
-    }
-
-    function encode(WitnetV2.DataSource memory _dds)
-        public pure
-        returns (bytes memory)
-    {
-        assert(_dds.headers[0].length == _dds.headers[1].length);
-        bytes memory _encodedMethod = encode(uint64(_dds.method), bytes1(0x08));
-        bytes memory _encodedUrl;
-        if (bytes(_dds.url).length > 0) {
-            _encodedUrl = abi.encodePacked(
-                encode(uint64(bytes(_dds.url).length), bytes1(0x12)),
-                bytes(_dds.url)
-            );
-        }
-        bytes memory _encodedScript;
-        if (_dds.script.length > 0) {
-            _encodedScript = abi.encodePacked(
-                encode(uint64(_dds.script.length), bytes1(0x1a)),
-                _dds.script
-            );
-        }
-        bytes memory _encodedBody;
-        if (bytes(_dds.body).length > 0) {
-            _encodedBody = abi.encodePacked(
-                encode(uint64(bytes(_dds.body).length), bytes1(0x22))
-            );
-        }
-        bytes memory _encodedHeaders;
-        if (_dds.headers[0].length > 0) {
-            bytes memory _partials;
-            for (uint _ix = 0; _ix < _dds.headers[0].length; ) {
-                _partials = abi.encodePacked(
-                    _partials,
-                    encode(uint64(bytes(_dds.headers[0][_ix]).length), bytes1(0x0a)),
-                    bytes(_dds.headers[0][_ix]),
-                    encode(uint64(bytes(_dds.headers[1][_ix]).length), bytes1(0x12)),
-                    bytes(_dds.headers[1][_ix])
-                );
-            }
-            _encodedHeaders = abi.encodePacked(
-                encode(uint64(_partials.length), bytes1(0x2a)),
-                _partials
-            );
-        }
-        uint _innerSize = (
-            _encodedMethod.length
-                + _encodedUrl.length
-                + _encodedScript.length
-                + _encodedBody.length
-                + _encodedHeaders.length
-        );
-        return abi.encodePacked(
-            encode(uint64(_innerSize), bytes1(0x12)),
-            _encodedMethod,
-            _encodedUrl,
-            _encodedScript,
-            _encodedBody,
-            _encodedHeaders
-        );
-    }
-
-    function encode(WitnetV2.RadonSLA memory _sla)
-        public pure
-        returns (bytes memory)
-    {
-        return abi.encodePacked(
-            encode(uint64(_sla.witnessReward), bytes1(0x10)),
-            encode(uint64(_sla.numWitnesses), bytes1(0x18)),
-            encode(uint64(_sla.commitRevealFee), bytes1(0x20)),
-            encode(uint64(_sla.minConsensusPercentage), bytes1(0x28)),
-            encode(uint64(_sla.collateral), bytes1(0x30))
-        );
-    }
-
-    function replaceCborStringsFromBytes(
-            bytes memory data,
-            string[] memory args
-        )
-        public pure
-        returns (WitnetCBOR.CBOR memory cbor)
-    {
-        cbor = WitnetCBOR.valueFromBytes(data);
-        while (!cbor.eof()) {
-            if (cbor.majorType == WitnetCBOR.MAJOR_TYPE_STRING) {
-                _replaceWildcards(cbor, args);
-            } else {
-                cbor.skip();
-            }
-        }
-    }
-
-    function _replaceWildcards(WitnetCBOR.CBOR memory self, string[] memory args)
-        private pure
-    {
-        uint _rewind = self.len;
-        uint _start = self.buffer.cursor;
-        bytes memory _currentText = bytes(self.readString());
-        uint _currentCborLength = _currentText.length + _rewind;
-        bytes memory _newText = WitnetBuffer.replace(bytes(_currentText), args);
-        if (keccak256(_newText) != keccak256(bytes(_currentText))) {
-            bytes memory _newCborPokes = encode(string(_newText));
-            self.buffer.cursor = _start - _rewind;
-            self.buffer.mutate(_currentCborLength, _newCborPokes);
-        }
-        self.buffer.cursor = _start;
-        self.skip();
     }
 
 }
