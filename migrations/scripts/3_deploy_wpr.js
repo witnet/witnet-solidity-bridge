@@ -4,9 +4,10 @@ const settings = require("../witnet.settings")
 const utils = require("../../scripts/utils")
 
 module.exports = async function (deployer, network, accounts) {
-  const realm = network === "test"
-    ? "default"
-    : utils.getRealmNetworkFromArgs()[0]
+
+  if (network === "test") return
+
+  const realm = utils.getRealmNetworkFromArgs()[0]
 
   const addresses = require("../witnet.addresses")[realm][network = network.split("-")[0]]
   const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
