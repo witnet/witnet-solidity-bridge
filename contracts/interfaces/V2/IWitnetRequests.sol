@@ -23,7 +23,7 @@ interface IWitnetRequests {
     error DrPostOnlyRequester(bytes32 drHash, address requester);
     error DrPostOnlyReporter(bytes32 drHash, address reporter);
 
-    event DrPost(WitnetV2.DrPostRequest request);
+    event DrPost(address indexed reporter, bytes32 drHash);
     event DrPostDeleted (address indexed from, bytes32 drHash);
     event DrPostDisputed(address indexed from, bytes32 drHash);
     event DrPostReported(address indexed from, bytes32 drHash);

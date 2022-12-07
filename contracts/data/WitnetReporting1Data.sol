@@ -32,6 +32,16 @@ abstract contract WitnetReporting1Data
         mapping (address => Escrow) escrows;
     }
 
+    constructor() {
+        __reporting().settings = IWitnetReporting1.SignUpConfig({
+            weiRejectionFee: 0.01 ether,
+            weiSignUpFee: 0.1 ether,
+            acceptanceBlocks: 32,
+            banningBlocks: 256,
+            exitBlocks: 64
+        });
+    }
+
     // --- Internal view functions
 
     
