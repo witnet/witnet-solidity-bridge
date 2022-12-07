@@ -50,12 +50,29 @@ abstract contract WitnetRequestBoardTrustlessBase
             bool _upgradable,
             bytes32 _versionTag
         )
+        Payable(address(0x0))
         WitnetUpgradableBase(
             _upgradable,
             _versionTag,
             "io.witnet.proxiable.boards.v2"
         )
     {}
+
+    receive() external payable override {
+        revert("WitnetRequestBoardTrustlessBase: no transfers accepted");
+    }
+
+    function blocks() override external view returns (IWitnetBlocks) {
+        return __board().blocks;
+    }
+
+    function bytecodes() override external view returns (IWitnetBytecodes) {
+        return __board().bytecodes;
+    }
+
+    function decoder() override external view returns (IWitnetDecoder) {
+        return __board().decoder;
+    }
 
     // ================================================================================================================
     // --- Overrides IERC165 interface --------------------------------------------------------------------------------
@@ -75,9 +92,9 @@ abstract contract WitnetRequestBoardTrustlessBase
     // ================================================================================================================
     // --- Internal virtual methods -----------------------------------------------------------------------------------
 
-    function _cancelDeadline(uint256 _postEpoch) internal view virtual returns (uint256);
-    function _reportDeadlineEpoch(uint256 _postEpoch) internal view virtual returns (uint256);    
-    function _selectReporter(bytes32 _drHash) internal virtual view returns (address);
+    // function _cancelDeadline(uint256 _postEpoch) internal view virtual returns (uint256);
+    // function _reportDeadlineEpoch(uint256 _postEpoch) internal view virtual returns (uint256);    
+    // function _selectReporter(bytes32 _drHash) internal virtual view returns (address);
 
 
     // ================================================================================================================
@@ -197,14 +214,14 @@ abstract contract WitnetRequestBoardTrustlessBase
         if (_refs.length > 1 && _refs[1] != address(0)) setBytecodes(_refs[1]);
         if (_refs.length > 2 && _refs[2] != address(0)) setDecoder(_refs[2]);
 
-        // All complying references must be provided:
-        if (address(__board().blocks) == address(0)) {
-            revert WitnetUpgradableBase.NotCompliant(type(IWitnetBlocks).interfaceId);
-        } else if (address(__board().bytecodes) == address(0)) {
-            revert WitnetUpgradableBase.NotCompliant(type(IWitnetBytecodes).interfaceId);
-        } else if (address(__board().decoder) == address(0)) {
-            revert WitnetUpgradableBase.NotCompliant(type(IWitnetDecoder).interfaceId);
-        }
+// // All complying references must be provided:
+// if (address(__board().blocks) == address(0)) {
+//     revert WitnetUpgradableBase.NotCompliant(type(IWitnetBlocks).interfaceId);
+// } else if (address(__board().bytecodes) == address(0)) {
+//     revert WitnetUpgradableBase.NotCompliant(type(IWitnetBytecodes).interfaceId);
+// } else if (address(__board().decoder) == address(0)) {
+//     revert WitnetUpgradableBase.NotCompliant(type(IWitnetDecoder).interfaceId);
+// }
 
         // Set deliveryTag if not done yet:
         if (__board().serviceTag == bytes4(0)) {
@@ -282,14 +299,17 @@ abstract contract WitnetRequestBoardTrustlessBase
     {
         return (
             estimateReportFee(_drRadHash, _gasPrice)
-                + __board().bytecodes.lookupRadonSLAReward(_drSlaHash) * _witPrice
+                // TODO: + __board().bytecodes.lookupDrSlaReward(_drSlaHash) * _witPrice
         );
     }
 
     function estimateReportFee(bytes32 _drRadHash, uint256 _gasPrice)
         public view
-        virtual
-        returns (uint256);
+        virtual override
+        returns (uint256)
+    {
+        revert("WitnetRequestBoardTrustlessBase: not yet implemented");
+    }
 
     function getDrPost(bytes32 _drHash)
         public view
@@ -416,54 +436,55 @@ abstract contract WitnetRequestBoardTrustlessBase
 
     function postDr(
             bytes32 _drRadHash,
-            bytes32 _drSlaHash,
-            uint256 _weiWitPrice
+            bytes32 _drSlaHash
         )
         external payable
         returns (bytes32 _drHash)
     {
         // TODO
-        // // Calculate current epoch in Witnet terms:
-        // uint256 _currentEpoch = block.timestamp.toEpoch();
+        // Calculate current epoch in Witnet terms:
+        uint256 _currentEpoch = block.timestamp; // TODO: .toEpoch();
 
-        // // Calculate data request delivery tag:
-        // bytes8 _drDeliveryTag = bytes8(keccak256(abi.encode(
-        //     _msgSender(),
-        //     _drRadHash,
-        //     _drSlaHash,
-        //     _currentEpoch,            
-        //     ++ __board().serviceStats.totalPosts
-        // )));
-        // _drDeliveryTag |= bytes8(serviceTag());
+        // Calculate data request delivery tag:
+        bytes8 _drDeliveryTag = bytes8(keccak256(abi.encode(
+            _msgSender(),
+            _drRadHash,
+            _drSlaHash,
+            _currentEpoch,            
+            ++ __board().serviceStats.totalPosts
+        )));
+        _drDeliveryTag |= bytes8(serviceTag());
 
-        // // Calculate data request post hash:
-        // _drHash = WitnetV2.hash(abi.encodePacked(
-        //     _drRadHash,
-        //     _drSlaHash,
-        //     _drDeliveryTag
-        // ));
+        // Calculate data request post hash:
+        _drHash = Witnet.hash(abi.encodePacked(
+            _drRadHash,
+            _drSlaHash,
+            _drDeliveryTag
+        ));
 
-        // // Check minimum base fee is covered:
+        // Check minimum base fee is covered:
         // uint256 _minBaseFee = estimateBaseFee(
         //     _drRadHash,
         //     _getGasPrice(),
         //     _drSlaHash,
-        //     _weiWitPrice
         // );
         // if (_getMsgValue() < _minBaseFee) {
         //     revert IWitnetRequests.DrPostLowReward(_drHash, _minBaseFee, _getMsgValue());
         // }
 
-        // // Save DrPost in storage:
-        // __drPostRequest(_drHash) = WitnetV2.DrPostRequest({
-        //     epoch: _currentEpoch,
-        //     from: _msgSender(),
-        //     to: _selectReporter(),
-        //     radHash: _drRadHash,
-        //     slaHash: _drSlaHash,
-        //     weiReward: _getMsgValue()
-        // });
-        // emit DrPost(__drPostRequest(_drHash));
+        // Save DrPost in storage:
+        WitnetV2.DrPost storage __dr = __drPost(_drHash);
+        __dr.block = block.number;
+        __dr.status = WitnetV2.DrPostStatus.Posted;
+        __dr.request = WitnetV2.DrPostRequest({
+            epoch: _currentEpoch,
+            requester: _msgSender(),
+            reporter: msg.sender, // TODO: _selectReporter(),
+            radHash: _drRadHash,
+            slaHash: _drSlaHash,
+            weiReward: _getMsgValue()
+        });
+        emit DrPost(msg.sender, _drHash);//__drPostRequest(_drHash));
     }
 
     function reportDrPost(
