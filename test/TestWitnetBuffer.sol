@@ -6,7 +6,6 @@ pragma experimental ABIEncoderV2;
 import "truffle/Assert.sol";
 import "../contracts/libs/WitnetBuffer.sol";
 
-
 contract TestWitnetBuffer {
 
   using WitnetBuffer for WitnetBuffer.Buffer;
