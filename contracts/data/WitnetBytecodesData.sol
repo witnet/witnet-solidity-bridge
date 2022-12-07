@@ -13,12 +13,9 @@ abstract contract WitnetBytecodesData
         IWitnetBytecodes
 {
 
-    bytes32 internal constant _WITNET_BYTECODES_DATA_SLOTHASH =
+    bytes32 private constant _WITNET_BYTECODES_DATA_SLOTHASH =
         /* keccak256("io.witnet.bytecodes.data") */
         0x673359bdfd0124f9962355e7aed2d07d989b0d4bc4cbe2c94c295e0f81427dec;
-
-    bytes internal constant _WITNET_BYTECODES_RADON_OPCODES_RESULT_TYPES =
-        hex"00ffffffffffffffffffffffffffffff0401ff010203050406070101ff01ffff07ff02ffffffffffffffffffffffffff0703ffffffffffffffffffffffffffff05070404020205050505ff04ff04ffff0405070202ff04040404ffffffffffff010203050406070101ffffffffffffff02ff050404000106060707ffffffffff";
 
     struct Bytecodes {
         address base;
@@ -30,39 +27,23 @@ abstract contract WitnetBytecodesData
         // ...
     }
 
-    struct Database {
-        mapping (uint256 => WitnetV2.DataProvider) providers;
-        mapping (uint256 => mapping (uint256 => bytes32[])) providersSources;
-        mapping (bytes32 => uint256) providersIndex;
-        
-        mapping (bytes32 => bytes) reducersBytecode;
-        mapping (bytes32 => bytes) retrievalsBytecode;
-        mapping (bytes32 => bytes) slasBytecode;
-        
-        mapping (bytes32 => IWitnetBytecodes.RadonRetrieval) retrievals;
-        mapping (bytes32 => WitnetV2.RadonReducer) reducers;
-        mapping (bytes32 => WitnetV2.RadonSLA) slas;
-        mapping (bytes32 => WitnetV2.DataSource) sources;
+    struct RadonRetrieval {
+        WitnetV2.RadonDataTypes dataType;
+        uint16 dataMaxSize;
+        string[][] args;
+        bytes32[] sources;
+        bytes32 aggregator;
+        bytes32 tally;        
     }
 
-    function _lookupOpcodeResultType(uint8 _opcode)
-        internal pure
-        returns (WitnetV2.RadonDataTypes)
-    {
-        if (_opcode >= _WITNET_BYTECODES_RADON_OPCODES_RESULT_TYPES.length) {
-            revert IWitnetBytecodes.UnsupportedRadonScriptOpcode(_opcode);
-        } else {
-            uint8 _resultType = uint8(
-                _WITNET_BYTECODES_RADON_OPCODES_RESULT_TYPES[_opcode]
-            );
-            if (_resultType == 0xff) {
-                revert IWitnetBytecodes.UnsupportedRadonScriptOpcode(_opcode);
-            } else if (_resultType > uint8(type(WitnetV2.RadonDataTypes).max)) {
-                revert IWitnetBytecodes.UnsupportedRadonDataType(_resultType, 0);
-            } else {
-                return WitnetV2.RadonDataTypes(_resultType);
-            }
-        }
+    struct Database {
+        mapping (uint256 => WitnetV2.DataProvider) providers;
+        mapping (bytes32 => uint256) providersIndex;
+        
+        mapping (bytes32 => WitnetV2.RadonReducer) reducers;
+        mapping (bytes32 => RadonRetrieval) retrievals;
+        mapping (bytes32 => WitnetV2.RadonSLA) slas;
+        mapping (bytes32 => WitnetV2.DataSource) sources;
     }
 
 
