@@ -11,7 +11,7 @@ import "../../../data/WitnetReporting1Data.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-abstract contract WitnetRequestBoardTrustlessReporting1
+contract WitnetRequestBoardTrustlessReporting1
     is 
         WitnetRequestBoardTrustlessBase,
         WitnetReporting1Data
@@ -221,8 +221,8 @@ function deleteDrPost(bytes32 _drHash)
         external
         override
         drPostInStatus(_drHash, WitnetV2.DrPostStatus.Posted)
-        onlySignedUpReporters
-        onlyExpectedReporterFor(_drHash)
+        // onlySignedUpReporters
+        // onlyExpectedReporterFor(_drHash)
     {
         if (_msgSender() != __drPostRequest(_drHash).requester) {
             revert WitnetV2.Unauthorized(_msgSender());
@@ -267,4 +267,14 @@ function deleteDrPost(bytes32 _drHash)
     }
 
     
+    // ================================================================================================================
+    // --- IWitnetReporting1Admin implementation ----------------------------------------------------------------------
+
+    function setSignUpConfig(IWitnetReporting1.SignUpConfig calldata)
+        virtual override
+        external
+    {
+        revert("WitnetRequestBoardTrustlessReporting1: not yet implemented");
+    }
+
 }
