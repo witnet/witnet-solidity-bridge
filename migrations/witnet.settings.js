@@ -200,7 +200,6 @@ module.exports = {
         host: "localhost",
         port: 8517,
         skipDryRun: true,
-        from: "0x8c49CAfC4542D9EA9107D4E48412ACEd2A68aA77",
       },
     },
     avalanche: {
