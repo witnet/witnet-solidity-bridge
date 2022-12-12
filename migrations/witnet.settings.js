@@ -539,7 +539,7 @@ module.exports = {
         network_id: 1230,
         skipDryRun: true,
       },
-    }
+    },
   },
 }
 
