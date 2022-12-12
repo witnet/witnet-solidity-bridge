@@ -489,6 +489,12 @@ module.exports = {
         network_id: 13939,
         skipDryRun: true,
       },
+      "reef.mainnet": {
+        host: "localhost",
+        port: 9532,
+        network_id: 13939,
+        skipDryRun: true,
+      },
     },
     smartbch: {
       "smartbch.amber": {
