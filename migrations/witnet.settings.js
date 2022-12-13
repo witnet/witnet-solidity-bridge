@@ -237,6 +237,12 @@ module.exports = {
         port: 8539,
         skipDryRun: true,
       },
+      "boba.ethereum.goerli": {
+        network_id: 2888,
+        host: "localhost",
+        port: 8515,
+        skipDryRun: true,
+      },
     },
     celo: {
       "celo.alfajores": {
