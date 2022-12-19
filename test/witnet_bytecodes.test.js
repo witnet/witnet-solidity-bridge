@@ -105,6 +105,8 @@ contract('WitnetBytecodes', (accounts) => {
         var binanceTickerHash
         var uniswapToken0PriceHash
         var uniswapToken1PriceHash
+        var heavyRetrievalHash
+        var heavyRetrievalBytecode
 
         var rngHash
         var rngBytecode
@@ -491,12 +493,10 @@ contract('WitnetBytecodes', (accounts) => {
                         [   // sources
                             binanceTickerHash,
                             binanceTickerHash,
-                            // binanceTickerHash,
                         ],
                         [
                             [ "BTC", "USD" ], // binance ticker args
                             [ "BTC", "USD" ], // binance ticker args
-                            // [ "BTC", "USD" ], // binance ticker args
                         ],
                         stdev15ReducerHash, // aggregator
                         stdev25ReducerHash, // tally
@@ -549,7 +549,6 @@ contract('WitnetBytecodes', (accounts) => {
                         tx.receipt,
                         "NewRadonRetrievalHash"
                     )
-                    console.log(tx.logs[0].args)
                     fraxUsdtPriceFeedHash = tx.logs[0].args.hash
                     fraxUsdtPriceFeedBytecode = tx.logs[0].args.bytecode
                 })
@@ -581,7 +580,8 @@ contract('WitnetBytecodes', (accounts) => {
                         tx.receipt,
                         "NewRadonRetrievalHash"
                     )
-                    console.log(tx.logs[0].args)
+                    heavyRetrievalHash = tx.logs[0].args.hash
+                    heavyRetrievalBytecode = tx.logs[0].args.bytecode
                 })
             })
             
@@ -735,12 +735,47 @@ contract('WitnetBytecodes', (accounts) => {
                     await bytecodes.bytecodeOf(btcUsdPriceFeedHash, slaHash)
                 })
                 it('returns expected bytecode if getting it offchain from known radon retrieval and sla', async () => {
-                    const bytecode = await bytecodes.bytecodeOf.call(btcUsdPriceFeedHash, slaHash)
+                    const bytecode = await bytecodes.bytecodeOf.call(heavyRetrievalHash, slaHash)
                     assert.equal(
-                        btcUsdPriceFeedBytecode + slaBytecode.slice(2),
+                        heavyRetrievalBytecode + slaBytecode.slice(2),
                         bytecode
                     )
                 })
+                })
+            })
+        })
+
+        context("hashOf(..)", async () => {
+            it("hashing unknown radon retrieval doesn't revert", async () => {
+                await bytecodes.hashOf("0x", slaHash)
+            })
+            it("hashing unknown radon sla doesn't revert", async () => {
+                await bytecodes.hashOf(btcUsdPriceFeedHash, "0x0")
+            })
+            it("hashing of known radon retrieval and sla works", async () => {
+                await bytecodes.hashOf(btcUsdPriceFeedHash, slaHash)
+            })
+        })
+
+        context("hashWeightRewardOf(..)", async () => {
+            it("hashing unknown radon retrieval reverts", async () => {
+                await expectRevertCustomError(
+                    WitnetBytecodes,
+                    bytecodes.hashWeightWitsOf("0x0", slaHash),
+                    "UnknownRadonRetrieval"
+                )
+            })
+            it("hashing unknown radon sla reverts", async () => {
+                await expectRevertCustomError(
+                    WitnetBytecodes,
+                    bytecodes.hashWeightWitsOf(btcUsdPriceFeedHash, "0x0"),
+                    "UnknownRadonSLA"
+                )
+            })
+            it("hashing of known radon retrieval and sla works", async () => {
+                    await bytecodes.hashWeightWitsOf(
+                        heavyRetrievalHash, slaHash
+                    )
             })
         })
 

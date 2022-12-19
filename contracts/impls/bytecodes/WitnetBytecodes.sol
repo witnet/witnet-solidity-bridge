@@ -195,6 +195,32 @@ contract WitnetBytecodes
         ));
     }
 
+    function hashWeightWitsOf(
+            bytes32 _retrievalHash, 
+            bytes32 _slaHash
+        ) 
+        external view
+        virtual override
+        returns (bytes32, uint32, uint256)
+    {
+        WitnetV2.RadonSLA storage __sla = __database().slas[_slaHash];
+        if (__sla.numWitnesses == 0) {
+            revert IWitnetBytecodes.UnknownRadonSLA(_slaHash);
+        }
+        RadonRetrieval storage __retrieval = __retrievals(_retrievalHash);
+        if (__retrieval.weight == 0) {
+            revert IWitnetBytecodes.UnknownRadonRetrieval(_retrievalHash);
+        }
+        return (
+            hashOf(_retrievalHash, _slaHash),
+            uint32(__retrieval.weight
+                + __sla.numWitnesses * 636
+                + 100
+            ),
+            __sla.numWitnesses * uint(__sla.witnessReward)
+        );
+    }
+
     function lookupDataProvider(uint256 _index)
         external view
         override
