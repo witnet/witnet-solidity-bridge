@@ -11,9 +11,13 @@ library WitnetV2 {
     error InsufficientFee(uint256 weiProvided, uint256 weiExpected);
     error Unauthorized(address violator);
 
+    error RadonFilterMissingArgs(uint8 opcode);
+
     error RadonRetrievalNoSources();
-    error RadonRetrievalArgsMismatch(string[][] args);
+    error RadonRetrievalSourcesArgsMismatch(uint expected, uint actual);
+    error RadonRetrievalMissingArgs(uint index, uint expected, uint actual);
     error RadonRetrievalResultsMismatch(uint index, uint8 read, uint8 expected);
+    error RadonRetrievalTooHeavy(bytes bytecode, uint weight);
 
     error RadonSlaNoReward();
     error RadonSlaNoWitnesses();
@@ -22,11 +26,15 @@ library WitnetV2 {
     error RadonSlaLowCollateral(uint256 collateral);
 
     error UnsupportedDataRequestMethod(uint8 method, string schema, string body, string[2][] headers);
+    error UnsupportedDataRequestMinMaxRanks(uint8 method, uint16 min, uint16 max);
     error UnsupportedRadonDataType(uint8 datatype, uint256 maxlength);
-    error UnsupportedRadonFilter(uint8 filter, bytes args);
-    error UnsupportedRadonReducer(uint8 reducer);
+    error UnsupportedRadonFilterOpcode(uint8 opcode);
+    error UnsupportedRadonFilterArgs(uint8 opcode, bytes args);
+    error UnsupportedRadonReducerOpcode(uint8 opcode);
+    error UnsupportedRadonReducerScript(uint8 opcode, bytes script, uint256 offset);
     error UnsupportedRadonScript(bytes script, uint256 offset);
     error UnsupportedRadonScriptOpcode(bytes script, uint256 cursor, uint8 opcode);
+    error UnsupportedRadonTallyScript(bytes32 hash);
 
     function toEpoch(uint _timestamp) internal pure returns (uint) {
         return 1 + (_timestamp - 11111) / 15;
@@ -116,6 +124,8 @@ library WitnetV2 {
     struct DataSource {
         DataRequestMethods method;
         RadonDataTypes resultDataType;
+        uint16 resultMinRank;
+        uint16 resultMaxRank;
         string url;
         string body;
         string[2][] headers;
@@ -160,6 +170,7 @@ library WitnetV2 {
     struct RadonReducer {
         RadonReducerOpcodes opcode;
         RadonFilter[] filters;
+        bytes script;
     }
 
     enum RadonReducerOpcodes {
@@ -184,15 +195,5 @@ library WitnetV2 {
         uint32 minConsensusPercentage;
         uint64 collateral;
     }
-
-    
-    // // ================================================================================================================
-    // // --- Internal view/pure methods ---------------------------------------------------------------------------------
-
-    // /// @notice Witnet function that computes the hash of a CBOR-encoded Data Request.
-    // /// @param _bytecode CBOR-encoded RADON.
-    // function hash(bytes memory _bytecode) internal pure returns (bytes32) {
-    //     return sha256(_bytecode);
-    // }
 
 }
