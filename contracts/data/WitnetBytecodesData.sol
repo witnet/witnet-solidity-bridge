@@ -28,12 +28,13 @@ abstract contract WitnetBytecodesData
     }
 
     struct RadonRetrieval {
-        WitnetV2.RadonDataTypes dataType;
-        uint16 dataMaxSize;
+        WitnetV2.RadonDataTypes resultDataType;
+        uint16 resultMaxSize;
         string[][] args;
         bytes32[] sources;
         bytes32 aggregator;
-        bytes32 tally;        
+        bytes32 tally;
+        uint256 weight;
     }
 
     struct Database {
@@ -44,6 +45,11 @@ abstract contract WitnetBytecodesData
         mapping (bytes32 => RadonRetrieval) retrievals;
         mapping (bytes32 => WitnetV2.RadonSLA) slas;
         mapping (bytes32 => WitnetV2.DataSource) sources;
+    }
+
+    constructor() {
+        // auto-initialize upon deployment
+        __bytecodes().base = address(this);
     }
 
 
@@ -68,7 +74,7 @@ abstract contract WitnetBytecodesData
         return __bytecodes().db;
     }
 
-    function __retrieval(bytes32 _drRetrievalHash)
+    function __retrievals(bytes32 _drRetrievalHash)
         internal view
         returns (RadonRetrieval storage _ptr)
     {
