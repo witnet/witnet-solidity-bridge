@@ -15,10 +15,15 @@ interface IWitnetBytecodes {
     event NewRadonRetrievalHash(bytes32 hash, bytes bytecode);
     event NewRadonSLAHash(bytes32 hash, bytes bytecode);
 
-    function bytecodeOf(bytes32 _drRetrievalHash) external view returns (bytes memory);
-    function bytecodeOf(bytes32 _drRetrievalHash, bytes32 _drSlaHash) external view returns (bytes memory);
+    function bytecodeOf(bytes32 drRetrievalHash) external view returns (bytes memory);
+    function bytecodeOf(bytes32 drRetrievalHash, bytes32 drSlaHash) external view returns (bytes memory);
 
-    function hashOf(bytes32 _drRetrievalHash, bytes32 _drSlaHash) external pure returns (bytes32 _drQueryHash);
+    function hashOf(bytes32 drRetrievalHash, bytes32 drSlaHash) external pure returns (bytes32 drQueryHash);
+    function hashWeightWitsOf(bytes32 drRetrievalHash, bytes32 drSlaHash) external view returns (
+            bytes32 drQueryHash,
+            uint32  drQueryWeight,
+            uint256 drQueryWits
+        );
 
     function lookupDataProvider(uint256 index) external view returns (string memory, uint);
     function lookupDataProviderIndex(string calldata fqdn) external view returns (uint);
