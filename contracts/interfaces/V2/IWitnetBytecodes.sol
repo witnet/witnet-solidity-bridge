@@ -6,7 +6,8 @@ import "../../libs/WitnetV2.sol";
 
 interface IWitnetBytecodes {
 
-    error IndexOutOfBounds(uint256 index, uint256 range);
+    error UnknownRadonRetrieval(bytes32 hash);
+    error UnknownRadonSLA(bytes32 hash);
     
     event NewDataProvider(uint256 index);
     event NewDataSourceHash(bytes32 hash);
@@ -25,8 +26,8 @@ interface IWitnetBytecodes {
     function lookupDataSource(bytes32 hash) external view returns (WitnetV2.DataSource memory);
     function lookupRadonReducer(bytes32 hash) external view returns (WitnetV2.RadonReducer memory);
     function lookupRadonRetrievalAggregator(bytes32 hash) external view returns (WitnetV2.RadonReducer memory);
-    function lookupRadonRetrievalDataMaxSize(bytes32 hash) external view returns (uint256);
-    function lookupRadonRetrievalDataType(bytes32 hash) external view returns (WitnetV2.RadonDataTypes);
+    function lookupRadonRetrievalResultMaxSize(bytes32 hash) external view returns (uint256);
+    function lookupRadonRetrievalResultDataType(bytes32 hash) external view returns (WitnetV2.RadonDataTypes);
     function lookupRadonRetrievalSources(bytes32 hash) external view returns (bytes32[] memory);
     function lookupRadonRetrievalSourcesCount(bytes32 hash) external view returns (uint);
     function lookupRadonRetrievalTally(bytes32 hash) external view returns (WitnetV2.RadonReducer memory);
@@ -35,6 +36,8 @@ interface IWitnetBytecodes {
     
     function verifyDataSource(
             WitnetV2.DataRequestMethods requestMethod,
+            uint16 resultMinRank,
+            uint16 resultMaxRank,
             string calldata requestSchema,
             string calldata requestFQDN,
             string calldata requestPath,
@@ -43,15 +46,18 @@ interface IWitnetBytecodes {
             string[2][] calldata requestHeaders,
             bytes calldata requestRadonScript
         ) external returns (bytes32);
+    
     function verifyRadonReducer(WitnetV2.RadonReducer calldata reducer) external returns (bytes32);
+    
     function verifyRadonRetrieval(
             WitnetV2.RadonDataTypes resultDataType,
-            uint16 resultMaxVariableSize,
+            uint16 resultMaxSize,
             bytes32[] calldata sources,
             string[][] calldata sourcesArgs,
             bytes32 aggregatorHash,
             bytes32 tallyHash
         ) external returns (bytes32);    
+    
     function verifyRadonSLA(WitnetV2.RadonSLA calldata drSLA) external returns (bytes32);
 
     function totalDataProviders() external view returns (uint);
