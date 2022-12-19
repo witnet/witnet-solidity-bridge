@@ -283,7 +283,7 @@ contract TestWitnetEncodingLib {
 
   function testVerifyRadonScriptOk1() external {
     Assert.equal(
-      uint(WitnetEncodingLib.verifyRadonScript(hex"861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b")),
+      uint(WitnetEncodingLib.verifyRadonRequestScript(hex"861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b")),
       uint(WitnetV2.RadonDataTypes.Integer),
       "unexpected result data type"
     );
@@ -291,7 +291,7 @@ contract TestWitnetEncodingLib {
 
   function testVerifyRadonScriptOk2() external {
     Assert.equal(
-      uint(WitnetEncodingLib.verifyRadonScript(hex"80")),
+      uint(WitnetEncodingLib.verifyRadonRequestScript(hex"80")),
       uint(WitnetV2.RadonDataTypes.Any),
       "unexpected result data type"
     );
