@@ -12,7 +12,7 @@ library WitnetBuffer {
 
   error EmptyBuffer();
   error IndexOutOfBounds(uint index, uint range);
-  error MissingArgs(uint index, string[] args);
+  error MissingArgs(uint expected, uint given);
 
   /// Iterable bytes buffer.
   struct Buffer {
@@ -398,6 +398,10 @@ library WitnetBuffer {
     uint source;
     uint sourceLength;
     uint sourcePointer;
+
+    if (input.length < 3) {
+      return input;
+    }
     
     assembly {
       // set starting input pointer
@@ -417,8 +421,8 @@ library WitnetBuffer {
             && input[ix + 1] >= bytes1("0")
             && input[ix + 1] <= bytes1("9")
         ) {
+          inputLength = (ix - lix);
           if (ix > lix) {
-            inputLength = (ix - lix);
             _memcpy(
               outputPointer,
               inputPointer,
@@ -429,7 +433,7 @@ library WitnetBuffer {
           }    
           uint ax = uint(uint8(input[ix + 1]) - uint8(bytes1("0")));
           if (ax >= args.length) {
-            revert MissingArgs(ax, args);
+            revert MissingArgs(ax + 1, args.length);
           }
           assembly {
             source := mload(add(args, mul(32, add(ax, 1))))

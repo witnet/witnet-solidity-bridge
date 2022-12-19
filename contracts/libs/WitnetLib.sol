@@ -47,6 +47,24 @@ library WitnetLib {
         }
     }
 
+    function toLowerCase(string memory str)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory lowered = new bytes(bytes(str).length);
+        unchecked {
+            for (uint i = 0; i < lowered.length; i ++) {
+                uint8 char = uint8(bytes(str)[i]);
+                if (char >= 65 && char <= 90) {
+                    lowered[i] = bytes1(char + 32);
+                } else {
+                    lowered[i] = bytes1(char);
+                }
+            }
+        }
+        return string(lowered);
+    }
+
     /// @notice Convert a `uint64` into a 2 characters long `string` representing its two less significant hexadecimal values.
     /// @param _u A `uint64` value.
     /// @return The `string` representing its hexadecimal value.
