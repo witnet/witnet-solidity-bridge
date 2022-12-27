@@ -510,6 +510,14 @@ module.exports = {
         skipDryRun: true,
       },
     },
+    scroll: {
+      "scroll.alpha": {
+        host: "localhost",
+        port: 8514,
+        network_id: 534354,
+        skipDryRun: true,
+      }
+    },
     smartbch: {
       "smartbch.amber": {
         host: "localhost",
