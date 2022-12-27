@@ -310,6 +310,14 @@
       "WitnetRequestBoard": "0x61E11e5f496936Ef7f9600f6D1E81b1E7c12b172"
     }
   },
+  "scroll": {
+    "scroll.alpha": {
+      "WitnetParserLib": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
+      "WitnetPriceRouter": "0xE2Efa3fe66352e63F118bB9165435C5BEDB777d0",
+      "WitnetRandomness": "0x225BAd150B9D5202DC805B34A0DF64B1a77459dF",
+      "WitnetRequestBoard": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425"
+    }
+  },
   "smartbch": {
     "smartbch.amber": {
       "WitnetParserLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
