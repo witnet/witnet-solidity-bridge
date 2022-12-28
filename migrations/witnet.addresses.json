@@ -75,10 +75,10 @@
       "WitnetRandomness": "0xbD804467270bCD832b4948242453CA66972860F5"
     },
     "celo.mainnet": {
-      "WitnetLib": "0x46FF6e05fd0a5fb4D794B99eCAE41c43f4D62d15",
-      "WitnetPriceRouter": "0x931673904eB6E69D775e35F522c0EA35575297Cb",
-      "WitnetRandomness": "0x3D7Ccf6518deBE3d2fd20c4b6AEc3FD904c0Ad29",
-      "WitnetRequestBoard": "0x03E709E6422E30C033456FCde38C70A12553E468"
+        "WitnetLib": "0x46FF6e05fd0a5fb4D794B99eCAE41c43f4D62d15",
+        "WitnetPriceRouter": "0x931673904eB6E69D775e35F522c0EA35575297Cb",
+        "WitnetRandomness": "0x3D7Ccf6518deBE3d2fd20c4b6AEc3FD904c0Ad29",
+        "WitnetRequestBoard": "0x03E709E6422E30C033456FCde38C70A12553E468"
     }
   },
   "conflux": {
@@ -139,14 +139,8 @@
     "dogechain.testnet": {
       "WitnetLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
       "WitnetPriceRouter": "0x9E943Ab1FD0D35B3BaDe31AA78D60C485EA1a604",
-      "WitnetRandomness": "0xD9465D38f50f364b3263Cb219e58d4dB2D584530",      
+      "WitnetRandomness": "0xD9465D38f50f364b3263Cb219e58d4dB2D584530",
       "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
-    },
-    "dogechain.mainnet": {
-      "WitnetParserLib": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
-      "WitnetPriceRouter": "0xD7f7933992c25A504e9Ddf7e76a3c1D6c432b25D",
-      "WitnetRandomness": "0x7FdB9CDe98967140a5627dA5221DBC03Bd8e8ad5",
-      "WitnetRequestBoard": "0xF2712e7114A237625EFC8bBA6a6ed1Bb8b6029c9"
     }
   },
   "harmony": {
@@ -284,6 +278,9 @@
   },
   "polygon": {
     "polygon.goerli": {
+      "WitnetBytecodes": "0x6156a1F312EdA146a2981cd5ed6B8688f1073F08",
+      "WitnetBytecodesImplementation": "0xf31E26b9f1E1ddb1e85814d52dF102b549cDD74B",
+      "WitnetEncodingLib": "0xCB1796E56d4246A013F12a24f2a23021b58019A0",
       "WitnetLib": "0x70767887abBF23291B24620dE6bcEBe8d8F1e6F3",
       "WitnetPriceRouter": "0x6d5544ca5b35bf2e7a78ace4E7B8d191fe5C9FAb",
       "WitnetRandomness": "0x0178287DfECA2F13F342512282bc8B59e774aE43",
