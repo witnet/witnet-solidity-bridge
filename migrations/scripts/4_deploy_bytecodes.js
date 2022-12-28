@@ -41,14 +41,19 @@ module.exports = async function (deployer, network, accounts) {
     ) {
       if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetEncodingLib)) {
         await deployer.deploy(WitnetEncodingLib)
-        await deployer.link(WitnetEncodingLib, [WitnetBytecodesImplementation])
         addresses[ecosystem][network].WitnetEncodingLib = WitnetEncodingLib.address
         if (!isDryRun) {
           saveAddresses(addresses)
         }
       } else {
-        console.info(`   Skipped: 'WitnetEncodingLib' presumably deployed at ${addresses[ecosystem][network].WitnetEncodingLib}`)
+        WitnetEncodingLib.address = addresses[ecosystem][network].WitnetEncodingLib
+        await WitnetEncodingLib.deployed()
+        console.info(`   Skipped: 'WitnetEncodingLib' deployed at ${addresses[ecosystem][network].WitnetEncodingLib}`)
       }
+      await deployer.link(
+        WitnetEncodingLib,
+        [ WitnetBytecodesImplementation ]
+      )
       await deployer.deploy(
         WitnetBytecodesImplementation,
         true,
