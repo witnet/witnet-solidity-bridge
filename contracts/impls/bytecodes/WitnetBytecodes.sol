@@ -215,6 +215,7 @@ contract WitnetBytecodes
             hashOf(_retrievalHash, _slaHash),
             uint32(__retrieval.weight
                 + __sla.numWitnesses * 636
+                // + (8 + 2 + 8 + 4 + 8)
                 + 100
             ),
             __sla.numWitnesses * uint(__sla.witnessReward)
@@ -270,6 +271,14 @@ contract WitnetBytecodes
         returns (WitnetV2.DataSource memory)
     {
         return __database().sources[_hash];
+    }
+
+    function lookupDataSourceResultDataType(bytes32 _hash)
+        external view
+        override
+        returns (WitnetV2.RadonDataTypes)
+    {
+        return __database().sources[_hash].resultDataType;
     }
     
     function lookupRadonReducer(bytes32 _hash)
