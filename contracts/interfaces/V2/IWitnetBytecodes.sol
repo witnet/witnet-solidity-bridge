@@ -6,6 +6,7 @@ import "../../libs/WitnetV2.sol";
 
 interface IWitnetBytecodes {
 
+    error UnknownDataSource(bytes32 hash);
     error UnknownRadonRetrieval(bytes32 hash);
     error UnknownRadonSLA(bytes32 hash);
     

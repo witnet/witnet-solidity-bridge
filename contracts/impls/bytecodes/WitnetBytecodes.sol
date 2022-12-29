@@ -281,7 +281,7 @@ contract WitnetBytecodes
         override
         returns (WitnetV2.RadonDataTypes)
     {
-        if (__database().sources[_hash].method == WitnetV2.DataRequestsMethods.Unknown) {
+        if (__database().sources[_hash].method == WitnetV2.DataRequestMethods.Unknown) {
             revert IWitnetBytecodes.UnknownDataSource(_hash);
         }
         return __database().sources[_hash].resultDataType;
