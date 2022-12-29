@@ -21,7 +21,7 @@ abstract contract WitnetRequestTemplate
     struct InitData {
         string[][] args;
         bytes32 tallyHash;
-        bytes32 slaHash;
+        bytes32 __slaHash;
         uint16 resultMaxSize;
     }
 
@@ -34,7 +34,7 @@ abstract contract WitnetRequestTemplate
     /// @notice SHA-256 hash of the Witnet Data Request bytecode.
     bytes32 public override hash;
 
-        /// @notice Array of source hashes encoded as bytes.
+    /// @notice Array of source hashes encoded as bytes.
     bytes /*immutable*/ public template;
 
     /// @notice Array of string arguments passed upon initialization.
@@ -44,22 +44,22 @@ abstract contract WitnetRequestTemplate
     WitnetV2.RadonDataTypes immutable public resultDataType;
     
     /// @notice Aggregator reducer hash.
-    bytes32 immutable public aggregatorHash;
+    bytes32 immutable internal __aggregatorHash;
 
     /// @notice Tally reducer hash.
-    bytes32 public tallyHash;
+    bytes32 internal __tallyHash;
 
     /// @notice Radon Retrieval hash. 
-    bytes32 public retrievalHash;
+    bytes32 internal __retrievalHash;
 
     /// @notice Radon SLA hash.
-    bytes32 public slaHash;
+    bytes32 internal __slaHash;
 
     /// @notice Unique id of last request attempt.
     uint256 public postId;    
 
     modifier initialized {
-        if (retrievalHash == bytes32(0)) {
+        if (__retrievalHash == bytes32(0)) {
             revert("WitnetRequestTemplate: not initialized");
         }
         _;
@@ -73,45 +73,51 @@ abstract contract WitnetRequestTemplate
     constructor(
             WitnetRequestBoard _wrb,
             IWitnetBytecodes _registry,
-            WitnetV2.RadonDataTypes _resultDataType,
             bytes32[] memory _sources,
-            bytes32 _aggregatorHash
+            bytes32 _aggregator,
+            WitnetV2.RadonDataTypes _resultDataType
         )
         UsingWitnet(_wrb)
     {
-        require(
-            address(_registry).supportsInterface(type(IWitnetBytecodes).interfaceId),
-            "WitnetRequestTemplate: uncompliant registry"
-        );
-        require(
-            _sources.length > 0, 
-            "WitnetRequestTemplate: no sources"
-        );
-        assert(_aggregatorHash != bytes32(0));
-        for (uint i = 0; i < _sources.length; i ++) {
+        {
             require(
-                _registry.lookupDataSourceResultDataType(_sources[i]) == _resultDataType,
-                "WitnetRequestTemplate: mismatching sources"
+                address(_registry).supportsInterface(type(IWitnetBytecodes).interfaceId),
+                "WitnetRequestTemplate: uncompliant registry"
             );
+            registry = _registry;
         }
-        aggregatorHash = _aggregatorHash;
-        registry = _registry;
-        resultDataType = _resultDataType;
-        template = abi.encode(_sources);
+        {
+            resultDataType = _resultDataType;
+        }
+        {        
+            require(
+                _sources.length > 0, 
+                "WitnetRequestTemplate: no sources"
+            );
+            for (uint _i = 0; _i < _sources.length; _i ++) {
+                require(
+                    _registry.lookupDataSourceResultDataType(_sources[_i]) == _resultDataType,
+                    "WitnetRequestTemplate: mismatching sources"
+                );
+            }
+            template = abi.encode(_sources);
+        }
+        {
+            assert(_aggregator != bytes32(0));
+            __aggregatorHash = _aggregator;
+        }        
     }
 
     /// =======================================================================
     /// --- WitnetRequestTemplate interface -----------------------------------
 
-    receive () external payable {}
-
-    function _decode(WitnetCBOR.CBOR memory) virtual internal view returns (bytes memory);
-
+    receive () virtual external payable {}
+    
     function getRadonAggregator()
         external view
         returns (WitnetV2.RadonReducer memory)
     {
-        return registry.lookupRadonRetrievalAggregator(retrievalHash);
+        return registry.lookupRadonRetrievalAggregator(__retrievalHash);
     }
 
     function getRadonTally()
@@ -119,7 +125,7 @@ abstract contract WitnetRequestTemplate
         initialized
         returns (WitnetV2.RadonReducer memory)
     {
-        return registry.lookupRadonRetrievalTally(retrievalHash);
+        return registry.lookupRadonRetrievalTally(__retrievalHash);
     }
 
     function getRadonSLA()
@@ -127,7 +133,7 @@ abstract contract WitnetRequestTemplate
         initialized
         returns (WitnetV2.RadonSLA memory)
     {
-        return registry.lookupRadonSLA(slaHash);
+        return registry.lookupRadonSLA(__slaHash);
     }
 
     function sources()
@@ -137,7 +143,11 @@ abstract contract WitnetRequestTemplate
         return abi.decode(template, (bytes32[]));
     }
 
-    function post() virtual external payable returns (uint256 _usedFunds) {
+    function post()
+        virtual
+        external payable
+        returns (uint256 _usedFunds)
+    {
         if (
             postId == 0
                 || (
@@ -152,7 +162,11 @@ abstract contract WitnetRequestTemplate
         }
     }
 
-    function pending() virtual public view returns (bool) {
+    function pending()
+        virtual
+        public view
+        returns (bool)
+    {
         return (
             postId == 0
                 || _witnetCheckResultAvailability(postId)
@@ -167,15 +181,20 @@ abstract contract WitnetRequestTemplate
     {
         require(!pending(), "WitnetRequestTemplate: pending");
         Witnet.Result memory _result = _witnetReadResult(postId);
-        return (_result.success, _decode(_result.value));
+        return (_result.success, _read(_result.value));
     }
+
+    function _read(WitnetCBOR.CBOR memory) virtual internal view returns (bytes memory);
 
 
     // ================================================================================================================
     // --- Implement 'Initializable' functions ------------------------------------------------------------------------
     
-    function initialize(bytes memory _initData) external {
-        require(retrievalHash == 0, "WitnetRequestTemplate: already initialized");
+    function initialize(bytes memory _initData)
+        external
+        virtual override
+    {
+        require(__retrievalHash == 0, "WitnetRequestTemplate: already initialized");
         bytes32[] memory _sources = abi.decode(WitnetRequestTemplate(payable(self)).template(), (bytes32[]));
         InitData memory _init = abi.decode(_initData, (InitData));
         args = _init.args;
@@ -184,14 +203,14 @@ abstract contract WitnetRequestTemplate
             _init.resultMaxSize,
             _sources,
             _init.args,
-            aggregatorHash,
+            __aggregatorHash,
             _init.tallyHash
         );       
-        retrievalHash = _retrievalHash; 
-        slaHash = _init.slaHash;
-        tallyHash = _init.tallyHash;
+        __retrievalHash = _retrievalHash; 
+        __slaHash = _init.__slaHash;
+        __tallyHash = _init.tallyHash;
         template = abi.encode(_sources);
-        bytecode = registry.bytecodeOf(retrievalHash, _init.slaHash);
+        bytecode = registry.bytecodeOf(__retrievalHash, _init.__slaHash);
         hash = sha256(bytecode);        
     }
 
