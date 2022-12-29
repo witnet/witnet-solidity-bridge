@@ -403,7 +403,7 @@ contract WitnetBytecodes
                 _requestMethod,
 
             resultDataType:
-                WitnetEncodingLib.verifyRadonRequestScript(_requestRadonScript),
+                WitnetEncodingLib.verifyRadonScriptResultDataType(_requestRadonScript),
 
             url:
                 string(abi.encodePacked(
