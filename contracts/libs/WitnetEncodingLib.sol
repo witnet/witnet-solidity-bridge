@@ -378,9 +378,11 @@ library WitnetEncodingLib {
                 resultMaxRank
             );
         }
-        validateUrlHost(host);
-        validateUrlPath(path);
-        validateUrlQuery(query);
+        // Cannot perform formal validation of url parts, as they
+        // could templatized.
+        // NOP: validateUrlHost(host);
+        // NOP: validateUrlPath(path);
+        // NOP: validateUrlQuery(query);
     }
     
     function validate(

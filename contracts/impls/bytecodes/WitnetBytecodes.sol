@@ -268,9 +268,12 @@ contract WitnetBytecodes
     function lookupDataSource(bytes32 _hash)
         external view
         override
-        returns (WitnetV2.DataSource memory)
+        returns (WitnetV2.DataSource memory _source)
     {
-        return __database().sources[_hash];
+        _source = __database().sources[_hash];
+        if (_source.method == WitnetV2.DataRequestMethods.Unknown) {
+            revert IWitnetBytecodes.UnknownDataSource(_hash);
+        }
     }
 
     function lookupDataSourceResultDataType(bytes32 _hash)
@@ -278,6 +281,9 @@ contract WitnetBytecodes
         override
         returns (WitnetV2.RadonDataTypes)
     {
+        if (__database().sources[_hash].method == WitnetV2.DataRequestsMethods.Unknown) {
+            revert IWitnetBytecodes.UnknownDataSource(_hash);
+        }
         return __database().sources[_hash].resultDataType;
     }
     
@@ -285,7 +291,7 @@ contract WitnetBytecodes
         external view
         override
         returns (WitnetV2.RadonReducer memory)
-    {
+    {   
         return __database().reducers[_hash];
     }
 
