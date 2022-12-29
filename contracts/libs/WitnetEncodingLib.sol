@@ -561,13 +561,13 @@ library WitnetEncodingLib {
         }
     }
 
-    function verifyRadonRequestScript(bytes memory script)
+    function verifyRadonScriptResultDataType(bytes memory script)
         public pure
         returns (WitnetV2.RadonDataTypes)
     {
-        // TODO: formal validation of radon script
         return _verifyRadonScriptResultDataType(
-            WitnetCBOR.fromBytes(script)
+            WitnetCBOR.fromBytes(script),
+            false
         );
     }
 
@@ -625,14 +625,19 @@ library WitnetEncodingLib {
         self.buffer.cursor = _start;
     }
 
-    function _verifyRadonScriptResultDataType(WitnetCBOR.CBOR memory self)
+    // event Log(WitnetCBOR.CBOR self, bool flip);
+    function _verifyRadonScriptResultDataType(WitnetCBOR.CBOR memory self, bool flip)
         private pure
         returns (WitnetV2.RadonDataTypes)
     {
+        // emit Log(self, flip);
         if (self.majorType == WitnetCBOR.MAJOR_TYPE_ARRAY) {
             WitnetCBOR.CBOR[] memory items = self.readArray();
             if (items.length > 1) {
-                return _verifyRadonScriptResultDataType(items[items.length - 2]);
+                return flip
+                    ? _verifyRadonScriptResultDataType(items[0], false)
+                    : _verifyRadonScriptResultDataType(items[items.length - 2], true)
+                ;
             } else {
                 return WitnetV2.RadonDataTypes.Any;
             }
