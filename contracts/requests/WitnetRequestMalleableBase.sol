@@ -16,6 +16,8 @@ abstract contract WitnetRequestMalleableBase
 {   
     using Witnet for *;
 
+    address immutable internal _SELF = address(this);
+
     event WitnessingParamsChanged(
         address indexed by,
         uint8 numWitnesses,
@@ -162,6 +164,15 @@ abstract contract WitnetRequestMalleableBase
 
     // ================================================================================================================
     // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
+
+    /// Contract address to which clones will be re-directed.
+    function self()
+        public view
+        virtual override
+        returns (address)
+    {
+        return _SELF;
+    }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
     /// behaviour while using its own EVM storage.

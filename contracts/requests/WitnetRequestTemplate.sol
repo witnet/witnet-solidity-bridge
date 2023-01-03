@@ -195,7 +195,7 @@ abstract contract WitnetRequestTemplate
         virtual override
     {
         require(retrievalHash == 0, "WitnetRequestTemplate: already initialized");
-        bytes32[] memory _sources = abi.decode(WitnetRequestTemplate(payable(self)).template(), (bytes32[]));
+        bytes32[] memory _sources = abi.decode(WitnetRequestTemplate(payable(self())).template(), (bytes32[]));
         InitData memory _init = abi.decode(_initData, (InitData));
         args = _init.args;
         bytes32 _retrievalHash = registry.verifyRadonRetrieval(
