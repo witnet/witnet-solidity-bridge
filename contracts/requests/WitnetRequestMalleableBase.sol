@@ -16,8 +16,6 @@ abstract contract WitnetRequestMalleableBase
 {   
     using Witnet for *;
 
-    address immutable internal _SELF = address(this);
-
     event WitnessingParamsChanged(
         address indexed by,
         uint8 numWitnesses,
@@ -165,13 +163,14 @@ abstract contract WitnetRequestMalleableBase
     // ================================================================================================================
     // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
 
-    /// Contract address to which clones will be re-directed.
-    function self()
-        public view
-        virtual override
-        returns (address)
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function initialize(bytes memory _template)
+        public 
+        override
+        initializer
     {
-        return _SELF;
+        _initialize(_template);
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
@@ -205,19 +204,6 @@ abstract contract WitnetRequestMalleableBase
 
 
     // ================================================================================================================
-    // --- 'Initializable' overriden functions ------------------------------------------------------------------------
-
-    /// @dev Initializes contract's storage context.
-    function initialize(bytes memory _template)
-        public
-        virtual override
-    {
-        require(_request().template.length == 0, "WitnetRequestMalleableBase: already initialized");
-        _initialize(_template);
-        _transferOwnership(_msgSender());
-    }
-
-    // ================================================================================================================
     // --- 'Ownable' overriden functions ------------------------------------------------------------------------------
 
     /// Returns the address of the current owner.
@@ -239,6 +225,7 @@ abstract contract WitnetRequestMalleableBase
         emit OwnershipTransferred(oldOwner, newOwner);
     }
 
+
     // ================================================================================================================
     // --- 'Proxiable 'overriden functions ----------------------------------------------------------------------------
 
@@ -259,10 +246,13 @@ abstract contract WitnetRequestMalleableBase
     // ================================================================================================================
     // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------    
 
-    /// @dev Initializes witnessing params and template bytecode.
+    /// @dev Initializes witnessing params and template bytecode. 
     function _initialize(bytes memory _template)
         internal
+        virtual
     {
+        _transferOwnership(_msgSender());
+
         assert(_template.length > 0);
         _request().template = _template;
 

@@ -13,6 +13,14 @@ abstract contract Upgradable is Initializable, Proxiable {
     bytes32 internal immutable _CODEHASH;
     bool internal immutable _UPGRADABLE;
 
+    modifier onlyDelegateCalls {
+        require(
+            address(this) != _BASE,
+            "Upgradable: not a delegate call"
+        );
+        _;
+    }
+
     /// Emitted every time the contract gets upgraded.
     /// @param from The address who ordered the upgrading. Namely, the WRB operator in "trustable" implementations.
     /// @param baseAddr The address of the new implementation contract.
@@ -53,6 +61,10 @@ abstract contract Upgradable is Initializable, Proxiable {
 
     /// @dev Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address from) virtual external view returns (bool);
+
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function initialize(bytes memory) virtual external;
 
     /// @dev Retrieves human-redable named version of current implementation.
     function version() virtual public view returns (string memory); 
