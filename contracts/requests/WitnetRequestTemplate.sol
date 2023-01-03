@@ -19,10 +19,8 @@ abstract contract WitnetRequestTemplate
     using ERC165Checker for address;
 
     struct InitData {
-        string[][] args;
-        bytes32 tallyHash;
         bytes32 slaHash;
-        uint16 resultMaxSize;
+        string[][] args;
     }
 
     /// @notice Witnet Data Request bytecode after inserting string arguments.
@@ -34,8 +32,11 @@ abstract contract WitnetRequestTemplate
     /// @notice Reference to Witnet Data Requests Bytecode Registry
     IWitnetBytecodes immutable public registry;
 
-        /// @notice Result data type.
+    /// @notice Result data type.
     WitnetV2.RadonDataTypes immutable public resultDataType;
+
+    /// @notice Result max size or rank (if variable type).
+    uint16 immutable public resultDataMaxSize;
 
     /// @notice Array of source hashes encoded as bytes.
     bytes /*immutable*/ public template;
@@ -50,13 +51,16 @@ abstract contract WitnetRequestTemplate
     bytes32 public slaHash;
     
     /// @notice Aggregator reducer hash.
-    bytes32 immutable internal __aggregatorHash;
+    bytes32 immutable internal _AGGREGATOR_HASH;
 
     /// @notice Tally reducer hash.
-    bytes32 internal __tallyHash;
+    bytes32 immutable internal _TALLY_HASH;
 
     /// @notice Unique id of last request attempt.
-    uint256 public postId;    
+    uint256 public postId;
+
+    /// @notice Contract address to which clones will be re-directed.
+    address immutable internal _SELF = address(this);
 
     modifier initialized {
         if (retrievalHash == bytes32(0)) {
@@ -75,7 +79,9 @@ abstract contract WitnetRequestTemplate
             IWitnetBytecodes _registry,
             bytes32[] memory _sources,
             bytes32 _aggregator,
-            WitnetV2.RadonDataTypes _resultDataType
+            bytes32 _tally,
+            WitnetV2.RadonDataTypes _resultDataType,
+            uint16 _resultDataMaxSize
         )
         UsingWitnet(_wrb)
     {
@@ -88,6 +94,7 @@ abstract contract WitnetRequestTemplate
         }
         {
             resultDataType = _resultDataType;
+            resultDataMaxSize = _resultDataMaxSize;
         }
         {        
             require(
@@ -104,14 +111,20 @@ abstract contract WitnetRequestTemplate
         }
         {
             assert(_aggregator != bytes32(0));
-            __aggregatorHash = _aggregator;
-        }        
+            _AGGREGATOR_HASH = _aggregator;
+        }
+        {
+            assert(_tally != bytes32(0));
+            _TALLY_HASH = _tally;
+        }
     }
 
     /// =======================================================================
     /// --- WitnetRequestTemplate interface -----------------------------------
 
     receive () virtual external payable {}
+
+    function _read(WitnetCBOR.CBOR memory) virtual internal view returns (bytes memory);
     
     function getRadonAggregator()
         external view
@@ -184,7 +197,18 @@ abstract contract WitnetRequestTemplate
         return (_result.success, _read(_result.value));
     }
 
-    function _read(WitnetCBOR.CBOR memory) virtual internal view returns (bytes memory);
+
+    // ================================================================================================================
+    // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
+
+    /// Contract address to which clones will be re-directed.
+    function self()
+        public view
+        virtual override
+        returns (address)
+    {
+        return _SELF;
+    }    
 
 
     // ================================================================================================================
@@ -200,18 +224,16 @@ abstract contract WitnetRequestTemplate
         args = _init.args;
         bytes32 _retrievalHash = registry.verifyRadonRetrieval(
             resultDataType,
-            _init.resultMaxSize,
+            resultDataMaxSize,
             _sources,
             _init.args,
-            __aggregatorHash,
-            _init.tallyHash
+            _AGGREGATOR_HASH,
+            _TALLY_HASH
         );       
-        retrievalHash = _retrievalHash; 
+        bytecode = registry.bytecodeOf(_retrievalHash, _init.slaHash);
+        hash = sha256(bytecode);
+        retrievalHash = _retrievalHash;
         slaHash = _init.slaHash;
-        __tallyHash = _init.tallyHash;
         template = abi.encode(_sources);
-        bytecode = registry.bytecodeOf(retrievalHash, _init.slaHash);
-        hash = sha256(bytecode);        
     }
-
 }
