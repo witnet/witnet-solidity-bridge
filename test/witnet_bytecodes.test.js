@@ -62,7 +62,7 @@ contract('WitnetBytecodes', (accounts) => {
         })
     })
 
-    context("Upgradable", async () => {
+    context("Upgradeable", async () => {
         it('should manifest to be upgradable from actual owner', async () => {
             assert.equal(
                 await bytecodes.isUpgradableFrom(firstOwnerAddress),

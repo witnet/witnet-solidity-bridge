@@ -178,7 +178,7 @@ abstract contract WitnetRequestBoardTrustlessBase
 
 
     // ================================================================================================================
-    // --- Overrides 'Upgradable' -------------------------------------------------------------------------------------
+    // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     /// @dev Must fail when trying to upgrade to same logic contract more than once.

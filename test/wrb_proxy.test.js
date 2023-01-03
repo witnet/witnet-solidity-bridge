@@ -91,7 +91,7 @@ contract("Witnet Requests Board Proxy", accounts => {
       )
     })
 
-    it("fails if owner tries to upgrade to not Upgradable-compliant implementation", async () => {
+    it("fails if owner tries to upgrade to not Upgradeable-compliant implementation", async () => {
       const troyHorse = await TrojanHorseNotUpgradable.new()
       await truffleAssert.reverts(
         proxy.upgradeWitnetRequestBoard(troyHorse.address, { from: contractOwner }),

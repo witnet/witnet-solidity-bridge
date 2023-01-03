@@ -8,10 +8,10 @@ import "../../contracts/patterns/Initializable.sol";
 import "../../contracts/patterns/Proxiable.sol";
 
 /**
- * @title Witnet Requests Board Trojan Horse: Proxiable but not-Upgradable
+ * @title Witnet Requests Board Trojan Horse: Proxiable but not-Upgradeable
  * @notice Contract to test proxy upgrade assertions.
  * @dev Upgrading an existing WitnetRequestBoard implementation with an instance of 
- * this kind (i.e. Proxiable but not-Upgradable), should not be permitted by the WitnetProxy.
+ * this kind (i.e. Proxiable but not-Upgradeable), should not be permitted by the WitnetProxy.
  * The contract has been created for testing purposes.
  * @author Witnet Foundation
  */

@@ -6,17 +6,17 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../patterns/ERC165.sol";
 import "../patterns/Ownable2Step.sol";
 import "../patterns/ReentrancyGuard.sol";
-import "../patterns/Upgradable.sol";
+import "../patterns/Upgradeable.sol";
 
 import "./WitnetProxy.sol";
 
-/// @title Witnet Request Board base contract, with an Upgradable (and Destructible) touch.
+/// @title Witnet Request Board base contract, with an Upgradeable (and Destructible) touch.
 /// @author The Witnet Foundation.
 abstract contract WitnetUpgradableBase
     is
         ERC165,
         Ownable2Step,
-        Upgradable, 
+        Upgradeable, 
         ReentrancyGuard
 {
     bytes32 internal immutable _WITNET_UPGRADABLE_VERSION;
@@ -31,7 +31,7 @@ abstract contract WitnetUpgradableBase
             bytes32 _versionTag,
             string memory _proxiableUUID
         )
-        Upgradable(_upgradable)
+        Upgradeable(_upgradable)
     {
         _WITNET_UPGRADABLE_VERSION = _versionTag;
         proxiableUUID = keccak256(bytes(_proxiableUUID));
@@ -55,21 +55,21 @@ abstract contract WitnetUpgradableBase
       returns (bool)
     {
         return _interfaceId == type(Ownable2Step).interfaceId
-            || _interfaceId == type(Upgradable).interfaceId
+            || _interfaceId == type(Upgradeable).interfaceId
             || super.supportsInterface(_interfaceId);
     }
 
     // ================================================================================================================
     // --- Overrides 'Proxiable' --------------------------------------------------------------------------------------
 
-    /// @dev Gets immutable "heritage blood line" (ie. genotype) as a Proxiable, and eventually Upgradable, contract.
-    ///      If implemented as an Upgradable touch, upgrading this contract to another one with a different 
+    /// @dev Gets immutable "heritage blood line" (ie. genotype) as a Proxiable, and eventually Upgradeable, contract.
+    ///      If implemented as an Upgradeable touch, upgrading this contract to another one with a different 
     ///      `proxiableUUID()` value should fail.
     bytes32 public immutable override proxiableUUID;
 
 
     // ================================================================================================================
-    // --- Overrides 'Upgradable' --------------------------------------------------------------------------------------
+    // --- Overrides 'Upgradeable' --------------------------------------------------------------------------------------
 
     /// Retrieves human-readable version tag of current implementation.
     function version() public view override returns (string memory) {
