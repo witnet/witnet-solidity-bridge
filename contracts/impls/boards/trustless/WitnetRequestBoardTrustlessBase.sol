@@ -436,7 +436,8 @@ abstract contract WitnetRequestBoardTrustlessBase
 
     function postDr(
             bytes32 _drRadHash,
-            bytes32 _drSlaHash
+            bytes32 _drSlaHash,
+            uint256
         )
         external payable
         returns (bytes32 _drHash)

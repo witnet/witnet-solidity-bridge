@@ -5,10 +5,11 @@ pragma experimental ABIEncoderV2;
 
 import "../patterns/Upgradable.sol";
 
-/// @title WitnetProxy: upgradable delegate-proxy contract that routes Witnet data requests coming from a 
-/// `UsingWitnet`-inheriting contract to a currently active `WitnetRequestBoard` implementation. 
+/// @title WitnetProxy: upgradable delegate-proxy contract. 
 /// @author The Witnet Foundation.
 contract WitnetProxy {
+
+    address immutable public proxy = address(this);
 
     struct WitnetProxySlot {
         address implementation;
@@ -20,15 +21,13 @@ contract WitnetProxy {
     /// Constructor with no params as to ease eventual support of Singleton pattern (i.e. ERC-2470).
     constructor () {}
 
-    /// WitnetProxies will never accept direct transfer of ETHs.
-    receive() external payable {
+    receive() virtual external payable {
         revert("WitnetProxy: no transfers accepted");
     }
 
     /// Payable fallback accepts delegating calls to payable functions.  
     fallback() external payable { /* solhint-disable no-complex-fallback */
         address _implementation = implementation();
-
         assembly { /* solhint-disable avoid-low-level-calls */
             // Gas optimized delegate call to 'implementation' contract.
             // Note: `msg.data`, `msg.sender` and `msg.value` will be passed over 
@@ -52,7 +51,7 @@ contract WitnetProxy {
 
     /// Returns proxy's current implementation address.
     function implementation() public view returns (address) {
-        return _proxySlot().implementation;
+        return __proxySlot().implementation;
     }
 
     /// Upgrades the `implementation` address.
@@ -102,7 +101,7 @@ contract WitnetProxy {
         require(_wasInitialized, "WitnetProxy: unable to initialize");
 
         // If all checks and initialization pass, update implementation address:
-        _proxySlot().implementation = _newImplementation;
+        __proxySlot().implementation = _newImplementation;
         emit Upgraded(_newImplementation);
 
         // Asserts new implementation complies w/ minimal implementation of Upgradable interface:
@@ -115,7 +114,7 @@ contract WitnetProxy {
     }
 
     /// @dev Complying with EIP-1967, retrieves storage struct containing proxy's current implementation address.
-    function _proxySlot() private pure returns (WitnetProxySlot storage _slot) {
+    function __proxySlot() private pure returns (WitnetProxySlot storage _slot) {
         assembly {
             // bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
             _slot.slot := 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc

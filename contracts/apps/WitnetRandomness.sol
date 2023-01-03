@@ -26,6 +26,8 @@ contract WitnetRandomness
         uint256 witnetQueryId;
     }
 
+    address immutable internal _SELF = address(this);
+
     /// Include an address to specify the immutable WitnetRequestBoard entrypoint address.
     /// @param _wrb The WitnetRequestBoard immutable entrypoint address.
     constructor(WitnetRequestBoard _wrb)
@@ -250,6 +252,15 @@ contract WitnetRandomness
 
     // ================================================================================================================
     // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
+
+    /// Contract address to which clones will be re-directed.
+    function self()
+        public view
+        virtual override
+        returns (address)
+    {
+        return _SELF;
+    }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
     /// behaviour while using its own EVM storage.
