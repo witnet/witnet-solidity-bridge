@@ -110,11 +110,11 @@ contract WitnetBytecodes
     // ================================================================================================================
     // --- Overrides 'Upgradable' -------------------------------------------------------------------------------------
 
-    /// Initialize storage-context when invoked as delegatecall. 
-    /// @dev Must fail when trying to initialize same instance more than once.
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
     function initialize(bytes memory) 
         public
-        virtual override
+        override
     {
         address _owner = __bytecodes().owner;
         if (_owner == address(0)) {
@@ -123,16 +123,25 @@ contract WitnetBytecodes
             __bytecodes().owner = _owner;
         } else {
             // only owner can initialize:
-            if (msg.sender != _owner) revert WitnetUpgradableBase.OnlyOwner(_owner);
+            if (msg.sender != _owner) {
+                revert WitnetUpgradableBase.OnlyOwner(_owner);
+            }
         }
 
         if (__bytecodes().base != address(0)) {
             // current implementation cannot be initialized more than once:
-            if(__bytecodes().base == base()) revert WitnetUpgradableBase.AlreadyInitialized(base());
+            if(__bytecodes().base == base()) {
+                revert WitnetUpgradableBase.AlreadyUpgraded(base());
+            }
         }        
         __bytecodes().base = base();
 
-        emit Upgraded(msg.sender, base(), codehash(), version());
+        emit Upgraded(
+            msg.sender,
+            base(),
+            codehash(),
+            version()
+        );
     }
 
     /// Tells whether provided address could eventually upgrade the contract.

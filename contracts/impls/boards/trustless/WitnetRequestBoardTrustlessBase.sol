@@ -180,11 +180,11 @@ abstract contract WitnetRequestBoardTrustlessBase
     // ================================================================================================================
     // --- Overrides 'Upgradable' -------------------------------------------------------------------------------------
 
-    /// Initialize storage-context when invoked as delegatecall. 
-    /// @dev Must fail when trying to initialize same instance more than once.
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
     function initialize(bytes memory _initData) 
         public
-        virtual override
+        override
     {
         address _owner = __board().owner;
         if (_owner == address(0)) {
@@ -193,7 +193,9 @@ abstract contract WitnetRequestBoardTrustlessBase
             __board().owner = _owner;
         } else {
             // only owner can initialize:
-            if (msg.sender != _owner) revert WitnetUpgradableBase.OnlyOwner(_owner);
+            if (msg.sender != _owner) {
+                revert WitnetUpgradableBase.OnlyOwner(_owner);
+            }
         }
 
         if (__board().serviceTag == bytes4(0)) {
@@ -202,7 +204,9 @@ abstract contract WitnetRequestBoardTrustlessBase
 
         if (__board().base != address(0)) {
             // current implementation cannot be initialized more than once:
-            if(__board().base == base()) revert WitnetUpgradableBase.AlreadyInitialized(base());
+            if(__board().base == base()) {
+                revert WitnetUpgradableBase.AlreadyUpgraded(base());
+            }
         }        
         __board().base = base();
 
@@ -290,8 +294,8 @@ abstract contract WitnetRequestBoardTrustlessBase
     function estimateBaseFee(
             bytes32 _drRadHash,
             uint256 _gasPrice,
-            bytes32 _drSlaHash,
-            uint256 _witPrice
+            bytes32,
+            uint256
         )
         public view
         override
@@ -303,7 +307,7 @@ abstract contract WitnetRequestBoardTrustlessBase
         );
     }
 
-    function estimateReportFee(bytes32 _drRadHash, uint256 _gasPrice)
+    function estimateReportFee(bytes32, uint256)
         public view
         virtual override
         returns (uint256)

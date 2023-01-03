@@ -21,7 +21,7 @@ abstract contract WitnetUpgradableBase
 {
     bytes32 internal immutable _WITNET_UPGRADABLE_VERSION;
 
-    error AlreadyInitialized(address implementation);
+    error AlreadyUpgraded(address implementation);
     error NotCompliant(bytes4 interfaceId);
     error NotUpgradable(address self);
     error OnlyOwner(address owner);
