@@ -59,9 +59,6 @@ abstract contract WitnetRequestTemplate
     /// @notice Unique id of last request attempt.
     uint256 public postId;
 
-    /// @notice Contract address to which clones will be re-directed.
-    address immutable internal _SELF = address(this);
-
     modifier initialized {
         if (retrievalHash == bytes32(0)) {
             revert("WitnetRequestTemplate: not initialized");
@@ -199,26 +196,23 @@ abstract contract WitnetRequestTemplate
 
 
     // ================================================================================================================
-    // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
+    // --- Overriden 'Clonable' functions -----------------------------------------------------------------------------    
 
-    /// Contract address to which clones will be re-directed.
-    function self()
-        public view
-        virtual override
-        returns (address)
-    {
-        return _SELF;
-    }    
-
-
-    // ================================================================================================================
-    // --- Implement 'Initializable' functions ------------------------------------------------------------------------
-    
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
     function initialize(bytes memory _initData)
-        external
-        virtual override
+        public
+        override
+        initializer
     {
-        require(retrievalHash == 0, "WitnetRequestTemplate: already initialized");
+        _initialize(_initData);
+    }
+
+    /// @dev Internal virtual method containing actual initialization logic for every new clone. 
+    function _initialize(bytes memory _initData)
+        internal
+        virtual
+    {
         bytes32[] memory _sources = abi.decode(WitnetRequestTemplate(payable(self())).template(), (bytes32[]));
         InitData memory _init = abi.decode(_initData, (InitData));
         args = _init.args;

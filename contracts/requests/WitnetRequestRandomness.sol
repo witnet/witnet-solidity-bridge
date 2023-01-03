@@ -11,13 +11,13 @@ contract WitnetRequestRandomness
     bytes internal constant _WITNET_RANDOMNESS_BYTECODE_TEMPLATE = hex"0a0f120508021a01801a0210022202100b";
 
     constructor() {
-        initialize(bytes(""));
+        _initialize(hex"");
     }
 
-    function initialize(bytes memory)
-        public
+    function _initialize(bytes memory)
+        internal
         virtual override
     {
-        super.initialize(_WITNET_RANDOMNESS_BYTECODE_TEMPLATE);
+        super._initialize(_WITNET_RANDOMNESS_BYTECODE_TEMPLATE);
     }
 }

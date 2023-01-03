@@ -26,8 +26,6 @@ contract WitnetRandomness
         uint256 witnetQueryId;
     }
 
-    address immutable internal _SELF = address(this);
-
     /// Include an address to specify the immutable WitnetRequestBoard entrypoint address.
     /// @param _wrb The WitnetRequestBoard immutable entrypoint address.
     constructor(WitnetRequestBoard _wrb)
@@ -253,15 +251,21 @@ contract WitnetRandomness
     // ================================================================================================================
     // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
 
-    /// Contract address to which clones will be re-directed.
-    function self()
-        public view
-        virtual override
-        returns (address)
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function initialize(bytes memory _initData)
+        public
+        override
+        initializer
     {
-        return _SELF;
+        witnetRandomnessRequest = WitnetRequestRandomness(
+            abi.decode(
+                _initData,
+                (address)
+            )
+        );
     }
-
+    
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
     /// behaviour while using its own EVM storage.
     /// @dev This function should always provide a new address, no matter how many times 
@@ -287,24 +291,6 @@ contract WitnetRandomness
     {
         _newInstance = super.cloneDeterministic(_salt);
         _clone(_newInstance);
-    }
-
-
-    // ================================================================================================================
-    // --- 'Initializable' overriden functions ------------------------------------------------------------------------
-
-    /// @dev Initializes contract's storage context.
-    function initialize(bytes memory _initData)
-        public
-        virtual override
-    {
-        require(address(witnetRandomnessRequest) == address(0), "WitnetRandomness: already initialized");
-        witnetRandomnessRequest = WitnetRequestRandomness(
-            abi.decode(
-                _initData,
-                (address)
-            )
-        );
     }
 
 

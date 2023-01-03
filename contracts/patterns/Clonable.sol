@@ -4,12 +4,13 @@ pragma solidity >=0.6.0 <0.9.0;
 
 import "./Initializable.sol";
 
-abstract contract Clonable is Initializable {
+abstract contract Clonable
+    is
+        Initializable
+{
+    address immutable internal _SELF = address(this);
 
     event Cloned(address indexed by, Clonable indexed self, Clonable indexed clone);
-
-    /// Contract address to which clones will be re-directed.
-    function self() virtual public view returns (address);
 
     /// Tells whether this contract is a clone of `self()`
     function cloned()
@@ -44,8 +45,15 @@ abstract contract Clonable is Initializable {
             // CREATE new instance:
             _instance := create(0, ptr, 0x37)
         }        
-        require(address(_instance) != address(0), "Clonable: CREATE failed");
-        emit Cloned(msg.sender, Clonable(self()), _instance);
+        require(
+            address(_instance) != address(0),
+            "Clonable: CREATE failed"
+        );
+        emit Cloned(
+            msg.sender,
+            Clonable(self()),
+            _instance
+        );
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract 
@@ -71,7 +79,19 @@ abstract contract Clonable is Initializable {
             // CREATE2 new instance:
             _instance := create2(0, ptr, 0x37, _salt)
         }
-        require(address(_instance) != address(0), "Clonable: CREATE2 failed");
+        require(
+            address(_instance) != address(0),
+            "Clonable: CREATE2 failed"
+        );
         emit Cloned(msg.sender, Clonable(self()), _instance);
+    }
+
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function initialize(bytes memory) virtual external;
+
+    /// @notice Contract address to which clones will be re-directed.
+    function self() virtual public view returns (address) {
+        return _SELF;
     }
 }

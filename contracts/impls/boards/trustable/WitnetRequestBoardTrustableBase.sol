@@ -58,9 +58,12 @@ abstract contract WitnetRequestBoardTrustableBase
     // ================================================================================================================
     // --- Overrides 'Upgradable' -------------------------------------------------------------------------------------
 
-    /// Initialize storage-context when invoked as delegatecall. 
-    /// @dev Must fail when trying to initialize same instance more than once.
-    function initialize(bytes memory _initData) virtual external override {
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function initialize(bytes memory _initData)
+        public
+        override
+    {
         address _owner = _state().owner;
         if (_owner == address(0)) {
             // set owner if none set yet
@@ -68,12 +71,18 @@ abstract contract WitnetRequestBoardTrustableBase
             _state().owner = _owner;
         } else {
             // only owner can initialize:
-            require(msg.sender == _owner, "WitnetRequestBoardTrustableBase: only owner");
+            require(
+                msg.sender == _owner,
+                "WitnetRequestBoardTrustableBase: only owner"
+            );
         }
 
         if (_state().base != address(0)) {
             // current implementation cannot be initialized more than once:
-            require(_state().base != base(), "WitnetRequestBoardTrustableBase: already initialized");
+            require(
+                _state().base != base(),
+                "WitnetRequestBoardTrustableBase: already upgraded"
+            );
         }        
         _state().base = base();
 
