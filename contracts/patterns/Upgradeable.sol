@@ -7,7 +7,7 @@ pragma solidity >=0.6.0 <0.9.0;
 import "./Initializable.sol";
 import "./Proxiable.sol";
 
-abstract contract Upgradable is Initializable, Proxiable {
+abstract contract Upgradeable is Initializable, Proxiable {
 
     address internal immutable _BASE;
     bytes32 internal immutable _CODEHASH;
@@ -16,7 +16,7 @@ abstract contract Upgradable is Initializable, Proxiable {
     modifier onlyDelegateCalls {
         require(
             address(this) != _BASE,
-            "Upgradable: not a delegate call"
+            "Upgradeable: not a delegate call"
         );
         _;
     }
