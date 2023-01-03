@@ -11,7 +11,7 @@ import "../../contracts/patterns/Proxiable.sol";
  * @title Witnet Requests Board Trojan Horse: Proxiable with a bad `proxiableUUID()`.
  * @notice Contract to test proxy upgrade assertions.
  * @dev Upgrading an existing WitnetRequestBoard implementation with an instance of 
- * this kind (i.e. Proxiable and Upgradable) but with a `proxiableUUID()` value different
+ * this kind (i.e. Proxiable and Upgradeable) but with a `proxiableUUID()` value different
  * to the one required for WitnetRequestBoards, should not be permitted by the WitnetProxy.
  * The contract has been created for testing purposes.
  * @author Witnet Foundation

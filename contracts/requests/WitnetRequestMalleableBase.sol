@@ -229,7 +229,7 @@ abstract contract WitnetRequestMalleableBase
     // ================================================================================================================
     // --- 'Proxiable 'overriden functions ----------------------------------------------------------------------------
 
-    /// @dev Complying with EIP-1822: Universal Upgradable Proxy Standard (UUPS)
+    /// @dev Complying with EIP-1822: Universal Upgradeable Proxy Standard (UUPS)
     /// @dev See https://eips.ethereum.org/EIPS/eip-1822.
     function proxiableUUID()
         external pure

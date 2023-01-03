@@ -712,7 +712,7 @@ contract("WitnetRequestBoard", ([
   })
 
   describe("interfaces", async () => {
-    describe("Upgradable:", async () => {
+    describe("Upgradeable:", async () => {
       it("initialization fails if called from non owner address", async () => {
         await expectRevert(
           this.WitnetRequestBoard.initialize(

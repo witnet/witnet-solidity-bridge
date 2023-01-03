@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../patterns/Upgradable.sol";
+import "../patterns/Upgradeable.sol";
 
 /// @title WitnetProxy: upgradable delegate-proxy contract. 
 /// @author The Witnet Foundation.
@@ -70,7 +70,7 @@ contract WitnetProxy {
             require(_newImplementation != _oldImplementation, "WitnetProxy: nothing to upgrade");
 
             // Assert whether current implementation is intrinsically upgradable:
-            try Upgradable(_oldImplementation).isUpgradable() returns (bool _isUpgradable) {
+            try Upgradeable(_oldImplementation).isUpgradable() returns (bool _isUpgradable) {
                 require(_isUpgradable, "WitnetProxy: not upgradable");
             } catch {
                 revert("WitnetProxy: unable to check upgradability");
@@ -86,7 +86,7 @@ contract WitnetProxy {
             require(_wasCalled, "WitnetProxy: not compliant");
             require(abi.decode(_result, (bool)), "WitnetProxy: not authorized");
             require(
-                Upgradable(_oldImplementation).proxiableUUID() == Upgradable(_newImplementation).proxiableUUID(),
+                Upgradeable(_oldImplementation).proxiableUUID() == Upgradeable(_newImplementation).proxiableUUID(),
                 "WitnetProxy: proxiableUUIDs mismatch"
             );
         }
@@ -104,8 +104,8 @@ contract WitnetProxy {
         __proxySlot().implementation = _newImplementation;
         emit Upgraded(_newImplementation);
 
-        // Asserts new implementation complies w/ minimal implementation of Upgradable interface:
-        try Upgradable(_newImplementation).isUpgradable() returns (bool _isUpgradable) {
+        // Asserts new implementation complies w/ minimal implementation of Upgradeable interface:
+        try Upgradeable(_newImplementation).isUpgradable() returns (bool _isUpgradable) {
             return _isUpgradable;
         }
         catch {
