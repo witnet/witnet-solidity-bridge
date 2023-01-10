@@ -38,7 +38,7 @@ contract WitnetRequestBoardTrojanHorseBadProxiable is Initializable, Proxiable {
     }
   }
 
-  function initialize(bytes calldata) external override {
+  function initialize(bytes calldata) external {
       // WATCH OUT: any one could reset storage context after 
       // upgrading the WRB to this implementation.
   }
