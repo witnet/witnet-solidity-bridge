@@ -1,6 +1,6 @@
 {
   "name": "witnet-solidity-bridge",
-  "version": "2.0.0",
+  "version": "0.6.3",
   "description": "Witnet Solidity Bridge contracts for EVM-compatible chains",
   "main": "",
   "scripts": {
@@ -42,29 +42,28 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@eth-optimism/solc": "0.7.6-alpha.1",
     "@openzeppelin/contracts": "4.8.0",
     "@openzeppelin/contracts-upgradeable": "4.8.0",
     "ado-contracts": "1.0.0",
-    "lodash": "^4.17.21"
+    "lodash": "4.17.21"
   },
   "devDependencies": {
-    "@openzeppelin/test-helpers": "0.5.5",
+    "@openzeppelin/test-helpers": "~0.5.16",
     "@witnet/truffle-flattener-single-experimental": "^0.1.0",
     "chai": "4.3.6",
     "custom-error-test-helper": "^1.0.6",
     "dotenv": "8.2.0",
-    "eslint": "^8.26.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-n": "^15.3.0",
-    "eslint-plugin-promise": "^6.1.1",
+    "eslint": "~8.31.0",
+    "eslint-config-standard": "~17.0.0",
+    "eslint-plugin-import": "~2.26.0",
+    "eslint-plugin-n": "~15.6.0",
+    "eslint-plugin-promise": "~6.1.1",
     "eth-gas-reporter": "0.2.25",
     "js-sha256": "0.9.0",
     "solhint": "3.3.7",
     "solidity-coverage": "0.7.16",
     "solidity-stringutils": "https://github.com/Arachnid/solidity-stringutils/",
-    "truffle": "5.6.2",
+    "truffle": "~5.7.2",
     "truffle-assertions": "0.9.2"
   }
 }

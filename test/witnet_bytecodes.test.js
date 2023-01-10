@@ -79,7 +79,7 @@ contract("WitnetBytecodes", (accounts) => {
       await expectRevertCustomError(
         WitnetBytecodes,
         bytecodes.initialize("0x", { from: firstOwnerAddress }),
-        "AlreadyInitialized"
+        "AlreadyUpgraded"
       )
       await expectRevertCustomError(
         WitnetBytecodes,
