@@ -141,7 +141,7 @@ contract("Witnet Requests Board Proxy", accounts => {
     it("fails also if the owner tries to re-initialize current implementation", async () => {
       await truffleAssert.reverts(
         wrb.initialize(web3.eth.abi.encodeParameter("address[]", [requestSender]), { from: contractOwner }),
-        "already initialized"
+        "already upgraded"
       )
     })
 
