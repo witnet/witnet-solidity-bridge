@@ -1,9 +1,7 @@
 const fs = require("fs")
-const { merge } = require("lodash")
 
 const addresses = require("../witnet.addresses")
-const package = require ("../../package")
-const settings = require("../witnet.settings")
+const thePackage = require("../../package")
 const utils = require("../../scripts/utils")
 
 const WitnetBytecodesProxy = artifacts.require("WitnetProxy")
@@ -21,7 +19,7 @@ module.exports = async function (deployer, network, accounts) {
 
     console.info()
 
-    var proxy
+    let proxy
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetBytecodes)) {
       await deployer.deploy(WitnetBytecodesProxy)
       proxy = await WitnetBytecodesProxy.deployed()
@@ -34,10 +32,10 @@ module.exports = async function (deployer, network, accounts) {
       console.info(`   Skipped: 'WitnetBytecodesProxy' deployed at ${proxy.address}`)
     }
 
-    var bytecodes
+    let bytecodes
     if (
-      utils.isNullAddress(addresses[ecosystem][network]?.WitnetBytecodesImplementation)
-        || utils.isNullAddress(addresses[ecosystem][network]?.WitnetEncodingLib)
+      utils.isNullAddress(addresses[ecosystem][network]?.WitnetBytecodesImplementation) ||
+        utils.isNullAddress(addresses[ecosystem][network]?.WitnetEncodingLib)
     ) {
       if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetEncodingLib)) {
         await deployer.deploy(WitnetEncodingLib)
@@ -52,12 +50,12 @@ module.exports = async function (deployer, network, accounts) {
       }
       await deployer.link(
         WitnetEncodingLib,
-        [ WitnetBytecodesImplementation ]
+        [WitnetBytecodesImplementation]
       )
       await deployer.deploy(
         WitnetBytecodesImplementation,
         true,
-        utils.fromAscii(package.version)
+        utils.fromAscii(thePackage.version)
       )
       bytecodes = await WitnetBytecodesImplementation.deployed()
       addresses[ecosystem][network].WitnetBytecodesImplementation = bytecodes.address
@@ -69,13 +67,13 @@ module.exports = async function (deployer, network, accounts) {
       console.info(`   Skipped: 'WitnetBytecodesImplementation' deployed at ${bytecodes.address}`)
     }
 
-    var implementation = await proxy.implementation()
+    const implementation = await proxy.implementation()
     if (implementation.toLowerCase() !== bytecodes.address.toLowerCase()) {
       console.info()
       console.info("   > WitnetBytecodesImplementation:", bytecodes.address, `(v${await bytecodes.version()})`)
       console.info("   > WitnetBytecodesProxy:", proxy.address)
       console.info("   > WitnetBytecodesProxy.implementation::", implementation)
-      const answer = await utils.prompt(`   > Upgrade the proxy ? [y/N] `)
+      const answer = await utils.prompt("   > Upgrade the proxy ? [y/N] ")
       if (["y", "yes"].includes(answer.toLowerCase().trim())) {
         await proxy.upgradeTo(bytecodes.address, "0x")
         console.info("   > Done.")
@@ -86,10 +84,10 @@ module.exports = async function (deployer, network, accounts) {
   }
 }
 
-function saveAddresses(addrs) {
+function saveAddresses (addrs) {
   fs.writeFileSync(
     "./migrations/witnet.addresses.json",
     JSON.stringify(addrs, null, 4),
-    { flag: 'w+'}
+    { flag: "w+" }
   )
 }

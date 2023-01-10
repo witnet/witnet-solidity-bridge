@@ -4,7 +4,6 @@ const settings = require("../witnet.settings")
 const utils = require("../../scripts/utils")
 
 module.exports = async function (deployer, network, accounts) {
-
   if (network === "test") return
 
   const realm = utils.getRealmNetworkFromArgs()[0]
