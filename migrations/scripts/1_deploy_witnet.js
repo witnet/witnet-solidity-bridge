@@ -3,12 +3,11 @@ const settings = require("../witnet.settings")
 const utils = require("../../scripts/utils")
 
 module.exports = async function (deployer, network, accounts) {
-  
   if (network === "test") {
     const WitnetRequestBoardTrustlessReporting1 = artifacts.require("WitnetRequestBoardTrustlessReporting1")
     await deployer.deploy(WitnetRequestBoardTrustlessReporting1, true, utils.fromAscii("testing"))
     const WitnetLib = artifacts.require("WitnetLib")
-    await deployer.deploy(WitnetLib);
+    await deployer.deploy(WitnetLib)
     const WitnetEncodingLib = artifacts.require("WitnetEncodingLib")
     await deployer.deploy(WitnetEncodingLib)
     const WitnetBytecodes = artifacts.require("WitnetBytecodes")
