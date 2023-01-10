@@ -448,7 +448,8 @@ abstract contract WitnetRequestBoardTrustlessBase
     {
         // TODO
         // Calculate current epoch in Witnet terms:
-        uint256 _currentEpoch = block.timestamp; // TODO: .toEpoch();
+        // solhint-disable-next-line
+        uint256 _currentEpoch = block.timestamp; // TODO: .toEpoch(); 
 
         // Calculate data request delivery tag:
         bytes8 _drDeliveryTag = bytes8(keccak256(abi.encode(

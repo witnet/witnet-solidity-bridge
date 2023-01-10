@@ -32,6 +32,6 @@
     "import/export": 0,
     "no-useless-constructor": 1,
     "handle-callback-err": 1,
-    "max-len" : ["error", { "code": 120 }]
+    "max-len" : ["error", { "code": 130 }]
   }
 }
