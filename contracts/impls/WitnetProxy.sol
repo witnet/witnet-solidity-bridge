@@ -19,9 +19,7 @@ contract WitnetProxy {
     /// Constructor with no params as to ease eventual support of Singleton pattern (i.e. ERC-2470).
     constructor () {}
 
-    receive() virtual external payable {
-        revert("WitnetProxy: no transfers accepted");
-    }
+    receive() virtual external payable {}
 
     /// Payable fallback accepts delegating calls to payable functions.  
     fallback() external payable { /* solhint-disable no-complex-fallback */
