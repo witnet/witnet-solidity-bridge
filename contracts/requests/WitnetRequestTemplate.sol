@@ -100,11 +100,17 @@ abstract contract WitnetRequestTemplate
             __sources = abi.encode(_sources);
         }
         {
-            assert(_aggregator != bytes32(0));
+            require(
+                uint8(_registry.lookupRadonReducer(_aggregator).opcode) != 0,
+                "WitnetRequestTemplate: unknown aggregator"
+            );
             _AGGREGATOR_HASH = _aggregator;
         }
         {
-            assert(_tally != bytes32(0));
+            require(
+                uint8(_registry.lookupRadonReducer(_tally).opcode) != 0,
+                "WitnetRequestTemplate: unknown tally"
+            );
             _TALLY_HASH = _tally;
         }
     }
@@ -121,15 +127,14 @@ abstract contract WitnetRequestTemplate
         external view
         returns (WitnetV2.RadonReducer memory)
     {
-        return registry.lookupRadonRetrievalAggregator(retrievalHash);
+        return registry.lookupRadonRetrievalAggregator(_AGGREGATOR_HASH);
     }
 
     function getRadonTally()
         external view
-        wasInitialized
         returns (WitnetV2.RadonReducer memory)
     {
-        return registry.lookupRadonRetrievalTally(retrievalHash);
+        return registry.lookupRadonRetrievalTally(_TALLY_HASH);
     }
 
     function getRadonSLA()
