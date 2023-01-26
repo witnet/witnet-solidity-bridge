@@ -57,12 +57,12 @@ abstract contract WitnetRequestMalleableBase
 
     /// Returns current Witnet Data Request bytecode, encoded using Protocol Buffers.
     function bytecode() external view override returns (bytes memory) {
-        return _request().bytecode;
+        return __storage().bytecode;
     }
 
     /// Returns SHA256 hash of current Witnet Data Request bytecode.
     function hash() external view override returns (bytes32) {
-        return _request().hash;
+        return __storage().hash;
     }
 
     /// Sets amount of nanowits that a witness solving the request will be required to collateralize in the commitment transaction.
@@ -71,7 +71,7 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        WitnetRequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = __storage().params;
         _params.witnessingCollateral = _witnessingCollateral;
         _malleateBytecode(
             _params.numWitnesses,
@@ -91,7 +91,7 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        WitnetRequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = __storage().params;
         _params.witnessingReward = _witnessingReward;
         _params.witnessingUnitaryFee = _witnessingUnitaryFee;
         _malleateBytecode(
@@ -112,7 +112,7 @@ abstract contract WitnetRequestMalleableBase
         virtual
         onlyOwner
     {
-        WitnetRequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = __storage().params;
         _params.numWitnesses = _numWitnesses;
         _params.minWitnessingConsensus = _minWitnessingConsensus;
         _malleateBytecode(
@@ -130,7 +130,7 @@ abstract contract WitnetRequestMalleableBase
         external view
         returns (bytes memory)
     {
-        return _request().template;
+        return __storage().template;
     }
 
     /// Returns total amount of nanowits that witnessing nodes will need to collateralize all together.
@@ -138,7 +138,7 @@ abstract contract WitnetRequestMalleableBase
         external view
         returns (uint128)
     {
-        WitnetRequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = __storage().params;
         return _params.numWitnesses * _params.witnessingCollateral;
     }
 
@@ -147,7 +147,7 @@ abstract contract WitnetRequestMalleableBase
         external view
         returns (uint128)
     {
-        WitnetRequestWitnessingParams storage _params = _request().params;
+        WitnetRequestWitnessingParams storage _params = __storage().params;
         return _params.numWitnesses * (2 * _params.witnessingUnitaryFee + _params.witnessingReward);
     }
 
@@ -156,35 +156,24 @@ abstract contract WitnetRequestMalleableBase
         external view
         returns (WitnetRequestWitnessingParams memory)
     {
-        return _request().params;
+        return __storage().params;
     }
 
 
     // ================================================================================================================
-    // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
-
-    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _template)
-        public 
-        override
-        initializer
-    {
-        _initialize(_template);
-    }
+    // --- 'Clonable' extension ---------------------------------------------------------------------------------------
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
     /// behaviour while using its own EVM storage.
     /// @dev This function should always provide a new address, no matter how many times 
     /// @dev is actually called from the same `msg.sender`.
+    /// @dev Ownership of new clone is transferred to the caller.
     function clone()
-        public
-        virtual override
-        returns (Clonable _instance)
+        virtual public
+        wasInitialized
+        returns (WitnetRequestMalleableBase)
     {
-        _instance = super.clone();
-        _instance.initialize(_request().template);
-        Ownable(address(_instance)).transferOwnership(msg.sender);
+        return _afterCloning(_clone());
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract 
@@ -192,14 +181,48 @@ abstract contract WitnetRequestMalleableBase
     /// @dev This function uses the CREATE2 opcode and a `_salt` to deterministically deploy
     /// @dev the clone. Using the same `_salt` multiple time will revert, since
     /// @dev no contract can be deployed more than once at the same address.
+    /// @dev Ownership of new clone is transferred to the caller.
     function cloneDeterministic(bytes32 _salt)
-        public
-        virtual override
-        returns (Clonable _instance)
+        virtual public
+        wasInitialized
+        returns (WitnetRequestMalleableBase)
     {
-        _instance = super.cloneDeterministic(_salt);
-        _instance.initialize(_request().template);
-        Ownable(address(_instance)).transferOwnership(msg.sender);
+        return _afterCloning(_cloneDeterministic(_salt));
+    }
+
+    /// @notice Tells whether this instance has been initialized.
+    function initialized()
+        override 
+        public view
+        returns (bool)
+    {
+        return __storage().template.length > 0;
+    }
+
+    /// @dev Initializes witnessing params and template bytecode. 
+    function _initialize(bytes memory _template)
+        virtual override internal
+        initializer
+    {
+        _transferOwnership(_msgSender());
+
+        assert(_template.length > 0);
+        __storage().template = _template;
+
+        WitnetRequestWitnessingParams storage _params = __storage().params;
+        _params.numWitnesses = 2;
+        _params.minWitnessingConsensus = 51;
+        _params.witnessingCollateral = 10 ** 9;      // 1 WIT
+        _params.witnessingReward = 5 * 10 ** 5;      // 0.5 milliWITs
+        _params.witnessingUnitaryFee = 25 * 10 ** 4; // 0.25 milliWITs
+        
+        _malleateBytecode(
+            _params.numWitnesses,
+            _params.minWitnessingConsensus,
+            _params.witnessingCollateral,
+            _params.witnessingReward,
+            _params.witnessingUnitaryFee
+        );
     }
 
 
@@ -212,7 +235,7 @@ abstract contract WitnetRequestMalleableBase
         virtual override
         returns (address)
     {
-        return _request().owner;
+        return __storage().owner;
     }
 
     /// @dev Transfers ownership of the contract to a new account (`newOwner`).
@@ -220,8 +243,8 @@ abstract contract WitnetRequestMalleableBase
         internal
         virtual override
     {
-        address oldOwner = _request().owner;
-        _request().owner = newOwner;
+        address oldOwner = __storage().owner;
+        __storage().owner = newOwner;
         emit OwnershipTransferred(oldOwner, newOwner);
     }
 
@@ -246,30 +269,13 @@ abstract contract WitnetRequestMalleableBase
     // ================================================================================================================
     // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------    
 
-    /// @dev Initializes witnessing params and template bytecode. 
-    function _initialize(bytes memory _template)
-        internal
-        virtual
+    function _afterCloning(address _newInstance)
+        virtual internal
+        returns (WitnetRequestMalleableBase)
     {
-        _transferOwnership(_msgSender());
-
-        assert(_template.length > 0);
-        _request().template = _template;
-
-        WitnetRequestWitnessingParams storage _params = _request().params;
-        _params.numWitnesses = 2;
-        _params.minWitnessingConsensus = 51;
-        _params.witnessingCollateral = 10 ** 9;      // 1 WIT
-        _params.witnessingReward = 5 * 10 ** 5;      // 0.5 milliWITs
-        _params.witnessingUnitaryFee = 25 * 10 ** 4; // 0.25 milliWITs
-        
-        _malleateBytecode(
-            _params.numWitnesses,
-            _params.minWitnessingConsensus,
-            _params.witnessingCollateral,
-            _params.witnessingReward,
-            _params.witnessingUnitaryFee
-        );
+        WitnetRequestMalleableBase(_newInstance).initializeClone(__storage().template);
+        Ownable(address(_newInstance)).transferOwnership(msg.sender);
+        return WitnetRequestMalleableBase(_newInstance);
     }
 
     /// @dev Serializes new `bytecode` by combining immutable template with given parameters.
@@ -300,15 +306,15 @@ abstract contract WitnetRequestMalleableBase
             "WitnetRequestMalleableBase: witnessing collateral below 1 WIT"
         );
 
-        _request().bytecode = abi.encodePacked(
-            _request().template,
+        __storage().bytecode = abi.encodePacked(
+            __storage().template,
             _uint64varint(bytes1(0x10), _witnessingReward),
             _uint8varint(bytes1(0x18), _numWitnesses),
             _uint64varint(0x20, _witnessingUnitaryFee),
             _uint8varint(0x28, _minWitnessingConsensus),
             _uint64varint(0x30, _witnessingCollateral)
         );
-        _request().hash = _request().bytecode.hash();
+        __storage().hash = __storage().bytecode.hash();
         emit WitnessingParamsChanged(
             msg.sender,
             _numWitnesses,
@@ -320,7 +326,7 @@ abstract contract WitnetRequestMalleableBase
     }
 
     /// @dev Returns pointer to storage slot where State struct is located.
-    function _request()
+    function __storage()
         internal pure
         virtual
         returns (WitnetRequestMalleableBaseContext storage _ptr)
