@@ -15,8 +15,20 @@ library WitnetLib {
     using WitnetCBOR for WitnetCBOR.CBOR[];
     using WitnetLib for bytes;
 
+    
     /// ===============================================================================================================
     /// --- WitnetLib internal methods --------------------------------------------------------------------------------
+
+    /// @notice Decode raw CBOR bytes into a Witnet.Result instance.
+    /// @param bytecode Raw bytes representing a CBOR-encoded value.
+    /// @return A `Witnet.Result` instance.
+    function resultFromCborBytes(bytes memory bytecode)
+        public pure
+        returns (Witnet.Result memory)
+    {
+        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(bytecode);
+        return _resultFromCborValue(cborValue);
+    }
 
     function toAddress(bytes memory _value) internal pure returns (address) {
         return address(toBytes20(_value));
@@ -563,17 +575,6 @@ library WitnetLib {
             "WitnetLib: tried to read `uint[]` value from errored result."
         );
         return result.value.readUintArray();
-    }
-
-    /// @notice Decode raw CBOR bytes into a Witnet.Result instance.
-    /// @param bytecode Raw bytes representing a CBOR-encoded value.
-    /// @return A `Witnet.Result` instance.
-    function resultFromCborBytes(bytes memory bytecode)
-        public pure
-        returns (Witnet.Result memory)
-    {
-        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(bytecode);
-        return _resultFromCborValue(cborValue);
     }
 
 }
