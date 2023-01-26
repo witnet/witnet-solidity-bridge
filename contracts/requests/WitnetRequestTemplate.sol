@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "../UsingWitnet.sol";
 import "../interfaces/V2/IWitnetBytecodes.sol";
 import "../interfaces/IWitnetRequest.sol";
+import "../libs/WitnetLib.sol";
 import "../patterns/Clonable.sol";
 
 abstract contract WitnetRequestTemplate
@@ -29,7 +30,10 @@ abstract contract WitnetRequestTemplate
     /// @notice SHA-256 hash of the Witnet Data Request bytecode.
     bytes32 public override hash;
 
-    /// @notice Unique id of last request attempt.
+    /// @notice Unique id of last update attempt.
+    uint256 public lastAttemptId;
+
+    /// @notice Unique id of last update that got solved successfully.
     uint256 public lastId;
 
     /// @notice Reference to Witnet Data Requests Bytecode Registry
@@ -100,17 +104,13 @@ abstract contract WitnetRequestTemplate
             __sources = abi.encode(_sources);
         }
         {
-            require(
-                uint8(_registry.lookupRadonReducer(_aggregator).opcode) != 0,
-                "WitnetRequestTemplate: unknown aggregator"
-            );
+            // revert if the aggregator reducer is unknown
+            _registry.lookupRadonReducer(_aggregator);
             _AGGREGATOR_HASH = _aggregator;
         }
         {
-            require(
-                uint8(_registry.lookupRadonReducer(_tally).opcode) != 0,
-                "WitnetRequestTemplate: unknown tally"
-            );
+            // revert if the tally reducer is unknown
+            _registry.lookupRadonReducer(_tally);
             _TALLY_HASH = _tally;
         }
     }
@@ -158,17 +158,20 @@ abstract contract WitnetRequestTemplate
         wasInitialized
         returns (uint256 _usedFunds)
     {
-        if (
-            lastId == 0
-                || (
-                    _witnetCheckResultAvailability(lastId)
-                        && witnet.isError(_witnetReadResult(lastId))
-                )
-        ) {
-            (lastId, _usedFunds) = _witnetPostRequest(this);
-            if (_usedFunds < msg.value) {
-                payable(msg.sender).transfer(msg.value - _usedFunds);
+        uint _lastAttempt = lastAttemptId;
+        if (updating()) {
+            _usedFunds = _witnetUpgradeReward(_lastAttempt);
+        } else {
+            if (
+                _lastAttempt > 0
+                    && !witnet.isError(_witnetReadResult(_lastAttempt))
+            ) {
+                lastId = _lastAttempt;
             }
+            (lastAttemptId, _usedFunds) = _witnetPostRequest(this);
+        }
+        if (_usedFunds < msg.value) {
+            payable(msg.sender).transfer(msg.value - _usedFunds);
         }
     }
 
@@ -177,23 +180,41 @@ abstract contract WitnetRequestTemplate
         public view
         returns (bool)
     {
+        uint _lastAttempt = lastAttemptId;
         return (
-            lastId == 0
-                || _witnetCheckResultAvailability(lastId)
+            _lastAttempt > 0
+                && !_witnetCheckResultAvailability(_lastAttempt)
         );
     }
 
-    function read() 
-        virtual
-        external view
-        notUpdating
-        returns (bool, bytes memory)
+    function lastValue()
+        virtual external view
+        returns (
+            bytes memory _value,
+            bytes32 _witnetDrTxHash,
+            uint256 _witnetTimestamp
+        )
     {
-        Witnet.Result memory _result = _witnetReadResult(lastId);
-        return (
-            _result.success,
-            _parseWitnetResult(_result.value)
-        );
+        Witnet.Response memory _response;
+        Witnet.Result memory _result;
+        if (
+            !updating()
+                && lastAttemptId > 0
+        ) {
+            _response = witnet.readResponse(lastAttemptId);
+            _result = WitnetLib.resultFromCborBytes(_response.cborBytes);
+        }
+        if (WitnetLib.failed(_result)) {
+            if (lastId > 0) {
+                _response = witnet.readResponse(lastId);
+                _result = WitnetLib.resultFromCborBytes(_response.cborBytes);
+            } else {
+                revert("WitnetRequestTemplate: no value yet");
+            }
+        }
+        _value = _parseWitnetResult(_result.value);
+        _witnetDrTxHash = _response.drTxHash;
+        _witnetTimestamp = _response.timestamp;
     }
 
 

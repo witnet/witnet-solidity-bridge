@@ -23,7 +23,7 @@ library WitnetLib {
     /// @param bytecode Raw bytes representing a CBOR-encoded value.
     /// @return A `Witnet.Result` instance.
     function resultFromCborBytes(bytes memory bytecode)
-        public pure
+        internal pure
         returns (Witnet.Result memory)
     {
         WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(bytecode);
