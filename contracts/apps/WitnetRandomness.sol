@@ -249,34 +249,18 @@ contract WitnetRandomness
 
 
     // ================================================================================================================
-    // --- 'Clonable' overriden functions -----------------------------------------------------------------------------
+    // --- 'Clonable' extension ---------------------------------------------------------------------------------------
 
-    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData)
-        public
-        override
-        initializer
-    {
-        witnetRandomnessRequest = WitnetRequestRandomness(
-            abi.decode(
-                _initData,
-                (address)
-            )
-        );
-    }
-    
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
     /// behaviour while using its own EVM storage.
     /// @dev This function should always provide a new address, no matter how many times 
     /// @dev is actually called from the same `msg.sender`.
     function clone()
-        public
-        virtual override
-        returns (Clonable _newInstance)
+        virtual public
+        wasInitialized
+        returns (WitnetRandomness)
     {
-        _newInstance = super.clone();
-        _clone(_newInstance);
+        return _afterClone(_clone());
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract 
@@ -285,12 +269,33 @@ contract WitnetRandomness
     /// @dev the clone. Using the same `_salt` multiple time will revert, since
     /// @dev no contract can be deployed more than once at the same address.
     function cloneDeterministic(bytes32 _salt)
-        public
-        virtual override
-        returns (Clonable _newInstance)
+        virtual public
+        wasInitialized
+        returns (WitnetRandomness)
     {
-        _newInstance = super.cloneDeterministic(_salt);
-        _clone(_newInstance);
+        return _afterClone(_cloneDeterministic(_salt));
+    }
+
+    /// @notice Tells whether this instance has been initialized.
+    function initialized()
+        override
+        public view
+        returns (bool)
+    {
+        return address(witnetRandomnessRequest) != address(0);
+    }
+
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function _initialize(bytes memory _initData)
+        virtual override internal
+    {
+        witnetRandomnessRequest = WitnetRequestRandomness(
+            abi.decode(
+                _initData,
+                (address)
+            )
+        );
     }
 
 
@@ -298,10 +303,14 @@ contract WitnetRandomness
     // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------
 
     /// @dev Common steps for both deterministic and non-deterministic cloning.
-    function _clone(Clonable _instance) internal {
-        address _request = address(witnetRandomnessRequest.clone());
-        Ownable(_request).transferOwnership(msg.sender);
-        _instance.initialize(abi.encode(_request));
+    function _afterClone(address _instance)
+        virtual internal
+        returns (WitnetRandomness)
+    {
+        address _randomnessRequest = address(witnetRandomnessRequest.clone());
+        Ownable(_randomnessRequest).transferOwnership(msg.sender);
+        WitnetRandomness(_instance).initializeClone(abi.encode(_randomnessRequest));
+        return WitnetRandomness(_instance);
     }
 
     /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.
