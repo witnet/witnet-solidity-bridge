@@ -29,6 +29,9 @@ abstract contract WitnetRequestTemplate
     /// @notice SHA-256 hash of the Witnet Data Request bytecode.
     bytes32 public override hash;
 
+    /// @notice Unique id of last request attempt.
+    uint256 public lastId;
+
     /// @notice Reference to Witnet Data Requests Bytecode Registry
     IWitnetBytecodes immutable public registry;
 
@@ -38,17 +41,17 @@ abstract contract WitnetRequestTemplate
     /// @notice Result max size or rank (if variable type).
     uint16 immutable public resultDataMaxSize;
 
-    /// @notice Array of source hashes encoded as bytes.
-    bytes /*immutable*/ public template;
-
     /// @notice Array of string arguments passed upon initialization.
-    string[][] public args;
+    string[][] public args;    
 
     /// @notice Radon Retrieval hash. 
     bytes32 public retrievalHash;
 
     /// @notice Radon SLA hash.
     bytes32 public slaHash;
+
+    /// @notice Array of source hashes encoded as bytes.
+    bytes /*immutable*/ internal __sources;
     
     /// @notice Aggregator reducer hash.
     bytes32 immutable internal _AGGREGATOR_HASH;
@@ -56,18 +59,8 @@ abstract contract WitnetRequestTemplate
     /// @notice Tally reducer hash.
     bytes32 immutable internal _TALLY_HASH;
 
-    /// @notice Unique id of last request attempt.
-    uint256 public postId;
-
-    modifier initialized {
-        if (retrievalHash == bytes32(0)) {
-            revert("WitnetRequestTemplate: not initialized");
-        }
-        _;
-    }
-
-    modifier notPending {
-        require(!pending(), "WitnetRequestTemplate: pending");
+    modifier notUpdating {
+        require(!updating(), "WitnetRequestTemplate: updating");
         _;
     }
 
@@ -104,7 +97,7 @@ abstract contract WitnetRequestTemplate
                     "WitnetRequestTemplate: mismatching sources"
                 );
             }
-            template = abi.encode(_sources);
+            __sources = abi.encode(_sources);
         }
         {
             assert(_aggregator != bytes32(0));
@@ -116,13 +109,14 @@ abstract contract WitnetRequestTemplate
         }
     }
 
+    
     /// =======================================================================
     /// --- WitnetRequestTemplate interface -----------------------------------
 
     receive () virtual external payable {}
 
-    function _read(WitnetCBOR.CBOR memory) virtual internal view returns (bytes memory);
-    
+    function _parseWitnetResult(WitnetCBOR.CBOR memory) virtual internal view returns (bytes memory);
+       
     function getRadonAggregator()
         external view
         returns (WitnetV2.RadonReducer memory)
@@ -132,7 +126,7 @@ abstract contract WitnetRequestTemplate
 
     function getRadonTally()
         external view
-        initialized
+        wasInitialized
         returns (WitnetV2.RadonReducer memory)
     {
         return registry.lookupRadonRetrievalTally(retrievalHash);
@@ -140,7 +134,7 @@ abstract contract WitnetRequestTemplate
 
     function getRadonSLA()
         external view
-        initialized
+        wasInitialized
         returns (WitnetV2.RadonSLA memory)
     {
         return registry.lookupRadonSLA(slaHash);
@@ -150,70 +144,85 @@ abstract contract WitnetRequestTemplate
         external view
         returns (bytes32[] memory)
     {
-        return abi.decode(template, (bytes32[]));
+        return abi.decode(__sources, (bytes32[]));
     }
 
-    function post()
+    function update()
         virtual
         external payable
+        wasInitialized
         returns (uint256 _usedFunds)
     {
         if (
-            postId == 0
+            lastId == 0
                 || (
-                    _witnetCheckResultAvailability(postId)
-                        && witnet.isError(_witnetReadResult(postId))
+                    _witnetCheckResultAvailability(lastId)
+                        && witnet.isError(_witnetReadResult(lastId))
                 )
         ) {
-            (postId, _usedFunds) = _witnetPostRequest(this);
+            (lastId, _usedFunds) = _witnetPostRequest(this);
             if (_usedFunds < msg.value) {
                 payable(msg.sender).transfer(msg.value - _usedFunds);
             }
         }
     }
 
-    function pending()
+    function updating()
         virtual
         public view
         returns (bool)
     {
         return (
-            postId == 0
-                || _witnetCheckResultAvailability(postId)
+            lastId == 0
+                || _witnetCheckResultAvailability(lastId)
         );
     }
 
     function read() 
         virtual
         external view
-        notPending
+        notUpdating
         returns (bool, bytes memory)
     {
-        require(!pending(), "WitnetRequestTemplate: pending");
-        Witnet.Result memory _result = _witnetReadResult(postId);
-        return (_result.success, _read(_result.value));
+        Witnet.Result memory _result = _witnetReadResult(lastId);
+        return (
+            _result.success,
+            _parseWitnetResult(_result.value)
+        );
     }
 
 
     // ================================================================================================================
-    // --- Overriden 'Clonable' functions -----------------------------------------------------------------------------    
+    // --- 'Clonable' extension ---------------------------------------------------------------------------------------
 
-    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData)
-        public
-        override
-        initializer
+    function clone(bytes memory _initData)
+        virtual public
+        returns (WitnetRequestTemplate)
     {
-        _initialize(_initData);
+        return _afterCloning(_clone(), _initData);        
+    }
+
+    function cloneDeterministic(bytes32 _salt, bytes memory _initData)
+        virtual public
+        returns (WitnetRequestTemplate)
+    {
+        return _afterCloning(_cloneDeterministic(_salt), _initData);
+    }
+
+    /// @notice Tells whether this instance has been initialized.
+    function initialized()
+        override
+        public view
+        returns (bool)
+    {
+        return retrievalHash != 0x0;
     }
 
     /// @dev Internal virtual method containing actual initialization logic for every new clone. 
     function _initialize(bytes memory _initData)
-        internal
-        virtual
+        virtual override internal
     {
-        bytes32[] memory _sources = abi.decode(WitnetRequestTemplate(payable(self())).template(), (bytes32[]));
+        bytes32[] memory _sources = WitnetRequestTemplate(payable(self())).sources();
         InitData memory _init = abi.decode(_initData, (InitData));
         args = _init.args;
         bytes32 _retrievalHash = registry.verifyRadonRetrieval(
@@ -228,6 +237,18 @@ abstract contract WitnetRequestTemplate
         hash = sha256(bytecode);
         retrievalHash = _retrievalHash;
         slaHash = _init.slaHash;
-        template = abi.encode(_sources);
+        __sources = abi.encode(_sources);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- Internal methods ------------------------------------------------------------------------------------------
+    
+    function _afterCloning(address _newInstance, bytes memory _initData)
+        virtual internal
+        returns (WitnetRequestTemplate)
+    {
+        WitnetRequestTemplate(payable(_newInstance)).initializeClone(_initData);
+        return WitnetRequestTemplate(payable(_newInstance));
     }
 }
