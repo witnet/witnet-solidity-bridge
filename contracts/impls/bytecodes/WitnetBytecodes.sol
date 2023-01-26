@@ -299,9 +299,12 @@ contract WitnetBytecodes
     function lookupRadonReducer(bytes32 _hash)
         external view
         override
-        returns (WitnetV2.RadonReducer memory)
+        returns (WitnetV2.RadonReducer memory _reducer)
     {   
-        return __database().reducers[_hash];
+        _reducer = __database().reducers[_hash];
+        if (uint8(_reducer.opcode) == 0) {
+            revert IWitnetBytecodes.UnknownRadonReducer(_hash);
+        }
     }
 
     function lookupRadonRetrievalAggregator(bytes32 _drRetrievalHash)
@@ -359,9 +362,12 @@ contract WitnetBytecodes
     function lookupRadonSLA(bytes32 _drSlaHash)
         external view
         override
-        returns (WitnetV2.RadonSLA memory)
+        returns (WitnetV2.RadonSLA memory _sla)
     {
-        return __database().slas[_drSlaHash];
+        _sla = __database().slas[_drSlaHash];
+        if (_sla.numWitnesses == 0) {
+            revert IWitnetBytecodes.UnknownRadonSLA(_drSlaHash);
+        }
     }
 
     function lookupRadonSLAReward(bytes32 _drSlaHash)
