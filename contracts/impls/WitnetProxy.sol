@@ -9,8 +9,6 @@ import "../patterns/Upgradeable.sol";
 /// @author The Witnet Foundation.
 contract WitnetProxy {
 
-    address immutable public proxy = address(this);
-
     struct WitnetProxySlot {
         address implementation;
     }
