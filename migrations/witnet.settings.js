@@ -553,6 +553,12 @@ module.exports = {
         network_id: 1230,
         skipDryRun: true,
       },
+      "ultron.mainnet": {
+        host: "localhost",
+        port: 9516,
+        network_id: 1231,
+        skipDryRun: true,
+      }
     },
   },
 }
