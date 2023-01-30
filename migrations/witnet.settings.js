@@ -139,6 +139,13 @@ module.exports = {
         /* _reportResultGasLimit */ "0x3100A1CAC7EF19DC",
       ],
     },
+    ultron: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 83949,
+      ],
+    },
   },
   compilers: {
     default: {
