@@ -190,9 +190,9 @@ abstract contract WitnetRequestTemplate
     function lastValue()
         virtual external view
         returns (
-            bytes memory _value,
-            bytes32 _witnetDrTxHash,
-            uint256 _witnetTimestamp
+            bytes memory value,
+            bytes32 witnetDrTxHash,
+            uint256 witnetTimestamp
         )
     {
         Witnet.Response memory _response;
@@ -212,9 +212,9 @@ abstract contract WitnetRequestTemplate
                 revert("WitnetRequestTemplate: no value yet");
             }
         }
-        _value = _parseWitnetResult(_result.value);
-        _witnetDrTxHash = _response.drTxHash;
-        _witnetTimestamp = _response.timestamp;
+        value = _parseWitnetResult(_result.value);
+        witnetDrTxHash = _response.drTxHash;
+        witnetTimestamp = _response.timestamp;
     }
 
 
