@@ -13,9 +13,9 @@ interface IWitnetBytecodes {
     
     event NewDataProvider(uint256 index);
     event NewDataSourceHash(bytes32 hash);
-    event NewRadonReducerHash(bytes32 hash, bytes bytecode);
-    event NewRadonRetrievalHash(bytes32 hash, bytes bytecode);
-    event NewRadonSLAHash(bytes32 hash, bytes bytecode);
+    event NewRadonReducerHash(bytes32 hash);
+    event NewRadHash(bytes32 hash);
+    event NewSlaHash(bytes32 hash);
 
     function bytecodeOf(bytes32 drRetrievalHash) external view returns (bytes memory);
     function bytecodeOf(bytes32 drRetrievalHash, bytes32 drSlaHash) external view returns (bytes memory);
@@ -47,7 +47,7 @@ interface IWitnetBytecodes {
             uint16 resultMinRank,
             uint16 resultMaxRank,
             string calldata requestSchema,
-            string calldata requestFQDN,
+            string calldata requestAuthority,
             string calldata requestPath,
             string calldata requestQuery,
             string calldata requestBody,
