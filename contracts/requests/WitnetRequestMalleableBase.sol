@@ -190,6 +190,16 @@ abstract contract WitnetRequestMalleableBase
         return _afterCloning(_cloneDeterministic(_salt));
     }
 
+    /// @notice Initializes a cloned instance. 
+    /// @dev Every cloned instance can only get initialized once.
+    function initializeClone(bytes memory _initData)
+        virtual external
+        initializer // => ensure a cloned instance can only be initialized once
+        onlyDelegateCalls // => this method can only be called upon cloned instances
+    {
+        _initialize(_initData);
+    }
+
     /// @notice Tells whether this instance has been initialized.
     function initialized()
         override 
@@ -197,32 +207,6 @@ abstract contract WitnetRequestMalleableBase
         returns (bool)
     {
         return __storage().template.length > 0;
-    }
-
-    /// @dev Initializes witnessing params and template bytecode. 
-    function _initialize(bytes memory _template)
-        virtual override internal
-        initializer
-    {
-        _transferOwnership(_msgSender());
-
-        assert(_template.length > 0);
-        __storage().template = _template;
-
-        WitnetRequestWitnessingParams storage _params = __storage().params;
-        _params.numWitnesses = 2;
-        _params.minWitnessingConsensus = 51;
-        _params.witnessingCollateral = 10 ** 9;      // 1 WIT
-        _params.witnessingReward = 5 * 10 ** 5;      // 0.5 milliWITs
-        _params.witnessingUnitaryFee = 25 * 10 ** 4; // 0.25 milliWITs
-        
-        _malleateBytecode(
-            _params.numWitnesses,
-            _params.minWitnessingConsensus,
-            _params.witnessingCollateral,
-            _params.witnessingReward,
-            _params.witnessingUnitaryFee
-        );
     }
 
 
@@ -276,6 +260,32 @@ abstract contract WitnetRequestMalleableBase
         WitnetRequestMalleableBase(_newInstance).initializeClone(__storage().template);
         Ownable(address(_newInstance)).transferOwnership(msg.sender);
         return WitnetRequestMalleableBase(_newInstance);
+    }
+
+    /// @dev Initializes witnessing params and template bytecode. 
+    function _initialize(bytes memory _template)
+        virtual internal
+        initializer
+    {
+        _transferOwnership(_msgSender());
+
+        assert(_template.length > 0);
+        __storage().template = _template;
+
+        WitnetRequestWitnessingParams storage _params = __storage().params;
+        _params.numWitnesses = 2;
+        _params.minWitnessingConsensus = 51;
+        _params.witnessingCollateral = 10 ** 9;      // 1 WIT
+        _params.witnessingReward = 5 * 10 ** 5;      // 0.5 milliWITs
+        _params.witnessingUnitaryFee = 25 * 10 ** 4; // 0.25 milliWITs
+        
+        _malleateBytecode(
+            _params.numWitnesses,
+            _params.minWitnessingConsensus,
+            _params.witnessingCollateral,
+            _params.witnessingReward,
+            _params.witnessingUnitaryFee
+        );
     }
 
     /// @dev Serializes new `bytecode` by combining immutable template with given parameters.

@@ -276,6 +276,16 @@ contract WitnetRandomness
         return _afterClone(_cloneDeterministic(_salt));
     }
 
+    /// @notice Initializes a cloned instance. 
+    /// @dev Every cloned instance can only get initialized once.
+    function initializeClone(bytes memory _initData)
+        virtual external
+        initializer // => ensure a cloned instance can only be initialized once
+        onlyDelegateCalls // => this method can only be called upon cloned instances
+    {
+        _initialize(_initData);
+    }
+
     /// @notice Tells whether this instance has been initialized.
     function initialized()
         override
@@ -288,7 +298,7 @@ contract WitnetRandomness
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
     /// @dev Must fail when trying to upgrade to same logic contract more than once.
     function _initialize(bytes memory _initData)
-        virtual override internal
+        virtual internal
     {
         witnetRandomnessRequest = WitnetRequestRandomness(
             abi.decode(

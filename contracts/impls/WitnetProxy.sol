@@ -9,10 +9,6 @@ import "../patterns/Upgradeable.sol";
 /// @author The Witnet Foundation.
 contract WitnetProxy {
 
-    struct WitnetProxySlot {
-        address implementation;
-    }
-
     /// Event emitted every time the implementation gets updated.
     event Upgraded(address indexed implementation);  
 
@@ -110,7 +106,7 @@ contract WitnetProxy {
     }
 
     /// @dev Complying with EIP-1967, retrieves storage struct containing proxy's current implementation address.
-    function __proxySlot() private pure returns (WitnetProxySlot storage _slot) {
+    function __proxySlot() private pure returns (Proxiable.ProxiableSlot storage _slot) {
         assembly {
             // bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
             _slot.slot := 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc
