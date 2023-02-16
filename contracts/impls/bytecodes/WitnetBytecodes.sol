@@ -384,7 +384,7 @@ contract WitnetBytecodes
             uint16 _resultMinRank,
             uint16 _resultMaxRank,
             string memory _requestSchema,
-            string memory _requestFQDN,
+            string memory _requestAuthority,
             string memory _requestPath,
             string memory _requestQuery,
             string memory _requestBody,
@@ -393,18 +393,18 @@ contract WitnetBytecodes
         )
         external
         virtual override
-        returns (bytes32 _hash)
+        returns (bytes32 hash)
     {   
         // lower case fqdn and schema, as they ought to be case-insenstive:
         _requestSchema = _requestSchema.toLowerCase();
-        _requestFQDN = _requestFQDN.toLowerCase();
+        _requestAuthority = _requestAuthority.toLowerCase();
 
         // validate input params
-        _requestMethod.validate(
+        hash = _requestMethod.validate(
             _resultMinRank,
             _resultMaxRank,
             _requestSchema,
-            _requestFQDN,
+            _requestAuthority,
             _requestPath,
             _requestQuery,
             _requestBody,
@@ -412,10 +412,8 @@ contract WitnetBytecodes
             _requestRadonScript
         );
 
-        // compose data source struct in memory
-        WitnetV2.DataSource memory _source = WitnetV2.DataSource({
-            method:
-                _requestMethod,
+            __database().sources[hash].method == WitnetV2.DataRequestMethods.Unknown
+            __database().sources[hash] = WitnetV2.DataSource({
 
             resultDataType:
                 WitnetEncodingLib.verifyRadonScriptResultDataType(_requestRadonScript),
@@ -423,7 +421,7 @@ contract WitnetBytecodes
             url:
                 string(abi.encodePacked(
                     _requestSchema,
-                    _requestFQDN,
+                        _requestAuthority,
                     bytes(_requestPath).length > 0
                         ? abi.encodePacked(bytes("/"), _requestPath)
                         : bytes(""),
@@ -444,23 +442,13 @@ contract WitnetBytecodes
             resultMinRank:
                 _resultMinRank,
 
-            resultMaxRank:
-                _resultMaxRank
-        });
-
-        // generate unique hash based on source metadata:
-        _hash = keccak256(abi.encode(_source));
-
-        // add metadata to storage if new:
-        if (__database().sources[_hash].method == WitnetV2.DataRequestMethods.Unknown) {
-            __database().sources[_hash] = _source;
-            __pushDataProviderSource(_requestFQDN, _hash);
-            emit NewDataSourceHash(_hash);
+            __pushDataProviderSource(_requestAuthority, hash);
+            emit NewDataSourceHash(hash);
         }
     }
 
     function verifyRadonReducer(WitnetV2.RadonReducer memory _reducer)
-        external returns (bytes32 _hash)
+        external returns (bytes32 hash)
     {
         _reducer.validate();
         bytes memory _bytecode = _reducer.encode();
@@ -469,7 +457,7 @@ contract WitnetBytecodes
         if (uint8(__reducer.opcode) == 0 && __reducer.filters.length == 0) {
             __reducer.opcode = _reducer.opcode;
             __pushRadonReducerFilters(__reducer, _reducer.filters);
-            emit NewRadonReducerHash(_hash, _bytecode);    
+            emit NewRadonReducerHash(hash);
         }   
     }
 
@@ -483,7 +471,7 @@ contract WitnetBytecodes
         )
         external
         virtual override
-        returns (bytes32 _hash)
+        returns (bytes32 hash)
     {
         // Check provided result type and result max size:
         // TODO: revisit
@@ -535,10 +523,9 @@ contract WitnetBytecodes
         }
         
         // Calculate hash and add metadata to storage if new:
-        _hash = _bytecode.hash();
-        
-        if (__database().retrievals[_hash].sources.length == 0) {
-            __database().retrievals[_hash] = RadonRetrieval({
+        hash = _bytecode.hash();
+        if (__database().retrievals[hash].sources.length == 0) {
+            __database().retrievals[hash] = RadonRetrieval({
                 resultDataType: _resultDataType,
                 resultMaxSize: _resultMaxSize,
                 args: _sourcesArgs,
@@ -547,14 +534,14 @@ contract WitnetBytecodes
                 tally: _tallyHash,
                 weight: uint16(_bytecode.length)
             });
-            emit NewRadonRetrievalHash(_hash, _bytecode);
+            emit NewRadHash(hash);
         }
     }
 
     function verifyRadonSLA(WitnetV2.RadonSLA calldata _sla)
         external 
         virtual override
-        returns (bytes32 _hash)
+        returns (bytes32 hash)
     {
         // Validate SLA params:
         _sla.validate();
@@ -563,10 +550,10 @@ contract WitnetBytecodes
         bytes memory _bytecode = _sla.encode();
 
         // Calculate hash and add to storage if new:
-        _hash = _bytecode.hash();
-        if (__database().slas[_hash].numWitnesses == 0) {
-            __database().slas[_hash] = _sla;
-            emit NewRadonSLAHash(_hash, _bytecode);
+        hash = _bytecode.hash();
+        if (__database().slas[hash].numWitnesses == 0) {
+            __database().slas[hash] = _sla;
+            emit NewSlaHash(hash);
         }
     }
 
