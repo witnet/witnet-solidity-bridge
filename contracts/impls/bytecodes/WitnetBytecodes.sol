@@ -412,36 +412,45 @@ contract WitnetBytecodes
             _requestRadonScript
         );
 
+        // should it be a new data source:
+        if (
             __database().sources[hash].method == WitnetV2.DataRequestMethods.Unknown
+        ) {
+            // compose data source and save it in storage:
             __database().sources[hash] = WitnetV2.DataSource({
+                method:
+                    _requestMethod,
 
-            resultDataType:
-                WitnetEncodingLib.verifyRadonScriptResultDataType(_requestRadonScript),
+                resultDataType:
+                    WitnetEncodingLib.verifyRadonScriptResultDataType(_requestRadonScript),
 
-            url:
-                string(abi.encodePacked(
-                    _requestSchema,
+                url:
+                    string(abi.encodePacked(
+                        _requestSchema,
                         _requestAuthority,
-                    bytes(_requestPath).length > 0
-                        ? abi.encodePacked(bytes("/"), _requestPath)
-                        : bytes(""),
-                    bytes(_requestQuery).length > 0
-                        ? abi.encodePacked("?", _requestQuery)
-                        : bytes("")
-                )),
+                        bytes(_requestPath).length > 0
+                            ? abi.encodePacked(bytes("/"), _requestPath)
+                            : bytes(""),
+                        bytes(_requestQuery).length > 0
+                            ? abi.encodePacked("?", _requestQuery)
+                            : bytes("")
+                    )),
 
-            body:
-                _requestBody,
+                body:
+                    _requestBody,
 
-            headers:
-                _requestHeaders,
+                headers:
+                    _requestHeaders,
 
-            script:
-                _requestRadonScript,
-                       
-            resultMinRank:
-                _resultMinRank,
+                script:
+                    _requestRadonScript,
+                        
+                resultMinRank:
+                    _resultMinRank,
 
+                resultMaxRank:
+                    _resultMaxRank
+            });
             __pushDataProviderSource(_requestAuthority, hash);
             emit NewDataSourceHash(hash);
         }
@@ -450,15 +459,17 @@ contract WitnetBytecodes
     function verifyRadonReducer(WitnetV2.RadonReducer memory _reducer)
         external returns (bytes32 hash)
     {
-        _reducer.validate();
-        bytes memory _bytecode = _reducer.encode();
-        _hash = _bytecode.hash();
-        WitnetV2.RadonReducer storage __reducer = __database().reducers[_hash];
-        if (uint8(__reducer.opcode) == 0 && __reducer.filters.length == 0) {
+        hash = keccak256(abi.encode(_reducer));
+        WitnetV2.RadonReducer storage __reducer = __database().reducers[hash];
+        if (
+            uint8(__reducer.opcode) == 0
+                && __reducer.filters.length == 0
+        ) {
+            _reducer.validate();
             __reducer.opcode = _reducer.opcode;
             __pushRadonReducerFilters(__reducer, _reducer.filters);
             emit NewRadonReducerHash(hash);
-        }   
+        }
     }
 
     function verifyRadonRetrieval(
