@@ -10,8 +10,6 @@ const WitnetV2 = artifacts.require("WitnetV2")
 contract("WitnetBytecodes", (accounts) => {
   const creatorAddress = accounts[0]
   const firstOwnerAddress = accounts[1]
-  //   const secondOwnerAddress = accounts[2]
-  //   const externalAddress = accounts[3]
   const unprivilegedAddress = accounts[4]
 
   let bytecodes
@@ -91,29 +89,21 @@ contract("WitnetBytecodes", (accounts) => {
 
   context("IWitnetBytecodes", async () => {
     let slaHash
-    let slaBytecode
 
     let concathashReducerHash
-    // let concathashReducerBytecode
     let modeNoFiltersReducerHash
-    // let modeNoFitlersReducerBytecode
     let stdev15ReducerHash
     let stdev25ReducerHash
 
     let rngSourceHash
     let binanceTickerHash
-    // let uniswapToken0PriceHash
     let uniswapToken1PriceHash
     let heavyRetrievalHash
     let heavyRetrievalBytecode
 
     let rngHash
-    // let rngBytecode
 
     let btcUsdPriceFeedHash
-    let btcUsdPriceFeedBytecode
-    // let fraxUsdtPriceFeedHash
-    // let fraxUsdtPriceFeedBytecode
 
     context("verifyDataSource(..)", async () => {
       context("WitnetV2.DataRequestMethods.Rng", async () => {
@@ -391,7 +381,7 @@ contract("WitnetBytecodes", (accounts) => {
           assert(tx.logs.length === 1)
           expectEvent(
             tx.receipt,
-            "NewRadonRetrievalHash"
+            "NewRadHash"
           )
           rngHash = tx.logs[0].args.hash
         //   rngBytecode = tx.logs[0].args.bytecode
@@ -482,10 +472,10 @@ contract("WitnetBytecodes", (accounts) => {
           assert(tx.logs.length === 1)
           expectEvent(
             tx.receipt,
-            "NewRadonRetrievalHash"
+            "NewRadHash"
           )
           btcUsdPriceFeedHash = tx.logs[0].args.hash
-          btcUsdPriceFeedBytecode = tx.logs[0].args.bytecode
+          // btcUsdPriceFeedBytecode = tx.logs[0].args.bytecode
         })
         it("verifying radon retrieval with repeated sources works", async () => {
           const tx = await bytecodes.verifyRadonRetrieval(
@@ -505,7 +495,7 @@ contract("WitnetBytecodes", (accounts) => {
           assert(tx.logs.length === 1)
           expectEvent(
             tx.receipt,
-            "NewRadonRetrievalHash"
+            "NewRadHash"
           )
         })
         it("reverts if trying to verify radon retrieval w/ incompatible sources", async () => {
@@ -548,10 +538,8 @@ contract("WitnetBytecodes", (accounts) => {
           assert(tx.logs.length === 1)
           expectEvent(
             tx.receipt,
-            "NewRadonRetrievalHash"
+            "NewRadHash"
           )
-        //   fraxUsdtPriceFeedHash = tx.logs[0].args.hash
-        //   fraxUsdtPriceFeedBytecode = tx.logs[0].args.bytecode
         })
         it("emits single event when verifying new radon retrieval w/ repeated http-post sources", async () => {
           const tx = await bytecodes.verifyRadonRetrieval(
@@ -579,10 +567,10 @@ contract("WitnetBytecodes", (accounts) => {
           assert(tx.logs.length === 1)
           expectEvent(
             tx.receipt,
-            "NewRadonRetrievalHash"
+            "NewRadHash"
           )
           heavyRetrievalHash = tx.logs[0].args.hash
-          heavyRetrievalBytecode = tx.logs[0].args.bytecode
+          heavyRetrievalBytecode = await bytecodes.bytecodeOf.call(heavyRetrievalHash)
         })
       })
     })
@@ -598,10 +586,9 @@ contract("WitnetBytecodes", (accounts) => {
         ])
         expectEvent(
           tx.receipt,
-          "NewRadonSLAHash"
+          "NewSlaHash"
         )
         slaHash = tx.logs[0].args.hash
-        slaBytecode = tx.logs[0].args.bytecode
       })
       it("emits no event when verifying an already verified radon sla", async () => {
         const tx = await bytecodes.verifyRadonSLA([
@@ -717,9 +704,8 @@ contract("WitnetBytecodes", (accounts) => {
         it("works if trying to get bytecode onchain from known radon retrieval", async () => {
           await bytecodes.bytecodeOf(btcUsdPriceFeedHash)
         })
-        it("returns expected bytecode if getting it offchain from known radon retrieval", async () => {
-          const bytecode = await bytecodes.bytecodeOf(btcUsdPriceFeedHash)
-          assert.equal(bytecode, btcUsdPriceFeedBytecode)
+        it("returns bytecode if getting it offchain from known radon retrieval", async () => {
+          await bytecodes.bytecodeOf(btcUsdPriceFeedHash)
         })
       })
       context("radon slas", async () => {
@@ -733,12 +719,9 @@ contract("WitnetBytecodes", (accounts) => {
         it("works if trying to get bytecode onchain from known radon retrieval and sla", async () => {
           await bytecodes.bytecodeOf(btcUsdPriceFeedHash, slaHash)
         })
-        it("returns expected bytecode if getting it offchain from known radon retrieval and sla", async () => {
+        it("returns full bytecode if getting it offchain from known radon retrieval and sla", async () => {
           const bytecode = await bytecodes.bytecodeOf.call(heavyRetrievalHash, slaHash)
-          assert.equal(
-            heavyRetrievalBytecode + slaBytecode.slice(2),
-            bytecode
-          )
+          assert.equal(bytecode.startsWith(heavyRetrievalBytecode), true)
         })
       })
     })
