@@ -35,7 +35,7 @@ abstract contract WitnetRequestBoardTrustableBase
         WitnetUpgradableBase(_upgradable, _versionTag, "io.witnet.proxiable.board")
     {}
 
-    receive() external payable override {
+    receive() external payable {
         revert("WitnetRequestBoardTrustableBase: no transfers accepted");
     }
 

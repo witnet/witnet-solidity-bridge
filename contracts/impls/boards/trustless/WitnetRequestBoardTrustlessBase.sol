@@ -58,7 +58,7 @@ abstract contract WitnetRequestBoardTrustlessBase
         )
     {}
 
-    receive() external payable override {
+    receive() external payable {
         revert("WitnetRequestBoardTrustlessBase: no transfers accepted");
     }
 

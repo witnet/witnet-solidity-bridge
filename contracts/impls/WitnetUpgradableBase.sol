@@ -36,11 +36,9 @@ abstract contract WitnetUpgradableBase
         _WITNET_UPGRADABLE_VERSION = _versionTag;
         proxiableUUID = keccak256(bytes(_proxiableUUID));
     }
-
-    receive() external payable virtual;
     
     /// @dev Reverts if proxy delegatecalls to unexistent method.
-    fallback() external payable {
+    fallback() external {
         revert("WitnetUpgradableBase: not implemented");
     }
 
