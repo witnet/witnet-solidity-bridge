@@ -41,7 +41,7 @@ contract WitnetBytecodes
         )
     {}
 
-    receive() external payable override {
+    receive() external payable {
         revert("WitnetBytecodes: no transfers");
     }
 
