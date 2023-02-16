@@ -28,7 +28,7 @@ interface IWitnetBytecodes {
         );
 
     function lookupDataProvider(uint256 index) external view returns (string memory, uint);
-    function lookupDataProviderIndex(string calldata fqdn) external view returns (uint);
+    function lookupDataProviderIndex(string calldata authority) external view returns (uint);
     function lookupDataProviderSources(uint256 index, uint256 offset, uint256 length) external view returns (bytes32[] memory);
     function lookupDataSource(bytes32 hash) external view returns (WitnetV2.DataSource memory);
     function lookupDataSourceResultDataType(bytes32 hash) external view returns (WitnetV2.RadonDataTypes);
