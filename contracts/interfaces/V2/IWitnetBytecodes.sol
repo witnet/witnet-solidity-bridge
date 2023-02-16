@@ -17,11 +17,11 @@ interface IWitnetBytecodes {
     event NewRadHash(bytes32 hash);
     event NewSlaHash(bytes32 hash);
 
-    function bytecodeOf(bytes32 drRetrievalHash) external view returns (bytes memory);
-    function bytecodeOf(bytes32 drRetrievalHash, bytes32 drSlaHash) external view returns (bytes memory);
+    function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
+    function bytecodeOf(bytes32 radHash, bytes32 slahHash) external view returns (bytes memory);
 
-    function hashOf(bytes32 drRetrievalHash, bytes32 drSlaHash) external pure returns (bytes32 drQueryHash);
-    function hashWeightWitsOf(bytes32 drRetrievalHash, bytes32 drSlaHash) external view returns (
+    function hashOf(bytes32 radHash, bytes32 slaHash) external pure returns (bytes32 drQueryHash);
+    function hashWeightWitsOf(bytes32 radHash, bytes32 slaHash) external view returns (
             bytes32 drQueryHash,
             uint32  drQueryWeight,
             uint256 drQueryWits
@@ -53,9 +53,10 @@ interface IWitnetBytecodes {
             string calldata requestBody,
             string[2][] calldata requestHeaders,
             bytes calldata requestRadonScript
-        ) external returns (bytes32);
+        ) external returns (bytes32 hash);
     
-    function verifyRadonReducer(WitnetV2.RadonReducer calldata reducer) external returns (bytes32);
+    function verifyRadonReducer(WitnetV2.RadonReducer calldata reducer)
+        external returns (bytes32 hash);
     
     function verifyRadonRetrieval(
             WitnetV2.RadonDataTypes resultDataType,
@@ -64,9 +65,10 @@ interface IWitnetBytecodes {
             string[][] calldata sourcesArgs,
             bytes32 aggregatorHash,
             bytes32 tallyHash
-        ) external returns (bytes32);    
+        ) external returns (bytes32 hash);    
     
-    function verifyRadonSLA(WitnetV2.RadonSLA calldata drSLA) external returns (bytes32);
+    function verifyRadonSLA(WitnetV2.RadonSLA calldata sla)
+        external returns (bytes32 hash);
 
     function totalDataProviders() external view returns (uint);
    
