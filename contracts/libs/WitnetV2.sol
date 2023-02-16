@@ -109,7 +109,7 @@ library WitnetV2 {
     }
 
     struct DataProvider {
-        string  fqdn;
+        string  authority;
         uint256 totalSources;
         mapping (uint256 => bytes32) sources;
     }
