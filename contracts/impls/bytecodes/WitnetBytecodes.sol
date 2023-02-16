@@ -234,23 +234,20 @@ contract WitnetBytecodes
     function lookupDataProvider(uint256 _index)
         external view
         override
-        returns (
-            string memory _fqdn,
-            uint256 _totalSources
-        )
+        returns (string memory, uint256)
     {
         return (
-            __database().providers[_index].fqdn,
+            __database().providers[_index].authority,
             __database().providers[_index].totalSources
         );
     }
 
-    function lookupDataProviderIndex(string calldata _fqdn)
+    function lookupDataProviderIndex(string calldata _authority)
         external view
         override
         returns (uint256)
     {
-        return __database().providersIndex[keccak256(abi.encodePacked(_fqdn))];
+        return __database().providersIndex[keccak256(abi.encodePacked(_authority))];
     }
 
     function lookupDataProviderSources(
@@ -395,7 +392,7 @@ contract WitnetBytecodes
         virtual override
         returns (bytes32 hash)
     {   
-        // lower case fqdn and schema, as they ought to be case-insenstive:
+        // lower case authority and schema, as they ought to be case-insenstive:
         _requestSchema = _requestSchema.toLowerCase();
         _requestAuthority = _requestAuthority.toLowerCase();
 
@@ -580,18 +577,18 @@ contract WitnetBytecodes
     // ================================================================================================================
     // --- Internal state-modifying methods ---------------------------------------------------------------------------
     
-    function __pushDataProviderSource(string memory _fqdn, bytes32 _sourceHash)
+    function __pushDataProviderSource(string memory _authority, bytes32 _sourceHash)
         internal 
         virtual
         returns (bytes32 _hash)
     {
-        if (bytes(_fqdn).length > 0) {
-            _hash = keccak256(abi.encodePacked(_fqdn));
+        if (bytes(_authority).length > 0) {
+            _hash = keccak256(abi.encodePacked(_authority));
             uint _index = __database().providersIndex[_hash];
             if (_index == 0) {
                 _index = ++ __bytecodes().totalDataProviders;
-                __database().providersIndex[keccak256(bytes(_fqdn))] = _index;
-                __database().providers[_index].fqdn = _fqdn;
+                __database().providersIndex[keccak256(bytes(_authority))] = _index;
+                __database().providers[_index].authority = _authority;
                 emit NewDataProvider(_index);
             }
             __database().providers[_index].sources[

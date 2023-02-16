@@ -37,9 +37,9 @@ library WitnetEncodingLib {
     bytes internal constant URL_QUERY_XALPHAS_CHARS = 
         hex"000000000000000000000000000000000000000000000000000000000000000000ffff00ffffffffffffffffffffffffffffffffffffffffffffffff00ff0000ffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff0000ff00ffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
 
-    error UrlBadHostIpv4(string fqdn, string part);
-    error UrlBadHostPort(string fqdn, string port);
-    error UrlBadHostXalphas(string fqdn, string part);
+    error UrlBadHostIpv4(string authority, string part);
+    error UrlBadHostPort(string authority, string port);
+    error UrlBadHostXalphas(string authority, string part);
     error UrlBadPathXalphas(string path, uint pos);
     error UrlBadQueryXalphas(string query, uint pos);
 
@@ -499,25 +499,25 @@ library WitnetEncodingLib {
         }
     }
 
-    function validateUrlHost(string memory fqdn)
+    function validateUrlHost(string memory authority)
         public pure
     {
         unchecked {
-            if (bytes(fqdn).length > 0) {  
-                strings.slice memory slice = fqdn.toSlice();
+            if (bytes(authority).length > 0) {  
+                strings.slice memory slice = authority.toSlice();
                 strings.slice memory host = slice.split(string(":").toSlice());
                 if (!_checkUrlHostPort(slice.toString())) {
-                    revert UrlBadHostPort(fqdn, slice.toString());
+                    revert UrlBadHostPort(authority, slice.toString());
                 }
                 strings.slice memory delim = string(".").toSlice();
                 string[] memory parts = new string[](host.count(delim) + 1);
                 if (parts.length == 1) {
-                    revert UrlBadHostXalphas(fqdn, fqdn);
+                    revert UrlBadHostXalphas(authority, authority);
                 }
                 for (uint ix = 0; ix < parts.length; ix ++) {
                     parts[ix] = host.split(delim).toString();
                     if (!_checkUrlHostXalphas(bytes(parts[ix]))) {
-                        revert UrlBadHostXalphas(fqdn, parts[ix]);
+                        revert UrlBadHostXalphas(authority, parts[ix]);
                     }
                 }
                 if (parts.length == 4) {
@@ -527,7 +527,7 @@ library WitnetEncodingLib {
                             _prevDigits = true;
                         } else {
                             if (_prevDigits) {
-                                revert UrlBadHostIpv4(fqdn, parts[ix - 1]);
+                                revert UrlBadHostIpv4(authority, parts[ix - 1]);
                             } else {
                                 break;
                             }
