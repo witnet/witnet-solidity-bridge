@@ -12,7 +12,7 @@ abstract contract Clonable
 
     event Cloned(address indexed by, address indexed self, address indexed clone);
 
-    modifier onlyDelegateCalls {
+    modifier onlyDelegateCalls virtual {
         require(address(this) != _SELF, "Clonable: not a delegate call");
         _;
     }
@@ -30,19 +30,6 @@ abstract contract Clonable
         return (
             address(this) != self()
         );
-    }
-
-    /// Internal virtual function for initializing contract's storage
-    function _initialize(bytes memory) virtual internal;
-
-    /// @notice Initializes a cloned instance. 
-    /// @dev Every cloned instance can only get initialized once.
-    function initializeClone(bytes memory _initData)
-        external
-        initializer // => ensure a cloned instance can only be initialized once
-        onlyDelegateCalls // => this method can only be called upon cloned instances
-    {
-        _initialize(_initData);
     }
 
     /// @notice Tells whether this instance has been initialized.

@@ -13,7 +13,7 @@ abstract contract Upgradeable is Initializable, Proxiable {
     bytes32 internal immutable _CODEHASH;
     bool internal immutable _UPGRADABLE;
 
-    modifier onlyDelegateCalls {
+    modifier onlyDelegateCalls virtual {
         require(
             address(this) != _BASE,
             "Upgradeable: not a delegate call"
