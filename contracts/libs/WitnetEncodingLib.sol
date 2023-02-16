@@ -347,6 +347,7 @@ library WitnetEncodingLib {
             bytes memory script
         )
         public pure
+        returns (bytes32)
     {
         if (!(
             (method == WitnetV2.DataRequestMethods.HttpGet || method == WitnetV2.DataRequestMethods.HttpPost)
@@ -378,11 +379,18 @@ library WitnetEncodingLib {
                 resultMaxRank
             );
         }
-        // Cannot perform formal validation of url parts, as they
-        // could templatized.
-        // NOP: validateUrlHost(host);
-        // NOP: validateUrlPath(path);
-        // NOP: validateUrlQuery(query);
+        return keccak256(abi.encode(
+            method,
+            resultMinRank,
+            resultMaxRank,
+            schema,
+            host,
+            path,
+            query,
+            body,
+            headers,
+            script
+        ));
     }
     
     function validate(
