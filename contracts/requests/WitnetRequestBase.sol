@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../libs/Witnet.sol";
 
-abstract contract WitnetRequestBase
+contract WitnetRequestBase
     is
         IWitnetRequest
 {
@@ -13,4 +13,9 @@ abstract contract WitnetRequestBase
 
     /// Returns SHA256 hash of Witnet Data Request as CBOR-encoded bytes.
     bytes32 public override hash;
+
+    constructor(bytes memory _bytecode) {
+        bytecode = _bytecode;
+        hash = Witnet.hash(_bytecode);
+    }
 }
