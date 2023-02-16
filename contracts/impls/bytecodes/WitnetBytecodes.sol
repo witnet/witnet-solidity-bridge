@@ -158,15 +158,15 @@ contract WitnetBytecodes
     // ================================================================================================================
     // --- Implementation of 'IWitnetBytecodes' -----------------------------------------------------------------------
 
-    function bytecodeOf(bytes32 _hash)
+    function bytecodeOf(bytes32 _radHash)
         public view
         override
         returns (bytes memory)
     {
-        RadonRetrieval memory _retrieval = __retrievals(_hash);
+        RadonRetrieval memory _retrieval = __retrievals(_radHash);
         WitnetV2.DataSource[] memory _sources = new WitnetV2.DataSource[](_retrieval.sources.length);
         if (_sources.length == 0) {
-            revert IWitnetBytecodes.UnknownRadonRetrieval(_hash);
+            revert IWitnetBytecodes.UnknownRadonRetrieval(_radHash);
         }
         for (uint _ix = 0; _ix < _retrieval.sources.length; _ix ++) {
             _sources[_ix] = __database().sources[_retrieval.sources[_ix]];
@@ -179,7 +179,7 @@ contract WitnetBytecodes
         );
     }
 
-    function bytecodeOf(bytes32 _retrievalHash, bytes32 _slaHash)
+    function bytecodeOf(bytes32 _radHash, bytes32 _slaHash)
         external view
         returns (bytes memory)
     {
@@ -188,24 +188,24 @@ contract WitnetBytecodes
             revert IWitnetBytecodes.UnknownRadonSLA(_slaHash);
         }
         return abi.encodePacked(
-            bytecodeOf(_retrievalHash),
+            bytecodeOf(_radHash),
             __database().slas[_slaHash].encode()
         );
     }
 
-    function hashOf(bytes32 _drRetrievalHash, bytes32 _drSlaHash)
+    function hashOf(bytes32 _radHash, bytes32 _slaHash)
         public pure 
         virtual override
         returns (bytes32)
     {
         return sha256(abi.encode(
-            _drRetrievalHash,
-            _drSlaHash
+            _radHash,
+            _slaHash
         ));
     }
 
     function hashWeightWitsOf(
-            bytes32 _retrievalHash, 
+            bytes32 _radHash, 
             bytes32 _slaHash
         ) 
         external view
@@ -216,12 +216,12 @@ contract WitnetBytecodes
         if (__sla.numWitnesses == 0) {
             revert IWitnetBytecodes.UnknownRadonSLA(_slaHash);
         }
-        RadonRetrieval storage __retrieval = __retrievals(_retrievalHash);
+        RadonRetrieval storage __retrieval = __retrievals(_radHash);
         if (__retrieval.weight == 0) {
-            revert IWitnetBytecodes.UnknownRadonRetrieval(_retrievalHash);
+            revert IWitnetBytecodes.UnknownRadonRetrieval(_radHash);
         }
         return (
-            hashOf(_retrievalHash, _slaHash),
+            hashOf(_radHash, _slaHash),
             uint32(__retrieval.weight
                 + __sla.numWitnesses * 636
                 // + (8 + 2 + 8 + 4 + 8)
@@ -307,75 +307,75 @@ contract WitnetBytecodes
         }
     }
 
-    function lookupRadonRetrievalAggregator(bytes32 _drRetrievalHash)
+    function lookupRadonRetrievalAggregator(bytes32 _radHash)
         external view
         override
         returns (WitnetV2.RadonReducer memory)
     {
         return __database().reducers[
-            __retrievals(_drRetrievalHash).aggregator
+            __retrievals(_radHash).aggregator
         ];
     }
 
-    function lookupRadonRetrievalResultDataType(bytes32 _drRetrievalHash)
+    function lookupRadonRetrievalResultDataType(bytes32 _radHash)
         external view
         override
         returns (WitnetV2.RadonDataTypes)
     {
-        return __retrievals(_drRetrievalHash).resultDataType;
+        return __retrievals(_radHash).resultDataType;
     }
 
-    function lookupRadonRetrievalResultMaxSize(bytes32 _drRetrievalHash)
+    function lookupRadonRetrievalResultMaxSize(bytes32 _radHash)
         external view
         override
         returns (uint256)
     {
-        return __retrievals(_drRetrievalHash).resultMaxSize;
+        return __retrievals(_radHash).resultMaxSize;
     }    
 
-    function lookupRadonRetrievalSources(bytes32 _drRetrievalHash)
+    function lookupRadonRetrievalSources(bytes32 _radHash)
         external view
         override
         returns (bytes32[] memory)
     {
-        return __retrievals(_drRetrievalHash).sources;
+        return __retrievals(_radHash).sources;
     }
 
-    function lookupRadonRetrievalSourcesCount(bytes32 _drRetrievalHash)
+    function lookupRadonRetrievalSourcesCount(bytes32 _radHash)
         external view
         override
         returns (uint)
     {
-        return __retrievals(_drRetrievalHash).sources.length;
+        return __retrievals(_radHash).sources.length;
     }
 
-    function lookupRadonRetrievalTally(bytes32 _drRetrievalHash)
+    function lookupRadonRetrievalTally(bytes32 _radHash)
         external view
         override
         returns (WitnetV2.RadonReducer memory)
     {
         return __database().reducers[
-            __retrievals(_drRetrievalHash).tally
+            __retrievals(_radHash).tally
         ];
     }
 
-    function lookupRadonSLA(bytes32 _drSlaHash)
+    function lookupRadonSLA(bytes32 _slaHash)
         external view
         override
-        returns (WitnetV2.RadonSLA memory _sla)
+        returns (WitnetV2.RadonSLA memory sla)
     {
-        _sla = __database().slas[_drSlaHash];
-        if (_sla.numWitnesses == 0) {
-            revert IWitnetBytecodes.UnknownRadonSLA(_drSlaHash);
+        sla = __database().slas[_slaHash];
+        if (sla.numWitnesses == 0) {
+            revert IWitnetBytecodes.UnknownRadonSLA(_slaHash);
         }
     }
 
-    function lookupRadonSLAReward(bytes32 _drSlaHash)
+    function lookupRadonSLAReward(bytes32 _slaHash)
         public view
         override
         returns (uint64)
     {
-        WitnetV2.RadonSLA storage __sla = __database().slas[_drSlaHash];
+        WitnetV2.RadonSLA storage __sla = __database().slas[_slaHash];
         return __sla.numWitnesses * __sla.witnessReward;
     }
 
