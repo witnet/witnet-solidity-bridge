@@ -199,7 +199,6 @@ contract WitnetRequestFactory
     function pendingOwner()
         public view
         virtual override
-        onlyOnFactory
         returns (address)
     {
         return __witnetRequestFactory().pendingOwner;
@@ -209,7 +208,6 @@ contract WitnetRequestFactory
     function owner()
         public view
         virtual override
-        onlyOnFactory
         returns (address)
     {
         return __witnetRequestFactory().owner;
@@ -220,7 +218,6 @@ contract WitnetRequestFactory
     function transferOwnership(address _newOwner)
         public
         virtual override
-        onlyOnFactory
         onlyOwner
     {
         __witnetRequestFactory().pendingOwner = _newOwner;

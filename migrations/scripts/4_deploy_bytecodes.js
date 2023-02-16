@@ -1,9 +1,8 @@
-const fs = require("fs")
-
 const addresses = require("../witnet.addresses")
 const thePackage = require("../../package")
 const utils = require("../../scripts/utils")
 
+const WitnetBytecodes = artifacts.require("WitnetBytecodes")
 const WitnetBytecodesProxy = artifacts.require("WitnetProxy")
 const WitnetBytecodesImplementation = artifacts.require("WitnetBytecodes")
 const WitnetEncodingLib = artifacts.require("WitnetEncodingLib")
@@ -25,12 +24,13 @@ module.exports = async function (deployer, network, accounts) {
       proxy = await WitnetBytecodesProxy.deployed()
       addresses[ecosystem][network].WitnetBytecodes = proxy.address
       if (!isDryRun) {
-        saveAddresses(addresses)
+        utils.saveAddresses(addresses)
       }
     } else {
       proxy = await WitnetBytecodesProxy.at(addresses[ecosystem][network].WitnetBytecodes)
-      console.info(`   Skipped: 'WitnetBytecodesProxy' deployed at ${proxy.address}`)
+      console.info(`   Skipped: 'WitnetBytecodes' deployed at ${proxy.address}`)
     }
+    WitnetBytecodes.address = proxy.address
 
     let bytecodes
     if (
@@ -41,7 +41,7 @@ module.exports = async function (deployer, network, accounts) {
         await deployer.deploy(WitnetEncodingLib)
         addresses[ecosystem][network].WitnetEncodingLib = WitnetEncodingLib.address
         if (!isDryRun) {
-          saveAddresses(addresses)
+          utils.saveAddresses(addresses)
         }
       } else {
         WitnetEncodingLib.address = addresses[ecosystem][network].WitnetEncodingLib
@@ -60,7 +60,7 @@ module.exports = async function (deployer, network, accounts) {
       bytecodes = await WitnetBytecodesImplementation.deployed()
       addresses[ecosystem][network].WitnetBytecodesImplementation = bytecodes.address
       if (!isDryRun) {
-        saveAddresses(addresses)
+        utils.saveAddresses(addresses)
       }
     } else {
       bytecodes = await WitnetBytecodesImplementation.at(addresses[ecosystem][network].WitnetBytecodesImplementation)
@@ -70,11 +70,13 @@ module.exports = async function (deployer, network, accounts) {
     const implementation = await proxy.implementation()
     if (implementation.toLowerCase() !== bytecodes.address.toLowerCase()) {
       console.info()
+      console.info("   > WitnetBytecodes proxy:", proxy.address)
+      console.info("   > WitnetBytecodes implementation:", implementation)
       console.info("   > WitnetBytecodesImplementation:", bytecodes.address, `(v${await bytecodes.version()})`)
-      console.info("   > WitnetBytecodesProxy:", proxy.address)
-      console.info("   > WitnetBytecodesProxy.implementation::", implementation)
-      const answer = await utils.prompt("   > Upgrade the proxy ? [y/N] ")
-      if (["y", "yes"].includes(answer.toLowerCase().trim())) {
+      if (
+        isDryRun
+          || ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
+      ) {
         await proxy.upgradeTo(bytecodes.address, "0x")
         console.info("   > Done.")
       } else {
@@ -82,12 +84,4 @@ module.exports = async function (deployer, network, accounts) {
       }
     }
   }
-}
-
-function saveAddresses (addrs) {
-  fs.writeFileSync(
-    "./migrations/witnet.addresses.json",
-    JSON.stringify(addrs, null, 4),
-    { flag: "w+" }
-  )
 }
