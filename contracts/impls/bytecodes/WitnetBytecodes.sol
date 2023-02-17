@@ -284,6 +284,17 @@ contract WitnetBytecodes
         }
     }
 
+    function lookupDataSourceArgsCount(bytes32 _hash)
+        external view
+        override
+        returns (uint8)
+    {
+        if (__database().sources[_hash].method == WitnetV2.DataRequestMethods.Unknown) {
+            revert IWitnetBytecodes.UnknownDataSource(_hash);
+        }
+        return __database().sources[_hash].argsCount;
+    }
+
     function lookupDataSourceResultDataType(bytes32 _hash)
         external view
         override
