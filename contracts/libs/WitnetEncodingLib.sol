@@ -223,14 +223,14 @@ library WitnetEncodingLib {
             uint16 resultMaxSize
         )
         public pure
-        returns (bytes memory bytecode)
+        returns (bytes memory)
     {
         bytes[] memory encodedSources = new bytes[](sources.length);
         for (uint ix = 0; ix < sources.length; ix ++) {
             replaceWildcards(sources[ix], args[ix]);
             encodedSources[ix] = encode(sources[ix]);
         }
-        bytecode = abi.encodePacked(
+        return abi.encodePacked(
             (resultMaxSize > 0
                 ? encode(uint64(resultMaxSize), 0x08)
                 : bytes("")
@@ -240,10 +240,6 @@ library WitnetEncodingLib {
             aggregatorInnerBytecode,
             encode(uint64(tallyInnerBytecode.length), bytes1(0x22)),
             tallyInnerBytecode
-        );
-        return abi.encodePacked(
-            encode(uint64(bytecode.length), bytes1(0x0a)),
-            bytecode
         );
     }
 
