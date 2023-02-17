@@ -7,33 +7,22 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 import "../data/WitnetRequestFactoryData.sol";
 import "../impls/WitnetUpgradableBase.sol";
-import "../interfaces/V2/IWitnetBytecodes.sol";
 import "../patterns/Clonable.sol";
-import "../requests/WitnetRequestTemplate.sol";
-
-interface IWitnetRequestFactory {
-    event WitnetRequestTemplateBuilt(WitnetRequestTemplate template);    
-    function build(
-            bytes32[] memory sourcesIds,
-            bytes32 aggregatorId,
-            bytes32 tallyId,
-            uint16  resultDataMaxSize
-        ) external returns (WitnetRequestTemplate _template);
-}
+import "../interfaces/V2/IWitnetRequestFactory.sol";
 
 contract WitnetRequestFactory
     is
         Clonable,
         IWitnetRequestFactory,
         WitnetRequest,
-        WitnetRequestFactoryData,
         WitnetRequestTemplate,
-        WitnetUpgradableBase
+        WitnetRequestFactoryData,
+        WitnetUpgradableBase        
 {
     using ERC165Checker for address;
 
     /// @notice Reference to Witnet Data Requests Bytecode Registry
-    IWitnetBytecodes immutable public registry;
+    IWitnetBytecodes immutable public override registry;
 
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
         require(
