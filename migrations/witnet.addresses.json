@@ -278,9 +278,9 @@
     },
     "polygon": {
         "polygon.goerli": {
-            "WitnetBytecodes": "0xd35a147605821269D17238c422DfF321520cb041",
-            "WitnetBytecodesImplementation": "0xD14B4b442267ECF1Cf5cA51C942009Cf7Cf5b727",
-            "WitnetEncodingLib": "0xA21F3a5dEC0d8DcDdAcB3a53bb8a9Aac50A74e4B",
+            "WitnetBytecodes": "",
+            "WitnetBytecodesImplementation": "",
+            "WitnetEncodingLib": "",
             "WitnetLib": "0x70767887abBF23291B24620dE6bcEBe8d8F1e6F3",
             "WitnetPriceRouter": "0x6d5544ca5b35bf2e7a78ace4E7B8d191fe5C9FAb",
             "WitnetRandomness": "0x0178287DfECA2F13F342512282bc8B59e774aE43",

@@ -549,7 +549,7 @@ contract WitnetBytecodes
         
         // Calculate hash and add metadata to storage if new:
         hash = _bytecode.hash();
-        if (__database().retrievals[hash].sources.length == 0) {
+        if (__database().retrievals[hash].weight == 0) {
             __database().retrievals[hash] = RadonRetrieval({
                 resultDataType: _resultDataType,
                 resultMaxSize: _resultMaxSize,
