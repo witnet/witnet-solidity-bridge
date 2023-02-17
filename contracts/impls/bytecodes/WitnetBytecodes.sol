@@ -187,8 +187,10 @@ contract WitnetBytecodes
         if (__sla.numWitnesses == 0) {
             revert IWitnetBytecodes.UnknownRadonSLA(_slaHash);
         }
+        bytes memory _radBytecode = bytecodeOf(_radHash);
         return abi.encodePacked(
-            bytecodeOf(_radHash),
+            WitnetEncodingLib.encode(uint64(_radBytecode.length), 0x0a),
+            _radBytecode,
             __database().slas[_slaHash].encode()
         );
     }

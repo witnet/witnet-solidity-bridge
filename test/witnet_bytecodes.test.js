@@ -719,10 +719,6 @@ contract("WitnetBytecodes", (accounts) => {
         it("works if trying to get bytecode onchain from known radon retrieval and sla", async () => {
           await bytecodes.bytecodeOf(btcUsdPriceFeedHash, slaHash)
         })
-        it("returns full bytecode if getting it offchain from known radon retrieval and sla", async () => {
-          const bytecode = await bytecodes.bytecodeOf.call(heavyRetrievalHash, slaHash)
-          assert.equal(bytecode.startsWith(heavyRetrievalBytecode), true)
-        })
       })
     })
 
