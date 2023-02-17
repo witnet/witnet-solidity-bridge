@@ -26,7 +26,6 @@ library WitnetV2 {
     error RadonSlaLowCollateral(uint256 collateral);
 
     error UnsupportedDataRequestMethod(uint8 method, string schema, string body, string[2][] headers);
-    error UnsupportedDataRequestMinMaxRanks(uint8 method, uint16 min, uint16 max);
     error UnsupportedRadonDataType(uint8 datatype, uint256 maxlength);
     error UnsupportedRadonFilterOpcode(uint8 opcode);
     error UnsupportedRadonFilterArgs(uint8 opcode, bytes args);
@@ -124,8 +123,6 @@ library WitnetV2 {
     struct DataSource {
         DataRequestMethods method;
         RadonDataTypes resultDataType;
-        uint16 resultMinRank;
-        uint16 resultMaxRank;
         string url;
         string body;
         string[2][] headers;

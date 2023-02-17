@@ -44,8 +44,6 @@ interface IWitnetBytecodes {
     
     function verifyDataSource(
             WitnetV2.DataRequestMethods requestMethod,
-            uint16 resultMinRank,
-            uint16 resultMaxRank,
             string calldata requestSchema,
             string calldata requestAuthority,
             string calldata requestPath,
