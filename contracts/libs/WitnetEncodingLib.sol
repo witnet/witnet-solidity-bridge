@@ -206,12 +206,7 @@ library WitnetEncodingLib {
             _encodedUrl,
             _encodedScript,
             _encodedBody,
-            _encodedHeaders,
-            source.resultMinRank > 0 || source.resultMaxRank > 0
-                ? abi.encodePacked(
-                    encode(uint64(source.resultMinRank), bytes1(0x30)),
-                    encode(uint64(source.resultMaxRank), bytes1(0x38))
-                ) : bytes("")
+            _encodedHeaders
         );
     }
 
@@ -332,10 +327,8 @@ library WitnetEncodingLib {
 
     function validate(
             WitnetV2.DataRequestMethods method,
-            uint16 resultMinRank,
-            uint16 resultMaxRank,
             string memory schema,
-            string memory host,
+            string memory authority,
             string memory path,
             string memory query,
             string memory body,
@@ -347,14 +340,14 @@ library WitnetEncodingLib {
     {
         if (!(
             (method == WitnetV2.DataRequestMethods.HttpGet || method == WitnetV2.DataRequestMethods.HttpPost)
-                && bytes(host).length > 0
+                && bytes(authority).length > 0
                 && (
                     keccak256(bytes(schema)) == keccak256(bytes("https://")) 
                     || keccak256(bytes(schema)) == keccak256(bytes("http://"))
                 )
             || method == WitnetV2.DataRequestMethods.Rng
                 && bytes(schema).length == 0
-                && bytes(host).length == 0
+                && bytes(authority).length == 0
                 && bytes(path).length == 0
                 && bytes(query).length == 0
                 && bytes(body).length == 0
@@ -368,19 +361,10 @@ library WitnetEncodingLib {
                 headers
             );
         }
-        if (resultMinRank > resultMaxRank) {
-            revert WitnetV2.UnsupportedDataRequestMinMaxRanks(
-                uint8(method),
-                resultMinRank,
-                resultMaxRank
-            );
-        }
         return keccak256(abi.encode(
             method,
-            resultMinRank,
-            resultMaxRank,
             schema,
-            host,
+            authority,
             path,
             query,
             body,
