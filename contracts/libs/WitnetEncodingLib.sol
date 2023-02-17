@@ -231,15 +231,15 @@ library WitnetEncodingLib {
             encodedSources[ix] = encode(sources[ix]);
         }
         bytecode = abi.encodePacked(
+            (resultMaxSize > 0
+                ? encode(uint64(resultMaxSize), 0x08)
+                : bytes("")
+            ),
             WitnetBuffer.concat(encodedSources),
             encode(uint64(aggregatorInnerBytecode.length), bytes1(0x1a)),
             aggregatorInnerBytecode,
             encode(uint64(tallyInnerBytecode.length), bytes1(0x22)),
-            tallyInnerBytecode,
-            (resultMaxSize > 0
-                ? encode(uint64(resultMaxSize), 0x28)
-                : bytes("")
-            )
+            tallyInnerBytecode
         );
         return abi.encodePacked(
             encode(uint64(bytecode.length), bytes1(0x0a)),
