@@ -23,7 +23,7 @@ library WitnetV2 {
     error RadonSlaNoWitnesses();
     error RadonSlaTooManyWitnesses(uint256 numWitnesses);
     error RadonSlaConsensusOutOfRange(uint256 percentage);
-    error RadonSlaLowCollateral(uint256 collateral);
+    error RadonSlaLowCollateral(uint256 witnessCollateral);
 
     error UnsupportedDataRequestMethod(uint8 method, string schema, string body, string[2][] headers);
     error UnsupportedRadonDataType(uint8 datatype, uint256 maxlength);
@@ -189,9 +189,9 @@ library WitnetV2 {
     struct RadonSLA {
         uint64 witnessReward;
         uint16 numWitnesses;
-        uint64 commitRevealFee;
+        uint64 minerCommitFee;
         uint32 minConsensusPercentage;
-        uint64 collateral;
+        uint64 witnessCollateral;
     }
 
 }

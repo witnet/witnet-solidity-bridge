@@ -313,7 +313,7 @@ abstract contract WitnetRequestMalleableBase
         );
         require(
             _witnessingCollateral >= 10 ** 9,
-            "WitnetRequestMalleableBase: witnessing collateral below 1 WIT"
+            "WitnetRequestMalleableBase: witness collateral below 1 WIT"
         );
 
         __storage().bytecode = abi.encodePacked(
