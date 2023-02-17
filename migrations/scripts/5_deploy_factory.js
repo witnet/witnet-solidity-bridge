@@ -44,7 +44,7 @@ module.exports = async function (deployer, network, accounts) {
         utils.saveAddresses(addresses)
       }
     } else {
-      bytecodes = await WitnetRequestFactoryImplementation.at(addresses[ecosystem][network].WitnetRequestFactoryImplementation)
+      factory = await WitnetRequestFactoryImplementation.at(addresses[ecosystem][network].WitnetRequestFactoryImplementation)
       console.info(`   Skipped: 'WitnetRequestFactoryImplementation' deployed at ${factory.address}`)
     }
 
