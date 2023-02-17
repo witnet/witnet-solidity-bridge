@@ -19,5 +19,5 @@ abstract contract WitnetRequest
     function radHash() virtual external view returns (bytes32);
     function slaHash() virtual external view returns (bytes32);
     function template() virtual external view returns (WitnetRequestTemplate);
-    function modifySLA(WitnetV2.RadonSLA calldata sla) virtual external;
+    function modifySLA(WitnetV2.RadonSLA calldata sla) virtual external returns (IWitnetRequest);
 }
