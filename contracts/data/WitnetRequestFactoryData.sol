@@ -40,8 +40,8 @@ contract WitnetRequestFactoryData {
     }
 
     struct WitnetRequestTemplateSlot {
-        /// @notice Array of sources hashes passed upon construction.
-        bytes32[] sources;
+        /// Whether any of the sources is parameterized.
+        bool parameterized;
         /// @notice Result data type.
         WitnetV2.RadonDataTypes resultDataType;
         /// @notice Result max size or rank (if variable type).
@@ -50,6 +50,8 @@ contract WitnetRequestFactoryData {
         bytes32 aggregatorHash;
         /// @notice Tally reducer hash.
         bytes32 tallyHash;
+        /// @notice Array of sources hashes passed upon construction.
+        bytes32[] sources;
     }
 
     function __witnetRequestFactory()
