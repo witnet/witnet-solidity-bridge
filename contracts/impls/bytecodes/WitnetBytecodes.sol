@@ -380,8 +380,6 @@ contract WitnetBytecodes
 
     function verifyDataSource(
             WitnetV2.DataRequestMethods _requestMethod,
-            uint16 _resultMinRank,
-            uint16 _resultMaxRank,
             string memory _requestSchema,
             string memory _requestAuthority,
             string memory _requestPath,
@@ -398,10 +396,8 @@ contract WitnetBytecodes
         _requestSchema = _requestSchema.toLowerCase();
         _requestAuthority = _requestAuthority.toLowerCase();
 
-        // validate input params
+        // validate data source params
         hash = _requestMethod.validate(
-            _resultMinRank,
-            _resultMaxRank,
             _requestSchema,
             _requestAuthority,
             _requestPath,
@@ -442,13 +438,7 @@ contract WitnetBytecodes
                     _requestHeaders,
 
                 script:
-                    _requestRadonScript,
-                        
-                resultMinRank:
-                    _resultMinRank,
-
-                resultMaxRank:
-                    _resultMaxRank
+                    _requestRadonScript
             });
             __pushDataProviderSource(_requestAuthority, hash);
             emit NewDataSourceHash(hash);
