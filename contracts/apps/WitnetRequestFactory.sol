@@ -64,6 +64,10 @@ contract WitnetRequestFactory
             "WitnetRequestFactory: uncompliant registry"
         );
         registry = _registry;
+        // let logic contract be used as a factory, while avoiding further initializations:
+        __proxiable().proxy = address(this);
+        __proxiable().implementation = address(this);
+        __witnetRequestFactory().owner = address(0);
     }
 
 
