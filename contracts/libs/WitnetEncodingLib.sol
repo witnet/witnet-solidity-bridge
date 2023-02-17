@@ -294,9 +294,9 @@ library WitnetEncodingLib {
         return abi.encodePacked(
             encode(uint64(sla.witnessReward), bytes1(0x10)),
             encode(uint64(sla.numWitnesses), bytes1(0x18)),
-            encode(uint64(sla.commitRevealFee), bytes1(0x20)),
+            encode(uint64(sla.minerCommitFee), bytes1(0x20)),
             encode(uint64(sla.minConsensusPercentage), bytes1(0x28)),
-            encode(uint64(sla.collateral), bytes1(0x30))
+            encode(uint64(sla.witnessCollateral), bytes1(0x30))
         );
     }
 
@@ -475,8 +475,8 @@ library WitnetEncodingLib {
         ) {
             revert WitnetV2.RadonSlaConsensusOutOfRange(sla.minConsensusPercentage);
         }
-        if (sla.collateral < 10 ** 9) {
-            revert WitnetV2.RadonSlaLowCollateral(sla.collateral);
+        if (sla.witnessCollateral < 10 ** 9) {
+            revert WitnetV2.RadonSlaLowCollateral(sla.witnessCollateral);
         }
     }
 
