@@ -382,6 +382,39 @@ library WitnetBuffer {
     buffer.cursor += 32;
   }
 
+  /// @notice Count number of required parameters for given bytes arrays
+  /// @dev Wildcard format: "\#\", with # in ["0".."9"].
+  /// @param input Bytes array containing strings.
+  /// @param count Highest wildcard index found, plus 1.
+  function argsCountOf(bytes memory input)
+    internal pure
+    returns (uint8 count)
+  {
+    if (input.length < 3) {
+      return 0;
+    }
+    unchecked {
+      uint ix = 0; 
+      uint length = input.length - 2;
+      for (; ix < length; ) {
+        if (
+          input[ix] == bytes1("\\")
+            && input[ix + 2] == bytes1("\\")
+            && input[ix + 1] >= bytes1("0")
+            && input[ix + 1] <= bytes1("9")
+        ) {
+          uint8 ax = uint8(uint8(input[ix + 1]) - uint8(bytes1("0")) + 1);
+          if (ax > count) {
+            count = ax;
+          }
+          ix += 3;
+        } else {
+          ix ++;
+        }
+      }
+    }
+  }
+
   /// @notice Replace bytecode indexed wildcards by correspondent string.
   /// @dev Wildcard format: "\#\", with # in ["0".."9"].
   /// @param input Bytes array containing strings.

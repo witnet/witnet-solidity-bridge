@@ -121,6 +121,7 @@ library WitnetV2 {
     }
 
     struct DataSource {
+        uint8 argsCount;
         DataRequestMethods method;
         RadonDataTypes resultDataType;
         string url;
