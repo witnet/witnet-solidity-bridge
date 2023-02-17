@@ -54,11 +54,11 @@ contract TestWitnetEncodingLib {
   function testEncodeRadonSLA() external {
     bytes memory bytecode = WitnetEncodingLib.encode(
       WitnetV2.RadonSLA({
-        witnessReward: 1000000,
         numWitnesses: 10,
-        commitRevealFee: 1000000,
         minConsensusPercentage: 51,
-        collateral: 5000000
+        minerCommitFee: 1000000,
+        witnessCollateral: 5000000,
+        witnessReward: 1000000  
       })
     );
     // emit Log(bytecode);
