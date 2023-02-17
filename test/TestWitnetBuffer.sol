@@ -12,6 +12,12 @@ contract TestWitnetBuffer {
 
   event Log(string _topic, uint256 _value);
 
+  function testArgsCountsOf() external {
+    Assert.equal(WitnetBuffer.argsCountOf(bytes("aaaaaa\\0\\")), 1, "bad count if trailing wildcard");
+    Assert.equal(WitnetBuffer.argsCountOf(bytes("\\9\\aaaaaaa\\1\\")), 10, "bad count if disordered wildcard indexes");
+    Assert.equal(WitnetBuffer.argsCountOf(bytes("\\6\\\\6\\\\6\\")), 7, "bad count if repeated wildcard indexes");
+  }
+
   function testFork() external {
     WitnetBuffer.Buffer memory buff = WitnetBuffer.Buffer(
       hex"00000000000000000000000000000000000000000000635C305C0102030405060708090a",

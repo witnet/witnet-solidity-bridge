@@ -407,12 +407,26 @@ contract WitnetBytecodes
             _requestRadonScript
         );
 
+        // count data source implicit wildcards
+        uint8 _argsCount = WitnetBuffer.argsCountOf(
+            abi.encode(
+                _requestAuthority, bytes(" "),
+                _requestPath, bytes(" "),
+                _requestQuery, bytes(" "),
+                _requestBody, bytes(" "),
+                _requestHeaders
+            )
+        );
+
         // should it be a new data source:
         if (
             __database().sources[hash].method == WitnetV2.DataRequestMethods.Unknown
         ) {
             // compose data source and save it in storage:
             __database().sources[hash] = WitnetV2.DataSource({
+                argsCount:
+                    _argsCount,
+
                 method:
                     _requestMethod,
 
