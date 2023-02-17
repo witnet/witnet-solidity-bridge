@@ -534,6 +534,14 @@ contract WitnetBytecodes
                     uint8(_resultDataType)
                 );
             }
+            // check enough args are provided for each source
+            if (_sourcesArgs[_ix].length < uint(_sources[_ix].argsCount)) {
+                revert WitnetV2.RadonRetrievalMissingArgs(
+                    _ix,
+                    _sources[_ix].argsCount,
+                    _sourcesArgs[_ix].length
+                );
+            }
         }
         
         // Build radon retrieval bytecode:
