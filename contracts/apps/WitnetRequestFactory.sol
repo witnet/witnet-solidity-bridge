@@ -70,31 +70,66 @@ contract WitnetRequestFactory
     /// ===============================================================================================================
     /// --- IWitnetRequestFactory implementation ----------------------------------------------------------------------
 
-    function build(
-            bytes32[] memory sourcesIds,
-            bytes32 aggregatorId,
-            bytes32 tallyId,
+    function buildRequest(
+            bytes32[] memory sources,
+            bytes32 aggregator,
+            bytes32 tally,
             uint16  resultDataMaxSize
         )
         virtual override
         external
         onlyOnFactory
+        returns (WitnetRequest _request)
+    {
+        WitnetRequestTemplate _template = buildRequestTemplate(sources, aggregator, tally, resultDataMaxSize);
+        require(!_template.parameterized(), "WitnetRequestFactory: parameterized sources");
+        _request = _template.settleArgs(abi.decode(hex"",(string[][])));
+        emit WitnetRequestBuilt(_request);
+    }
+
+    function buildRequestTemplate(
+            bytes32[] memory sources,
+            bytes32 aggregator,
+            bytes32 tally,
+            uint16  resultDataMaxSize
+        )
+        virtual override
+        public
+        onlyOnFactory
         returns (WitnetRequestTemplate _template)
     {
         _template = WitnetRequestFactory(_cloneDeterministic(
             keccak256(abi.encodePacked(
-                sourcesIds,
-                aggregatorId,
-                tallyId,
+                sources,
+                aggregator,
+                tally,
                 resultDataMaxSize
             ))
         )).initializeWitnetRequestTemplate(
-            sourcesIds,
-            aggregatorId,
-            tallyId,
+            sources,
+            aggregator,
+            tally,
             resultDataMaxSize
         );
-        emit WitnetRequestTemplateBuilt(_template);
+        emit WitnetRequestTemplateBuilt(_template, _template.parameterized());
+    }
+
+    function class() 
+        virtual override(IWitnetRequestFactory, WitnetRequest, WitnetRequestTemplate)
+        external view
+        returns (bytes4)
+    {
+        if (address(this) == _SELF) {
+            return type(Upgradeable).interfaceId;
+        } else {
+            if (address(this) == __proxy()) {
+                return type(IWitnetRequestFactory).interfaceId;
+            } else if (__witnetRequest().radHash != bytes32(0)) {
+                return type(WitnetRequest).interfaceId;
+            } else {
+                return type(WitnetRequestTemplate).interfaceId;
+            }
+        }
     }
 
     function initializeWitnetRequestTemplate(
@@ -109,7 +144,9 @@ contract WitnetRequestFactory
     {
         WitnetV2.RadonDataTypes _resultDataType;
         require(_sources.length > 0, "WitnetRequestTemplate: no sources");
-        // check all sources return the same data types
+        // check all sources return the same data types, 
+        // and whether any of them is parameterized
+        bool _parameterized;
         for (uint _ix = 0; _ix < _sources.length; _ix ++) {
             if (_ix == 0) {
                 _resultDataType = registry.lookupDataSourceResultDataType(_sources[_ix]);
@@ -119,6 +156,9 @@ contract WitnetRequestFactory
                     "WitnetRequestTemplate: mismatching sources"
                 );
             }
+            if (!_parameterized) {
+                _parameterized = registry.lookupDataSourceArgsCount(_sources[_ix]) > 0;
+            }
         }
         // revert if the aggregator reducer is unknown
         registry.lookupRadonReducer(_aggregatorId);
@@ -126,11 +166,12 @@ contract WitnetRequestFactory
         registry.lookupRadonReducer(_tallyId);
         {
             WitnetRequestTemplateSlot storage __data = __witnetRequestTemplate();
-            __data.sources = _sources;
+            __data.parameterized = _parameterized;
             __data.aggregatorHash = _aggregatorId;
             __data.tallyHash = _tallyId;
             __data.resultDataType = _resultDataType;
             __data.resultDataMaxSize = _resultDataMaxSize;
+            __data.sources = _sources;
         }
         return WitnetRequestTemplate(address(this));
     }
@@ -407,15 +448,6 @@ contract WitnetRequestFactory
 
     }
 
-    function getDataSourcesArgsCount()
-        override
-        external view
-        onlyDelegateCalls
-        returns (uint8[] memory)
-    {
-        revert("WitnetRequestFactory: not yet implemented");
-    }
-
     function getDataSourcesCount() 
         override
         external view
@@ -535,6 +567,20 @@ contract WitnetRequestFactory
             return registry.lookupRadonReducer(
                 __witnetRequestTemplate().tallyHash
             );
+        }
+    }
+
+    function parameterized()
+        override
+        external view
+        onlyDelegateCalls
+        returns (bool)
+    {
+        WitnetRequestTemplate _template = __witnetRequest().template;
+        if (address(_template) != address(0)) {
+            return _template.parameterized();
+        } else {
+            return __witnetRequestTemplate().parameterized;
         }
     }
 
