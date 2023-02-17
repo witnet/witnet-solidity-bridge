@@ -342,8 +342,9 @@ library WitnetEncodingLib {
             (method == WitnetV2.DataRequestMethods.HttpGet || method == WitnetV2.DataRequestMethods.HttpPost)
                 && bytes(authority).length > 0
                 && (
-                    keccak256(bytes(schema)) == keccak256(bytes("https://")) 
-                    || keccak256(bytes(schema)) == keccak256(bytes("http://"))
+                    bytes(schema).length == 0
+                        || keccak256(bytes(schema)) == keccak256(bytes("https://")) 
+                        || keccak256(bytes(schema)) == keccak256(bytes("http://"))
                 )
             || method == WitnetV2.DataRequestMethods.Rng
                 && bytes(schema).length == 0
