@@ -102,14 +102,7 @@ contract WitnetRequestFactory
         onlyOnFactory
         returns (WitnetRequestTemplate _template)
     {
-        _template = WitnetRequestFactory(_cloneDeterministic(
-            keccak256(abi.encodePacked(
-                sources,
-                aggregator,
-                tally,
-                resultDataMaxSize
-            ))
-        )).initializeWitnetRequestTemplate(
+        _template = WitnetRequestFactory(_clone()).initializeWitnetRequestTemplate(
             sources,
             aggregator,
             tally,
@@ -607,9 +600,7 @@ contract WitnetRequestFactory
             __data.aggregatorHash,
             __data.tallyHash
         );
-        request = WitnetRequestFactory(
-            _cloneDeterministic(_radHash)
-        ).initializeWitnetRequest(
+        request = WitnetRequestFactory(_clone()).initializeWitnetRequest(
             _args,
             _radHash
         );
