@@ -383,7 +383,7 @@ contract WitnetBytecodes
     function lookupRadonSLAReward(bytes32 _slaHash)
         public view
         override
-        returns (uint64)
+        returns (uint)
     {
         WitnetV2.RadonSLA storage __sla = __database().slas[_slaHash];
         return __sla.numWitnesses * __sla.witnessReward;
