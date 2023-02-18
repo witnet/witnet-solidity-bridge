@@ -163,10 +163,10 @@ contract WitnetBytecodes
         override
         returns (bytes memory)
     {
-        RadonRetrieval memory _retrieval = __retrievals(_radHash);
+        RadonRequest memory _retrieval = __retrievals(_radHash);
         WitnetV2.DataSource[] memory _sources = new WitnetV2.DataSource[](_retrieval.sources.length);
         if (_sources.length == 0) {
-            revert IWitnetBytecodes.UnknownRadonRetrieval(_radHash);
+            revert IWitnetBytecodes.UnknownRadonRequest(_radHash);
         }
         for (uint _ix = 0; _ix < _retrieval.sources.length; _ix ++) {
             _sources[_ix] = __database().sources[_retrieval.sources[_ix]];
@@ -218,9 +218,9 @@ contract WitnetBytecodes
         if (__sla.numWitnesses == 0) {
             revert IWitnetBytecodes.UnknownRadonSLA(_slaHash);
         }
-        RadonRetrieval storage __retrieval = __retrievals(_radHash);
+        RadonRequest storage __retrieval = __retrievals(_radHash);
         if (__retrieval.weight == 0) {
-            revert IWitnetBytecodes.UnknownRadonRetrieval(_radHash);
+            revert IWitnetBytecodes.UnknownRadonRequest(_radHash);
         }
         return (
             hashOf(_radHash, _slaHash),
@@ -317,7 +317,7 @@ contract WitnetBytecodes
         }
     }
 
-    function lookupRadonRetrievalAggregator(bytes32 _radHash)
+    function lookupRadonRequestAggregator(bytes32 _radHash)
         external view
         override
         returns (WitnetV2.RadonReducer memory)
@@ -327,7 +327,7 @@ contract WitnetBytecodes
         ];
     }
 
-    function lookupRadonRetrievalResultDataType(bytes32 _radHash)
+    function lookupRadonRequestResultDataType(bytes32 _radHash)
         external view
         override
         returns (WitnetV2.RadonDataTypes)
@@ -335,7 +335,7 @@ contract WitnetBytecodes
         return __retrievals(_radHash).resultDataType;
     }
 
-    function lookupRadonRetrievalResultMaxSize(bytes32 _radHash)
+    function lookupRadonRequestResultMaxSize(bytes32 _radHash)
         external view
         override
         returns (uint256)
@@ -343,7 +343,7 @@ contract WitnetBytecodes
         return __retrievals(_radHash).resultMaxSize;
     }    
 
-    function lookupRadonRetrievalSources(bytes32 _radHash)
+    function lookupRadonRequestSources(bytes32 _radHash)
         external view
         override
         returns (bytes32[] memory)
@@ -351,7 +351,7 @@ contract WitnetBytecodes
         return __retrievals(_radHash).sources;
     }
 
-    function lookupRadonRetrievalSourcesCount(bytes32 _radHash)
+    function lookupRadonRequestSourcesCount(bytes32 _radHash)
         external view
         override
         returns (uint)
@@ -359,7 +359,7 @@ contract WitnetBytecodes
         return __retrievals(_radHash).sources.length;
     }
 
-    function lookupRadonRetrievalTally(bytes32 _radHash)
+    function lookupRadonRequestTally(bytes32 _radHash)
         external view
         override
         returns (WitnetV2.RadonReducer memory)
@@ -486,32 +486,27 @@ contract WitnetBytecodes
         }
     }
 
-    function verifyRadonRetrieval(
-            WitnetV2.RadonDataTypes _resultDataType,
-            uint16 _resultMaxSize,
+    function verifyRadonRequest(
             bytes32[] memory _sourcesHashes,
-            string[][] memory _sourcesArgs,
             bytes32 _aggregatorHash,
-            bytes32 _tallyHash
+            bytes32 _tallyHash,
+            uint16 _resultMaxSize,
+            string[][] memory _args
         )
         external
         virtual override
         returns (bytes32 hash)
     {
-        // Check provided result type and result max size:
-        // TODO: revisit
-        _resultMaxSize = _resultDataType.validate(_resultMaxSize);
-
         // Check that at least one source is provided;
         if (_sourcesHashes.length == 0) {
-            revert WitnetV2.RadonRetrievalNoSources();
+            revert WitnetV2.RadonRequestNoSources();
         }
         
         // Check that number of args arrays matches the number of sources:
-        if ( _sourcesHashes.length != _sourcesArgs.length) {
-            revert WitnetV2.RadonRetrievalSourcesArgsMismatch(
+        if ( _sourcesHashes.length != _args.length) {
+            revert WitnetV2.RadonRequestSourcesArgsMismatch(
                 _sourcesHashes.length,
-                _sourcesArgs.length
+                _args.length
             );
         }
         
@@ -523,45 +518,51 @@ contract WitnetBytecodes
         }
         
         // Check result type consistency among all sources:
+        WitnetV2.RadonDataTypes _resultDataType;
         WitnetV2.DataSource[] memory _sources = new WitnetV2.DataSource[](_sourcesHashes.length);
         for (uint _ix = 0; _ix < _sources.length; _ix ++) {
             _sources[_ix] = __database().sources[_sourcesHashes[_ix]];
             // Check all sources return same Radon data type:
-            if (_sources[_ix].resultDataType != _resultDataType) {
-                revert WitnetV2.RadonRetrievalResultsMismatch(
+            if (_ix == 0) {
+                _resultDataType = _sources[0].resultDataType;
+            } else if (_sources[_ix].resultDataType != _resultDataType) {
+                revert WitnetV2.RadonRequestResultsMismatch(
                     _ix,
                     uint8(_sources[_ix].resultDataType),
                     uint8(_resultDataType)
                 );
             }
             // check enough args are provided for each source
-            if (_sourcesArgs[_ix].length < uint(_sources[_ix].argsCount)) {
-                revert WitnetV2.RadonRetrievalMissingArgs(
+            if (_args[_ix].length < uint(_sources[_ix].argsCount)) {
+                revert WitnetV2.RadonRequestMissingArgs(
                     _ix,
                     _sources[_ix].argsCount,
-                    _sourcesArgs[_ix].length
+                    _args[_ix].length
                 );
             }
         }
+
+        // Check provided result type and result max size:
+        _resultMaxSize = _resultDataType.validate(_resultMaxSize);
         
         // Build radon retrieval bytecode:
         bytes memory _bytecode = _sources.encode(
-            _sourcesArgs,
+            _args,
             _aggregator.encode(),
             _tally.encode(),
             _resultMaxSize
         );
         if (_bytecode.length > 65535) {
-            revert WitnetV2.RadonRetrievalTooHeavy(_bytecode, _bytecode.length);
+            revert WitnetV2.RadonRequestTooHeavy(_bytecode, _bytecode.length);
         }
         
         // Calculate hash and add metadata to storage if new:
         hash = _bytecode.hash();
-        if (__database().retrievals[hash].weight == 0) {
-            __database().retrievals[hash] = RadonRetrieval({
+        if (__database().requests[hash].weight == 0) {
+            __database().requests[hash] = RadonRequest({
                 resultDataType: _resultDataType,
                 resultMaxSize: _resultMaxSize,
-                args: _sourcesArgs,
+                args: _args,
                 sources: _sourcesHashes,
                 aggregator: _aggregatorHash,
                 tally: _tallyHash,

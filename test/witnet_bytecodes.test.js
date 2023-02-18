@@ -110,8 +110,6 @@ contract("WitnetBytecodes", (accounts) => {
         it("emits appropiate single event when verifying randomness data source for the first time", async () => {
           const tx = await bytecodes.verifyDataSource(
             2, // requestMethod
-            0, // resultMinRank
-            0, // resultMaxRank
             "", // requestSchema
             "", // requestFQDN
             "", // requestPath
@@ -129,8 +127,6 @@ contract("WitnetBytecodes", (accounts) => {
         it("emits no event when verifying already existing randomness data source", async () => {
           const tx = await bytecodes.verifyDataSource(
             2, // requestMethod
-            0, // resultMinRank
-            0, // resultMaxRank
             "", // requestSchema
             "", // requestFQDN
             "", // requestPath
@@ -144,8 +140,6 @@ contract("WitnetBytecodes", (accounts) => {
         it("generates proper hash upon offchain verification of already existing randmoness source", async () => {
           const hash = await bytecodes.verifyDataSource.call(
             2, // requestMethod
-            0, // resultMinRank
-            0, // resultMaxRank
             "", // requestSchema
             "", // requestFQDN
             "", // requestPath
@@ -163,8 +157,6 @@ contract("WitnetBytecodes", (accounts) => {
           "emits new data provider and source events when verifying a new http-get source for the first time", async () => {
             const tx = await bytecodes.verifyDataSource(
               1, // requestMethod
-              0, // resultMinRank
-              0, // resultMaxRank
               "HTTPs://", // requestSchema
               "api.binance.US", // requestFQDN
               "api/v3/ticker/price", // requestPath
@@ -196,8 +188,6 @@ contract("WitnetBytecodes", (accounts) => {
         it("emits one single event when verifying new http-get endpoint to already existing provider", async () => {
           const tx = await bytecodes.verifyDataSource(
             1, // requestMethod
-            0, // resultMinRank
-            0, // resultMaxRank
             "http://", // requestSchema
             "api.binance.us", // requestFQDN
             "api/v3/ticker/24hr", // requestPath
@@ -218,8 +208,6 @@ contract("WitnetBytecodes", (accounts) => {
           "emits new data provider and source events when verifying a new http-post source for the first time", async () => {
             const tx = await bytecodes.verifyDataSource(
               3, // requestMethod
-              0, // resultMinRank
-              0, // resultMaxRank
               "HTTPs://", // requestSchema
               "api.thegraph.com", // requestFQDN
               "subgraphs/name/uniswap/uniswap-v3", // requestPath
@@ -354,9 +342,9 @@ contract("WitnetBytecodes", (accounts) => {
       })
     })
 
-    context("verifyRadonRetrieval(..)", async () => {
+    context("verifyRadonRequest(..)", async () => {
       context("Use case: Randomness", async () => {
-        it("emits single event when verifying new radomness retrieval", async () => {
+        it("emits single event when verifying new radomness request", async () => {
           let tx = await bytecodes.verifyRadonReducer([
             2, // Mode
             [], // no filters
@@ -368,15 +356,13 @@ contract("WitnetBytecodes", (accounts) => {
           )
           modeNoFiltersReducerHash = tx.logs[0].args.hash
           //   modeNoFiltersReducerBytecode = tx.logs[0].args.bytecode
-          tx = await bytecodes.verifyRadonRetrieval(
-            0, // resultDataType
-            0, // resultMaxVariableSize
+          tx = await bytecodes.verifyRadonRequest(
             [ // sources
               rngSourceHash,
             ],
-            [[]], // sourcesArgs
             modeNoFiltersReducerHash, // aggregator
             concathashReducerHash, // tally
+            0, [[]], // sourcesArgs
           )
           assert(tx.logs.length === 1)
           expectEvent(
@@ -384,90 +370,71 @@ contract("WitnetBytecodes", (accounts) => {
             "NewRadHash"
           )
           rngHash = tx.logs[0].args.hash
-        //   rngBytecode = tx.logs[0].args.bytecode
         })
-        it("emits no event when verifying same randomness retrieval", async () => {
-          const tx = await bytecodes.verifyRadonRetrieval(
-            0, // resultDataType
-            0, // resultMaxVariableSize
+        it("emits no event when verifying same randomness request", async () => {
+          const tx = await bytecodes.verifyRadonRequest(
             [ // sources
               rngSourceHash,
             ],
-            [[]], // sourcesArgs
             modeNoFiltersReducerHash, // aggregator
             concathashReducerHash, // tally
+            0, [[]], // sourcesArgs
           )
           assert(tx.logs.length === 0)
         })
-        it("generates same hash when verifying same randomness retrieval offchain", async () => {
-          const hash = await bytecodes.verifyRadonRetrieval.call(
-            0, // resultDataType
-            0, // resultMaxVariableSize
+        it("generates same hash when verifying same randomness request offchain", async () => {
+          const hash = await bytecodes.verifyRadonRequest.call(
             [ // sources
               rngSourceHash,
             ],
-            [[]], // sourcesArgs
             modeNoFiltersReducerHash, // aggregator
             concathashReducerHash, // tally
+            0, // resultMaxVariableSize
+            [[]], // sourcesArgs
           )
           assert.equal(hash, rngHash)
         })
       })
       context("Use case: Price feeds", async () => {
-        it("reverts custom error if trying to verify retrieval w/ templated source and 0 args out of 2", async () => {
-          await expectRevertCustomError(
-            WitnetBuffer,
-            bytecodes.verifyRadonRetrieval(
-              4, // resultDataType
-              0, // resultMaxVariableSize
+        it("reverts custom error if trying to verify request w/ templated source and 0 args out of 2", async () => {
+          await expectRevert.unspecified(
+            bytecodes.verifyRadonRequest(
               [ // sources
                 binanceTickerHash,
-              ],
-              [ // sourcesArgs
-                [],
               ],
               stdev15ReducerHash, // aggregator
               stdev25ReducerHash, // tally
-            ),
-            "MissingArgs", [
-              1, // expected
-              0, // given
-            ]
+              0, // resultMaxVariableSize
+              [ [], ],
+            )
           )
         })
-        it("reverts custom error if trying to verify retrieval w/ templated source and 1 args out of 2", async () => {
-          await expectRevertCustomError(
-            WitnetBuffer,
-            bytecodes.verifyRadonRetrieval(
-              4, // resultDataType
-              0, // resultMaxVariableSize
+        it("reverts custom error if trying to verify request w/ templated source and 1 args out of 2", async () => {
+          await expectRevert.unspecified(
+            bytecodes.verifyRadonRequest(
               [ // sources
                 binanceTickerHash,
               ],
+              stdev15ReducerHash, // aggregator
+              stdev25ReducerHash, // tally
+              0, // resultMaxVariableSize
               [ // sourcesArgs
                 ["BTC"],
               ],
-              stdev15ReducerHash, // aggregator
-              stdev25ReducerHash, // tally
-            ),
-            "MissingArgs", [
-              2, // expected
-              1, // given
-            ]
+            )
           )
         })
-        it("emits single event when verifying new price feed retrieval for the first time", async () => {
-          const tx = await bytecodes.verifyRadonRetrieval(
-            4, // resultDataType
-            0, // resultMaxVariableSize,
-            [ // sources
+        it("emits single event when verifying new price feed request for the first time", async () => {
+          const tx = await bytecodes.verifyRadonRequest(
+            [ // source
               binanceTickerHash,
-            ],
-            [
-              ["BTC", "USD"], // binance ticker args
             ],
             stdev15ReducerHash, // aggregator
             stdev25ReducerHash, // tally
+            0, // resultMaxVariableSize,
+            [
+              ["BTC", "USD"], // binance ticker args
+            ],
           )
           assert(tx.logs.length === 1)
           expectEvent(
@@ -477,20 +444,19 @@ contract("WitnetBytecodes", (accounts) => {
           btcUsdPriceFeedHash = tx.logs[0].args.hash
           // btcUsdPriceFeedBytecode = tx.logs[0].args.bytecode
         })
-        it("verifying radon retrieval with repeated sources works", async () => {
-          const tx = await bytecodes.verifyRadonRetrieval(
-            4, // resultDataType
-            0, // resultMaxVariableSize,
+        it("verifying radon request with repeated sources works", async () => {
+          const tx = await bytecodes.verifyRadonRequest(
             [ // sources
               binanceTickerHash,
               binanceTickerHash,
             ],
+            stdev15ReducerHash, // aggregator
+            stdev25ReducerHash, // tally
+            0, // resultMaxVariableSize,
             [
               ["BTC", "USD"], // binance ticker args
               ["BTC", "USD"], // binance ticker args
             ],
-            stdev15ReducerHash, // aggregator
-            stdev25ReducerHash, // tally
           )
           assert(tx.logs.length === 1)
           expectEvent(
@@ -498,42 +464,40 @@ contract("WitnetBytecodes", (accounts) => {
             "NewRadHash"
           )
         })
-        it("reverts if trying to verify radon retrieval w/ incompatible sources", async () => {
+        it("reverts if trying to verify radon request w/ incompatible sources", async () => {
           await expectRevertCustomError(
             WitnetV2,
-            bytecodes.verifyRadonRetrieval(
-              4, // resultDataType
-              0, // resultMaxVariableSize,
+            bytecodes.verifyRadonRequest(
               [ // sources
                 binanceTickerHash,
                 rngSourceHash,
               ],
+              stdev15ReducerHash, // aggregator
+              stdev25ReducerHash, // tally
+              0, // resultMaxVariableSize,
               [
                 ["BTC", "USD"], // binance ticker args
                 [],
               ],
-              stdev15ReducerHash, // aggregator
-              stdev25ReducerHash, // tally
             ),
-            "RadonRetrievalResultsMismatch", [
+            "RadonRequestResultsMismatch", [
               1, // index
               0, // read
               4, // expected
             ]
           )
         })
-        it("emits single event when verifying new radon retrieval w/ http-post source", async () => {
-          const tx = await bytecodes.verifyRadonRetrieval(
-            4, // resultDataType
-            0, // resultMaxVariableSize,
+        it("emits single event when verifying new radon request w/ http-post source", async () => {
+          const tx = await bytecodes.verifyRadonRequest(
             [ // sources
               uniswapToken1PriceHash,
             ],
+            stdev15ReducerHash, // aggregator
+            stdev25ReducerHash, // tally
+            0, // resultMaxVariableSize,
             [
               ["0xc2a856c3aff2110c1171b8f942256d40e980c726"], // pair id
             ],
-            stdev15ReducerHash, // aggregator
-            stdev25ReducerHash, // tally
           )
           assert(tx.logs.length === 1)
           expectEvent(
@@ -541,10 +505,8 @@ contract("WitnetBytecodes", (accounts) => {
             "NewRadHash"
           )
         })
-        it("emits single event when verifying new radon retrieval w/ repeated http-post sources", async () => {
-          const tx = await bytecodes.verifyRadonRetrieval(
-            4, // resultDataType
-            0, // resultMaxVariableSize,
+        it("emits single event when verifying new radon request w/ repeated http-post sources", async () => {
+          const tx = await bytecodes.verifyRadonRequest(
             [ // sources
               uniswapToken1PriceHash,
               uniswapToken1PriceHash,
@@ -553,6 +515,9 @@ contract("WitnetBytecodes", (accounts) => {
               uniswapToken1PriceHash,
               uniswapToken1PriceHash,
             ],
+            stdev15ReducerHash, // aggregator
+            stdev25ReducerHash, // tally
+            0, // resultMaxVariableSize,
             [
               ["0xc2a856c3aff2110c1171b8f942256d40e980c726"], // pair id
               ["0xc2a856c3aff2110c1171b8f942256d40e980c726"], // pair id
@@ -561,8 +526,6 @@ contract("WitnetBytecodes", (accounts) => {
               ["0xc2a856c3aff2110c1171b8f942256d40e980c726"], // pair id
               ["0xc2a856c3aff2110c1171b8f942256d40e980c726"], // pair id
             ],
-            stdev15ReducerHash, // aggregator
-            stdev25ReducerHash, // tally
           )
           assert(tx.logs.length === 1)
           expectEvent(
@@ -578,11 +541,11 @@ contract("WitnetBytecodes", (accounts) => {
     context("verifyRadonSLA(..)", async () => {
       it("emits event when verifying new radon sla", async () => {
         const tx = await bytecodes.verifyRadonSLA([
-          10 ** 6,
           10,
-          10 ** 6,
           51,
+          10 ** 9,
           5 * 10 ** 9,
+          10 ** 6,
         ])
         expectEvent(
           tx.receipt,
@@ -592,11 +555,11 @@ contract("WitnetBytecodes", (accounts) => {
       })
       it("emits no event when verifying an already verified radon sla", async () => {
         const tx = await bytecodes.verifyRadonSLA([
-          10 ** 6,
           10,
-          10 ** 6,
           51,
+          10 ** 9,
           5 * 10 ** 9,
+          10 ** 6,
         ])
         assert.equal(
           tx.logs.length,
@@ -606,11 +569,11 @@ contract("WitnetBytecodes", (accounts) => {
       })
       it("generates proper hash upon offchain call", async () => {
         const hash = await bytecodes.verifyRadonSLA.call([
-          10 ** 6,
           10,
-          10 ** 6,
           51,
+          10 ** 9,
           5 * 10 ** 9,
+          10 ** 6,
         ])
         assert.equal(hash, slaHash)
       })
@@ -618,11 +581,11 @@ contract("WitnetBytecodes", (accounts) => {
         await expectRevertCustomError(
           WitnetV2,
           bytecodes.verifyRadonSLA([
-            0,
             10,
-            10 ** 6,
             51,
+            0,
             5 * 10 ** 9,
+            10 ** 6,
           ]),
           "RadonSlaNoReward"
         )
@@ -631,11 +594,11 @@ contract("WitnetBytecodes", (accounts) => {
         await expectRevertCustomError(
           WitnetV2,
           bytecodes.verifyRadonSLA([
-            10 ** 6,
             0,
-            10 ** 6,
             51,
+            10 ** 9,
             5 * 10 ** 9,
+            10 ** 6
           ]),
           "RadonSlaNoWitnesses"
         )
@@ -644,11 +607,11 @@ contract("WitnetBytecodes", (accounts) => {
         await expectRevertCustomError(
           WitnetV2,
           bytecodes.verifyRadonSLA([
-            10 ** 6,
             500,
-            10 ** 6,
             51,
-            5 * 10 ** 9,
+            10 ** 9,
+            15 * 10 ** 9,
+            10 ** 6,
           ]),
           "RadonSlaTooManyWitnesses"
         )
@@ -657,22 +620,22 @@ contract("WitnetBytecodes", (accounts) => {
         await expectRevertCustomError(
           WitnetV2,
           bytecodes.verifyRadonSLA([
-            10 ** 6,
             10,
-            10 ** 6,
             50,
-            5 * 10 ** 9,
+            10 ** 9,
+            15 * 10 ** 9,
+            10 ** 6,
           ]),
           "RadonSlaConsensusOutOfRange"
         )
         await expectRevertCustomError(
           WitnetV2,
           bytecodes.verifyRadonSLA([
-            10 ** 6,
             10,
-            10 ** 6,
             100,
+            10 ** 9,
             5 * 10 ** 9,
+            10 ** 6,
           ]),
           "RadonSlaConsensusOutOfRange"
         )
@@ -681,10 +644,10 @@ contract("WitnetBytecodes", (accounts) => {
         await expectRevertCustomError(
           WitnetV2,
           bytecodes.verifyRadonSLA([
-            10 ** 6,
             10,
-            10 ** 6,
             51,
+            10 ** 6,
+            10 ** 6,
             10 ** 6,
           ]),
           "RadonSlaLowCollateral"
@@ -693,18 +656,18 @@ contract("WitnetBytecodes", (accounts) => {
     })
 
     context("bytecodeOf(..)", async () => {
-      context("radon retrievals", async () => {
-        it("reverts if trying to get bytecode from unknown radon retrieval", async () => {
+      context("radon requests", async () => {
+        it("reverts if trying to get bytecode from unknown radon request", async () => {
           await expectRevertCustomError(
             WitnetBytecodes,
             bytecodes.bytecodeOf("0x0"),
-            "UnknownRadonRetrieval"
+            "UnknownRadonRequest"
           )
         })
-        it("works if trying to get bytecode onchain from known radon retrieval", async () => {
+        it("works if trying to get bytecode onchain from known radon request", async () => {
           await bytecodes.bytecodeOf(btcUsdPriceFeedHash)
         })
-        it("returns bytecode if getting it offchain from known radon retrieval", async () => {
+        it("returns bytecode if getting it offchain from known radon request", async () => {
           await bytecodes.bytecodeOf(btcUsdPriceFeedHash)
         })
       })
@@ -716,30 +679,30 @@ contract("WitnetBytecodes", (accounts) => {
             "UnknownRadonSLA"
           )
         })
-        it("works if trying to get bytecode onchain from known radon retrieval and sla", async () => {
+        it("works if trying to get bytecode onchain from known radon request and sla", async () => {
           await bytecodes.bytecodeOf(btcUsdPriceFeedHash, slaHash)
         })
       })
     })
 
     context("hashOf(..)", async () => {
-      it("hashing unknown radon retrieval doesn't revert", async () => {
+      it("hashing unknown radon request doesn't revert", async () => {
         await bytecodes.hashOf("0x", slaHash)
       })
       it("hashing unknown radon sla doesn't revert", async () => {
         await bytecodes.hashOf(btcUsdPriceFeedHash, "0x0")
       })
-      it("hashing of known radon retrieval and sla works", async () => {
+      it("hashing of known radon request and sla works", async () => {
         await bytecodes.hashOf(btcUsdPriceFeedHash, slaHash)
       })
     })
 
     context("hashWeightRewardOf(..)", async () => {
-      it("hashing unknown radon retrieval reverts", async () => {
+      it("hashing unknown radon request reverts", async () => {
         await expectRevertCustomError(
           WitnetBytecodes,
           bytecodes.hashWeightWitsOf("0x0", slaHash),
-          "UnknownRadonRetrieval"
+          "UnknownRadonRequest"
         )
       })
       it("hashing unknown radon sla reverts", async () => {
@@ -749,7 +712,7 @@ contract("WitnetBytecodes", (accounts) => {
           "UnknownRadonSLA"
         )
       })
-      it("hashing of known radon retrieval and sla works", async () => {
+      it("hashing of known radon request and sla works", async () => {
         await bytecodes.hashWeightWitsOf(
           heavyRetrievalHash, slaHash
         )
