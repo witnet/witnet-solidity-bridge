@@ -41,7 +41,7 @@ interface IWitnetBytecodes {
     function lookupRadonRetrievalSourcesCount(bytes32 hash) external view returns (uint);
     function lookupRadonRetrievalTally(bytes32 hash) external view returns (WitnetV2.RadonReducer memory);
     function lookupRadonSLA(bytes32 hash) external view returns (WitnetV2.RadonSLA memory);
-    function lookupRadonSLAReward(bytes32 hash) external view returns (uint64);
+    function lookupRadonSLAReward(bytes32 hash) external view returns (uint);
     
     function verifyDataSource(
             WitnetV2.DataRequestMethods requestMethod,
