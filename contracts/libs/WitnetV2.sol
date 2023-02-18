@@ -13,11 +13,11 @@ library WitnetV2 {
 
     error RadonFilterMissingArgs(uint8 opcode);
 
-    error RadonRetrievalNoSources();
-    error RadonRetrievalSourcesArgsMismatch(uint expected, uint actual);
-    error RadonRetrievalMissingArgs(uint index, uint expected, uint actual);
-    error RadonRetrievalResultsMismatch(uint index, uint8 read, uint8 expected);
-    error RadonRetrievalTooHeavy(bytes bytecode, uint weight);
+    error RadonRequestNoSources();
+    error RadonRequestSourcesArgsMismatch(uint expected, uint actual);
+    error RadonRequestMissingArgs(uint index, uint expected, uint actual);
+    error RadonRequestResultsMismatch(uint index, uint8 read, uint8 expected);
+    error RadonRequestTooHeavy(bytes bytecode, uint weight);
 
     error RadonSlaNoReward();
     error RadonSlaNoWitnesses();
