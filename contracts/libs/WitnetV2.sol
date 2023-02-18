@@ -187,11 +187,11 @@ library WitnetV2 {
     }
 
     struct RadonSLA {
-        uint64 witnessReward;
-        uint16 numWitnesses;
-        uint64 minerCommitFee;
-        uint32 minConsensusPercentage;
-        uint64 witnessCollateral;
+        uint numWitnesses;
+        uint minConsensusPercentage;
+        uint witnessReward;
+        uint witnessCollateral;
+        uint minerCommitFee;
     }
 
 }
