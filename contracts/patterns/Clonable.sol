@@ -50,7 +50,7 @@ abstract contract Clonable
         internal
         returns (address _instance)
     {
-        bytes memory ptr = _cloneBytecode();
+        bytes memory ptr = _cloneBytecodePtr();
         assembly {
             // CREATE new instance:
             _instance := create(0, ptr, 0x37)
@@ -61,7 +61,19 @@ abstract contract Clonable
 
     /// @notice Returns minimal proxy's deploy bytecode.
     function _cloneBytecode()
-        virtual internal
+        virtual internal view
+        returns (bytes memory)
+    {
+        return abi.encodePacked(
+            hex"3d602d80600a3d3981f3363d3d373d3d3d363d73",
+            bytes20(self()),
+            hex"5af43d82803e903d91602b57fd5bf3"
+        );
+    }
+
+    /// @notice Returns mem pointer to minimal proxy's deploy bytecode.
+    function _cloneBytecodePtr()
+        virtual internal view
         returns (bytes memory ptr)
     {
         address _base = self();
@@ -88,7 +100,7 @@ abstract contract Clonable
         internal
         returns (address _instance)
     {
-        bytes memory ptr = _cloneBytecode();
+        bytes memory ptr = _cloneBytecodePtr();
         assembly {
             // CREATE2 new instance:
             _instance := create2(0, ptr, 0x37, _salt)
