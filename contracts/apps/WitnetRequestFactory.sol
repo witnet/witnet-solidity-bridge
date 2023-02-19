@@ -75,40 +75,72 @@ contract WitnetRequestFactory
     /// --- IWitnetRequestFactory implementation ----------------------------------------------------------------------
 
     function buildRequest(
-            bytes32[] memory sources,
-            bytes32 aggregator,
-            bytes32 tally,
-            uint16  resultDataMaxSize
+            bytes32[] memory _sources,
+            bytes32 _aggregator,
+            bytes32 _tally,
+            uint16  _resultDataMaxSize
         )
         virtual override
         external
         onlyOnFactory
         returns (WitnetRequest _request)
     {
-        WitnetRequestTemplate _template = buildRequestTemplate(sources, aggregator, tally, resultDataMaxSize);
-        require(!_template.parameterized(), "WitnetRequestFactory: parameterized sources");
+        WitnetRequestTemplate _template = buildRequestTemplate(
+            _sources,
+            _aggregator,
+            _tally,
+            _resultDataMaxSize
+        );
+        require(
+            !_template.parameterized(),
+            "WitnetRequestFactory: parameterized sources"
+        );
         _request = _template.settleArgs(abi.decode(hex"",(string[][])));
         emit WitnetRequestBuilt(_request);
     }
 
     function buildRequestTemplate(
-            bytes32[] memory sources,
-            bytes32 aggregator,
-            bytes32 tally,
-            uint16  resultDataMaxSize
+            bytes32[] memory _sources,
+            bytes32 _aggregator,
+            bytes32 _tally,
+            uint16  _resultDataMaxSize
         )
         virtual override
         public
         onlyOnFactory
         returns (WitnetRequestTemplate _template)
     {
-        _template = WitnetRequestFactory(_clone()).initializeWitnetRequestTemplate(
-            sources,
-            aggregator,
-            tally,
-            resultDataMaxSize
-        );
-        emit WitnetRequestTemplateBuilt(_template, _template.parameterized());
+        bytes32 _salt = keccak256(abi.encodePacked(
+            bytes3(0xfabada), // avoids address collisions between templates w/ no args and actual requests
+            _sources,
+            _aggregator,
+            _tally,
+            _resultDataMaxSize
+        ));
+        address _address = address(uint160(uint256(keccak256(
+            abi.encodePacked(
+                bytes1(0xff),
+                address(this),
+                _salt,
+                keccak256(_cloneBytecode())
+            )
+        ))));
+        if (_address.code.length > 0) {
+            _template = WitnetRequestTemplate(_address);
+        } else {
+            _template = WitnetRequestFactory(
+                _cloneDeterministic(_salt)
+            ).initializeWitnetRequestTemplate(
+                _sources,
+                _aggregator,
+                _tally,
+                _resultDataMaxSize
+            );
+            emit WitnetRequestTemplateBuilt(
+                _template,
+                _template.parameterized()
+            );
+        }
     }
 
     function class() 
@@ -140,7 +172,10 @@ contract WitnetRequestFactory
         returns (WitnetRequestTemplate)
     {
         WitnetV2.RadonDataTypes _resultDataType;
-        require(_sources.length > 0, "WitnetRequestTemplate: no sources");
+        require(
+            _sources.length > 0,
+            "WitnetRequestTemplate: no sources"
+        );
         // check all sources return the same data types, 
         // and whether any of them is parameterized
         bool _parameterized;
@@ -174,8 +209,8 @@ contract WitnetRequestFactory
     }
     
     function initializeWitnetRequest(
-            string[][] memory _args,
-            bytes32 _radHash
+            bytes32 _radHash,
+            string[][] memory _args
         )
         virtual public
         initializer
@@ -589,21 +624,33 @@ contract WitnetRequestFactory
         virtual override
         external
         onlyOnTemplates
-        returns (WitnetRequest request)
+        returns (WitnetRequest _request)
     {
         WitnetRequestTemplateSlot storage __data = __witnetRequestTemplate();
-        bytes32 _radHash = registry.verifyRadonRetrieval(
-            __data.resultDataType,
-            __data.resultDataMaxSize,
+        bytes32 _radHash = registry.verifyRadonRequest(
             __data.sources,
-            _args,
             __data.aggregatorHash,
-            __data.tallyHash
+            __data.tallyHash,
+            __data.resultDataMaxSize,
+            _args
         );
-        request = WitnetRequestFactory(_clone()).initializeWitnetRequest(
-            _args,
-            _radHash
-        );
-        emit WitnetRequestTemplateSettled(request, _radHash, _args);
+        address _address = address(uint160(uint256(keccak256(
+            abi.encodePacked(
+                bytes1(0xff),
+                address(this),
+                _radHash,
+                keccak256(_cloneBytecode())
+            )
+        ))));
+        if (_address.code.length > 0) {
+            _request = WitnetRequest(_address);
+        } else {
+            _request = WitnetRequestFactory(_cloneDeterministic(_radHash))
+                .initializeWitnetRequest(
+                    _radHash,
+                    _args
+                );
+            emit WitnetRequestTemplateSettled(_request, _radHash, _args);
+        }
     }
 }
