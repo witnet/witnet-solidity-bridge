@@ -240,23 +240,24 @@ contract WitnetRequestFactory
       virtual override
       returns (bool)
     {
-        if (address(this) == _SELF) {
+        if (__witnetRequest().radHash != bytes32(0)) {
+            return (
+                _interfaceId == type(IWitnetRequest).interfaceId
+                    || _interfaceId == type(WitnetRequest).interfaceId
+                    || _interfaceId  == type(WitnetRequestTemplate).interfaceId
+            );
+        }
+        else if (__witnetRequestTemplate().sources.length > 0) {
+            return (_interfaceId == type(WitnetRequestTemplate).interfaceId);
+        }
+        else if (address(this) == __proxy()) {
+            return (
+                _interfaceId == type(IWitnetRequestFactory).interfaceId
+                    || super.supportsInterface(_interfaceId)
+            );
+        }
+        else {
             return (_interfaceId == type(Upgradeable).interfaceId);
-        } else {
-            if (address(this) == __proxy()) {
-                return (
-                    _interfaceId == type(IWitnetRequestFactory).interfaceId
-                        || super.supportsInterface(_interfaceId)
-                );
-            } else if (__witnetRequest().radHash != bytes32(0)) {
-                return (
-                    _interfaceId == type(WitnetRequestTemplate).interfaceId
-                        || _interfaceId == type(WitnetRequest).interfaceId
-                        || _interfaceId  == type(IWitnetRequest).interfaceId
-                );
-            } else {
-                return (_interfaceId == type(WitnetRequestTemplate).interfaceId);
-            }
         }
     }
 
@@ -316,7 +317,6 @@ contract WitnetRequestFactory
     function initialize(bytes memory) 
         virtual override
         public
-        initializer 
         onlyDelegateCalls
     {
         // WitnetRequest or WitnetRequestTemplate instances would already be initialized,
