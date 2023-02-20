@@ -290,8 +290,8 @@
             "WitnetPriceRouter": "0x6d5544ca5b35bf2e7a78ace4E7B8d191fe5C9FAb",
             "WitnetRandomness": "0x0178287DfECA2F13F342512282bc8B59e774aE43",
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
-            "WitnetRequestFactory": "0x3921cC3eBF8c8a9d0F788Fc6cD371287EEe636Ff",
-            "WitnetRequestFactoryImplementation": ""
+            "WitnetRequestFactory": "0x2A0C6942fb6fE55799C070CD88737106e6Cc0467",
+            "WitnetRequestFactoryImplementation": "0xaDfa4C235C951745A2f28b5ff54Ccc2Ff356384C"
         },
         "polygon.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
