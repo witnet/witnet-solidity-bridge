@@ -43,10 +43,15 @@
     },
     "boba": {
         "boba.moonbeam.bobabase": {
+            "WitnetBytecodes": "",
+            "WitnetBytecodesImplementation": "",
+            "WitnetEncodingLib": "",
             "WitnetLib": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425",
             "WitnetPriceRouter": "0xD9465D38f50f364b3263Cb219e58d4dB2D584530",
             "WitnetRandomness": "0xB4B2E2e00e9d6E5490d55623E4F403EC84c6D33f",
-            "WitnetRequestBoard": "0x0985FDe9f424fe4f5AC516F66bAf5591e18aCBEb"
+            "WitnetRequestBoard": "0x0985FDe9f424fe4f5AC516F66bAf5591e18aCBEb",
+            "WitnetRequestFactory": "",
+            "WitnetRequestFactoryImplementation": ""
         },
         "boba.ethereum.goerli": {
             "WitnetLib": "0x7D8A488BACB56dA2De17628e26a21fFd97792b81",
@@ -291,7 +296,7 @@
             "WitnetRandomness": "0x0178287DfECA2F13F342512282bc8B59e774aE43",
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
             "WitnetRequestFactory": "0x2A0C6942fb6fE55799C070CD88737106e6Cc0467",
-            "WitnetRequestFactoryImplementation": "0xaDfa4C235C951745A2f28b5ff54Ccc2Ff356384C"
+            "WitnetRequestFactoryImplementation": "0x285A3Fabb1E96aD80Bc3767AF08ACfcA71Bd14D2"
         },
         "polygon.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
