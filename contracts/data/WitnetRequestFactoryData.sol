@@ -29,6 +29,8 @@ contract WitnetRequestFactoryData {
         string[][] args;  
         /// Witnet Data Request bytecode after inserting string arguments.
         bytes bytecode;    
+        /// Address from which the request's SLA can be modifies.
+        address curator;
         /// SHA-256 hash of the Witnet Data Request bytecode.
         bytes32 hash;
         /// Radon RAD hash. 
