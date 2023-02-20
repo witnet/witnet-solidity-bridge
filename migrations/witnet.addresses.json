@@ -296,7 +296,7 @@
             "WitnetRandomness": "0x0178287DfECA2F13F342512282bc8B59e774aE43",
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
             "WitnetRequestFactory": "0x2A0C6942fb6fE55799C070CD88737106e6Cc0467",
-            "WitnetRequestFactoryImplementation": "0x285A3Fabb1E96aD80Bc3767AF08ACfcA71Bd14D2"
+            "WitnetRequestFactoryImplementation": "0x6B25A89dF5458aA8028358B8eA491EbD4EAe30b2"
         },
         "polygon.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
