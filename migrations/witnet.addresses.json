@@ -284,8 +284,8 @@
     "polygon": {
         "polygon.goerli": {
             "WitnetBytecodes": "0xB01A55f7D4324C92E16FC8AAf63d8060DE3CC21c",
-            "WitnetBytecodesImplementation": "0x32B57F0a4680384Ae9118A74bf0f7A657f8dF39a",
-            "WitnetEncodingLib": "0x0fde3791E85448cACc2Bf1B612C2f07525cE7663",
+            "WitnetBytecodesImplementation": "0x0A3a19bA45F54f7031A9aBB66C81e972cE618dD9",
+            "WitnetEncodingLib": "0x7DeDAafae9Af3A65F664b79e5F82156B5cdcD473",
             "WitnetLib": "0x70767887abBF23291B24620dE6bcEBe8d8F1e6F3",
             "WitnetPriceRouter": "0x6d5544ca5b35bf2e7a78ace4E7B8d191fe5C9FAb",
             "WitnetRandomness": "0x0178287DfECA2F13F342512282bc8B59e774aE43",
