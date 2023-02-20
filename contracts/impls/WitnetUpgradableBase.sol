@@ -70,7 +70,7 @@ abstract contract WitnetUpgradableBase
     // --- Overrides 'Upgradeable' --------------------------------------------------------------------------------------
 
     /// Retrieves human-readable version tag of current implementation.
-    function version() public view override returns (string memory) {
+    function version() public view virtual override returns (string memory) {
         return _toString(_WITNET_UPGRADABLE_VERSION);
     }
 

@@ -110,13 +110,18 @@ contract WitnetRequestFactory
         onlyOnFactory
         returns (WitnetRequestTemplate _template)
     {
-        bytes32 _salt = keccak256(abi.encodePacked(
-            bytes3(0xfabada), // avoids address collisions between templates w/ no args and actual requests
-            _sources,
-            _aggregator,
-            _tally,
-            _resultDataMaxSize
-        ));
+        bytes32 _salt = keccak256(
+            // As to avoid template address collisions from:
+            abi.encodePacked( 
+                // - different factory versions
+                _WITNET_UPGRADABLE_VERSION,
+                // - different templates
+                _sources, 
+                _aggregator,
+                _tally,
+                _resultDataMaxSize
+            )
+        );
         address _address = address(uint160(uint256(keccak256(
             abi.encodePacked(
                 bytes1(0xff),
@@ -480,6 +485,14 @@ contract WitnetRequestFactory
         return IWitnetRequest(address(this));
     }
 
+    function version() 
+        virtual override(WitnetRequest, WitnetRequestTemplate, WitnetUpgradableBase)
+        public view
+        returns (string memory)
+    {
+        return WitnetUpgradableBase.version();
+    }
+
 
     /// ===============================================================================================================
     /// --- WitnetRequestTemplate implementation ----------------------------------------------------------------------
@@ -649,7 +662,17 @@ contract WitnetRequestFactory
             __data.resultDataMaxSize,
             _args
         );
-        bytes32 _salt = keccak256(abi.encodePacked(_radHash, msg.sender));
+        bytes32 _salt = keccak256( 
+            // As to avoid request address collisions from:
+            abi.encodePacked( 
+                // - different factory versions
+                _WITNET_UPGRADABLE_VERSION,
+                // - different curators
+                msg.sender,
+                // - different templates or args values
+                _radHash
+            )
+        );
         address _address = address(uint160(uint256(keccak256(
             abi.encodePacked(
                 bytes1(0xff),

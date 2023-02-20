@@ -22,4 +22,5 @@ abstract contract WitnetRequestTemplate
     function lookupRadonTally() virtual external view returns (WitnetV2.RadonReducer memory);
     function parameterized() virtual external view returns (bool);
     function settleArgs(string[][] calldata args) virtual external returns (WitnetRequest);
+    function version() virtual external view returns (string memory);
 }
