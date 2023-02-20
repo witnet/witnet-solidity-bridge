@@ -690,7 +690,7 @@ contract WitnetRequestFactory
                     _radHash,
                     _args
                 );
-            emit WitnetRequestTemplateSettled(_request, _radHash, _args);
         }
+        emit WitnetRequestTemplateSettled(_request, _radHash, _args);
     }
 }
