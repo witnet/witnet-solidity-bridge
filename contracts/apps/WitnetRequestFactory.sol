@@ -684,10 +684,10 @@ contract WitnetRequestFactory
         if (_address.code.length > 0) {
             _request = WitnetRequest(_address);
         } else {
-            _request = WitnetRequestFactory(_cloneDeterministic(_radHash))
+            _request = WitnetRequestFactory(_cloneDeterministic(_salt))
                 .initializeWitnetRequest(
                     msg.sender,
-                    _salt,
+                    _radHash,
                     _args
                 );
             emit WitnetRequestTemplateSettled(_request, _radHash, _args);
