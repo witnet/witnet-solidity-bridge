@@ -603,12 +603,17 @@ contract WitnetBytecodes
     // ================================================================================================================
     // --- Internal state-modifying methods ---------------------------------------------------------------------------
     
-    function __pushDataProviderSource(string memory _authority, bytes32 _sourceHash)
-        internal 
-        virtual
+    function __pushDataProviderSource(
+            string memory _authority,
+            bytes32 _sourceHash
+        )
+        internal virtual
         returns (bytes32 _hash)
     {
-        if (bytes(_authority).length > 0) {
+        if (
+            bytes(_authority).length > 0
+                && WitnetBuffer.argsCountOf(bytes(_authority)) == 0
+        ) {
             _hash = keccak256(abi.encodePacked(_authority));
             uint _index = __database().providersIndex[_hash];
             if (_index == 0) {
