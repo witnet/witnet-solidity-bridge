@@ -475,11 +475,11 @@ contract WitnetRequestFactory
         );
         bytes32 _slaHash = registry.verifyRadonSLA(_sla);
         WitnetRequestSlot storage __data = __witnetRequest();
-        bytes memory _bytecode = registry.bytecodeOf(__data.radHash, _slaHash);
-        {
+        if (_slaHash != __data.slaHash) {
+            bytes memory _bytecode = registry.bytecodeOf(__data.radHash, _slaHash);
             __data.bytecode = _bytecode;
             __data.hash = Witnet.hash(_bytecode);
-            __data.slaHash = _slaHash;
+            __data.slaHash = _slaHash;        
             emit WitnetRequestSettled(_sla);
         }
         return IWitnetRequest(address(this));
