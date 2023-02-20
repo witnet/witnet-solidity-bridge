@@ -14,6 +14,7 @@ abstract contract WitnetRequest
 
     function args() virtual external view returns (string[][] memory);
     function class() virtual external view returns (bytes4);
+    function curator() virtual external view returns (address);
     function getRadonSLA() virtual external view returns (WitnetV2.RadonSLA memory);
     function initialized() virtual external view returns (bool);
     function radHash() virtual external view returns (bytes32);

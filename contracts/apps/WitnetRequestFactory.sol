@@ -209,6 +209,7 @@ contract WitnetRequestFactory
     }
     
     function initializeWitnetRequest(
+            address _from,
             bytes32 _radHash,
             string[][] memory _args
         )
@@ -218,6 +219,7 @@ contract WitnetRequestFactory
     {
         WitnetRequestSlot storage __data = __witnetRequest();
         __data.args = _args;
+        __data.curator = _from;
         __data.radHash = _radHash;
         __data.template = WitnetRequestTemplate(msg.sender);
         return WitnetRequest(address(this));
@@ -404,6 +406,15 @@ contract WitnetRequestFactory
         return __witnetRequest().args;
     }
 
+    function curator()
+        override
+        external view
+        onlyDelegateCalls
+        returns (address)
+    {
+        return __witnetRequest().curator;
+    }
+
     function getRadonSLA()
         override
         external view
@@ -452,6 +463,10 @@ contract WitnetRequestFactory
         require(
             address(_template) != address(0),
             "WitnetRequestFactory: not a request"
+        );
+        require(
+            msg.sender == __witnetRequest().curator,
+            "WitnetRequest: not the curator"
         );
         bytes32 _slaHash = registry.verifyRadonSLA(_sla);
         WitnetRequestSlot storage __data = __witnetRequest();
@@ -634,11 +649,12 @@ contract WitnetRequestFactory
             __data.resultDataMaxSize,
             _args
         );
+        bytes32 _salt = keccak256(abi.encodePacked(_radHash, msg.sender));
         address _address = address(uint160(uint256(keccak256(
             abi.encodePacked(
                 bytes1(0xff),
                 address(this),
-                _radHash,
+                _salt,
                 keccak256(_cloneBytecode())
             )
         ))));
@@ -647,7 +663,8 @@ contract WitnetRequestFactory
         } else {
             _request = WitnetRequestFactory(_cloneDeterministic(_radHash))
                 .initializeWitnetRequest(
-                    _radHash,
+                    msg.sender,
+                    _salt,
                     _args
                 );
             emit WitnetRequestTemplateSettled(_request, _radHash, _args);
