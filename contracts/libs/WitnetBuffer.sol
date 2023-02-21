@@ -463,7 +463,9 @@ library WitnetBuffer {
             );
             inputPointer += inputLength + 3;
             outputPointer += inputLength;
-          }    
+          } else {
+            inputPointer += 3;
+          }
           uint ax = uint(uint8(input[ix + 1]) - uint8(bytes1("0")));
           if (ax >= args.length) {
             revert MissingArgs(ax + 1, args.length);
