@@ -87,6 +87,20 @@ contract TestWitnetBuffer {
     // TODO
   }
 
+  function testReplace() external {
+    string memory input = "\\0\\/image/\\1\\?digest=sha-256";
+    string[] memory args = new string[](2);
+    args[0] = "https://api.whatever.com/";
+    args[1] = "1";
+    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
+    emit Log(string(phrase), phrase.length);
+    Assert.equal(
+      keccak256(phrase),
+      keccak256(bytes("https://api.whatever.com//image/1?digest=sha-256")),
+      "String replacement not good :/"
+    );
+  }
+
   function testReplace0Args() external {
     string memory input = "In a village of La Mancha, the name of which I have no desire to call to mind, there lived not long since one of those gentlemen that keep a lance in the lance-rack, an old buckler, a lean hack, and a greyhound for coursing";
     string[] memory args = new string[](1);
