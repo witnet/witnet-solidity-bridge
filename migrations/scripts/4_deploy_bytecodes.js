@@ -74,8 +74,8 @@ module.exports = async function (deployer, network, accounts) {
       console.info("   > WitnetBytecodes implementation:", implementation)
       console.info("   > WitnetBytecodesImplementation:", bytecodes.address, `(v${await bytecodes.version()})`)
       if (
-        isDryRun
-          || ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
+        isDryRun ||
+          ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
       ) {
         await proxy.upgradeTo(bytecodes.address, "0x")
         console.info("   > Done.")
