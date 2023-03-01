@@ -265,7 +265,6 @@ abstract contract WitnetRequestMalleableBase
     /// @dev Initializes witnessing params and template bytecode. 
     function _initialize(bytes memory _template)
         virtual internal
-        initializer
     {
         _transferOwnership(_msgSender());
 
