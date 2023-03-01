@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable var-name-mixedcase
+// solhint-disable payable-fallback
 
 pragma solidity >=0.8.0 <0.9.0;
 
