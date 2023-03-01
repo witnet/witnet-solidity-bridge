@@ -55,8 +55,8 @@ module.exports = async function (deployer, network, accounts) {
       console.info("   > WitnetRequestFactory implementation:", implementation)
       console.info("   > WitnetRequestFactoryImplementation:", factory.address, `(v${await factory.version()})`)
       if (
-        isDryRun
-          || ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
+        isDryRun ||
+          ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
       ) {
         await proxy.upgradeTo(factory.address, "0x")
         console.info("   > Done.")
