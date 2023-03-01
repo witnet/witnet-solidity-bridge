@@ -27,6 +27,7 @@ contract("UsingWitnet", accounts => {
 
     before(async () => {
       witnet = await WitnetLib.deployed()
+      await WRB.link(WitnetLib, witnet.address)
       if (!proxy) {
         // create one and only proxy contract:
         proxy = await WRBProxy.new({ from: ownerAccount })

@@ -3,7 +3,6 @@ const { expectEvent, expectRevert } = require("@openzeppelin/test-helpers")
 const { assert } = require("chai")
 const { expectRevertCustomError } = require("custom-error-test-helper")
 
-const WitnetBuffer = artifacts.require("WitnetBuffer")
 const WitnetBytecodes = artifacts.require("WitnetBytecodes")
 const WitnetV2 = artifacts.require("WitnetV2")
 
@@ -99,7 +98,6 @@ contract("WitnetBytecodes", (accounts) => {
     let binanceTickerHash
     let uniswapToken1PriceHash
     let heavyRetrievalHash
-    let heavyRetrievalBytecode
 
     let rngHash
 
@@ -405,7 +403,7 @@ contract("WitnetBytecodes", (accounts) => {
               stdev15ReducerHash, // aggregator
               stdev25ReducerHash, // tally
               0, // resultMaxVariableSize
-              [ [], ],
+              [[]],
             )
           )
         })
@@ -533,7 +531,6 @@ contract("WitnetBytecodes", (accounts) => {
             "NewRadHash"
           )
           heavyRetrievalHash = tx.logs[0].args.hash
-          heavyRetrievalBytecode = await bytecodes.bytecodeOf.call(heavyRetrievalHash)
         })
       })
     })
@@ -598,7 +595,7 @@ contract("WitnetBytecodes", (accounts) => {
             51,
             10 ** 9,
             5 * 10 ** 9,
-            10 ** 6
+            10 ** 6,
           ]),
           "RadonSlaNoWitnesses"
         )

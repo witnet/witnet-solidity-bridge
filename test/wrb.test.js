@@ -11,7 +11,7 @@ const { expect, assert } = require("chai")
 
 // Contracts
 const WRB = artifacts.require(settings.artifacts.default.WitnetRequestBoard)
-
+const WitnetLib = artifacts.require("WitnetLib")
 const WitnetRequest = artifacts.require("WitnetRequestTestHelper")
 const WitnetRequestTestHelper = artifacts.require("WitnetRequestTestHelper")
 
@@ -33,6 +33,7 @@ contract("WitnetRequestBoard", ([
   other,
 ]) => {
   beforeEach(async () => {
+    await WRB.link(WitnetLib, WitnetLib.address)
     this.WitnetRequestBoard = await WRB.new(
       ...settings.constructorParams.default.WitnetRequestBoard,
       { from: owner }
@@ -728,7 +729,7 @@ contract("WitnetRequestBoard", ([
             web3.eth.abi.encodeParameter("address[]", [other]),
             { from: owner }
           ),
-          "already initialized"
+          "already upgraded"
         )
       })
     })
