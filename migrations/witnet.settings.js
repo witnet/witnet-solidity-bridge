@@ -187,6 +187,7 @@ module.exports = {
         network_id: 1,
         host: "localhost",
         port: 9545,
+        skipDryRun: true,
       },
       "ethereum.rinkeby": {
         network_id: 4,

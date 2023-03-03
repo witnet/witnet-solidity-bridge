@@ -13,10 +13,15 @@
             "WitnetRequestBoard": "0x6cE42a35C61ccfb42907EEE57eDF14Bb69C7fEF4"
         },
         "ethereum.mainnet": {
+            "WitnetBytecodes": "0xB8CdB2577dA632a77D6b90526aB53Eb5694Ed2D1",
+            "WitnetBytecodesImplementation": "0x93b3bab878CFc17f784fA4B52a2fdE630dc7E8C8",
+            "WitnetEncodingLib": "0x01673796C51EDfFba3EAb7bf308bEA352D73A017",
             "WitnetLib": "0xaD18Fd3CC724A11c2B0D8cc7f1B108d8A3388416",
             "WitnetPriceRouter": "0x83A757eAe821Ad7B520D9A74952337138A80b2AF",
             "WitnetRandomness": "0x894907c7Ab64C1092620B5c8Ba039BB6E611eba8",
-            "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA"
+            "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA",
+            "WitnetRequestFactory": "0xdABE9E1B328d5Dd6b96271e5562ee3f7D8D035c4",
+            "WitnetRequestFactoryImplementation": "0xBfe9473720CC8DCa9615b8B6CFE228C7e1089396"
         }
     },
     "arbitrum": {
