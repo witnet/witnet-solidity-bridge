@@ -214,7 +214,7 @@ contract WitnetRequestFactory
     }
     
     function initializeWitnetRequest(
-            address _from,
+            address _curator,
             bytes32 _radHash,
             string[][] memory _args
         )
@@ -224,9 +224,31 @@ contract WitnetRequestFactory
     {
         WitnetRequestSlot storage __data = __witnetRequest();
         __data.args = _args;
-        __data.curator = _from;
+        __data.curator = _curator;
         __data.radHash = _radHash;
         __data.template = WitnetRequestTemplate(msg.sender);
+        return WitnetRequest(address(this));
+    }
+
+    function forkWitnetRequest(
+            address _curator,
+            bytes32 _slaHash
+        )
+        virtual public
+        initializer
+        returns (WitnetRequest)
+    {
+        WitnetRequest parent = WitnetRequest(msg.sender);
+        WitnetRequestSlot storage __data = __witnetRequest();
+        bytes32 _radHash = parent.radHash();
+        __data.args = parent.args();
+        __data.curator = _curator;
+        __data.radHash = _radHash;
+        __data.slaHash = _slaHash;
+        __data.template = parent.template();
+        bytes memory _bytecode = registry.bytecodeOf(_radHash, _slaHash);
+        __data.bytecode = _bytecode;
+        __data.hash = Witnet.hash(_bytecode);
         return WitnetRequest(address(this));
     }
 
@@ -469,18 +491,27 @@ contract WitnetRequestFactory
             address(_template) != address(0),
             "WitnetRequestFactory: not a request"
         );
-        require(
-            msg.sender == __witnetRequest().curator,
-            "WitnetRequest: not the curator"
-        );
         bytes32 _slaHash = registry.verifyRadonSLA(_sla);
         WitnetRequestSlot storage __data = __witnetRequest();
         if (_slaHash != __data.slaHash) {
-            bytes memory _bytecode = registry.bytecodeOf(__data.radHash, _slaHash);
-            __data.bytecode = _bytecode;
-            __data.hash = Witnet.hash(_bytecode);
-            __data.slaHash = _slaHash;        
             emit WitnetRequestSettled(_sla);
+            if (msg.sender == __witnetRequest().curator) {
+                bytes memory _bytecode = registry.bytecodeOf(__data.radHash, _slaHash);
+                __data.bytecode = _bytecode;
+                __data.hash = Witnet.hash(_bytecode);
+                __data.slaHash = _slaHash;        
+            } else {
+                (address _addr, bytes32 _salt) = _calcRequestAddrSalt(msg.sender, __data.radHash);
+                if (_addr.code.length > 0) {
+                    return IWitnetRequest(_addr);
+                } else {
+                    return WitnetRequestFactory(_cloneDeterministic(_salt))
+                        .forkWitnetRequest(
+                            msg.sender,
+                            _slaHash
+                        );
+                }
+            }
         }
         return IWitnetRequest(address(this));
     }
@@ -650,7 +681,7 @@ contract WitnetRequestFactory
 
     function settleArgs(string[][] memory _args)
         virtual override
-        external
+        public
         onlyOnTemplates
         returns (WitnetRequest _request)
     {
@@ -662,25 +693,7 @@ contract WitnetRequestFactory
             __data.resultDataMaxSize,
             _args
         );
-        bytes32 _salt = keccak256( 
-            // As to avoid request address collisions from:
-            abi.encodePacked( 
-                // - different factory versions
-                _WITNET_UPGRADABLE_VERSION,
-                // - different curators
-                msg.sender,
-                // - different templates or args values
-                _radHash
-            )
-        );
-        address _address = address(uint160(uint256(keccak256(
-            abi.encodePacked(
-                bytes1(0xff),
-                address(this),
-                _salt,
-                keccak256(_cloneBytecode())
-            )
-        ))));
+        (address _address, bytes32 _salt) = _calcRequestAddrSalt(msg.sender, _radHash);
         if (_address.code.length > 0) {
             _request = WitnetRequest(_address);
         } else {
@@ -692,5 +705,30 @@ contract WitnetRequestFactory
                 );
         }
         emit WitnetRequestTemplateSettled(_request, _radHash, _args);
+    }
+
+    function _calcRequestAddrSalt(address _curator, bytes32 _radHash)
+        virtual internal view
+        returns (address _addr, bytes32 _salt)
+    {
+        _salt = keccak256( 
+            // As to avoid request address collisions from:
+            abi.encodePacked( 
+                // - different factory versions
+                _WITNET_UPGRADABLE_VERSION,
+                // - different curators
+                _curator,
+                // - different templates or args values
+                _radHash
+            )
+        );
+        _addr = address(uint160(uint256(keccak256(
+            abi.encodePacked(
+                bytes1(0xff),
+                address(this),
+                _salt,
+                keccak256(_cloneBytecode())
+            )
+        ))));
     }
 }
