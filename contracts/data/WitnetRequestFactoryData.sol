@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../requests/WitnetRequestTemplate.sol";
+import "../interfaces/V2/IWitnetRequestFactory.sol";
 
 contract WitnetRequestFactoryData {
 
@@ -29,7 +29,7 @@ contract WitnetRequestFactoryData {
         string[][] args;  
         /// Witnet Data Request bytecode after inserting string arguments.
         bytes bytecode;    
-        /// Address from which the request's SLA can be modifies.
+        /// Curator's address on settled requests.
         address curator;
         /// SHA-256 hash of the Witnet Data Request bytecode.
         bytes32 hash;
@@ -42,18 +42,20 @@ contract WitnetRequestFactoryData {
     }
 
     struct WitnetRequestTemplateSlot {
+        /// @notice Aggregator reducer hash.
+        bytes32 aggregator;
+        /// @notice Parent IWitnetRequestFactory from which this template was built.
+        IWitnetRequestFactory factory;
         /// Whether any of the sources is parameterized.
         bool parameterized;
+        /// @notice Tally reducer hash.
+        bytes32 tally;
+        /// @notice Array of retrievals hashes passed upon construction.
+        bytes32[] retrievals;
         /// @notice Result data type.
         WitnetV2.RadonDataTypes resultDataType;
         /// @notice Result max size or rank (if variable type).
-        uint16 resultDataMaxSize;        
-        /// @notice Aggregator reducer hash.
-        bytes32 aggregatorHash;
-        /// @notice Tally reducer hash.
-        bytes32 tallyHash;
-        /// @notice Array of sources hashes passed upon construction.
-        bytes32[] sources;
+        uint16 resultDataMaxSize; 
     }
 
     function __witnetRequestFactory()
