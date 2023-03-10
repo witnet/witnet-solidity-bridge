@@ -114,7 +114,7 @@ library WitnetBuffer {
   /// @return The next byte in the buffer counting from the cursor position.
   function next(Buffer memory buffer)
     internal pure
-    withinRange(buffer.cursor, buffer.data.length)
+    withinRange(buffer.cursor, buffer.data.length + 1)
     returns (bytes1)
   {
     // Return the byte at the position marked by the cursor and advance the cursor all at once
@@ -155,7 +155,7 @@ library WitnetBuffer {
       uint length
     )
     internal pure
-    withinRange(length, buffer.data.length - buffer.cursor)
+    withinRange(length, buffer.data.length - buffer.cursor + 1)
     returns (bytes memory)
   {
     return peek(

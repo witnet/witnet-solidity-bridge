@@ -614,12 +614,11 @@ library WitnetEncodingLib {
         self.buffer.cursor = _start;
     }
 
-    // event Log(WitnetCBOR.CBOR self, bool flip);
+    
     function _verifyRadonScriptResultDataType(WitnetCBOR.CBOR memory self, bool flip)
         private pure
         returns (WitnetV2.RadonDataTypes)
     {
-        // emit Log(self, flip);
         if (self.majorType == WitnetCBOR.MAJOR_TYPE_ARRAY) {
             WitnetCBOR.CBOR[] memory items = self.readArray();
             if (items.length > 1) {

@@ -170,12 +170,14 @@ library WitnetCBOR {
       self.majorType == MAJOR_TYPE_ARRAY
     ) { 
       self.len = readLength(self.buffer, self.additionalInformation);      
-    // } else if (
-    //   self.majorType == MAJOR_TYPE_CONTENT_FREE
-    // ) {
-      // TODO
-    } else {
-      revert UnsupportedMajorType(self.majorType);
+    } else if (
+       self.majorType != MAJOR_TYPE_CONTENT_FREE
+        || (
+          self.additionalInformation != 20
+            && self.additionalInformation != 21
+        )
+    ) {
+      revert("WitnetCBOR: unsupported major type");//UnsupportedMajorType(self.majorType);
     }
     return self;
   }
@@ -184,47 +186,40 @@ library WitnetCBOR {
     internal pure
     returns (uint64)
   {
-    assert(1 << 0 == 1);
     if (self.additionalInformation < 24) {
-      return self.additionalInformation;
-    } else if (self.additionalInformation > 27) {
-      revert InvalidLengthEncoding(self.additionalInformation);
-    } else {
+      return 0;
+    } else if (self.additionalInformation < 28) {
       return uint64(1 << (self.additionalInformation - 24));
+    } else {
+      revert InvalidLengthEncoding(self.additionalInformation);
     }
   }
 
-  // event Array(uint cursor, uint items);
-  // event Log2(uint index, bytes data, uint cursor, uint major, uint addinfo, uint len);
   function readArray(CBOR memory self)
     internal pure
     isMajorType(self, MAJOR_TYPE_ARRAY)
     returns (CBOR[] memory items)
   {
+    // read array's length and move self cursor forward to the first array element:
     uint64 len = readLength(self.buffer, self.additionalInformation);
-    // emit Array(self.buffer.cursor, len);
     items = new CBOR[](len + 1);
     for (uint ix = 0; ix < len; ix ++) {
-      items[ix] = self.fork().settle();
-      // emit Log2(
-      //   ix,
-      //   items[ix].buffer.data,
-      //   items[ix].buffer.cursor,
-      //   items[ix].majorType,
-      //   items[ix].additionalInformation,
-      //   items[ix].len
-      // );
-      self.buffer.cursor = items[ix].buffer.cursor;
-      self.majorType = items[ix].majorType;
-      self.additionalInformation = items[ix].additionalInformation;
-      self.len = items[ix].len;
+      // settle next element in the array:
+      self = self.settle();
+      // fork it and added to the list of items to be returned:
+      items[ix] = self.fork();
       if (self.majorType == MAJOR_TYPE_ARRAY) {
-        CBOR[] memory subitems = self.readArray();
-        self = subitems[subitems.length - 1];
+        // should this element be an array, 
+        // move forward to the first element after inner array:
+        CBOR[] memory _subitems = self.readArray();
+        self = _subitems[_subitems.length - 1];
       } else {
+        // otherwise, move forward to the next element:
         self.skip();
       }
     }
+    // return self cursor as extra item at the end of the list,
+    // as to optimize recursion when jumping over nested arrays:
     items[len] = self;
   }
 

@@ -305,4 +305,12 @@ contract TestWitnetEncodingLib {
     );
   }
 
+  function testVerifyRadonScriptOk4() external {
+    Assert.equal(
+      uint(WitnetEncodingLib.verifyRadonScriptResultDataType(hex"880B821866646461746182186165706169727382118282186762696483187582635C305CF5F4821818F48218646D746F6B656E5C315C50726963658218571A000F4240185B")),     
+      uint(WitnetV2.RadonDataTypes.Integer),
+      "unexpected result data type"
+    );
+  }
+
 }
