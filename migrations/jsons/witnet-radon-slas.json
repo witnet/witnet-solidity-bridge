@@ -3,7 +3,7 @@
         "hash": "0x",
         "witnessReward": 1000000,
         "numWitnesses": 10,
-        "minerCommitFee": 1000000,
+        "minerCommitRevealFee": 1000000,
         "minConsensusPercentage": 51,
         "collateral": 5000000000
     }

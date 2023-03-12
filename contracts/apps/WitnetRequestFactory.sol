@@ -89,16 +89,16 @@ contract WitnetRequestFactory
         bool _parameterized;
         for (uint _ix = 0; _ix < _retrievalsIds.length; _ix ++) {
             if (_ix == 0) {
-                _resultDataType = registry.lookupDataSourceResultDataType(_retrievalsIds[_ix]);
+                _resultDataType = registry.lookupRadonRetrievalResultDataType(_retrievalsIds[_ix]);
             } else {
                 require(
-                    _resultDataType == registry.lookupDataSourceResultDataType(_retrievalsIds[_ix]),
+                    _resultDataType == registry.lookupRadonRetrievalResultDataType(_retrievalsIds[_ix]),
                     "WitnetRequestTemplate: mismatching retrievals"
                 );
             }
             if (!_parameterized) {
                 // check whether at least one of the retrievals is parameterized
-                _parameterized = registry.lookupDataSourceArgsCount(_retrievalsIds[_ix]) > 0;
+                _parameterized = registry.lookupRadonRetrievalArgsCount(_retrievalsIds[_ix]) > 0;
             }
         }
         // check that the aggregator and tally reducers actually exist in the registry
@@ -637,7 +637,7 @@ contract WitnetRequestFactory
         override
         external view
         onlyDelegateCalls
-        returns (WitnetV2.DataSource memory)
+        returns (WitnetV2.RadonRetrieval memory)
     {
         WitnetRequestTemplate _template = __witnetRequest().template;
         if (address(_template) != address(0)) {
@@ -647,7 +647,7 @@ contract WitnetRequestFactory
                 _index < __witnetRequestTemplate().retrievals.length,
                 "WitnetRequestTemplate: out of range"
             );
-            return registry.lookupDataSource(
+            return registry.lookupRadonRetrieval(
                 __witnetRequestTemplate().retrievals[_index]
             );
         }

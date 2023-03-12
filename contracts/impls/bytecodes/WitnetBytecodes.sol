@@ -24,8 +24,8 @@ contract WitnetBytecodes
     using Witnet for bytes;
     using WitnetLib for string;
     using WitnetEncodingLib for WitnetV2.DataRequestMethods;
-    using WitnetEncodingLib for WitnetV2.DataSource;
-    using WitnetEncodingLib for WitnetV2.DataSource[];
+    using WitnetEncodingLib for WitnetV2.RadonRetrieval;
+    using WitnetEncodingLib for WitnetV2.RadonRetrieval[];
     using WitnetEncodingLib for WitnetV2.RadonReducer;
     using WitnetEncodingLib for WitnetV2.RadonSLA;
     using WitnetEncodingLib for WitnetV2.RadonDataTypes;    

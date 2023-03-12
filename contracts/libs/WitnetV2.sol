@@ -109,8 +109,8 @@ library WitnetV2 {
 
     struct DataProvider {
         string  authority;
-        uint256 totalSources;
-        mapping (uint256 => bytes32) sources;
+        uint256 totalEndpoints;
+        mapping (uint256 => bytes32) endpoints;
     }
 
     enum DataRequestMethods {
@@ -118,16 +118,6 @@ library WitnetV2 {
         /* 1 */ HttpGet,
         /* 2 */ Rng,
         /* 3 */ HttpPost
-    }
-
-    struct DataSource {
-        uint8 argsCount;
-        DataRequestMethods method;
-        RadonDataTypes resultDataType;
-        string url;
-        string body;
-        string[2][] headers;
-        bytes script;
     }
 
     enum RadonDataTypes {
@@ -186,12 +176,22 @@ library WitnetV2 {
         /* 0x0B */ ConcatenateAndHash
     }
 
+    struct RadonRetrieval {
+        uint8 argsCount;
+        DataRequestMethods method;
+        RadonDataTypes resultDataType;
+        string url;
+        string body;
+        string[2][] headers;
+        bytes script;
+    }
+
     struct RadonSLA {
         uint numWitnesses;
         uint minConsensusPercentage;
         uint witnessReward;
         uint witnessCollateral;
-        uint minerCommitFee;
+        uint minerCommitRevealFee;
     }
 
 }

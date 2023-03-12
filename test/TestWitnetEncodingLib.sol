@@ -56,7 +56,7 @@ contract TestWitnetEncodingLib {
       WitnetV2.RadonSLA({
         numWitnesses: 10,
         minConsensusPercentage: 51,
-        minerCommitFee: 1000000,
+        minerCommitRevealFee: 1000000,
         witnessCollateral: 5000000,
         witnessReward: 1000000  
       })
@@ -84,8 +84,8 @@ contract TestWitnetEncodingLib {
     );
   }
 
-  function testEncodeDataSourceUrlOnly() external {
-    WitnetV2.DataSource memory source;
+  function testEncodeRadonRetrievalUrlOnly() external {
+    WitnetV2.RadonRetrieval memory source;
     source.method = WitnetV2.DataRequestMethods.HttpGet;
     source.url = "https://data.messar.io/api/v1/assets/\\0\\/metrics/market-data?fields=market_data/price_\\1\\";
     source.script = hex"861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b";
@@ -94,12 +94,12 @@ contract TestWitnetEncodingLib {
     Assert.equal(
       keccak256(bytecode),
       keccak256(hex"128b010801125968747470733a2f2f646174612e6d65737361722e696f2f6170692f76312f6173736574732f5c305c2f6d6574726963732f6d61726b65742d646174613f6669656c64733d6d61726b65745f646174612f70726963655f5c315c1a2c861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b"),
-      "bad encode(WitnetV2.DataSource)"
+      "bad encode(WitnetV2.RadonRetrieval)"
     );
   }
 
-  function testEncodeDataSourceUrlBodyHeaders() external {
-    WitnetV2.DataSource memory source;
+  function testEncodeRadonRetrievalUrlBodyHeaders() external {
+    WitnetV2.RadonRetrieval memory source;
     source.method = WitnetV2.DataRequestMethods.HttpPost;
     source.url = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3";
     source.body = "{\"query\":\"{pool(id:\\\"0xc2a856c3aff2110c1171b8f942256d40e980c726\\\"){token1Price}}\"}";
@@ -113,7 +113,7 @@ contract TestWitnetEncodingLib {
       keccak256(bytecode),
       keccak256(
         hex"1285020803123a68747470733a2f2f6170692e74686567726170682e636f6d2f7375626772617068732f6e616d652f756e69737761702f756e69737761702d76331a2c861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b22527b227175657279223a227b706f6f6c2869643a5c223078633261383536633361666632313130633131373162386639343232353664343065393830633732365c22297b746f6b656e3150726963657d7d227d2a190a0a757365722d6167656e74120b7769746e65742d727573742a280a0c636f6e74656e742d747970651218746578742f68746d6c3b20636861727365743d7574662d38"),
-      "bad encode(WitnetV2.DataSource)"
+      "bad encode(WitnetV2.RadonRetrieval)"
     );
   }
 

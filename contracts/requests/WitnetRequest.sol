@@ -23,7 +23,7 @@ abstract contract WitnetRequestTemplate
     function tally() virtual external view returns (bytes32);
     
     function getRadonAggregator() virtual external view returns (WitnetV2.RadonReducer memory);
-    function getRadonRetrievalByIndex(uint256) virtual external view returns (WitnetV2.DataSource memory);
+    function getRadonRetrievalByIndex(uint256) virtual external view returns (WitnetV2.RadonRetrieval memory);
     function getRadonRetrievalsCount() virtual external view returns (uint256);
     function getRadonTally() virtual external view returns (WitnetV2.RadonReducer memory);
     

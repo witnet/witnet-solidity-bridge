@@ -103,10 +103,10 @@ contract("WitnetBytecodes", (accounts) => {
 
     let btcUsdPriceFeedHash
 
-    context("verifyDataSource(..)", async () => {
+    context("verifyRadonRetrieval(..)", async () => {
       context("WitnetV2.DataRequestMethods.Rng", async () => {
         it("emits appropiate single event when verifying randomness data source for the first time", async () => {
-          const tx = await bytecodes.verifyDataSource(
+          const tx = await bytecodes.verifyRadonRetrieval(
             2, // requestMethod
             "", // requestSchema
             "", // requestFQDN
@@ -118,12 +118,12 @@ contract("WitnetBytecodes", (accounts) => {
           )
           expectEvent(
             tx.receipt,
-            "NewDataSourceHash"
+            "NewRadonRetrievalHash"
           )
           rngSourceHash = tx.logs[0].args.hash
         })
         it("emits no event when verifying already existing randomness data source", async () => {
-          const tx = await bytecodes.verifyDataSource(
+          const tx = await bytecodes.verifyRadonRetrieval(
             2, // requestMethod
             "", // requestSchema
             "", // requestFQDN
@@ -136,7 +136,7 @@ contract("WitnetBytecodes", (accounts) => {
           assert.equal(tx.logs.length, 0, "some unexpected event was emitted")
         })
         it("generates proper hash upon offchain verification of already existing randmoness source", async () => {
-          const hash = await bytecodes.verifyDataSource.call(
+          const hash = await bytecodes.verifyRadonRetrieval.call(
             2, // requestMethod
             "", // requestSchema
             "", // requestFQDN
@@ -153,7 +153,7 @@ contract("WitnetBytecodes", (accounts) => {
       context("WitnetV2.DataRequestMethods.HttpGet", async () => {
         it(
           "emits new data provider and source events when verifying a new http-get source for the first time", async () => {
-            const tx = await bytecodes.verifyDataSource(
+            const tx = await bytecodes.verifyRadonRetrieval(
               1, // requestMethod
               "HTTPs://", // requestSchema
               "api.binance.US", // requestFQDN
@@ -170,12 +170,12 @@ contract("WitnetBytecodes", (accounts) => {
             assert.equal(tx.logs[0].args.index, 1)
             expectEvent(
               tx.receipt,
-              "NewDataSourceHash"
+              "NewRadonRetrievalHash"
             )
             binanceTickerHash = tx.logs[1].args.hash
           })
         it("data source metadata gets stored as expected", async () => {
-          const ds = await bytecodes.lookupDataSource(binanceTickerHash)
+          const ds = await bytecodes.lookupRadonRetrieval(binanceTickerHash)
           assert.equal(ds.method, 1) // HTTP-GET
           assert.equal(ds.resultDataType, 4) // Integer
           assert.equal(ds.url, "https://api.binance.us/api/v3/ticker/price?symbol=\\0\\\\1\\")
@@ -184,7 +184,7 @@ contract("WitnetBytecodes", (accounts) => {
           assert.equal(ds.script, "0x841877821864696c61737450726963658218571a000f4240185b")
         })
         it("emits one single event when verifying new http-get endpoint to already existing provider", async () => {
-          const tx = await bytecodes.verifyDataSource(
+          const tx = await bytecodes.verifyRadonRetrieval(
             1, // requestMethod
             "http://", // requestSchema
             "api.binance.us", // requestFQDN
@@ -197,14 +197,14 @@ contract("WitnetBytecodes", (accounts) => {
           assert.equal(tx.logs.length, 1)
           expectEvent(
             tx.receipt,
-            "NewDataSourceHash"
+            "NewRadonRetrievalHash"
           )
         })
       })
       context("WitnetV2.DataRequestMethods.HttpPost", async () => {
         it(
           "emits new data provider and source events when verifying a new http-post source for the first time", async () => {
-            const tx = await bytecodes.verifyDataSource(
+            const tx = await bytecodes.verifyRadonRetrieval(
               3, // requestMethod
               "HTTPs://", // requestSchema
               "api.thegraph.com", // requestFQDN
@@ -224,12 +224,12 @@ contract("WitnetBytecodes", (accounts) => {
             assert.equal(tx.logs[0].args.index, 2)
             expectEvent(
               tx.receipt,
-              "NewDataSourceHash"
+              "NewRadonRetrievalHash"
             )
             uniswapToken1PriceHash = tx.logs[1].args.hash
           })
         it("data source metadata gets stored as expected", async () => {
-          const ds = await bytecodes.lookupDataSource(uniswapToken1PriceHash)
+          const ds = await bytecodes.lookupRadonRetrieval(uniswapToken1PriceHash)
           assert.equal(ds.method, 3) // HTTP-GET
           assert.equal(ds.resultDataType, 4) // Integer
           assert.equal(ds.url, "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3")

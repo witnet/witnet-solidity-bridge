@@ -151,7 +151,7 @@ library WitnetEncodingLib {
         }
     }   
 
-    function encode(WitnetV2.DataSource memory source)
+    function encode(WitnetV2.RadonRetrieval memory source)
         public pure
         returns (bytes memory)
     {
@@ -211,7 +211,7 @@ library WitnetEncodingLib {
     }
 
     function encode(
-            WitnetV2.DataSource[] memory sources,
+            WitnetV2.RadonRetrieval[] memory sources,
             string[][] memory args,
             bytes memory aggregatorInnerBytecode,
             bytes memory tallyInnerBytecode,
@@ -294,7 +294,7 @@ library WitnetEncodingLib {
         return abi.encodePacked(
             encode(uint64(sla.witnessReward), bytes1(0x10)),
             encode(uint64(sla.numWitnesses), bytes1(0x18)),
-            encode(uint64(sla.minerCommitFee), bytes1(0x20)),
+            encode(uint64(sla.minerCommitRevealFee), bytes1(0x20)),
             encode(uint64(sla.minConsensusPercentage), bytes1(0x28)),
             encode(uint64(sla.witnessCollateral), bytes1(0x30))
         );
@@ -317,7 +317,7 @@ library WitnetEncodingLib {
         return cbor.buffer.data;
     }
 
-    function replaceWildcards(WitnetV2.DataSource memory self, string[] memory args)
+    function replaceWildcards(WitnetV2.RadonRetrieval memory self, string[] memory args)
         public pure
     {
         self.url = string (WitnetBuffer.replace(bytes(self.url), args));
