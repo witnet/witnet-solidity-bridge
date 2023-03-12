@@ -20,6 +20,13 @@ interface IWitnetBytecodes {
     function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
     function bytecodeOf(bytes32 radHash, bytes32 slahHash) external view returns (bytes memory);
 
+    function hashOf(
+            bytes32[] calldata sources,
+            bytes32 aggregator,
+            bytes32 tally,
+            uint16 resultMaxSize,
+            string[][] calldata args
+        ) external pure returns (bytes32);
     function hashOf(bytes32 radHash, bytes32 slaHash) external pure returns (bytes32 drQueryHash);
     function hashWeightWitsOf(bytes32 radHash, bytes32 slaHash) external view returns (
             bytes32 drQueryHash,

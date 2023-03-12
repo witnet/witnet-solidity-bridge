@@ -182,6 +182,26 @@ contract WitnetBytecodes
         );
     }
 
+    function hashOf(
+            bytes32[] calldata _retrievalsIds,
+            bytes32 _aggregatorId,
+            bytes32 _tallyId,
+            uint16 _resultMaxSize,
+            string[][] calldata _args
+        )
+        external pure
+        virtual override
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(
+            _retrievalsIds,
+            _aggregatorId,
+            _tallyId,
+            _resultMaxSize,
+            _args
+        ));
+    }
+
     function hashOf(bytes32 _radHash, bytes32 _slaHash)
         public pure 
         virtual override
