@@ -500,7 +500,6 @@ contract WitnetBytecodes
         returns (bytes32 hash)
     {
         // calculate unique hash
-        // (TODO: order retrievalsIds)
         hash = keccak256(abi.encode(
             _retrievalsIds,
             _aggregatorId,
@@ -617,7 +616,7 @@ contract WitnetBytecodes
     
     // ================================================================================================================
     // --- Internal state-modifying methods ---------------------------------------------------------------------------
-    
+
     function __pushDataProviderSource(
             string memory _authority,
             bytes32 _retrievalHash

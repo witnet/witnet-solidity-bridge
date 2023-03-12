@@ -46,6 +46,14 @@ contract WitnetRequestFactory
         _;
     }
 
+    modifier securedRequest {
+        require(
+            __witnetRequest().slaHash != bytes32(0),
+            "WitnetRequest: unsecured"
+        );
+        _;
+    }
+
     constructor(
             IWitnetBytecodes _registry,
             bool _upgradable,
@@ -148,11 +156,6 @@ contract WitnetRequestFactory
         __data.radHash = _radHash;
         __data.slaHash = _slaHash;
         __data.template = parent.template();
-        {
-            bytes memory _bytecode = registry.bytecodeOf(_radHash, _slaHash);
-            __data.bytecode = _bytecode;
-            __data.hash = Witnet.hash(_bytecode);
-        }
         return WitnetRequest(address(this));
     }
 
@@ -390,14 +393,29 @@ contract WitnetRequestFactory
     /// ===============================================================================================================
     /// --- IWitnetRequest implementation -----------------------------------------------------------------------------
 
-    function bytecode() override external view returns (bytes memory) {
-        return __witnetRequest().bytecode;
+    function bytecode()
+        override
+        external view
+        securedRequest
+        returns (bytes memory)
+    {
+        return registry.bytecodeOf(
+            __witnetRequest().radHash,
+            __witnetRequest().slaHash
+        );
     }
 
-    function hash() override external view returns (bytes32) {
-        return __witnetRequest().hash;
+    function hash()
+        override
+        external view
+        securedRequest
+        returns (bytes32)
+    {
+        return sha256(abi.encodePacked(
+            __witnetRequest().radHash,
+            __witnetRequest().slaHash
+        ));
     }
-
 
     /// ===============================================================================================================
     /// --- WitnetRequest implementation ------------------------------------------------------------------------------
@@ -482,9 +500,6 @@ contract WitnetRequestFactory
         bytes32 _slaHash = registry.verifyRadonSLA(_sla);
         if (_slaHash != __data.slaHash) {
             if (msg.sender == __witnetRequest().curator) {
-                bytes memory _bytecode = registry.bytecodeOf(__data.radHash, _slaHash);
-                __data.bytecode = _bytecode;
-                __data.hash = Witnet.hash(_bytecode);
                 __data.slaHash = _slaHash;
                 _settled = WitnetRequest(address(this));
             } else {
