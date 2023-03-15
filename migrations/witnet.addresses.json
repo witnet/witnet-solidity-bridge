@@ -305,7 +305,7 @@
     },
     "reef.mainnet": {
       "WitnetParserLib": "0xD3e5A6F4653C5D596d16c947cfA30973C5aa9f34",
-      "WitnetPriceRouter": "0xa22AbF47Fd1eDDf7C0967C9d7fF06FB3c42B26E2",
+      "WitnetPriceRouter": "0x828d7517d9cf0d99f952d709371117ef8825e81b",
       "WitnetRandomness": "0x03e82c280ae03af908edb250d3d187db0018e501",
       "WitnetRequestBoard": "0x61E11e5f496936Ef7f9600f6D1E81b1E7c12b172"
     }
