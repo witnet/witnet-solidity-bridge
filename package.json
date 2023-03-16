@@ -59,6 +59,7 @@
     "eslint-plugin-import": "~2.26.0",
     "eslint-plugin-n": "~15.6.0",
     "eslint-plugin-promise": "~6.1.1",
+    "eth-create2": "~1.0.1",
     "eth-gas-reporter": "0.2.25",
     "js-sha256": "0.9.0",
     "solhint": "3.3.7",

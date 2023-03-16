@@ -3,13 +3,19 @@ require("dotenv").config()
 const readline = require("readline")
 const web3 = require("web3")
 
+const traceHeader = require("./traceHeader")
+const traceTx = require("./traceTx")
+
 module.exports = {
   fromAscii,
   getRealmNetworkFromArgs,
   getRealmNetworkFromString,
   isNullAddress,
+  padLeft,
   prompt,
   saveAddresses,
+  traceHeader,
+  traceTx,
 }
 
 function fromAscii (str) {
@@ -73,6 +79,14 @@ function isNullAddress (addr) {
   return !addr ||
       addr === "0x0000000000000000000000000000000000000000" ||
       !web3.utils.isAddress(addr)
+}
+
+function padLeft(str, char, size) {
+  if (str.length < size) {
+      return char.repeat((size - str.length) / char.length) + str
+  } else {
+      return str
+  }
 }
 
 async function prompt (text) {
