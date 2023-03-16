@@ -12,7 +12,6 @@ abstract contract WitnetBytecodesData
         ERC165, 
         IWitnetBytecodes
 {
-
     bytes32 private constant _WITNET_BYTECODES_DATA_SLOTHASH =
         /* keccak256("io.witnet.bytecodes.data") */
         0x673359bdfd0124f9962355e7aed2d07d989b0d4bc4cbe2c94c295e0f81427dec;
@@ -46,6 +45,8 @@ abstract contract WitnetBytecodesData
         mapping (bytes32 => WitnetV2.RadonSLA) slas;
         
         mapping (bytes32 => RadonRequest) requests;
+        mapping (bytes32 => bytes32) rads;
+
         mapping (bytes32 => bytes) radsBytecode;
         mapping (bytes32 => bytes) slasBytecode;
     }
@@ -83,5 +84,4 @@ abstract contract WitnetBytecodesData
     {
         return __database().requests[_drRetrievalHash];
     }
-
 }

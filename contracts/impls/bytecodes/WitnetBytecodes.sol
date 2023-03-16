@@ -497,18 +497,19 @@ contract WitnetBytecodes
         )
         external
         virtual override
-        returns (bytes32 hash)
+        returns (bytes32 _radHash)
     {
         // calculate unique hash
-        hash = keccak256(abi.encode(
+        bytes32 hash = keccak256(abi.encode(
             _retrievalsIds,
             _aggregatorId,
             _tallyId,
             _resultMaxSize,
             _args
         ));
+        _radHash = __database().rads[hash];
         // verify, compose and register only if hash is not yet known:
-        if (__database().requests[hash].tally == bytes32(0)) {
+        if (__database().rads[hash] == bytes32(0)) {
         
             // Check that at least one source is provided;
             if (_retrievalsIds.length == 0) {
@@ -570,8 +571,10 @@ contract WitnetBytecodes
             }
         
             // Calculate radhash and add request metadata and rad bytecode to storage:
-            bytes32 _radHash = _bytecode.hash();
-            __database().requests[hash] = RadonRequest({
+            _radHash = _bytecode.hash();
+            __database().rads[hash] = _radHash;
+            __database().radsBytecode[_radHash] = _bytecode;
+            __database().requests[_radHash] = RadonRequest({
                 aggregator: _aggregatorId,
                 args: _args,
                 radHash: _radHash,
@@ -580,7 +583,6 @@ contract WitnetBytecodes
                 retrievals: _retrievalsIds,
                 tally: _tallyId
             });
-            __database().radsBytecode[_radHash] = _bytecode;
             emit NewRadHash(_radHash);
         }
     }
@@ -588,7 +590,7 @@ contract WitnetBytecodes
     function verifyRadonSLA(WitnetV2.RadonSLA calldata _sla)
         external 
         virtual override
-        returns (bytes32 hash)
+        returns (bytes32 _slaHash)
     {
         // Validate SLA params:
         _sla.validate();
@@ -597,11 +599,11 @@ contract WitnetBytecodes
         bytes memory _bytecode = _sla.encode();
 
         // Calculate hash and add to storage if new:
-        hash = _bytecode.hash();
-        if (__database().slas[hash].numWitnesses == 0) {
-            __database().slas[hash] = _sla;
-            __database().slasBytecode[hash] = _bytecode;
-            emit NewSlaHash(hash);
+        _slaHash = _bytecode.hash();
+        if (__database().slas[_slaHash].numWitnesses == 0) {
+            __database().slas[_slaHash] = _sla;
+            __database().slasBytecode[_slaHash] = _bytecode;
+            emit NewSlaHash(_slaHash);
         }
     }
 
