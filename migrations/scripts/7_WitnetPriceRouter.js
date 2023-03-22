@@ -1,3 +1,4 @@
+const packageJson = require("../../package.json")
 const singletons = require("../witnet.singletons") 
 const utils = require("../../scripts/utils")
 
@@ -72,7 +73,12 @@ module.exports = async function (deployer, network, [, from]) {
 
   var router
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceRouterImplementation)) {
-    await deployer.deploy(WitnetPriceRouterImplementation, { from })
+    await deployer.deploy(
+      WitnetPriceRouterImplementation,
+      true,
+      utils.fromAscii(packageJson.version),
+      { from }
+    )
     router = await WitnetPriceRouterImplementation.deployed()
     addresses[ecosystem][network].WitnetPriceRouterImplementation = router.address
     if (!isDryRun) {

@@ -1,3 +1,4 @@
+const ethUtils = require("ethereumjs-util")
 const { merge } = require("lodash")
 
 const settings = require("../witnet.settings")
