@@ -2,16 +2,16 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/IWitnetPriceRouter.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-import "../interfaces/IWitnetPriceFeed.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "../interfaces/IWitnetPriceFeed.sol";
+
+import "../impls/WitnetUpgradableBase.sol";
+import "../interfaces/IWitnetPriceRouter.sol";
 
 contract WitnetPriceRouter
     is
-        IWitnetPriceRouter,
-        Ownable
+        WitnetUpgradableBase,
+        IWitnetPriceRouter
 {
     using Strings for uint256;
     
@@ -26,6 +26,64 @@ contract WitnetPriceRouter
     mapping (address => bytes32) internal __pricefeedId_;
 
     bytes32[] internal __supportedCurrencyPairs;
+
+    constructor(
+            bool _upgradable,
+            bytes32 _versionTag
+        )
+        WitnetUpgradableBase(
+            _upgradable,
+            _versionTag,
+            "io.witnet.proxiable.router"
+        )
+    {}
+
+    // ================================================================================================================
+    // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
+
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function initialize(bytes memory) 
+        public
+        override
+    {
+        address _owner = owner();
+        if (_owner == address(0)) {
+            // set owner if none set yet
+            _owner = msg.sender;
+            _transferOwnership(_owner);
+        } else {
+            // only owner can initialize:
+            if (msg.sender != _owner) {
+                revert WitnetUpgradableBase.OnlyOwner(_owner);
+            }
+        }
+
+        if (__proxiable().implementation != address(0)) {
+            // current implementation cannot be initialized more than once:
+            if(__proxiable().implementation == base()) {
+                revert WitnetUpgradableBase.AlreadyUpgraded(base());
+            }
+        }        
+        __proxiable().implementation = base();
+
+        emit Upgraded(
+            msg.sender,
+            base(),
+            codehash(),
+            version()
+        );
+    }
+
+    /// Tells whether provided address could eventually upgrade the contract.
+    function isUpgradableFrom(address _from) external view override returns (bool) {
+        address _owner = owner();
+        return (
+            // false if the WRB is intrinsically not upgradable, or `_from` is no owner
+            isUpgradable()
+                && _owner == _from
+        );
+    }
 
     // ========================================================================
     // --- Implementation of 'IERC2362' ---------------------------------------
