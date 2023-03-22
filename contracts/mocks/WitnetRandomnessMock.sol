@@ -26,7 +26,7 @@ contract WitnetRandomnessMock
             uint8 _mockRandomizeLatencyBlocks,
             uint256 _mockRandomizeFee
         )
-        WitnetRandomness(WitnetRequestBoard(payable(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)))
+        WitnetRandomness(WitnetRequestBoard(payable(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)), false, bytes32("mocked"))
     {
         __mockRandomizeLatencyBlocks = _mockRandomizeLatencyBlocks;
         __mockRandomizeFee = _mockRandomizeFee;

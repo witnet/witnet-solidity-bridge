@@ -1,10 +1,11 @@
+const packageJson = require("../../package.json")
 const singletons = require("../witnet.singletons") 
 const utils = require("../../scripts/utils")
 
 const Create2Factory = artifacts.require("Create2Factory")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 const WitnetRandomness = artifacts.require("WitnetProxy")
-const WitnetRandomnessImplementation = artifacts.require("WitnetPriceRouter")
+const WitnetRandomnessImplementation = artifacts.require("WitnetRandomness")
 
 module.exports = async function (deployer, network, [, from]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
@@ -73,7 +74,13 @@ module.exports = async function (deployer, network, [, from]) {
 
   var randomness
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRandomnessImplementation)) {
-    await deployer.deploy(WitnetRandomnessImplementation, WitnetRequestBoard.address, { from })
+    await deployer.deploy(
+      WitnetRandomnessImplementation,
+      WitnetRequestBoard.address,
+      true,
+      utils.fromAscii(packageJson.version),
+      { from }
+    )
     randomness = await WitnetRandomnessImplementation.deployed()
     addresses[ecosystem][network].WitnetRandomnessImplementation = randomness.address
     if (!isDryRun) {

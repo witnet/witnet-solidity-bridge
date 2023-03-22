@@ -4,16 +4,19 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../UsingWitnet.sol";
+import "../impls/WitnetUpgradableBase.sol";
 import "../interfaces/IWitnetRandomness.sol";
+import "../patterns/Clonable.sol";
 import "../requests/WitnetRequestRandomness.sol";
 
 /// @title WitnetRandomness: A trustless randomness generator and registry, based on the Witnet oracle. 
 /// @author Witnet Foundation.
 contract WitnetRandomness
     is
-        IWitnetRandomness,
+        Clonable,
         UsingWitnet,
-        Clonable
+        WitnetUpgradableBase,
+        IWitnetRandomness
 {
     WitnetRequestRandomness public witnetRandomnessRequest;
     uint256 public override latestRandomizeBlock;
@@ -26,10 +29,24 @@ contract WitnetRandomness
         uint256 witnetQueryId;
     }
 
+    modifier onlyDelegateCalls override(Clonable, Upgradeable) {
+        require(address(this) != base(), "WitnetRandomness: not a delegate call");
+        _;
+    }
+
     /// Include an address to specify the immutable WitnetRequestBoard entrypoint address.
     /// @param _wrb The WitnetRequestBoard immutable entrypoint address.
-    constructor(WitnetRequestBoard _wrb)
+    constructor(
+            WitnetRequestBoard _wrb,
+            bool _upgradable,
+            bytes32 _version
+        )
         UsingWitnet(_wrb)
+        WitnetUpgradableBase(
+            _upgradable, 
+            _version,
+            "io.witnet.proxiable.randomness"
+        )
     {
         witnetRandomnessRequest = new WitnetRequestRandomness();
         witnetRandomnessRequest.transferOwnership(msg.sender);
@@ -249,6 +266,54 @@ contract WitnetRandomness
 
 
     // ================================================================================================================
+    // --- 'Upgradeable' extension ------------------------------------------------------------------------------------
+
+    /// Initialize storage-context when invoked as delegatecall. 
+    /// @dev Must fail when trying to initialize same instance more than once.
+    function initialize(bytes memory) 
+        public
+        virtual override
+        onlyDelegateCalls // => we don't want the logic base contract to be ever initialized
+    {
+        if (
+            __proxiable().proxy == address(0)
+                && __proxiable().implementation == address(0)
+        ) {
+            // a proxy is being initilized for the first time ...
+            __proxiable().proxy = address(this);
+            _transferOwnership(msg.sender);
+            witnetRandomnessRequest = new WitnetRequestRandomness();
+            witnetRandomnessRequest.transferOwnership(msg.sender);
+        }
+        else {
+            // a proxy is being upgraded ...
+            // only the proxy's owner can upgrade it
+            require(
+                msg.sender == owner(),
+                "WitnetRandomness: not the owner"
+            );
+            // the implementation cannot be upgraded more than once, though
+            require(
+                __proxiable().implementation != base(),
+                "WitnetRandomness: already initialized"
+            );
+            emit Upgraded(msg.sender, base(), codehash(), version());
+        }
+        __proxiable().implementation = base();
+    }
+
+    /// Tells whether provided address could eventually upgrade the contract.
+    function isUpgradableFrom(address _from) external view override returns (bool) {
+        address _owner = owner();
+        return (
+            // false if the WRB is intrinsically not upgradable, or `_from` is no owner
+            isUpgradable()
+                && _owner == _from
+        );
+    }
+
+
+    // ================================================================================================================
     // --- 'Clonable' extension ---------------------------------------------------------------------------------------
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
@@ -306,6 +371,8 @@ contract WitnetRandomness
                 (address)
             )
         );
+        // make sure that this clone cannot ever get initialized as a proxy.
+        __proxiable().implementation = base();
     }
 
 
