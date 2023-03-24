@@ -1,14 +1,17 @@
 module.exports = {
   WitnetBytecodes: {
-    gas: 700000,
-    salt: 165414219,
+    salt: 69620662,
+  },
+  WitnetPriceRouter: {
+    salt: 35082159,
+  },
+  WitnetRandomness: {
+    salt: 103419408,
   },
   WitnetRequestBoard: {
-    gas: 700000,
-    salt: 117492393
+    salt: 72167531,
   },
   WitnetRequestFactory: {
-    gas: 750000,
-    salt: 224648038,
+    salt: 84037617,
   }
 }
