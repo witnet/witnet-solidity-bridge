@@ -34,4 +34,7 @@ module.exports = {
     timeout: 300000,
     useColors: true,
   },
+  plugins: [
+    'truffle-plugin-verify',
+  ],
 }
