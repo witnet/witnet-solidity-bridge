@@ -518,11 +518,17 @@ module.exports = {
       },
     },
     scroll: {
-      "scroll.alpha": {
+      "scroll.goerli": {
         host: "localhost",
         port: 8514,
-        network_id: 534354,
+        network_id: 534353,
         skipDryRun: true,
+        gasPrice: 2000000,
+        verify: {
+          apiUrl: 'https://blockscout.scroll.io/api',
+          apiKey: 'MY_API_KEY',
+          explorerUrl: 'https://blockscout.scroll.io/address',
+        },
       }
     },
     smartbch: {
