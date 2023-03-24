@@ -121,10 +121,10 @@ module.exports = async function (deployer, network, [, from, reporter]) {
     ) {
       try {
         const tx = await proxy.upgradeTo(
-          WitnetRequestBoard.address,
+          board.address,
           web3.eth.abi.encodeParameter(
             "address[]",
-            [ from, reporter ],
+            [ reporter, ],
           ),
           { from }
         )
@@ -132,11 +132,12 @@ module.exports = async function (deployer, network, [, from, reporter]) {
         console.info("   => transaction gas  :", tx.receipt.gasUsed)
         console.info("   > Done.")
       } catch (ex) {
-        console.error("   !! Cannot upgrade the token proxy:")
-        console.error(ex)
+        console.info("   !! Cannot upgrade the proxy:")
+        console.info(ex)
       }
     } else {
       console.info("   > Not upgraded.")
     }
   }
+  WitnetRequestBoardImplementation.address = proxy.address
 }

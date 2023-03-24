@@ -16,7 +16,9 @@ module.exports = async function (deployer, network, [,,,,,, from]) {
     await deployer.deploy(Create2Factory, { from })    
     factory = await Create2Factory.deployed()
     addresses[ecosystem][network].Create2Factory = factory.address
-    utils.saveAddresses(addresses)
+    if (!isDryRun) {
+      utils.saveAddresses(addresses)
+    }
   } else {
     factory = await Create2Factory.at(addresses[ecosystem][network].Create2Factory)
     Create2Factory.address = factory.address

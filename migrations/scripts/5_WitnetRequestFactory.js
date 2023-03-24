@@ -103,10 +103,18 @@ module.exports = async function (deployer, network, [, from]) {
       isDryRun ||
         ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
     ) {
-      await proxy.upgradeTo(factory.address, "0x", { from })
-      console.info("   > Done.")
+      try {
+        var tx = await proxy.upgradeTo(factory.address, "0x", { from })
+        console.info("   => transaction hash :", tx.receipt.transactionHash)
+        console.info("   => transaction gas  :", tx.receipt.gasUsed)
+        console.info("   > Done.")
+      } catch (ex) {
+        console.info("   !! Cannot upgrade the proxy:")
+        console.info(ex)
+      }
     } else {
       console.info("   > Not upgraded.")
     }
   }
+  WitnetRequestFactoryImplementation.address = proxy.address
 }

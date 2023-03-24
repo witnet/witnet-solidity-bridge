@@ -1,3 +1,5 @@
+const ethUtils = require('ethereumjs-util');
+
 const packageJson = require("../../package.json")
 const singletons = require("../witnet.singletons") 
 const utils = require("../../scripts/utils")
@@ -99,10 +101,18 @@ module.exports = async function (deployer, network, [, from]) {
       isDryRun ||
         ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
     ) {
-      await proxy.upgradeTo(router.address, "0x", { from })
-      console.info("   > Done.")
+      try { 
+        var tx = await proxy.upgradeTo(router.address, "0x", { from })
+        console.info("   => transaction hash :", tx.receipt.transactionHash)
+        console.info("   => transaction gas  :", tx.receipt.gasUsed)
+        console.info("   > Done.")
+      } catch (ex) {
+        console.info("   !! Cannot upgrade the proxy:")
+        console.info(ex)
+      }
     } else {
       console.info("   > Not upgraded.")
     }
   }
+  WitnetPriceRouterImplementation.address = proxy.address
 }
