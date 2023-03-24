@@ -37,12 +37,12 @@ interface IWitnetBytecodes {
     function lookupDataProvider(uint256 index) external view returns (string memory, uint);
     function lookupDataProviderIndex(string calldata authority) external view returns (uint);
     function lookupDataProviderSources(uint256 index, uint256 offset, uint256 length) external view returns (bytes32[] memory);
+
+    function lookupRadonReducer(bytes32 hash) external view returns (WitnetV2.RadonReducer memory);
     
     function lookupRadonRetrieval(bytes32 hash) external view returns (WitnetV2.RadonRetrieval memory);
     function lookupRadonRetrievalArgsCount(bytes32 hash) external view returns (uint8);
     function lookupRadonRetrievalResultDataType(bytes32 hash) external view returns (WitnetV2.RadonDataTypes);
-    
-    function lookupRadonReducer(bytes32 hash) external view returns (WitnetV2.RadonReducer memory);
     
     function lookupRadonRequestAggregator(bytes32 radHash) external view returns (WitnetV2.RadonReducer memory);
     function lookupRadonRequestResultMaxSize(bytes32 radHash) external view returns (uint256);
