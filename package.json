@@ -30,6 +30,7 @@
     "fmt": "npm run fmt:js && npm run fmt:sol",
     "migrate": "npm run clean:build && node ./scripts/migrate.js 2>&1",
     "networks": "node ./scripts/networks.js 2>&1",
+    "ops:rng:sla": "truffle migrate --migrations_directory ./migrations/ops/rng/sla --network",
     "test": "npm run clean && truffle test"
   },
   "author": "Witnet Foundation <info@witnet.foundation>",
