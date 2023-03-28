@@ -87,7 +87,7 @@
         "celo.mainnet": {
             "WitnetLib": "0x46FF6e05fd0a5fb4D794B99eCAE41c43f4D62d15",
             "WitnetPriceRouter": "0x931673904eB6E69D775e35F522c0EA35575297Cb",
-            "WitnetRandomness": "0x3D7Ccf6518deBE3d2fd20c4b6AEc3FD904c0Ad29",
+            "WitnetRandomness": "0x6023fF93A3b37791a94B15D6AEaD488933b01Db3",
             "WitnetRequestBoard": "0x03E709E6422E30C033456FCde38C70A12553E468"
         }
     },
