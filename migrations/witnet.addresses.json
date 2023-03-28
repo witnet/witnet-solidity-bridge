@@ -151,6 +151,12 @@
             "WitnetPriceRouter": "0x9E943Ab1FD0D35B3BaDe31AA78D60C485EA1a604",
             "WitnetRandomness": "0xD9465D38f50f364b3263Cb219e58d4dB2D584530",
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431"
+        },
+        "dogechain.mainnet": {
+            "WitnetLib": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
+            "WitnetPriceRouter": "0xD7f7933992c25A504e9Ddf7e76a3c1D6c432b25D",
+            "WitnetRandomness": "0xD7f7933992c25A504e9Ddf7e76a3c1D6c432b25D",
+            "WitnetRequestBoard": "0xF2712e7114A237625EFC8bBA6a6ed1Bb8b6029c9"
         }
     },
     "harmony": {
@@ -335,7 +341,7 @@
             "WitnetPriceRouterImplementation": "0xBfFA2ec6225390C517A1bEB83b27a171C6734294",
             "WitnetProxy": "0x840bafDC40D88F54Db41327fe1C85241f9151243",
             "WitnetRandomness": "0x123456f4De47e1947210CD62e2f8CF9c2FeD9d4d",
-            "WitnetRandomnessImplementation": "0x65772461641A4A6E8B10c81bae1a132E04e77262",
+            "WitnetRandomnessImplementation": "0x6F68A4d58cEd8e094b42511350527Ed628ACB970",
             "WitnetRequestBoard": "0x0000007F26760C151AC86695D5846D21e7828B67",
             "WitnetRequestBoardImplementation": "0x6bF6F65Ad0859e9Ee869DAD252a29c9daAa27449",
             "WitnetRequestFactory": "0xFaCADE177178C6E0C6914CAe220F2824fF5587B8",
