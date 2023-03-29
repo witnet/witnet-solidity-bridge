@@ -272,11 +272,11 @@ abstract contract WitnetRequestMalleableBase
         __storage().template = _template;
 
         WitnetRequestWitnessingParams storage _params = __storage().params;
-        _params.numWitnesses = 2;
+        _params.numWitnesses = 7;
         _params.minWitnessingConsensus = 51;
-        _params.witnessingCollateral = 10 ** 9;      // 1 WIT
-        _params.witnessingReward = 5 * 10 ** 5;      // 0.5 milliWITs
-        _params.witnessingUnitaryFee = 25 * 10 ** 4; // 0.25 milliWITs
+        _params.witnessingCollateral = 15 * 10 ** 9;  // 15 WIT
+        _params.witnessingReward = 15 * 10 ** 7;      // 150 mWIT
+        _params.witnessingUnitaryFee = 10 ** 7; // 10 mWIT
         
         _malleateBytecode(
             _params.numWitnesses,
