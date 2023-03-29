@@ -341,6 +341,21 @@ module.exports = {
         skipDryRun: true,
       },
     },
+    elastos: {
+      "elastos.testnet": {
+        host: "localhost",
+        port: 8513,
+        network_id: 21,
+        skipDryRun: true,
+        verify: {
+          apiUrl: 'https://esc-testnet.elastos.io/api',
+          browserURL: 'https://esc-testnet.elastos.io/address',
+          // apiKey: 'D75NV1MFN41XRSE9SWV9BA3QZKUD1U9RM3',
+          apiURL: 'https://esc-testnet.elastos.io/api',
+          explorerUrl: 'https://esc-testnet.elastos.io/address',
+        },
+      },
+    },
     harmony: {
       "harmony.testnet#0": {
         host: "localhost",
