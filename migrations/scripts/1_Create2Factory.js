@@ -2,6 +2,7 @@ const addresses = require("../witnet.addresses")
 const utils = require("../../scripts/utils")
 
 const Create2Factory = artifacts.require("Create2Factory")
+const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (deployer, network, [,,,,,, from]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
@@ -25,6 +26,11 @@ module.exports = async function (deployer, network, [,,,,,, from]) {
     utils.traceHeader(`Skipping 'Create2Factory'`)
     console.info("   > Contract address:", factory.address)
     console.info()
+  }
+  console.log(addresses[ecosystem][network]?.WitnetProxy)
+  if (addresses[ecosystem][network]?.WitnetProxy === "") {
+    await deployer.deploy(WitnetProxy, { from })
+    addresses[ecosystem][network].WitnetProxy = WitnetProxy.address
   }
   if (!isDryRun) {
     utils.saveAddresses(addresses)
