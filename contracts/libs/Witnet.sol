@@ -13,8 +13,15 @@ library Witnet {
 
     /// @notice Witnet function that computes the hash of a CBOR-encoded Data Request.
     /// @param _bytecode CBOR-encoded RADON.
-    function hash(bytes memory _bytecode) internal pure returns (bytes32) {
-        return sha256(_bytecode);
+    function hash(bytes memory _bytecode) internal view returns (bytes32) {
+        if (
+            block.chainid != 1101           // Polygon zkEVM mainnet
+                && block.chainid != 1442    // Polygon zkEVM testnet
+        ) {
+            return sha256(_bytecode);
+        } else {
+            return 0x0;
+        }
     }
 
     /// Struct containing both request and response data related to every query posted to the Witnet Request Board

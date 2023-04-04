@@ -23,7 +23,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
     ? "default"
     : utils.getRealmNetworkFromArgs()[0]
 
-  const artifactsName = merge(settings.artifacts.default, settings.artifacts[realm])
+  const artifactsName = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRequestBoardImplementation = artifacts.require(artifactsName.WitnetRequestBoard)
   
   var board

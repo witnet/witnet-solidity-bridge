@@ -476,7 +476,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @param _queryId The unique query identifier.
     function readRequestBytecode(uint256 _queryId)
         external view
-        override
+        virtual override
         returns (bytes memory _bytecode)
     {
         require(

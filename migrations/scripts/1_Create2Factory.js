@@ -27,7 +27,6 @@ module.exports = async function (deployer, network, [,,,,,, from]) {
     console.info("   > Contract address:", factory.address)
     console.info()
   }
-  console.log(addresses[ecosystem][network]?.WitnetProxy)
   if (addresses[ecosystem][network]?.WitnetProxy === "") {
     await deployer.deploy(WitnetProxy, { from })
     addresses[ecosystem][network].WitnetProxy = WitnetProxy.address

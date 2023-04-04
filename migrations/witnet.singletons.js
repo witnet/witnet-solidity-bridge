@@ -1,17 +1,17 @@
 module.exports = {
   WitnetBytecodes: {
-    salt: 69620662,
+    salt: 178366606,
   },
   WitnetPriceRouter: {
-    salt: 35082159,
+    salt: 7148124,
   },
   WitnetRandomness: {
-    salt: 103419408,
+    salt: 36274595,
   },
   WitnetRequestBoard: {
-    salt: 72167531,
+    salt: 21096971,
   },
   WitnetRequestFactory: {
-    salt: 84037617,
+    salt: 222309,
   }
 }

@@ -14,6 +14,9 @@ module.exports = {
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
+    "polygon.zkevm.goerli": {
+      WitnetRequestBoard: "WitnetRequestBoardTrustableZkEvm",
+    },
     reef: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
     },
@@ -149,7 +152,7 @@ module.exports = {
   compilers: {
     default: {
       solc: {
-        version: "0.8.13",
+        version: "0.8.17",
         settings: {
           optimizer: {
             enabled: true,
@@ -515,6 +518,17 @@ module.exports = {
         network_id: 137,
         skipDryRun: true,
       },
+      "polygon.zkevm.goerli": {
+        host:"localhost",
+        port: 8512,
+        gas: 7000000,
+        network_id: 1442,
+        skipDryRun: true,
+        verify: {
+          apiUrl: 'http://api-testnet-zkevm.polygonscan.com/api',
+          explorerUrl: 'https://testnet-zkevm.polygonscan.com/address',
+        }
+      }
     },
     reef: {
       "reef.testnet": {
