@@ -521,7 +521,6 @@ module.exports = {
       "polygon.zkevm.goerli": {
         host:"localhost",
         port: 8512,
-        gas: 7000000,
         network_id: 1442,
         skipDryRun: true,
         verify: {

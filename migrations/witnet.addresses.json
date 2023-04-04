@@ -332,6 +332,16 @@
             "WitnetPriceRouter": "0x3806311c7138ddF2bAF2C2093ff3633E5A73AbD4",
             "WitnetRandomness": "0xc8c0d4dB2D7801D6E2A863934597cFD31689f7D5",
             "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
+        },
+        "polygon.zkevm.goerli": {
+            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetLib": "0x1b91eAB33362f10A5F803Fe3f0d181F42caFaac3",
+            "WitnetProxy": "0x840bafDC40D88F54Db41327fe1C85241f9151243",
+            "WitnetEncodingLib": "0xf6d52770453166de85B6B6260Cf22196bC460E88",
+            "WitnetPriceRouter": "0xFEeEed553b5a5C236EDd047BB034EF303d36f827",
+            "WitnetRequestBoard": "0x0000007D51dA8BF5cA07Fdd1E0970fa3fD8B92bD",
+            "WitnetPriceRouterImplementation": "0xBfFA2ec6225390C517A1bEB83b27a171C6734294",
+            "WitnetRequestBoardImplementation": "0xB4f1f8E27799256ec95C5b5A8d2A5722Bd542E69"
         }
     },
     "reef": {
