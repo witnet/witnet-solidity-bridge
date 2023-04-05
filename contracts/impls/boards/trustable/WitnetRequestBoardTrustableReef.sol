@@ -18,11 +18,17 @@ contract WitnetRequestBoardTrustableReef
         WitnetRequestBoardTrustableDefault
 {           
     constructor(
+            IWitnetBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasLimit
         )
-        WitnetRequestBoardTrustableDefault(_upgradable, _versionTag, _reportResultGasLimit)
+        WitnetRequestBoardTrustableDefault(
+            _registry,
+            _upgradable,
+            _versionTag,
+            _reportResultGasLimit
+        )
     {}
     
     // ================================================================================================================

@@ -26,10 +26,9 @@ interface IWitnetRequestBoardRequestor {
     /// @dev - provided reward is too low.
     /// @dev - provided script is zero address.
     /// @dev - provided script bytecode is empty.
-    /// @param _addr The address of the IWitnetRequest contract that can provide the actual Data Request bytecode.
-    /// @return _queryId An unique query identifier.
-    function postRequest(IWitnetRequest _addr) external payable returns (uint256 _queryId);
-
+    /// @param addr The address of the IWitnetRequest contract that can provide the actual Data Request bytecode.
+    /// @return _queryId Unique query identifier.
+    function postRequest(IWitnetRequest addr) external payable returns (uint256 _queryId);
     /// Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Updates request `gasPrice` in case this method is called with a higher 
     /// @dev gas price value than the one used in previous calls to `postRequest` or

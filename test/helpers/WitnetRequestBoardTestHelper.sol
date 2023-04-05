@@ -45,7 +45,7 @@ contract WitnetRequestBoardTestHelper
     returns(uint256 _id)
   {
     _id = super.postRequest(_request);
-    _state().queries[_id].response.drTxHash = keccak256("hello");
-    _state().queries[_id].response.cborBytes = "hello";
+    __storage().queries[_id].response.drTxHash = keccak256("hello");
+    __storage().queries[_id].response.cborBytes = "hello";
   }
 }

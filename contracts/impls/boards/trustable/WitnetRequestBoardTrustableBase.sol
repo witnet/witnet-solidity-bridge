@@ -27,12 +27,14 @@ abstract contract WitnetRequestBoardTrustableBase
     using WitnetLib for Witnet.Result;
     
     constructor(
+            IWitnetBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag,
             address _currency
         )
         Payable(_currency)
         WitnetUpgradableBase(_upgradable, _versionTag, "io.witnet.proxiable.board")
+        WitnetRequestBoard(_registry)
     {}
 
     receive() external payable {
@@ -64,11 +66,11 @@ abstract contract WitnetRequestBoardTrustableBase
         public
         override
     {
-        address _owner = _state().owner;
+        address _owner = __storage().owner;
         if (_owner == address(0)) {
             // set owner if none set yet
             _owner = msg.sender;
-            _state().owner = _owner;
+            __storage().owner = _owner;
         } else {
             // only owner can initialize:
             require(
@@ -77,14 +79,14 @@ abstract contract WitnetRequestBoardTrustableBase
             );
         }
 
-        if (_state().base != address(0)) {
+        if (__storage().base != address(0)) {
             // current implementation cannot be initialized more than once:
             require(
-                _state().base != base(),
+                __storage().base != base(),
                 "WitnetRequestBoardTrustableBase: already upgraded"
             );
         }        
-        _state().base = base();
+        __storage().base = base();
 
         emit Upgraded(msg.sender, base(), codehash(), version());
 
@@ -94,7 +96,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
     /// Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address _from) external view override returns (bool) {
-        address _owner = _state().owner;
+        address _owner = __storage().owner;
         return (
             // false if the WRB is intrinsically not upgradable, or `_from` is no owner
             isUpgradable()
@@ -112,7 +114,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (address)
     {
-        return _state().owner;
+        return __storage().owner;
     }
 
     /// Transfers ownership.
@@ -121,9 +123,9 @@ abstract contract WitnetRequestBoardTrustableBase
         virtual override
         onlyOwner
     {
-        address _owner = _state().owner;
+        address _owner = __storage().owner;
         if (_newOwner != _owner) {
-            _state().owner = _newOwner;
+            __storage().owner = _newOwner;
             emit OwnershipTransferred(_owner, _newOwner);
         }
     }
@@ -269,7 +271,7 @@ abstract contract WitnetRequestBoardTrustableBase
         uint _batchSize = _batchResults.length;
         for ( uint _i = 0; _i < _batchSize; _i ++) {
             BatchResult memory _result = _batchResults[_i];
-            if (_getQueryStatus(_result.queryId) != Witnet.QueryStatus.Posted) {
+            if (_statusOf(_result.queryId) != Witnet.QueryStatus.Posted) {
                 if (_verbose) {
                     emit BatchReportError(
                         _result.queryId,
@@ -333,13 +335,13 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (Witnet.Response memory _response)
     {
-        Witnet.Query storage __query = _state().queries[_queryId];
+        Witnet.Query storage __query = __storage().queries[_queryId];
         require(
             msg.sender == __query.from,
             "WitnetRequestBoardTrustableBase: only requester"
         );
         _response = __query.response;
-        delete _state().queries[_queryId];
+        delete __storage().queries[_queryId];
         emit DeletedQuery(_queryId, msg.sender);
     }
 
@@ -348,33 +350,35 @@ abstract contract WitnetRequestBoardTrustableBase
     /// result to this request.
     /// @dev Fails if:
     /// @dev - provided reward is too low.
-    /// @dev - provided script is zero address.
-    /// @dev - provided script bytecode is empty.
-    /// @param _addr The address of a IWitnetRequest contract, containing the actual Data Request seralized bytecode.
+    /// @dev - provided address is zero.
+    /// @param _requestAddr The address of a IWitnetRequest contract, containing the actual Data Request seralized bytecode.
     /// @return _queryId An unique query identifier.
-    function postRequest(IWitnetRequest _addr)
-        public payable
+    function postRequest(IWitnetRequest _requestAddr)
         virtual override
+        public payable
         returns (uint256 _queryId)
     {
         uint256 _value = _getMsgValue();
         uint256 _gasPrice = _getGasPrice();
 
-        // Checks the tally reward is covering gas cost
-        uint256 minResultReward = estimateReward(_gasPrice);
-        require(_value >= minResultReward, "WitnetRequestBoardTrustableBase: reward too low");
+        // check base reward
+        uint256 _baseReward = estimateReward(_gasPrice);
+        require(_value >= _baseReward, "WitnetRequestBoardTrustableBase: reward too low");
 
         // Validates provided script:
-        require(address(_addr) != address(0), "WitnetRequestBoardTrustableBase: null script");
-        bytes memory _bytecode = _addr.bytecode();
-        require(_bytecode.length > 0, "WitnetRequestBoardTrustableBase: empty script");
+        require(address(_requestAddr) != address(0), "WitnetRequestBoardTrustableBase: no request");
 
-        _queryId = ++ _state().numQueries;
-        _state().queries[_queryId].from = msg.sender;
+        _queryId = ++ __storage().numQueries;
+        __storage().queries[_queryId].from = msg.sender;
 
-        Witnet.Request storage _request = _getRequestData(_queryId);
-        _request.addr = _addr;
-        _request.hash = _bytecode.hash();
+        Witnet.Request storage _request = __request(_queryId);
+        _request.addr = address(_requestAddr);
+        _request.gasprice = _gasPrice;
+        _request.reward = _value;
+
+        // Let observers know that a new request has been posted
+        emit PostedRequest(_queryId, msg.sender);
+    }
         _request.gasprice = _gasPrice;
         _request.reward = _value;
 
@@ -395,7 +399,7 @@ abstract contract WitnetRequestBoardTrustableBase
         virtual override      
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        Witnet.Request storage _request = _getRequestData(_queryId);
+        Witnet.Request storage _request = __request(_queryId);
 
         uint256 _newReward = _request.reward + _getMsgValue();
         uint256 _newGasPrice = _getGasPrice();
@@ -430,7 +434,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (uint256)
     {
-        return _state().numQueries + 1;
+        return __storage().numQueries + 1;
     }
 
     /// Gets the whole Query data contents, if any, no matter its current status.
@@ -439,7 +443,7 @@ abstract contract WitnetRequestBoardTrustableBase
       override
       returns (Witnet.Query memory)
     {
-        return _state().queries[_queryId];
+        return __storage().queries[_queryId];
     }
 
     /// Gets current status of given query.
@@ -448,7 +452,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (Witnet.QueryStatus)
     {
-        return _getQueryStatus(_queryId);
+        return _statusOf(_queryId);
 
     }
 
@@ -462,11 +466,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (Witnet.Request memory _request)
     {
-        Witnet.Query storage __query = _state().queries[_queryId];
-        _request = __query.request;
-        if (__query.from != address(0)) {
-            _request.requester = __query.from;
-        }
+        return __request(_queryId);
     }
     
     /// Retrieves the serialized bytecode of a previously posted Witnet Data Request.
@@ -480,18 +480,10 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (bytes memory _bytecode)
     {
         require(
-            _getQueryStatus(_queryId) != Witnet.QueryStatus.Unknown,
+            _statusOf(_queryId) != Witnet.QueryStatus.Unknown,
             "WitnetRequestBoardTrustableBase: not yet posted"
         );
-        Witnet.Request storage _request = _getRequestData(_queryId);
-        if (address(_request.addr) != address(0)) {
-            // if DR's request contract address is not zero,
-            // we assume the DR has not been deleted, so
-            // DR's bytecode can still be fetched:
-            _bytecode = _request.addr.bytecode();
-            require(
-                _bytecode.hash() == _request.hash,
-                "WitnetRequestBoardTrustableBase: bytecode changed after posting"
+        Witnet.Request storage _request = __request(_queryId);
             );
         } 
     }
@@ -507,7 +499,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (uint256)
     {
-        return _state().queries[_queryId].request.gasprice;
+        return __storage().queries[_queryId].request.gasprice;
     }
 
     /// Retrieves the reward currently set for a previously posted request.
@@ -520,7 +512,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (uint256)
     {
-        return _state().queries[_queryId].request.reward;
+        return __storage().queries[_queryId].request.reward;
     }
 
     /// Retrieves the Witnet-provided result, and metadata, to a previously posted request.    
@@ -532,7 +524,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (Witnet.Response memory _response)
     {
-        return _getResponseData(_queryId);
+        return __response(_queryId);
     }
 
     /// Retrieves the hash of the Witnet transaction that actually solved the referred query.
@@ -544,7 +536,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (bytes32)
     {
-        return _getResponseData(_queryId).drTxHash;
+        return __response(_queryId).drTxHash;
     }
 
     /// Retrieves the address that reported the result to a previously-posted request.
@@ -556,7 +548,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (address)
     {
-        return _getResponseData(_queryId).reporter;
+        return __response(_queryId).reporter;
     }
 
     /// Retrieves the Witnet-provided CBOR-bytes result of a previously posted request.
@@ -568,7 +560,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (Witnet.Result memory)
     {
-        Witnet.Response storage _response = _getResponseData(_queryId);
+        Witnet.Response storage _response = __response(_queryId);
         return WitnetLib.resultFromCborBytes(_response.cborBytes);
     }
 
@@ -581,7 +573,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (uint256)
     {
-        return _getResponseData(_queryId).timestamp;
+        return __response(_queryId).timestamp;
     }
 
 
@@ -800,20 +792,20 @@ abstract contract WitnetRequestBoardTrustableBase
         internal
         returns (uint256 _reward)
     {
-        Witnet.Query storage __query = _state().queries[_queryId];
-        Witnet.Request storage __request = __query.request;
-        Witnet.Response storage __response = __query.response;
+        Witnet.Query storage _query = __query(_queryId);
+        Witnet.Request storage _request = _query.request;
+        Witnet.Response storage _response = _query.response;
 
         // solhint-disable not-rely-on-time
-        __response.timestamp = _timestamp;
-        __response.drTxHash = _drTxHash;
-        __response.reporter = msg.sender;
-        __response.cborBytes = _cborBytes;
+        _response.timestamp = _timestamp;
+        _response.drTxHash = _drTxHash;
+        _response.reporter = msg.sender;
+        _response.cborBytes = _cborBytes;
 
         // return request latest reward
-        _reward = __request.reward;
+        _reward = _request.reward;
 
         // Request data won't be needed anymore, so it can just get deleted right now:  
-        delete __query.request;
+        delete _query.request;
     }
 }

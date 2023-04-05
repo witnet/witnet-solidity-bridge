@@ -25,11 +25,17 @@ contract WitnetRequestBoardTrustableOvm2
     OVM_GasPriceOracle immutable public gasPriceOracleL1;
 
     constructor(
-        bool _upgradable,
-        bytes32 _versionTag,
-        uint256 _reportResultGasLimit
-    )
-        WitnetRequestBoardTrustableDefault(_upgradable, _versionTag, _reportResultGasLimit)
+            IWitnetBytecodes _registry,
+            bool _upgradable,
+            bytes32 _versionTag,
+            uint256 _reportResultGasLimit
+        )
+        WitnetRequestBoardTrustableDefault(
+            _registry,
+            _upgradable,
+            _versionTag,
+            _reportResultGasLimit
+        )
     {
         gasPriceOracleL1 = OVM_GasPriceOracle(0x420000000000000000000000000000000000000F);
     }

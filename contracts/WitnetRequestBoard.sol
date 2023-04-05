@@ -8,6 +8,7 @@ import "./interfaces/IWitnetRequestBoardReporter.sol";
 import "./interfaces/IWitnetRequestBoardRequestor.sol";
 import "./interfaces/IWitnetRequestBoardView.sol";
 import "./interfaces/IWitnetRequestParser.sol";
+import "./interfaces/V2/IWitnetBytecodes.sol";
 
 /// @title Witnet Request Board functionality base contract.
 /// @author The Witnet Foundation.
@@ -17,4 +18,9 @@ abstract contract WitnetRequestBoard is
     IWitnetRequestBoardRequestor,
     IWitnetRequestBoardView,
     IWitnetRequestParser
-{}
+{
+    IWitnetBytecodes immutable public registry;
+    constructor (IWitnetBytecodes _registry) {
+        registry = _registry;
+    }
+}

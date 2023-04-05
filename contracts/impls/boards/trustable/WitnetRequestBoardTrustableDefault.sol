@@ -17,16 +17,22 @@ contract WitnetRequestBoardTrustableDefault
     is 
         Destructible,
         WitnetRequestBoardTrustableBase
-{  
+{
     uint256 internal immutable _ESTIMATED_REPORT_RESULT_GAS;
 
     constructor(
-        bool _upgradable,
-        bytes32 _versionTag,
-        uint256 _reportResultGasLimit
-    )
-        WitnetRequestBoardTrustableBase(_upgradable, _versionTag, address(0))
-    {
+            IWitnetBytecodes _registry,
+            bool _upgradable,
+            bytes32 _versionTag,
+            uint256 _reportResultGasLimit
+        )
+        WitnetRequestBoardTrustableBase(
+            _registry, 
+            _upgradable, 
+            _versionTag, 
+            address(0)
+        )
+    {   
         _ESTIMATED_REPORT_RESULT_GAS = _reportResultGasLimit;
     }
 
