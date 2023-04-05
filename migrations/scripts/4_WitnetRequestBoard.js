@@ -6,6 +6,7 @@ const singletons = require("../witnet.singletons")
 const utils = require("../../scripts/utils")
 
 const Create2Factory = artifacts.require("Create2Factory")
+const WitnetBytecodes = artifacts.require("WitnetBytecodes")
 const WitnetLib = artifacts.require("WitnetLib")
 const WitnetProxy = artifacts.require("WitnetProxy")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
@@ -31,6 +32,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
     await deployer.link(WitnetLib, WitnetRequestBoardImplementation);
     await deployer.deploy(
       WitnetRequestBoardImplementation,
+      WitnetBytecodes.address,
       ...(
         // if defined, use network-specific constructor parameters:
         settings.constructorParams[network]?.WitnetRequestBoard ||
@@ -140,4 +142,5 @@ module.exports = async function (deployer, network, [, from, reporter]) {
     }
   }
   WitnetRequestBoardImplementation.address = proxy.address
+
 }
