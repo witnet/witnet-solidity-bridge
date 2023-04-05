@@ -379,6 +379,35 @@ abstract contract WitnetRequestBoardTrustableBase
         // Let observers know that a new request has been posted
         emit PostedRequest(_queryId, msg.sender);
     }
+
+    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// result to this request.
+    /// @dev Fails if:
+    /// @dev - provided reward is too low.
+    /// @param _radHash The radHash of the Witnet Data Request.
+    /// @param _slaHash The slaHash of the Witnet Data Request.
+    function postRequest(bytes32 _radHash, bytes32 _slaHash)
+        virtual override
+        public payable
+        returns (uint256 _queryId)
+    {
+        uint256 _value = _getMsgValue();
+        uint256 _gasPrice = _getGasPrice();
+
+        // check base reward
+        uint256 _baseReward = estimateReward(_gasPrice);
+        require(
+            _value >= _baseReward,
+            "WitnetRequestBoardTrustableBase: reward too low"
+        );
+
+        _queryId = ++ __storage().numQueries;
+        __storage().queries[_queryId].from = msg.sender;
+
+        Witnet.Request storage _request = __request(_queryId);
+        _request.radHash = _radHash;
+        _request.slaHash = _slaHash;
         _request.gasprice = _gasPrice;
         _request.reward = _value;
 
@@ -484,8 +513,14 @@ abstract contract WitnetRequestBoardTrustableBase
             "WitnetRequestBoardTrustableBase: not yet posted"
         );
         Witnet.Request storage _request = __request(_queryId);
+        if (_request.addr != address(0)) {
+            _bytecode = IWitnetRequest(_request.addr).bytecode();
+        } else if (_request.radHash != bytes32(0)) {
+            _bytecode = registry.bytecodeOf(
+                _request.radHash,
+                _request.slaHash
             );
-        } 
+        }
     }
 
     /// Retrieves the gas price that any assigned reporter will have to pay when reporting 

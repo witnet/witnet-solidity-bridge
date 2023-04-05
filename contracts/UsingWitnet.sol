@@ -81,6 +81,24 @@ abstract contract UsingWitnet {
         _id = witnet.postRequest{value: _reward}(_request);
     }
 
+    /// Send a new request to the Witnet network with transaction value as a reward.
+    /// @param _radHash Unique hash of some pre-registered Witnet Radon Request.
+    /// @param _slaHash Unique hash of some pre-registered Witnet Radon SLA.
+    /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
+    /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
+    function _witnetPostRequest(bytes32 _radHash, bytes32 _slaHash)
+        internal
+        virtual
+        returns (uint256 _id, uint256 _reward)
+    {
+        _reward = _witnetEstimateReward();
+        require(
+            _reward <= msg.value,
+            "UsingWitnet: reward too low"
+        );
+        _id = witnet.postRequest{value: _reward}(_radHash, _slaHash);
+    }
+
     /// Upgrade the reward for a previously posted request.
     /// @dev Call to `upgradeReward` function in the WitnetRequestBoard contract.
     /// @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.

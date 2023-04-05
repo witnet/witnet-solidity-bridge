@@ -29,6 +29,16 @@ interface IWitnetRequestBoardRequestor {
     /// @param addr The address of the IWitnetRequest contract that can provide the actual Data Request bytecode.
     /// @return _queryId Unique query identifier.
     function postRequest(IWitnetRequest addr) external payable returns (uint256 _queryId);
+
+    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// result to this request.
+    /// @dev Fails if, provided reward is too low.
+    /// @param radHash The radHash of the Witnet Data Request.
+    /// @param slaHash The slaHash of the Witnet Data Request.
+    /// @return _queryId Unique query identifier.
+    function postRequest(bytes32 radHash, bytes32 slaHash) external payable returns (uint256 _queryId);
+    
     /// Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Updates request `gasPrice` in case this method is called with a higher 
     /// @dev gas price value than the one used in previous calls to `postRequest` or
