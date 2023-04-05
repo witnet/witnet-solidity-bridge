@@ -360,19 +360,19 @@
     },
     "scroll": {
         "scroll.goerli": {
-            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
-            "WitnetBytecodes": "0x000000b3B867AEF034469bBA55cAD342A4E1A305",
-            "WitnetBytecodesImplementation": "0x364E2b91a4C7563288C3ccF7256BA172935CC550",
             "WitnetEncodingLib": "0xf6d52770453166de85B6B6260Cf22196bC460E88",
             "WitnetLib": "0x1b91eAB33362f10A5F803Fe3f0d181F42caFaac3",
-            "WitnetPriceRouter": "0xfeeeed88838b4fa4EE46D05c2148e645058f3C28",
-            "WitnetPriceRouterImplementation": "0xBfFA2ec6225390C517A1bEB83b27a171C6734294",
             "WitnetProxy": "0x840bafDC40D88F54Db41327fe1C85241f9151243",
+            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetBytecodes": "0x000000b3B867AEF034469bBA55cAD342A4E1A305",
+            "WitnetPriceRouter": "0xfeeeed88838b4fa4EE46D05c2148e645058f3C28",
             "WitnetRandomness": "0x123456f4De47e1947210CD62e2f8CF9c2FeD9d4d",
-            "WitnetRandomnessImplementation": "0x6F68A4d58cEd8e094b42511350527Ed628ACB970",
             "WitnetRequestBoard": "0x0000007F26760C151AC86695D5846D21e7828B67",
-            "WitnetRequestBoardImplementation": "0x6bF6F65Ad0859e9Ee869DAD252a29c9daAa27449",
             "WitnetRequestFactory": "0xFaCADE177178C6E0C6914CAe220F2824fF5587B8",
+            "WitnetBytecodesImplementation": "0x364E2b91a4C7563288C3ccF7256BA172935CC550",
+            "WitnetPriceRouterImplementation": "0xBfFA2ec6225390C517A1bEB83b27a171C6734294",
+            "WitnetRandomnessImplementation": "0x6F68A4d58cEd8e094b42511350527Ed628ACB970",
+            "WitnetRequestBoardImplementation": "0xE490b89AfADE571d8Afa158446C603D530608ceA",
             "WitnetRequestFactoryImplementation": "0xb5F3c9Dc6Ca7C1078cE5c51c1cE030D6BEEd57E2"
         }
     },
