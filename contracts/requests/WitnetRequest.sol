@@ -28,6 +28,7 @@ abstract contract WitnetRequestTemplate
     function getRadonTally() virtual external view returns (WitnetV2.RadonReducer memory);
     
     function buildRequest(string[][] calldata args) virtual external returns (WitnetRequest);
+    function verifyRadonRequest(string[][] calldata args) virtual external returns (bytes32);
 }
 
 abstract contract WitnetRequest

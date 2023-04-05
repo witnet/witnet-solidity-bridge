@@ -732,6 +732,27 @@ contract WitnetRequestFactory
         emit WitnetRequestBuilt(_request, _radHash, _args);
     }
 
+    function verifyRadonRequest(string[][] memory _args)
+        virtual override
+        public
+        onlyDelegateCalls
+        returns (bytes32 _radHash)
+    {
+        // if called on a WitnetRequest instance:
+        if (address(__witnetRequest().template) != address(0)) {
+            // ...surrogate to request's template
+            return __witnetRequest().template.verifyRadonRequest(_args);
+        }
+        WitnetRequestTemplateSlot storage __data = __witnetRequestTemplate();
+        _radHash = registry.verifyRadonRequest(
+            __data.retrievals,
+            __data.aggregator,
+            __data.tally,
+            __data.resultDataMaxSize,
+            _args
+        );
+    }
+
     function _determineAddress(bytes32 _hash)
         internal view
         returns (address, bytes32)
