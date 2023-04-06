@@ -8,7 +8,9 @@ import "./interfaces/IWitnetRequestBoardReporter.sol";
 import "./interfaces/IWitnetRequestBoardRequestor.sol";
 import "./interfaces/IWitnetRequestBoardView.sol";
 import "./interfaces/IWitnetRequestParser.sol";
+
 import "./interfaces/V2/IWitnetBytecodes.sol";
+import "./interfaces/V2/IWitnetRequestFactory.sol";
 
 /// @title Witnet Request Board functionality base contract.
 /// @author The Witnet Foundation.
@@ -19,8 +21,14 @@ abstract contract WitnetRequestBoard is
     IWitnetRequestBoardView,
     IWitnetRequestParser
 {
+    IWitnetRequestFactory immutable public factory;
     IWitnetBytecodes immutable public registry;
-    constructor (IWitnetBytecodes _registry) {
-        registry = _registry;
+    constructor (IWitnetRequestFactory _factory) {
+        require(
+            _factory.class() == type(IWitnetRequestFactory).interfaceId,
+            "WitnetRequestBoard: uncompliant factory"
+        );
+        factory = _factory;
+        registry = _factory.registry();
     }
 }

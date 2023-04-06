@@ -21,13 +21,13 @@ contract WitnetRequestBoardTrustableDefault
     uint256 internal immutable _ESTIMATED_REPORT_RESULT_GAS;
 
     constructor(
-            IWitnetBytecodes _registry,
+            IWitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasLimit
         )
         WitnetRequestBoardTrustableBase(
-            _registry, 
+            _factory, 
             _upgradable, 
             _versionTag, 
             address(0)

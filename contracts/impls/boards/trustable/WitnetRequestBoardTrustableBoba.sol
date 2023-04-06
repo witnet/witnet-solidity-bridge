@@ -33,14 +33,14 @@ contract WitnetRequestBoardTrustableBoba
     }
             
     constructor(
-            IWitnetBytecodes _registry,
+            IWitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _layer2ReportResultGasLimit,
             uint256 _layer2GasPrice,            
             address _oETH
         )
-        WitnetRequestBoardTrustableBase(_registry, _upgradable, _versionTag, _oETH)
+        WitnetRequestBoardTrustableBase(_factory, _upgradable, _versionTag, _oETH)
     {
         require(address(_oETH) != address(0), "WitnetRequestBoardTrustableBoba: null currency");
         _OVM_GAS_PRICE = _layer2GasPrice;

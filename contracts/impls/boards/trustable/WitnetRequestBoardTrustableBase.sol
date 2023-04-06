@@ -27,14 +27,14 @@ abstract contract WitnetRequestBoardTrustableBase
     using WitnetLib for Witnet.Result;
     
     constructor(
-            IWitnetBytecodes _registry,
+            IWitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             address _currency
         )
         Payable(_currency)
         WitnetUpgradableBase(_upgradable, _versionTag, "io.witnet.proxiable.board")
-        WitnetRequestBoard(_registry)
+        WitnetRequestBoard(_factory)
     {}
 
     receive() external payable {
