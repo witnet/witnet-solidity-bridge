@@ -320,11 +320,11 @@
             "WitnetBytecodes": "0x000000BAE534378248325afB51142CEB94eBB7E5",
             "WitnetBytecodesImplementation": "0xc2462eE5d9F8C70f3E0C4CE5881dFFF291Ff2205",
             "WitnetEncodingLib": "0xce66333c9D7BE37D61d3c5b57D6D41ff082Ca92f",
-            "WitnetLib": "0xeF262eCBF9c61A0e71688D90d8fe75B0C3a48901",
+            "WitnetErrorsLib": "",
             "WitnetPriceRouter": "0x6d5544ca5b35bf2e7a78ace4E7B8d191fe5C9FAb",
             "WitnetRandomness": "0x0178287DfECA2F13F342512282bc8B59e774aE43",
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
-            "WitnetRequestBoardImplementation": "0x5c1dD29563203883A5D5C3136783D3119B2C4e57",
+            "WitnetRequestBoardImplementation": "",
             "WitnetRequestFactory": "0xFAcAde16357B139029Ad3060Fe2d5a4AD98A1630",
             "WitnetRequestFactoryImplementation": "0x2Ce7843C1c2fce51DE54a06dB3516103fbde0F6D",
             "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b"
@@ -375,7 +375,7 @@
             "WitnetPriceRouterImplementation": "0xBfFA2ec6225390C517A1bEB83b27a171C6734294",
             "WitnetRandomnessImplementation": "0x6F68A4d58cEd8e094b42511350527Ed628ACB970",
             "WitnetRequestBoardImplementation": "0xE490b89AfADE571d8Afa158446C603D530608ceA",
-            "WitnetRequestFactoryImplementation": "0xb5F3c9Dc6Ca7C1078cE5c51c1cE030D6BEEd57E2"
+            "WitnetRequestFactoryImplementation": ""
         }
     },
     "smartbch": {

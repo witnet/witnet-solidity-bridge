@@ -76,10 +76,7 @@ module.exports = async function (deployer, network, [, from]) {
 
   let bytecodes
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetBytecodesImplementation)) {
-    await deployer.link(
-      WitnetEncodingLib,
-      [WitnetBytecodesImplementation]
-    )
+    await deployer.link(WitnetEncodingLib, [ WitnetBytecodesImplementation, ])
     await deployer.deploy(
       WitnetBytecodesImplementation,
       true,

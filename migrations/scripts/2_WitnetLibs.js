@@ -1,6 +1,6 @@
 const utils = require("../../scripts/utils")
 
-const WitnetLib = artifacts.require("WitnetLib")
+const WitnetErrorsLib = artifacts.require("WitnetErrorsLib")
 const WitnetEncodingLib = artifacts.require("WitnetEncodingLib")
 
 module.exports = async function (deployer, network, [, from]) {
@@ -13,14 +13,14 @@ module.exports = async function (deployer, network, [, from]) {
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
   var lib
-  if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetLib)) {
-    await deployer.deploy(WitnetLib, { from })
-    lib = await WitnetLib.deployed()
-    addresses[ecosystem][network].WitnetLib = lib.address
+  if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetErrorsLib)) {
+    await deployer.deploy(WitnetErrorsLib, { from })
+    lib = await WitnetErrorsLib.deployed()
+    addresses[ecosystem][network].WitnetErrorsLib = lib.address
   } else {
-    lib = await WitnetLib.at(addresses[ecosystem][network]?.WitnetLib)
-    WitnetLib.address = lib.address
-    utils.traceHeader("Skipping 'WitnetLib'")
+    lib = await WitnetErrorsLib.at(addresses[ecosystem][network]?.WitnetErrorsLib)
+    WitnetErrorsLib.address = lib.address
+    utils.traceHeader("Skipping 'WitnetErrorsLib'")
     console.info("  ", "> library address:", lib.address)
     console.info()
   }
@@ -32,7 +32,7 @@ module.exports = async function (deployer, network, [, from]) {
     lib = await WitnetEncodingLib.deployed()
     addresses[ecosystem][network].WitnetEncodingLib = lib.address
   } else {
-    lib = await WitnetLib.at(addresses[ecosystem][network]?.WitnetEncodingLib)
+    lib = await WitnetEncodingLib.at(addresses[ecosystem][network]?.WitnetEncodingLib)
     WitnetEncodingLib.address = lib.address
     utils.traceHeader("Skipping 'WitnetEncodingLib'")
     console.info("  ", "> library address:", lib.address)

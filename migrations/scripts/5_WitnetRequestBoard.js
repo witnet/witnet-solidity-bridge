@@ -6,8 +6,8 @@ const singletons = require("../witnet.singletons")
 const utils = require("../../scripts/utils")
 
 const Create2Factory = artifacts.require("Create2Factory")
+const WitnetErrorsLib = artifacts.require("WitnetErrorsLib")
 const WitnetRequestFactory = artifacts.require("WitnetRequestFactory")
-const WitnetLib = artifacts.require("WitnetLib")
 const WitnetProxy = artifacts.require("WitnetProxy")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
@@ -29,7 +29,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
   
   var board
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoardImplementation)) {
-    await deployer.link(WitnetLib, WitnetRequestBoardImplementation);
+    await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation);
     await deployer.deploy(
       WitnetRequestBoardImplementation,
       WitnetRequestFactory.address,
