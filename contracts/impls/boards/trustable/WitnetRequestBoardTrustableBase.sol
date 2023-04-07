@@ -338,11 +338,11 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         Witnet.QueryStatus _queryStatus = _statusOf(_queryId);
         if (_queryStatus == Witnet.QueryStatus.Reported) {
-            // TODO: determine if there was an error by peeking the first byte of result buffer
-            Witnet.Result memory _result = __response(_queryId).cborBytes.parseResult();
-            return (_result.success 
-                ? Witnet.ResultStatus.Ready
-                : Witnet.ResultStatus.Error
+            bytes storage __cborValues = __response(_queryId).cborBytes;
+            // determine whether reported result is an error by peeking in first byte
+            return (__cborValues[0] == bytes1(0xd8) 
+                ? Witnet.ResultStatus.Error
+                : Witnet.ResultStatus.Ready
             );
         } else if (_queryStatus == Witnet.QueryStatus.Posted) {
             return Witnet.ResultStatus.Awaiting;
