@@ -3,6 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../libs/Witnet.sol";
+
 import "../patterns/Clonable.sol";
 import "../patterns/Ownable.sol";
 import "../patterns/Proxiable.sol";

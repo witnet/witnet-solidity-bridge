@@ -42,16 +42,16 @@ interface IWitnetRequestParser {
     /// @return The `bytes32` decoded from the Witnet.Result.
     function asBytes32(Witnet.Result memory _result) external pure returns (bytes32);
 
-    /// Decode an error code from a Witnet.Result as a member of `Witnet.ErrorCodes`.
+    /// Decode an error code from a Witnet.Result as a member of `Witnet.ResultErrorCodes`.
     /// @param _result An instance of `Witnet.Result`.
     /// @return The `CBORValue.Error memory` decoded from the Witnet.Result.
-    function asErrorCode(Witnet.Result memory _result) external pure returns (Witnet.ErrorCodes);
+    function asErrorCode(Witnet.Result memory _result) external pure returns (Witnet.ResultErrorCodes);
 
-    /// Generate a suitable error message for a member of `Witnet.ErrorCodes` and its corresponding arguments.
+    /// Generate a suitable error message for a member of `Witnet.ResultErrorCodes` and its corresponding arguments.
     /// @dev WARN: Note that client contracts should wrap this function into a try-catch foreseing potential errors generated in this function
     /// @param _result An instance of `Witnet.Result`.
     /// @return A tuple containing the `CBORValue.Error memory` decoded from the `Witnet.Result`, plus a loggable error message.
-    function asErrorMessage(Witnet.Result memory _result) external pure returns (Witnet.ErrorCodes, string memory);
+    function asErrorMessage(Witnet.Result memory _result) external pure returns (Witnet.ResultErrorCodes, string memory);
 
     /// Decode a fixed16 (half-precision) numeric value from a Witnet.Result as an `int32` value.
     /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values.

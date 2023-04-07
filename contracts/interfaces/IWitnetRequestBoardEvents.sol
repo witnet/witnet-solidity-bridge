@@ -5,6 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @title Witnet Request Board emitting events interface.
 /// @author The Witnet Foundation.
 interface IWitnetRequestBoardEvents {
+    
     /// Emitted when a Witnet Data Request is posted to the WRB.
     event PostedRequest(uint256 queryId, address from);
 

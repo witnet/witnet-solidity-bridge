@@ -5,7 +5,8 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @title The Witnet Request Board Reporter interface.
 /// @author The Witnet Foundation.
 interface IWitnetRequestBoardReporter {
-    /// Reports the Witnet-provided result to a previously posted request. 
+
+    /// @notice Reports the Witnet-provided result to a previously posted request. 
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
     /// @dev Fails if:
     /// @dev - the `_queryId` is not in 'Posted' status.
@@ -20,7 +21,7 @@ interface IWitnetRequestBoardReporter {
             bytes calldata _result
         ) external;
 
-    /// Reports the Witnet-provided result to a previously posted request.
+    /// @notice Reports the Witnet-provided result to a previously posted request.
     /// @dev Fails if:
     /// @dev - called from unauthorized address;
     /// @dev - the `_queryId` is not in 'Posted' status.
@@ -37,7 +38,7 @@ interface IWitnetRequestBoardReporter {
             bytes calldata _result
         ) external;
 
-    /// Reports Witnet-provided results to multiple requests within a single EVM tx.
+    /// @notice Reports Witnet-provided results to multiple requests within a single EVM tx.
     /// @dev Must emit a PostedResult event for every succesfully reported result.
     /// @param _batchResults Array of BatchResult structs, every one containing:
     ///         - unique query identifier;

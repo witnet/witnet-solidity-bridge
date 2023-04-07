@@ -5,6 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @title Witnet Request Board basic administration interface.
 /// @author The Witnet Foundation.
 interface IWitnetRequestBoardAdmin {
+    
     event OwnershipTransferred(address indexed from, address indexed to);
 
     /// Gets admin/owner address.
@@ -12,4 +13,7 @@ interface IWitnetRequestBoardAdmin {
 
     /// Transfers ownership.
     function transferOwnership(address) external;
+
+    /// Accepts ownership.
+    function acceptOwnership() external;
 }

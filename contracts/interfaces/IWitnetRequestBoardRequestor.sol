@@ -13,15 +13,28 @@ import "../libs/Witnet.sol";
 ///   - remove from storage all data related to past and solved data requests, and results.
 /// @author The Witnet Foundation.
 interface IWitnetRequestBoardRequestor {
-    /// Retrieves a copy of all Witnet-provided data related to a previously posted request, removing the whole query from the WRB storage.
+
+    /// @notice Returns query's result current status from a requester's point of view:
+    /// @notice   - 0 => Void: the query is either non-existent or deleted;
+    /// @notice   - 1 => Awaiting: the query has not yet been reported;
+    /// @notice   - 2 => Ready: the query has been succesfully solved;
+    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
+    /// @param _queryId The unique query identifier.
+    function checkResultStatus(uint256 _queryId) external view returns (Witnet.ResultStatus);
+
+    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
+    /// @param _queryId The unique query identifier.
+    function checkResultError(uint256 _queryId) external view returns (Witnet.ResultError memory);
+
+    /// @notice Retrieves a copy of all Witnet-provided data related to a previously posted request, removing the whole query from the WRB storage.
     /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
     /// @dev the one that actually posted the given request.
     /// @param _queryId The unique query identifier.
     function deleteQuery(uint256 _queryId) external returns (Witnet.Response memory);
 
-    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
-    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
-    /// result to this request.
+    /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// @notice result to this request.
     /// @dev Fails if:
     /// @dev - provided reward is too low.
     /// @dev - provided script is zero address.
@@ -30,16 +43,16 @@ interface IWitnetRequestBoardRequestor {
     /// @return _queryId Unique query identifier.
     function postRequest(IWitnetRequest addr) external payable returns (uint256 _queryId);
 
-    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
-    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
-    /// result to this request.
+    /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// @notice result to this request.
     /// @dev Fails if, provided reward is too low.
     /// @param radHash The radHash of the Witnet Data Request.
     /// @param slaHash The slaHash of the Witnet Data Request.
     /// @return _queryId Unique query identifier.
     function postRequest(bytes32 radHash, bytes32 slaHash) external payable returns (uint256 _queryId);
     
-    /// Increments the reward of a previously posted request by adding the transaction value to it.
+    /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Updates request `gasPrice` in case this method is called with a higher 
     /// @dev gas price value than the one used in previous calls to `postRequest` or
     /// @dev `upgradeReward`. 
