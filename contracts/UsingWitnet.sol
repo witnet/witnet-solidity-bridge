@@ -12,32 +12,26 @@ abstract contract UsingWitnet {
 
     WitnetRequestBoard public immutable witnet;
 
-    /// Include an address to specify the WitnetRequestBoard entry point address.
+    /// @dev Include an address to specify the WitnetRequestBoard entry point address.
     /// @param _wrb The WitnetRequestBoard entry point address.
     constructor(WitnetRequestBoard _wrb)
     {
-        require(address(_wrb) != address(0), "UsingWitnet: zero address");
+        require(address(_wrb) != address(0), "UsingWitnet: no WRB");
         witnet = _wrb;
     }
 
-    /// Provides a convenient way for client contracts extending this to block the execution of the main logic of the
-    /// contract until a particular request has been successfully solved and reported by Witnet.
+    /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
+    /// @dev contract until a particular request has been successfully solved and reported by Witnet,
+    /// @dev either with an error or successfully.
     modifier witnetRequestSolved(uint256 _id) {
-        require(
-                _witnetCheckResultAvailability(_id),
-                "UsingWitnet: request not solved"
-            );
+        require(_witnetCheckResultAvailability(_id), "UsingWitnet: unsolved query");
         _;
     }
 
-    /// Check if a data request has been solved and reported by Witnet.
-    /// @dev Contracts depending on Witnet should not start their main business logic (e.g. receiving value from third.
-    /// parties) before this method returns `true`.
+    /// @dev Check if given query was already reported back from the Witnet oracle.
     /// @param _id The unique identifier of a previously posted data request.
-    /// @return A boolean telling if the request has been already resolved or not. Returns `false` also, if the result was deleted.
     function _witnetCheckResultAvailability(uint256 _id)
         internal view
-        virtual
         returns (bool)
     {
         return witnet.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
@@ -48,7 +42,6 @@ abstract contract UsingWitnet {
     /// @return The reward to be included when either posting a new request, or upgrading the reward of a previously posted one.
     function _witnetEstimateReward(uint256 _gasPrice)
         internal view
-        virtual
         returns (uint256)
     {
         return witnet.estimateReward(_gasPrice);
@@ -58,19 +51,17 @@ abstract contract UsingWitnet {
     /// @return The reward to be included when either posting a new request, or upgrading the reward of a previously posted one.
     function _witnetEstimateReward()
         internal view
-        virtual
         returns (uint256)
     {
         return witnet.estimateReward(tx.gasprice);
     }
 
-    /// Send a new request to the Witnet network with transaction value as a reward.
-    /// @param _request An instance of `IWitnetRequest` contract.
+    /// @dev Send a new request to the Witnet network with transaction value as a reward.
+    /// @param _request An instance of some contract implementing the `IWitnetRequest` inteface.
     /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
     /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
     function _witnetPostRequest(IWitnetRequest _request)
-        internal
-        virtual
+        virtual internal
         returns (uint256 _id, uint256 _reward)
     {
         _reward = _witnetEstimateReward();
@@ -81,14 +72,13 @@ abstract contract UsingWitnet {
         _id = witnet.postRequest{value: _reward}(_request);
     }
 
-    /// Send a new request to the Witnet network with transaction value as a reward.
+    /// @dev Send a new request to the Witnet network with transaction value as a reward.
     /// @param _radHash Unique hash of some pre-registered Witnet Radon Request.
     /// @param _slaHash Unique hash of some pre-registered Witnet Radon SLA.
     /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
     /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
     function _witnetPostRequest(bytes32 _radHash, bytes32 _slaHash)
-        internal
-        virtual
+        virtual internal
         returns (uint256 _id, uint256 _reward)
     {
         _reward = _witnetEstimateReward();
@@ -99,13 +89,12 @@ abstract contract UsingWitnet {
         _id = witnet.postRequest{value: _reward}(_radHash, _slaHash);
     }
 
-    /// Upgrade the reward for a previously posted request.
+    /// @dev Upgrade the reward for a previously posted request.
     /// @dev Call to `upgradeReward` function in the WitnetRequestBoard contract.
     /// @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
     /// @return Amount in which the reward has been increased.
     function _witnetUpgradeReward(uint256 _id)
-        internal
-        virtual
+        virtual internal
         returns (uint256)
     {
         uint256 _currentReward = witnet.readRequestReward(_id);        
@@ -114,30 +103,8 @@ abstract contract UsingWitnet {
         if (_newReward > _currentReward) {
             _fundsToAdd = (_newReward - _currentReward);
         }
-        witnet.upgradeReward{value: _fundsToAdd}(_id); // Let Request.gasPrice be updated
+        // let Request.gasPrice be updated
+        witnet.upgradeReward{value: _fundsToAdd}(_id); 
         return _fundsToAdd;
     }
-
-    /// Read the Witnet-provided result to a previously posted request.
-    /// @param _id The unique identifier of a request that was posted to Witnet.
-    /// @return The result of the request as an instance of `Witnet.Result`.
-    function _witnetReadResult(uint256 _id)
-        internal view
-        virtual
-        returns (Witnet.Result memory)
-    {
-        return witnet.readResponseResult(_id);
-    }
-
-    /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
-    /// @param _id The unique identifier of a previously posted request.
-    /// @return The Witnet-provided result to the request.
-    function _witnetDeleteQuery(uint256 _id)
-        internal
-        virtual
-        returns (Witnet.Response memory)
-    {
-        return witnet.deleteQuery(_id);
-    }
-
 }
