@@ -22,7 +22,8 @@ contract WitnetBytecodes
     using ERC165Checker for address;
     
     using Witnet for bytes;
-    using WitnetLib for string;
+    using Witnet for string;
+    
     using WitnetEncodingLib for WitnetV2.DataRequestMethods;
     using WitnetEncodingLib for WitnetV2.RadonRetrieval;
     using WitnetEncodingLib for WitnetV2.RadonRetrieval[];

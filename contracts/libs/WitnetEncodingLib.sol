@@ -2,20 +2,21 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./WitnetLib.sol";
 import "solidity-stringutils/src/strings.sol";
 
-/// @title A library for decoding Witnet request results
-/// @notice The library exposes functions to check the Witnet request success.
-/// and retrieve Witnet results from CBOR values into solidity types.
+import "./WitnetV2.sol";
+
+/// @title A library for encoding Witnet Data Requests.
 /// @author The Witnet Foundation.
 library WitnetEncodingLib {
 
     using strings for string;
     using strings for strings.slice;
+
     using WitnetBuffer for WitnetBuffer.Buffer;
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
+    using Witnet for string;
 
     bytes internal constant WITNET_RADON_OPCODES_RESULT_TYPES =
         hex"10ffffffffffffffffffffffffffffff0401ff010203050406071311ff01ffff07ff02ffffffffffffffffffffffffff0703ffffffffffffffffffffffffffff0405070202ff04040404ffffffffffff05070402040205050505ff04ff04ffffff010203050406070101ffffffffffff02ff050404000106060707ffffffffff";
@@ -568,7 +569,7 @@ library WitnetEncodingLib {
         private pure
         returns (bool)
     {
-        (uint res, bool ok) = WitnetLib.tryUint(ipv4);
+        (uint res, bool ok) = Witnet.tryUint(ipv4);
         return (ok && res <= 255);
     }
 
@@ -576,7 +577,7 @@ library WitnetEncodingLib {
         private pure
         returns (bool)
     {
-        (uint res, bool ok) = WitnetLib.tryUint(hostPort);
+        (uint res, bool ok) = Witnet.tryUint(hostPort);
         return (ok && res <= 65536);
     }
 

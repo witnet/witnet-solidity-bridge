@@ -55,7 +55,7 @@ library WitnetBuffer {
           // sets source memory pointer
           sourcePointer := add(source, 32)
         }
-        _memcpy(
+        memcpy(
           destinationPointer,
           sourcePointer,
           sourceLength
@@ -138,7 +138,7 @@ library WitnetBuffer {
       destinationPointer := add(peeks, 32)
       sourcePointer := add(add(data, 32), offset)
     }
-    _memcpy(
+    memcpy(
       destinationPointer,
       sourcePointer,
       length
@@ -188,7 +188,7 @@ library WitnetBuffer {
         destinationPointer := add(output, 32)
       }
       // Copy `length` bytes from source to destination
-      _memcpy(
+      memcpy(
         destinationPointer,
         sourcePointer,
         length
@@ -456,7 +456,7 @@ library WitnetBuffer {
         ) {
           inputLength = (ix - lix);
           if (ix > lix) {
-            _memcpy(
+            memcpy(
               outputPointer,
               inputPointer,
               inputLength
@@ -475,7 +475,7 @@ library WitnetBuffer {
             sourceLength := mload(source)
             sourcePointer := add(source, 32)      
           }        
-          _memcpy(
+          memcpy(
             outputPointer,
             sourcePointer,
             sourceLength
@@ -492,7 +492,7 @@ library WitnetBuffer {
     }
     if (outputLength > 0) {
       if (ix > lix ) {
-        _memcpy(
+        memcpy(
           outputPointer,
           inputPointer,
           ix - lix
@@ -561,7 +561,7 @@ library WitnetBuffer {
   /// @param src Address to the source memory.
   /// @param len How many bytes to copy.
   // solium-disable-next-line security/no-assign-params
-  function _memcpy(
+  function memcpy(
       uint dest,
       uint src,
       uint len
