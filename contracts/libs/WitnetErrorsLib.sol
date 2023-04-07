@@ -45,7 +45,7 @@ library WitnetErrorsLib {
         private pure
         returns(uint[] memory)
     {
-        Witnet.Result memory result = Witnet.parseResult(cborBytes);
+        Witnet.Result memory result = Witnet.resultFromCborBytes(cborBytes);
         return _errorsFromResult(result);
     }
 

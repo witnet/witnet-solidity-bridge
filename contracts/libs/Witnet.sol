@@ -367,7 +367,7 @@ library Witnet {
     /// @dev Transform given bytes into a Witnet.Result instance.
     /// @param bytecode Raw bytes representing a CBOR-encoded value.
     /// @return A `Witnet.Result` instance.
-    function parseResult(bytes memory bytecode)
+    function resultFromCborBytes(bytes memory bytecode)
         internal pure
         returns (Witnet.Result memory)
     {
