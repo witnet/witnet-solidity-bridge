@@ -20,7 +20,7 @@
     "flatten:witnet:boards": "npm run flatten:witnet:boards:trustable",
     "flatten:witnet:boards:trustable": "npm run flatten contracts/impls/boards/trustable/",
     "flatten:witnet:bytecodes": "npm run flatten contracts/impls/bytecodes/",
-    "flatten:witnet:libs": "npm run flatten contracts/libs/WitnetLib.sol && npm run flatten contracts/libs/WitnetEncodingLib.sol",
+    "flatten:witnet:libs": "npm run flatten contracts/libs/WitnetErrorsLib.sol && npm run flatten contracts/libs/WitnetEncodingLib.sol",
     "flatten:witnet:proxy": "npm run flatten contracts/impls/WitnetProxy.sol",
     "fmt:js": "eslint \"**/*.js\"",
     "fmt:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" && solhint \"test/**/*.sol\" && solhint \"flattened/**/*.sol\"",
