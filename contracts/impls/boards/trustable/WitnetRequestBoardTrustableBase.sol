@@ -369,7 +369,7 @@ abstract contract WitnetRequestBoardTrustableBase
                 reason: "WitnetRequestBoardTrustableBase: unknown query"
             });
         } else {
-            try WitnetErrorsLib.parseResultError(__response(_queryId).cborBytes)
+            try WitnetErrorsLib.resultErrorFromCborBytes(__response(_queryId).cborBytes)
                 returns (Witnet.ResultError memory _error)
             {
                 return _error;
@@ -660,7 +660,7 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (Witnet.Result memory)
     {
         Witnet.Response storage _response = __response(_queryId);
-        return _response.cborBytes.parseResult();
+        return _response.cborBytes.resultFromCborBytes();
     }
 
     /// Retrieves the timestamp in which the result to the referred query was solved by the Witnet DON.

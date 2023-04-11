@@ -26,7 +26,7 @@ library WitnetErrorsLib {
     /// @notice Extract error code and description string from given CBOR-encoded value.
     /// @dev Client contracts should wrap this function into a try-catch foreseeing potential parsing errors.
     /// @return _error Witnet.ResultError data struct containing error code and description.
-    function parseResultError(bytes memory bytecode)
+    function resultErrorFromCborBytes(bytes memory bytecode)
         public pure
         returns (Witnet.ResultError memory _error)
     {
