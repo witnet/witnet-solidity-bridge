@@ -178,7 +178,7 @@ contract WitnetRequestFactory
             // As to avoid template address collisions from:
             abi.encodePacked( 
                 // - different factory major or mid versions:
-                bytes4(_WITNET_UPGRADABLE_VERSION),
+                _WITNET_UPGRADABLE_VERSION,// TODO: once WitnetRequestTemplate interface is final: bytes4(_WITNET_UPGRADABLE_VERSION),
                 // - different templates params:
                 _retrievals, 
                 _aggregator,
