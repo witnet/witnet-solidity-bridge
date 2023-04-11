@@ -10,7 +10,6 @@ import "./WitnetBuffer.sol";
 /// @dev Most of the logic has been borrowed from Patrick Gansterer’s cbor.js library: https://github.com/paroga/cbor-js
 /// @author The Witnet Foundation.
 /// 
-/// TODO: add support for Map (majorType = 5)
 /// TODO: add support for Float32 (majorType = 7, additionalInformation = 26)
 /// TODO: add support for Float64 (majorType = 7, additionalInformation = 27) 
 
@@ -168,6 +167,7 @@ library WitnetCBOR {
       self.buffer.cursor += len;
     } else if (
       self.majorType == MAJOR_TYPE_ARRAY
+        || self.majorType == MAJOR_TYPE_MAP
     ) { 
       self.len = readLength(self.buffer, self.additionalInformation);      
     } else if (
@@ -177,7 +177,7 @@ library WitnetCBOR {
             && self.additionalInformation != 21
         )
     ) {
-      revert("WitnetCBOR: unsupported major type");//UnsupportedMajorType(self.majorType);
+      revert("WitnetCBOR.skip: unsupported major type");
     }
     return self;
   }
@@ -209,12 +209,47 @@ library WitnetCBOR {
       // fork it and added to the list of items to be returned:
       items[ix] = self.fork();
       if (self.majorType == MAJOR_TYPE_ARRAY) {
-        // should this element be an array, 
-        // move forward to the first element after inner array:
         CBOR[] memory _subitems = self.readArray();
+        // move forward to the first element after inner array:
+        self = _subitems[_subitems.length - 1];
+      } else if (self.majorType == MAJOR_TYPE_MAP) {
+        CBOR[] memory _subitems = self.readMap();
+        // move forward to the first element after inner map:
         self = _subitems[_subitems.length - 1];
       } else {
-        // otherwise, move forward to the next element:
+        // move forward to the next element:
+        self.skip();
+      }
+    }
+    // return self cursor as extra item at the end of the list,
+    // as to optimize recursion when jumping over nested arrays:
+    items[len] = self;
+  }
+
+  function readMap(CBOR memory self)
+    internal pure
+    isMajorType(self, MAJOR_TYPE_MAP)
+    returns (CBOR[] memory items)
+  {
+    // read number of items within the map and move self cursor forward to the first inner element:
+    uint64 len = readLength(self.buffer, self.additionalInformation) * 2;
+    items = new CBOR[](len + 1);
+    for (uint ix = 0; ix < len; ix ++) {
+      // settle next element in the array:
+      self = self.settle();
+      // fork it and added to the list of items to be returned:
+      items[ix] = self.fork();
+      if (ix % 2 == 0 && self.majorType != MAJOR_TYPE_STRING) {
+        revert("heyhey");
+      } else if (self.majorType == MAJOR_TYPE_ARRAY || self.majorType == MAJOR_TYPE_MAP) {
+        CBOR[] memory _subitems = (self.majorType == MAJOR_TYPE_ARRAY
+            ? self.readArray()
+            : self.readMap()
+        );
+        // move forward to the first element after inner array or map:
+        self = _subitems[_subitems.length - 1];
+      } else {
+        // move forward to the next element:
         self.skip();
       }
     }
