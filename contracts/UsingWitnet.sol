@@ -77,7 +77,7 @@ abstract contract UsingWitnet {
     /// @dev Enough ETH needs to be provided as to cover for the implicit fee.
     /// @param _radHash Unique hash of some pre-validated Witnet Radon Request.
     /// @param _slaHash Unique hash of some pre-validated Witnet Radon Service-Level Agreement.
-    /// @param _id The unique identifier of the just posted data request.
+    /// @return _id The unique identifier of the just posted data request.
     /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
     function _witnetPostRequest(bytes32 _radHash, bytes32 _slaHash)
         virtual internal

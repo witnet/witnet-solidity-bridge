@@ -53,6 +53,8 @@ module.exports = async function (deployer, network, [, from, reporter]) {
     utils.traceHeader(`Skipping '${artifactsName.WitnetRequestBoard}'`)
     console.info("  ", "> contract address:", board.address)
     console.info()
+    WitnetRequestBoardImplementation.address = board.address
+    await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation)
   }
 
   var proxy
@@ -141,5 +143,4 @@ module.exports = async function (deployer, network, [, from, reporter]) {
       console.info("   > Not upgraded.")
     }
   }
-  WitnetRequestBoardImplementation.address = proxy.address
 }
