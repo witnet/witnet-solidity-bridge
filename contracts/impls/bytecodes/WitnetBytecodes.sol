@@ -437,7 +437,8 @@ contract WitnetBytecodes
                             _requestPath, bytes(" "),
                             _requestQuery, bytes(" "),
                             _requestBody, bytes(" "),
-                            _requestHeaders
+                            _requestHeaders, bytes(" "),
+                            _requestRadonScript
                         )
                     ),
 
