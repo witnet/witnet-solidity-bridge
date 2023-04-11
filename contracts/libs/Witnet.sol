@@ -268,10 +268,6 @@ library Witnet {
         _isReady(result)
         returns (int32)
     {
-        require(
-            result.success,
-            "WitnetLib: tried to read `fixed16` value from errored result."
-        );
         return result.value.readFloat16();
     }
 
@@ -298,7 +294,6 @@ library Witnet {
     /// @return The `int[]` decoded from the Witnet.Result.
     function asIntArray(Witnet.Result memory result)
         internal pure
-        _isReady(result)
         returns (int[] memory)
     {
         return result.value.readIntArray();

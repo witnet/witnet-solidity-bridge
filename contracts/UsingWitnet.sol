@@ -23,12 +23,12 @@ abstract contract UsingWitnet {
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
     /// @dev contract until a particular request has been successfully solved and reported by Witnet,
     /// @dev either with an error or successfully.
-    modifier witnetRequestSolved(uint256 _id) {
+    modifier witnetQuerySolved(uint256 _id) {
         require(_witnetCheckResultAvailability(_id), "UsingWitnet: unsolved query");
         _;
     }
 
-    /// @dev Check if given query was already reported back from the Witnet oracle.
+    /// @notice Check if given query was already reported back from the Witnet oracle.
     /// @param _id The unique identifier of a previously posted data request.
     function _witnetCheckResultAvailability(uint256 _id)
         internal view
@@ -37,7 +37,7 @@ abstract contract UsingWitnet {
         return witnet.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
     }
 
-    /// Estimate the reward amount.
+    /// @notice Estimate the reward amount.
     /// @param _gasPrice The gas price for which we want to retrieve the estimation.
     /// @return The reward to be included when either posting a new request, or upgrading the reward of a previously posted one.
     function _witnetEstimateReward(uint256 _gasPrice)
@@ -47,7 +47,7 @@ abstract contract UsingWitnet {
         return witnet.estimateReward(_gasPrice);
     }
 
-    /// Estimates the reward amount, considering current transaction gas price.
+    /// @notice Estimates the reward amount, considering current transaction gas price.
     /// @return The reward to be included when either posting a new request, or upgrading the reward of a previously posted one.
     function _witnetEstimateReward()
         internal view
@@ -56,8 +56,9 @@ abstract contract UsingWitnet {
         return witnet.estimateReward(tx.gasprice);
     }
 
-    /// @dev Send a new request to the Witnet network with transaction value as a reward.
-    /// @param _request An instance of some contract implementing the `IWitnetRequest` inteface.
+    /// @notice Post some data request to be eventually solved by the Witnet decentralized oracle network.
+    /// @dev Enough ETH needs to be provided as to cover for the implicit fee.
+    /// @param _request An instance of some contract implementing the `IWitnetRequest` interface.
     /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
     /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
     function _witnetPostRequest(IWitnetRequest _request)
@@ -72,10 +73,11 @@ abstract contract UsingWitnet {
         _id = witnet.postRequest{value: _reward}(_request);
     }
 
-    /// @dev Send a new request to the Witnet network with transaction value as a reward.
-    /// @param _radHash Unique hash of some pre-registered Witnet Radon Request.
-    /// @param _slaHash Unique hash of some pre-registered Witnet Radon SLA.
-    /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
+    /// @notice Post some data request to be eventually solved by the Witnet decentralized oracle network.
+    /// @dev Enough ETH needs to be provided as to cover for the implicit fee.
+    /// @param _radHash Unique hash of some pre-validated Witnet Radon Request.
+    /// @param _slaHash Unique hash of some pre-validated Witnet Radon Service-Level Agreement.
+    /// @param _id The unique identifier of the just posted data request.
     /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
     function _witnetPostRequest(bytes32 _radHash, bytes32 _slaHash)
         virtual internal
@@ -89,9 +91,21 @@ abstract contract UsingWitnet {
         _id = witnet.postRequest{value: _reward}(_radHash, _slaHash);
     }
 
-    /// @dev Upgrade the reward for a previously posted request.
-    /// @dev Call to `upgradeReward` function in the WitnetRequestBoard contract.
-    /// @param _id The unique identifier of a request that has been previously sent to the WitnetRequestBoard.
+    /// @notice Read the Witnet-provided result to a previously posted request.
+    /// @dev Reverts if the data request was not yet solved.
+    /// @param _id The unique identifier of some previously posted data request.
+    /// @return The result of the request as an instance of `Witnet.Result`.
+    function _witnetReadResult(uint256 _id)
+        internal view
+        virtual
+        returns (Witnet.Result memory)
+    {
+        return witnet.readResponseResult(_id);
+    }
+
+    /// @notice Upgrade the reward of some previously posted data request.
+    /// @dev Reverts if the data request was already solved.
+    /// @param _id The unique identifier of some previously posted data request.
     /// @return Amount in which the reward has been increased.
     function _witnetUpgradeReward(uint256 _id)
         virtual internal
@@ -103,7 +117,6 @@ abstract contract UsingWitnet {
         if (_newReward > _currentReward) {
             _fundsToAdd = (_newReward - _currentReward);
         }
-        // let Request.gasPrice be updated
         witnet.upgradeReward{value: _fundsToAdd}(_id); 
         return _fundsToAdd;
     }
