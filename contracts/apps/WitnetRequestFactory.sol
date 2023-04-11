@@ -32,7 +32,8 @@ contract WitnetRequestFactory
 
     modifier onlyOnFactory {
         require(
-            address(this) == __proxy(),
+            address(this) == __proxy()
+                || address(this) == base(),
             "WitnetRequestFactory: not the factory"
         );
         _;
@@ -217,16 +218,15 @@ contract WitnetRequestFactory
         external view
         returns (bytes4)
     {
-        if (address(this) == _SELF) {
-            return type(Upgradeable).interfaceId;
+        if (
+            address(this) == _SELF
+                || address(this) == __proxy()
+        ) {
+            return type(IWitnetRequestFactory).interfaceId;
+        } else if (__witnetRequest().radHash != bytes32(0)) {
+            return type(WitnetRequest).interfaceId;
         } else {
-            if (address(this) == __proxy()) {
-                return type(IWitnetRequestFactory).interfaceId;
-            } else if (__witnetRequest().radHash != bytes32(0)) {
-                return type(WitnetRequest).interfaceId;
-            } else {
-                return type(WitnetRequestTemplate).interfaceId;
-            }
+            return type(WitnetRequestTemplate).interfaceId;
         }
     }
 
