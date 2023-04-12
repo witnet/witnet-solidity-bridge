@@ -5,8 +5,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetRequestBoardTrustableBase.sol";
-import "../../../patterns/Destructible.sol";
+import "../boards/trustable/WitnetRequestBoardTrustableBase.sol";
+import "../../patterns/Destructible.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -21,7 +21,7 @@ contract WitnetRequestBoardTrustableDefault
     uint256 internal immutable _ESTIMATED_REPORT_RESULT_GAS;
 
     constructor(
-            IWitnetRequestFactory _factory,
+            WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasLimit

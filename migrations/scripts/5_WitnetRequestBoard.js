@@ -1,22 +1,24 @@
 const ethUtils = require("ethereumjs-util")
 const { merge } = require("lodash")
 
+const addresses = require("../witnet.addresses")
 const settings = require("../witnet.settings")
 const singletons = require("../witnet.singletons") 
 const utils = require("../../scripts/utils")
+const version = `${require("../../package").version}-${require('child_process').execSync('git rev-parse HEAD').toString().trim().substring(0, 7)}`
 
 const Create2Factory = artifacts.require("Create2Factory")
+const WitnetProxy = artifacts.require("WitnetProxy")
+
 const WitnetErrorsLib = artifacts.require("WitnetErrorsLib")
 const WitnetRequestFactory = artifacts.require("WitnetRequestFactory")
-const WitnetProxy = artifacts.require("WitnetProxy")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
 module.exports = async function (deployer, network, [, from, reporter]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
   const ecosystem = utils.getRealmNetworkFromArgs()[0]
   network = network.split("-")[0]
-
-  var addresses = require("../witnet.addresses")
+  
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
@@ -27,37 +29,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
   const artifactsName = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRequestBoardImplementation = artifacts.require(artifactsName.WitnetRequestBoard)
   
-  var board
-  if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoardImplementation)) {
-    await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation);
-    await deployer.deploy(
-      WitnetRequestBoardImplementation,
-      WitnetRequestFactory.address,
-      ...(
-        // if defined, use network-specific constructor parameters:
-        settings.constructorParams[network]?.WitnetRequestBoard ||
-          // otherwise, use realm-specific parameters, if any:
-          settings.constructorParams[realm]?.WitnetRequestBoard ||
-          // or, default defined parameters for WRBs, if any:
-          settings.constructorParams?.default?.WitnetRequestBoard
-      ), 
-      { from }
-    )
-    board = await WitnetRequestBoardImplementation.deployed()
-    addresses[ecosystem][network].WitnetRequestBoardImplementation = board.address
-    if (!isDryRun) {
-      utils.saveAddresses(addresses)
-    }
-  } else {
-    board = await WitnetRequestBoardImplementation.at(addresses[ecosystem][network].WitnetRequestBoardImplementation)
-    utils.traceHeader(`Skipping '${artifactsName.WitnetRequestBoard}'`)
-    console.info("  ", "> contract address:", board.address)
-    console.info()
-    WitnetRequestBoardImplementation.address = board.address
-    await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation)
-  }
-
-  var proxy
+  let proxy
   const factory = await Create2Factory.deployed()
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoard)) {
     if(
@@ -94,8 +66,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
       proxy = await WitnetProxy.at(proxyAddr)
     } else {
       // Deploy no singleton proxy ...
-      await deployer.deploy(WitnetProxy, { from })
-      proxy = await WitnetProxy.deployed()
+      proxy = await WitnetProxy.new({ from })
     }
     // update addresses file      
     addresses[ecosystem][network].WitnetRequestBoard = proxy.address
@@ -104,13 +75,42 @@ module.exports = async function (deployer, network, [, from, reporter]) {
     }
   } else {
     proxy = await WitnetProxy.at(addresses[ecosystem][network].WitnetRequestBoard)
-    utils.traceHeader("Skipping 'WitnetRequestBoard'")
-    console.info("  ", "> proxy address:", proxy.address)
-    console.info()
+    console.info(`   Skipped: 'WitnetRequestBoard' deployed at ${proxy.address}`)
   }
   WitnetRequestBoard.address = proxy.address
 
-  var implementation = await proxy.implementation.call({ from })
+  let board
+  if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoardImplementation)) {
+    await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation);
+    await deployer.deploy(
+      WitnetRequestBoardImplementation,
+      WitnetRequestFactory.address,
+      /* _isUpgradeable */ true,
+      /* _versionTag    */ utils.fromAscii(version),
+      ...(
+        // if defined, use network-specific constructor parameters:
+        settings.constructorParams[network]?.WitnetRequestBoard ||
+          // otherwise, use realm-specific parameters, if any:
+          settings.constructorParams[realm]?.WitnetRequestBoard ||
+          // or, default defined parameters for WRBs, if any:
+          settings.constructorParams?.default?.WitnetRequestBoard
+      ), 
+      { from }
+    )
+    board = await WitnetRequestBoardImplementation.deployed()
+    addresses[ecosystem][network].WitnetRequestBoardImplementation = board.address
+    if (!isDryRun) {
+      utils.saveAddresses(addresses)
+    }
+  } else {
+    board = await WitnetRequestBoardImplementation.at(addresses[ecosystem][network].WitnetRequestBoardImplementation)
+    console.info(`   Skipped: '${WitnetRequestBoardImplementation.contractName}' deployed at ${board.address}`)
+    console.info()
+    WitnetRequestBoardImplementation.address = board.address
+    await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation)
+  }
+
+  const implementation = await proxy.implementation.call({ from })
   if (implementation.toLowerCase() !== board.address.toLowerCase()) {
     const header = `Upgrading 'WitnetRequestBoard' at ${proxy.address}...`
     console.info()

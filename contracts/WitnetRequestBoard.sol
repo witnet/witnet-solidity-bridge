@@ -3,8 +3,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./interfaces/V2/IWitnetBytecodes.sol";
-import "./interfaces/V2/IWitnetRequestFactory.sol";
+import "./WitnetBytecodes.sol";
+import "./WitnetRequestFactory.sol";
 
 import "./interfaces/IWitnetRequestBoardEvents.sol";
 import "./interfaces/IWitnetRequestBoardReporter.sol";
@@ -22,11 +22,11 @@ abstract contract WitnetRequestBoard is
     IWitnetRequestBoardRequestor,
     IWitnetRequestBoardView
 {
-    IWitnetRequestFactory immutable public factory;
-    IWitnetBytecodes immutable public registry;
-    constructor (IWitnetRequestFactory _factory) {
+    WitnetRequestFactory immutable public factory;
+    WitnetBytecodes immutable public registry;
+    constructor (WitnetRequestFactory _factory) {
         require(
-            _factory.class() == type(IWitnetRequestFactory).interfaceId,
+            _factory.class() == type(WitnetRequestFactory).interfaceId,
             "WitnetRequestBoard: uncompliant factory"
         );
         factory = _factory;

@@ -5,7 +5,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetRequestBoardTrustableDefault.sol";
+import "../../defaults/WitnetRequestBoardTrustableDefault.sol";
 
 // solhint-disable-next-line
 interface OVM_GasPriceOracle {
@@ -25,7 +25,7 @@ contract WitnetRequestBoardTrustableOvm2
     OVM_GasPriceOracle immutable public gasPriceOracleL1;
 
     constructor(
-            IWitnetRequestFactory _factory,
+            WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasLimit

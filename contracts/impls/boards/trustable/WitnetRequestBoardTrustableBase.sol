@@ -28,7 +28,7 @@ abstract contract WitnetRequestBoardTrustableBase
     using Witnet for Witnet.Result;
     
     constructor(
-            IWitnetRequestFactory _factory,
+            WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             address _currency

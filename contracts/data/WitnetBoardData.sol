@@ -3,7 +3,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../libs/Witnet.sol";
-import "../interfaces/V2/IWitnetBytecodes.sol";
 
 /// @title Witnet Request Board base data model. 
 /// @author The Witnet Foundation.
@@ -18,7 +17,6 @@ abstract contract WitnetBoardData {
         address owner;    
         uint256 numQueries;
         mapping (uint => Witnet.Query) queries;
-        IWitnetBytecodes registry;
     }
 
     constructor() {
