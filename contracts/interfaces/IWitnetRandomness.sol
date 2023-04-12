@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../libs/Witnet.sol";
+import "../WitnetRequestBoard.sol";
 
 /// @title The Witnet Randomness generator interface.
 /// @author Witnet Foundation.
@@ -92,4 +92,8 @@ interface IWitnetRandomness {
     /// @notice request was posted. All unused funds shall be transferred back to the tx sender.
     /// @return _usedFunds Amount of dunds actually used from those provided by the tx sender.
     function upgradeRandomizeFee(uint256 _block) external payable returns (uint256 _usedFunds);
+
+    /// @notice Returns address of the Witnet Request Board being used for posting randomness requests to Wtinet.
+    function witnet() external view returns (WitnetRequestBoard);
+
 }

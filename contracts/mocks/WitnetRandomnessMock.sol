@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../apps/WitnetRandomness.sol";
+import "../impls/defaults/WitnetRandomnessDefault.sol";
 
 /// @title WitnetRandomness mock contract implementation. 
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
@@ -13,7 +13,7 @@ import "../apps/WitnetRandomness.sol";
 /// @author Witnet Foundation.
 contract WitnetRandomnessMock
     is
-        WitnetRandomness
+        WitnetRandomnessDefault
 {
     uint8 internal __mockRandomizeLatencyBlocks;
     uint256 internal __mockRandomizeFee;
@@ -26,7 +26,11 @@ contract WitnetRandomnessMock
             uint8 _mockRandomizeLatencyBlocks,
             uint256 _mockRandomizeFee
         )
-        WitnetRandomness(WitnetRequestBoard(payable(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)), false, bytes32("mocked"))
+        WitnetRandomnessDefault(
+            WitnetRequestBoard(payable(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)),
+            false,
+            bytes32("mocked")
+        )
     {
         __mockRandomizeLatencyBlocks = _mockRandomizeLatencyBlocks;
         __mockRandomizeFee = _mockRandomizeFee;

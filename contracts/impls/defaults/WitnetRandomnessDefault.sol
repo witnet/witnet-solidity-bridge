@@ -3,27 +3,30 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../UsingWitnet.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
-import "../impls/WitnetUpgradableBase.sol";
-import "../interfaces/IWitnetRandomness.sol";
-import "../patterns/Clonable.sol";
-import "../requests/WitnetRequestRandomness.sol";
+import "../WitnetUpgradableBase.sol";
+import "../../WitnetRandomness.sol";
+import "../../patterns/Clonable.sol";
 
-/// @title WitnetRandomness: A trustless randomness generator and registry, based on the Witnet oracle. 
+import "../../requests/WitnetRequestRandomness.sol";
+
+/// @title WitnetRandomnessDefault: A trustless randomness generator and registry, using the Witnet oracle. 
 /// @author Witnet Foundation.
-contract WitnetRandomness
+contract WitnetRandomnessDefault
     is
         Clonable,
-        UsingWitnet,
-        WitnetUpgradableBase,
-        IWitnetRandomness
+        WitnetRandomness,
+        WitnetUpgradableBase
 {
+    using ERC165Checker for address;
     using Witnet for Witnet.Result;
 
-    WitnetRequestRandomness public witnetRandomnessRequest;
     uint256 public override latestRandomizeBlock;
-
+    
+    WitnetRequestBoard public immutable override witnet;
+    WitnetRequestRandomness public witnetRandomnessRequest;
+    
     mapping (uint256 => RandomizeData) internal __randomize_;
     struct RandomizeData {
         address from;
@@ -33,7 +36,7 @@ contract WitnetRandomness
     }
 
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
-        require(address(this) != base(), "WitnetRandomness: not a delegate call");
+        require(address(this) != base(), "WitnetRandomnessDefault: not a delegate call");
         _;
     }
 
@@ -44,13 +47,17 @@ contract WitnetRandomness
             bool _upgradable,
             bytes32 _version
         )
-        UsingWitnet(_wrb)
         WitnetUpgradableBase(
             _upgradable, 
             _version,
             "io.witnet.proxiable.randomness"
         )
     {
+        require(
+            address(_wrb).supportsInterface(type(WitnetRequestBoard).interfaceId),
+            "WitnetRandomnessDefault: uncompliant request board"
+        );
+        witnet = _wrb;
         witnetRandomnessRequest = new WitnetRequestRandomness();
         witnetRandomnessRequest.transferOwnership(msg.sender);
     }
@@ -62,7 +69,7 @@ contract WitnetRandomness
         virtual override
         returns (uint256)
     {
-        return _witnetEstimateReward(_gasPrice);
+        return witnet.estimateReward(_gasPrice);
     }
 
     /// Retrieves data of a randomization request that got successfully posted to the WRB within a given block.
@@ -108,16 +115,16 @@ contract WitnetRandomness
             _block = getRandomnessNextBlock(_block);
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
-        require(_queryId != 0, "WitnetRandomness: not randomized");
+        require(_queryId != 0, "WitnetRandomnessDefault: not randomized");
         Witnet.ResultStatus _resultStatus = witnet.checkResultStatus(_queryId);
         if (_resultStatus == Witnet.ResultStatus.Ready) {
             return witnet.readResponseResult(_queryId).asBytes32();
         } else if (_resultStatus == Witnet.ResultStatus.Error) {
             uint256 _nextRandomizeBlock = __randomize_[_block].nextBlock;
-            require(_nextRandomizeBlock != 0, "WitnetRandomness: faulty randomize");
+            require(_nextRandomizeBlock != 0, "WitnetRandomnessDefault: faulty randomize");
             return getRandomnessAfter(_nextRandomizeBlock);
         } else {
-            revert("WitnetRandomness: pending randomize");
+            revert("WitnetRandomnessDefault: pending randomize");
         }
     }
 
@@ -163,7 +170,7 @@ contract WitnetRandomness
         RandomizeData storage _data = __randomize_[_block];
         return (
             _data.witnetQueryId != 0 
-                && _witnetCheckResultAvailability(_data.witnetQueryId)
+                && witnet.getQueryStatus(_data.witnetQueryId) == Witnet.QueryStatus.Reported
         );
     }
 
@@ -294,12 +301,12 @@ contract WitnetRandomness
             // only the proxy's owner can upgrade it
             require(
                 msg.sender == owner(),
-                "WitnetRandomness: not the owner"
+                "WitnetRandomnessDefault: not the owner"
             );
             // the implementation cannot be upgraded more than once, though
             require(
                 __proxiable().implementation != base(),
-                "WitnetRandomness: already initialized"
+                "WitnetRandomnessDefault: already initialized"
             );
             emit Upgraded(msg.sender, base(), codehash(), version());
         }
@@ -390,7 +397,7 @@ contract WitnetRandomness
     {
         address _randomnessRequest = address(witnetRandomnessRequest.clone());
         Ownable(_randomnessRequest).transferOwnership(msg.sender);
-        WitnetRandomness(_instance).initializeClone(abi.encode(_randomnessRequest));
+        WitnetRandomnessDefault(_instance).initializeClone(abi.encode(_randomnessRequest));
         return WitnetRandomness(_instance);
     }
 
@@ -432,5 +439,40 @@ contract WitnetRandomness
             ? _latest
             : _searchPrevBlock(_target, __randomize_[_latest].prevBlock)
         );
+    }
+
+    /// @notice Post some data request to be eventually solved by the Witnet decentralized oracle network.
+    /// @dev Enough ETH needs to be provided as to cover for the implicit fee.
+    /// @param _request An instance of some contract implementing the `IWitnetRequest` interface.
+    /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
+    /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
+    function _witnetPostRequest(IWitnetRequest _request)
+        virtual internal
+        returns (uint256 _id, uint256 _reward)
+    {
+        _reward = witnet.estimateReward(tx.gasprice);
+        require(
+            _reward <= msg.value,
+            "WitnetRandomnessDefault: reward too low"
+        );
+        _id = witnet.postRequest{value: _reward}(_request);
+    }
+
+    /// @notice Upgrade the reward of some previously posted data request.
+    /// @dev Reverts if the data request was already solved.
+    /// @param _id The unique identifier of some previously posted data request.
+    /// @return Amount in which the reward has been increased.
+    function _witnetUpgradeReward(uint256 _id)
+        virtual internal
+        returns (uint256)
+    {
+        uint256 _currentReward = witnet.readRequestReward(_id);        
+        uint256 _newReward = witnet.estimateReward(tx.gasprice);
+        uint256 _fundsToAdd = 0;
+        if (_newReward > _currentReward) {
+            _fundsToAdd = (_newReward - _currentReward);
+        }
+        witnet.upgradeReward{value: _fundsToAdd}(_id); 
+        return _fundsToAdd;
     }
 }
