@@ -1,12 +1,10 @@
-const packageJson = require("../package.json")
 module.exports = {
   artifacts: {
     default: {
-      WitnetLib: "WitnetLib",
-      WitnetPriceRouter: "WitnetPriceRouter",
-      WitnetProxy: "WitnetProxy",
-      WitnetRandomness: "WitnetRandomness",
+      WitnetBytecodes: "WitnetBytecodesDefault",
+      WitnetRandomness: "WitnetRandomnessDefault",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
+      WitnetRequestFactory: "WitnetRequestFactoryDefault",
     },
     boba: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
@@ -14,139 +12,8 @@ module.exports = {
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
-    "polygon.zkevm.goerli": {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableZkEvm",
-    },
     reef: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
-    },
-  },
-  constructorParams: {
-    default: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 133000,
-      ],
-    },
-    avalanche: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 155000,
-      ],
-    },
-    celo: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 114000,
-      ],
-    },
-    conflux: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 78500,
-      ],
-    },
-    "conflux.espace.testnet": {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 225000,
-      ],
-    },
-    "conflux.espace.mainnet": {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 225000,
-      ],
-    },
-    dogechain: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 85000,
-      ],
-    },
-    harmony: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 530000,
-      ],
-    },
-    hsc: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 85000,
-      ],
-    },
-    kcc: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 92500,
-      ],
-    },
-    klaytn: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 105000,
-      ],
-    },
-    meter: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 85000,
-      ],
-    },
-    metis: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 134800,
-      ],
-    },
-    moonbeam: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 115000,
-      ],
-    },
-    okxchain: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 145000,
-      ],
-    },
-    optimism: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 135000,
-      ],
-    },
-    reef: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ "0x3100A1CAC7EF19DC",
-      ],
-    },
-    ultron: {
-      WitnetRequestBoard: [
-        /* _isUpgradable */ true,
-        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
-        /* _reportResultGasLimit */ 83949,
-      ],
     },
   },
   compilers: {
@@ -159,17 +26,104 @@ module.exports = {
             runs: 200,
           },
         },
-        outputSelection: {
-          "*": {
-            "*": ["evm.bytecode"],
-          },
-        },
       },
     },
     conflux: {
       solc: {
         evmVersion: "petersburg",
       },
+    },
+  },
+  constructorParams: {
+    default: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 133000,
+      ],
+    },
+    avalanche: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 155000
+      ],
+    },
+    celo: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 114000,
+      ],
+    },
+    conflux: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 78500
+      ],
+    },
+    "conflux.espace.testnet": {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 225000
+      ],
+    },
+    "conflux.espace.mainnet": {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 225000
+      ],
+    },
+    dogechain: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 85000
+      ],
+    },
+    harmony: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 530000
+      ],
+    },
+    hsc: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 85000
+      ],
+    },
+    kcc: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 92500
+      ],
+    },
+    klaytn: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 105000
+      ],
+    },
+    meter: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 85000
+      ],
+    },
+    metis: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 134800
+      ],
+    },
+    moonbeam: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 115000
+      ],
+    },
+    okxchain: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 145000,
+      ],
+    },
+    optimism: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 135000,
+      ],
+    },
+    reef: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ "0x3100A1CAC7EF19DC",
+      ],
+    },
+    ultron: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 83949,
+      ],
     },
   },
   networks: {
@@ -600,13 +554,4 @@ module.exports = {
       }
     },
   },
-}
-
-function fromAscii (str) {
-  const arr1 = []
-  for (let n = 0, l = str.length; n < l; n++) {
-    const hex = Number(str.charCodeAt(n)).toString(16)
-    arr1.push(hex)
-  }
-  return "0x" + arr1.join("")
 }
