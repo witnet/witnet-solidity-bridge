@@ -3,6 +3,7 @@ const ethUtils = require('ethereumjs-util');
 const packageJson = require("../../package.json")
 const singletons = require("../witnet.singletons") 
 const utils = require("../../scripts/utils")
+const version = `${require("../../package").version}-${require('child_process').execSync('git rev-parse HEAD').toString().trim().substring(0,7)}`
 
 const Create2Factory = artifacts.require("Create2Factory")
 const WitnetPriceRouter = artifacts.require("WitnetProxy")
@@ -62,8 +63,7 @@ module.exports = async function (deployer, network, [, from]) {
         proxy = await WitnetPriceRouter.at(proxyAddr)
       } else {
         // Deploy no singleton proxy ...
-        await deployer.deploy(WitnetPriceRouter, { from })
-        proxy = await WitnetPriceRouter.deployed()
+        proxy = await WitnetProxy.new({ from })
       }
       addresses[ecosystem][network].WitnetPriceRouter = proxy.address
       if (!isDryRun) {
@@ -79,7 +79,7 @@ module.exports = async function (deployer, network, [, from]) {
       await deployer.deploy(
         WitnetPriceRouterImplementation,
         true,
-        utils.fromAscii(packageJson.version),
+        utils.fromAscii(version),
         { from }
       )
       router = await WitnetPriceRouterImplementation.deployed()
@@ -122,7 +122,7 @@ module.exports = async function (deployer, network, [, from]) {
       await deployer.deploy(
         WitnetPriceRouterImplementation,
         false,
-        utils.fromAscii(packageJson.version),
+        utils.fromAscii(version),
         { from }
       )
       addresses[ecosystem][network].WitnetPriceRouter = WitnetPriceRouterImplementation.address;
