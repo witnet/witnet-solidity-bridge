@@ -34,18 +34,7 @@ if (!settings.networks[realm] || !settings.networks[realm][network]) {
   process.exit(1)
 }
 
-const artifact = (settings.artifacts[realm] && settings.artifacts[realm].WitnetRequestBoard) ||
-  settings.artifacts.default.WitnetRequestBoard
-
-if (!fs.existsSync(`./flattened/${artifact}/Flattened${artifact}.sol`)) {
-  console.log("\n\
-    > Please, flatten Witnet artifacts first. E.g.:\n\
-      $ yarn flatten:witnet\n\n\
-  ")
-  process.exit(0)
-}
-
-migrateFlattened(network)
+migrate(network)
 
 /// ///////////////////////////////////////////////////////////////////////////////
 
