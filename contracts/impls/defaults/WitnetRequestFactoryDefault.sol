@@ -5,27 +5,30 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
-import "../data/WitnetRequestFactoryData.sol";
-import "../impls/WitnetUpgradableBase.sol";
-import "../patterns/Clonable.sol";
+import "../../WitnetBytecodes.sol";
+import "../../WitnetRequestFactory.sol";
+import "../../data/WitnetRequestFactoryData.sol";
+import "../../impls/WitnetUpgradableBase.sol";
+import "../../patterns/Clonable.sol";
+import "../../requests/WitnetRequest.sol";
 
-contract WitnetRequestFactory
+contract WitnetRequestFactoryDefault
     is
         Clonable,
-        IWitnetRequestFactory,
         WitnetRequest,
+        WitnetRequestFactory,
         WitnetRequestFactoryData,
         WitnetUpgradableBase        
 {
     using ERC165Checker for address;
 
     /// @notice Reference to Witnet Data Requests Bytecode Registry
-    IWitnetBytecodes immutable public override registry;
+    WitnetBytecodes immutable public override(IWitnetRequestFactory, WitnetRequestTemplate) registry;
 
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
         require(
             address(this) != _BASE,
-            "WitnetRequestFactory: not a delegate call"
+            "WitnetRequestFactoryDefault: not a delegate call"
         );
         _;
     }
@@ -34,7 +37,7 @@ contract WitnetRequestFactory
         require(
             address(this) == __proxy()
                 || address(this) == base(),
-            "WitnetRequestFactory: not the factory"
+            "WitnetRequestFactoryDefault: not the factory"
         );
         _;
     }
@@ -42,7 +45,7 @@ contract WitnetRequestFactory
     modifier onlyOnTemplates {
         require(
             __witnetRequestTemplate().tally != bytes32(0),
-            "WitnetRequestFactory: not a WitnetRequestTemplate"
+            "WitnetRequestFactoryDefault: not a WitnetRequestTemplate"
         );
         _;
     }
@@ -56,7 +59,7 @@ contract WitnetRequestFactory
     }
 
     constructor(
-            IWitnetBytecodes _registry,
+            WitnetBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag
         )
@@ -67,8 +70,8 @@ contract WitnetRequestFactory
         )
     {
         require(
-            address(_registry).supportsInterface(type(IWitnetBytecodes).interfaceId),
-            "WitnetRequestFactory: uncompliant registry"
+            address(_registry).supportsInterface(type(WitnetBytecodes).interfaceId),
+            "WitnetRequestFactoryDefault: uncompliant registry"
         );
         registry = _registry;
         // let logic contract be used as a factory, while avoiding further initializations:
@@ -116,7 +119,7 @@ contract WitnetRequestFactory
         {
             WitnetRequestTemplateSlot storage __data = __witnetRequestTemplate();
             __data.aggregator = _aggregatorId;
-            __data.factory = IWitnetRequestFactory(msg.sender);
+            __data.factory = WitnetRequestFactory(msg.sender);
             __data.parameterized = _parameterized;
             __data.resultDataType = _resultDataType;
             __data.resultDataMaxSize = _resultDataMaxSize;
@@ -173,7 +176,7 @@ contract WitnetRequestFactory
         virtual override
         public
         onlyOnFactory
-        returns (WitnetRequestTemplate _template)
+        returns (address _template)
     {
         bytes32 _salt = keccak256(
             // As to avoid template address collisions from:
@@ -187,7 +190,7 @@ contract WitnetRequestFactory
                 _resultDataMaxSize
             )
         );
-        address _address = address(uint160(uint256(keccak256(
+        _template = address(uint160(uint256(keccak256(
             abi.encodePacked(
                 bytes1(0xff),
                 address(this),
@@ -195,20 +198,18 @@ contract WitnetRequestFactory
                 keccak256(_cloneBytecode())
             )
         ))));
-        if (_address.code.length > 0) {
-            _template = WitnetRequestTemplate(_address);
-        } else {
-            _template = WitnetRequestFactory(
+        if (_template.code.length == 0) {
+            _template = address(WitnetRequestFactoryDefault(
                 _cloneDeterministic(_salt)
             ).initializeWitnetRequestTemplate(
                 _retrievals,
                 _aggregator,
                 _tally,
                 _resultDataMaxSize
-            );
+            ));
             emit WitnetRequestTemplateBuilt(
                 _template,
-                _template.parameterized()
+                WitnetRequestTemplate(_template).parameterized()
             );
         }
     }
@@ -222,7 +223,7 @@ contract WitnetRequestFactory
             address(this) == _SELF
                 || address(this) == __proxy()
         ) {
-            return type(IWitnetRequestFactory).interfaceId;
+            return type(WitnetRequestFactory).interfaceId;
         } else if (__witnetRequest().radHash != bytes32(0)) {
             return type(WitnetRequest).interfaceId;
         } else {
@@ -250,14 +251,11 @@ contract WitnetRequestFactory
         else if (__witnetRequestTemplate().retrievals.length > 0) {
             return (_interfaceId == type(WitnetRequestTemplate).interfaceId);
         }
-        else if (address(this) == __proxy()) {
+        else {
             return (
-                _interfaceId == type(IWitnetRequestFactory).interfaceId
+                _interfaceId == type(WitnetRequestFactory).interfaceId
                     || super.supportsInterface(_interfaceId)
             );
-        }
-        else {
-            return (_interfaceId == type(Upgradeable).interfaceId);
         }
     }
 
@@ -495,7 +493,7 @@ contract WitnetRequestFactory
         WitnetRequestTemplate _template = __witnetRequest().template;
         require(
             address(_template) != address(0),
-            "WitnetRequestFactory: not a WitnetRequest"
+            "WitnetRequestFactoryDefault: not a WitnetRequest"
         );
         bytes32 _slaHash = registry.verifyRadonSLA(_sla);
         if (_slaHash != __data.slaHash) {
@@ -507,7 +505,7 @@ contract WitnetRequestFactory
                 if (_address.code.length > 0) {
                     _settled = WitnetRequest(_address);
                 } else {
-                    _settled = WitnetRequestFactory(_cloneDeterministic(_salt))
+                    _settled = WitnetRequestFactoryDefault(_cloneDeterministic(_salt))
                         .forkWitnetRequest(
                             msg.sender,
                             _slaHash
@@ -537,7 +535,7 @@ contract WitnetRequestFactory
         override
         external view
         onlyDelegateCalls
-        returns (IWitnetRequestFactory)
+        returns (WitnetRequestFactory)
     {
         WitnetRequestTemplate _template = __witnetRequest().template;
         if (address(_template) != address(0)) {
@@ -723,7 +721,7 @@ contract WitnetRequestFactory
         if (_address.code.length > 0) {
             _request = WitnetRequest(_address);
         } else {
-            _request = WitnetRequestFactory(_cloneDeterministic(_salt))
+            _request = WitnetRequestFactoryDefault(_cloneDeterministic(_salt))
                 .initializeWitnetRequest(
                     _radHash,
                     _args

@@ -1,14 +1,17 @@
 const ethUtils = require('ethereumjs-util');
+const { merge } = require("lodash")
 
 const addresses = require("../witnet.addresses")
+const settings = require("../witnet.settings")
 const singletons = require("../witnet.singletons") 
-const thePackage = require("../../package")
 const utils = require("../../scripts/utils")
+const version = `${require("../../package").version}-${require('child_process').execSync('git rev-parse HEAD').toString().trim().substring(0,7)}`
 
 const Create2Factory = artifacts.require("Create2Factory")
+const WitnetProxy = artifacts.require("WitnetProxy")
+
 const WitnetBytecodes = artifacts.require("WitnetBytecodes")
-const WitnetRequestFactory = artifacts.require("WitnetProxy")
-const WitnetRequestFactoryImplementation = artifacts.require("WitnetRequestFactory")
+const WitnetRequestFactory = artifacts.require("WitnetRequestFactory")
 
 module.exports = async function (deployer, network, [, from]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
@@ -19,11 +22,13 @@ module.exports = async function (deployer, network, [, from]) {
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
   console.info()
-  console.info()
   if (!isDryRun && addresses[ecosystem][network].WitnetRequestFactory == undefined) {
     console.info(`   WitnetRequestFactory: not to be deployed into '${network}`)
     return
   }
+
+  const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
+  const WitnetRequestFactoryImplementation = artifacts.require(artifactNames.WitnetRequestFactory)
 
   let proxy
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestFactory)) {
@@ -33,7 +38,7 @@ module.exports = async function (deployer, network, [, from]) {
         && singletons?.WitnetRequestFactory
     ) {
       // Deploy the proxy via a singleton factory and a salt...
-      const bytecode = WitnetRequestFactory.toJSON().bytecode
+      const bytecode = WitnetProxy.toJSON().bytecode
       const salt = singletons.WitnetRequestFactory?.salt 
         ? "0x" + ethUtils.setLengthLeft(
             ethUtils.toBuffer(
@@ -59,28 +64,28 @@ module.exports = async function (deployer, network, [, from]) {
       console.info("  ", "> proxy address:       ", proxyAddr)
       console.info("  ", "> proxy codehash:      ", web3.utils.soliditySha3(await web3.eth.getCode(proxyAddr)))        
       console.info("  ", "> proxy inception salt:", salt)
-      proxy = await WitnetRequestFactory.at(proxyAddr)
+      proxy = await WitnetProxy.at(proxyAddr)
     } else {
       // Deploy no singleton proxy ...
-      await deployer.deploy(WitnetRequestFactory, { from })
-      proxy = await WitnetRequestFactory.deployed()
+      proxy = await WitnetProxy.new({ from })
     }
     addresses[ecosystem][network].WitnetRequestFactory = proxy.address
     if (!isDryRun) {
       utils.saveAddresses(addresses)
     }
   } else {
-    proxy = await WitnetRequestFactory.at(addresses[ecosystem][network].WitnetRequestFactory)
+    proxy = await WitnetProxy.at(addresses[ecosystem][network].WitnetRequestFactory)
     console.info(`   Skipped: 'WitnetRequestFactory' deployed at ${proxy.address}`)
   }
+  WitnetRequestFactory.address = proxy.address
 
   var factory
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestFactoryImplementation)) {
     await deployer.deploy(
       WitnetRequestFactoryImplementation,
       addresses[ecosystem][network].WitnetBytecodes || WitnetBytecodes.address,
-      true,
-      utils.fromAscii(thePackage.version),
+      /* _isUpgradeable */ true,
+      /* _versionTag    */ utils.fromAscii(version),
       { from }
     )
     factory = await WitnetRequestFactoryImplementation.deployed()
@@ -90,15 +95,19 @@ module.exports = async function (deployer, network, [, from]) {
     }
   } else {
     factory = await WitnetRequestFactoryImplementation.at(addresses[ecosystem][network].WitnetRequestFactoryImplementation)
-    console.info(`   Skipped: 'WitnetRequestFactoryImplementation' deployed at ${factory.address}`)
+    console.info(`   Skipped: '${WitnetRequestFactoryImplementation.contractName}' deployed at ${factory.address}`)
+    WitnetRequestFactoryImplementation.address = factory.address
   }
 
   const implementation = await proxy.implementation()
   if (implementation.toLowerCase() !== factory.address.toLowerCase()) {
+    const header = `Upgrading 'WitnetRequestFactory' at ${proxy.address}...`
     console.info()
-    console.info("   > WitnetRequestFactory proxy:", proxy.address)
-    console.info("   > WitnetRequestFactory implementation:", implementation)
-    console.info("   > WitnetRequestFactoryImplementation:", factory.address, `(v${await factory.version()})`)
+    console.info("  ", header)
+    console.info("  ", "-".repeat(header.length))
+    console.info()
+    console.info("   > old implementation:", implementation)
+    console.info("   > new implementation:", factory.address, `(v${await factory.version.call({ from })})`)
     if (
       isDryRun ||
         ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
@@ -116,5 +125,4 @@ module.exports = async function (deployer, network, [, from]) {
       console.info("   > Not upgraded.")
     }
   }
-  WitnetRequestFactoryImplementation.address = proxy.address
 }
