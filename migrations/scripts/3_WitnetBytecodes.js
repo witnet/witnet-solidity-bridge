@@ -91,6 +91,8 @@ module.exports = async function (deployer, network, [, from]) {
   } else {
     bytecodes = await WitnetBytecodesImplementation.at(addresses[ecosystem][network].WitnetBytecodesImplementation)
     console.info(`   Skipped: 'WitnetBytecodesImplementation' deployed at ${bytecodes.address}`)
+    console.info()
+    await deployer.link(WitnetEncodingLib, WitnetBytecodesImplementation)
   }
 
   const implementation = await proxy.implementation()
