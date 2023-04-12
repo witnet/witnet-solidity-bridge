@@ -2,21 +2,17 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "../interfaces/V2/IWitnetBytecodes.sol";
+import "../libs/WitnetV2.sol";
 
 /// @title Witnet Request Board base data model. 
 /// @author The Witnet Foundation.
-abstract contract WitnetBytecodesData
-    is
-        ERC165, 
-        IWitnetBytecodes
-{
+abstract contract WitnetBytecodesData {
+    
     bytes32 private constant _WITNET_BYTECODES_DATA_SLOTHASH =
         /* keccak256("io.witnet.bytecodes.data") */
         0x673359bdfd0124f9962355e7aed2d07d989b0d4bc4cbe2c94c295e0f81427dec;
 
-    struct Bytecodes {
+    struct Storage {
         address base;
         address owner;
         address pendingOwner;
@@ -60,10 +56,10 @@ abstract contract WitnetBytecodesData
     // ================================================================================================================
     // --- Internal state-modifying functions -------------------------------------------------------------------------
     
-    /// @dev Returns storage pointer to contents of 'Bytecodes' struct.
+    /// @dev Returns storage pointer to contents of 'Storage' struct.
     function __bytecodes()
       internal pure
-      returns (Bytecodes storage _ptr)
+      returns (Storage storage _ptr)
     {
         assembly {
             _ptr.slot := _WITNET_BYTECODES_DATA_SLOTHASH

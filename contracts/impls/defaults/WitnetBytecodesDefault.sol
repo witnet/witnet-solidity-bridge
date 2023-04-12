@@ -5,19 +5,21 @@ pragma solidity >=0.8.4 <0.9.0;
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 import "../WitnetUpgradableBase.sol";
+import "../../WitnetBytecodes.sol";
 import "../../data/WitnetBytecodesData.sol";
 
 import "../../libs/WitnetEncodingLib.sol";
 
-/// @title Witnet Request Board "trustless" base implementation contract.
+/// @title Witnet Request Board EVM-default implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetBytecodes
+contract WitnetBytecodesDefault
     is 
-        WitnetUpgradableBase,
-        WitnetBytecodesData
+        WitnetBytecodes,
+        WitnetBytecodesData,
+        WitnetUpgradableBase
 {
     using ERC165Checker for address;
     
@@ -43,7 +45,7 @@ contract WitnetBytecodes
     {}
 
     receive() external payable {
-        revert("WitnetBytecodes: no transfers");
+        revert("WitnetBytecodesDefault: no transfers");
     }
 
 
@@ -53,10 +55,10 @@ contract WitnetBytecodes
     /// @dev See {IERC165-supportsInterface}.
     function supportsInterface(bytes4 _interfaceId)
       public view
-      virtual override(WitnetUpgradableBase, ERC165)
+      virtual override
       returns (bool)
     {
-        return _interfaceId == type(IWitnetBytecodes).interfaceId
+        return _interfaceId == type(WitnetBytecodes).interfaceId
             || super.supportsInterface(_interfaceId);
     }
 
@@ -173,7 +175,7 @@ contract WitnetBytecodes
     {
         WitnetV2.RadonSLA storage __sla = __database().slas[_slaHash];
         if (__sla.numWitnesses == 0) {
-            revert IWitnetBytecodes.UnknownRadonSLA(_slaHash);
+            revert IWitnetBytecodesErrors.UnknownRadonSLA(_slaHash);
         }
         bytes memory _radBytecode = bytecodeOf(_radHash);
         return abi.encodePacked(
@@ -286,7 +288,7 @@ contract WitnetBytecodes
     {
         _source = __database().retrievals[_hash];
         if (_source.method == WitnetV2.DataRequestMethods.Unknown) {
-            revert IWitnetBytecodes.UnknownRadonRetrieval(_hash);
+            revert IWitnetBytecodesErrors.UnknownRadonRetrieval(_hash);
         }
     }
 
@@ -296,7 +298,7 @@ contract WitnetBytecodes
         returns (uint8)
     {
         if (__database().retrievals[_hash].method == WitnetV2.DataRequestMethods.Unknown) {
-            revert IWitnetBytecodes.UnknownRadonRetrieval(_hash);
+            revert IWitnetBytecodesErrors.UnknownRadonRetrieval(_hash);
         }
         return __database().retrievals[_hash].argsCount;
     }
@@ -307,7 +309,7 @@ contract WitnetBytecodes
         returns (WitnetV2.RadonDataTypes)
     {
         if (__database().retrievals[_hash].method == WitnetV2.DataRequestMethods.Unknown) {
-            revert IWitnetBytecodes.UnknownRadonRetrieval(_hash);
+            revert IWitnetBytecodesErrors.UnknownRadonRetrieval(_hash);
         }
         return __database().retrievals[_hash].resultDataType;
     }
@@ -319,7 +321,7 @@ contract WitnetBytecodes
     {   
         _reducer = __database().reducers[_hash];
         if (uint8(_reducer.opcode) == 0) {
-            revert IWitnetBytecodes.UnknownRadonReducer(_hash);
+            revert IWitnetBytecodesErrors.UnknownRadonReducer(_hash);
         }
     }
 
@@ -382,7 +384,7 @@ contract WitnetBytecodes
     {
         sla = __database().slas[_slaHash];
         if (sla.numWitnesses == 0) {
-            revert IWitnetBytecodes.UnknownRadonSLA(_slaHash);
+            revert IWitnetBytecodesErrors.UnknownRadonSLA(_slaHash);
         }
     }
 

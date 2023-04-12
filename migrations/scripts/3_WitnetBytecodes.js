@@ -1,13 +1,16 @@
 const ethUtils = require('ethereumjs-util');
+const { merge } = require("lodash")
 
 const addresses = require("../witnet.addresses")
-const singletons = require("../witnet.singletons") 
-const thePackage = require("../../package")
+const settings = require("../witnet.settings")
+const singletons = require("../witnet.singletons")
 const utils = require("../../scripts/utils")
+const version = `${require("../../package").version}-${require('child_process').execSync('git rev-parse HEAD').toString().trim().substring(0,7)}`
 
 const Create2Factory = artifacts.require("Create2Factory")
-const WitnetBytecodes = artifacts.require("WitnetProxy")
-const WitnetBytecodesImplementation = artifacts.require("WitnetBytecodes")
+const WitnetProxy = artifacts.require("WitnetProxy")
+
+const WitnetBytecodes = artifacts.require("WitnetBytecodes")
 const WitnetEncodingLib = artifacts.require("WitnetEncodingLib")
 
 module.exports = async function (deployer, network, [, from]) {
@@ -23,6 +26,9 @@ module.exports = async function (deployer, network, [, from]) {
     console.info(`   WitnetBytecodes: not to be deployed into '${network}`)
     return
   }
+
+  const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
+  const WitnetBytecodesImplementation = artifacts.require(artifactNames.WitnetBytecodes)
   
   let proxy
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetBytecodes)) {
@@ -32,7 +38,7 @@ module.exports = async function (deployer, network, [, from]) {
         && singletons?.WitnetBytecodes
     ) {
       // Deploy the proxy via a singleton factory and a salt...
-      const bytecode = WitnetBytecodes.toJSON().bytecode
+      const bytecode = WitnetProxy.toJSON().bytecode
       const salt = singletons.WitnetBytecodes?.salt 
         ? "0x" + ethUtils.setLengthLeft(
             ethUtils.toBuffer(
@@ -58,18 +64,17 @@ module.exports = async function (deployer, network, [, from]) {
       console.info("  ", "> proxy address:       ", proxyAddr)
       console.info("  ", "> proxy codehash:      ", web3.utils.soliditySha3(await web3.eth.getCode(proxyAddr)))        
       console.info("  ", "> proxy inception salt:", salt)
-      proxy = await WitnetBytecodes.at(proxyAddr)
+      proxy = await WitnetProxy.at(proxyAddr)
     } else {
       // Deploy no singleton proxy ...
-      await deployer.deploy(WitnetBytecodes, { from })
-      proxy = await WitnetBytecodes.deployed()
+      proxy = await WitnetProxy.new({ from })
     }
     addresses[ecosystem][network].WitnetBytecodes = proxy.address
     if (!isDryRun) {
       utils.saveAddresses(addresses)
     }
   } else {
-    proxy = await WitnetBytecodes.at(addresses[ecosystem][network].WitnetBytecodes)
+    proxy = await WitnetProxy.at(addresses[ecosystem][network].WitnetBytecodes)
     console.info(`   Skipped: 'WitnetBytecodes' deployed at ${proxy.address}`)
   }
   WitnetBytecodes.address = proxy.address
@@ -79,8 +84,8 @@ module.exports = async function (deployer, network, [, from]) {
     await deployer.link(WitnetEncodingLib, [ WitnetBytecodesImplementation, ])
     await deployer.deploy(
       WitnetBytecodesImplementation,
-      true,
-      utils.fromAscii(thePackage.version),
+      /* _isUpgradeable */ true,
+      /* _versionTag    */ utils.fromAscii(version),
       { from }
     )
     bytecodes = await WitnetBytecodesImplementation.deployed()
@@ -90,17 +95,21 @@ module.exports = async function (deployer, network, [, from]) {
     }
   } else {
     bytecodes = await WitnetBytecodesImplementation.at(addresses[ecosystem][network].WitnetBytecodesImplementation)
-    console.info(`   Skipped: 'WitnetBytecodesImplementation' deployed at ${bytecodes.address}`)
+    console.info(`   Skipped: '${WitnetBytecodesImplementation.contractName}' deployed at ${bytecodes.address}`)
     console.info()
+    WitnetBytecodesImplementation.address = bytecodes.address
     await deployer.link(WitnetEncodingLib, WitnetBytecodesImplementation)
   }
 
-  const implementation = await proxy.implementation()
+  const implementation = await proxy.implementation.call({ from })
   if (implementation.toLowerCase() !== bytecodes.address.toLowerCase()) {
+    const header = `Upgrading 'WitnetBytecodes' at ${proxy.address}...`
     console.info()
-    console.info("   > WitnetBytecodes proxy:", proxy.address)
-    console.info("   > WitnetBytecodes implementation:", implementation)
-    console.info("   > WitnetBytecodesImplementation:", bytecodes.address, `(v${await bytecodes.version()})`)
+    console.info("  ", header)
+    console.info("  ", "-".repeat(header.length))
+    console.info()
+    console.info("   > old implementation:", implementation)
+    console.info("   > new implementation:", bytecodes.address, `(v${await bytecodes.version.call({ from })})`)
     if (
       isDryRun ||
         ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
@@ -118,5 +127,4 @@ module.exports = async function (deployer, network, [, from]) {
       console.info("   > Not upgraded.")
     }
   }
-  WitnetBytecodesImplementation.address = proxy.address
 }

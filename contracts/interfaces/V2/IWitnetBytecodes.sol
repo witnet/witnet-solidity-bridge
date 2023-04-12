@@ -6,17 +6,6 @@ import "../../libs/WitnetV2.sol";
 
 interface IWitnetBytecodes {
 
-    error UnknownRadonRetrieval(bytes32 hash);
-    error UnknownRadonReducer(bytes32 hash);
-    error UnknownRadonRequest(bytes32 hash);
-    error UnknownRadonSLA(bytes32 hash);
-    
-    event NewDataProvider(uint256 index);
-    event NewRadonRetrievalHash(bytes32 hash);
-    event NewRadonReducerHash(bytes32 hash);
-    event NewRadHash(bytes32 hash);
-    event NewSlaHash(bytes32 hash);
-
     function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
     function bytecodeOf(bytes32 radHash, bytes32 slahHash) external view returns (bytes memory);
 
