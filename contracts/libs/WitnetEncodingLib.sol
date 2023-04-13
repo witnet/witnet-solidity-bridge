@@ -2,21 +2,15 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "solidity-stringutils/src/strings.sol";
-
 import "./WitnetV2.sol";
 
 /// @title A library for encoding Witnet Data Requests.
 /// @author The Witnet Foundation.
 library WitnetEncodingLib {
 
-    using strings for string;
-    using strings for strings.slice;
-
     using WitnetBuffer for WitnetBuffer.Buffer;
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
-    using Witnet for string;
 
     bytes internal constant WITNET_RADON_OPCODES_RESULT_TYPES =
         hex"10ffffffffffffffffffffffffffffff0401ff010203050406071311ff01ffff07ff02ffffffffffffffffffffffffff0703ffffffffffffffffffffffffffff0405070202ff04040404ffffffffffff05070402040205050505ff04ff04ffffff010203050406070101ffffffffffff02ff050404000106060707ffffffffff";
@@ -28,21 +22,6 @@ library WitnetEncodingLib {
             // 05070402040205050505ff04ff04ffff
             // ff010203050406070101ffffffffffff
             // 02ff050404000106060707ffffffffff
-
-    bytes internal constant URL_HOST_XALPHAS_CHARS = 
-        hex"000000000000000000000000000000000000000000000000000000000000000000ffff00ffffffffffffffff00ff0000ffffffffffffffffffff00ff00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff0000ff00ffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-
-    bytes internal constant URL_PATH_XALPHAS_CHARS = 
-        hex"000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff0000ff00ffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-
-    bytes internal constant URL_QUERY_XALPHAS_CHARS = 
-        hex"000000000000000000000000000000000000000000000000000000000000000000ffff00ffffffffffffffffffffffffffffffffffffffffffffffff00ff0000ffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff0000ff00ffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-
-    error UrlBadHostIpv4(string authority, string part);
-    error UrlBadHostPort(string authority, string port);
-    error UrlBadHostXalphas(string authority, string part);
-    error UrlBadPathXalphas(string path, uint pos);
-    error UrlBadQueryXalphas(string query, uint pos);
 
     /// ===============================================================================================================
     /// --- WitnetLib internal methods --------------------------------------------------------------------------------
@@ -481,76 +460,6 @@ library WitnetEncodingLib {
         }
     }
 
-    function validateUrlHost(string memory authority)
-        public pure
-    {
-        unchecked {
-            if (bytes(authority).length > 0) {  
-                strings.slice memory slice = authority.toSlice();
-                strings.slice memory host = slice.split(string(":").toSlice());
-                if (!_checkUrlHostPort(slice.toString())) {
-                    revert UrlBadHostPort(authority, slice.toString());
-                }
-                strings.slice memory delim = string(".").toSlice();
-                string[] memory parts = new string[](host.count(delim) + 1);
-                if (parts.length == 1) {
-                    revert UrlBadHostXalphas(authority, authority);
-                }
-                for (uint ix = 0; ix < parts.length; ix ++) {
-                    parts[ix] = host.split(delim).toString();
-                    if (!_checkUrlHostXalphas(bytes(parts[ix]))) {
-                        revert UrlBadHostXalphas(authority, parts[ix]);
-                    }
-                }
-                if (parts.length == 4) {
-                    bool _prevDigits = false;
-                    for (uint ix = 4; ix > 0; ix --) {
-                        if (_checkUrlHostIpv4(parts[ix - 1])) {
-                            _prevDigits = true;
-                        } else {
-                            if (_prevDigits) {
-                                revert UrlBadHostIpv4(authority, parts[ix - 1]);
-                            } else {
-                                break;
-                            }
-                        }   
-                    }
-                }
-            }
-        }
-    }
-
-    function validateUrlPath(string memory path)
-        public pure
-    {
-        unchecked {
-            if (bytes(path).length > 0) {
-                if (bytes(path)[0] == bytes1("/")) {
-                    revert UrlBadPathXalphas(path, 0);
-                }
-                for (uint ix = 0; ix < bytes(path).length; ix ++) {
-                    if (URL_PATH_XALPHAS_CHARS[uint8(bytes(path)[ix])] == 0x0) {
-                        revert UrlBadPathXalphas(path, ix);
-                    }
-                }
-            }
-        }
-    }
-
-    function validateUrlQuery(string memory query)
-        public pure
-    {
-        unchecked {
-            if (bytes(query).length > 0) {
-                for (uint ix = 0; ix < bytes(query).length; ix ++) {
-                    if (URL_QUERY_XALPHAS_CHARS[uint8(bytes(query)[ix])] == 0x0) {
-                        revert UrlBadQueryXalphas(query, ix);
-                    }
-                }
-            }
-        }
-    }
-
     function verifyRadonScriptResultDataType(bytes memory script)
         public pure
         returns (WitnetV2.RadonDataTypes)
@@ -564,36 +473,6 @@ library WitnetEncodingLib {
 
     /// ===============================================================================================================
     /// --- WitnetLib private methods ---------------------------------------------------------------------------------
-
-    function _checkUrlHostIpv4(string memory ipv4)
-        private pure
-        returns (bool)
-    {
-        (uint res, bool ok) = Witnet.tryUint(ipv4);
-        return (ok && res <= 255);
-    }
-
-    function _checkUrlHostPort(string memory hostPort)
-        private pure
-        returns (bool)
-    {
-        (uint res, bool ok) = Witnet.tryUint(hostPort);
-        return (ok && res <= 65536);
-    }
-
-    function _checkUrlHostXalphas(bytes memory xalphas)
-        private pure
-        returns (bool)
-    {
-        unchecked {
-            for (uint ix = 0; ix < xalphas.length; ix ++) {
-                if (URL_HOST_XALPHAS_CHARS[uint8(xalphas[ix])] == 0x00) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
 
     function _replaceCborWildcards(
             WitnetCBOR.CBOR memory self,
