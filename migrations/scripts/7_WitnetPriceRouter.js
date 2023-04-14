@@ -89,15 +89,18 @@ module.exports = async function (deployer, network, [, from]) {
       }
     } else {
       router = await WitnetPriceRouterImplementation.at(addresses[ecosystem][network].WitnetPriceRouterImplementation)
-      console.info(`   Skipped: 'WitnetPriceRouterImplementation' deployed at ${router.address}`)
+      console.info(`   Skipped: '${WitnetPriceRouterImplementation.contractName}' deployed at ${router.address}`)
     }
 
     const implementation = await proxy.implementation()
     if (implementation.toLowerCase() !== router.address.toLowerCase()) {
+      const header = `Upgrading 'WitnetPriceRouter' at ${proxy.address}...`
       console.info()
-      console.info("   > WitnetPriceRouter proxy:", proxy.address)
-      console.info("   > WitnetPriceRouter implementation:", implementation)
-      console.info("   > WitnetPriceRouterImplementation:", router.address, `(v${await router.version()})`)
+      console.info("  ", header)
+      console.info("  ", "-".repeat(header.length))
+      console.info()
+      console.info("   > old implementation:", implementation)
+      console.info("   > new implementation:", router.address, `(v${await router.version.call({ from })})`)
       if (
         isDryRun ||
           ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())

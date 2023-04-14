@@ -13,5 +13,5 @@ module.exports = {
   },
   WitnetRequestFactory: {
     salt: 222309,
-  }
+  },
 }

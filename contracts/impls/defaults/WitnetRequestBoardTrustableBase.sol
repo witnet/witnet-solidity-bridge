@@ -339,7 +339,7 @@ abstract contract WitnetRequestBoardTrustableBase
         Witnet.QueryStatus _queryStatus = _statusOf(_queryId);
         if (_queryStatus == Witnet.QueryStatus.Reported) {
             bytes storage __cborValues = __response(_queryId).cborBytes;
-            // determine whether reported result is an error by peeking in first byte
+            // determine whether reported result is an error by peeking the first byte
             return (__cborValues[0] == bytes1(0xd8) 
                 ? Witnet.ResultStatus.Error
                 : Witnet.ResultStatus.Ready

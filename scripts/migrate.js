@@ -38,7 +38,7 @@ migrate(network)
 
 /// ///////////////////////////////////////////////////////////////////////////////
 
-async function migrateFlattened (network) {
+async function migrate (network) {
   console.log(
     `> Migrating into "${realm}:${network}"...`
   )
@@ -47,7 +47,6 @@ async function migrateFlattened (network) {
       "truffle",
       [
         "migrate",
-        "--compile-all",
         "--reset",
         "--network",
         network,

@@ -22,10 +22,6 @@ module.exports = async function (deployer, network, [, from, reporter]) {
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
-  const realm = network === "test" || network === "develop"
-    ? "default"
-    : utils.getRealmNetworkFromArgs()[0]
-
   const artifactsName = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRequestBoardImplementation = artifacts.require(artifactsName.WitnetRequestBoard)
   
@@ -90,8 +86,8 @@ module.exports = async function (deployer, network, [, from, reporter]) {
       ...(
         // if defined, use network-specific constructor parameters:
         settings.constructorParams[network]?.WitnetRequestBoard ||
-          // otherwise, use realm-specific parameters, if any:
-          settings.constructorParams[realm]?.WitnetRequestBoard ||
+          // otherwise, use ecosystem-specific parameters, if any:
+          settings.constructorParams[ecosystem]?.WitnetRequestBoard ||
           // or, default defined parameters for WRBs, if any:
           settings.constructorParams?.default?.WitnetRequestBoard
       ), 

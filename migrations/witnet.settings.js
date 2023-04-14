@@ -15,6 +15,12 @@ module.exports = {
     reef: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
     },
+    "polygon.zkevm.polygon": {
+      WitnetRandomness: "WitnetRandomnessZkEvm",
+    },
+    "polygon.zkevm.mainnet": {
+      WitnetRandomness: "WitnetRandomnessZkEvm",
+    },
   },
   compilers: {
     default: {
@@ -473,14 +479,14 @@ module.exports = {
         skipDryRun: true,
       },
       "polygon.zkevm.goerli": {
-        host:"localhost",
+        host: "localhost",
         port: 8512,
         network_id: 1442,
         skipDryRun: true,
         verify: {
           apiUrl: 'http://api-testnet-zkevm.polygonscan.com/api',
           explorerUrl: 'https://testnet-zkevm.polygonscan.com/address',
-        }
+        },
       }
     },
     reef: {
