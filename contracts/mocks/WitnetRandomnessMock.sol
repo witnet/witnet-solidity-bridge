@@ -23,11 +23,13 @@ contract WitnetRandomnessMock
     /// @param _mockRandomizeLatencyBlocks Mocked number of blocks in which a new randomness will be provided after `randomize()`
     /// @param _mockRandomizeFee Mocked randomize fee (will be constant no matter what tx gas price is provided).
     constructor (
+            WitnetRequestRandomness _request,
             uint8 _mockRandomizeLatencyBlocks,
             uint256 _mockRandomizeFee
         )
         WitnetRandomnessDefault(
-            WitnetRequestBoard(payable(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)),
+            WitnetRequestBoard(payable(0)),
+            _request,
             false,
             bytes32("mocked")
         )

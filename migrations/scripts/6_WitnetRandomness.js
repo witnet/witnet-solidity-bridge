@@ -10,8 +10,9 @@ const version = `${require("../../package").version}-${require('child_process').
 const Create2Factory = artifacts.require("Create2Factory")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
-const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 const WitnetRandomness = artifacts.require("WitnetRandomness")
+const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
+const WitnetRequestRandomness = artifacts.require("WitnetRequestRandomness")
 
 module.exports = async function (deployer, network, [, from]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
@@ -24,17 +25,29 @@ module.exports = async function (deployer, network, [, from]) {
   // Should the WitnetRandomness be deployed into this network:
   console.info()
   if (!isDryRun && addresses[ecosystem][network].WitnetRandomness == undefined) {
-    console.info(`\n   WitnetPriceRouter: Not to be deployed into '${network}'`)
+    console.info(`\n   WitnetRandomness: Not to be deployed into '${network}'`)
     return;
   }
 
+  var create2Factory = await Create2Factory.deployed()
+  if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestRandomness)) {
+    // Invariantly deploy a WitnetRequestRandomness contract if not found in the addresses file
+    await deployer.deploy(WitnetRequestRandomness, { from, gas: 2000000 })
+    addresses[ecosystem][network].WitnetRequestRandomness = WitnetRequestRandomness.address
+    if (!isDryRun) {
+      utils.saveAddresses(addresses)
+    }
+  } else {
+    WitnetRequestRandomness.address = addresses[ecosystem][network]?.WitnetRequestRandomness
+    console.info(`   Skipped: 'WitnetRequestRandomness' deployed at ${WitnetRequestRandomness.address}`)
+  }
+  
   const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRandomnessImplementation = artifacts.require(artifactNames.WitnetRandomness)
 
   if (addresses[ecosystem][network].WitnetRandomnessImplementation != undefined) {
     let proxy
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRandomness)) {
-      var create2Factory = await Create2Factory.deployed()
       if(
         create2Factory && !utils.isNullAddress(create2Factory.address)
           && singletons?.WitnetRandomness
@@ -52,7 +65,7 @@ module.exports = async function (deployer, network, [, from]) {
         const proxyAddr = await create2Factory.determineAddr.call(bytecode, salt, { from })
         if ((await web3.eth.getCode(proxyAddr)).length <= 3) {
           // deploy instance only if not found in current network:
-          utils.traceHeader(`Singleton inception of 'WitnetPriceRouter':`)
+          utils.traceHeader(`Singleton inception of 'WitnetRandomness':`)
           const balance = await web3.eth.getBalance(from)
           const gas = singletons.WitnetRandomness.gas || 10 ** 6
           const tx = await create2Factory.deploy(bytecode, salt, { from, gas })
@@ -86,8 +99,9 @@ module.exports = async function (deployer, network, [, from]) {
       await deployer.deploy(
         WitnetRandomnessImplementation,
         WitnetRequestBoard.address,
+        WitnetRequestRandomness.address,
         /* _isUpgradeable */ true,
-        /* _versionTag    */ version,
+        /* _versionTag    */ utils.fromAscii(version),
         { from }
       )
       randomness = await WitnetRandomnessImplementation.deployed()
@@ -96,14 +110,16 @@ module.exports = async function (deployer, network, [, from]) {
         utils.saveAddresses(addresses)
       }
     } else {
-      randomness = await WitnetRandomnessImplementation.at(addresses[ecosystem][network].WitnetRandomnessImplementation)
-      console.info(`   Skipped: 'WitnetRandomnessImplementation' deployed at ${randomness.address}`)
-      WitnetRandomnessImplementation.address = randmoness.address
+      randomness = await WitnetRandomnessImplementation.at(
+        addresses[ecosystem][network].WitnetRandomnessImplementation
+      )
+      console.info(`   Skipped: '${WitnetRandomnessImplementation.contractName}' deployed at ${randomness.address}`)
+      WitnetRandomnessImplementation.address = randomness.address
     }
 
     const implementation = await proxy.implementation()
     if (implementation.toLowerCase() !== randomness.address.toLowerCase()) {
-      const header = `Upgrading 'WitnetRequestFactory' at ${proxy.address}...`
+      const header = `Upgrading 'WitnetRandomness' at ${proxy.address}...`
       console.info()
       console.info("  ", header)
       console.info("  ", "-".repeat(header.length))
@@ -133,6 +149,7 @@ module.exports = async function (deployer, network, [, from]) {
       await deployer.deploy(
         WitnetRandomnessImplementation,
         WitnetRequestBoard.address,
+        WitnetRequestRandomness.address,
         false,
         utils.fromAscii(version),
         { from }

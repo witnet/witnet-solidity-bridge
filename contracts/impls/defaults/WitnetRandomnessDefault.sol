@@ -25,7 +25,7 @@ contract WitnetRandomnessDefault
     uint256 public override latestRandomizeBlock;
     
     WitnetRequestBoard public immutable override witnet;
-    WitnetRequestRandomness public witnetRandomnessRequest;
+    WitnetRequestRandomness public override witnetRandomnessRequest;
     
     mapping (uint256 => RandomizeData) internal __randomize_;
     struct RandomizeData {
@@ -44,6 +44,7 @@ contract WitnetRandomnessDefault
     /// @param _wrb The WitnetRequestBoard immutable entrypoint address.
     constructor(
             WitnetRequestBoard _wrb,
+            WitnetRequestRandomness _request,
             bool _upgradable,
             bytes32 _version
         )
@@ -54,12 +55,16 @@ contract WitnetRandomnessDefault
         )
     {
         require(
-            address(_wrb).supportsInterface(type(WitnetRequestBoard).interfaceId),
+            address(_wrb) == address(0)
+                || address(_wrb).supportsInterface(type(WitnetRequestBoard).interfaceId),
             "WitnetRandomnessDefault: uncompliant request board"
         );
+        require(
+            _request.owner() == msg.sender,
+            "WitnetRandomnessDefault: unowned randomness request"
+        );
         witnet = _wrb;
-        witnetRandomnessRequest = new WitnetRequestRandomness();
-        witnetRandomnessRequest.transferOwnership(msg.sender);
+        witnetRandomnessRequest = _request;
     }
 
     /// Returns amount of wei required to be paid as a fee when requesting randomization with a 
@@ -294,7 +299,7 @@ contract WitnetRandomnessDefault
             __proxiable().proxy = address(this);
             _transferOwnership(msg.sender);
             witnetRandomnessRequest = new WitnetRequestRandomness();
-            witnetRandomnessRequest.transferOwnership(msg.sender);
+            WitnetRequestRandomness(address(witnetRandomnessRequest)).transferOwnership(msg.sender);
         }
         else {
             // a proxy is being upgraded ...
@@ -395,7 +400,7 @@ contract WitnetRandomnessDefault
         virtual internal
         returns (WitnetRandomness)
     {
-        address _randomnessRequest = address(witnetRandomnessRequest.clone());
+        address _randomnessRequest = address(WitnetRequestRandomness(address(witnetRandomnessRequest)).clone());
         Ownable(_randomnessRequest).transferOwnership(msg.sender);
         WitnetRandomnessDefault(_instance).initializeClone(abi.encode(_randomnessRequest));
         return WitnetRandomness(_instance);

@@ -1,5 +1,5 @@
 const WitnetRandomnessMock = artifacts.require("WitnetRandomnessMock")
-
+const WitnetRequestRandomness = artifacts.require("WitnetRequestRandomness")
 const RandomnessBareMinimal = artifacts.require("RandomnessBareMinimal")
 
 const {
@@ -12,13 +12,16 @@ const { expect, assert } = require("chai")
 
 contract("WitnetRandomnesMock", accounts => {
   let witnet
+  let request
   const deployer = accounts[0]
   const stranger = accounts[1]
   const fee = 10 ** 15
   const gasPrice = 1e9
 
   before(async () => {
+    request = await WitnetRequestRandomness.new({ from: deployer })
     witnet = await WitnetRandomnessMock.new(
+      request.address,
       2, // _mockRandomizeLatencyBlock
       fee, // _mockRandomizeFee
       { from: deployer }
