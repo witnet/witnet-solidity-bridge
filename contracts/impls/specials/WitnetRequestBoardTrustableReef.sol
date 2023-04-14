@@ -6,7 +6,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 // Inherits from:
-import "../../defaults/WitnetRequestBoardTrustableDefault.sol";
+import "../defaults/WitnetRequestBoardTrustableDefault.sol";
 
 /// @title Witnet Request Board OVM-compatible (Optimism) "trustable" implementation.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.

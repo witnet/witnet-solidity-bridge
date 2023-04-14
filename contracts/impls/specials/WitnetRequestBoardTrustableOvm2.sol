@@ -5,7 +5,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../defaults/WitnetRequestBoardTrustableDefault.sol";
+import "../defaults/WitnetRequestBoardTrustableDefault.sol";
 
 // solhint-disable-next-line
 interface OVM_GasPriceOracle {

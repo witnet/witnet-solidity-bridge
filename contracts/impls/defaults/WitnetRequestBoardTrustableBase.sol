@@ -3,13 +3,13 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../WitnetUpgradableBase.sol";
-import "../../../WitnetRequestBoard.sol";
-import "../../../data/WitnetBoardDataACLs.sol";
-import "../../../interfaces/IWitnetRequestBoardAdminACLs.sol";
-import "../../../patterns/Payable.sol";
+import "../WitnetUpgradableBase.sol";
+import "../../WitnetRequestBoard.sol";
+import "../../data/WitnetBoardDataACLs.sol";
+import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
+import "../../patterns/Payable.sol";
 
-import "../../../libs/WitnetErrorsLib.sol";
+import "../../libs/WitnetErrorsLib.sol";
 
 /// @title Witnet Request Board "trustable" base implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
