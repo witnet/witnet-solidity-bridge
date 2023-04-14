@@ -21,12 +21,6 @@ module.exports = async function (deployer, network, [, from]) {
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
-  console.info()
-  if (!isDryRun && addresses[ecosystem][network].WitnetBytecodes == undefined) {
-    console.info(`   WitnetBytecodes: not to be deployed into '${network}`)
-    return
-  }
-
   const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetBytecodesImplementation = artifacts.require(artifactNames.WitnetBytecodes)
   
