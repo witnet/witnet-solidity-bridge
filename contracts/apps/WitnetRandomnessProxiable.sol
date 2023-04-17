@@ -5,18 +5,18 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
-import "../WitnetUpgradableBase.sol";
-import "../../WitnetRandomness.sol";
-import "../../patterns/Clonable.sol";
+import "../impls/WitnetUpgradableBase.sol";
+import "../interfaces/IWitnetRandomness.sol";
+import "../patterns/Clonable.sol";
 
-import "../../requests/WitnetRequestRandomness.sol";
+import "../requests/WitnetRequestRandomness.sol";
 
-/// @title WitnetRandomnessDefault: A trustless randomness generator and registry, using the Witnet oracle. 
+/// @title WitnetRandomnessProxiable: A trustless randomness generator and registry, using the Witnet oracle. 
 /// @author Witnet Foundation.
-contract WitnetRandomnessDefault
+contract WitnetRandomnessProxiable
     is
         Clonable,
-        WitnetRandomness,
+        IWitnetRandomness,
         WitnetUpgradableBase
 {
     using ERC165Checker for address;
@@ -36,7 +36,7 @@ contract WitnetRandomnessDefault
     }
 
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
-        require(address(this) != base(), "WitnetRandomnessDefault: not a delegate call");
+        require(address(this) != base(), "WitnetRandomnessProxiable: not a delegate call");
         _;
     }
 
@@ -45,11 +45,10 @@ contract WitnetRandomnessDefault
     constructor(
             WitnetRequestBoard _wrb,
             WitnetRequestRandomness _request,
-            bool _upgradable,
             bytes32 _version
         )
         WitnetUpgradableBase(
-            _upgradable, 
+            false, 
             _version,
             "io.witnet.proxiable.randomness"
         )
@@ -57,11 +56,11 @@ contract WitnetRandomnessDefault
         require(
             address(_wrb) == address(0)
                 || address(_wrb).supportsInterface(type(WitnetRequestBoard).interfaceId),
-            "WitnetRandomnessDefault: uncompliant request board"
+            "WitnetRandomnessProxiable: uncompliant request board"
         );
         require(
             _request.owner() == msg.sender,
-            "WitnetRandomnessDefault: unowned randomness request"
+            "WitnetRandomnessProxiable: unowned randomness request"
         );
         witnet = _wrb;
         witnetRandomnessRequest = _request;
@@ -120,16 +119,16 @@ contract WitnetRandomnessDefault
             _block = getRandomnessNextBlock(_block);
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
-        require(_queryId != 0, "WitnetRandomnessDefault: not randomized");
+        require(_queryId != 0, "WitnetRandomnessProxiable: not randomized");
         Witnet.ResultStatus _resultStatus = witnet.checkResultStatus(_queryId);
         if (_resultStatus == Witnet.ResultStatus.Ready) {
             return witnet.readResponseResult(_queryId).asBytes32();
         } else if (_resultStatus == Witnet.ResultStatus.Error) {
             uint256 _nextRandomizeBlock = __randomize_[_block].nextBlock;
-            require(_nextRandomizeBlock != 0, "WitnetRandomnessDefault: faulty randomize");
+            require(_nextRandomizeBlock != 0, "WitnetRandomnessProxiable: faulty randomize");
             return getRandomnessAfter(_nextRandomizeBlock);
         } else {
-            revert("WitnetRandomnessDefault: pending randomize");
+            revert("WitnetRandomnessProxiable: pending randomize");
         }
     }
 
@@ -301,31 +300,15 @@ contract WitnetRandomnessDefault
             witnetRandomnessRequest = new WitnetRequestRandomness();
             WitnetRequestRandomness(address(witnetRandomnessRequest)).transferOwnership(msg.sender);
         }
-        else {
-            // a proxy is being upgraded ...
-            // only the proxy's owner can upgrade it
-            require(
-                msg.sender == owner(),
-                "WitnetRandomnessDefault: not the owner"
-            );
-            // the implementation cannot be upgraded more than once, though
-            require(
-                __proxiable().implementation != base(),
-                "WitnetRandomnessDefault: already initialized"
-            );
-            emit Upgraded(msg.sender, base(), codehash(), version());
+        else if (__proxiable().implementation == base()) {
+            revert("WitnetRandomnessProxiable: not upgradeable");
         }
         __proxiable().implementation = base();
     }
 
     /// Tells whether provided address could eventually upgrade the contract.
-    function isUpgradableFrom(address _from) external view override returns (bool) {
-        address _owner = owner();
-        return (
-            // false if the WRB is intrinsically not upgradable, or `_from` is no owner
-            isUpgradable()
-                && _owner == _from
-        );
+    function isUpgradableFrom(address) external pure override returns (bool) {
+        return false;
     }
 
 
@@ -339,7 +322,7 @@ contract WitnetRandomnessDefault
     function clone()
         virtual public
         wasInitialized
-        returns (WitnetRandomness)
+        returns (WitnetRandomnessProxiable)
     {
         return _afterClone(_clone());
     }
@@ -352,7 +335,7 @@ contract WitnetRandomnessDefault
     function cloneDeterministic(bytes32 _salt)
         virtual public
         wasInitialized
-        returns (WitnetRandomness)
+        returns (WitnetRandomnessProxiable)
     {
         return _afterClone(_cloneDeterministic(_salt));
     }
@@ -398,12 +381,12 @@ contract WitnetRandomnessDefault
     /// @dev Common steps for both deterministic and non-deterministic cloning.
     function _afterClone(address _instance)
         virtual internal
-        returns (WitnetRandomness)
+        returns (WitnetRandomnessProxiable)
     {
         address _randomnessRequest = address(WitnetRequestRandomness(address(witnetRandomnessRequest)).clone());
         Ownable(_randomnessRequest).transferOwnership(msg.sender);
-        WitnetRandomnessDefault(_instance).initializeClone(abi.encode(_randomnessRequest));
-        return WitnetRandomness(_instance);
+        WitnetRandomnessProxiable(_instance).initializeClone(abi.encode(_randomnessRequest));
+        return WitnetRandomnessProxiable(_instance);
     }
 
     /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.
@@ -458,7 +441,7 @@ contract WitnetRandomnessDefault
         _reward = witnet.estimateReward(tx.gasprice);
         require(
             _reward <= msg.value,
-            "WitnetRandomnessDefault: reward too low"
+            "WitnetRandomnessProxiable: reward too low"
         );
         _id = witnet.postRequest{value: _reward}(_request);
     }

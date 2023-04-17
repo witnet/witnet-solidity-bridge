@@ -3,17 +3,17 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../impls/defaults/WitnetRandomnessDefault.sol";
+import "../apps/WitnetRandomnessProxiable.sol";
 
-/// @title WitnetRandomness mock contract implementation. 
+/// @title WitnetRandomnessProxiable mock contract implementation. 
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
-/// @dev ON SUPPORTED TESTNETS, PLEASE USE THE `WitnetRandomness`
+/// @dev ON SUPPORTED TESTNETS, PLEASE USE THE `WitnetRandomnessProxiable`
 /// @dev CONTRACT ADDRESS PROVIDED BY THE WITNET FOUNDATION.
 /// @dev SEE: https://docs.witnet.io/smart-contracts/witnet-randomness-oracle/contract-addresses
 /// @author Witnet Foundation.
 contract WitnetRandomnessMock
     is
-        WitnetRandomnessDefault
+        WitnetRandomnessProxiable
 {
     uint8 internal __mockRandomizeLatencyBlocks;
     uint256 internal __mockRandomizeFee;
@@ -27,10 +27,9 @@ contract WitnetRandomnessMock
             uint8 _mockRandomizeLatencyBlocks,
             uint256 _mockRandomizeFee
         )
-        WitnetRandomnessDefault(
+        WitnetRandomnessProxiable(
             WitnetRequestBoard(payable(0)),
             _request,
-            false,
             bytes32("mocked")
         )
     {

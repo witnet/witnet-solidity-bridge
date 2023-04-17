@@ -100,7 +100,6 @@ module.exports = async function (deployer, network, [, from]) {
         WitnetRandomnessImplementation,
         WitnetRequestBoard.address,
         WitnetRequestRandomness.address,
-        /* _isUpgradeable */ true,
         /* _versionTag    */ utils.fromAscii(version),
         { from }
       )
@@ -150,7 +149,6 @@ module.exports = async function (deployer, network, [, from]) {
         WitnetRandomnessImplementation,
         WitnetRequestBoard.address,
         WitnetRequestRandomness.address,
-        false,
         utils.fromAscii(version),
         { from }
       )
