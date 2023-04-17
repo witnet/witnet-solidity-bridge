@@ -194,4 +194,17 @@ library WitnetV2 {
         uint minerCommitRevealFee;
     }
 
+    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
+        internal pure
+        returns (bool)
+    {
+        return (
+            a.numWitnesses >= b.numWitnesses
+                && a.minConsensusPercentage >= b.minConsensusPercentage
+                && a.witnessReward >= b.witnessReward
+                && a.witnessCollateral >= b.witnessCollateral
+                && a.minerCommitRevealFee >= b.minerCommitRevealFee
+        );
+    }
+
 }
