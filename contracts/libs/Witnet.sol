@@ -421,6 +421,21 @@ library Witnet {
         return string(lowered);
     }
 
+    /// @notice Converts bytes32 into string.
+    function toString(bytes32 _bytes32)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory _bytes = new bytes(_toStringLength(_bytes32));
+        for (uint _i = 0; _i < _bytes.length;) {
+            _bytes[_i] = _bytes32[_i];
+            unchecked {
+                _i ++;
+            }
+        }
+        return string(_bytes);
+    }
+
     function tryUint(string memory str)
         internal pure
         returns (uint res, bool)
@@ -443,7 +458,7 @@ library Witnet {
     /// ===============================================================================================================
     /// --- 'uint8' helper methods ------------------------------------------------------------------------------------
 
-    /// @dev Convert a `uint8` into a 2 characters long `string` representing its two less significant hexadecimal values.
+    /// @notice Convert a `uint8` into a 2 characters long `string` representing its two less significant hexadecimal values.
     function toHexString(uint8 _u)
         internal pure
         returns (string memory)
@@ -460,7 +475,7 @@ library Witnet {
         return string(b2);
     }
 
-    /// @dev Convert a `uint8` into a 1, 2 or 3 characters long `string` representing its.
+    /// @notice Convert a `uint8` into a 1, 2 or 3 characters long `string` representing its.
     /// three less significant decimal values.
     function toString(uint8 _u)
         internal pure
@@ -497,5 +512,20 @@ library Witnet {
         // [CBOR tag 39] Identifiers for CBOR: https://github.com/lucas-clemente/cbor-specs/blob/master/id.md
         bool success = cbor.tag != 39;
         return Witnet.Result(success, cbor);
+    }
+
+    /// @dev Calculate length of string-equivalent to given bytes32.
+    function _toStringLength(bytes32 _bytes32)
+        private pure
+        returns (uint _length)
+    {
+        for (; _length < 32; ) {
+            if (_bytes32[_length] == 0) {
+                break;
+            }
+            unchecked {
+                _length ++;
+            }
+        }
     }
 }
