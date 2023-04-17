@@ -39,7 +39,7 @@ abstract contract WitnetUpgradableBase
     }
     
     /// @dev Reverts if proxy delegatecalls to unexistent method.
-    fallback() external {
+    fallback() virtual external {
         revert("WitnetUpgradableBase: not implemented");
     }
 
@@ -58,6 +58,7 @@ abstract contract WitnetUpgradableBase
             || super.supportsInterface(_interfaceId);
     }
 
+    
     // ================================================================================================================
     // --- Overrides 'Proxiable' --------------------------------------------------------------------------------------
 
