@@ -319,6 +319,7 @@
         "polygon.goerli": {
             "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
             "WitnetBytecodes": "0x000000BAE534378248325afB51142CEB94eBB7E5",
+            "WitnetPriceFeeds": "0xFEeEed553b5a5C236EDd047BB034EF303d36f827",
             "WitnetPriceRouter": "0x6d5544ca5b35bf2e7a78ace4E7B8d191fe5C9FAb",
             "WitnetRandomness": "0x1234564b565386e7a47c7B8d1238cf91e24BdEB6",
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
@@ -327,6 +328,7 @@
             "WitnetErrorsLib": "0x7Cecfb22CD939decC99Df8BcaCdeD171cDA8dc44",
             "WitnetEncodingLib": "0xeBd91A65eA5d30536E4b4C97D907cfe08a06358C",
             "WitnetBytecodesImplementation": "0xEBef903399a4FD3Ba035c2b9824Bb468bB3d7060",
+            "WitnetPriceFeedsImplementation": "0x3280539A77C578C3eF698f53f29CDba00eC9B72E",
             "WitnetRandomnessImplementation": "0x83e8f5B6D4D94CAC5943689616B96786c2465c9A",
             "WitnetRequestBoardImplementation": "0x473a1da1026D45597b45853A4CD8f9fADe8c65F5",
             "WitnetRequestFactoryImplementation": "0xe145A4D3335D5F78d7e9cB6a3C1832155cB4Be01"
