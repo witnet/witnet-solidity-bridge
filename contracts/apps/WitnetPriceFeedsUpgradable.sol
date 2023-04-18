@@ -379,7 +379,7 @@ contract WitnetPriceFeedsUpgradable
         emit SettledFeed(msg.sender, feedId, caption, radHash);
     }
 
-    function settleFeed(string calldata caption, address solver)
+    function settleFeedSolver(string calldata caption, address solver)
         override external
         onlyOwner
     {
@@ -401,9 +401,18 @@ contract WitnetPriceFeedsUpgradable
             __record.radHash = 0;
             __record.solver = solver;
         }
-        // smoke-test the provided solver 
+        // validate solver first-level dependencies
+        {
+            (bool _success, ) = solver.delegatecall(abi.encodeWithSelector(
+                IWitnetPriceSolver.validate.selector, feedId
+            ));
+            require(_success, "WitnetPriceFeedUpgradable: solver validation failed");
+        }
+        // smoke-test the solver 
         {   
-            (bool _success, ) = address(this).staticcall(abi.encodeWithSelector(IWitnetPriceSolver.solve.selector, feedId));
+            (bool _success, ) = address(this).staticcall(abi.encodeWithSelector(
+                IWitnetPriceSolver.solve.selector, feedId
+            ));
             require(_success, "WitnetPriceFeedsUpgradable: smoke-test failed");
         }
         emit SettledFeedSolver(msg.sender, feedId, caption, solver);

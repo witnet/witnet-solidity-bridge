@@ -11,6 +11,8 @@ interface IWitnetPriceSolver {
         bytes32 drTxHash;
         Witnet.ResultStatus status;
     }
-    function deps() external pure returns (bytes4[] memory);
-    function solve(bytes4) external view returns (Price memory);
+    function decimals() external view returns (uint8);
+    function deps() external view returns (bytes4[] memory);
+    function solve(bytes4 feedId) external view returns (Price memory);
+    function validate(bytes4 feedId) external;
 }

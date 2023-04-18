@@ -24,6 +24,7 @@ abstract contract WitnetFeedsData {
         uint256 latestUpdateQueryId;
         bytes32 radHash;
         address solver;
+        uint256 reserved;
     }
 
     // ================================================================================================
