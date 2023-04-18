@@ -25,6 +25,7 @@ interface IWitnetFeeds {
     function latestUpdateResultStatus(bytes4 feedId) external view returns (Witnet.ResultStatus);
 
     function lookupRadHash(bytes4 feedId) external view returns (bytes32);
+    function lookupRetrievals(bytes4 feedId) external view returns (WitnetV2.RadonRetrieval[] memory);
 
     function requestUpdate(bytes4 feedId) payable external returns (uint256 usedFunds);
     function requestUpdate(bytes4 feedId, bytes32 slaHash) payable external returns (uint256 usedFunds);

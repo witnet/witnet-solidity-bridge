@@ -193,59 +193,70 @@ contract WitnetPriceFeedsUpgradable
     }
 
     function lastResponse(bytes4 feedId)
-        virtual public view
+        override public view
         returns (Witnet.Response memory)
     {
         return witnet.readResponse(__records_(feedId).lastValidQueryId);
     }
     
     function lastResult(bytes4 feedId)
-        virtual external view
+        override external view
         returns (Witnet.Result memory)
     {
         return witnet.readResponseResult(__records_(feedId).lastValidQueryId);
     }
 
     function latestUpdateQueryId(bytes4 feedId)
-        virtual public view
+        override public view
         returns (uint256)
     {
         return __records_(feedId).latestUpdateQueryId;
     }
 
     function latestUpdateRequest(bytes4 feedId)
-        virtual external view 
+        override external view 
         returns (Witnet.Request memory)
     {
         return witnet.readRequest(latestUpdateQueryId(feedId));
     }
 
     function latestUpdateResponse(bytes4 feedId)
-        virtual external view
+        override external view
         returns (Witnet.Response memory)
     {
         return witnet.readResponse(latestUpdateQueryId(feedId));
     }
 
     function latestUpdateResultError(bytes4 feedId)
-        virtual external view 
+        override external view 
         returns (Witnet.ResultError memory)
     {
         return witnet.checkResultError(latestUpdateQueryId(feedId));
     }
     
     function latestUpdateResultStatus(bytes4 feedId)
-        virtual public view
+        override public view
         returns (Witnet.ResultStatus)
     {
         return witnet.checkResultStatus(latestUpdateQueryId(feedId));
     }
     
     function lookupRadHash(bytes4 feedId)
-        virtual external view
+        override public view
         returns (bytes32)
     {
         return __records_(feedId).radHash;
+    }
+
+    function lookupRetrievals(bytes4 feedId)
+        override external view
+        returns (WitnetV2.RadonRetrieval[] memory _retrievals)
+    {
+        bytes32[] memory _hashes = registry.lookupRadonRequestSources(lookupRadHash(feedId));
+        _retrievals = new WitnetV2.RadonRetrieval[](_hashes.length);
+        for (uint _ix = 0; _ix < _retrievals.length; _ix ++) {
+            _retrievals[_ix] = registry.lookupRadonRetrieval(_hashes[_ix]);
+        }
     }
 
     function requestUpdate(bytes4 feedId)
@@ -347,15 +358,22 @@ contract WitnetPriceFeedsUpgradable
         require(_index != 0, "WitnetPriceFeedsUpgradable: unknown feed");
         {
             bytes4 _lastFeedId = __ids[__ids.length - 1];
-            __ids[_index] = _lastFeedId;
+            __ids[_index - 1] = _lastFeedId;
             __records_(_lastFeedId).index = _index;
             delete __storage().records[feedId];
         }
         emit ErasedFeed(msg.sender, feedId, caption);
     }
-    
-    function settleFeed(string calldata caption, bytes32 radHash)
+
+    function settleDefaultRadonSLA(WitnetV2.RadonSLA calldata sla)
         override external
+        onlyOwner
+    {
+        __storage().defaultSlaHash = registry.verifyRadonSLA(sla);
+    }
+    
+    function settleFeedRequest(string calldata caption, bytes32 radHash)
+        override public
         onlyOwner
     {
         require(
@@ -377,6 +395,24 @@ contract WitnetPriceFeedsUpgradable
             __record.solver = address(0);
         }
         emit SettledFeed(msg.sender, feedId, caption, radHash);
+    }
+
+    function settleFeedRequest(string calldata caption, WitnetRequest request)
+        override external
+        onlyOwner
+    {
+        settleFeedRequest(caption, request.radHash());
+    }
+
+    function settleFeedRequest(
+            string calldata caption,
+            WitnetRequestTemplate template,
+            string[][] calldata args
+        )
+        override external
+        onlyOwner
+    {
+        settleFeedRequest(caption, template.verifyRadonRequest(args));
     }
 
     function settleFeedSolver(string calldata caption, address solver)
@@ -416,13 +452,6 @@ contract WitnetPriceFeedsUpgradable
             require(_success, "WitnetPriceFeedsUpgradable: smoke-test failed");
         }
         emit SettledFeedSolver(msg.sender, feedId, caption, solver);
-    }
-    
-    function settleRadonSLA(WitnetV2.RadonSLA calldata sla)
-        override external
-        onlyOwner
-    {
-        __storage().defaultSlaHash = registry.verifyRadonSLA(sla);
     }
 
 
