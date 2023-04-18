@@ -5,8 +5,8 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
+import "../WitnetRandomness.sol";
 import "../impls/WitnetUpgradableBase.sol";
-import "../interfaces/IWitnetRandomness.sol";
 import "../patterns/Clonable.sol";
 
 import "../requests/WitnetRequestRandomness.sol";
@@ -16,7 +16,7 @@ import "../requests/WitnetRequestRandomness.sol";
 contract WitnetRandomnessProxiable
     is
         Clonable,
-        IWitnetRandomness,
+        WitnetRandomness,
         WitnetUpgradableBase
 {
     using ERC165Checker for address;
@@ -64,6 +64,47 @@ contract WitnetRandomnessProxiable
         );
         witnet = _wrb;
         witnetRandomnessRequest = _request;
+    }
+
+    /// @notice Initializes a cloned instance. 
+    /// @dev Every cloned instance can only get initialized once.
+    function initializeClone(bytes memory _initData)
+        virtual external
+        initializer // => ensure a cloned instance can only be initialized once
+        onlyDelegateCalls // => this method can only be called upon cloned instances
+    {
+        _initialize(_initData);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'WitnetRandomness' implementation -------------------------------------------------------------------------
+
+    /// Deploys and returns the address of a minimal proxy clone that replicates contract
+    /// behaviour while using its own EVM storage.
+    /// @dev This function should always provide a new address, no matter how many times 
+    /// @dev is actually called from the same `msg.sender`.
+    function clone()
+        virtual override
+        public
+        wasInitialized
+        returns (WitnetRandomness)
+    {
+        return _afterClone(_clone());
+    }
+
+    /// Deploys and returns the address of a minimal proxy clone that replicates contract 
+    /// behaviour while using its own EVM storage.
+    /// @dev This function uses the CREATE2 opcode and a `_salt` to deterministically deploy
+    /// @dev the clone. Using the same `_salt` multiple time will revert, since
+    /// @dev no contract can be deployed more than once at the same address.
+    function cloneDeterministic(bytes32 _salt)
+        virtual override
+        public
+        wasInitialized
+        returns (WitnetRandomness)
+    {
+        return _afterClone(_cloneDeterministic(_salt));
     }
 
     /// Returns amount of wei required to be paid as a fee when requesting randomization with a 
@@ -315,41 +356,6 @@ contract WitnetRandomnessProxiable
     // ================================================================================================================
     // --- 'Clonable' extension ---------------------------------------------------------------------------------------
 
-    /// Deploys and returns the address of a minimal proxy clone that replicates contract
-    /// behaviour while using its own EVM storage.
-    /// @dev This function should always provide a new address, no matter how many times 
-    /// @dev is actually called from the same `msg.sender`.
-    function clone()
-        virtual public
-        wasInitialized
-        returns (WitnetRandomnessProxiable)
-    {
-        return _afterClone(_clone());
-    }
-
-    /// Deploys and returns the address of a minimal proxy clone that replicates contract 
-    /// behaviour while using its own EVM storage.
-    /// @dev This function uses the CREATE2 opcode and a `_salt` to deterministically deploy
-    /// @dev the clone. Using the same `_salt` multiple time will revert, since
-    /// @dev no contract can be deployed more than once at the same address.
-    function cloneDeterministic(bytes32 _salt)
-        virtual public
-        wasInitialized
-        returns (WitnetRandomnessProxiable)
-    {
-        return _afterClone(_cloneDeterministic(_salt));
-    }
-
-    /// @notice Initializes a cloned instance. 
-    /// @dev Every cloned instance can only get initialized once.
-    function initializeClone(bytes memory _initData)
-        virtual external
-        initializer // => ensure a cloned instance can only be initialized once
-        onlyDelegateCalls // => this method can only be called upon cloned instances
-    {
-        _initialize(_initData);
-    }
-
     /// @notice Tells whether this instance has been initialized.
     function initialized()
         override
@@ -357,6 +363,21 @@ contract WitnetRandomnessProxiable
         returns (bool)
     {
         return address(witnetRandomnessRequest) != address(0);
+    }
+
+
+    // ================================================================================================================
+    // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------
+
+    /// @dev Common steps for both deterministic and non-deterministic cloning.
+    function _afterClone(address _instance)
+        virtual internal
+        returns (WitnetRandomness)
+    {
+        address _randomnessRequest = address(WitnetRequestRandomness(address(witnetRandomnessRequest)).clone());
+        Ownable(_randomnessRequest).transferOwnership(msg.sender);
+        WitnetRandomnessProxiable(_instance).initializeClone(abi.encode(_randomnessRequest));
+        return WitnetRandomness(_instance);
     }
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
@@ -372,21 +393,6 @@ contract WitnetRandomnessProxiable
         );
         // make sure that this clone cannot ever get initialized as a proxy.
         __proxiable().implementation = base();
-    }
-
-
-    // ================================================================================================================
-    // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------
-
-    /// @dev Common steps for both deterministic and non-deterministic cloning.
-    function _afterClone(address _instance)
-        virtual internal
-        returns (WitnetRandomnessProxiable)
-    {
-        address _randomnessRequest = address(WitnetRequestRandomness(address(witnetRandomnessRequest)).clone());
-        Ownable(_randomnessRequest).transferOwnership(msg.sender);
-        WitnetRandomnessProxiable(_instance).initializeClone(abi.encode(_randomnessRequest));
-        return WitnetRandomnessProxiable(_instance);
     }
 
     /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.

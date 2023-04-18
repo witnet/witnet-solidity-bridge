@@ -22,7 +22,6 @@ module.exports = async function (deployer, network, [, from]) {
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
-  // Should the WitnetRandomness be deployed into this network:
   console.info()
   if (!isDryRun && addresses[ecosystem][network].WitnetRandomness == undefined) {
     console.info(`\n   WitnetRandomness: Not to be deployed into '${network}'`)
