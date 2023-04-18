@@ -2,7 +2,7 @@ module.exports = {
   WitnetBytecodes: {
     salt: 178366606,
   },
-  WitnetPriceRouter: {
+  WitnetPriceFeeds: {
     salt: 7148124,
   },
   WitnetRandomness: {

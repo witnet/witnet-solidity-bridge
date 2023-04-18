@@ -2,6 +2,7 @@ module.exports = {
   artifacts: {
     default: {
       WitnetBytecodes: "WitnetBytecodesDefault",
+      WitnetPriceFeeds: "WitnetPriceFeedsUpgradable",
       WitnetRandomness: "WitnetRandomnessProxiable",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
       WitnetRequestFactory: "WitnetRequestFactoryDefault",

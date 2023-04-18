@@ -1,44 +1,50 @@
 const ethUtils = require('ethereumjs-util');
+const { merge } = require("lodash")
 
-const packageJson = require("../../package.json")
+const addresses = require("../witnet.addresses")
+const settings = require("../witnet.settings")
 const singletons = require("../witnet.singletons") 
 const utils = require("../../scripts/utils")
 const version = `${require("../../package").version}-${require('child_process').execSync('git rev-parse HEAD').toString().trim().substring(0,7)}`
 
 const Create2Factory = artifacts.require("Create2Factory")
-const WitnetPriceRouter = artifacts.require("WitnetProxy")
-const WitnetPriceRouterImplementation = artifacts.require("WitnetPriceRouter")
+const WitnetProxy = artifacts.require("WitnetProxy")
+
+const WitnetPriceFeeds = artifacts.require("WitnetPriceFeeds")
+const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
 module.exports = async function (deployer, network, [, from]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
   const ecosystem = utils.getRealmNetworkFromArgs()[0]
   network = network.split("-")[0]
 
-  var addresses = require("../witnet.addresses")
+  
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
-  // Should the WitnetPriceRouter be deployed into this network:
   console.info()
-  if (!isDryRun && addresses[ecosystem][network].WitnetPriceRouter == undefined) {
-    console.info(`\n   WitnetPriceRouter: Not to be deployed into '${network}'`)
+  if (!isDryRun && addresses[ecosystem][network].WitnetPriceFeeds == undefined) {
+    console.info(`\n   WitnetPriceFeeds: Not to be deployed into '${network}'`)
     return;
   }
 
-  if (addresses[ecosystem][network]?.WitnetPriceRouterImplementation != undefined) {
+  const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
+  const WitnetPriceFeedsImplementation = artifacts.require(artifactNames.WitnetPriceFeeds)
+
+  if (addresses[ecosystem][network]?.WitnetPriceFeedsImplementation != undefined || isDryRun) {
     let proxy
-    if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceRouter)) {
+    if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeeds)) {
       var create2Factory = await Create2Factory.deployed()
       if(
         create2Factory && !utils.isNullAddress(create2Factory.address)
-          && singletons?.WitnetPriceRouter
+          && singletons?.WitnetPriceFeeds
       ) {
         // Deploy the proxy via a singleton factory and a salt...
-        const bytecode = WitnetPriceRouter.toJSON().bytecode
-        const salt = singletons.WitnetPriceRouter?.salt 
+        const bytecode = WitnetProxy.toJSON().bytecode
+        const salt = singletons.WitnetPriceFeeds?.salt 
           ? "0x" + ethUtils.setLengthLeft(
               ethUtils.toBuffer(
-                singletons.WitnetPriceRouter.salt
+                singletons.WitnetPriceFeeds.salt
               ), 32
             ).toString("hex")
           : "0x0"
@@ -46,55 +52,58 @@ module.exports = async function (deployer, network, [, from]) {
         const proxyAddr = await create2Factory.determineAddr.call(bytecode, salt, { from })
         if ((await web3.eth.getCode(proxyAddr)).length <= 3) {
           // deploy instance only if not found in current network:
-          utils.traceHeader(`Singleton inception of 'WitnetPriceRouter':`)
+          utils.traceHeader(`Singleton inception of 'WitnetPriceFeeds':`)
           const balance = await web3.eth.getBalance(from)
-          const gas = singletons.WitnetPriceRouter.gas || 10 ** 6
+          const gas = singletons.WitnetPriceFeeds.gas || 10 ** 6
           const tx = await create2Factory.deploy(bytecode, salt, { from, gas })
           utils.traceTx(
             tx.receipt,
             web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString())
           )
         } else {
-          utils.traceHeader(`Singleton 'WitnetPriceRouter':`)
+          utils.traceHeader(`Singleton 'WitnetPriceFeeds':`)
         }
         console.info("  ", "> proxy address:       ", proxyAddr)
         console.info("  ", "> proxy codehash:      ", web3.utils.soliditySha3(await web3.eth.getCode(proxyAddr)))        
         console.info("  ", "> proxy inception salt:", salt)
-        proxy = await WitnetPriceRouter.at(proxyAddr)
+        proxy = await WitnetProxy.at(proxyAddr)
       } else {
         // Deploy no singleton proxy ...
         proxy = await WitnetProxy.new({ from })
       }
-      addresses[ecosystem][network].WitnetPriceRouter = proxy.address
+      addresses[ecosystem][network].WitnetPriceFeeds = proxy.address
       if (!isDryRun) {
         utils.saveAddresses(addresses)
       }
     } else {
-      proxy = await WitnetPriceRouter.at(addresses[ecosystem][network].WitnetPriceRouter)
-      console.info(`   Skipped: 'WitnetPriceRouter' deployed at ${proxy.address}`)
+      proxy = await WitnetPriceFeeds.at(addresses[ecosystem][network].WitnetPriceFeeds)
+      console.info(`   Skipped: 'WitnetPriceFeeds' deployed at ${proxy.address}`)
     }
 
     var router
-    if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceRouterImplementation)) {
+    if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsImplementation)) {
       await deployer.deploy(
-        WitnetPriceRouterImplementation,
+        WitnetPriceFeedsImplementation,
+        WitnetRequestBoard.address,
         true,
         utils.fromAscii(version),
         { from }
       )
-      router = await WitnetPriceRouterImplementation.deployed()
-      addresses[ecosystem][network].WitnetPriceRouterImplementation = router.address
+      router = await WitnetPriceFeedsImplementation.deployed()
+      addresses[ecosystem][network].WitnetPriceFeedsImplementation = router.address
       if (!isDryRun) {
         utils.saveAddresses(addresses)
       }
     } else {
-      router = await WitnetPriceRouterImplementation.at(addresses[ecosystem][network].WitnetPriceRouterImplementation)
-      console.info(`   Skipped: '${WitnetPriceRouterImplementation.contractName}' deployed at ${router.address}`)
+      router = await WitnetPriceFeedsImplementation.at(
+        addresses[ecosystem][network].WitnetPriceFeedsImplementation
+      )
+      console.info(`   Skipped: '${WitnetPriceFeedsImplementation.contractName}' deployed at ${router.address}`)
     }
 
     const implementation = await proxy.implementation()
     if (implementation.toLowerCase() !== router.address.toLowerCase()) {
-      const header = `Upgrading 'WitnetPriceRouter' at ${proxy.address}...`
+      const header = `Upgrading 'WitnetPriceFeeds' at ${proxy.address}...`
       console.info()
       console.info("  ", header)
       console.info("  ", "-".repeat(header.length))
@@ -118,23 +127,23 @@ module.exports = async function (deployer, network, [, from]) {
         console.info("   > Not upgraded.")
       }
     }
-    WitnetPriceRouterImplementation.address = proxy.address
   } else {
-    if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceRouter)) {
-      // deploy unproxified WitnetPriceRouter contract
+    if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeeds)) {
+      // deploy unproxified WitnetPriceFeeds contract
       await deployer.deploy(
-        WitnetPriceRouterImplementation,
+        WitnetPriceFeedsImplementation,
+        WitnetRequestBoard.address,
         false,
         utils.fromAscii(version),
         { from }
       )
-      addresses[ecosystem][network].WitnetPriceRouter = WitnetPriceRouterImplementation.address;
+      addresses[ecosystem][network].WitnetPriceFeeds = WitnetPriceFeedsImplementation.address;
       if (!isDryRun) {
         utils.saveAddresses(addresses)
       }
     } else {
-      WitnetPriceRouterImplementation.address = addresses[ecosystem][network]?.WitnetPriceRouter
-      console.info(`   Skipped: unproxied 'WitnetPriceRouter' deployed at ${WitnetPriceRouterImplementation.address}`)
+      WitnetPriceFeedsImplementation.address = addresses[ecosystem][network]?.WitnetPriceFeeds
+      console.info(`   Skipped: unproxied 'WitnetPriceFeeds' deployed at ${WitnetPriceFeedsImplementation.address}`)
     }
   }
 }
