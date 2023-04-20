@@ -76,7 +76,7 @@ module.exports = async function (deployer, network, [, from]) {
         utils.saveAddresses(addresses)
       }
     } else {
-      proxy = await WitnetPriceFeeds.at(addresses[ecosystem][network].WitnetPriceFeeds)
+      proxy = await WitnetProxy.at(addresses[ecosystem][network].WitnetPriceFeeds)
       console.info(`   Skipped: 'WitnetPriceFeeds' deployed at ${proxy.address}`)
     }
 
@@ -99,7 +99,9 @@ module.exports = async function (deployer, network, [, from]) {
         addresses[ecosystem][network].WitnetPriceFeedsImplementation
       )
       console.info(`   Skipped: '${WitnetPriceFeedsImplementation.contractName}' deployed at ${router.address}`)
+      WitnetPriceFeedsImplementation.address = router.address
     }
+    WitnetPriceFeeds.address = proxy.address
 
     const implementation = await proxy.implementation()
     if (implementation.toLowerCase() !== router.address.toLowerCase()) {
@@ -145,5 +147,6 @@ module.exports = async function (deployer, network, [, from]) {
       WitnetPriceFeedsImplementation.address = addresses[ecosystem][network]?.WitnetPriceFeeds
       console.info(`   Skipped: unproxied 'WitnetPriceFeeds' deployed at ${WitnetPriceFeedsImplementation.address}`)
     }
+    WitnetPriceFeeds.address = WitnetPriceFeedsImplementation.address
   }
 }
