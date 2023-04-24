@@ -49,7 +49,7 @@ module.exports = {
     },
     avalanche: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 155000
+        /* _reportResultGasLimit */ 155000,
       ],
     },
     celo: {
@@ -59,57 +59,57 @@ module.exports = {
     },
     conflux: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 78500
+        /* _reportResultGasLimit */ 78500,
       ],
     },
     "conflux.espace.testnet": {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 225000
+        /* _reportResultGasLimit */ 225000,
       ],
     },
     "conflux.espace.mainnet": {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 225000
+        /* _reportResultGasLimit */ 225000,
       ],
     },
     dogechain: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 85000
+        /* _reportResultGasLimit */ 85000,
       ],
     },
     harmony: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 530000
+        /* _reportResultGasLimit */ 530000,
       ],
     },
     hsc: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 85000
+        /* _reportResultGasLimit */ 85000,
       ],
     },
     kcc: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 92500
+        /* _reportResultGasLimit */ 92500,
       ],
     },
     klaytn: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 105000
+        /* _reportResultGasLimit */ 105000,
       ],
     },
     meter: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 85000
+        /* _reportResultGasLimit */ 85000,
       ],
     },
     metis: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 134800
+        /* _reportResultGasLimit */ 134800,
       ],
     },
     moonbeam: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 115000
+        /* _reportResultGasLimit */ 115000,
       ],
     },
     okxchain: {
@@ -312,11 +312,11 @@ module.exports = {
         network_id: 21,
         skipDryRun: true,
         verify: {
-          apiUrl: 'https://esc-testnet.elastos.io/api',
-          browserURL: 'https://esc-testnet.elastos.io/address',
+          apiUrl: "https://esc-testnet.elastos.io/api",
+          browserURL: "https://esc-testnet.elastos.io/address",
           // apiKey: 'D75NV1MFN41XRSE9SWV9BA3QZKUD1U9RM3',
-          apiURL: 'https://esc-testnet.elastos.io/api',
-          explorerUrl: 'https://esc-testnet.elastos.io/address',
+          apiURL: "https://esc-testnet.elastos.io/api",
+          explorerUrl: "https://esc-testnet.elastos.io/address",
         },
       },
     },
@@ -485,10 +485,10 @@ module.exports = {
         network_id: 1442,
         skipDryRun: true,
         verify: {
-          apiUrl: 'http://api-testnet-zkevm.polygonscan.com/api',
-          explorerUrl: 'https://testnet-zkevm.polygonscan.com/address',
+          apiUrl: "http://api-testnet-zkevm.polygonscan.com/api",
+          explorerUrl: "https://testnet-zkevm.polygonscan.com/address",
         },
-      }
+      },
     },
     reef: {
       "reef.testnet": {
@@ -510,13 +510,13 @@ module.exports = {
         port: 8514,
         network_id: 534353,
         skipDryRun: true,
-        gasPrice: 2000000,
+        gasPrice: 3000000,
         verify: {
-          apiUrl: 'https://blockscout.scroll.io/api',
-          apiKey: 'MY_API_KEY',
-          explorerUrl: 'https://blockscout.scroll.io/address',
+          apiUrl: "https://blockscout.scroll.io/api",
+          apiKey: "MY_API_KEY",
+          explorerUrl: "https://blockscout.scroll.io/address",
         },
-      }
+      },
     },
     smartbch: {
       "smartbch.amber": {
@@ -558,7 +558,7 @@ module.exports = {
         port: 9516,
         network_id: 1231,
         skipDryRun: true,
-      }
+      },
     },
   },
 }

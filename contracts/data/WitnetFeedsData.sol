@@ -20,7 +20,7 @@ abstract contract WitnetFeedsData {
         string  caption;
         uint8   decimals;
         uint256 index;
-        uint256 lastValidQueryId;
+        uint256 latestValidQueryId;
         uint256 latestUpdateQueryId;
         bytes32 radHash;
         address solver;

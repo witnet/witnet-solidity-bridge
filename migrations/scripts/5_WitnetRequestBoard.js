@@ -3,9 +3,13 @@ const { merge } = require("lodash")
 
 const addresses = require("../witnet.addresses")
 const settings = require("../witnet.settings")
-const singletons = require("../witnet.singletons") 
+const singletons = require("../witnet.singletons")
 const utils = require("../../scripts/utils")
-const version = `${require("../../package").version}-${require('child_process').execSync('git rev-parse HEAD').toString().trim().substring(0, 7)}`
+const version = `${
+  require("../../package").version
+}-${
+  require("child_process").execSync("git rev-parse HEAD").toString().trim().substring(0, 7)
+}`
 
 const Create2Factory = artifacts.require("Create2Factory")
 const WitnetProxy = artifacts.require("WitnetProxy")
@@ -18,34 +22,34 @@ module.exports = async function (deployer, network, [, from, reporter]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
   const ecosystem = utils.getRealmNetworkFromArgs()[0]
   network = network.split("-")[0]
-  
+
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
   const artifactsName = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRequestBoardImplementation = artifacts.require(artifactsName.WitnetRequestBoard)
-  
+
   let proxy
   const factory = await Create2Factory.deployed()
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoard)) {
-    if(
-      factory && !utils.isNullAddress(factory.address)
-        && singletons?.WitnetRequestBoard
+    if (
+      factory && !utils.isNullAddress(factory.address) &&
+        singletons?.WitnetRequestBoard
     ) {
       // Deploy the proxy via a singleton factory and a salt...
       const bytecode = WitnetProxy.toJSON().bytecode
-      const salt = singletons.WitnetRequestBoard?.salt 
+      const salt = singletons.WitnetRequestBoard?.salt
         ? "0x" + ethUtils.setLengthLeft(
-            ethUtils.toBuffer(
-              singletons.WitnetRequestBoard.salt
-            ), 32
-          ).toString("hex")
+          ethUtils.toBuffer(
+            singletons.WitnetRequestBoard.salt
+          ), 32
+        ).toString("hex")
         : "0x0"
-      ;
+
       const proxyAddr = await factory.determineAddr.call(bytecode, salt, { from })
       if ((await web3.eth.getCode(proxyAddr)).length <= 3) {
         // deploy instance only if not found in current network:
-        utils.traceHeader(`Singleton inception of 'WitnetRequestBoard':`)
+        utils.traceHeader("Singleton inception of 'WitnetRequestBoard':")
         const balance = await web3.eth.getBalance(from)
         const gas = singletons.WitnetRequestBoard.gas || 10 ** 6
         const tx = await factory.deploy(bytecode, salt, { from, gas })
@@ -54,17 +58,17 @@ module.exports = async function (deployer, network, [, from, reporter]) {
           web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString())
         )
       } else {
-        utils.traceHeader(`Singleton 'WitnetRequestBoard':`)
+        utils.traceHeader("Singleton 'WitnetRequestBoard':")
       }
       console.info("  ", "> proxy address:       ", proxyAddr)
-      console.info("  ", "> proxy codehash:      ", web3.utils.soliditySha3(await web3.eth.getCode(proxyAddr)))        
+      console.info("  ", "> proxy codehash:      ", web3.utils.soliditySha3(await web3.eth.getCode(proxyAddr)))
       console.info("  ", "> proxy inception salt:", salt)
       proxy = await WitnetProxy.at(proxyAddr)
     } else {
       // Deploy no singleton proxy ...
       proxy = await WitnetProxy.new({ from })
     }
-    // update addresses file      
+    // update addresses file
     addresses[ecosystem][network].WitnetRequestBoard = proxy.address
     if (!isDryRun) {
       utils.saveAddresses(addresses)
@@ -77,7 +81,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
 
   let board
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoardImplementation)) {
-    await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation);
+    await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation)
     await deployer.deploy(
       WitnetRequestBoardImplementation,
       WitnetRequestFactory.address,
@@ -90,7 +94,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
           settings.constructorParams[ecosystem]?.WitnetRequestBoard ||
           // or, default defined parameters for WRBs, if any:
           settings.constructorParams?.default?.WitnetRequestBoard
-      ), 
+      ),
       { from }
     )
     board = await WitnetRequestBoardImplementation.deployed()
@@ -106,7 +110,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
     await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation)
   }
 
-  const implementation = await proxy.implementation.call({ from })
+  const implementation = await proxy.implementation.call()
   if (implementation.toLowerCase() !== board.address.toLowerCase()) {
     const header = `Upgrading 'WitnetRequestBoard' at ${proxy.address}...`
     console.info()
@@ -124,7 +128,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
           board.address,
           web3.eth.abi.encodeParameter(
             "address[]",
-            [ reporter, ],
+            [reporter],
           ),
           { from }
         )

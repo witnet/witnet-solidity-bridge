@@ -240,7 +240,7 @@ library WitnetCBOR {
       // fork it and added to the list of items to be returned:
       items[ix] = self.fork();
       if (ix % 2 == 0 && self.majorType != MAJOR_TYPE_STRING) {
-        revert("heyhey");
+        revert UnexpectedMajorType(self.majorType, MAJOR_TYPE_STRING);
       } else if (self.majorType == MAJOR_TYPE_ARRAY || self.majorType == MAJOR_TYPE_MAP) {
         CBOR[] memory _subitems = (self.majorType == MAJOR_TYPE_ARRAY
             ? self.readArray()

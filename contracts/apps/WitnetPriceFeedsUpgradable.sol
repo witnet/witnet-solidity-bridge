@@ -45,6 +45,7 @@ contract WitnetPriceFeedsUpgradable
         )
     {}
 
+    // solhint-disable-next-line payable-fallback
     fallback() override external {
         if (
             msg.sig == IWitnetPriceSolver.solve.selector
@@ -92,6 +93,19 @@ contract WitnetPriceFeedsUpgradable
             if (msg.sender != owner()) {
                 revert("WitnetPriceFeedsUpgradable: not the owner");
             }
+        }
+        require(
+            __proxiable().implementation != base(),
+            "WitnetPriceFeedsUpgradable: already initialized"
+        );
+        if (__storage().defaultSlaHash == 0) {
+            settleDefaultRadonSLA(WitnetV2.RadonSLA({
+                numWitnesses: 7,
+                witnessCollateral: 15 * 10 ** 9,
+                witnessReward: 15* 10 ** 7,
+                minerCommitRevealFee: 10 ** 7,
+                minConsensusPercentage: 51
+            }));
         }
         __proxiable().implementation = base();
         emit Upgraded(msg.sender, base(), codehash(), version());
@@ -192,18 +206,18 @@ contract WitnetPriceFeedsUpgradable
         return witnet.estimateReward(_evmGasPrice);
     }
 
-    function lastResponse(bytes4 feedId)
+    function latestResponse(bytes4 feedId)
         override public view
         returns (Witnet.Response memory)
     {
-        return witnet.readResponse(__records_(feedId).lastValidQueryId);
+        return witnet.readResponse(_latestValidQueryId(feedId));
     }
     
-    function lastResult(bytes4 feedId)
+    function latestResult(bytes4 feedId)
         override external view
         returns (Witnet.Result memory)
     {
-        return witnet.readResponseResult(__records_(feedId).lastValidQueryId);
+        return witnet.readResponseResult(_latestValidQueryId(feedId));
     }
 
     function latestUpdateQueryId(bytes4 feedId)
@@ -238,7 +252,27 @@ contract WitnetPriceFeedsUpgradable
         override public view
         returns (Witnet.ResultStatus)
     {
-        return witnet.checkResultStatus(latestUpdateQueryId(feedId));
+        uint _latestUpdateQueryId = latestUpdateQueryId(feedId);
+        if (_latestUpdateQueryId > 0) {
+            return witnet.checkResultStatus(_latestUpdateQueryId);
+        } else {
+            return Witnet.ResultStatus.Ready;
+        }
+    }
+
+    function lookupBytecode(bytes4 feedId)
+        override external view
+        returns (bytes memory)
+    {
+        Record storage __record = __records_(feedId);
+        require(
+            __record.radHash != 0,
+            "WitnetPriceFeedsUpgradable: no RAD hash"
+        );
+        return registry.bytecodeOf(
+            __record.radHash,
+            __storage().defaultSlaHash
+        );
     }
     
     function lookupRadHash(bytes4 feedId)
@@ -260,16 +294,16 @@ contract WitnetPriceFeedsUpgradable
     }
 
     function requestUpdate(bytes4 feedId)
+        external payable
         virtual override
-        payable external
         returns (uint256)
     {
         return requestUpdate(feedId, __storage().defaultSlaHash);
     }
     
     function requestUpdate(bytes4 feedId, bytes32 _slaHash)
+        public payable
         virtual override
-        payable public
         returns (uint256 _usedFunds)
     {
         require(
@@ -311,7 +345,7 @@ contract WitnetPriceFeedsUpgradable
         uint _latestId = __feed.latestUpdateQueryId;
         Witnet.ResultStatus _latestStatus = latestUpdateResultStatus(feedId);
         if (_latestStatus == Witnet.ResultStatus.Awaiting) {
-            // latest update is still pending, so just raise upgrade reward,
+            // latest update is still pending, so just increase the reward
             // accordingly to current tx gasprice:
             int _deltaReward = int(witnet.readRequestReward(_latestId)) - int(_usedFunds);
             if (_deltaReward > 0) {
@@ -325,13 +359,13 @@ contract WitnetPriceFeedsUpgradable
             // Check if latest update ended successfully:
             if (_latestStatus == Witnet.ResultStatus.Ready) {
                 // If so, remove previous last valid query from the WRB:
-                if (__feed.lastValidQueryId > 0) {
-                    witnet.deleteQuery(__feed.lastValidQueryId);
+                if (__feed.latestValidQueryId > 0) {
+                    witnet.deleteQuery(__feed.latestValidQueryId);
                 }
-                __feed.lastValidQueryId = _latestId;
+                __feed.latestValidQueryId = _latestId;
             } else {
                 // Otherwise, delete latest query, as it was faulty
-                // as we are about to post a new update request:
+                // and we are about to post a new update request:
                 witnet.deleteQuery(_latestId);
             }
             // Post update request to the WRB:
@@ -362,11 +396,11 @@ contract WitnetPriceFeedsUpgradable
             __records_(_lastFeedId).index = _index;
             delete __storage().records[feedId];
         }
-        emit ErasedFeed(msg.sender, feedId, caption);
+        emit DeletedFeed(msg.sender, feedId, caption);
     }
 
-    function settleDefaultRadonSLA(WitnetV2.RadonSLA calldata sla)
-        override external
+    function settleDefaultRadonSLA(WitnetV2.RadonSLA memory sla)
+        override public
         onlyOwner
     {
         __storage().defaultSlaHash = registry.verifyRadonSLA(sla);
@@ -439,17 +473,33 @@ contract WitnetPriceFeedsUpgradable
         }
         // validate solver first-level dependencies
         {
-            (bool _success, ) = solver.delegatecall(abi.encodeWithSelector(
-                IWitnetPriceSolver.validate.selector, feedId
+            // solhint-disable-next-line avoid-low-level-calls
+            (bool _success, bytes memory _reason) = solver.delegatecall(abi.encodeWithSelector(
+                IWitnetPriceSolver.validate.selector,
+                feedId
             ));
-            require(_success, "WitnetPriceFeedUpgradable: solver validation failed");
+            require(
+                _success,
+                string(abi.encodePacked(
+                    "WitnetPriceFeedUpgradable: solver validation failed: ",
+                    _reason
+                ))
+            );
         }
         // smoke-test the solver 
         {   
-            (bool _success, ) = address(this).staticcall(abi.encodeWithSelector(
-                IWitnetPriceSolver.solve.selector, feedId
+            // solhint-disable-next-line avoid-low-level-calls
+            (bool _success, bytes memory _reason) = address(this).staticcall(abi.encodeWithSelector(
+                IWitnetPriceSolver.solve.selector,
+                feedId
             ));
-            require(_success, "WitnetPriceFeedsUpgradable: smoke-test failed");
+            require(
+                _success,
+                string(abi.encodePacked(
+                    "WitnetPriceFeedsUpgradable: smoke-test failed: ",
+                    _reason
+                ))
+            );
         }
         emit SettledFeedSolver(msg.sender, feedId, caption, solver);
     }
@@ -474,29 +524,39 @@ contract WitnetPriceFeedsUpgradable
         return IWitnetPriceSolver(__records_(feedId).solver);
     }
 
-    function lastPrice(bytes4 feedId)
+    function latestPrice(bytes4 feedId)
         virtual override
         public view
         returns (IWitnetPriceSolver.Price memory)
     {
-        Witnet.Response memory _lastResponse = lastResponse(feedId);
-        Witnet.Result memory _lastResult = Witnet.resultFromCborBytes(_lastResponse.cborBytes);
-        return IWitnetPriceSolver.Price({
-            value: _lastResult.asUint(),
-            timestamp: _lastResponse.timestamp,
-            drTxHash: _lastResponse.drTxHash,
-            status: latestUpdateResultStatus(feedId)
-        });
+        uint _queryId = _latestValidQueryId(feedId);
+        if (_queryId > 0) {
+            Witnet.Response memory _latestResponse = latestResponse(feedId);
+            Witnet.Result memory _latestResult = Witnet.resultFromCborBytes(_latestResponse.cborBytes);
+            return IWitnetPriceSolver.Price({
+                value: _latestResult.asUint(),
+                timestamp: _latestResponse.timestamp,
+                drTxHash: _latestResponse.drTxHash,
+                status: latestUpdateResultStatus(feedId)
+            });
+        } else {
+            return IWitnetPriceSolver.Price({
+                value: 0,
+                timestamp: 0,
+                drTxHash: 0,
+                status: latestUpdateResultStatus(feedId)
+            });
+        }
     }
 
-    function lastPrices(bytes4[] calldata feedIds)
+    function latestPrices(bytes4[] calldata feedIds)
         virtual override
         external view
         returns (IWitnetPriceSolver.Price[] memory _prices)
     {
         _prices = new IWitnetPriceSolver.Price[](feedIds.length);
         for (uint _ix = 0; _ix < feedIds.length; _ix ++) {
-            _prices[_ix] = lastPrice(feedIds[_ix]);
+            _prices[_ix] = latestPrice(feedIds[_ix]);
         }
     }
 
@@ -509,13 +569,13 @@ contract WitnetPriceFeedsUpgradable
         external view
         returns (int256 _value, uint256 _timestamp, uint256 _status)
     {
-        IWitnetPriceSolver.Price memory _lastPrice = lastPrice(bytes4(feedId));
+        IWitnetPriceSolver.Price memory _latestPrice = latestPrice(bytes4(feedId));
         return (
-            int(_lastPrice.value),
-            _lastPrice.timestamp,
-            _lastPrice.status == Witnet.ResultStatus.Ready 
+            int(_latestPrice.value),
+            _latestPrice.timestamp,
+            _latestPrice.status == Witnet.ResultStatus.Ready 
                 ? 200
-                : _lastPrice.status == Witnet.ResultStatus.Awaiting 
+                : _latestPrice.status == Witnet.ResultStatus.Awaiting 
                     ? 404
                     : 400
         );
@@ -524,6 +584,21 @@ contract WitnetPriceFeedsUpgradable
 
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
+
+    function _latestValidQueryId(bytes4 feedId)
+        virtual internal view
+        returns (uint256)
+    {
+        uint _latestUpdateQueryId = latestUpdateQueryId(feedId);
+        if (
+            _latestUpdateQueryId > 0
+                && witnet.checkResultStatus(_latestUpdateQueryId) == Witnet.ResultStatus.Ready
+        ) {
+            return _latestUpdateQueryId;
+        } else {
+            return __records_(feedId).latestValidQueryId;
+        }
+    }
 
     function _validateCaption(string calldata caption)
         internal view returns (uint8)
@@ -542,5 +617,4 @@ contract WitnetPriceFeedsUpgradable
         require(_success, "WitnetPriceFeedsUpgradable: bad decimals");
         return uint8(_decimals);
     }
-
-}   
+}

@@ -34,7 +34,11 @@ abstract contract WitnetRequestBoardTrustableBase
             address _currency
         )
         Payable(_currency)
-        WitnetUpgradableBase(_upgradable, _versionTag, "io.witnet.proxiable.board")
+        WitnetUpgradableBase(
+            _upgradable,
+            _versionTag,
+            "io.witnet.proxiable.board"
+        )
         WitnetRequestBoard(_factory)
     {}
 

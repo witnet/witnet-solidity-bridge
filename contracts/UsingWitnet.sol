@@ -57,6 +57,7 @@ abstract contract UsingWitnet {
     }
 
     /// @notice Post some data request to be eventually solved by the Witnet decentralized oracle network.
+    /// @notice The EVM -> Witnet bridge will read the Witnet Data Request bytecode from `_request`.
     /// @dev Enough ETH needs to be provided as to cover for the implicit fee.
     /// @param _request An instance of some contract implementing the `IWitnetRequest` interface.
     /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
@@ -74,6 +75,8 @@ abstract contract UsingWitnet {
     }
 
     /// @notice Post some data request to be eventually solved by the Witnet decentralized oracle network.
+    /// @notice The EVM -> Witnet bridge will read the Witnet Data Request bytecode from the WitnetBytecodes
+    /// @notice registry based on given `_radHash` and `_slaHash` values.
     /// @dev Enough ETH needs to be provided as to cover for the implicit fee.
     /// @param _radHash Unique hash of some pre-validated Witnet Radon Request.
     /// @param _slaHash Unique hash of some pre-validated Witnet Radon Service-Level Agreement.

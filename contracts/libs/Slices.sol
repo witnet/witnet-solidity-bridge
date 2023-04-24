@@ -160,11 +160,11 @@ library Slices {
      * @param self The Slice to operate on.
      * @return The length of the Slice in runes.
      */
-    function len(Slice memory self) internal pure returns (uint l) {
+    function len(Slice memory self) internal pure returns (uint _l) {
         // Starting at ptr-31 means the LSB will be the byte we care about
         uint ptr = self._ptr - 31;
         uint end = ptr + self._len;
-        for (l = 0; ptr < end; l++) {
+        for (_l = 0; ptr < end; _l++) {
             uint8 b;
             assembly { b := and(mload(ptr), 0xFF) }
             if (b < 0x80) {
@@ -258,31 +258,31 @@ library Slices {
             return rune;
         }
 
-        uint l;
-        uint b;
-        // Load the first byte of the rune into the LSBs of b
-        assembly { b := and(mload(sub(mload(add(self, 32)), 31)), 0xFF) }
-        if (b < 0x80) {
-            l = 1;
-        } else if(b < 0xE0) {
-            l = 2;
-        } else if(b < 0xF0) {
-            l = 3;
+        uint _l;
+        uint _b;
+        // Load the first byte of the rune into the LSBs of _b
+        assembly { _b := and(mload(sub(mload(add(self, 32)), 31)), 0xFF) }
+        if (_b < 0x80) {
+            _l = 1;
+        } else if(_b < 0xE0) {
+            _l = 2;
+        } else if(_b < 0xF0) {
+            _l = 3;
         } else {
-            l = 4;
+            _l = 4;
         }
 
         // Check for truncated codepoints
-        if (l > self._len) {
+        if (_l > self._len) {
             rune._len = self._len;
             self._ptr += self._len;
             self._len = 0;
             return rune;
         }
 
-        self._ptr += l;
-        self._len -= l;
-        rune._len = l;
+        self._ptr += _l;
+        self._len -= _l;
+        rune._len = _l;
         return rune;
     }
 

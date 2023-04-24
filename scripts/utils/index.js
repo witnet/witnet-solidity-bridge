@@ -81,11 +81,11 @@ function isNullAddress (addr) {
       !web3.utils.isAddress(addr)
 }
 
-function padLeft(str, char, size) {
+function padLeft (str, char, size) {
   if (str.length < size) {
-      return char.repeat((size - str.length) / char.length) + str
+    return char.repeat((size - str.length) / char.length) + str
   } else {
-      return str
+    return str
   }
 }
 

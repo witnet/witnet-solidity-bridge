@@ -194,6 +194,8 @@ library WitnetV2 {
         uint minerCommitRevealFee;
     }
 
+    /// @notice Returns `true` if all witnessing parameters in `b` have same
+    /// @notice value or greater than the ones in `a`.
     function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
         internal pure
         returns (bool)

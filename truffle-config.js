@@ -35,7 +35,7 @@ module.exports = {
     useColors: true,
   },
   plugins: [
-    'truffle-plugin-verify',
+    "truffle-plugin-verify",
   ],
   api_keys: {
     elastos: "",

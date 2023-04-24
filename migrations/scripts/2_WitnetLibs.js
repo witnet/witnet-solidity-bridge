@@ -8,11 +8,11 @@ module.exports = async function (deployer, network, [, from]) {
   const ecosystem = utils.getRealmNetworkFromArgs()[0]
   network = network.split("-")[0]
 
-  var addresses = require("../witnet.addresses")
+  const addresses = require("../witnet.addresses")
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
-  var lib
+  let lib
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetErrorsLib)) {
     await deployer.deploy(WitnetErrorsLib, { from })
     lib = await WitnetErrorsLib.deployed()

@@ -8,8 +8,6 @@ require("dotenv").config()
 const settings = require("../migrations/witnet.settings")
 const utils = require("./utils")
 
-const fs = require("fs")
-
 if (process.argv.length < 3) {
   console.log()
   console.log("\n\

@@ -1,11 +1,15 @@
-const ethUtils = require('ethereumjs-util');
+const ethUtils = require("ethereumjs-util")
 const { merge } = require("lodash")
 
 const addresses = require("../witnet.addresses")
 const settings = require("../witnet.settings")
 const singletons = require("../witnet.singletons")
 const utils = require("../../scripts/utils")
-const version = `${require("../../package").version}-${require('child_process').execSync('git rev-parse HEAD').toString().trim().substring(0,7)}`
+const version = `${
+  require("../../package").version
+}-${
+  require("child_process").execSync("git rev-parse HEAD").toString().trim().substring(0, 7)
+}`
 
 const Create2Factory = artifacts.require("Create2Factory")
 const WitnetProxy = artifacts.require("WitnetProxy")
@@ -23,28 +27,28 @@ module.exports = async function (deployer, network, [, from]) {
 
   const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetBytecodesImplementation = artifacts.require(artifactNames.WitnetBytecodes)
-  
+
   let proxy
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetBytecodes)) {
-    var factory = await Create2Factory.deployed()
-    if(
-      factory && !utils.isNullAddress(factory.address)
-        && singletons?.WitnetBytecodes
+    const factory = await Create2Factory.deployed()
+    if (
+      factory && !utils.isNullAddress(factory.address) &&
+        singletons?.WitnetBytecodes
     ) {
       // Deploy the proxy via a singleton factory and a salt...
       const bytecode = WitnetProxy.toJSON().bytecode
-      const salt = singletons.WitnetBytecodes?.salt 
+      const salt = singletons.WitnetBytecodes?.salt
         ? "0x" + ethUtils.setLengthLeft(
-            ethUtils.toBuffer(
-              singletons.WitnetBytecodes.salt
-            ), 32
-          ).toString("hex")
+          ethUtils.toBuffer(
+            singletons.WitnetBytecodes.salt
+          ), 32
+        ).toString("hex")
         : "0x0"
-      ;
+
       const proxyAddr = await factory.determineAddr.call(bytecode, salt, { from })
       if ((await web3.eth.getCode(proxyAddr)).length <= 3) {
         // deploy instance only if not found in current network:
-        utils.traceHeader(`Singleton inception of 'WitnetBytecodes':`)
+        utils.traceHeader("Singleton inception of 'WitnetBytecodes':")
         const balance = await web3.eth.getBalance(from)
         const gas = singletons.WitnetBytecodes.gas || 10 ** 6
         const tx = await factory.deploy(bytecode, salt, { from, gas })
@@ -53,10 +57,10 @@ module.exports = async function (deployer, network, [, from]) {
           web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString())
         )
       } else {
-        utils.traceHeader(`Singleton 'WitnetBytecodes':`)
+        utils.traceHeader("Singleton 'WitnetBytecodes':")
       }
       console.info("  ", "> proxy address:       ", proxyAddr)
-      console.info("  ", "> proxy codehash:      ", web3.utils.soliditySha3(await web3.eth.getCode(proxyAddr)))        
+      console.info("  ", "> proxy codehash:      ", web3.utils.soliditySha3(await web3.eth.getCode(proxyAddr)))
       console.info("  ", "> proxy inception salt:", salt)
       proxy = await WitnetProxy.at(proxyAddr)
     } else {
@@ -75,7 +79,7 @@ module.exports = async function (deployer, network, [, from]) {
 
   let bytecodes
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetBytecodesImplementation)) {
-    await deployer.link(WitnetEncodingLib, [ WitnetBytecodesImplementation, ])
+    await deployer.link(WitnetEncodingLib, [WitnetBytecodesImplementation])
     await deployer.deploy(
       WitnetBytecodesImplementation,
       /* _isUpgradeable */ true,
@@ -95,7 +99,7 @@ module.exports = async function (deployer, network, [, from]) {
     await deployer.link(WitnetEncodingLib, WitnetBytecodesImplementation)
   }
 
-  const implementation = await proxy.implementation.call({ from })
+  const implementation = await proxy.implementation.call()
   if (implementation.toLowerCase() !== bytecodes.address.toLowerCase()) {
     const header = `Upgrading 'WitnetBytecodes' at ${proxy.address}...`
     console.info()
@@ -109,7 +113,7 @@ module.exports = async function (deployer, network, [, from]) {
         ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
     ) {
       try {
-        var tx = await proxy.upgradeTo(bytecodes.address, "0x", { from })
+        const tx = await proxy.upgradeTo(bytecodes.address, "0x", { from })
         console.info("   => transaction hash :", tx.receipt.transactionHash)
         console.info("   => transaction gas  :", tx.receipt.gasUsed)
         console.info("   > Done.")

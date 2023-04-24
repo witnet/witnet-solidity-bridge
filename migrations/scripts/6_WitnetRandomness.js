@@ -1,11 +1,15 @@
-const ethUtils = require('ethereumjs-util');
+const ethUtils = require("ethereumjs-util")
 const { merge } = require("lodash")
 
 const addresses = require("../witnet.addresses")
 const settings = require("../witnet.settings")
-const singletons = require("../witnet.singletons") 
+const singletons = require("../witnet.singletons")
 const utils = require("../../scripts/utils")
-const version = `${require("../../package").version}-${require('child_process').execSync('git rev-parse HEAD').toString().trim().substring(0,7)}`
+const version = `${
+  require("../../package").version
+}-${
+  require("child_process").execSync("git rev-parse HEAD").toString().trim().substring(0, 7)
+}`
 
 const Create2Factory = artifacts.require("Create2Factory")
 const WitnetProxy = artifacts.require("WitnetProxy")
@@ -23,12 +27,12 @@ module.exports = async function (deployer, network, [, from]) {
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
   console.info()
-  if (!isDryRun && addresses[ecosystem][network].WitnetRandomness == undefined) {
+  if (!isDryRun && addresses[ecosystem][network].WitnetRandomness === undefined) {
     console.info(`\n   WitnetRandomness: Not to be deployed into '${network}'`)
-    return;
+    return
   }
 
-  var create2Factory = await Create2Factory.deployed()
+  const create2Factory = await Create2Factory.deployed()
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestRandomness)) {
     // Invariantly deploy a WitnetRequestRandomness contract if not found in the addresses file
     await deployer.deploy(WitnetRequestRandomness, { from, gas: 2000000 })
@@ -40,31 +44,31 @@ module.exports = async function (deployer, network, [, from]) {
     WitnetRequestRandomness.address = addresses[ecosystem][network]?.WitnetRequestRandomness
     console.info(`   Skipped: 'WitnetRequestRandomness' deployed at ${WitnetRequestRandomness.address}`)
   }
-  
+
   const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRandomnessImplementation = artifacts.require(artifactNames.WitnetRandomness)
 
-  if (addresses[ecosystem][network].WitnetRandomnessImplementation != undefined) {
+  if (addresses[ecosystem][network].WitnetRandomnessImplementation !== undefined) {
     let proxy
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRandomness)) {
-      if(
-        create2Factory && !utils.isNullAddress(create2Factory.address)
-          && singletons?.WitnetRandomness
+      if (
+        create2Factory && !utils.isNullAddress(create2Factory.address) &&
+          singletons?.WitnetRandomness
       ) {
         // Deploy the proxy via a singleton factory and a salt...
         const bytecode = WitnetProxy.toJSON().bytecode
-        const salt = singletons.WitnetRandomness?.salt 
+        const salt = singletons.WitnetRandomness?.salt
           ? "0x" + ethUtils.setLengthLeft(
-              ethUtils.toBuffer(
-                singletons.WitnetRandomness.salt
-              ), 32
-            ).toString("hex")
+            ethUtils.toBuffer(
+              singletons.WitnetRandomness.salt
+            ), 32
+          ).toString("hex")
           : "0x0"
-        ;
+
         const proxyAddr = await create2Factory.determineAddr.call(bytecode, salt, { from })
         if ((await web3.eth.getCode(proxyAddr)).length <= 3) {
           // deploy instance only if not found in current network:
-          utils.traceHeader(`Singleton inception of 'WitnetRandomness':`)
+          utils.traceHeader("Singleton inception of 'WitnetRandomness':")
           const balance = await web3.eth.getBalance(from)
           const gas = singletons.WitnetRandomness.gas || 10 ** 6
           const tx = await create2Factory.deploy(bytecode, salt, { from, gas })
@@ -73,10 +77,10 @@ module.exports = async function (deployer, network, [, from]) {
             web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString())
           )
         } else {
-          utils.traceHeader(`Singleton 'WitnetRandomness':`)
+          utils.traceHeader("Singleton 'WitnetRandomness':")
         }
         console.info("  ", "> proxy address:       ", proxyAddr)
-        console.info("  ", "> proxy codehash:      ", web3.utils.soliditySha3(await web3.eth.getCode(proxyAddr)))        
+        console.info("  ", "> proxy codehash:      ", web3.utils.soliditySha3(await web3.eth.getCode(proxyAddr)))
         console.info("  ", "> proxy inception salt:", salt)
         proxy = await WitnetProxy.at(proxyAddr)
       } else {
@@ -93,7 +97,7 @@ module.exports = async function (deployer, network, [, from]) {
     }
     WitnetRandomness.address = proxy.address
 
-    var randomness
+    let randomness
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRandomnessImplementation)) {
       await deployer.deploy(
         WitnetRandomnessImplementation,
@@ -129,7 +133,7 @@ module.exports = async function (deployer, network, [, from]) {
           ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
       ) {
         try {
-          var tx = await proxy.upgradeTo(randomness.address, "0x", { from })
+          const tx = await proxy.upgradeTo(randomness.address, "0x", { from })
           console.info("   => transaction hash :", tx.receipt.transactionHash)
           console.info("   => transaction gas  :", tx.receipt.gasUsed)
           console.info("   > Done.")
@@ -151,7 +155,7 @@ module.exports = async function (deployer, network, [, from]) {
         utils.fromAscii(version),
         { from }
       )
-      addresses[ecosystem][network].WitnetRandomness = WitnetRandomnessImplementation.address;
+      addresses[ecosystem][network].WitnetRandomness = WitnetRandomnessImplementation.address
       if (!isDryRun) {
         utils.saveAddresses(addresses)
       }

@@ -14,6 +14,6 @@ interface IWitnetPriceFeeds {
     /// ======================================================================================================
     /// --- IWitnetFeeds extension ---------------------------------------------------------------------------
 
-    function lastPrice(bytes4 feedId) external view returns (IWitnetPriceSolver.Price memory);
-    function lastPrices(bytes4[] calldata feedIds)  external view returns (IWitnetPriceSolver.Price[] memory);
+    function latestPrice(bytes4 feedId) external view returns (IWitnetPriceSolver.Price memory);
+    function latestPrices(bytes4[] calldata feedIds)  external view returns (IWitnetPriceSolver.Price[] memory);
 }

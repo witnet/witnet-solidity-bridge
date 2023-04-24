@@ -294,6 +294,7 @@ library Witnet {
     /// @return The `int[]` decoded from the Witnet.Result.
     function asIntArray(Witnet.Result memory result)
         internal pure
+        _isReady(result)
         returns (int[] memory)
     {
         return result.value.readIntArray();
@@ -337,7 +338,6 @@ library Witnet {
     /// @return The `uint[]` decoded from the Witnet.Result.
     function asUintArray(Witnet.Result memory result)
         internal pure
-        _isReady(result)
         returns (uint[] memory)
     {
         return result.value.readUintArray();
