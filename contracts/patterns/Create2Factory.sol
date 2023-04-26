@@ -4,8 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /// @title Based on Singleton Factory (EIP-2470), authored by Guilherme Schmidt (Status Research & Development GmbH)
 /// @notice Exposes CREATE2 (EIP-1014) to deploy bytecode on deterministic addresses based on initialization code and salt.
-/// @dev Exposes also helper method to pre-determine contract address gieve
-/// @author Ricardo Guilherme Schmidt (Status Research & Development GmbH)
 
 contract Create2Factory {
 

@@ -1,8 +1,9 @@
+const fs = require("fs");
+
 const addresses = require("../witnet.addresses")
 const utils = require("../../scripts/utils")
 
 const Create2Factory = artifacts.require("Create2Factory")
-const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (deployer, network, [,,,,,, from]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
@@ -27,9 +28,28 @@ module.exports = async function (deployer, network, [,,,,,, from]) {
     console.info("   > Contract address:", factory.address)
     console.info()
   }
+
+  // Settle WitnetProxy bytecode and source code as to guarantee 
+  // salted addresses remain as expected no matter if the solc version
+  // is changed in migrations/witnet.settings.js
+  utils.traceHeader("Defrosting 'WitnetProxy' artifact")
+  fs.writeFileSync(
+    `build/${ecosystem}/contracts/WitnetProxy.json`,
+    fs.readFileSync("migrations/abis/WitnetProxy.json"),
+    { encoding:'utf8', flag:'w' }
+  )
+  const WitnetProxy = artifacts.require("WitnetProxy")
+  const metadata = JSON.parse(WitnetProxy.metadata)
+  console.info("  ", "> compiler:          ", metadata.compiler.version)
+  console.info("  ", "> compilation target:", metadata.settings.compilationTarget)
+  console.info("  ", "> evmVersion:        ", metadata.settings.evmVersion)
+  console.info("  ", "> optimizer:         ", JSON.stringify(metadata.settings.optimizer))
+
   if (addresses[ecosystem][network]?.WitnetProxy === "") {
     await deployer.deploy(WitnetProxy, { from })
     addresses[ecosystem][network].WitnetProxy = WitnetProxy.address
+  } else {
+    WitnetProxy.address = addresses[ecosystem][network]?.WitnetProxy
   }
   if (!isDryRun) {
     utils.saveAddresses(addresses)

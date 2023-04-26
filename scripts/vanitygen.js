@@ -23,7 +23,6 @@ module.exports = async function () {
       artifact = artifacts.require(args[index + 1])
     } else if (argv === "--target") {
       target = args[index + 1].toLowerCase()
-      assert(web3.utils.isHexStrict(target), "--target refers invalid hex string")
     } else if (argv === "--hits") {
       hits = parseInt(args[index + 1])
     } else if (argv === "--network") {
@@ -46,6 +45,10 @@ module.exports = async function () {
   const bytecode = artifact
     ? artifact.toJSON().bytecode
     : `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${from.toLowerCase().slice(2)}5af43d82803e903d91602b57fd5bf3`
+  const targets = target.split(",")
+  for (var j = 0; j < targets.length; j ++) {
+    assert(web3.utils.isHexStrict(targets[j]), "--target refers invalid hex string")
+  }
   console.log("Bytecode:  ", bytecode)
   console.log("Artifact:  ", artifact?.contractName || "ERC-1167: Minimal Proxy Contract")
   console.log("From:      ", from)
@@ -56,7 +59,7 @@ module.exports = async function () {
   while (count < hits) {
     const salt = "0x" + utils.padLeft(offset.toString(16), "0", 32)
     const addr = create2(from, salt, bytecode)
-    if (addr.toLowerCase().startsWith(target)) {
+    if (targets.some((word) => addr.toLowerCase().startsWith(word))) {
       const found = `${offset} => ${web3.utils.toChecksumAddress(addr)}`
       console.log(found)
       fs.appendFileSync(`./migrations/salts/${artifact?.contractName || "MinimalProxy"}$${from.toLowerCase()}.tmp`, found + "\n")
