@@ -2,7 +2,7 @@ module.exports = {
   artifacts: {
     default: {
       WitnetBytecodes: "WitnetBytecodesDefault",
-      WitnetPriceFeeds: "WitnetPriceFeedsUpgradable",
+      WitnetPriceFeeds: "WitnetPriceRouter",
       WitnetRandomness: "WitnetRandomnessProxiable",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
@@ -15,13 +15,7 @@ module.exports = {
     },
     reef: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
-    },
-    "polygon.zkevm.polygon": {
-      WitnetRandomness: "WitnetRandomnessZkEvm",
-    },
-    "polygon.zkevm.mainnet": {
-      WitnetRandomness: "WitnetRandomnessZkEvm",
-    },
+    }
   },
   compilers: {
     default: {
