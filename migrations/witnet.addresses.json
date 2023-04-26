@@ -161,20 +161,22 @@
     },
     "elastos": {
         "elastos.testnet": {
-            "WitnetEncodingLib": "0xf6d52770453166de85B6B6260Cf22196bC460E88",
-            "WitnetErrorsLib": "0x9F026F081b5E1f60d583CE380f30A0a4eF0AB97a",
             "WitnetProxy": "0x840bafDC40D88F54Db41327fe1C85241f9151243",
             "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
-            "WitnetBytecodes": "0x000000b3B867AEF034469bBA55cAD342A4E1A305",
-            "WitnetPriceRouter": "0xfeeeed88838b4fa4EE46D05c2148e645058f3C28",
-            "WitnetRandomness": "0x123456f4De47e1947210CD62e2f8CF9c2FeD9d4d",
-            "WitnetRequestBoard": "0x0000007F26760C151AC86695D5846D21e7828B67",
-            "WitnetRequestFactory": "0xFaCADE177178C6E0C6914CAe220F2824fF5587B8",
-            "WitnetBytecodesImplementation": "0x4743325168af9195Aa5b25e491E9bE87d87E7F93",
+            "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
+            "WitnetPriceRouter": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
+            "WitnetRandomness": "0x88888885966F8F77cC6E797aE263C4d091e44A55",
+            "WitnetRequestBoard": "0x777777772C24e6CD34B464D1d71616C444254537",
+            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
+            "WitnetErrorsLib": "0x2ef492c5300Ba8002ECC1ee44fD758be1d3B6e89",
+            "WitnetEncodingLib": "0x6F68A4d58cEd8e094b42511350527Ed628ACB970",
+            "WitnetBytecodesImplementation": "0x7ab66AB288A143D4e07Aff9b729165bFb71DB73a",
             "WitnetPriceRouterImplementation": "0x4874cb1732eE1167A006E0Ab047D940ACF04D771",
-            "WitnetRandomnessImplementation": "0x6dc0E2AC80550F901cd4d5F5a4C48333A0ca97Ee",
-            "WitnetRequestBoardImplementation": "0x7538f6Bff94B0F7F0A0802376238Aab0D2528521",
-            "WitnetRequestFactoryImplementation": "0x9f9bAB64229680E170835BC9cC1c96F2C63f7d16"
+            "WitnetRandomnessImplementation": "0x9597b5708CDB58fF057ca494574951Fc3d9163f7",
+            "WitnetRequestBoardImplementation": "0x7a56A80A9B169c046EdD1d8f584455a394bc9C71",
+            "WitnetRequestFactoryImplementation": "0xd8875D7D3087DEec0103d47d4cE0C4a5414874E1",
+            "WitnetRequestRandomness": "0x34fcD46c6D97A534BdC31Eb9d1e5273298CA8034"
+        },
         }
     },
     "harmony": {
