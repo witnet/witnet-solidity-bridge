@@ -177,6 +177,22 @@
             "WitnetRequestFactoryImplementation": "0xd8875D7D3087DEec0103d47d4cE0C4a5414874E1",
             "WitnetRequestRandomness": "0x34fcD46c6D97A534BdC31Eb9d1e5273298CA8034"
         },
+        "elastos.mainnet": {
+            "WitnetProxy": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
+            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
+            "WitnetPriceRouter": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
+            "WitnetRandomness": "0x88888885966F8F77cC6E797aE263C4d091e44A55",
+            "WitnetRequestBoard": "0x777777772C24e6CD34B464D1d71616C444254537",
+            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
+            "WitnetErrorsLib": "0x0Dd81412825b9C3960195ab47F14dFa9Fd70e36e",
+            "WitnetEncodingLib": "0x1225A47bC743199dFef9FEEf065b3B76695AaaaC",
+            "WitnetBytecodesImplementation": "0xF503A52bEcF03d9d5fc85459906a4d280142B1cd",
+            "WitnetPriceRouterImplementation": "0x0Aa147F25CE8BfaA4E6B4B2CCa91f595bD732CD4",
+            "WitnetRandomnessImplementation": "0x92a68143Ee3C2527C2B07e4354efAF89fd75a359",
+            "WitnetRequestBoardImplementation": "0x0fa3a073f48c985151875A0979A7222615F642E4",
+            "WitnetRequestFactoryImplementation": "0x49dbaA6eE184Da1bCAba0764B5Daa363d49b3fe5",
+            "WitnetRequestRandomness": "0x217C32Cf5755aB281809f29F21c107cD0E4652B3"
         }
     },
     "harmony": {
