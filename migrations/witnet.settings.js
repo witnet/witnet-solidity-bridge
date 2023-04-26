@@ -308,9 +308,16 @@ module.exports = {
         verify: {
           apiUrl: "https://esc-testnet.elastos.io/api",
           browserURL: "https://esc-testnet.elastos.io/address",
-          // apiKey: 'D75NV1MFN41XRSE9SWV9BA3QZKUD1U9RM3',
-          apiURL: "https://esc-testnet.elastos.io/api",
-          explorerUrl: "https://esc-testnet.elastos.io/address",
+        },
+      },
+      "elastos.mainnet": {
+        host: "localhost",
+        port: 9513,
+        network_id: 20,
+        skipDryRun: true,
+        verify: {
+          apiUrl: "https://esc.elastos.io/api",
+          browserURL: "https://esc.elastos.io/address",
         },
       },
     },
