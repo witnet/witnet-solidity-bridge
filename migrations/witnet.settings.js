@@ -10,12 +10,15 @@ module.exports = {
     boba: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
+    "elastos.testnet": {
+      WitnetPriceFeeds: "WitnetPriceFeedsUpgradable",
+    },
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
     reef: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
-    }
+    },
   },
   compilers: {
     default: {
@@ -308,6 +311,7 @@ module.exports = {
         verify: {
           apiUrl: "https://esc-testnet.elastos.io/api",
           browserURL: "https://esc-testnet.elastos.io/address",
+          apiKey: 'MY-API-KEY',
         },
       },
       "elastos.mainnet": {
@@ -318,6 +322,7 @@ module.exports = {
         verify: {
           apiUrl: "https://esc.elastos.io/api",
           browserURL: "https://esc.elastos.io/address",
+          apiKey: 'MY-API-KEY',
         },
       },
     },
