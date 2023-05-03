@@ -3,7 +3,7 @@ const { merge } = require("lodash")
 
 const addresses = require("../witnet.addresses")
 const settings = require("../witnet.settings")
-const singletons = require("../witnet.singletons")
+const singletons = require("../witnet.salts")
 const utils = require("../../scripts/utils")
 const version = `${
   require("../../package").version

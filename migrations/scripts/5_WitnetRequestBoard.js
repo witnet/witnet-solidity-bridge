@@ -3,7 +3,7 @@ const { merge } = require("lodash")
 
 const addresses = require("../witnet.addresses")
 const settings = require("../witnet.settings")
-const singletons = require("../witnet.singletons")
+const singletons = require("../witnet.salts")
 const utils = require("../../scripts/utils")
 const version = `${
   require("../../package").version
@@ -132,8 +132,8 @@ module.exports = async function (deployer, network, [, from, reporter]) {
           ),
           { from }
         )
-        console.info("   => transaction hash :", tx.receipt.transactionHash)
-        console.info("   => transaction gas  :", tx.receipt.gasUsed)
+        console.info("   => Transaction hash :", tx.receipt.transactionHash)
+        console.info("   => Transaction gas  :", tx.receipt.gasUsed)
         console.info("   > Done.")
       } catch (ex) {
         console.info("   !! Cannot upgrade the proxy:")
