@@ -2,16 +2,13 @@ module.exports = {
   artifacts: {
     default: {
       WitnetBytecodes: "WitnetBytecodesDefault",
-      WitnetPriceFeeds: "WitnetPriceRouter",
+      WitnetPriceFeeds: "WitnetPriceFeedsUpgradable",
       WitnetRandomness: "WitnetRandomnessProxiable",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
     },
     boba: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
-    },
-    "elastos.testnet": {
-      WitnetPriceFeeds: "WitnetPriceFeedsUpgradable",
     },
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",

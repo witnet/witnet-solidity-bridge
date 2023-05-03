@@ -540,12 +540,29 @@ contract WitnetPriceFeedsUpgradable
                 status: latestUpdateResultStatus(feedId)
             });
         } else {
-            return IWitnetPriceSolver.Price({
-                value: 0,
-                timestamp: 0,
-                drTxHash: 0,
-                status: latestUpdateResultStatus(feedId)
-            });
+            address _solver = __records_(feedId).solver;
+            if (_solver != address(0)) {
+                // solhint-disable-next-line avoid-low-level-calls
+                (bool _success, bytes memory _result) = address(this).staticcall(abi.encodeWithSelector(
+                    IWitnetPriceSolver.solve.selector,
+                    feedId
+                ));
+                require(
+                    _success,
+                    string(abi.encodePacked(
+                        "WitnetPriceFeedsUpgradable: ",
+                        _result
+                    ))
+                );
+                return abi.decode(_result, (IWitnetPriceSolver.Price));
+            } else {
+                return IWitnetPriceSolver.Price({
+                    value: 0,
+                    timestamp: 0,
+                    drTxHash: 0,
+                    status: latestUpdateResultStatus(feedId)
+                });
+            }
         }
     }
 

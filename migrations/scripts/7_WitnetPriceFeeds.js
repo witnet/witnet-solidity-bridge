@@ -85,22 +85,6 @@ module.exports = async function (deployer, network, [, from]) {
 
     let router
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsImplementation)) {
-      if (WitnetPriceFeedsImplementation.contractName === "WitnetPriceRouter") {
-        await deployer.deploy(
-          WitnetPriceFeedsImplementation,
-          true,
-          utils.fromAscii(version),
-          { from }
-        )
-      } else {
-        await deployer.deploy(
-          WitnetPriceFeedsImplementation,
-          WitnetRequestBoard.address,
-          true,
-          utils.fromAscii(version),
-          { from }
-        )
-      }
       router = await WitnetPriceFeedsImplementation.deployed()
       addresses[ecosystem][network].WitnetPriceFeedsImplementation = router.address
       if (!isDryRun) {

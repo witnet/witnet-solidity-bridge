@@ -167,7 +167,7 @@
             "WitnetErrorsLib": "0x2ef492c5300Ba8002ECC1ee44fD758be1d3B6e89",
             "WitnetEncodingLib": "0x6F68A4d58cEd8e094b42511350527Ed628ACB970",
             "WitnetBytecodesImplementation": "0x7ab66AB288A143D4e07Aff9b729165bFb71DB73a",
-            "WitnetPriceFeedsImplementation": "0x1f35F6d6BE5Bd574b2B00Ac2Dc0BeCAfcc04Ed51",
+            "WitnetPriceFeedsImplementation": "0x80264666C9a4e73e8D8E31c3Ea1677907c5163dD",
             "WitnetRandomnessImplementation": "0x9597b5708CDB58fF057ca494574951Fc3d9163f7",
             "WitnetRequestBoardImplementation": "0x7a56A80A9B169c046EdD1d8f584455a394bc9C71",
             "WitnetRequestFactoryImplementation": "0xd8875D7D3087DEec0103d47d4cE0C4a5414874E1",
