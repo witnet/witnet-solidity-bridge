@@ -5,11 +5,11 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
-import "../WitnetRandomness.sol";
-import "../impls/WitnetUpgradableBase.sol";
-import "../patterns/Clonable.sol";
+import "../../WitnetRandomness.sol";
+import "../../impls/WitnetUpgradableBase.sol";
+import "../../patterns/Clonable.sol";
 
-import "../requests/WitnetRequestRandomness.sol";
+import "../../requests/WitnetRequestRandomness.sol";
 
 /// @title WitnetRandomnessProxiable: A trustless randomness generator and registry, using the Witnet oracle. 
 /// @author Witnet Foundation.

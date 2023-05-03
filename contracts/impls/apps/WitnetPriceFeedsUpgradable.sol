@@ -5,13 +5,13 @@ pragma experimental ABIEncoderV2;
 
 import "ado-contracts/contracts/interfaces/IERC2362.sol";
 
-import "../WitnetFeeds.sol";
-import "../data/WitnetFeedsData.sol";
-import "../impls/WitnetUpgradableBase.sol";
-import "../interfaces/V2/IWitnetPriceFeeds.sol";
-import "../interfaces/V2/IWitnetPriceSolver.sol";
+import "../../WitnetFeeds.sol";
+import "../../data/WitnetFeedsData.sol";
+import "../../impls/WitnetUpgradableBase.sol";
+import "../../interfaces/V2/IWitnetPriceFeeds.sol";
+import "../../interfaces/V2/IWitnetPriceSolver.sol";
 
-import "../libs/Slices.sol";
+import "../../libs/Slices.sol";
 
 /// @title WitnetPriceFeedsUpgradable: ...
 /// @author Witnet Foundation.

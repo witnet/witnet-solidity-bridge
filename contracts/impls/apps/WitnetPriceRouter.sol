@@ -3,10 +3,10 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "../interfaces/IWitnetPriceFeed.sol";
+import "../../interfaces/IWitnetPriceFeed.sol";
 
-import "../impls/WitnetUpgradableBase.sol";
-import "../interfaces/IWitnetPriceRouter.sol";
+import "../../impls/WitnetUpgradableBase.sol";
+import "../../interfaces/IWitnetPriceRouter.sol";
 
 contract WitnetPriceRouter
     is
@@ -20,12 +20,13 @@ contract WitnetPriceRouter
         uint256 decimals;
         string  base;
         string  quote;
-    }    
+    }
 
-    mapping (bytes4 => Pair) internal __pairs;
-    mapping (address => bytes32) internal __pricefeedId_;
-
-    bytes32[] internal __supportedCurrencyPairs;
+    struct Storage {
+        mapping (bytes4 => Pair) pairs;
+        mapping (address => bytes32) pricefeedId_;
+        bytes32[] supportedCurrencyPairs;
+    }
 
     constructor(
             bool _upgradable,
@@ -132,7 +133,7 @@ contract WitnetPriceRouter
         virtual override
         returns (IERC165)
     {
-        return __pairs[bytes4(_erc2362id)].pricefeed;
+        return __storage().pairs[bytes4(_erc2362id)].pricefeed;
     }
 
     /// Returns human-readable ERC2362-based caption of the currency pair being
@@ -145,7 +146,7 @@ contract WitnetPriceRouter
         returns (string memory)
     {
         require(supportsPriceFeed(_pricefeed), "WitnetPriceRouter: unknown");
-        return lookupERC2362ID(__pricefeedId_[address(_pricefeed)]);
+        return lookupERC2362ID(__storage().pricefeedId_[address(_pricefeed)]);
     }
 
     /// Returns human-readable caption of the ERC2362-based currency pair identifier, if known.
@@ -154,7 +155,7 @@ contract WitnetPriceRouter
         virtual override
         returns (string memory _caption)
     {
-        Pair storage _pair = __pairs[bytes4(_erc2362id)];
+        Pair storage _pair = __storage().pairs[bytes4(_erc2362id)];
         if (
             bytes(_pair.base).length > 0 
                 && bytes(_pair.quote).length > 0
@@ -190,7 +191,7 @@ contract WitnetPriceRouter
                 "WitnetPriceRouter: feed contract is not compliant with IWitnetPriceFeed"
             );
             require(
-                __pricefeedId_[address(_pricefeed)] == bytes32(0),
+                __storage().pricefeedId_[address(_pricefeed)] == bytes32(0),
                 "WitnetPriceRouter: already serving a currency pair"
             );
         }
@@ -204,19 +205,19 @@ contract WitnetPriceRouter
         );
         bytes32 _erc2362id = keccak256(_caption);
         
-        Pair storage _record = __pairs[bytes4(_erc2362id)];
+        Pair storage _record = __storage().pairs[bytes4(_erc2362id)];
         address _currentPriceFeed = address(_record.pricefeed);
         if (bytes(_record.base).length == 0) {
             _record.base = _base;
             _record.quote = _quote;
             _record.decimals = _decimals;
-            __supportedCurrencyPairs.push(_erc2362id);
+            __storage().supportedCurrencyPairs.push(_erc2362id);
         }
         else if (_currentPriceFeed != address(0)) {
-            __pricefeedId_[_currentPriceFeed] = bytes32(0);
+            __storage().pricefeedId_[_currentPriceFeed] = bytes32(0);
         }
         if (address(_pricefeed) != _currentPriceFeed) {
-            __pricefeedId_[address(_pricefeed)] = _erc2362id;
+            __storage().pricefeedId_[address(_pricefeed)] = _erc2362id;
         }
         _record.pricefeed = _pricefeed;
         emit CurrencyPairSet(_erc2362id, _pricefeed);
@@ -228,7 +229,7 @@ contract WitnetPriceRouter
         virtual override
         returns (bytes32[] memory)
     {
-        return __supportedCurrencyPairs;
+        return __storage().supportedCurrencyPairs;
     }
 
     /// Returns `true` if given pair is currently being served by a compliant price feed contract.
@@ -237,7 +238,7 @@ contract WitnetPriceRouter
         virtual override
         returns (bool)
     {
-        return address(__pairs[bytes4(_erc2362id)].pricefeed) != address(0);
+        return address(__storage().pairs[bytes4(_erc2362id)].pricefeed) != address(0);
     }
 
     /// Returns `true` if given price feed contract is currently serving updates to any known currency pair. 
@@ -246,6 +247,20 @@ contract WitnetPriceRouter
         virtual override
         returns (bool)
     {
-        return __pairs[bytes4(__pricefeedId_[address(_pricefeed)])].pricefeed == _pricefeed;
+        return __storage().pairs[bytes4(__storage().pricefeedId_[address(_pricefeed)])].pricefeed == _pricefeed;
+    }
+
+
+    /// =======================================================================
+    /// --- Internal methods --------------------------------------------------
+
+    bytes32 internal constant _WITNET_PRICE_ROUTER_SLOTHASH =
+        /* keccak256("io.witnet.router.data") */
+        0x1ab0a3400242e9b47752f01347893fa91d77046d73895ccd575be9dd5025abd9;
+
+    function __storage() internal pure returns (Storage storage ptr) {
+        assembly {
+            ptr.slot := _WITNET_PRICE_ROUTER_SLOTHASH
+        }
     }
 }
