@@ -42,7 +42,7 @@ module.exports = async function (deployer, network, [, from]) {
       utils.saveAddresses(addresses)
     }
   } else {
-    WitnetPriceRouter.address = [ecosystem][network].WitnetPriceRouter
-    console.info(`   Skipped: 'WitnetPriceRouter' deployed at ${router.address}`)
+    WitnetPriceRouter.address = addresses[ecosystem][network].WitnetPriceRouter
+    console.info(`   Skipped: 'WitnetPriceRouter' deployed at ${WitnetPriceRouter.address}`)
   }
 }
