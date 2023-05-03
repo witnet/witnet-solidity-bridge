@@ -5,7 +5,7 @@ const utils = require("../../scripts/utils")
 
 const Create2Factory = artifacts.require("Create2Factory")
 
-module.exports = async function (deployer, network, [,,,,,, from]) {
+module.exports = async function (deployer, network, [, from,,,,, master]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
   const ecosystem = utils.getRealmNetworkFromArgs()[0]
   network = network.split("-")[0]
@@ -15,7 +15,7 @@ module.exports = async function (deployer, network, [,,,,,, from]) {
 
   let factory
   if (utils.isNullAddress(addresses[ecosystem][network]?.Create2Factory)) {
-    await deployer.deploy(Create2Factory, { from })
+    await deployer.deploy(Create2Factory, { from: master })
     factory = await Create2Factory.deployed()
     addresses[ecosystem][network].Create2Factory = factory.address
     if (!isDryRun) {
@@ -49,7 +49,9 @@ module.exports = async function (deployer, network, [,,,,,, from]) {
     await deployer.deploy(WitnetProxy, { from })
     addresses[ecosystem][network].WitnetProxy = WitnetProxy.address
   } else {
-    WitnetProxy.address = addresses[ecosystem][network]?.WitnetProxy
+    if (addresses[ecosystem][network]?.WitnetProxy) {
+      WitnetProxy.address = addresses[ecosystem][network]?.WitnetProxy
+    }
   }
   if (!isDryRun) {
     utils.saveAddresses(addresses)
