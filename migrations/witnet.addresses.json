@@ -283,15 +283,22 @@
     },
     "moonbeam": {
         "moonbeam.moonbase": {
-            "WitnetBytecodes": "0x4Daa9A7880b27305B881F84e9D4c5Dc808ac4F7f",
-            "WitnetBytecodesImplementation": "0xd38CeD27B2A27DD4e62765a6fFB5F7078E346b54",
-            "WitnetEncodingLib": "0x92aD6266E77DE33E4135B199D79DCf004521cad3",
-            "WitnetLib": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
+            "WitnetProxy": "0x6bF6F65Ad0859e9Ee869DAD252a29c9daAa27449",
+            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
+            "WitnetPriceFeeds": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
             "WitnetPriceRouter": "0x56834Ff8D4b27db647Da97CA3bd8540f7fA0e89D",
-            "WitnetRandomness": "0x45111778a7db1356DaAB576cBe73681F0745182c",
+            "WitnetRandomness": "0x88888885966F8F77cC6E797aE263C4d091e44A55",
             "WitnetRequestBoard": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425",
-            "WitnetRequestFactory": "0xecad2534fecD949A2e8751aB73ccD7c7e193A19F",
-            "WitnetRequestFactoryImplementation": "0xcf7D253BC0367A7Bf60762A803644a91435574e8"
+            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
+            "WitnetRequestRandomness": "0xb5F3c9Dc6Ca7C1078cE5c51c1cE030D6BEEd57E2",
+            "WitnetErrorsLib": "0xf6d52770453166de85B6B6260Cf22196bC460E88",
+            "WitnetEncodingLib": "0xB5447342cA17A40e59d410b340ba412E22e36201",
+            "WitnetBytecodesImplementation": "0x705E076F3387cFd59708D8D8508CECe3e1C65C87",
+            "WitnetPriceFeedsImplementation": "0xBfFA2ec6225390C517A1bEB83b27a171C6734294",
+            "WitnetRandomnessImplementation": "0x65772461641A4A6E8B10c81bae1a132E04e77262",
+            "WitnetRequestBoardImplementation": "0xeDA4f244FEe1D6a3EA0fB2c0Fc6b7D1c49fEF01D",
+            "WitnetRequestFactoryImplementation": "0x364E2b91a4C7563288C3ccF7256BA172935CC550"
         },
         "moonbeam.moonriver": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
