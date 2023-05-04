@@ -1,7 +1,4 @@
-const { merge } = require("lodash")
-
 const addresses = require("../witnet.addresses")
-const settings = require("../witnet.settings")
 const utils = require("../../scripts/utils")
 const version = `${
   require("../../package").version
@@ -32,7 +29,6 @@ module.exports = async function (deployer, network, [, from]) {
   ) {
     await deployer.deploy(
       WitnetPriceRouter,
-      WitnetRequestBoard.address,
       false,
       utils.fromAscii(version),
       { from }

@@ -319,7 +319,19 @@ module.exports = {
         verify: {
           apiUrl: "https://esc.elastos.io/api",
           browserURL: "https://esc.elastos.io/address",
-          apiKey: 'MY-API-KEY',
+        },
+      },
+    },
+    fuse: {
+      "fuse.testnet": {
+        host: "localhost",
+        port: 8511,
+        network_id: 123,
+        skipDryRun: true,
+        verify: {
+          apiUrl: "https://explorer.fusespark.io/api",
+          browserURL: "https://explorer.fusespark.io/address",
+          apiKey: 'MY_API_KEY',
         },
       },
     },
