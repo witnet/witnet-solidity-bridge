@@ -9,7 +9,10 @@ interface IWitnetPriceFeeds {
     /// --- IFeeds extension ---------------------------------------------------------------------------------
     
     function lookupDecimals(bytes4 feedId) external view returns (uint8);    
-    function lookupPriceSolver(bytes4 feedId) external view returns (IWitnetPriceSolver);
+    function lookupPriceSolver(bytes4 feedId) external view returns (
+            IWitnetPriceSolver solverAddress, 
+            string[] memory solverDeps
+        );
 
     /// ======================================================================================================
     /// --- IWitnetFeeds extension ---------------------------------------------------------------------------
