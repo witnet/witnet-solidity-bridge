@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /// @title WitnetFeeds data model.
 /// @author The Witnet Foundation.
-abstract contract WitnetFeedsData {
+abstract contract WitnetPriceFeedsData {
     
     bytes32 private constant _WITNET_FEEDS_DATA_SLOTHASH =
         /* keccak256("io.witnet.feeds.data") */
@@ -24,7 +24,8 @@ abstract contract WitnetFeedsData {
         uint256 latestUpdateQueryId;
         bytes32 radHash;
         address solver;
-        int256  reductor;
+        int256  solverReductor;
+        bytes32 solverDepsFlag;
     }
 
     // ================================================================================================
@@ -41,5 +42,19 @@ abstract contract WitnetFeedsData {
 
     function __records_(bytes4 feedId) internal view returns (Record storage) {
         return __storage().records[feedId];
+    }
+
+    function _depsOf(bytes4 feedId) internal view returns (bytes4[] memory _deps) {
+        bytes32 _solverDepsFlag = __storage().records[feedId].solverDepsFlag;
+        _deps = new bytes4[](8);
+        uint _len;
+        for (_len = 0; _len < 8; _len ++) {
+            _deps[_len] = bytes4(_solverDepsFlag);
+            _solverDepsFlag <<= 32;
+        }
+        assembly {
+            // reset length to actual number of dependencies:
+            mstore(_deps, _len)
+        }
     }
 }

@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "ado-contracts/contracts/interfaces/IERC2362.sol";
 
 import "../../WitnetFeeds.sol";
-import "../../data/WitnetFeedsData.sol";
+import "../../data/WitnetPriceFeedsData.sol";
 import "../../impls/WitnetUpgradableBase.sol";
 import "../../interfaces/V2/IWitnetPriceFeeds.sol";
 import "../../interfaces/V2/IWitnetPriceSolver.sol";
@@ -20,7 +20,7 @@ contract WitnetPriceFeedsUpgradable
         IERC2362,
         IWitnetPriceFeeds,
         WitnetFeeds,
-        WitnetFeedsData,
+        WitnetPriceFeedsData,
         WitnetUpgradableBase
 {
     using Slices for string;
