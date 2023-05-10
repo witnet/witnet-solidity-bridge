@@ -12,8 +12,7 @@ interface IWitnetPriceSolver {
         Witnet.ResultStatus status;
     }
     function class() external pure returns (bytes4);
-    function decimals() external view returns (uint8);
-    function deps() external view returns (bytes4[] memory);
+    function delegator() external view returns (address);
     function solve(bytes4 feedId) external view returns (Price memory);
-    function validate(bytes4 feedId) external;
+    function validate(bytes4 feedId, string[] calldata initdata) external;
 }
