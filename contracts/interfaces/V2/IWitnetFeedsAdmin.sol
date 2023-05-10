@@ -11,5 +11,5 @@ interface IWitnetFeedsAdmin {
     function settleFeedRequest(string calldata caption, bytes32 radHash) external;
     function settleFeedRequest(string calldata caption, WitnetRequest request) external;
     function settleFeedRequest(string calldata caption, WitnetRequestTemplate template, string[][] calldata) external;
-    function settleFeedSolver(string calldata caption, address solver) external;
+    function settleFeedSolver(string calldata caption, address solver, string[] calldata deps) external;
 }
