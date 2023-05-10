@@ -482,13 +482,15 @@ contract WitnetPriceFeedsUpgradable
                 feedId,
                 deps
             ));
-            require(
-                _success,
-                string(abi.encodePacked(
+            if (!_success) {
+                assembly {
+                    _reason := add(_reason, 4)
+                }
+                revert(string(abi.encodePacked(
                     "WitnetPriceFeedUpgradable: solver validation failed: ",
-                    _reason
-                ))
-            );
+                    string(abi.decode(_reason,(string)))
+                )));
+            }
         }
         // smoke-test the solver 
         {   
@@ -497,13 +499,15 @@ contract WitnetPriceFeedsUpgradable
                 IWitnetPriceSolver.solve.selector,
                 feedId
             ));
-            require(
-                _success,
-                string(abi.encodePacked(
+            if (!_success) {
+                assembly {
+                    _reason := add(_reason, 4)
+                }
+                revert(string(abi.encodePacked(
                     "WitnetPriceFeedsUpgradable: smoke-test failed: ",
-                    _reason
-                ))
-            );
+                    string(abi.decode(_reason,(string)))
+                )));
+            }
         }
         emit SettledFeedSolver(msg.sender, feedId, caption, solver);
     }
@@ -556,14 +560,17 @@ contract WitnetPriceFeedsUpgradable
                     IWitnetPriceSolver.solve.selector,
                     feedId
                 ));
-                require(
-                    _success,
-                    string(abi.encodePacked(
+                if (_success) {
+                    assembly {
+                        _result := add(_result, 4)
+                    }
+                    revert(string(abi.encodePacked(
                         "WitnetPriceFeedsUpgradable: ",
-                        _result
-                    ))
-                );
-                return abi.decode(_result, (IWitnetPriceSolver.Price));
+                        string(abi.decode(_result, (string)))
+                    )));
+                } else {
+                    return abi.decode(_result, (IWitnetPriceSolver.Price));
+                }
             } else {
                 return IWitnetPriceSolver.Price({
                     value: 0,

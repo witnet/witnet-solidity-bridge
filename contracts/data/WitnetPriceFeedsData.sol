@@ -50,7 +50,11 @@ abstract contract WitnetPriceFeedsData {
         uint _len;
         for (_len = 0; _len < 8; _len ++) {
             _deps[_len] = bytes4(_solverDepsFlag);
-            _solverDepsFlag <<= 32;
+            if (_deps[_len] == 0) {
+                break;
+            } else {
+                _solverDepsFlag <<= 32;
+            }
         }
         assembly {
             // reset length to actual number of dependencies:
