@@ -1,4 +1,4 @@
-const fs = require("fs");
+const fs = require("fs")
 
 const addresses = require("../witnet.addresses")
 const utils = require("../../scripts/utils")
@@ -29,14 +29,14 @@ module.exports = async function (deployer, network, [, from,,,,, master]) {
     console.info()
   }
 
-  // Settle WitnetProxy bytecode and source code as to guarantee 
+  // Settle WitnetProxy bytecode and source code as to guarantee
   // salted addresses remain as expected no matter if the solc version
   // is changed in migrations/witnet.settings.js
   utils.traceHeader("Defrosting 'WitnetProxy' artifact")
   fs.writeFileSync(
     `build/${ecosystem}/contracts/WitnetProxy.json`,
     fs.readFileSync("migrations/abis/WitnetProxy.json"),
-    { encoding:'utf8', flag:'w' }
+    { encoding: "utf8", flag: "w" }
   )
   const WitnetProxy = artifacts.require("WitnetProxy")
   const metadata = JSON.parse(WitnetProxy.metadata)

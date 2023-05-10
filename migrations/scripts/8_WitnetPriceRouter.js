@@ -7,7 +7,6 @@ const version = `${
 }`
 
 const WitnetPriceRouter = artifacts.require("WitnetPriceRouter")
-const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
 module.exports = async function (deployer, network, [, from]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
@@ -24,8 +23,8 @@ module.exports = async function (deployer, network, [, from]) {
   }
 
   if (
-    isDryRun
-      || utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceRouter)
+    isDryRun ||
+      utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceRouter)
   ) {
     await deployer.deploy(
       WitnetPriceRouter,
