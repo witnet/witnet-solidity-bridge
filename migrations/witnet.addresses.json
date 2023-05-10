@@ -371,8 +371,8 @@
             "WitnetBytecodesImplementation": "0x1a50d6bc99f9a79e8aECFdE71c5A597ef9012C39",
             "WitnetPriceFeedsImplementation": "0xEdb5535994bF19d56c30F5BEa0937232E198F671",
             "WitnetRandomnessImplementation": "0x24Cc52D0603F161E16c3DB29Da4c2bCc07d17C4b",
-            "WitnetRequestBoardImplementation": "0x88dB6Eb24A8A218B4B676DEC09d19bED7dB1FAA7",
-            "WitnetRequestFactoryImplementation": "0x9712d3F4872d689b8119968f863A12ee42D45087"
+            "WitnetRequestBoardImplementation": "0x83Bf7353Db9EefEf3169e391b1EAcd2A9b2d191d",
+            "WitnetRequestFactoryImplementation": "0x4779A692aC089E02FD1301B0b53Fa1a02985a83F"
         },
         "polygon.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
