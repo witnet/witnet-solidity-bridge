@@ -138,7 +138,7 @@ contract WitnetPriceFeedsUpgradable
 
     function lookupCaption(bytes4 feedId)
         override
-        external view
+        public view
         returns (string memory)
     {
         return __records_(feedId).caption;
@@ -312,7 +312,7 @@ contract WitnetPriceFeedsUpgradable
         );
         Record storage __record = __records_(feedId);
         if (__record.solver != address(0)) {
-            _usedFunds = _requestUpdate(__record.solver, _slaHash);
+            _usedFunds = _requestUpdate(_depsOf(feedId), _slaHash);
         } else if (__record.radHash != 0) {
             _usedFunds = _requestUpdate(feedId, _slaHash);
         } else {
@@ -324,11 +324,10 @@ contract WitnetPriceFeedsUpgradable
         }
     }
 
-    function _requestUpdate(address solver, bytes32 slaHash)
+    function _requestUpdate(bytes4[] memory _deps, bytes32 slaHash)
         virtual internal
         returns (uint256 _usedFunds)
     {
-        bytes4[] memory _deps = IWitnetPriceSolver(solver).deps();
         uint _partial = msg.value / _deps.length;
         for (uint _ix = 0; _ix < _deps.length; _ix ++) {
             _usedFunds += this.requestUpdate{value: _partial}(_deps[_ix], slaHash);
@@ -449,13 +448,17 @@ contract WitnetPriceFeedsUpgradable
         settleFeedRequest(caption, template.verifyRadonRequest(args));
     }
 
-    function settleFeedSolver(string calldata caption, address solver)
+    function settleFeedSolver(
+            string calldata caption,
+            address solver,
+            string[] calldata deps
+        )
         override external
         onlyOwner
     {
         require(
             solver != address(0),
-            "WitnetPriceFeedsUpgradable: no solver"
+            "WitnetPriceFeedsUpgradable: no solver address"
         );
         bytes4 feedId = hash(caption);        
         Record storage __record = __records_(feedId);
@@ -476,7 +479,8 @@ contract WitnetPriceFeedsUpgradable
             // solhint-disable-next-line avoid-low-level-calls
             (bool _success, bytes memory _reason) = solver.delegatecall(abi.encodeWithSelector(
                 IWitnetPriceSolver.validate.selector,
-                feedId
+                feedId,
+                deps
             ));
             require(
                 _success,
@@ -519,9 +523,14 @@ contract WitnetPriceFeedsUpgradable
     function lookupPriceSolver(bytes4 feedId)
         override
         external view
-        returns (IWitnetPriceSolver)
+        returns (IWitnetPriceSolver _solverAddress, string[] memory _solverDeps)
     {
-        return IWitnetPriceSolver(__records_(feedId).solver);
+        _solverAddress = IWitnetPriceSolver(__records_(feedId).solver);
+        bytes4[] memory _deps = _depsOf(feedId);
+        _solverDeps = new string[](_deps.length);
+        for (uint _ix = 0; _ix < _deps.length; _ix ++) {
+            _solverDeps[_ix] = lookupCaption(_deps[_ix]);
+        }
     }
 
     function latestPrice(bytes4 feedId)
