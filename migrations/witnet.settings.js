@@ -410,12 +410,16 @@ module.exports = {
         network_id: 1088,
         skipDryRun: true,
       },
-      "metis.rinkeby": {
+      "metis.goerli": {
         host: "localhost",
         port: 8536,
-        network_id: 588,
+        network_id: 599,
         skipDryRun: true,
-        gas: 30000000,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://goerli.explorer.metisdevops.link/api",
+          explorerUrl: "https://goerli.explorer.metisdevops.link//address",
+        },
       },
     },
     meter: {
