@@ -74,12 +74,13 @@ library WitnetErrorsLib {
         else {
             _error.code = Witnet.ResultErrorCodes(errors[0]);
         }
+        // switch on _error.code
         if (
             _error.code == Witnet.ResultErrorCodes.SourceScriptNotCBOR
                 && errors.length >= 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "Source script #",
+                "Syntax error: source script #",
                 Witnet.toString(uint8(errors[1])),
                 " was not a valid CBOR value"
             ));
@@ -88,16 +89,16 @@ library WitnetErrorsLib {
                 && errors.length >= 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "The CBOR value in script #",
+                "Syntax error: the CBOR value in script #",
                 Witnet.toString(uint8(errors[1])),
-                " was not an Array of calls"
+                " was not an array of calls"
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.SourceScriptNotRADON
                 && errors.length >= 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "The CBOR value in script #",
+                "Syntax error: the CBOR value in script #",
                 Witnet.toString(uint8(errors[1])),
                 " was not a valid Data Request"
             ));
@@ -106,7 +107,7 @@ library WitnetErrorsLib {
                 && errors.length >= 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "The request contained too many sources (", 
+                "Complexity error: the request contained too many sources (", 
                 Witnet.toString(uint8(errors[1])), 
                 ")"
             ));
@@ -115,7 +116,7 @@ library WitnetErrorsLib {
                 && errors.length >= 4
         ) {
             _error.reason = string(abi.encodePacked(
-                "Script #",
+                "Complexity error: script #",
                 Witnet.toString(uint8(errors[2])),
                 " from the ",
                 _stageName(uint8(errors[1])),
@@ -128,7 +129,7 @@ library WitnetErrorsLib {
                 && errors.length >= 5
         ) {
             _error.reason = string(abi.encodePacked(
-                "Operator _error.code 0x",
+                "Radon script: opcode 0x",
                 Witnet.toHexString(uint8(errors[4])),
                 " found at call #",
                 Witnet.toString(uint8(errors[3])),
@@ -143,9 +144,9 @@ library WitnetErrorsLib {
                 && errors.length >= 3
         ) {
             _error.reason = string(abi.encodePacked(
-                "Source #",
+                "External error: source #",
                 Witnet.toString(uint8(errors[1])),
-                " could not be retrieved. Failed with HTTP error code: ",
+                " failed with HTTP error code: ",
                 Witnet.toString(uint8(errors[2] / 100)),
                 Witnet.toString(uint8(errors[2] % 100 / 10)),
                 Witnet.toString(uint8(errors[2] % 10))
@@ -155,7 +156,7 @@ library WitnetErrorsLib {
                 && errors.length >= 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "Source #",
+                "External error: source #",
                 Witnet.toString(uint8(errors[1])),
                 " could not be retrieved because of a timeout"
             ));
@@ -164,7 +165,7 @@ library WitnetErrorsLib {
                 && errors.length >= 5
         ) {
             _error.reason = string(abi.encodePacked(
-                "Underflow at operator code 0x",
+                "Math error: underflow at opcode 0x",
                 Witnet.toHexString(uint8(errors[4])),
                 " found at call #",
                 Witnet.toString(uint8(errors[3])),
@@ -179,7 +180,7 @@ library WitnetErrorsLib {
                 && errors.length >= 5
         ) {
             _error.reason = string(abi.encodePacked(
-                "Overflow at operator code 0x",
+                "Math error: overflow at opcode 0x",
                 Witnet.toHexString(uint8(errors[4])),
                 " found at call #",
                 Witnet.toString(uint8(errors[3])),
@@ -194,7 +195,7 @@ library WitnetErrorsLib {
                 && errors.length >= 5
         ) {
             _error.reason = string(abi.encodePacked(
-                "Division by zero at operator code 0x",
+                "Math error: division by zero at opcode 0x",
                 Witnet.toHexString(uint8(errors[4])),
                 " found at call #",
                 Witnet.toString(uint8(errors[3])),
@@ -207,20 +208,43 @@ library WitnetErrorsLib {
         } else if (
             _error.code == Witnet.ResultErrorCodes.BridgeMalformedRequest
         ) {
-            _error.reason = "The structure of the request is invalid and it cannot be parsed";
+            _error.reason = "Bridge error: malformed data request cannot be processed";
         } else if (
             _error.code == Witnet.ResultErrorCodes.BridgePoorIncentives
         ) {
-            _error.reason = "The request has been rejected by the bridge node due to poor incentives";
+            _error.reason = "Bridge error: rejected due to poor witnessing incentives";
         } else if (
             _error.code == Witnet.ResultErrorCodes.BridgeOversizedResult
         ) {
-            _error.reason = "The request result length exceeds a bridge contract defined limit";
+            _error.reason = "Bridge error: rejected due to poor bridging incentives";
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.RetrievalTimeout
+        ) {
+            _error.reason = "External error: at least one of the sources timed out";
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.InsufficientConsensus
+        ) {
+            _error.reason = "Insufficient witnessing consensus";
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.InsufficientCommits
+        ) {
+            _error.reason = "Insufficient witnessing commits";
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.TallyExecution
+        ) {
+            _error.reason = "Tally execution error";
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.ArrayIndexOutOfBounds
+        ) {
+            _error.reason = "Radon script: tried to access a value from an array with an index out of bounds";
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.MapKeyNotFound
+        ) {
+            _error.reason = "Radon script: tried to access a value from a map with a key that does not exist";
         } else {
             _error.reason = string(abi.encodePacked(
-                "Unknown error (0x",
-                Witnet.toHexString(uint8(errors[0])),
-                ")"
+                "Unhandled error: 0x",
+                Witnet.toHexString(uint8(errors[0]))
             ));
         }
     }
