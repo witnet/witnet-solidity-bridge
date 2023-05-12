@@ -252,12 +252,7 @@ contract WitnetPriceFeedsUpgradable
         override public view
         returns (Witnet.ResultStatus)
     {
-        uint _latestUpdateQueryId = latestUpdateQueryId(feedId);
-        if (_latestUpdateQueryId > 0) {
-            return witnet.checkResultStatus(_latestUpdateQueryId);
-        } else {
-            return Witnet.ResultStatus.Ready;
-        }
+        return _checkQueryResultStatus(latestUpdateQueryId(feedId));
     }
 
     function lookupBytecode(bytes4 feedId)
@@ -298,7 +293,7 @@ contract WitnetPriceFeedsUpgradable
         virtual override
         returns (uint256)
     {
-        return requestUpdate(feedId, __storage().defaultSlaHash);
+        return _requestUpdate(feedId, __storage().defaultSlaHash);
     }
     
     function requestUpdate(bytes4 feedId, bytes32 _slaHash)
@@ -310,18 +305,7 @@ contract WitnetPriceFeedsUpgradable
             registry.lookupRadonSLA(_slaHash).equalOrGreaterThan(defaultRadonSLA()),
             "WitnetPriceFeedsUpgradable: unsecure update"
         );
-        Record storage __record = __records_(feedId);
-        if (__record.solver != address(0)) {
-            _usedFunds = _requestUpdate(_depsOf(feedId), _slaHash);
-        } else if (__record.radHash != 0) {
-            _usedFunds = _requestUpdate(feedId, _slaHash);
-        } else {
-            revert("WitnetPriceFeedsUpgradable: unknown feed");
-        }
-        if (_usedFunds < msg.value) {
-            // transfer back unused funds:
-            payable(msg.sender).transfer(msg.value - _usedFunds);
-        }
+        return _requestUpdate(feedId, _slaHash);
     }
 
     function _requestUpdate(bytes4[] memory _deps, bytes32 slaHash)
@@ -338,40 +322,50 @@ contract WitnetPriceFeedsUpgradable
         virtual internal
         returns (uint256 _usedFunds)
     {
-        _usedFunds = estimateUpdateBaseFee(feedId, tx.gasprice, 0, _slaHash);
-        require(msg.value>= _usedFunds, "WitnetPriceFeedsUpgradable: reward too low");
         Record storage __feed = __records_(feedId);
-        uint _latestId = __feed.latestUpdateQueryId;
-        Witnet.ResultStatus _latestStatus = latestUpdateResultStatus(feedId);
-        if (_latestStatus == Witnet.ResultStatus.Awaiting) {
-            // latest update is still pending, so just increase the reward
-            // accordingly to current tx gasprice:
-            int _deltaReward = int(witnet.readRequestReward(_latestId)) - int(_usedFunds);
-            if (_deltaReward > 0) {
-                _usedFunds = uint(_deltaReward);
-                witnet.upgradeReward{value: _usedFunds}(_latestId);
-                emit UpdatingFeedReward(msg.sender, feedId, _usedFunds);
-            } else {
-                _usedFunds = 0;
-            }
-        } else {
-            // Check if latest update ended successfully:
-            if (_latestStatus == Witnet.ResultStatus.Ready) {
-                // If so, remove previous last valid query from the WRB:
-                if (__feed.latestValidQueryId > 0) {
-                    witnet.deleteQuery(__feed.latestValidQueryId);
+        if (__feed.radHash != 0) {
+            _usedFunds = estimateUpdateBaseFee(feedId, tx.gasprice, 0, _slaHash);
+            require(msg.value>= _usedFunds, "WitnetPriceFeedsUpgradable: reward too low");
+            uint _latestId = __feed.latestUpdateQueryId;
+            Witnet.ResultStatus _latestStatus = _checkQueryResultStatus(_latestId);
+            if (_latestStatus == Witnet.ResultStatus.Awaiting) {
+                // latest update is still pending, so just increase the reward
+                // accordingly to current tx gasprice:
+                int _deltaReward = int(witnet.readRequestReward(_latestId)) - int(_usedFunds);
+                if (_deltaReward > 0) {
+                    _usedFunds = uint(_deltaReward);
+                    witnet.upgradeReward{value: _usedFunds}(_latestId);
+                    emit UpdatingFeedReward(msg.sender, feedId, _usedFunds);
+                } else {
+                    _usedFunds = 0;
                 }
-                __feed.latestValidQueryId = _latestId;
             } else {
-                // Otherwise, delete latest query, as it was faulty
-                // and we are about to post a new update request:
-                witnet.deleteQuery(_latestId);
-            }
-            // Post update request to the WRB:
-            _latestId = witnet.postRequest{value: _usedFunds}(__feed.radHash, _slaHash);
-            // Update latest query id:
-            __feed.latestUpdateQueryId = _latestId;
-            emit UpdatingFeed(msg.sender, feedId, _slaHash, _usedFunds);
+                // Check if latest update ended successfully:
+                if (_latestStatus == Witnet.ResultStatus.Ready) {
+                    // If so, remove previous last valid query from the WRB:
+                    if (__feed.latestValidQueryId > 0) {
+                        witnet.deleteQuery(__feed.latestValidQueryId);
+                    }
+                    __feed.latestValidQueryId = _latestId;
+                } else {
+                    // Otherwise, delete latest query, as it was faulty
+                    // and we are about to post a new update request:
+                    witnet.deleteQuery(_latestId);
+                }
+                // Post update request to the WRB:
+                _latestId = witnet.postRequest{value: _usedFunds}(__feed.radHash, _slaHash);
+                // Update latest query id:
+                __feed.latestUpdateQueryId = _latestId;
+                emit UpdatingFeed(msg.sender, feedId, _slaHash, _usedFunds);
+            }            
+        } else if (__feed.solver != address(0)) {
+            _usedFunds = _requestUpdate(_depsOf(feedId), _slaHash);
+        } else {
+            revert("WitnetPriceFeedsUpgradable: unknown feed");
+        }
+        if (_usedFunds < msg.value) {
+            // transfer back unused funds:
+            payable(msg.sender).transfer(msg.value - _usedFunds);
         }
     }
 
@@ -560,7 +554,7 @@ contract WitnetPriceFeedsUpgradable
                     IWitnetPriceSolver.solve.selector,
                     feedId
                 ));
-                if (_success) {
+                if (!_success) {
                     assembly {
                         _result := add(_result, 4)
                     }
@@ -617,6 +611,17 @@ contract WitnetPriceFeedsUpgradable
 
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
+
+    function _checkQueryResultStatus(uint _queryId)
+        internal view
+        returns (Witnet.ResultStatus)
+    {
+        if (_queryId > 0) {
+            return witnet.checkResultStatus(_queryId);
+        } else {
+            return Witnet.ResultStatus.Ready;
+        }
+    }
 
     function _latestValidQueryId(bytes4 feedId)
         virtual internal view
