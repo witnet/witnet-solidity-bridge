@@ -166,6 +166,16 @@ module.exports = {
         port: 8517,
         skipDryRun: true,
       },
+      "arbitrum.one": {
+        network_id: 42161,
+        host: "localhost",
+        port: 9517,
+        skipDryRun: true,
+        verify: {
+          apiUrl: "https://api.arbiscan.io/api",
+          browserURL: "https://arbiscan.io/address",
+        },
+      },
     },
     avalanche: {
       "avalanche.mainnet": {
