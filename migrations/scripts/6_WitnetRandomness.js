@@ -35,7 +35,7 @@ module.exports = async function (deployer, network, [, from]) {
   const create2Factory = await Create2Factory.deployed()
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestRandomness)) {
     // Invariantly deploy a WitnetRequestRandomness contract if not found in the addresses file
-    await deployer.deploy(WitnetRequestRandomness, { from, gas: 2000000 })
+    await deployer.deploy(WitnetRequestRandomness, { from })
     addresses[ecosystem][network].WitnetRequestRandomness = WitnetRequestRandomness.address
     if (!isDryRun) {
       utils.saveAddresses(addresses)
@@ -70,7 +70,7 @@ module.exports = async function (deployer, network, [, from]) {
           // deploy instance only if not found in current network:
           utils.traceHeader("Singleton inception of 'WitnetRandomness':")
           const balance = await web3.eth.getBalance(from)
-          const gas = singletons.WitnetRandomness.gas || 10 ** 6
+          const gas = singletons.WitnetRandomness.gas
           const tx = await create2Factory.deploy(bytecode, salt, { from, gas })
           utils.traceTx(
             tx.receipt,
