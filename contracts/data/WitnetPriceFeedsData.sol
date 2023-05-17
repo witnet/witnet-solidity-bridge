@@ -23,14 +23,15 @@ abstract contract WitnetPriceFeedsData {
         uint256 latestValidQueryId;
         uint256 latestUpdateQueryId;
         bytes32 radHash;
-        address solver;
-        int256  solverReductor;
-        bytes32 solverDepsFlag;
+        address solver;         // logic contract address for reducing values on routed feeds.
+        int256  solverReductor; // as to reduce resulting number of decimals on routed feeds.
+        bytes32 solverDepsFlag; // as to store ids of up to 8 depending feeds.
     }
 
     // ================================================================================================
     // --- Internal functions -------------------------------------------------------------------------
     
+    /// @notice Returns storage pointer to where Storage data is located. 
     function __storage()
       internal pure
       returns (Storage storage _ptr)
@@ -40,10 +41,16 @@ abstract contract WitnetPriceFeedsData {
         }
     }
 
+    /// @notice Returns storage pointer to where Record for given feedId is located.
     function __records_(bytes4 feedId) internal view returns (Record storage) {
         return __storage().records[feedId];
     }
 
+    /// @notice Returns array of feed ids from which given feed's value depends.
+    /// @dev Returns empty array on either unsupported or not-routed feeds.
+    /// @dev The maximum number of dependencies is hard-limited to 8, as to limit number
+    /// @dev of SSTORE operations (`__storage().records[feedId].solverDepsFlag`), 
+    /// @dev no matter the actual number of depending feeds involved.
     function _depsOf(bytes4 feedId) internal view returns (bytes4[] memory _deps) {
         bytes32 _solverDepsFlag = __storage().records[feedId].solverDepsFlag;
         _deps = new bytes4[](8);
