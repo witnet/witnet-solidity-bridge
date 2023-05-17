@@ -308,7 +308,7 @@ module.exports = {
         verify: {
           apiUrl: "https://esc-testnet.elastos.io/api",
           browserURL: "https://esc-testnet.elastos.io/address",
-          apiKey: 'MY-API-KEY',
+          apiKey: "MY-API-KEY",
         },
       },
       "elastos.mainnet": {
@@ -331,7 +331,7 @@ module.exports = {
         verify: {
           apiUrl: "https://explorer.fusespark.io/api",
           browserURL: "https://explorer.fusespark.io/address",
-          apiKey: 'MY_API_KEY',
+          apiKey: "MY_API_KEY",
         },
       },
     },
