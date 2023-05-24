@@ -3,23 +3,19 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "ado-contracts/contracts/interfaces/IERC2362.sol";
-
-import "../../WitnetFeeds.sol";
+import "../../WitnetPriceFeeds.sol";
 import "../../data/WitnetPriceFeedsData.sol";
 import "../../impls/WitnetUpgradableBase.sol";
-import "../../interfaces/V2/IWitnetPriceFeeds.sol";
-import "../../interfaces/V2/IWitnetPriceSolver.sol";
 
+import "../../interfaces/V2/IWitnetPriceSolver.sol";
 import "../../libs/Slices.sol";
+import "../../libs/WitnetPriceSolverFactoryLib.sol";
 
 /// @title WitnetPriceFeedsUpgradable: ...
 /// @author Witnet Foundation.
 contract WitnetPriceFeedsUpgradable
     is
-        IERC2362,
-        IWitnetPriceFeeds,
-        WitnetFeeds,
+        WitnetPriceFeeds,
         WitnetPriceFeedsData,
         WitnetUpgradableBase
 {
@@ -33,11 +29,7 @@ contract WitnetPriceFeedsUpgradable
             bool _upgradable,
             bytes32 _version
         )
-        WitnetFeeds(
-            _wrb,
-            WitnetV2.RadonDataTypes.Integer,
-            "Price-"
-        )
+        WitnetPriceFeeds(_wrb)
         WitnetUpgradableBase(
             _upgradable,
             _version,
