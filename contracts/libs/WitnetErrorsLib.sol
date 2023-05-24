@@ -9,6 +9,7 @@ import "./Witnet.sol";
 /// @author The Witnet Foundation.
 library WitnetErrorsLib {
 
+    using WitnetCBOR for WitnetCBOR.CBOR;
     // ================================================================================================================
     // --- Library public methods -------------------------------------------------------------------------------------
     
@@ -19,8 +20,9 @@ library WitnetErrorsLib {
         public pure
         returns (Witnet.ResultError memory _error)
     {
-         uint[] memory errors = _errorsFromResult(result);
-         return _fromErrorCodes(errors);
+         return _fromErrorArray(
+            _errorsFromResult(result)
+        );
     }
 
     /// @notice Extract error code and description string from given CBOR-encoded value.
@@ -30,8 +32,8 @@ library WitnetErrorsLib {
         public pure
         returns (Witnet.ResultError memory _error)
     {
-        uint[] memory errors = _errorsFromCborBytes(cborBytes);
-        return _fromErrorCodes(errors);
+        WitnetCBOR.CBOR[] memory errors = _errorsFromCborBytes(cborBytes);
+        return _fromErrorArray(errors);
     }
 
 
@@ -43,7 +45,7 @@ library WitnetErrorsLib {
     /// @return The `uint[]` error parameters as decoded from the `Witnet.Result`.
     function _errorsFromCborBytes(bytes memory cborBytes)
         private pure
-        returns(uint[] memory)
+        returns(WitnetCBOR.CBOR[] memory)
     {
         Witnet.Result memory result = Witnet.resultFromCborBytes(cborBytes);
         return _errorsFromResult(result);
@@ -54,25 +56,25 @@ library WitnetErrorsLib {
     /// @return The `uint[]` error parameters as decoded from the `Witnet.Result`.
     function _errorsFromResult(Witnet.Result memory result)
         private pure
-        returns (uint[] memory)
+        returns (WitnetCBOR.CBOR[] memory)
     {
         require(!result.success, "no errors");
-        return Witnet.asUintArray(result);
+        return result.value.readArray();
     }
 
-    /// @dev Extract Witnet.ResultErrorCodes and error description from given array of uints.
-    function _fromErrorCodes(uint[] memory errors)
+    /// @dev Extract Witnet.ResultErrorCodes and error description from given array of CBOR values.
+    function _fromErrorArray(WitnetCBOR.CBOR[] memory errors)
         private pure
         returns (Witnet.ResultError memory _error)
     {
-        if (errors.length == 0) {
+        if (errors.length < 2) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "Unknown error: no error code was found."
             });
         }
         else {
-            _error.code = Witnet.ResultErrorCodes(errors[0]);
+            _error.code = Witnet.ResultErrorCodes(errors[0].readUint());
         }
         // switch on _error.code
         if (
