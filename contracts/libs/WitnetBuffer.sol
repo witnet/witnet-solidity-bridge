@@ -252,10 +252,56 @@ library WitnetBuffer {
       result *= -1;
     }
   }
+
+  /// @notice Consume the next 4 bytes from the buffer as an IEEE 754-2008 floating point number enclosed into an `int`.
+  /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
+  /// by 9 decimal orders so as to get a fixed precision of 9 decimal positions, which should be OK for most `float32`
+  /// use cases. In other words, the integer output of this method is 10^9 times the actual value. The input bytes are
+  /// expected to follow the 64-bit base-2 format (a.k.a. `binary32`) in the IEEE 754-2008 standard.
+  /// @param buffer An instance of `Buffer`.
+  /// @return result The `int` value of the next 8 bytes in the buffer counting from the cursor position.
+  function readFloat32(Buffer memory buffer)
+    internal pure
+    returns (int result)
+  {
+    uint value = readUint32(buffer);
+    // Get bit at position 0
+    uint sign = value & 0x80000000;
+    // Get bits 1 to 8, then normalize to the [-127, 128] range so as to counterweight the IEEE 754 exponent bias
+    int exponent = (int(value & 0x7f800000) >> 23) - 127;
+    // Get bits 9 to 31
+    int fraction = int(value & 0x007fffff);
+    // Add 2^23 to the fraction if exponent is not -127
+    if (exponent != -127) {
+      fraction |= 0x800000;
+    } else if (exponent == 128) {
+      revert(
+        string(abi.encodePacked(
+          "WitnetBuffer.readFloat32: ",
+          sign != 0 ? "negative" : hex"",
+          " infinity"
+        ))
+      );
+    }
+    // Compute `2 ^ exponent · (1 + fraction / 2^23)`
+    if (exponent >= 0) {
       result = (
-        int32((int256(1 << uint256(int256(exponent)))
-          * 10000
-          * int256(uint256(int256(significand)) | 0x400)) >> 10)
+        int(1 << uint(exponent))
+          * (10 ** 9)
+          * fraction
+      ) >> 23;
+    } else {
+      result = (
+        fraction 
+          * (10 ** 9)
+          / int(1 << uint(-exponent)) 
+      ) >> 23;
+    }
+    // Make the result negative if the sign bit is not 0
+    if (sign != 0) {
+      result *= -1;
+    }
+  }
       );
     } else {
       result = (int32(
