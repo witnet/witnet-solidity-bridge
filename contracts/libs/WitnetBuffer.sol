@@ -217,16 +217,41 @@ library WitnetBuffer {
     uint32 value = readUint16(buffer);
     // Get bit at position 0
     uint32 sign = value & 0x8000;
-    // Get bits 1 to 5, then normalize to the [-14, 15] range so as to counterweight the IEEE 754 exponent bias
+    // Get bits 1 to 5, then normalize to the [-15, 16] range so as to counterweight the IEEE 754 exponent bias
     int32 exponent = (int32(value & 0x7c00) >> 10) - 15;
     // Get bits 6 to 15
-    int32 significand = int32(value & 0x03ff);
-    // Add 1024 to the fraction if the exponent is 0
-    if (exponent == 15) {
-      significand |= 0x400;
+    int32 fraction = int32(value & 0x03ff);
+    // Add 2^10 to the fraction if exponent is not -15
+    if (exponent != -15) {
+      fraction |= 0x400;
+    } else if (exponent == 16) {
+      revert(
+        string(abi.encodePacked(
+          "WitnetBuffer.readFloat16: ",
+          sign != 0 ? "negative" : hex"",
+          " infinity"
+        ))
+      );
     }
     // Compute `2 ^ exponent · (1 + fraction / 1024)`
     if (exponent >= 0) {
+      result = int32(
+        int(1 << uint256(int256(exponent)))
+          * 10000
+          * fraction
+      ) >> 10;
+    } else {
+      result = int32(
+        int(fraction)
+          * 10000
+          / int(1 << uint(int(- exponent)))
+      ) >> 10;
+    }
+    // Make the result negative if the sign bit is not 0
+    if (sign != 0) {
+      result *= -1;
+    }
+  }
       result = (
         int32((int256(1 << uint256(int256(exponent)))
           * 10000
