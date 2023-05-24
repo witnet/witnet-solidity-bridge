@@ -9,7 +9,10 @@ import "./Witnet.sol";
 /// @author The Witnet Foundation.
 library WitnetErrorsLib {
 
+    using Witnet for uint8;
+    using Witnet for uint256;
     using WitnetCBOR for WitnetCBOR.CBOR;
+
     // ================================================================================================================
     // --- Library public methods -------------------------------------------------------------------------------------
     
@@ -79,174 +82,206 @@ library WitnetErrorsLib {
         // switch on _error.code
         if (
             _error.code == Witnet.ResultErrorCodes.SourceScriptNotCBOR
-                && errors.length >= 2
+                && errors.length > 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "Syntax error: source script #",
-                Witnet.toString(uint8(errors[1])),
-                " was not a valid CBOR value"
+                "Witnet: Radon: Script #",
+                errors[1].readUint().toString(),
+                ": invalid CBOR value."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.SourceScriptNotArray
-                && errors.length >= 2
+                && errors.length > 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "Syntax error: the CBOR value in script #",
-                Witnet.toString(uint8(errors[1])),
-                " was not an array of calls"
+                "Witnet: Radon: Script #",
+                errors[1].readUint().toString(),
+                ": CBOR value expected to be an array of calls."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.SourceScriptNotRADON
-                && errors.length >= 2
+                && errors.length > 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "Syntax error: the CBOR value in script #",
-                Witnet.toString(uint8(errors[1])),
-                " was not a valid Data Request"
+                "Witnet: Radon: Script #",
+                errors[1].readUint().toString(),
+                ": CBOR value expected to be a data request."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.RequestTooManySources
-                && errors.length >= 2
+                && errors.length > 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "Complexity error: the request contained too many sources (", 
-                Witnet.toString(uint8(errors[1])), 
-                ")"
+                "Witnet: Radon: too many sources (", 
+                errors[1].readUint().toString(),
+                ")."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.ScriptTooManyCalls
-                && errors.length >= 4
+                && errors.length > 4
         ) {
             _error.reason = string(abi.encodePacked(
-                "Complexity error: script #",
-                Witnet.toString(uint8(errors[2])),
-                " from the ",
-                _stageName(uint8(errors[1])),
-                " stage contained too many calls (",
-                Witnet.toString(uint8(errors[3])),
-                ")"
+                "Witnet: ",
+                _stageName(uint8(errors[1].readUint())),
+                ": Script #",
+                errors[2].readUint().toString(),
+                ": too many calls (",
+                errors[3].readUint().toString(),
+                ")."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.UnsupportedOperator
-                && errors.length >= 5
+                && errors.length > 5
         ) {
             _error.reason = string(abi.encodePacked(
-                "Radon script: opcode 0x",
-                Witnet.toHexString(uint8(errors[4])),
-                " found at call #",
-                Witnet.toString(uint8(errors[3])),
-                " in script #",
-                Witnet.toString(uint8(errors[2])),
-                " from ",
-                _stageName(uint8(errors[1])),
-                " stage is not supported"
+                "Witnet: ",
+                _stageName(uint8(errors[1].readUint())),
+                ": Script #",
+                errors[2].readUint().toString(),
+                ": Step #",
+                errors[3].readUint().toString(),
+                ": unsupported opcode (0x",
+                Witnet.toHexString(uint8(errors[4].readUint())),
+                ")."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.HTTP
-                && errors.length >= 3
+                && errors.length > 3
         ) {
             _error.reason = string(abi.encodePacked(
-                "External error: source #",
-                Witnet.toString(uint8(errors[1])),
-                " failed with HTTP error code: ",
-                Witnet.toString(uint8(errors[2] / 100)),
-                Witnet.toString(uint8(errors[2] % 100 / 10)),
-                Witnet.toString(uint8(errors[2] % 10))
+                "Witnet: Retrieval: Source #",
+                errors[1].readUint().toString(),
+                ": HTTP/",
+                errors[2].readUint().toString(), 
+                " error."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.RetrievalTimeout
-                && errors.length >= 2
+                && errors.length > 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "External error: source #",
-                Witnet.toString(uint8(errors[1])),
-                " could not be retrieved because of a timeout"
+                "Witnet: Retrieval: Source #",
+                errors[1].readUint().toString(),
+                ": timeout."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.Underflow
-                && errors.length >= 5
+                && errors.length > 5
         ) {
             _error.reason = string(abi.encodePacked(
-                "Math error: underflow at opcode 0x",
-                Witnet.toHexString(uint8(errors[4])),
-                " found at call #",
-                Witnet.toString(uint8(errors[3])),
-                " in script #",
-                Witnet.toString(uint8(errors[2])),
-                " from ",
-                _stageName(uint8(errors[1])),
-                " stage"
+                "Witnet: ",
+                _stageName(uint8(errors[1].readUint())),
+                ": Script #",
+                errors[2].readUint().toString(),
+                ": Step #",
+                errors[3].readUint().toString(),
+                ": math underflow (0x",
+                Witnet.toHexString(uint8(errors[4].readUint())),
+                ")."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.Overflow
-                && errors.length >= 5
+                && errors.length > 5
         ) {
             _error.reason = string(abi.encodePacked(
-                "Math error: overflow at opcode 0x",
-                Witnet.toHexString(uint8(errors[4])),
-                " found at call #",
-                Witnet.toString(uint8(errors[3])),
-                " in script #",
-                Witnet.toString(uint8(errors[2])),
-                " from ",
-                _stageName(uint8(errors[1])),
-                " stage"
+                "Witnet: ",
+                _stageName(uint8(errors[1].readUint())),
+                ": Script #",
+                errors[2].readUint().toString(),
+                ": Step #",
+                errors[3].readUint().toString(),
+                ": math overflow (0x",
+                Witnet.toHexString(uint8(errors[4].readUint())),
+                ")."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.DivisionByZero
-                && errors.length >= 5
+                && errors.length > 5
         ) {
             _error.reason = string(abi.encodePacked(
-                "Math error: division by zero at opcode 0x",
-                Witnet.toHexString(uint8(errors[4])),
-                " found at call #",
-                Witnet.toString(uint8(errors[3])),
-                " in script #",
-                Witnet.toString(uint8(errors[2])),
-                " from ",
-                _stageName(uint8(errors[1])),
-                " stage"
+                "Witnet: ",
+                _stageName(uint8(errors[1].readUint())),
+                ": Script #",
+                errors[2].readUint().toString(),
+                ": Step #",
+                errors[3].readUint().toString(),
+                ": division by zero (0x",
+                Witnet.toHexString(uint8(errors[4].readUint())),
+                ")."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.BridgeMalformedRequest
         ) {
-            _error.reason = "Bridge error: malformed data request cannot be processed";
+            _error.reason = "Witnet: Bridge: malformed data request cannot be processed.";
         } else if (
             _error.code == Witnet.ResultErrorCodes.BridgePoorIncentives
         ) {
-            _error.reason = "Bridge error: rejected due to poor witnessing incentives";
+            _error.reason = "Witnet: Bridge: rejected due to poor witnessing incentives.";
         } else if (
             _error.code == Witnet.ResultErrorCodes.BridgeOversizedResult
         ) {
-            _error.reason = "Bridge error: rejected due to poor bridging incentives";
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.RetrievalTimeout
-        ) {
-            _error.reason = "External error: at least one of the sources timed out";
+            _error.reason = "Witnet: Bridge: rejected due to poor bridging incentives.";
         } else if (
             _error.code == Witnet.ResultErrorCodes.InsufficientConsensus
+                && errors.length > 3
         ) {
-            _error.reason = "Insufficient witnessing consensus";
+            _error.reason = string(abi.encodePacked(
+                "Witnet: Tally: insufficient consensus: ",
+                uint(int(errors[1].readFloat64() / 10 ** 13)).toString(), 
+                "% <= ",
+                uint(int(errors[2].readFloat64() / 10 ** 13)).toString(), 
+                "%."
+            ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.InsufficientCommits
         ) {
-            _error.reason = "Insufficient witnessing commits";
+            _error.reason = "Witnet: Tally: insufficient commits.";
         } else if (
             _error.code == Witnet.ResultErrorCodes.TallyExecution
+                && errors.length > 2
         ) {
-            _error.reason = "Tally execution error";
+            _error.reason = string(abi.encodePacked(
+                "Witnet: Tally: execution error: ",
+                errors[1].readString(),
+                "."
+            ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.ArrayIndexOutOfBounds
+                && errors.length > 2
         ) {
-            _error.reason = "Radon script: tried to access a value from an array with an index out of bounds";
+            _error.reason = string(abi.encodePacked(
+                "Witnet: tried to access a value from an array with an index (",
+                errors[1].readUint().toString(),
+                ") out of bounds."
+            ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.MapKeyNotFound
+                && errors.length > 2
         ) {
-            _error.reason = "Radon script: tried to access a value from a map with a key that does not exist";
+            _error.reason = string(abi.encodePacked(
+                "Witnet: tried to access a value from a map with a key (\"",
+                errors[1].readString(),
+                "\") that was not found."
+            ));
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.NoReveals
+        ) {
+            _error.reason = "Witnet: Tally: no reveals.";
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.MalformedReveal
+        ) {
+            _error.reason = "Witnet: Tally: malformed reveal.";
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.UnhandledIntercept
+        ) {
+            _error.reason = "Witnet: Tally: unhandled intercept.";
         } else {
             _error.reason = string(abi.encodePacked(
                 "Unhandled error: 0x",
-                Witnet.toHexString(uint8(errors[0]))
+                Witnet.toHexString(uint8(_error.code)),
+                errors.length > 2
+                    ? string(abi.encodePacked(" (", uint(errors.length - 1).toString(), ")."))
+                    : "."
             ));
         }
     }
@@ -259,13 +294,13 @@ library WitnetErrorsLib {
         returns (string memory)
     {
         if (stageIndex == 0) {
-            return "retrieval";
+            return "Retrieval";
         } else if (stageIndex == 1) {
-            return "aggregation";
+            return "Aggregation";
         } else if (stageIndex == 2) {
-            return "tally";
+            return "Tally";
         } else {
-            return "unknown";
+            return "(unknown)";
         }
     }
 }
