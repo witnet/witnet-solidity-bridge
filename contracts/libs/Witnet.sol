@@ -135,7 +135,7 @@ library Witnet {
             OtherError0x6D, OtherError0x6E,OtherError0x6F,
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Access errors =====================================================================================================
-            /// 0x70: Tried to access a value from an index using an index that is out of bounds
+            /// 0x70: Tried to access a value from an array using an index that is out of bounds
             ArrayIndexOutOfBounds,
             /// 0x71: Tried to access a value from a map using a key that does not exist
             MapKeyNotFound,
@@ -497,6 +497,26 @@ library Witnet {
             b3[2] = bytes1(uint8(_u % 10) + 48);
             return string(b3);
         }
+    }
+
+    /// @notice Convert a `uint` into a string` representing its value.
+    function toString(uint v)
+        internal pure 
+        returns (string memory)
+    {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        do {
+            uint8 remainder = uint8(v % 10);
+            v = v / 10;
+            reversed[i ++] = bytes1(48 + remainder);
+        } while (v != 0);
+        bytes memory buf = new bytes(i);
+        for (uint j = 1; j <= i; j ++) {
+            buf[j - 1] = reversed[i - j];
+        }
+        return string(buf);
     }
 
 
