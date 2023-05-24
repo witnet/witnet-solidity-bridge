@@ -8,8 +8,7 @@ import "../../data/WitnetPriceFeedsData.sol";
 import "../../impls/WitnetUpgradableBase.sol";
 
 import "../../interfaces/V2/IWitnetPriceSolver.sol";
-import "../../libs/Slices.sol";
-import "../../libs/WitnetPriceSolverFactoryLib.sol";
+import "../../libs/WitnetPriceFeedsLib.sol";
 
 /// @title WitnetPriceFeedsUpgradable: ...
 /// @author Witnet Foundation.
@@ -19,8 +18,6 @@ contract WitnetPriceFeedsUpgradable
         WitnetPriceFeedsData,
         WitnetUpgradableBase
 {
-    using Slices for string;
-    using Slices for Slices.Slice;
     using Witnet for Witnet.Result;
     using WitnetV2 for WitnetV2.RadonSLA;
     
@@ -581,6 +578,36 @@ contract WitnetPriceFeedsUpgradable
 
 
     // ================================================================================================================
+    // --- Implements 'IWitnetPriceSolverDeployer' ---------------------------------------------------------------------
+
+    function deployPriceSolver(bytes calldata initcode, bytes calldata additionalParams)
+        virtual override
+        external
+        onlyOwner
+        returns (address _solver)
+    {
+        _solver = WitnetPriceFeedsLib.deployPriceSolver(initcode, additionalParams);
+        emit WitnetPriceSolverDeployed(
+            msg.sender, 
+            _solver, 
+            _solver.codehash, 
+            abi.encodePacked(
+                abi.encode(address(this)),
+                additionalParams
+            )
+        );
+    }
+
+    function determinePriceSolverAddress(bytes calldata initcode, bytes calldata additionalParams)
+        virtual override
+        public view
+        returns (address)
+    {
+        return WitnetPriceFeedsLib.determinePriceSolverAddress(initcode, additionalParams);
+    }
+
+
+    // ================================================================================================================
     // --- Implements 'IERC2362' --------------------------------------------------------------------------------------
     
     function valueFor(bytes32 feedId)
@@ -633,18 +660,6 @@ contract WitnetPriceFeedsUpgradable
     function _validateCaption(string calldata caption)
         internal view returns (uint8)
     {
-        require(
-            bytes6(bytes(caption)) == bytes6(__prefix),
-            "WitnetPriceFeedsUpgradable: bad caption prefix"
-        );
-        Slices.Slice memory _caption = caption.toSlice();
-        Slices.Slice memory _delim = string("-").toSlice();
-        string[] memory _parts = new string[](_caption.count(_delim) + 1);
-        for (uint _ix = 0; _ix < _parts.length; _ix ++) {
-            _parts[_ix] = _caption.split(_delim).toString();
-        }
-        (uint _decimals, bool _success) = Witnet.tryUint(_parts[_parts.length - 1]);
-        require(_success, "WitnetPriceFeedsUpgradable: bad decimals");
-        return uint8(_decimals);
+        return WitnetPriceFeedsLib.validateCaption(__prefix, caption);
     }
 }

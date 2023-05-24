@@ -15,6 +15,7 @@ const Create2Factory = artifacts.require("Create2Factory")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
 const WitnetPriceFeeds = artifacts.require("WitnetPriceFeeds")
+const WitnetPriceFeedsLib = artifacts.require("WitnetPriceFeedsLib")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
 module.exports = async function (deployer, network, [, from]) {
@@ -29,6 +30,21 @@ module.exports = async function (deployer, network, [, from]) {
   if (!isDryRun && addresses[ecosystem][network].WitnetPriceFeeds === undefined) {
     console.info(`\n   WitnetPriceFeeds: Not to be deployed into '${network}'`)
     return
+  }
+
+  if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsLib)) {
+    await deployer.deploy(WitnetPriceFeedsLib, { from })
+    let lib = await WitnetPriceFeedsLib.deployed()
+    addresses[ecosystem][network].WitnetPriceFeedsLib = lib.address
+    if (!isDryRun) {
+      utils.saveAddresses(addresses)
+    }
+  } else {
+    let lib = await WitnetPriceFeedsLib.at(addresses[ecosystem][network]?.WitnetPriceFeedsLib)
+    WitnetPriceFeedsLib.address = lib.address
+    utils.traceHeader("Skipping 'WitnetPriceFeedsLib'")
+    console.info("  ", "> library address:", lib.address)
+    console.info()
   }
 
   const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
@@ -85,6 +101,7 @@ module.exports = async function (deployer, network, [, from]) {
 
     let router
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsImplementation)) {
+      await deployer.link(WitnetPriceFeedsLib, WitnetPriceFeedsImplementation)
       await deployer.deploy(
         WitnetPriceFeedsImplementation,
         WitnetRequestBoard.address,
