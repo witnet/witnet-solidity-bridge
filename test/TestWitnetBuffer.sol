@@ -83,10 +83,6 @@ contract TestWitnetBuffer {
     );
   }
 
-  function testReplaceMissingArgs() external {
-    // TODO
-  }
-
   function testReplace() external {
     string memory input = "\\0\\/image/\\1\\?digest=sha-256";
     string[] memory args = new string[](2);
@@ -233,6 +229,28 @@ contract TestWitnetBuffer {
 
     uint256 actual = buf.readUint256();
     Assert.equal(uint(actual), uint(expected), "Read Uint64 from a Buffer");
+  }
+
+  function testReadFloat64() external {
+    WitnetBuffer.Buffer memory buf;
+    buf = WitnetBuffer.Buffer(hex"3FE051EB851EB852", 0);
+    Assert.equal(
+      buf.readFloat64(),
+      510000000000000,
+      "Reading Float64(0.51)"
+    );
+    buf = WitnetBuffer.Buffer(hex"3FE5555555555555", 0);
+    Assert.equal(
+      buf.readFloat64(),
+      666666666666666,
+      "Reading Float64(2/3)"
+    );
+    buf = WitnetBuffer.Buffer(hex"400921FB54442D18", 0);
+    Assert.equal(
+      buf.readFloat64(),
+      3141592653589793,
+      "Reading Float64(pi)"
+    );
   }
 
   function testMultipleReadHead() external {
