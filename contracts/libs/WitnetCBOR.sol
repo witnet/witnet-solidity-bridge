@@ -9,9 +9,6 @@ import "./WitnetBuffer.sol";
 /// the gas cost of decoding them into a useful native type.
 /// @dev Most of the logic has been borrowed from Patrick Gansterer’s cbor.js library: https://github.com/paroga/cbor-js
 /// @author The Witnet Foundation.
-/// 
-/// TODO: add support for Float32 (majorType = 7, additionalInformation = 26)
-/// TODO: add support for Float64 (majorType = 7, additionalInformation = 27) 
 
 library WitnetCBOR {
 
@@ -157,6 +154,11 @@ library WitnetCBOR {
     if (
       self.majorType == MAJOR_TYPE_INT
         || self.majorType == MAJOR_TYPE_NEGATIVE_INT
+        || (
+          self.majorType == MAJOR_TYPE_CONTENT_FREE 
+            && self.additionalInformation >= 25
+            && self.additionalInformation <= 27
+        )
     ) {
       self.buffer.cursor += self.peekLength();
     } else if (
@@ -354,6 +356,42 @@ library WitnetCBOR {
   {
     if (cbor.additionalInformation == 25) {
       return cbor.buffer.readFloat16();
+    } else {
+      revert UnsupportedPrimitive(cbor.additionalInformation);
+    }
+  }
+
+  /// @notice Decode a `CBOR` structure into a `fixed32` value.
+  /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
+  /// by 9 decimal orders so as to get a fixed precision of 9 decimal positions, which should be OK for most `fixed64`
+  /// use cases. In other words, the output of this method is 10^9 times the actual value, encoded into an `int`.
+  /// @param cbor An instance of `CBOR`.
+  /// @return The value represented by the input, as an `int` value.
+  function readFloat32(CBOR memory cbor)
+    internal pure
+    isMajorType(cbor, MAJOR_TYPE_CONTENT_FREE)
+    returns (int)
+  {
+    if (cbor.additionalInformation == 26) {
+      return cbor.buffer.readFloat32();
+    } else {
+      revert UnsupportedPrimitive(cbor.additionalInformation);
+    }
+  }
+
+  /// @notice Decode a `CBOR` structure into a `fixed64` value.
+  /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
+  /// by 15 decimal orders so as to get a fixed precision of 15 decimal positions, which should be OK for most `fixed64`
+  /// use cases. In other words, the output of this method is 10^15 times the actual value, encoded into an `int`.
+  /// @param cbor An instance of `CBOR`.
+  /// @return The value represented by the input, as an `int` value.
+  function readFloat64(CBOR memory cbor)
+    internal pure
+    isMajorType(cbor, MAJOR_TYPE_CONTENT_FREE)
+    returns (int)
+  {
+    if (cbor.additionalInformation == 27) {
+      return cbor.buffer.readFloat64();
     } else {
       revert UnsupportedPrimitive(cbor.additionalInformation);
     }
