@@ -268,4 +268,37 @@ contract TestWitnetErrorsLib {
     );
   }
 
+  function testTallyErrorMessages() external {
+    Witnet.ResultError memory error0x50 = WitnetErrorsLib.resultErrorFromCborBytes(hex"D827811850");
+    Witnet.ResultError memory error0x51 = WitnetErrorsLib.resultErrorFromCborBytes(hex"D827831851FB3FE051EB851EB852FB3FE51EB851EB851F");
+    Witnet.ResultError memory error0x52 = WitnetErrorsLib.resultErrorFromCborBytes(hex"D827811852");
+    Witnet.ResultError memory error0x60 = WitnetErrorsLib.resultErrorFromCborBytes(hex"D827811860");
+    Witnet.ResultError memory error0xff = WitnetErrorsLib.resultErrorFromCborBytes(hex"D8278118FF");
+    Assert.equal(
+      error0x50.reason,
+      "Witnet: Tally: no reveals.",
+      "Error message for error code `0x50` (`Witnet.ResultErrorCodes.NoReveals`) should be properly formatted"
+    );
+    Assert.equal(
+      error0x51.reason,
+      "Witnet: Tally: insufficient consensus: 51% <= 66%.",
+      "Error message for error code `0x50` (`Witnet.ResultErrorCodes.InsufficientConsensus`) should be properly formatted"
+    );
+    Assert.equal(
+      error0x52.reason,
+      "Witnet: Tally: insufficient commits.",
+      "Error message for error code `0x52` (`Witnet.ResultErrorCodes.InsufficientCommits`) should be properly formatted"
+    );
+    Assert.equal(
+      error0x60.reason,
+      "Witnet: Tally: malformed reveal.",
+      "Error message for error code `0x60` (`Witnet.ResultErrorCodes.MalformedReveal`) should be properly formatted"
+    );
+    Assert.equal(
+      error0xff.reason,
+      "Witnet: Tally: unhandled intercept.",
+      "Error message for error code `0xFF` (`Witnet.ResultErrorCodes.UnhandledIntercept`) should be properly formatted"
+    );
+  }
+
 }
