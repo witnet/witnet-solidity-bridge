@@ -302,13 +302,50 @@ library WitnetBuffer {
       result *= -1;
     }
   }
+
+  /// @notice Consume the next 8 bytes from the buffer as an IEEE 754-2008 floating point number enclosed into an `int`.
+  /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
+  /// by 15 decimal orders so as to get a fixed precision of 15 decimal positions, which should be OK for most `float64`
+  /// use cases. In other words, the integer output of this method is 10^15 times the actual value. The input bytes are
+  /// expected to follow the 64-bit base-2 format (a.k.a. `binary64`) in the IEEE 754-2008 standard.
+  /// @param buffer An instance of `Buffer`.
+  /// @return result The `int` value of the next 8 bytes in the buffer counting from the cursor position.
+  function readFloat64(Buffer memory buffer)
+    internal pure
+    returns (int result)
+  {
+    uint value = readUint64(buffer);
+    // Get bit at position 0
+    uint sign = value & 0x8000000000000000;
+    // Get bits 1 to 12, then normalize to the [-1023, 1024] range so as to counterweight the IEEE 754 exponent bias
+    int exponent = (int(value & 0x7ff0000000000000) >> 52) - 1023;
+    // Get bits 6 to 15
+    int fraction = int(value & 0x000fffffffffffff);
+    // Add 2^52 to the fraction if exponent is not -1023
+    if (exponent != -1023) {
+      fraction |= 0x10000000000000;
+    } else if (exponent == 1024) {
+      revert(
+        string(abi.encodePacked(
+          "WitnetBuffer.readFloat64: ",
+          sign != 0 ? "negative" : hex"",
+          " infinity"
+        ))
       );
+    }
+    // Compute `2 ^ exponent · (1 + fraction / 1024)`
+    if (exponent >= 0) {
+      result = (
+        int(1 << uint(exponent))
+          * (10 ** 15)
+          * fraction
+      ) >> 52;
     } else {
-      result = (int32(
-        ((int256(uint256(int256(significand)) | 0x400) * 10000)
-          / int256(1 << uint256(int256(- exponent))))
-          >> 10
-      ));
+      result = (
+        fraction 
+          * (10 ** 15)
+          / int(1 << uint(-exponent)) 
+      ) >> 52;
     }
     // Make the result negative if the sign bit is not 0
     if (sign != 0) {
