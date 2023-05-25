@@ -657,6 +657,13 @@ contract WitnetPriceFeedsUpgradable
     function _validateCaption(string calldata caption)
         internal view returns (uint8)
     {
-        return WitnetPriceFeedsLib.validateCaption(__prefix, caption);
+        try WitnetPriceFeedsLib.validateCaption(__prefix, caption) returns (uint8 _decimals) {
+            return _decimals;
+        } catch Error(string memory reason) {
+            revert(string(abi.encodePacked(
+                "WitnetPriceFeedsUpgradable: ", 
+                reason
+            )));
+        }
     }
 }
