@@ -20,17 +20,22 @@ library WitnetPriceFeedsLib {
 
     function deployPriceSolver(
             bytes calldata initcode,
-            bytes calldata additionalParams
+            bytes calldata constructorParams
         )
         external
         returns (address _solver)
     {
-        _solver = determinePriceSolverAddress(initcode, additionalParams);
+        _solver = determinePriceSolverAddress(initcode, constructorParams);
         if (_solver.code.length == 0) {
-            bytes memory _bytecode = _completeInitCode(initcode, additionalParams);
+            bytes memory _bytecode = _completeInitCode(initcode, constructorParams);
             address _createdContract;
             assembly {
-                _createdContract := create2(0, add(_bytecode, 0x20), mload(_bytecode), 0x0)
+                _createdContract := create2(
+                    0, 
+                    add(_bytecode, 0x20),
+                    mload(_bytecode), 
+                    0
+                )
             }
             assert(_solver == _createdContract);
             require(
@@ -42,7 +47,7 @@ library WitnetPriceFeedsLib {
 
     function determinePriceSolverAddress(
             bytes calldata initcode,
-            bytes calldata additionalParams
+            bytes calldata constructorParams
         )
         public view
         returns (address)
@@ -53,7 +58,7 @@ library WitnetPriceFeedsLib {
                     bytes1(0xff),
                     address(this),
                     bytes32(0),
-                    keccak256(_completeInitCode(initcode, additionalParams))
+                    keccak256(_completeInitCode(initcode, constructorParams))
                 )
             )))
         );
@@ -78,14 +83,13 @@ library WitnetPriceFeedsLib {
         return uint8(_decimals);
     }
 
-    function _completeInitCode(bytes calldata initcode, bytes calldata additionalParams)
-        private view
+    function _completeInitCode(bytes calldata initcode, bytes calldata constructorParams)
+        private pure
         returns (bytes memory)
     {
         return abi.encodePacked(
-            initcode, 
-            abi.encode(address(this)),
-            additionalParams
+            initcode,
+            constructorParams
         );
     } 
 

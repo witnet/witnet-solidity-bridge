@@ -580,30 +580,27 @@ contract WitnetPriceFeedsUpgradable
     // ================================================================================================================
     // --- Implements 'IWitnetPriceSolverDeployer' ---------------------------------------------------------------------
 
-    function deployPriceSolver(bytes calldata initcode, bytes calldata additionalParams)
+    function deployPriceSolver(bytes calldata initcode, bytes calldata constructorParams)
         virtual override
         external
         onlyOwner
         returns (address _solver)
     {
-        _solver = WitnetPriceFeedsLib.deployPriceSolver(initcode, additionalParams);
+        _solver = WitnetPriceFeedsLib.deployPriceSolver(initcode, constructorParams);
         emit WitnetPriceSolverDeployed(
             msg.sender, 
             _solver, 
             _solver.codehash, 
-            abi.encodePacked(
-                abi.encode(address(this)),
-                additionalParams
-            )
+            constructorParams
         );
     }
 
-    function determinePriceSolverAddress(bytes calldata initcode, bytes calldata additionalParams)
+    function determinePriceSolverAddress(bytes calldata initcode, bytes calldata constructorParams)
         virtual override
         public view
-        returns (address)
+        returns (address _address)
     {
-        return WitnetPriceFeedsLib.determinePriceSolverAddress(initcode, additionalParams);
+        return WitnetPriceFeedsLib.determinePriceSolverAddress(initcode, constructorParams);
     }
 
 
