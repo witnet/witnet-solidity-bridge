@@ -82,132 +82,86 @@ library WitnetErrorsLib {
         // switch on _error.code
         if (
             _error.code == Witnet.ResultErrorCodes.SourceScriptNotCBOR
-                && errors.length > 2
+                && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: Script #",
-                errors[1].readUint().toString(),
-                ": invalid CBOR value."
+                "Witnet: Radon: invalid CBOR value."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.SourceScriptNotArray
-                && errors.length > 2
+                && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: Script #",
-                errors[1].readUint().toString(),
-                ": CBOR value expected to be an array of calls."
+                "Witnet: Radon: CBOR value expected to be an array of calls."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.SourceScriptNotRADON
-                && errors.length > 2
+                && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: Script #",
-                errors[1].readUint().toString(),
-                ": CBOR value expected to be a data request."
+                "Witnet: Radon: CBOR value expected to be a data request."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.RequestTooManySources
-                && errors.length > 2
+                && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: too many sources (", 
-                errors[1].readUint().toString(),
-                ")."
+                "Witnet: Radon: too many sources."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.ScriptTooManyCalls
-                && errors.length > 4
+                && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: ",
-                _stageName(uint8(errors[1].readUint())),
-                ": Script #",
-                errors[2].readUint().toString(),
-                ": too many calls (",
-                errors[3].readUint().toString(),
-                ")."
+                "Witnet: Radon: too many calls."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.UnsupportedOperator
-                && errors.length > 5
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: ",
-                _stageName(uint8(errors[1].readUint())),
-                ": Script #",
-                errors[2].readUint().toString(),
-                ": Step #",
-                errors[3].readUint().toString(),
-                ": unsupported opcode (0x",
-                Witnet.toHexString(uint8(errors[4].readUint())),
-                ")."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.HTTP
                 && errors.length > 3
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: Retrieval: Source #",
-                errors[1].readUint().toString(),
-                ": HTTP/",
-                errors[2].readUint().toString(), 
+                "Witnet: Radon: unsupported '",
+                errors[2].readString(),
+                "' for input type '",
+                errors[1].readString(),
+                "'."
+            ));
+        } else if (
+            _error.code == Witnet.ResultErrorCodes.HTTP
+                && errors.length > 2
+        ) {
+            _error.reason = string(abi.encodePacked(
+                "Witnet: Retrieval: HTTP/",
+                errors[1].readUint().toString(), 
                 " error."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.RetrievalTimeout
-                && errors.length > 2
+                && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: Retrieval: Source #",
-                errors[1].readUint().toString(),
-                ": timeout."
+                "Witnet: Retrieval: timeout."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.Underflow
-                && errors.length > 5
+                && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: ",
-                _stageName(uint8(errors[1].readUint())),
-                ": Script #",
-                errors[2].readUint().toString(),
-                ": Step #",
-                errors[3].readUint().toString(),
-                ": math underflow (0x",
-                Witnet.toHexString(uint8(errors[4].readUint())),
-                ")."
+                "Witnet: Aggregation: math underflow."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.Overflow
-                && errors.length > 5
+                && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: ",
-                _stageName(uint8(errors[1].readUint())),
-                ": Script #",
-                errors[2].readUint().toString(),
-                ": Step #",
-                errors[3].readUint().toString(),
-                ": math overflow (0x",
-                Witnet.toHexString(uint8(errors[4].readUint())),
-                ")."
+                "Witnet: Aggregation: math overflow."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.DivisionByZero
-                && errors.length > 5
+                && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: ",
-                _stageName(uint8(errors[1].readUint())),
-                ": Script #",
-                errors[2].readUint().toString(),
-                ": Step #",
-                errors[3].readUint().toString(),
-                ": division by zero (0x",
-                Witnet.toHexString(uint8(errors[4].readUint())),
-                ")."
+                "Witnet: Aggregation: division by zero."
             ));
         } else if (
             _error.code == Witnet.ResultErrorCodes.BridgeMalformedRequest
@@ -225,11 +179,19 @@ library WitnetErrorsLib {
             _error.code == Witnet.ResultErrorCodes.InsufficientConsensus
                 && errors.length > 3
         ) {
+            uint reached = (errors[1].additionalInformation == 25
+                ? uint(int(errors[1].readFloat16() / 10 ** 4))
+                : uint(int(errors[1].readFloat64() / 10 ** 15))
+            );
+            uint expected = (errors[2].additionalInformation == 25
+                ? uint(int(errors[2].readFloat16() / 10 ** 4))
+                : uint(int(errors[2].readFloat64() / 10 ** 15))
+            );
             _error.reason = string(abi.encodePacked(
                 "Witnet: Tally: insufficient consensus: ",
-                uint(int(errors[1].readFloat64() / 10 ** 13)).toString(), 
+                reached.toString(), 
                 "% <= ",
-                uint(int(errors[2].readFloat64() / 10 ** 13)).toString(), 
+                expected.toString(), 
                 "%."
             ));
         } else if (
@@ -238,11 +200,11 @@ library WitnetErrorsLib {
             _error.reason = "Witnet: Tally: insufficient commits.";
         } else if (
             _error.code == Witnet.ResultErrorCodes.TallyExecution
-                && errors.length > 2
+                && errors.length > 3
         ) {
             _error.reason = string(abi.encodePacked(
                 "Witnet: Tally: execution error: ",
-                errors[1].readString(),
+                errors[2].readString(),
                 "."
             ));
         } else if (
@@ -250,7 +212,7 @@ library WitnetErrorsLib {
                 && errors.length > 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: tried to access a value from an array with an index (",
+                "Witnet: Aggregation: tried to access a value from an array with an index (",
                 errors[1].readUint().toString(),
                 ") out of bounds."
             ));
@@ -259,7 +221,7 @@ library WitnetErrorsLib {
                 && errors.length > 2
         ) {
             _error.reason = string(abi.encodePacked(
-                "Witnet: tried to access a value from a map with a key (\"",
+                "Witnet: Aggregation: tried to access a value from a map with a key (\"",
                 errors[1].readString(),
                 "\") that was not found."
             ));
@@ -280,7 +242,7 @@ library WitnetErrorsLib {
                 "Unhandled error: 0x",
                 Witnet.toHexString(uint8(_error.code)),
                 errors.length > 2
-                    ? string(abi.encodePacked(" (", uint(errors.length - 1).toString(), ")."))
+                    ? string(abi.encodePacked(" (", uint(errors.length - 1).toString(), " params)."))
                     : "."
             ));
         }
