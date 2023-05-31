@@ -337,11 +337,12 @@
             "WitnetRequestBoard": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425",
             "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
             "WitnetRequestRandomness": "0xb5F3c9Dc6Ca7C1078cE5c51c1cE030D6BEEd57E2",
-            "WitnetErrorsLib": "",
+            "WitnetErrorsLib": "0x7a56A80A9B169c046EdD1d8f584455a394bc9C71",
             "WitnetEncodingLib": "0xB5447342cA17A40e59d410b340ba412E22e36201",
+            "WitnetPriceFeedsLib": "0x685528FA605c31aE076e1ee1707041B7Cb356573",
             "WitnetBytecodesImplementation": "0x705E076F3387cFd59708D8D8508CECe3e1C65C87",
             "WitnetRandomnessImplementation": "0x65772461641A4A6E8B10c81bae1a132E04e77262",
-            "WitnetRequestBoardImplementation": "",
+            "WitnetRequestBoardImplementation": "0xb6E0e5a64C7c02Fa477A5254dca35ED967570DF5",
             "WitnetRequestFactoryImplementation": "0x364E2b91a4C7563288C3ccF7256BA172935CC550"
         },
         "moonbeam.moonriver": {
@@ -395,12 +396,14 @@
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
             "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
             "WitnetRequestRandomness": "0xCFf84e16db3c705aD3C6e96b5575ab9111C874B9",
-            "WitnetErrorsLib": "",
+            "WitnetErrorsLib": "0x724d8E0a9B83a3Fc1A807b91392cAF5f42233307",
             "WitnetEncodingLib": "0x3E4F5AB751F3B7D8953Be20CCc3bD0A7a4dea903",
+            "WitnetPriceFeedsLib": "0x83587BcfD1f75B5D08c4e27F098F99783cc693cb",
             "WitnetBytecodesImplementation": "0x1a50d6bc99f9a79e8aECFdE71c5A597ef9012C39",
             "WitnetRandomnessImplementation": "0x24Cc52D0603F161E16c3DB29Da4c2bCc07d17C4b",
-            "WitnetRequestBoardImplementation": "",
-            "WitnetRequestFactoryImplementation": "0x4779A692aC089E02FD1301B0b53Fa1a02985a83F"
+            "WitnetRequestBoardImplementation": "0xe0329cad0306dF321CD331C526E6Ccc67ce5c007",
+            "WitnetRequestFactoryImplementation": "0x4779A692aC089E02FD1301B0b53Fa1a02985a83F",
+            
         },
         "polygon.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
