@@ -34,13 +34,13 @@ module.exports = async function (deployer, network, [, from]) {
 
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsLib)) {
     await deployer.deploy(WitnetPriceFeedsLib, { from })
-    let lib = await WitnetPriceFeedsLib.deployed()
+    const lib = await WitnetPriceFeedsLib.deployed()
     addresses[ecosystem][network].WitnetPriceFeedsLib = lib.address
     if (!isDryRun) {
       utils.saveAddresses(addresses)
     }
   } else {
-    let lib = await WitnetPriceFeedsLib.at(addresses[ecosystem][network]?.WitnetPriceFeedsLib)
+    const lib = await WitnetPriceFeedsLib.at(addresses[ecosystem][network]?.WitnetPriceFeedsLib)
     WitnetPriceFeedsLib.address = lib.address
     utils.traceHeader("Skipping 'WitnetPriceFeedsLib'")
     console.info("  ", "> library address:", lib.address)
