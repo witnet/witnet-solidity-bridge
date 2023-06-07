@@ -207,11 +207,11 @@ contract WitnetRequestFactoryDefault
                 _tally,
                 _resultDataMaxSize
             ));
-            emit WitnetRequestTemplateBuilt(
-                _template,
-                WitnetRequestTemplate(_template).parameterized()
-            );
         }
+        emit WitnetRequestTemplateBuilt(
+            _template,
+            WitnetRequestTemplate(_template).parameterized()
+        );
     }
 
     function class() 
