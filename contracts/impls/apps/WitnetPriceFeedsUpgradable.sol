@@ -60,6 +60,10 @@ contract WitnetPriceFeedsUpgradable
         }
     }
 
+    function class() virtual override external pure returns (bytes4) {
+        return type(WitnetPriceFeeds).interfaceId;
+    }
+
 
     // ================================================================================================================
     // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
@@ -93,7 +97,8 @@ contract WitnetPriceFeedsUpgradable
                 witnessCollateral: 15 * 10 ** 9,
                 witnessReward: 15 * 10 ** 7,
                 minerCommitRevealFee: 10 ** 7,
-                minConsensusPercentage: 51
+                minConsensusPercentage: 51,
+                minMinerFee: 0
             }));
         }
         __proxiable().implementation = base();

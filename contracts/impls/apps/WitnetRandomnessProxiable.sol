@@ -66,6 +66,10 @@ contract WitnetRandomnessProxiable
         witnetRandomnessRequest = _request;
     }
 
+    function class() virtual override external pure returns (bytes4) {
+        return type(WitnetRandomness).interfaceId;
+    }
+
     /// @notice Initializes a cloned instance. 
     /// @dev Every cloned instance can only get initialized once.
     function initializeClone(bytes memory _initData)

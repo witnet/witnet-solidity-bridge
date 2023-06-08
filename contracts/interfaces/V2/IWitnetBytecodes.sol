@@ -4,10 +4,18 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../../libs/WitnetV2.sol";
 
-interface IWitnetBytecodes {
+interface IWitnetBytecodes {   
 
     function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
     function bytecodeOf(bytes32 radHash, bytes32 slahHash) external view returns (bytes memory);
+
+    function fetchBytecodeWitFeesOf(bytes32 radHash, bytes32 slaHash)
+        external view returns (
+            uint256 _witMinMinerFee,
+            uint256 _witWitnessingFee,
+            bytes memory _radSlaBytecode
+        );
+    function fetchMaxResultSizeWitRewardOf(bytes32 radHash, bytes32 slaHash) external view returns (uint256, uint256);
 
     function hashOf(
             bytes32[] calldata sources,

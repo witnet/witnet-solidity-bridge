@@ -30,7 +30,7 @@ contract WitnetRequestBoardTrustableDefault
             _factory, 
             _upgradable, 
             _versionTag, 
-            address(0)
+            IERC20(address(0))
         )
     {   
         _ESTIMATED_REPORT_RESULT_GAS = _reportResultGasLimit;
@@ -84,7 +84,7 @@ contract WitnetRequestBoardTrustableDefault
     /// Transfers ETHs to given address.
     /// @param _to Recipient address.
     /// @param _amount Amount of ETHs to transfer.
-    function _safeTransferTo(address payable _to, uint256 _amount)
+    function __safeTransferTo(address payable _to, uint256 _amount)
         internal
         virtual override
     {

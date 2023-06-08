@@ -190,7 +190,7 @@ contract WitnetRequestFactoryDefault
                 _resultDataMaxSize
             )
         );
-        _template = address(uint160(uint256(keccak256(
+        _t  emplate = address(uint160(uint256(keccak256(
             abi.encodePacked(
                 bytes1(0xff),
                 address(this),
@@ -215,7 +215,7 @@ contract WitnetRequestFactoryDefault
     }
 
     function class() 
-        virtual override(IWitnetRequestFactory, WitnetRequestTemplate)
+        virtual override(IWitnetRequestFactory, WitnetRequestTemplate, WitnetUpgradableBase)
         external view
         returns (bytes4)
     {

@@ -43,6 +43,8 @@ abstract contract WitnetUpgradableBase
         revert("WitnetUpgradableBase: not implemented");
     }
 
+    function class() virtual external view returns (bytes4);
+
 
     // ================================================================================================================
     // --- Overrides IERC165 interface --------------------------------------------------------------------------------

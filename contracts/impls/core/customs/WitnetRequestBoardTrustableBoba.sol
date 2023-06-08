@@ -38,7 +38,7 @@ contract WitnetRequestBoardTrustableBoba
             bytes32 _versionTag,
             uint256 _layer2ReportResultGasLimit,
             uint256 _layer2GasPrice,            
-            address _oETH
+            IERC20 _oETH
         )
         WitnetRequestBoardTrustableBase(_factory, _upgradable, _versionTag, _oETH)
     {
@@ -84,7 +84,7 @@ contract WitnetRequestBoardTrustableBoba
     /// @dev Updates `lastBalance` value.
     /// @param _to OVM_ETH recipient account.
     /// @param _amount Amount of oETHs to transfer.
-    function _safeTransferTo(address payable _to, uint256 _amount)
+    function __safeTransferTo(address payable _to, uint256 _amount)
         internal
         override
     {

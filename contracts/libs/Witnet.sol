@@ -55,7 +55,8 @@ library Witnet {
         Void,
         Awaiting,
         Ready,
-        Error
+        Error,
+        Expired
     }
 
     /// Data struct describing an error when trying to fetch a Witnet-provided result to a Data Request.
@@ -124,8 +125,10 @@ library Witnet {
             InsufficientCommits,
             /// 0x53: Generic error during tally execution
             TallyExecution,
+            /// 0x54: Max result size exceeded
+            MaxResultSizeExceeded,
             /// Unallocated
-            OtherError0x54, OtherError0x55, OtherError0x56, OtherError0x57, OtherError0x58, OtherError0x59,
+            OtherError0x55, OtherError0x56, OtherError0x57, OtherError0x58, OtherError0x59, 
             OtherError0x5A, OtherError0x5B, OtherError0x5C, OtherError0x5D, OtherError0x5E, OtherError0x5F,
             /// 0x60: Invalid reveal serialization (malformed reveals are converted to this value)
             MalformedReveal,
@@ -169,9 +172,17 @@ library Witnet {
             BridgeOversizedResult,
             /// Unallocated
             OtherError0xE3, OtherError0xE4, OtherError0xE5, OtherError0xE6, OtherError0xE7, OtherError0xE8, OtherError0xE9,
-            OtherError0xEA, OtherError0xEB, OtherError0xEC, OtherError0xED, OtherError0xEE, OtherError0xEF, OtherError0xF0,
-            OtherError0xF1, OtherError0xF2, OtherError0xF3, OtherError0xF4, OtherError0xF5, OtherError0xF6, OtherError0xF7,
-            OtherError0xF8, OtherError0xF9, OtherError0xFA, OtherError0xFB, OtherError0xFC, OtherError0xFD, OtherError0xFE,
+            OtherError0xEA, OtherError0xEB, OtherError0xEC, OtherError0xED, OtherError0xEE, OtherError0xEF,
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Request board errors: errors that arise when trying to fetch a result to some previously posted data request ====== 
+            BoardUnsolvedQuery,
+            BoardUnknownQuery,
+            BoardExpiredQuery,
+            BoardUndecodableError,
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Other errors: errors that arise when trying to fetch a result to some previously posted data request ==============
+            OtherError0xF4, OtherError0xF5, OtherError0xF6, OtherError0xF7, OtherError0xF8, OtherError0xF9, OtherError0xFA, 
+            OtherError0xFB, OtherError0xFC, OtherError0xFD, OtherError0xFE,
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// 0xFF: Some tally error is not intercepted but should
         UnhandledIntercept
@@ -341,6 +352,17 @@ library Witnet {
         returns (uint[] memory)
     {
         return result.value.readUintArray();
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'address' helper methods ----------------------------------------------------------------------------------
+
+    function toHexString(address addr)
+        internal pure
+        returns (string memory)
+    {
+        // TODO
     }
 
 
