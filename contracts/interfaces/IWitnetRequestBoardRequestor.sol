@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../libs/Witnet.sol";
+import "../libs/WitnetV2.sol";
 
 /// @title Witnet Requestor Interface
 /// @notice It defines how to interact with the Witnet Request Board in order to:
@@ -47,11 +47,20 @@ interface IWitnetRequestBoardRequestor {
     /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
     /// @notice result to this request.
     /// @dev Fails if, provided reward is too low.
-    /// @param radHash The radHash of the Witnet Data Request.
-    /// @param slaHash The slaHash of the Witnet Data Request.
+    /// @param radHash The RAD hash of the data request to be solved by Witnet.
+    /// @param slaHash The SLA hash of the data request to be solved by Witnet.
     /// @return _queryId Unique query identifier.
     function postRequest(bytes32 radHash, bytes32 slaHash) external payable returns (uint256 _queryId);
-    
+
+    /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// @notice result to this request.
+    /// @dev Fails if, provided reward is too low.
+    /// @param radHash The RAD hash of the data request to be solved by Witnet.
+    /// @param slaParams The SLA params of the data request to be solved by Witnet.
+    /// @return _queryId Unique query identifier.
+    function postRequest(bytes32 radHash, WitnetV2.RadonSLA calldata slaParams) external payable returns (uint256 _queryId);
+
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Updates request `gasPrice` in case this method is called with a higher 
     /// @dev gas price value than the one used in previous calls to `postRequest` or

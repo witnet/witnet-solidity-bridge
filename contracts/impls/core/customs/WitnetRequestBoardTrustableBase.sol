@@ -419,9 +419,9 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Fails if:
     /// @dev - provided reward is too low.
     /// @dev - provided address is zero.
-    /// @param _requestAddr The address of a IWitnetRequest contract, containing the actual Data Request seralized bytecode.
+    /// @param _requestInterface The address of a IWitnetRequest contract, containing the actual Data Request seralized bytecode.
     /// @return _queryId An unique query identifier.
-    function postRequest(IWitnetRequest _requestAddr)
+    function postRequest(IWitnetRequest _requestInterface)
         virtual override
         public payable
         returns (uint256 _queryId)
@@ -434,13 +434,13 @@ abstract contract WitnetRequestBoardTrustableBase
         require(_value >= _baseReward, "WitnetRequestBoardTrustableBase: reward too low");
 
         // Validates provided script:
-        require(address(_requestAddr) != address(0), "WitnetRequestBoardTrustableBase: no request");
+        require(_requestInterface.hash() != bytes32(0), "WitnetRequestBoardTrustableBase: no precompiled request");
 
         _queryId = ++ __storage().numQueries;
         __storage().queries[_queryId].from = msg.sender;
 
         Witnet.Request storage _request = __request(_queryId);
-        _request.addr = address(_requestAddr);
+        _request.addr = address(_requestInterface);
         _request.gasprice = _gasPrice;
         _request.reward = _value;
 
@@ -482,6 +482,25 @@ abstract contract WitnetRequestBoardTrustableBase
         // Let observers know that a new request has been posted
         emit PostedRequest(_queryId, msg.sender);
     }
+
+    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// result to this request.
+    /// @dev Fails if:
+    /// @dev - provided reward is too low.
+    /// @param _radHash The RAD hash of the data tequest to be solved by Witnet.
+    /// @param _slaParams The SLA param of the data request to be solved by Witnet.
+    function postRequest(bytes32 _radHash, WitnetV2.RadonSLA calldata _slaParams)
+        virtual override
+        public payable
+        returns (uint256 _queryId)
+    {
+        return postRequest(
+            _radHash,
+            registry.verifyRadonSLA(_slaParams)
+        );
+    }
+    
     
     /// Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Updates request `gasPrice` in case this method is called with a higher 

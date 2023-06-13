@@ -50,14 +50,6 @@ contract WitnetRequestFactoryDefault
         _;
     }
 
-    modifier securedRequest {
-        require(
-            __witnetRequest().slaHash != bytes32(0),
-            "WitnetRequest: unsecured"
-        );
-        _;
-    }
-
     constructor(
             WitnetBytecodes _registry,
             bool _upgradable,
@@ -94,7 +86,7 @@ contract WitnetRequestFactoryDefault
         WitnetV2.RadonDataTypes _resultDataType;
         require(
             _retrievalsIds.length > 0,
-            "WitnetRequestTemplate: no retrievals ?"
+            "WitnetRequestTemplate: no retrievals?"
         );
         // check that all retrievals exist in the registry,
         // and they all return the same data type
@@ -135,32 +127,13 @@ contract WitnetRequestFactoryDefault
         )
         virtual public
         initializer
-        returns (WitnetRequest)
+        returns (address)
     {
         WitnetRequestSlot storage __data = __witnetRequest();
         __data.args = _args;
         __data.radHash = _radHash;
         __data.template = WitnetRequestTemplate(msg.sender);
-        return WitnetRequest(address(this));
-    }
-
-    function forkWitnetRequest(
-            address _curator,
-            bytes32 _slaHash
-        )
-        virtual public
-        initializer
-        returns (WitnetRequest)
-    {
-        WitnetRequestSlot storage __data = __witnetRequest();
-        WitnetRequest parent = WitnetRequest(msg.sender);
-        bytes32 _radHash = parent.radHash();
-        __data.args = parent.args();
-        __data.curator = _curator;
-        __data.radHash = _radHash;
-        __data.slaHash = _slaHash;
-        __data.template = parent.template();
-        return WitnetRequest(address(this));
+        return address(this);
     }
 
 
@@ -389,51 +362,14 @@ contract WitnetRequestFactoryDefault
 
 
     /// ===============================================================================================================
-    /// --- IWitnetRequest implementation -----------------------------------------------------------------------------
+    /// --- WitnetRequest implementation ------------------------------------------------------------------------------
 
     function bytecode()
         override
         external view
-        securedRequest
         returns (bytes memory)
     {
-        return registry.bytecodeOf(
-            __witnetRequest().radHash,
-            __witnetRequest().slaHash
-        );
-    }
-
-    function hash()
-        override
-        external view
-        securedRequest
-        returns (bytes32)
-    {
-        return sha256(abi.encodePacked(
-            __witnetRequest().radHash,
-            __witnetRequest().slaHash
-        ));
-    }
-
-    /// ===============================================================================================================
-    /// --- WitnetRequest implementation ------------------------------------------------------------------------------
-
-    function curator()
-        override 
-        external view
-        onlyDelegateCalls
-        returns (address)
-    {
-        return __witnetRequest().curator;
-    }
-
-    function secured()
-        override
-        external view
-        onlyDelegateCalls
-        returns (bool)
-    {
-        return __witnetRequest().slaHash != bytes32(0);
+        return registry.bytecodeOf(__witnetRequest().radHash);
     }
 
     function template()
@@ -461,62 +397,6 @@ contract WitnetRequestFactoryDefault
         returns (bytes32)
     {
         return __witnetRequest().radHash;
-    }
-
-    function slaHash() 
-        override
-        external view
-        onlyDelegateCalls
-        returns (bytes32)
-    {
-        return __witnetRequest().slaHash;
-    }
-
-    function getRadonSLA()
-        override
-        external view
-        onlyDelegateCalls
-        returns (WitnetV2.RadonSLA memory)
-    {
-        return registry.lookupRadonSLA(
-            __witnetRequest().slaHash
-        );
-    }
-
-    function settleRadonSLA(WitnetV2.RadonSLA memory _sla)
-        virtual override
-        external
-        onlyDelegateCalls
-        returns (WitnetRequest _settled)
-    {
-        WitnetRequestSlot storage __data = __witnetRequest();
-        WitnetRequestTemplate _template = __witnetRequest().template;
-        require(
-            address(_template) != address(0),
-            "WitnetRequestFactoryDefault: not a WitnetRequest"
-        );
-        bytes32 _slaHash = registry.verifyRadonSLA(_sla);
-        if (_slaHash != __data.slaHash) {
-            if (msg.sender == __witnetRequest().curator) {
-                __data.slaHash = _slaHash;
-                _settled = WitnetRequest(address(this));
-            } else {
-                (address _address, bytes32 _salt) = _determineAddress(_slaHash);
-                if (_address.code.length > 0) {
-                    _settled = WitnetRequest(_address);
-                } else {
-                    _settled = WitnetRequestFactoryDefault(_cloneDeterministic(_salt))
-                        .forkWitnetRequest(
-                            msg.sender,
-                            _slaHash
-                        )
-                    ;
-                }
-            }
-        } else {
-            _settled = WitnetRequest(address(this));
-        }
-        emit WitnetRequestSettled(_settled, __data.radHash, _slaHash);
     }
 
     function version() 
@@ -700,7 +580,7 @@ contract WitnetRequestFactoryDefault
         virtual override
         public
         onlyDelegateCalls
-        returns (WitnetRequest _request)
+        returns (address _request)
     {
         // if called on a WitnetRequest instance:
         if (address(__witnetRequest().template) != address(0)) {
@@ -715,12 +595,11 @@ contract WitnetRequestFactoryDefault
             __data.resultDataMaxSize,
             _args
         );
-        // address of unsecured requests (i.e. no slaHash, no curator) built out of a template,
-        // will be determined by the template's address and the request's radHash:
-        (address _address, bytes32 _salt) = _determineAddress(_radHash);
-        if (_address.code.length > 0) {
-            _request = WitnetRequest(_address);
-        } else {
+        // the request address will be determined by the template's address,
+        // the request's radHash and the factory's implementation version:
+        bytes32 _salt;
+        (_request, _salt) = _determineRequestAddressAndSalt(_radHash);
+        if (_request.code.length == 0) {
             _request = WitnetRequestFactoryDefault(_cloneDeterministic(_salt))
                 .initializeWitnetRequest(
                     _radHash,
@@ -751,11 +630,16 @@ contract WitnetRequestFactoryDefault
         );
     }
 
-    function _determineAddress(bytes32 _hash)
+    function _determineRequestAddressAndSalt(bytes32 _radHash)
         internal view
         returns (address, bytes32)
     {
-        bytes32 _salt = keccak256(abi.encodePacked(_hash, bytes4(_WITNET_UPGRADABLE_VERSION)));
+        bytes32 _salt = keccak256(
+            abi.encodePacked(
+                _radHash, 
+                bytes4(_WITNET_UPGRADABLE_VERSION)
+            )
+        );
         return (
             address(uint160(uint256(keccak256(
                 abi.encodePacked(

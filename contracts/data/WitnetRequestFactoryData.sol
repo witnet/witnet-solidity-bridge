@@ -26,13 +26,9 @@ contract WitnetRequestFactoryData {
 
     struct WitnetRequestSlot {
         /// Array of string arguments passed upon initialization.
-        string[][] args;  
-        /// Curator's address on settled requests.
-        address curator;
-        /// Radon RAD hash. 
+        string[][] args;
+        /// Radon RAD hash.
         bytes32 radHash;
-        /// Radon SLA hash.
-        bytes32 slaHash;
         /// Parent WitnetRequestTemplate contract.
         WitnetRequestTemplate template;
     }
