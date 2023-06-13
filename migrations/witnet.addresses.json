@@ -65,6 +65,25 @@
         }
     },
     "boba": {
+        "boba.bnb.testnet": {
+            "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
+            "WitnetPriceFeeds": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
+            "WitnetPriceRouter": "0x8D20457d968c937b7cb65be6B8cC766613fBcF28",
+            "WitnetRandomness": "0x88888885966F8F77cC6E797aE263C4d091e44A55",
+            "WitnetRequestBoard": "0x777777772C24e6CD34B464D1d71616C444254537",
+            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
+            "WitnetErrorsLib": "0x1b91eAB33362f10A5F803Fe3f0d181F42caFaac3",
+            "WitnetEncodingLib": "0x6395d83C9Aa803498980A5ab78217785d4db7bE7",
+            "WitnetPriceFeedsLib": "0x8684d396366C21AA01B120F69df2070f840aC134",
+            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetProxy": "0xc71A87657b13A370594967A04b4301a3AcEAF007",
+            "WitnetBytecodesImplementation": "0xFB36b14df6D319A5A7F418C80b0700664A4f9e6a",
+            "WitnetPriceFeedsImplementation": "0xef978B8CdA6464D0fBaCE5FBC8Ed7A7A8976E094",
+            "WitnetRandomnessImplementation": "0xB4f1f8E27799256ec95C5b5A8d2A5722Bd542E69",
+            "WitnetRequestBoardImplementation": "0x654B79823f244c2476907F21EBD20cFebC04D0A5",
+            "WitnetRequestFactoryImplementation": "0x2163DBCBdbBeC066EF8d8Adab75Af8b0B9A5cfAA",
+            "WitnetRequestRandomness": "0x620e20d91C9b0e11ecAE439E7b85138DA2a1003F"
+        },
         "boba.moonbeam.bobabase": {
             "WitnetLib": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425",
             "WitnetPriceRouter": "0xD9465D38f50f364b3263Cb219e58d4dB2D584530",
@@ -402,7 +421,7 @@
             "WitnetBytecodesImplementation": "0x1a50d6bc99f9a79e8aECFdE71c5A597ef9012C39",
             "WitnetRandomnessImplementation": "0x24Cc52D0603F161E16c3DB29Da4c2bCc07d17C4b",
             "WitnetRequestBoardImplementation": "0xe0329cad0306dF321CD331C526E6Ccc67ce5c007",
-            "WitnetRequestFactoryImplementation": "0x4779A692aC089E02FD1301B0b53Fa1a02985a83F"            
+            "WitnetRequestFactoryImplementation": "0x4779A692aC089E02FD1301B0b53Fa1a02985a83F"
         },
         "polygon.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",

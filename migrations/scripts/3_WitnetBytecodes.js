@@ -13,7 +13,6 @@ const version = `${
 
 const Create2Factory = artifacts.require("Create2Factory")
 const WitnetProxy = artifacts.require("WitnetProxy")
-
 const WitnetBytecodes = artifacts.require("WitnetBytecodes")
 const WitnetEncodingLib = artifacts.require("WitnetEncodingLib")
 

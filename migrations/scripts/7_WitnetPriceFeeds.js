@@ -32,6 +32,9 @@ module.exports = async function (deployer, network, [, from]) {
     return
   }
 
+  const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
+  const WitnetPriceFeedsImplementation = artifacts.require(artifactNames.WitnetPriceFeeds)
+
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsLib)) {
     await deployer.deploy(WitnetPriceFeedsLib, { from })
     const lib = await WitnetPriceFeedsLib.deployed()
@@ -46,9 +49,7 @@ module.exports = async function (deployer, network, [, from]) {
     console.info("  ", "> library address:", lib.address)
     console.info()
   }
-
-  const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
-  const WitnetPriceFeedsImplementation = artifacts.require(artifactNames.WitnetPriceFeeds)
+  await deployer.link(WitnetPriceFeedsLib, WitnetPriceFeedsImplementation)
 
   if (addresses[ecosystem][network]?.WitnetPriceFeedsImplementation !== undefined || isDryRun) {
     let proxy
@@ -101,7 +102,6 @@ module.exports = async function (deployer, network, [, from]) {
 
     let router
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsImplementation)) {
-      await deployer.link(WitnetPriceFeedsLib, WitnetPriceFeedsImplementation)
       await deployer.deploy(
         WitnetPriceFeedsImplementation,
         WitnetRequestBoard.address,
