@@ -17,11 +17,14 @@ interface IWitnetRequestBoardV2 {
     event PostedQuery(address indexed from, bytes32 hash, address callback);
     event DeletedQuery(address indexed from, bytes32 hash);
     event ReportedQuery(address indexed from, bytes32 hash, address callback);
-    event DisputedQuery(address indexed from, bytes32 hash);
+    event DisputedQuery(address indexed from, bytes32 hash, bytes32 tallyHash);
+
+    function DDR_QUERY_TAG() external view returns (bytes4);
+    function DDR_REPORT_QUERY_GAS_BASE() external view returns (uint256);
+    function DDR_REPORT_QUERY_MIN_STAKE_WEI() external view returns (uint256);
+    function DDR_REPORT_QUERY_MIN_STAKE_WEI(uint256 gasPrice) external view returns (uint256);
 
     function class() external view returns (bytes4);
-    function nonce() external view returns (uint256);
-    function tag()   external view returns (bytes4);
 
     function estimateQueryReward(
             bytes32 radHash, 
@@ -35,6 +38,7 @@ interface IWitnetRequestBoardV2 {
         external view returns (
             WitnetV2.QueryStatus status,
             uint256 weiEvmReward,
+            uint256 weiEvmStake,
             bytes memory radBytecode,
             WitnetV2.RadonSLAv2 memory slaParams
         );   
@@ -67,13 +71,14 @@ interface IWitnetRequestBoardV2 {
             IWitnetRequestCallback callback,
             uint256 callbackGas
         ) external payable returns (bytes32 queryHash);
+    
+    function reportQuery(bytes32 queryHash, bytes calldata relayerSignature, WitnetV2.QueryReport memory) external;
+    function reportQueryBatch(bytes32[] calldata hashes, bytes[] calldata signatures, WitnetV2.QueryReport[] calldata) external;
 
     function disputeQuery(bytes32 queryHash, WitnetV2.QueryReport memory) external;
-    
-    function reportQuery(bytes32 queryHash, WitnetV2.QueryReport memory) external;
-    function reportQueryBatch(bytes32[] calldata hashes, WitnetV2.QueryReport[] calldata) external;
 
     function claimQueryReward(bytes32 queryHash) external returns (uint256);
-    function deleteQuery(bytes32 queryHash) external;
-    
+    function deleteQuery(bytes32 queryHash) external;    
+
+    function determineQueryTallyHash(bytes32 queryTallyHash) external returns (bytes32 queryHash, uint256 queryStakes);
 }

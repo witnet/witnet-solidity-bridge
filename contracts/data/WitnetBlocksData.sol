@@ -13,7 +13,18 @@ abstract contract WitnetBlocksData {
         0x28b1d7e478138a94698f82768889fd6edf6b777bb6815c200552870d3e78ffb5;
 
     struct Storage {
-        WitnetV2.Beacon lastBeacon;
+        uint256 lastBeaconIndex;
+        uint256 nextBeaconIndex;
+        uint256 latestBeaconIndex;
+        mapping (/* beacon index */ uint256 => WitnetV2.Beacon) beacons;
+        mapping (/* beacon index */ uint256 => uint256) beaconSuccessorOf;
+        mapping (/* beacon index */ uint256 => BeaconTracks) beaconTracks;
+    }
+
+    struct BeaconTracks {
+        mapping (bytes32 => bool) disputed;
+        bytes32[] queries;
+        uint256 offset;
     }
 
     // ================================================================================================
@@ -27,6 +38,10 @@ abstract contract WitnetBlocksData {
         assembly {
             _ptr.slot := _WITNET_BLOCKS_DATA_SLOTHASH
         }
+    }
+
+    function __tracks_(uint256 beaconIndex) internal view returns (BeaconTracks storage) {
+        return __blocks().beaconTracks[beaconIndex];
     }
 
 }

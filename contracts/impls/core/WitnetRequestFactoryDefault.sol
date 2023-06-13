@@ -190,7 +190,7 @@ contract WitnetRequestFactoryDefault
                 _resultDataMaxSize
             )
         );
-        _t  emplate = address(uint160(uint256(keccak256(
+        _template = address(uint160(uint256(keccak256(
             abi.encodePacked(
                 bytes1(0xff),
                 address(this),

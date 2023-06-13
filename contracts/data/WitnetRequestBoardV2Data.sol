@@ -14,9 +14,14 @@ abstract contract WitnetRequestBoardV2Data {
       0xfeed002ff8a708dcba69bac2a8e829fd61fee551b9e9fc0317707d989cb0fe53;
 
     struct Storage {
-      uint256 nonce;
       mapping (address => Escrow) escrows;
-      mapping (bytes32 => WitnetV2.Query) queries;
+      mapping (/* queryHash */ bytes32 => WitnetV2.Query) queries;
+      mapping (/* tallyHash */ bytes32 => Suitor) suitors;
+    }
+
+    struct Suitor {
+      uint256 index;
+      bytes32 queryHash;
     }
 
     struct Escrow {
@@ -54,56 +59,5 @@ abstract contract WitnetRequestBoardV2Data {
         assembly {
             _ptr.slot := _WITNET_BOARD_DATA_SLOTHASH
         }
-    }
-
-    /// Gets current status of given query.
-    function _statusOf(bytes32 queryHash, IWitnetBlocks blocks)
-      internal view
-      returns (WitnetV2.QueryStatus)
-    {
-      WitnetV2.Query storage __query = __query_(queryHash);
-      if (__query.reporter != address(0) || __query.disputes.length > 0) {
-        if (blocks.getLastBeaconIndex() >= __query.epoch) {
-          return WitnetV2.QueryStatus.Finalized;
-        } else {
-          if (__query.disputes.length > 0) {
-            return WitnetV2.QueryStatus.Disputed;
-          } else {
-            return WitnetV2.QueryStatus.Reported;
-          }
-        }
-      } else if (__query.from != address(0)) {
-        return WitnetV2.checkQueryPostStatus(
-          __query.epoch, 
-          blocks.getCurrentBeaconIndex()
-        );
-      } else {
-        return WitnetV2.QueryStatus.Void;
-      }
-    }
-
-    function _statusOfRevertMessage(WitnetV2.QueryStatus queryStatus)
-      internal pure
-      returns (string memory)
-    {
-      string memory _reason;
-      if (queryStatus == WitnetV2.QueryStatus.Posted) {
-        _reason = "Posted";
-      } else if (queryStatus == WitnetV2.QueryStatus.Reported) {
-        _reason = "Reported";
-      } else if (queryStatus == WitnetV2.QueryStatus.Disputed) {
-        _reason = "Disputed";
-      } else if (queryStatus == WitnetV2.QueryStatus.Expired) {
-        _reason = "Expired";
-      } else if (queryStatus == WitnetV2.QueryStatus.Finalized) {
-        _reason = "Finalized";
-      } else {
-        _reason = "expected";
-      }
-      return string(abi.encodePacked(
-        "WitnetRequestBoardV2Data: not in ", 
-        _reason,
-        " status"
-      ));
     }
 }

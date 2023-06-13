@@ -21,12 +21,36 @@ contract WitnetRequestBoardTrustlessDefault
         WitnetRequestBoardV2Data,
         WitnetUpgradableBase
 {
-    uint256 immutable internal __reportQueryMinGas;
+    using WitnetV2 for WitnetV2.QueryReport;
+    
+    bytes4 immutable public override DDR_QUERY_TAG;
+    uint256 immutable internal _DDR_REPORT_QUERY_GAS_BASE;
+
+    /// Asserts the given query is currently in some specific status.
+    modifier queryInStatus(
+            bytes32 queryHash,
+            WitnetV2.QueryStatus queryStatus
+        )
+    {
+        require(
+            checkQueryStatus(queryHash) == queryStatus,
+            _queryNotInStatusRevertMessage(queryStatus)
+        );
+        _;
+    }
+
+    modifier stakes(bytes32 queryHash) {
+        __stake(
+            msg.sender,
+            __query_(queryHash).weiStake
+        );
+        _;
+    }
 
     constructor(
             WitnetBlocks _blocks,
             WitnetRequestFactory _factory,
-            uint256 _reportQueryMinGas,
+            uint256 _reportQueryGasBase,
             bool _upgradable,
             bytes32 _versionTag
         )
@@ -38,31 +62,38 @@ contract WitnetRequestBoardTrustlessDefault
             "io.witnet.proxiable.board"
         )
     {
-        __reportQueryMinGas = _reportQueryMinGas;
+        DDR_QUERY_TAG = bytes4(keccak256(abi.encodePacked(
+            "evm:",
+            Witnet.toString(block.chainid),
+            ":",
+            Witnet.toHexString(address(_blocks.board()))
+        )));
+        _DDR_REPORT_QUERY_GAS_BASE = _reportQueryGasBase;
     }
 
-    /// Asserts the given query is currently in some specific status.
-    modifier queryInStatus(
-            bytes32 queryHash,
-            WitnetV2.QueryStatus queryStatus
-        )
+    function DDR_REPORT_QUERY_GAS_BASE()
+        virtual override
+        public view
+        returns (uint256)
     {
-        require(
-            _statusOf(queryHash, blocks) == queryStatus,
-            _statusOfRevertMessage(queryStatus)
-        );
-        _;
+        return _DDR_REPORT_QUERY_GAS_BASE;
     }
 
-    modifier stakes(bytes32 queryHash) {
-        __stake(
-            msg.sender,
-            __query_(queryHash).weiReward
-                * WitnetV2.toRadonSLAv2EvmCollateralRatio(
-                    __request_(queryHash).packedSLA
-                )
-        );
-        _;
+    function DDR_REPORT_QUERY_MIN_STAKE_WEI()
+        virtual override
+        public view
+        returns (uint256)
+    {
+        return DDR_REPORT_QUERY_MIN_STAKE_WEI(_getGasPrice());
+    }
+
+    function DDR_REPORT_QUERY_MIN_STAKE_WEI(uint256 evmGasPrice)
+        virtual override
+        public view
+        returns (uint256)
+    {
+        // 50% over given gas price
+        return (blocks.ROLLUP_MAX_GAS() * evmGasPrice * 15) / 10;
     }
 
 
@@ -135,6 +166,20 @@ contract WitnetRequestBoardTrustlessDefault
         __escrow_from.atStake -= value;
         __escrow_to.balance += value;
         emit Slashed(from, to, value);
+    }
+
+    function __unstake(address from, uint256 value)
+        virtual override
+        internal
+    {
+        Escrow storage __escrow = __storage().escrows[from];
+        require(
+            __escrow.atStake >= value,
+            "WitnetRequestBoardTrustlessDefault: insufficient stake"
+        );
+        __escrow.atStake -= value;
+        __escrow.balance += value;
+        emit Unstaked(from, value);
     }
 
     
@@ -226,27 +271,6 @@ contract WitnetRequestBoardTrustlessDefault
         return type(IWitnetRequestBoardV2).interfaceId;
     }
     
-    function nonce()
-        external view
-        virtual override
-        returns (uint256)
-    {
-        return __storage().nonce;
-    }
-
-    function tag()
-        public view 
-        virtual override
-        returns (bytes4)
-    {
-        return bytes4(keccak256(abi.encodePacked(
-            "evm:",
-            Witnet.toString(block.chainid),
-            ":",
-            Witnet.toHexString(address(this))
-        )));
-    }
-
     function estimateQueryReward(
             bytes32 radHash, 
             WitnetV2.RadonSLAv2 calldata slaParams,
@@ -260,13 +284,13 @@ contract WitnetRequestBoardTrustlessDefault
     {
         uint _queryMaxResultSize = registry.lookupRadonRequestResultMaxSize(radHash);
         uint _queryTotalWits = (
-            slaParams.witMinerFee * 3
+            slaParams.witMinMinerFee * 3
                 + slaParams.committeeSize * slaParams.witWitnessReward
         );
         return (
             witEvmPrice * _queryTotalWits
                 + evmMaxGasPrice * ( 
-                    __reportQueryMinGas
+                    _DDR_REPORT_QUERY_GAS_BASE
                         + _getSaveToStorageCost(2 + _queryMaxResultSize / 32)
                         + evmCallbackGasLimit
                         // TODO: + evmClaimQueryGasLimit
@@ -281,14 +305,16 @@ contract WitnetRequestBoardTrustlessDefault
         returns (
             WitnetV2.QueryStatus status,
             uint256 weiEvmReward,
+            uint256 weiEvmStake,
             bytes memory radBytecode,
             WitnetV2.RadonSLAv2 memory slaParams
         )
     {
-        status = _statusOf(queryHash, blocks);
+        status = checkQueryStatus(queryHash);
         WitnetV2.Query storage __query = __query_(queryHash);
         WitnetV2.QueryRequest storage __request = __query.request;
         weiEvmReward = __query.weiReward;
+        weiEvmStake = __query.weiStake;
         radBytecode = registry.bytecodeOf(__request.radHash);
         slaParams = WitnetV2.toRadonSLAv2(__request.packedSLA);
     }
@@ -301,7 +327,7 @@ contract WitnetRequestBoardTrustlessDefault
             uint256 weiEvmReward
         )
     {
-        status = _statusOf(queryHash, blocks);
+        status = checkQueryStatus(queryHash);
         weiEvmReward = __query_(queryHash).weiReward;
     }
 
@@ -358,15 +384,39 @@ contract WitnetRequestBoardTrustlessDefault
         virtual override
         returns (Witnet.Result memory)
     {
-        return Witnet.resultFromCborBytes(__report_(queryHash).resultCborBytes);
+        return Witnet.resultFromCborBytes(__report_(queryHash).tallyCborBytes);
     }
 
     function checkQueryStatus(bytes32 queryHash)
-        external view
+        public view
         virtual override
         returns (WitnetV2.QueryStatus)
     {
-        return _statusOf(queryHash, blocks);
+        WitnetV2.Query storage __query = __query_(queryHash);
+        if (__query.reporter != address(0)) {
+            if (__query.disputes.length > 0) {
+                // disputed or finalized
+                if (blocks.getLastBeaconEpoch() > __query.reportEpoch) {
+                    return WitnetV2.QueryStatus.Finalized;
+                } else {
+                    return WitnetV2.QueryStatus.Disputed;
+                }
+            } else {
+                // reported or finalized
+                return WitnetV2.checkQueryReportStatus(
+                    __query.reportEpoch, 
+                    blocks.getCurrentEpoch()
+                );
+            }
+        } else if (__query.from != address(0)) {
+            // posted, delayed or expired
+            return WitnetV2.checkQueryPostStatus(
+                __query.postEpoch,
+                blocks.getCurrentEpoch()
+            );
+        } else {
+            return WitnetV2.QueryStatus.Void;
+        }
     }
     
     function checkQueryResultStatus(bytes32 queryHash)
@@ -374,23 +424,20 @@ contract WitnetRequestBoardTrustlessDefault
         virtual override
         returns (Witnet.ResultStatus)
     {
-        WitnetV2.QueryStatus _queryStatus = _statusOf(queryHash, blocks);
-        if (
-            _queryStatus == WitnetV2.QueryStatus.Posted
-                || _queryStatus == WitnetV2.QueryStatus.Delayed
-        ) {
-            return Witnet.ResultStatus.Awaiting;
-        } else if (_queryStatus == WitnetV2.QueryStatus.Reported) {
+        WitnetV2.QueryStatus _queryStatus = checkQueryStatus(queryHash);
+        if (_queryStatus == WitnetV2.QueryStatus.Finalized) {
             // determine whether reported result is an error by peeking the first byte
-            return (__report_(queryHash).resultCborBytes[0] == bytes1(0xd8) 
+            return (__report_(queryHash).tallyCborBytes[0] == bytes1(0xd8) 
                 ? Witnet.ResultStatus.Error
                 : Witnet.ResultStatus.Ready
             );
         } else if (_queryStatus == WitnetV2.QueryStatus.Expired) {
             return Witnet.ResultStatus.Expired;
-        } else {
+        } else if (_queryStatus == WitnetV2.QueryStatus.Void) {
             return Witnet.ResultStatus.Void;
-        } 
+        } else {
+            return Witnet.ResultStatus.Awaiting;
+        }
     }
     
     function checkQueryResultError(bytes32 queryHash)
@@ -415,7 +462,7 @@ contract WitnetRequestBoardTrustlessDefault
                 reason: "Witnet: Board: unknown query"
             });
         } else {
-            try WitnetErrorsLib.resultErrorFromCborBytes(__report_(queryHash).resultCborBytes)
+            try WitnetErrorsLib.resultErrorFromCborBytes(__report_(queryHash).tallyCborBytes)
                 returns (Witnet.ResultError memory _error)
             {
                 return _error;
@@ -465,17 +512,25 @@ contract WitnetRequestBoardTrustlessDefault
             WitnetV2.isValid(slaParams),
             "WitnetRequestBoardTrustlessDefault: invalid SLA"
         );
+        bytes32 packedSLA = WitnetV2.pack(slaParams);
+        uint256 postEpoch = blocks.getCurrentEpoch();
         queryHash = keccak256(abi.encodePacked(
-            block.chainid,
-            blockhash(block.number - 1), 
-            __storage().nonce ++
+            DDR_QUERY_TAG,
+            radHash,
+            packedSLA,
+            postEpoch
         ));
         WitnetV2.Query storage __query = __storage().queries[queryHash];
-        __query.epoch = blocks.getCurrentBeaconIndex();
+        require(
+            __query.postEpoch == 0,
+            "WitnetRequestBoardTrustlessDefault: already posted"
+        );
+        __query.postEpoch = postEpoch;
         __query.weiReward = msg.value;
+        __query.weiStake = DDR_REPORT_QUERY_MIN_STAKE_WEI();
         __query.request = WitnetV2.QueryRequest({
             radHash: radHash, 
-            packedSLA: WitnetV2.pack(slaParams)
+            packedSLA: packedSLA
         });
         if (address(queryCallback) != address(0)) {
             require(
@@ -502,11 +557,12 @@ contract WitnetRequestBoardTrustlessDefault
         address _requester = __query.from;
         address _reporter = __query.reporter;
         uint256 _weiReward = __query.weiReward;
+        uint256 _weiStake = __query.weiStake;
         require(
             msg.sender == __query.from,
             "WitnetRequestBoardTrustlessDefault: not the requester"
         );
-        WitnetV2.QueryStatus _queryStatus = _statusOf(queryHash, blocks);
+        WitnetV2.QueryStatus _queryStatus = checkQueryStatus(queryHash);
         if (
             _queryStatus == WitnetV2.QueryStatus.Finalized
                 || _queryStatus == WitnetV2.QueryStatus.Expired
@@ -524,6 +580,9 @@ contract WitnetRequestBoardTrustlessDefault
                     __receive(_reporter, _weiReward);
                 }
             }
+            if (_weiStake > 0) {
+                __unstake(_reporter, _weiStake);
+            }
         } else {
             revert("WitnetRequestBoardTrustlessDefault: not in current status");
         }
@@ -531,19 +590,36 @@ contract WitnetRequestBoardTrustlessDefault
 
     function reportQuery(
             bytes32 queryHash,
+            bytes calldata relayerSignature,
             WitnetV2.QueryReport calldata queryReport
         )
         public 
         virtual override
         stakes(queryHash)
-        queryInStatus(queryHash, WitnetV2.QueryStatus.Posted)
     {
         WitnetV2.Query storage __query = __query_(queryHash);
-        WitnetV2.QueryCallback storage __callback = __query.callback;
-        {
+        WitnetV2.QueryStatus _queryStatus = checkQueryStatus(queryHash);
+        if (
+            _queryStatus == WitnetV2.QueryStatus.Delayed
+            || (
+                _queryStatus == WitnetV2.QueryStatus.Posted
+                    && Witnet.recoverAddr(queryHash, relayerSignature) == msg.sender
+                    && msg.sender == queryReport.relayer
+            )
+        ) {
             __query.reporter = msg.sender;
-            __query.report = queryReport;
+        } else {
+            revert("WitnetRequestBoardTrustlessDefault: unauthorized report");
         }
+        uint _tallyBeaconIndex = WitnetV2.beaconIndexFromEpoch(queryReport.tallyEpoch);
+        uint _postBeaconIndex = WitnetV2.beaconIndexFromEpoch(__query.postEpoch);
+        require(
+            _tallyBeaconIndex >= _postBeaconIndex && _tallyBeaconIndex <= _postBeaconIndex + 1, 
+            "WitnetRequestBoardTrustlessDefault: too late tally"
+        );
+        __query.reportEpoch = blocks.getCurrentEpoch();
+        __query.report = queryReport;
+        WitnetV2.QueryCallback storage __callback = __query.callback;
         if (__callback.addr != address(0)) {
             IWitnetRequestCallback(__callback.addr).settleWitnetQueryReport{gas: __callback.gas}(
                 queryHash,
@@ -558,46 +634,24 @@ contract WitnetRequestBoardTrustlessDefault
     }
 
     function reportQueryBatch(
-            bytes32[] calldata queryHashes, 
-            WitnetV2.QueryReport[] calldata queryReports
+            bytes32[] calldata hashes,
+            bytes[] calldata signatures,
+            WitnetV2.QueryReport[] calldata reports
         )
         external 
         virtual override
     {
         require(
-            queryHashes.length == queryReports.length,
-            "WitnetRequestBoardTrustlessDefault: length mismatch"
+            hashes.length == reports.length
+                && hashes.length == signatures.length,
+            "WitnetRequestBoardTrustlessDefault: arrays mismatch"
         );
-        for (uint _ix = 0; _ix < queryHashes.length; _ix ++) {
-            require(
-                _statusOf(queryHashes[_ix], blocks) == WitnetV2.QueryStatus.Posted,
-                string(abi.encodePacked(
-                    "WitnetRequestBoardTrustlessDefault: not in Posted status: index ",
-                    Witnet.toString(_ix)
-                ))
-            );
-            reportQuery(queryHashes[_ix], queryReports[_ix]);
+        for (uint _ix = 0; _ix < hashes.length; _ix ++) {
+            WitnetV2.QueryStatus _status = checkQueryStatus(hashes[_ix]);
+            if (_status == WitnetV2.QueryStatus.Posted || _status == WitnetV2.QueryStatus.Delayed) {
+                reportQuery(hashes[_ix], signatures[_ix], reports[_ix]);
+            }
         }
-    }
-
-    function claimQueryReward(bytes32 queryHash)
-        external
-        virtual override
-        queryInStatus(queryHash, WitnetV2.QueryStatus.Finalized)
-        returns (uint256 _weiReward)
-    {
-        WitnetV2.Query storage __query = __query_(queryHash);
-        _weiReward = __query.weiReward;
-        require(
-            msg.sender == __query.reporter,
-            "WitnetRequestBoardTrustlessDefault: not the reporter"
-        );
-        require(
-            __query.weiReward > 0,
-            "WitnetRequestBoardTrustlessDefault: already claimed"
-        );
-        __query.weiReward = 0;
-        __receive(__query.reporter, _weiReward);
     }
 
     function disputeQuery(
@@ -608,21 +662,91 @@ contract WitnetRequestBoardTrustlessDefault
         virtual override
         stakes(queryHash)
     {
-        WitnetV2.QueryStatus queryStatus = _statusOf(queryHash, blocks);
+        WitnetV2.QueryStatus queryStatus = checkQueryStatus(queryHash);
         if (
             queryStatus == WitnetV2.QueryStatus.Reported
                 || queryStatus == WitnetV2.QueryStatus.Delayed
                 || queryStatus == WitnetV2.QueryStatus.Disputed
         ) {
             WitnetV2.Query storage __query = __query_(queryHash);
+            uint _tallyBeaconIndex = WitnetV2.beaconIndexFromEpoch(queryReport.tallyEpoch);
+            uint _postBeaconIndex = WitnetV2.beaconIndexFromEpoch(__query.postEpoch);
+            require(
+                _tallyBeaconIndex >= _postBeaconIndex
+                    && _tallyBeaconIndex <= _postBeaconIndex + 1,
+                "WitnetRequestBoardTrustlessDefault: too late tally"
+            );
             __query.disputes.push(WitnetV2.QueryDispute({
                 disputer: msg.sender,
                 report: queryReport
             }));
-            emit DisputedQuery(msg.sender, queryHash);
+            if (__query.disputes.length == 1 && __query.reporter != address(0)) {
+                // upon first dispute, append reporter's tallyHash
+                __storage().suitors[__query.report.tallyHash(queryHash)] = Suitor({
+                    index: 0,
+                    queryHash: queryHash
+                });
+            }
+            bytes32 _tallyHash = queryReport.tallyHash(queryHash);
+            require(
+                __storage().suitors[_tallyHash].queryHash == bytes32(0),
+                "WitnetRequestBoardTrustlessDefault: replayed dispute"
+            );
+            __storage().suitors[_tallyHash] = Suitor({
+                index: __query.disputes.length,
+                queryHash: queryHash
+            });
+            // settle query dispute on WitnetBlocks
+            blocks.disputeQuery(queryHash, _tallyBeaconIndex);
+            // emit event
+            emit DisputedQuery(
+                msg.sender, 
+                queryHash, 
+                _tallyHash
+            );
         } else {
-            revert("WitnetRequestBoardTrustlessDefault: not in this status");
+            revert("WitnetRequestBoardTrustlessDefault: not disputable");
         }
+    }
+
+    function claimQueryReward(bytes32 queryHash)
+        external
+        virtual override
+        queryInStatus(queryHash, WitnetV2.QueryStatus.Finalized)
+        returns (uint256 _weiReward)
+    {
+        WitnetV2.Query storage __query = __query_(queryHash);
+        require(
+            msg.sender == __query.reporter,
+            "WitnetRequestBoardTrustlessDefault: not the reporter"
+        );
+        _weiReward = __query.weiReward;
+        if (_weiReward > 0) {
+            __query.weiReward = 0;
+            __receive(__query.reporter, _weiReward);
+        } else {
+            revert("WitnetRequestBoardTrustlessDefault: already claimed");
+        }
+        uint _weiStake = __query.weiStake;
+        if (_weiStake > 0) {
+            __query.weiStake = 0;
+            __unstake(__query.reporter, _weiStake);
+        }
+    }
+
+    function determineQueryTallyHash(bytes32)
+        virtual override
+        external
+        returns (
+            bytes32,
+            uint256
+        )
+    {
+        require(
+            msg.sender == address(blocks),
+            "WitnetRequestBoardTrustlessDefault: unauthorized"
+        );
+        // TODO
     }
 
 
@@ -631,6 +755,41 @@ contract WitnetRequestBoardTrustlessDefault
 
     function _getSaveToStorageCost(uint256 words) virtual internal pure returns (uint256) {
         return words * 20000;
+    }
+
+    function _queryNotInStatusRevertMessage(WitnetV2.QueryStatus queryStatus)
+        internal pure
+        returns (string memory)
+    {
+        string memory _reason;
+        if (queryStatus == WitnetV2.QueryStatus.Posted) {
+            _reason = "Posted";
+        } else if (queryStatus == WitnetV2.QueryStatus.Reported) {
+            _reason = "Reported";
+        } else if (queryStatus == WitnetV2.QueryStatus.Disputed) {
+            _reason = "Disputed";
+        } else if (queryStatus == WitnetV2.QueryStatus.Expired) {
+            _reason = "Expired";
+        } else if (queryStatus == WitnetV2.QueryStatus.Finalized) {
+            _reason = "Finalized";
+        } else {
+            _reason = "expected";
+        }
+        return string(abi.encodePacked(
+            "WitnetRequestBoardTrustlessDefault: not in ", 
+            _reason,
+            " status"
+        ));
+    }
+
+    function _max(uint a, uint b) internal pure returns (uint256) {
+        unchecked {
+            if (a >= b) {
+                return a;
+            } else {
+                return b;
+            }
+        }
     }
 
 }
