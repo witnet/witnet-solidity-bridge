@@ -22,7 +22,7 @@ library WitnetBuffer {
 
   // Ensures we access an existing index in an array
   modifier withinRange(uint index, uint _range) {
-    if (index >= _range) {
+    if (index > _range) {
       revert IndexOutOfBounds(index, _range);
     }
     _;
@@ -92,7 +92,7 @@ library WitnetBuffer {
       bytes memory pokes
     )
     internal pure
-    withinRange(length, buffer.data.length - buffer.cursor)
+    withinRange(length, buffer.data.length - buffer.cursor + 1)
   {
     bytes[] memory parts = new bytes[](3);
     parts[0] = peek(
@@ -114,7 +114,7 @@ library WitnetBuffer {
   /// @return The next byte in the buffer counting from the cursor position.
   function next(Buffer memory buffer)
     internal pure
-    withinRange(buffer.cursor, buffer.data.length + 1)
+    withinRange(buffer.cursor, buffer.data.length)
     returns (bytes1)
   {
     // Return the byte at the position marked by the cursor and advance the cursor all at once
@@ -127,7 +127,7 @@ library WitnetBuffer {
       uint length
     )
     internal pure
-    withinRange(offset + length, buffer.data.length + 1)
+    withinRange(offset + length, buffer.data.length)
     returns (bytes memory)
   {
     bytes memory data = buffer.data;
@@ -155,7 +155,7 @@ library WitnetBuffer {
       uint length
     )
     internal pure
-    withinRange(length, buffer.data.length - buffer.cursor + 1)
+    withinRange(length, buffer.data.length - buffer.cursor)
     returns (bytes memory)
   {
     return peek(
@@ -171,7 +171,7 @@ library WitnetBuffer {
   /// @return output A `bytes memory` containing the first `length` bytes from the buffer, counting from the cursor position.
   function read(Buffer memory buffer, uint length)
     internal pure
-    withinRange(buffer.cursor + length, buffer.data.length + 1)
+    withinRange(buffer.cursor + length, buffer.data.length)
     returns (bytes memory output)
   {
     // Create a new `bytes memory destination` value
@@ -415,7 +415,7 @@ library WitnetBuffer {
   /// @return value The `uint16` value of the next 2 bytes in the buffer counting from the cursor position.
   function readUint16(Buffer memory buffer)
     internal pure
-    withinRange(buffer.cursor + 1, buffer.data.length)
+    withinRange(buffer.cursor + 2, buffer.data.length)
     returns (uint16 value)
   {
     bytes memory data = buffer.data;
@@ -431,7 +431,7 @@ library WitnetBuffer {
   /// @return value The `uint32` value of the next 4 bytes in the buffer counting from the cursor position.
   function readUint32(Buffer memory buffer)
     internal pure
-    withinRange(buffer.cursor + 3, buffer.data.length)
+    withinRange(buffer.cursor + 4, buffer.data.length)
     returns (uint32 value)
   {
     bytes memory data = buffer.data;
@@ -447,7 +447,7 @@ library WitnetBuffer {
   /// @return value The `uint64` value of the next 8 bytes in the buffer counting from the cursor position.
   function readUint64(Buffer memory buffer)
     internal pure
-    withinRange(buffer.cursor + 7, buffer.data.length)
+    withinRange(buffer.cursor + 8, buffer.data.length)
     returns (uint64 value)
   {
     bytes memory data = buffer.data;
@@ -463,7 +463,7 @@ library WitnetBuffer {
   /// @return value The `uint128` value of the next 16 bytes in the buffer counting from the cursor position.
   function readUint128(Buffer memory buffer)
     internal pure
-    withinRange(buffer.cursor + 15, buffer.data.length)
+    withinRange(buffer.cursor + 16, buffer.data.length)
     returns (uint128 value)
   {
     bytes memory data = buffer.data;
@@ -479,7 +479,7 @@ library WitnetBuffer {
   /// @return value The `uint256` value of the next 32 bytes in the buffer counting from the cursor position.
   function readUint256(Buffer memory buffer)
     internal pure
-    withinRange(buffer.cursor + 31, buffer.data.length)
+    withinRange(buffer.cursor + 32, buffer.data.length)
     returns (uint256 value)
   {
     bytes memory data = buffer.data;
@@ -632,7 +632,7 @@ library WitnetBuffer {
       bool relative
     )
     internal pure
-    withinRange(offset, buffer.data.length + 1)
+    withinRange(offset, buffer.data.length)
     returns (uint)
   {
     // Deal with relative offsets
