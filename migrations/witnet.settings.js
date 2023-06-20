@@ -329,7 +329,6 @@ module.exports = {
         verify: {
           apiUrl: "https://esc-testnet.elastos.io/api",
           browserURL: "https://esc-testnet.elastos.io/address",
-          apiKey: "D75NV1MFN41XRSE9SWV9BA3QZKUD1U9RM3",
         },
       },
       "elastos.mainnet": {
@@ -340,7 +339,6 @@ module.exports = {
         verify: {
           apiUrl: "https://esc.elastos.io/api",
           browserURL: "https://esc.elastos.io/address",
-          apiKey: "D75NV1MFN41XRSE9SWV9BA3QZKUD1U9RM3",
         },
       },
     },
