@@ -84,6 +84,25 @@
             "WitnetRequestFactoryImplementation": "0x2163DBCBdbBeC066EF8d8Adab75Af8b0B9A5cfAA",
             "WitnetRequestRandomness": "0x620e20d91C9b0e11ecAE439E7b85138DA2a1003F"
         },
+        "boba.bnb.mainnet": {
+            "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
+            "WitnetPriceFeeds": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
+            "WitnetPriceRouter": "0x62a1b1D6E5bA031846894FC5C3609f586c78D23D",
+            "WitnetRandomness": "0x88888885966F8F77cC6E797aE263C4d091e44A55",
+            "WitnetRequestBoard": "0x777777772C24e6CD34B464D1d71616C444254537",
+            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
+            "WitnetErrorsLib": "0x1225A47bC743199dFef9FEEf065b3B76695AaaaC",
+            "WitnetEncodingLib": "0xF503A52bEcF03d9d5fc85459906a4d280142B1cd",
+            "WitnetPriceFeedsLib": "0x7AA219C444f68eDBD5789d89076efA8A3f09996b",
+            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetProxy": "0x0Dd81412825b9C3960195ab47F14dFa9Fd70e36e",
+            "WitnetBytecodesImplementation": "0xa239729c399c9eBae7fdc188A1Dbb2c4a06Cd4Bb",
+            "WitnetPriceFeedsImplementation": "0xc45c93083F7B97Cdb700D4D2ADE6a727E04793ff",
+            "WitnetRandomnessImplementation": "0xC467B6E0F700D3E044C9F20BB76957eEC0B33c8C",
+            "WitnetRequestBoardImplementation": "0xD111C0ef9A8FA71a66E37255d255abd8879D143C",
+            "WitnetRequestFactoryImplementation": "0x4756097b9184327713D07b3ac4C2a898468220B1",
+            "WitnetRequestRandomness": "0xA99B485363DBAe90D17B10F988C4e1Ae895048e0"
+        },
         "boba.moonbeam.bobabase": {
             "WitnetLib": "0x02Cd4089679EAA9431a88170fd784e7dE78A2425",
             "WitnetPriceRouter": "0xD9465D38f50f364b3263Cb219e58d4dB2D584530",

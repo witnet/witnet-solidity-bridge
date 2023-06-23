@@ -12,7 +12,7 @@ The repository also provides:
 
 - `UsingWitnet`, an inheritable abstract contract that injects methods for conveniently interacting with the WRB.
 - `WitnetRequest`, used as a means to encapsulate unmodifiable Witnet Data Requests.
-- `WitnetRequestBase`, useful as a base contract to implement your own modifiable Witnet Data Requests.
+- `WitnetRequestPrecompiled`, useful as a base contract to implement your own modifiable Witnet Data Requests.
 
 
 ## **WitnetProxy**
