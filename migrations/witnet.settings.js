@@ -205,6 +205,17 @@ module.exports = {
           apiKey: "MY_API_KEY",
         },
       },
+      "boba.bnb.mainnet": {
+        network_id: 56288,
+        host: "localhost",
+        port: 9510,
+        skipDryRun: true,
+        verify: {
+          apiUrl: "https://blockexplorer.bnb.boba.network/api",
+          browserURL: "https://blockexplorer.bnb.boba.network/",
+          apiKey: "MY_API_KEY",
+        },
+      },
       "boba.moonbeam.bobabase": {
         network_id: 1297,
         host: "localhost",
