@@ -3,28 +3,21 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "ado-contracts/contracts/interfaces/IERC2362.sol";
-
-import "../../WitnetFeeds.sol";
+import "../../WitnetPriceFeeds.sol";
 import "../../data/WitnetPriceFeedsData.sol";
 import "../../impls/WitnetUpgradableBase.sol";
-import "../../interfaces/V2/IWitnetPriceFeeds.sol";
-import "../../interfaces/V2/IWitnetPriceSolver.sol";
 
-import "../../libs/Slices.sol";
+import "../../interfaces/V2/IWitnetPriceSolver.sol";
+import "../../libs/WitnetPriceFeedsLib.sol";
 
 /// @title WitnetPriceFeedsUpgradable: ...
 /// @author Witnet Foundation.
 contract WitnetPriceFeedsUpgradable
     is
-        IERC2362,
-        IWitnetPriceFeeds,
-        WitnetFeeds,
+        WitnetPriceFeeds,
         WitnetPriceFeedsData,
         WitnetUpgradableBase
 {
-    using Slices for string;
-    using Slices for Slices.Slice;
     using Witnet for Witnet.Result;
     using WitnetV2 for WitnetV2.RadonSLA;
     
@@ -33,11 +26,7 @@ contract WitnetPriceFeedsUpgradable
             bool _upgradable,
             bytes32 _version
         )
-        WitnetFeeds(
-            _wrb,
-            WitnetV2.RadonDataTypes.Integer,
-            "Price-"
-        )
+        WitnetPriceFeeds(_wrb)
         WitnetUpgradableBase(
             _upgradable,
             _version,
@@ -71,6 +60,10 @@ contract WitnetPriceFeedsUpgradable
         }
     }
 
+    function class() virtual override external pure returns (bytes4) {
+        return type(WitnetPriceFeeds).interfaceId;
+    }
+
 
     // ================================================================================================================
     // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
@@ -100,11 +93,12 @@ contract WitnetPriceFeedsUpgradable
         );
         if (__storage().defaultSlaHash == 0) {
             settleDefaultRadonSLA(WitnetV2.RadonSLA({
-                numWitnesses: 7,
+                numWitnesses: 5,
                 witnessCollateral: 15 * 10 ** 9,
-                witnessReward: 15* 10 ** 7,
+                witnessReward: 15 * 10 ** 7,
                 minerCommitRevealFee: 10 ** 7,
-                minConsensusPercentage: 51
+                minConsensusPercentage: 51,
+                minMinerFee: 0
             }));
         }
         __proxiable().implementation = base();
@@ -589,6 +583,33 @@ contract WitnetPriceFeedsUpgradable
 
 
     // ================================================================================================================
+    // --- Implements 'IWitnetPriceSolverDeployer' ---------------------------------------------------------------------
+
+    function deployPriceSolver(bytes calldata initcode, bytes calldata constructorParams)
+        virtual override
+        external
+        onlyOwner
+        returns (address _solver)
+    {
+        _solver = WitnetPriceFeedsLib.deployPriceSolver(initcode, constructorParams);
+        emit WitnetPriceSolverDeployed(
+            msg.sender, 
+            _solver, 
+            _solver.codehash, 
+            constructorParams
+        );
+    }
+
+    function determinePriceSolverAddress(bytes calldata initcode, bytes calldata constructorParams)
+        virtual override
+        public view
+        returns (address _address)
+    {
+        return WitnetPriceFeedsLib.determinePriceSolverAddress(initcode, constructorParams);
+    }
+
+
+    // ================================================================================================================
     // --- Implements 'IERC2362' --------------------------------------------------------------------------------------
     
     function valueFor(bytes32 feedId)
@@ -641,18 +662,13 @@ contract WitnetPriceFeedsUpgradable
     function _validateCaption(string calldata caption)
         internal view returns (uint8)
     {
-        require(
-            bytes6(bytes(caption)) == bytes6(__prefix),
-            "WitnetPriceFeedsUpgradable: bad caption prefix"
-        );
-        Slices.Slice memory _caption = caption.toSlice();
-        Slices.Slice memory _delim = string("-").toSlice();
-        string[] memory _parts = new string[](_caption.count(_delim) + 1);
-        for (uint _ix = 0; _ix < _parts.length; _ix ++) {
-            _parts[_ix] = _caption.split(_delim).toString();
+        try WitnetPriceFeedsLib.validateCaption(__prefix, caption) returns (uint8 _decimals) {
+            return _decimals;
+        } catch Error(string memory reason) {
+            revert(string(abi.encodePacked(
+                "WitnetPriceFeedsUpgradable: ", 
+                reason
+            )));
         }
-        (uint _decimals, bool _success) = Witnet.tryUint(_parts[_parts.length - 1]);
-        require(_success, "WitnetPriceFeedsUpgradable: bad decimals");
-        return uint8(_decimals);
     }
 }

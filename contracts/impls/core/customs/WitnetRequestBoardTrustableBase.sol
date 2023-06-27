@@ -31,7 +31,7 @@ abstract contract WitnetRequestBoardTrustableBase
             WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
-            address _currency
+            IERC20 _currency
         )
         Payable(_currency)
         WitnetUpgradableBase(
@@ -44,6 +44,15 @@ abstract contract WitnetRequestBoardTrustableBase
 
     receive() external payable {
         revert("WitnetRequestBoardTrustableBase: no transfers accepted");
+    }
+
+    function class() virtual override external pure returns (bytes4) {
+        return (
+            type(IWitnetRequestBoardDeprecating).interfaceId
+                ^ type(IWitnetRequestBoardReporter).interfaceId
+                ^ type(IWitnetRequestBoardRequestor).interfaceId
+                ^ type(IWitnetRequestBoardView).interfaceId
+        );
     }
 
 
@@ -205,7 +214,7 @@ abstract contract WitnetRequestBoardTrustableBase
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
         // solhint-disable not-rely-on-time
-        _safeTransferTo(
+        __safeTransferTo(
             payable(msg.sender),
             __reportResult(
                 _queryId,
@@ -243,7 +252,7 @@ abstract contract WitnetRequestBoardTrustableBase
         // Ensures the result bytes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
-        _safeTransferTo(
+        __safeTransferTo(
             payable(msg.sender),
             __reportResult(
                 _queryId,
@@ -319,7 +328,7 @@ abstract contract WitnetRequestBoardTrustableBase
         }   
         // Transfer all successful rewards in one single shot to the authorized reporter, if any:
         if (_batchReward > 0) {
-            _safeTransferTo(
+            __safeTransferTo(
                 payable(msg.sender),
                 _batchReward
             );

@@ -23,6 +23,31 @@ library WitnetEncodingLib {
             // ff010203050406070101ffffffffffff
             // 02ff050404000106060707ffffffffff
 
+    error RadonFilterMissingArgs(uint8 opcode);
+    
+    error RadonRequestNoSources();
+    error RadonRequestSourcesArgsMismatch(uint expected, uint actual);
+    error RadonRequestMissingArgs(uint index, uint expected, uint actual);
+    error RadonRequestResultsMismatch(uint index, uint8 read, uint8 expected);
+    error RadonRequestTooHeavy(bytes bytecode, uint weight);
+
+    error RadonSlaNoReward();
+    error RadonSlaNoWitnesses();
+    error RadonSlaTooManyWitnesses(uint256 numWitnesses);
+    error RadonSlaConsensusOutOfRange(uint256 percentage);
+    error RadonSlaLowCollateral(uint256 witnessCollateral);
+
+    error UnsupportedDataRequestMethod(uint8 method, string schema, string body, string[2][] headers);
+    error UnsupportedRadonDataType(uint8 datatype, uint256 maxlength);
+    error UnsupportedRadonFilterOpcode(uint8 opcode);
+    error UnsupportedRadonFilterArgs(uint8 opcode, bytes args);
+    error UnsupportedRadonReducerOpcode(uint8 opcode);
+    error UnsupportedRadonReducerScript(uint8 opcode, bytes script, uint256 offset);
+    error UnsupportedRadonScript(bytes script, uint256 offset);
+    error UnsupportedRadonScriptOpcode(bytes script, uint256 cursor, uint8 opcode);
+    error UnsupportedRadonTallyScript(bytes32 hash);
+    
+    
     /// ===============================================================================================================
     /// --- WitnetLib internal methods --------------------------------------------------------------------------------
 
@@ -335,7 +360,7 @@ library WitnetEncodingLib {
                 && headers.length == 0
                 && script.length >= 1
         )) {
-            revert WitnetV2.UnsupportedDataRequestMethod(
+            revert UnsupportedDataRequestMethod(
                 uint8(method),
                 schema,
                 body,
@@ -368,7 +393,7 @@ library WitnetEncodingLib {
                 || dataType == WitnetV2.RadonDataTypes.Array
         ) {
             if (/*maxDataSize == 0 ||*/maxDataSize > 2048) {
-                revert WitnetV2.UnsupportedRadonDataType(
+                revert UnsupportedRadonDataType(
                     uint8(dataType),
                     maxDataSize
                 );
@@ -381,7 +406,7 @@ library WitnetEncodingLib {
         ) {
             return 0; // TBD: size(dataType);
         } else {
-            revert WitnetV2.UnsupportedRadonDataType(
+            revert UnsupportedRadonDataType(
                 uint8(dataType),
                 size(dataType)
             );
@@ -396,18 +421,18 @@ library WitnetEncodingLib {
         ) {
             // check filters that require arguments
             if (filter.args.length == 0) {
-                revert WitnetV2.RadonFilterMissingArgs(uint8(filter.opcode));
+                revert RadonFilterMissingArgs(uint8(filter.opcode));
             }
         } else if (
             filter.opcode == WitnetV2.RadonFilterOpcodes.Mode
         ) {
             // check filters that don't require any arguments
             if (filter.args.length > 0) {
-                revert WitnetV2.UnsupportedRadonFilterArgs(uint8(filter.opcode), filter.args);
+                revert UnsupportedRadonFilterArgs(uint8(filter.opcode), filter.args);
             }
         } else {
             // reject unsupported opcodes
-            revert WitnetV2.UnsupportedRadonFilterOpcode(uint8(filter.opcode));
+            revert UnsupportedRadonFilterOpcode(uint8(filter.opcode));
         }
     }
 
@@ -422,14 +447,14 @@ library WitnetEncodingLib {
                     || reducer.opcode == WitnetV2.RadonReducerOpcodes.ConcatenateAndHash
                     || reducer.opcode == WitnetV2.RadonReducerOpcodes.AverageMedian
             )) {
-                revert WitnetV2.UnsupportedRadonReducerOpcode(uint8(reducer.opcode));
+                revert UnsupportedRadonReducerOpcode(uint8(reducer.opcode));
             }
             for (uint ix = 0; ix < reducer.filters.length; ix ++) {
                 validate(reducer.filters[ix]);
             }
         } else {
             if (uint8(reducer.opcode) != 0xff || reducer.filters.length > 0) {
-                revert WitnetV2.UnsupportedRadonReducerScript(
+                revert UnsupportedRadonReducerScript(
                     uint8(reducer.opcode),
                     reducer.script,
                     0
@@ -442,21 +467,21 @@ library WitnetEncodingLib {
         public pure
     {
         if (sla.witnessReward == 0) {
-            revert WitnetV2.RadonSlaNoReward();
+            revert RadonSlaNoReward();
         }
         if (sla.numWitnesses == 0) {
-            revert WitnetV2.RadonSlaNoWitnesses();
+            revert RadonSlaNoWitnesses();
         } else if (sla.numWitnesses > 127) {
-            revert WitnetV2.RadonSlaTooManyWitnesses(sla.numWitnesses);
+            revert RadonSlaTooManyWitnesses(sla.numWitnesses);
         }
         if (
             sla.minConsensusPercentage < 51 
                 || sla.minConsensusPercentage > 99
         ) {
-            revert WitnetV2.RadonSlaConsensusOutOfRange(sla.minConsensusPercentage);
+            revert RadonSlaConsensusOutOfRange(sla.minConsensusPercentage);
         }
         if (sla.witnessCollateral < 10 ** 9) {
-            revert WitnetV2.RadonSlaLowCollateral(sla.witnessCollateral);
+            revert RadonSlaLowCollateral(sla.witnessCollateral);
         }
     }
 
@@ -517,7 +542,7 @@ library WitnetEncodingLib {
                 : uint8(WITNET_RADON_OPCODES_RESULT_TYPES[opcode])
             );
             if (dataType > uint8(type(WitnetV2.RadonDataTypes).max)) {
-                revert WitnetV2.UnsupportedRadonScriptOpcode(
+                revert UnsupportedRadonScriptOpcode(
                     self.buffer.data,
                     cursor,
                     uint8(opcode)

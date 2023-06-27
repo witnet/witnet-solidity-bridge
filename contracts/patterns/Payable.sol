@@ -7,10 +7,10 @@ import "../interfaces/IERC20.sol";
 abstract contract Payable {
     IERC20 public immutable currency;
 
-    event Received(address from, uint256 value);
-    event Transfer(address to, uint256 value);
+    event Received(address indexed from, uint256 value);
+    event Transfer(address indexed to, uint256 value);
 
-    constructor(address _currency) {
+    constructor(IERC20 _currency) {
         currency = IERC20(_currency);
     }
 
@@ -21,5 +21,5 @@ abstract contract Payable {
     function _getMsgValue() internal view virtual returns (uint256);
 
     /// Perform safe transfer or whatever token is used for paying rewards.
-    function _safeTransferTo(address payable, uint256) internal virtual;
+    function __safeTransferTo(address payable, uint256) internal virtual;
 }

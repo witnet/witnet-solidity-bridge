@@ -194,6 +194,17 @@ module.exports = {
       },
     },
     boba: {
+      "boba.bnb.testnet": {
+        network_id: 9728,
+        host: "localhost",
+        port: 8510,
+        skipDryRun: true,
+        verify: {
+          apiUrl: "https://blockexplorer.testnet.bnb.boba.network/api",
+          browserURL: "https://blockexplorer.testnet.bnb.boba.network/",
+          apiKey: "MY_API_KEY",
+        },
+      },
       "boba.moonbeam.bobabase": {
         network_id: 1297,
         host: "localhost",
@@ -318,7 +329,7 @@ module.exports = {
         verify: {
           apiUrl: "https://esc-testnet.elastos.io/api",
           browserURL: "https://esc-testnet.elastos.io/address",
-          apiKey: "MY-API-KEY",
+          apiKey: "D75NV1MFN41XRSE9SWV9BA3QZKUD1U9RM3",
         },
       },
       "elastos.mainnet": {
@@ -329,6 +340,7 @@ module.exports = {
         verify: {
           apiUrl: "https://esc.elastos.io/api",
           browserURL: "https://esc.elastos.io/address",
+          apiKey: "D75NV1MFN41XRSE9SWV9BA3QZKUD1U9RM3",
         },
       },
     },

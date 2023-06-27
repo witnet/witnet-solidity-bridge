@@ -207,15 +207,15 @@ contract WitnetRequestFactoryDefault
                 _tally,
                 _resultDataMaxSize
             ));
-            emit WitnetRequestTemplateBuilt(
-                _template,
-                WitnetRequestTemplate(_template).parameterized()
-            );
         }
+        emit WitnetRequestTemplateBuilt(
+            _template,
+            WitnetRequestTemplate(_template).parameterized()
+        );
     }
 
     function class() 
-        virtual override(IWitnetRequestFactory, WitnetRequestTemplate)
+        virtual override(IWitnetRequestFactory, WitnetRequestTemplate, WitnetUpgradableBase)
         external view
         returns (bytes4)
     {

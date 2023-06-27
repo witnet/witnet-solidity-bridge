@@ -6,105 +6,66 @@ import "./Witnet.sol";
 
 library WitnetV2 {
 
-    error IndexOutOfBounds(uint256 index, uint256 range);
-    error InsufficientBalance(uint256 weiBalance, uint256 weiExpected);
-    error InsufficientFee(uint256 weiProvided, uint256 weiExpected);
-    error Unauthorized(address violator);
-
-    error RadonFilterMissingArgs(uint8 opcode);
-
-    error RadonRequestNoSources();
-    error RadonRequestSourcesArgsMismatch(uint expected, uint actual);
-    error RadonRequestMissingArgs(uint index, uint expected, uint actual);
-    error RadonRequestResultsMismatch(uint index, uint8 read, uint8 expected);
-    error RadonRequestTooHeavy(bytes bytecode, uint weight);
-
-    error RadonSlaNoReward();
-    error RadonSlaNoWitnesses();
-    error RadonSlaTooManyWitnesses(uint256 numWitnesses);
-    error RadonSlaConsensusOutOfRange(uint256 percentage);
-    error RadonSlaLowCollateral(uint256 witnessCollateral);
-
-    error UnsupportedDataRequestMethod(uint8 method, string schema, string body, string[2][] headers);
-    error UnsupportedRadonDataType(uint8 datatype, uint256 maxlength);
-    error UnsupportedRadonFilterOpcode(uint8 opcode);
-    error UnsupportedRadonFilterArgs(uint8 opcode, bytes args);
-    error UnsupportedRadonReducerOpcode(uint8 opcode);
-    error UnsupportedRadonReducerScript(uint8 opcode, bytes script, uint256 offset);
-    error UnsupportedRadonScript(bytes script, uint256 offset);
-    error UnsupportedRadonScriptOpcode(bytes script, uint256 cursor, uint8 opcode);
-    error UnsupportedRadonTallyScript(bytes32 hash);
-
-    function toEpoch(uint _timestamp) internal pure returns (uint) {
-        return 1 + (_timestamp - 11111) / 15;
-    }
-
-    function toTimestamp(uint _epoch) internal pure returns (uint) {
-        return 111111+ _epoch * 15;
-    }
+    uint256 constant _WITNET_BLOCK_TIME_SECS = 45;
+    uint256 constant _WITNET_INCEPTION_TS = 1602666000;
+    uint256 constant _WITNET_SUPERBLOCK_EPOCHS = 10;
 
     struct Beacon {
-        uint256 escrow;
-        uint256 evmBlock;
-        uint256 gasprice;
-        address relayer;
-        address slasher;
-        uint256 superblockIndex;
-        uint256 superblockRoot;        
+        uint256 index;
+        uint256 prevIndex;
+        bytes32 prevRoot;
+        bytes32 nextBlsRoot;
+        bytes32 ddrTallyRoot;
     }
 
-    enum BeaconStatus {
-        Idle
-    }
-
-    struct Block {
-        bytes32 blockHash;
-        bytes32 drTxsRoot;
-        bytes32 drTallyTxsRoot;
+    struct FastForward {
+        Beacon next;
+        bytes32[] signatures;
     }
     
-    enum BlockStatus {
-        Idle
-    }
-
-    struct DrPost {
-        uint256 block;
-        DrPostStatus status;
-        DrPostRequest request;
-        DrPostResponse response;
-    }
-    
-    /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
-    struct DrPostRequest {
-        uint256 epoch;
-        address requester;
-        address reporter;
-        bytes32 radHash;
-        bytes32 slaHash;
-        uint256 weiReward;
-    }
-
-    /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
-    struct DrPostResponse {
-        address disputer;
-        address reporter;
-        uint256 escrowed;
-        uint256 drCommitTxEpoch;
-        uint256 drTallyTxEpoch;
-        bytes32 drTallyTxHash;
-        bytes   drTallyResultCborBytes;
-    }
-
-    enum DrPostStatus {
+    /// Possible status of a WitnetV2 query.
+    enum QueryStatus {
         Void,
-        Deleted,
-        Expired,
         Posted,
-        Disputed,
         Reported,
-        Finalized,
-        Accepted,
-        Rejected
+        Delayed,
+        Disputed,
+        Expired,
+        Finalized
+    }
+
+    struct Query {
+        address from;
+        address reporter;
+        uint256 postEpoch;
+        uint256 reportEpoch;
+        uint256 weiReward;
+        uint256 weiStake;
+        QueryRequest request;
+        QueryReport report;
+        QueryCallback callback;
+        QueryDispute[] disputes;
+    }
+
+    struct QueryDispute {
+        address disputer;
+        QueryReport report;
+    }
+
+    struct QueryCallback {
+        address addr;
+        uint256 gas;
+    }
+
+    struct QueryRequest {
+        bytes32 radHash;
+        bytes32 packedSLA;
+    }
+
+    struct QueryReport {
+        address relayer;
+        uint256 tallyEpoch;
+        bytes   tallyCborBytes;
     }
 
     struct DataProvider {
@@ -192,6 +153,56 @@ library WitnetV2 {
         uint witnessReward;
         uint witnessCollateral;
         uint minerCommitRevealFee;
+        uint minMinerFee;
+    }
+
+    struct RadonSLAv2 {
+        uint8 committeeSize;
+        uint8 committeeConsensus;
+        uint8 ratioWitCollateral;
+        uint8 reserved;
+        uint64 witWitnessReward;
+        uint64 witMinMinerFee;
+    }
+
+    function beaconIndexFromEpoch(uint epoch) internal pure returns (uint256) {
+        return epoch / 10;
+    }
+
+    function beaconIndexFromTimestamp(uint ts) internal pure returns (uint256) {
+        return 1 + epochFromTimestamp(ts) / _WITNET_SUPERBLOCK_EPOCHS;
+    }
+
+    function checkQueryPostStatus(
+            uint queryPostEpoch, 
+            uint currentEpoch
+        ) 
+        internal pure 
+        returns (WitnetV2.QueryStatus)
+    {
+        if (currentEpoch > queryPostEpoch + _WITNET_SUPERBLOCK_EPOCHS) {
+            if (currentEpoch > queryPostEpoch + _WITNET_SUPERBLOCK_EPOCHS * 2) {
+                return WitnetV2.QueryStatus.Expired;
+            } else {
+                return WitnetV2.QueryStatus.Delayed;
+            }
+        } else {
+            return WitnetV2.QueryStatus.Posted;
+        }
+    }
+
+    function checkQueryReportStatus(
+            uint queryReportEpoch,
+            uint currentEpoch
+        )
+        internal pure
+        returns (WitnetV2.QueryStatus)
+    {
+        if (currentEpoch > queryReportEpoch + _WITNET_SUPERBLOCK_EPOCHS) {
+            return WitnetV2.QueryStatus.Finalized;
+        } else {
+            return WitnetV2.QueryStatus.Reported;
+        }
     }
 
     /// @notice Returns `true` if all witnessing parameters in `b` have same
@@ -206,7 +217,107 @@ library WitnetV2 {
                 && a.witnessReward >= b.witnessReward
                 && a.witnessCollateral >= b.witnessCollateral
                 && a.minerCommitRevealFee >= b.minerCommitRevealFee
+                && a.minMinerFee >= b.minMinerFee
         );
     }
 
+    /// @notice Returns `true` if all witnessing parameters in `b` have same
+    /// @notice value or greater than the ones in `a`.
+    function equalOrGreaterThan(RadonSLAv2 memory a, RadonSLAv2 memory b)
+        internal pure
+        returns (bool)
+    {
+        return (
+            a.committeeSize >= b.committeeSize
+                && a.committeeConsensus >= b.committeeConsensus
+                // && a.ratioEvmCollateral >= b.ratioEvmCollateral
+                && a.ratioWitCollateral >= b.ratioWitCollateral
+                && a.witWitnessReward >= b.witWitnessReward
+                && a.witMinMinerFee >= b.witMinMinerFee
+        );
+    }
+
+    function epochFromTimestamp(uint ts) internal pure returns (uint256) {
+        return (ts - _WITNET_INCEPTION_TS) / _WITNET_BLOCK_TIME_SECS;
+    }
+
+    function isValid(RadonSLAv2 calldata sla) internal pure returns (bool) {
+        return (
+            sla.committeeSize >= 1
+                && sla.committeeConsensus >= 51
+                && sla.committeeConsensus <= 99
+                && sla.ratioWitCollateral >= 1
+                && sla.ratioWitCollateral <= 127
+                && sla.witWitnessReward >= 1
+                && sla.witMinMinerFee >= 1
+        );
+    }
+
+    function pack(RadonSLAv2 calldata sla) internal pure returns (bytes32) {
+        return bytes32(abi.encodePacked(
+            sla.committeeSize,
+            sla.committeeConsensus,
+            sla.ratioWitCollateral,
+            uint8(0),
+            sla.witWitnessReward,
+            sla.witMinMinerFee
+        ));
+    }
+
+    function tallyHash(QueryReport calldata self, bytes32 queryHash)
+        internal pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encodePacked(
+            queryHash,
+            self.relayer,
+            self.tallyEpoch,
+            self.tallyCborBytes
+        ));
+    }
+
+    function tallyHash(QueryReport storage self, bytes32 queryHash)
+        internal view
+        returns (bytes32)
+    {
+        return keccak256(abi.encodePacked(
+            queryHash,
+            self.relayer,
+            self.tallyEpoch,
+            self.tallyCborBytes
+        ));
+    }
+
+    function toRadonSLAv2(bytes32 packed) internal pure returns (RadonSLAv2 memory sla) {
+        return RadonSLAv2({
+            committeeSize: uint8(bytes1(packed)),
+            committeeConsensus: uint8(bytes1(packed << 8)),
+            ratioWitCollateral: uint8(bytes1(packed << 16)),
+            reserved: 0,
+            witWitnessReward: uint64(bytes8(packed << 32)),
+            witMinMinerFee: uint64(bytes8(packed << 96))
+        });
+    }
+
+    function merkle(bytes32[] calldata items) internal pure returns (bytes32) {
+        // TODO
+    }
+
+    function merkle(WitnetV2.Beacon memory self) internal pure returns (bytes32) {
+        // TODO
+    }
+
+    function verifyFastForward(WitnetV2.Beacon memory self, WitnetV2.FastForward calldata ff)
+        internal pure
+        returns (WitnetV2.Beacon memory)
+    {
+        require(
+            self.index == ff.next.prevIndex
+                && merkle(self) == ff.next.prevRoot,
+            "WitnetV2: misplaced fastforward"
+        );
+        // TODO verify ff proofs
+        return ff.next;
+    }
+   
 }

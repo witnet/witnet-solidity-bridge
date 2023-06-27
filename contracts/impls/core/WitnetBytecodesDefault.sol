@@ -48,6 +48,10 @@ contract WitnetBytecodesDefault
         revert("WitnetBytecodesDefault: no transfers");
     }
 
+    function class() virtual override external pure returns (bytes4) {
+        return type(WitnetBytecodes).interfaceId;
+    }
+
 
     // ================================================================================================================
     // --- Overrides IERC165 interface --------------------------------------------------------------------------------
@@ -170,7 +174,7 @@ contract WitnetBytecodesDefault
     }
 
     function bytecodeOf(bytes32 _radHash, bytes32 _slaHash)
-        external view
+        public view
         returns (bytes memory)
     {
         WitnetV2.RadonSLA storage __sla = __database().slas[_slaHash];
@@ -182,6 +186,36 @@ contract WitnetBytecodesDefault
             WitnetEncodingLib.encode(uint64(_radBytecode.length), 0x0a),
             _radBytecode,
             __database().slasBytecode[_slaHash]
+        );
+    }
+
+    function fetchBytecodeWitFeesOf(bytes32 _radHash, bytes32 _slaHash)
+        external view returns (
+            uint256 _witMinMinerFee,
+            uint256 _witWitnessingFee,
+            bytes memory _radSlabytecode
+        )
+    {
+        _radSlabytecode = bytecodeOf(_radHash, _slaHash);
+        WitnetV2.RadonSLA memory _sla = __database().slas[_slaHash]; // TODO: _unpackRadonSAL(_slaHash);
+        _witMinMinerFee = _sla.minMinerFee;
+        _witWitnessingFee = _sla.numWitnesses * (_sla.witnessReward + _sla.minerCommitRevealFee * 2);
+    }
+        
+    function fetchMaxResultSizeWitRewardOf(bytes32 _radHash, bytes32 _slaHash)
+        external view
+        virtual override
+        returns (uint256 _maxResultSize, uint256 _witReward)
+    {
+        _maxResultSize = __requests(_radHash).resultMaxSize;
+        if (_maxResultSize < 32) _maxResultSize = 32;
+        WitnetV2.RadonSLA memory _sla = __database().slas[_slaHash]; // TODO: _unpackRadonSLA(_slaHash);
+        _witReward = (
+            _sla.minMinerFee
+                + _sla.numWitnesses * (
+                    _sla.witnessReward
+                        + _sla.minerCommitRevealFee * 2
+                )
         );
     }
 
@@ -517,12 +551,12 @@ contract WitnetBytecodesDefault
         
             // Check that at least one source is provided;
             if (_retrievalsIds.length == 0) {
-                revert WitnetV2.RadonRequestNoSources();
+                revert WitnetEncodingLib.RadonRequestNoSources();
             }
             
             // Check that number of args arrays matches the number of sources:
             if ( _retrievalsIds.length != _args.length) {
-                revert WitnetV2.RadonRequestSourcesArgsMismatch(
+                revert WitnetEncodingLib.RadonRequestSourcesArgsMismatch(
                     _retrievalsIds.length,
                     _args.length
                 );
@@ -532,7 +566,7 @@ contract WitnetBytecodesDefault
             WitnetV2.RadonReducer memory _aggregator = __database().reducers[_aggregatorId];
             WitnetV2.RadonReducer memory _tally = __database().reducers[_tallyId];
             if (_tally.script.length > 0) {
-                revert WitnetV2.UnsupportedRadonTallyScript(_tallyId);
+                revert WitnetEncodingLib.UnsupportedRadonTallyScript(_tallyId);
             }
             
             // Check result type consistency among all sources:
@@ -544,7 +578,7 @@ contract WitnetBytecodesDefault
                 if (_ix == 0) {
                     _resultDataType = _retrievals[0].resultDataType;
                 } else if (_retrievals[_ix].resultDataType != _resultDataType) {
-                    revert WitnetV2.RadonRequestResultsMismatch(
+                    revert WitnetEncodingLib.RadonRequestResultsMismatch(
                         _ix,
                         uint8(_retrievals[_ix].resultDataType),
                         uint8(_resultDataType)
@@ -552,7 +586,7 @@ contract WitnetBytecodesDefault
                 }
                 // check enough args are provided for each source
                 if (_args[_ix].length < uint(_retrievals[_ix].argsCount)) {
-                    revert WitnetV2.RadonRequestMissingArgs(
+                    revert WitnetEncodingLib.RadonRequestMissingArgs(
                         _ix,
                         _retrievals[_ix].argsCount,
                         _args[_ix].length
@@ -571,7 +605,7 @@ contract WitnetBytecodesDefault
                 _resultMaxSize
             );
             if (_bytecode.length > 65535) {
-                revert WitnetV2.RadonRequestTooHeavy(_bytecode, _bytecode.length);
+                revert WitnetEncodingLib.RadonRequestTooHeavy(_bytecode, _bytecode.length);
             }
         
             // Calculate radhash and add request metadata and rad bytecode to storage:

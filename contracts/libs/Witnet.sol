@@ -55,7 +55,8 @@ library Witnet {
         Void,
         Awaiting,
         Ready,
-        Error
+        Error,
+        Expired
     }
 
     /// Data struct describing an error when trying to fetch a Witnet-provided result to a Data Request.
@@ -124,8 +125,10 @@ library Witnet {
             InsufficientCommits,
             /// 0x53: Generic error during tally execution
             TallyExecution,
+            /// 0x54: Max result size exceeded
+            MaxResultSizeExceeded,
             /// Unallocated
-            OtherError0x54, OtherError0x55, OtherError0x56, OtherError0x57, OtherError0x58, OtherError0x59,
+            OtherError0x55, OtherError0x56, OtherError0x57, OtherError0x58, OtherError0x59, 
             OtherError0x5A, OtherError0x5B, OtherError0x5C, OtherError0x5D, OtherError0x5E, OtherError0x5F,
             /// 0x60: Invalid reveal serialization (malformed reveals are converted to this value)
             MalformedReveal,
@@ -135,7 +138,7 @@ library Witnet {
             OtherError0x6D, OtherError0x6E,OtherError0x6F,
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Access errors =====================================================================================================
-            /// 0x70: Tried to access a value from an index using an index that is out of bounds
+            /// 0x70: Tried to access a value from an array using an index that is out of bounds
             ArrayIndexOutOfBounds,
             /// 0x71: Tried to access a value from a map using a key that does not exist
             MapKeyNotFound,
@@ -169,9 +172,17 @@ library Witnet {
             BridgeOversizedResult,
             /// Unallocated
             OtherError0xE3, OtherError0xE4, OtherError0xE5, OtherError0xE6, OtherError0xE7, OtherError0xE8, OtherError0xE9,
-            OtherError0xEA, OtherError0xEB, OtherError0xEC, OtherError0xED, OtherError0xEE, OtherError0xEF, OtherError0xF0,
-            OtherError0xF1, OtherError0xF2, OtherError0xF3, OtherError0xF4, OtherError0xF5, OtherError0xF6, OtherError0xF7,
-            OtherError0xF8, OtherError0xF9, OtherError0xFA, OtherError0xFB, OtherError0xFC, OtherError0xFD, OtherError0xFE,
+            OtherError0xEA, OtherError0xEB, OtherError0xEC, OtherError0xED, OtherError0xEE, OtherError0xEF,
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Request board errors: errors that arise when trying to fetch a result to some previously posted data request ====== 
+            BoardUnsolvedQuery,
+            BoardUnknownQuery,
+            BoardExpiredQuery,
+            BoardUndecodableError,
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Other errors: errors that arise when trying to fetch a result to some previously posted data request ==============
+            OtherError0xF4, OtherError0xF5, OtherError0xF6, OtherError0xF7, OtherError0xF8, OtherError0xF9, OtherError0xFA, 
+            OtherError0xFB, OtherError0xFC, OtherError0xFD, OtherError0xFE,
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// 0xFF: Some tally error is not intercepted but should
         UnhandledIntercept
@@ -345,6 +356,17 @@ library Witnet {
 
 
     /// ===============================================================================================================
+    /// --- 'address' helper methods ----------------------------------------------------------------------------------
+
+    function toHexString(address addr)
+        internal pure
+        returns (string memory)
+    {
+        // TODO
+    }
+
+
+    /// ===============================================================================================================
     /// --- 'bytes' helper methods ------------------------------------------------------------------------------------
 
     /// @dev Witnet function that computes the hash of a CBOR-encoded Data Request.
@@ -358,6 +380,32 @@ library Witnet {
             return 0x0;
         }
     }
+
+    /// Recovers address from hash and signature.
+    function recoverAddr(bytes32 hash_, bytes memory signature)
+        internal pure
+        returns (address)
+    {
+        if (signature.length != 65) {
+            return (address(0));
+        }
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+        assembly {
+            r := mload(add(signature, 0x20))
+            s := mload(add(signature, 0x40))
+            v := byte(0, mload(add(signature, 0x60)))
+        }
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+            return address(0);
+        }
+        if (v != 27 && v != 28) {
+            return address(0);
+        }
+        return ecrecover(hash_, v, r, s);
+    }   
+
 
     /// @dev Transform given bytes into a Witnet.Result instance.
     /// @param bytecode Raw bytes representing a CBOR-encoded value.
@@ -497,6 +545,26 @@ library Witnet {
             b3[2] = bytes1(uint8(_u % 10) + 48);
             return string(b3);
         }
+    }
+
+    /// @notice Convert a `uint` into a string` representing its value.
+    function toString(uint v)
+        internal pure 
+        returns (string memory)
+    {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        do {
+            uint8 remainder = uint8(v % 10);
+            v = v / 10;
+            reversed[i ++] = bytes1(48 + remainder);
+        } while (v != 0);
+        bytes memory buf = new bytes(i);
+        for (uint j = 1; j <= i; j ++) {
+            buf[j - 1] = reversed[i - j];
+        }
+        return string(buf);
     }
 
 

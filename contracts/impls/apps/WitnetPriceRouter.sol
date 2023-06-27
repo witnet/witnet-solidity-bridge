@@ -39,6 +39,10 @@ contract WitnetPriceRouter
         )
     {}
 
+    function class() virtual override external pure returns (bytes4) {
+        return type(IWitnetPriceRouter).interfaceId;
+    }
+
     // ================================================================================================================
     // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
 

@@ -81,22 +81,31 @@ module.exports = async function (deployer, network, [, from, reporter]) {
 
   let board
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoardImplementation)) {
-    await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation)
-    await deployer.deploy(
-      WitnetRequestBoardImplementation,
-      WitnetRequestFactory.address,
-      /* _isUpgradeable */ true,
-      /* _versionTag    */ utils.fromAscii(version),
-      ...(
-        // if defined, use network-specific constructor parameters:
-        settings.constructorParams[network]?.WitnetRequestBoard ||
-          // otherwise, use ecosystem-specific parameters, if any:
-          settings.constructorParams[ecosystem]?.WitnetRequestBoard ||
-          // or, default defined parameters for WRBs, if any:
-          settings.constructorParams?.default?.WitnetRequestBoard
-      ),
-      { from }
-    )
+    if (WitnetRequestBoardImplementation.contractName === "WitnetRequestBoardBypass") {
+      await deployer.deploy(
+        WitnetRequestBoardImplementation,
+        addresses[ecosystem][network]?.WitnetRequestBoardBypass,
+        true,
+        utils.fromAscii(version)
+      )
+    } else {
+      await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation)
+      await deployer.deploy(
+        WitnetRequestBoardImplementation,
+        WitnetRequestFactory.address,
+        /* _isUpgradeable */ true,
+        /* _versionTag    */ utils.fromAscii(version),
+        ...(
+          // if defined, use network-specific constructor parameters:
+          settings.constructorParams[network]?.WitnetRequestBoard ||
+            // otherwise, use ecosystem-specific parameters, if any:
+            settings.constructorParams[ecosystem]?.WitnetRequestBoard ||
+            // or, default defined parameters for WRBs, if any:
+            settings.constructorParams?.default?.WitnetRequestBoard
+        ),
+        { from }
+      )
+    }
     board = await WitnetRequestBoardImplementation.deployed()
     addresses[ecosystem][network].WitnetRequestBoardImplementation = board.address
     if (!isDryRun) {

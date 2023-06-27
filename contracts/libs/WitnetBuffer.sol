@@ -217,27 +217,135 @@ library WitnetBuffer {
     uint32 value = readUint16(buffer);
     // Get bit at position 0
     uint32 sign = value & 0x8000;
-    // Get bits 1 to 5, then normalize to the [-14, 15] range so as to counterweight the IEEE 754 exponent bias
+    // Get bits 1 to 5, then normalize to the [-15, 16] range so as to counterweight the IEEE 754 exponent bias
     int32 exponent = (int32(value & 0x7c00) >> 10) - 15;
     // Get bits 6 to 15
-    int32 significand = int32(value & 0x03ff);
-    // Add 1024 to the fraction if the exponent is 0
-    if (exponent == 15) {
-      significand |= 0x400;
+    int32 fraction = int32(value & 0x03ff);
+    // Add 2^10 to the fraction if exponent is not -15
+    if (exponent != -15) {
+      fraction |= 0x400;
+    } else if (exponent == 16) {
+      revert(
+        string(abi.encodePacked(
+          "WitnetBuffer.readFloat16: ",
+          sign != 0 ? "negative" : hex"",
+          " infinity"
+        ))
+      );
+    }
+    // Compute `2 ^ exponent · (1 + fraction / 1024)`
+    if (exponent >= 0) {
+      result = int32(
+        int(1 << uint256(int256(exponent)))
+          * 10000
+          * fraction
+      ) >> 10;
+    } else {
+      result = int32(
+        int(fraction)
+          * 10000
+          / int(1 << uint(int(- exponent)))
+      ) >> 10;
+    }
+    // Make the result negative if the sign bit is not 0
+    if (sign != 0) {
+      result *= -1;
+    }
+  }
+
+  /// @notice Consume the next 4 bytes from the buffer as an IEEE 754-2008 floating point number enclosed into an `int`.
+  /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
+  /// by 9 decimal orders so as to get a fixed precision of 9 decimal positions, which should be OK for most `float32`
+  /// use cases. In other words, the integer output of this method is 10^9 times the actual value. The input bytes are
+  /// expected to follow the 64-bit base-2 format (a.k.a. `binary32`) in the IEEE 754-2008 standard.
+  /// @param buffer An instance of `Buffer`.
+  /// @return result The `int` value of the next 8 bytes in the buffer counting from the cursor position.
+  function readFloat32(Buffer memory buffer)
+    internal pure
+    returns (int result)
+  {
+    uint value = readUint32(buffer);
+    // Get bit at position 0
+    uint sign = value & 0x80000000;
+    // Get bits 1 to 8, then normalize to the [-127, 128] range so as to counterweight the IEEE 754 exponent bias
+    int exponent = (int(value & 0x7f800000) >> 23) - 127;
+    // Get bits 9 to 31
+    int fraction = int(value & 0x007fffff);
+    // Add 2^23 to the fraction if exponent is not -127
+    if (exponent != -127) {
+      fraction |= 0x800000;
+    } else if (exponent == 128) {
+      revert(
+        string(abi.encodePacked(
+          "WitnetBuffer.readFloat32: ",
+          sign != 0 ? "negative" : hex"",
+          " infinity"
+        ))
+      );
+    }
+    // Compute `2 ^ exponent · (1 + fraction / 2^23)`
+    if (exponent >= 0) {
+      result = (
+        int(1 << uint(exponent))
+          * (10 ** 9)
+          * fraction
+      ) >> 23;
+    } else {
+      result = (
+        fraction 
+          * (10 ** 9)
+          / int(1 << uint(-exponent)) 
+      ) >> 23;
+    }
+    // Make the result negative if the sign bit is not 0
+    if (sign != 0) {
+      result *= -1;
+    }
+  }
+
+  /// @notice Consume the next 8 bytes from the buffer as an IEEE 754-2008 floating point number enclosed into an `int`.
+  /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values
+  /// by 15 decimal orders so as to get a fixed precision of 15 decimal positions, which should be OK for most `float64`
+  /// use cases. In other words, the integer output of this method is 10^15 times the actual value. The input bytes are
+  /// expected to follow the 64-bit base-2 format (a.k.a. `binary64`) in the IEEE 754-2008 standard.
+  /// @param buffer An instance of `Buffer`.
+  /// @return result The `int` value of the next 8 bytes in the buffer counting from the cursor position.
+  function readFloat64(Buffer memory buffer)
+    internal pure
+    returns (int result)
+  {
+    uint value = readUint64(buffer);
+    // Get bit at position 0
+    uint sign = value & 0x8000000000000000;
+    // Get bits 1 to 12, then normalize to the [-1023, 1024] range so as to counterweight the IEEE 754 exponent bias
+    int exponent = (int(value & 0x7ff0000000000000) >> 52) - 1023;
+    // Get bits 6 to 15
+    int fraction = int(value & 0x000fffffffffffff);
+    // Add 2^52 to the fraction if exponent is not -1023
+    if (exponent != -1023) {
+      fraction |= 0x10000000000000;
+    } else if (exponent == 1024) {
+      revert(
+        string(abi.encodePacked(
+          "WitnetBuffer.readFloat64: ",
+          sign != 0 ? "negative" : hex"",
+          " infinity"
+        ))
+      );
     }
     // Compute `2 ^ exponent · (1 + fraction / 1024)`
     if (exponent >= 0) {
       result = (
-        int32((int256(1 << uint256(int256(exponent)))
-          * 10000
-          * int256(uint256(int256(significand)) | 0x400)) >> 10)
-      );
+        int(1 << uint(exponent))
+          * (10 ** 15)
+          * fraction
+      ) >> 52;
     } else {
-      result = (int32(
-        ((int256(uint256(int256(significand)) | 0x400) * 10000)
-          / int256(1 << uint256(int256(- exponent))))
-          >> 10
-      ));
+      result = (
+        fraction 
+          * (10 ** 15)
+          / int(1 << uint(-exponent)) 
+      ) >> 52;
     }
     // Make the result negative if the sign bit is not 0
     if (sign != 0) {
