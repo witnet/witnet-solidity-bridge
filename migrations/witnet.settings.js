@@ -366,6 +366,19 @@ module.exports = {
         },
       },
     },
+    gnosis: {
+      "gnosis.testnet": {
+        host: "localhost",
+        port: 8509,
+        network_id: 10200,
+        skipDryRun: true,
+        verify: {
+          apiUrl: "https://blockscout.com/gnosis/chiado/api",
+          browserURL: "https://blockscout.com/gnosis/chiado/",
+          apiKey: "MY_API_KEY",
+        },
+      },
+    },
     harmony: {
       "harmony.testnet#0": {
         host: "localhost",
