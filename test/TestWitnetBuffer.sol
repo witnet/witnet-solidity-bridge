@@ -88,10 +88,10 @@ contract TestWitnetBuffer {
     string[] memory args = new string[](2);
     args[0] = "https://api.whatever.com/";
     args[1] = "1";
-    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
-    emit Log(string(phrase), phrase.length);
+    string memory phrase = WitnetBuffer.replace(input, args);
+    emit Log(phrase, bytes(phrase).length);
     Assert.equal(
-      keccak256(phrase),
+      keccak256(bytes(phrase)),
       keccak256(bytes("https://api.whatever.com//image/1?digest=sha-256")),
       "String replacement not good :/"
     );
@@ -101,10 +101,10 @@ contract TestWitnetBuffer {
     string memory input = "In a village of La Mancha, the name of which I have no desire to call to mind, there lived not long since one of those gentlemen that keep a lance in the lance-rack, an old buckler, a lean hack, and a greyhound for coursing";
     string[] memory args = new string[](1);
     args[0] = "Don Quixote";
-    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
-    emit Log(string(phrase), phrase.length);
+    string memory phrase = WitnetBuffer.replace(input, args);
+    emit Log(phrase, bytes(phrase).length);
     Assert.equal(
-      keccak256(phrase),
+      keccak256(bytes(phrase)),
       keccak256(bytes(input)),
       "String replacement not good :/"
     );
@@ -114,10 +114,10 @@ contract TestWitnetBuffer {
     string memory input = "\\0\\";
     string[] memory args = new string[](1);
     args[0] = "Hello!";
-    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
-    emit Log(string(phrase), phrase.length);
+    string memory phrase = WitnetBuffer.replace(input, args);
+    emit Log(phrase, bytes(phrase).length);
     Assert.equal(
-      keccak256(phrase),
+      keccak256(bytes(phrase)),
       keccak256(bytes("Hello!")),
       "String replacement not good :/"
     );
@@ -129,10 +129,10 @@ contract TestWitnetBuffer {
     args[0] = "Hello";
     args[1] = "decentralized";
     args[2] = "world";
-    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
-    emit Log(string(phrase), phrase.length);
+    string memory phrase = WitnetBuffer.replace(input, args);
+    emit Log(phrase, bytes(phrase).length);
     Assert.equal(
-      keccak256(phrase),
+      keccak256(bytes(phrase)),
       keccak256(bytes("Test: Hello decentralized world!")),
       "String replacement not good :/"
     );
@@ -144,10 +144,10 @@ contract TestWitnetBuffer {
     args[2] = "Hello";
     args[0] = "decentralized";
     args[3] = "world";
-    bytes memory phrase = WitnetBuffer.replace(bytes(input), args);
-    emit Log(string(phrase), phrase.length);
+    string memory phrase = WitnetBuffer.replace(input, args);
+    emit Log(phrase, bytes(phrase).length);
     Assert.equal(
-      keccak256(phrase),
+      keccak256(bytes(phrase)),
       keccak256(bytes("Test: Hello decentralized world!")),
       "String replacement not good :/"
     );

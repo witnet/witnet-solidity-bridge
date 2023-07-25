@@ -291,8 +291,10 @@ library WitnetEncodingLib {
         while (!cbor.eof()) {
             if (cbor.majorType == WitnetCBOR.MAJOR_TYPE_STRING) {
                 _replaceCborWildcards(cbor, args);
+                cbor = cbor.settle();
+            } else {
+                cbor = cbor.skip().settle();
             }
-            cbor = cbor.skip().settle();
         }
         return cbor.buffer.data;
     }
@@ -300,8 +302,8 @@ library WitnetEncodingLib {
     function replaceWildcards(WitnetV2.RadonRetrieval memory self, string[] memory args)
         public pure
     {
-        self.url = string (WitnetBuffer.replace(bytes(self.url), args));
-        self.body = string(WitnetBuffer.replace(bytes(self.body), args));
+        self.url = WitnetBuffer.replace(self.url, args);
+        self.body = WitnetBuffer.replace(self.body, args);
         self.script = replaceCborStringsFromBytes(self.script, args);
     }
 
@@ -482,16 +484,16 @@ library WitnetEncodingLib {
         uint _rewind = self.len;
         uint _start = self.buffer.cursor;
         bytes memory _peeks = bytes(self.readString());
-        uint _dataLength = _peeks.length + _rewind;
-        bytes memory _pokes = WitnetBuffer.replace(_peeks, args);
-        if (keccak256(_pokes) != keccak256(bytes(_peeks))) {
+        (bytes memory _pokes, uint _replacements) = WitnetBuffer.replace(_peeks, args);
+        if (_replacements > 0) {
+            bytes memory _encodedPokes = encode(string(_pokes));
             self.buffer.cursor = _start - _rewind;
             self.buffer.mutate(
-                _dataLength,
-                encode(string(_pokes))
+                _peeks.length + _rewind,
+                _encodedPokes
             );
+            self.buffer.cursor += _encodedPokes.length;
         }
-        self.buffer.cursor = _start;
     }
 
     

@@ -523,13 +523,15 @@ library WitnetBuffer {
     }
   }
 
-  /// @notice Replace bytecode indexed wildcards by correspondent string.
+  /// @notice Replace bytecode indexed wildcards by correspondent substrings.
   /// @dev Wildcard format: "\#\", with # in ["0".."9"].
   /// @param input Bytes array containing strings.
-  /// @param args String values for replacing existing indexed wildcards in input.
+  /// @param args Array of substring values for replacing indexed wildcards.
+  /// @return output Resulting bytes array after replacing all wildcards.
+  /// @return hits Total number of replaced wildcards.
   function replace(bytes memory input, string[] memory args)
     internal pure
-    returns (bytes memory output)
+    returns (bytes memory output, uint hits)
   {
     uint ix = 0; uint lix = 0;
     uint inputLength;
@@ -541,7 +543,7 @@ library WitnetBuffer {
     uint sourcePointer;
 
     if (input.length < 3) {
-      return input;
+      return (input, 0);
     }
     
     assembly {
@@ -592,6 +594,7 @@ library WitnetBuffer {
           outputPointer += sourceLength;
           ix += 3;
           lix = ix;
+          hits ++;
         } else {
           ix ++;
         }
@@ -615,8 +618,21 @@ library WitnetBuffer {
       }
     }
     else {
-      return input;
+      return (input, 0);
     }
+  }
+
+  /// @notice Replace string indexed wildcards by correspondent substrings.
+  /// @dev Wildcard format: "\#\", with # in ["0".."9"].
+  /// @param input String potentially containing wildcards.
+  /// @param args Array of substring values for replacing indexed wildcards.
+  /// @return output Resulting string after replacing all wildcards.
+  function replace(string memory input, string[] memory args)
+    internal pure
+    returns (string memory)
+  {
+    (bytes memory _outputBytes, ) = replace(bytes(input), args);
+    return string(_outputBytes);
   }
 
   /// @notice Move the inner cursor of the buffer to a relative or absolute position.
