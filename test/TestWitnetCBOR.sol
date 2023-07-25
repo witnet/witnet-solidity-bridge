@@ -4,8 +4,8 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "truffle/Assert.sol";
+import "../contracts/libs/Witnet.sol";
 import "../contracts/libs/WitnetCBOR.sol";
-import "../contracts/libs/WitnetLib.sol";
 
 contract TestWitnetCBOR {
 
@@ -123,7 +123,7 @@ contract TestWitnetCBOR {
 
   function testBytes32DecodeValueFrom31bytes() external {
     bytes memory encoded = hex"581f01020304050607080910111213141516171819202122232425262728293031";
-    bytes32 decoded = WitnetLib.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.fromBytes(encoded)));
+    bytes32 decoded = Witnet.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.fromBytes(encoded)));
     bytes32 expected = 0x0102030405060708091011121314151617181920212223242526272829303100;
     Assert.equal(
       decoded,
@@ -134,7 +134,7 @@ contract TestWitnetCBOR {
 
   function testBytes32DecodeValueFrom32bytes() external {
     bytes memory encoded = hex"58200102030405060708091011121314151617181920212223242526272829303132";
-    bytes32 decoded = WitnetLib.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.fromBytes(encoded)));
+    bytes32 decoded = Witnet.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.fromBytes(encoded)));
     bytes32 expected = 0x0102030405060708091011121314151617181920212223242526272829303132;
     Assert.equal(
       decoded,
@@ -145,7 +145,7 @@ contract TestWitnetCBOR {
 
   function testBytes32DecodeValueFrom33bytes() external {
     bytes memory encoded = hex"5821010203040506070809101112131415161718192021222324252627282930313233";
-    bytes32 decoded = WitnetLib.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.fromBytes(encoded)));
+    bytes32 decoded = Witnet.toBytes32(WitnetCBOR.readBytes(WitnetCBOR.fromBytes(encoded)));
     bytes32 expected = 0x0102030405060708091011121314151617181920212223242526272829303132;
     Assert.equal(
       decoded,

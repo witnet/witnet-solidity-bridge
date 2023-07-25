@@ -235,17 +235,17 @@ library WitnetBuffer {
     }
     // Compute `2 ^ exponent · (1 + fraction / 1024)`
     if (exponent >= 0) {
-      result = int32(
+      result = int32(int(
         int(1 << uint256(int256(exponent)))
           * 10000
           * fraction
-      ) >> 10;
+      ) >> 10);
     } else {
-      result = int32(
+      result = int32(int(
         int(fraction)
           * 10000
           / int(1 << uint(int(- exponent)))
-      ) >> 10;
+      ) >> 10);
     }
     // Make the result negative if the sign bit is not 0
     if (sign != 0) {
