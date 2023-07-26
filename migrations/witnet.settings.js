@@ -165,6 +165,10 @@ module.exports = {
         host: "localhost",
         port: 8517,
         skipDryRun: true,
+        verify: {
+          apiUrl: "https://api-goerli.arbiscan.io/",
+          browserURL: "https://goerli.arbiscan.io/",
+        },
       },
       "arbitrum.one": {
         network_id: 42161,
@@ -173,7 +177,7 @@ module.exports = {
         skipDryRun: true,
         verify: {
           apiUrl: "https://api.arbiscan.io/api",
-          browserURL: "https://arbiscan.io/address",
+          browserURL: "https://arbiscan.io/",
         },
       },
     },
@@ -191,6 +195,11 @@ module.exports = {
         port: 8533,
         skipDryRun: true,
         gasPrice: 30 * 10 ** 9,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://api-testnet.snowtrace.io/",
+          browserURL: "https://testnet.snowtrace.io/",
+        },
       },
     },
     boba: {
@@ -247,6 +256,11 @@ module.exports = {
         host: "localhost",
         port: 8538,
         skipDryRun: true,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://explorer.celo.org/alfajores/api",
+          browserURL: "https://explorer.celo.org/alfajores/",
+        },
       },
       "celo.mainnet": {
         network_id: 42220,
@@ -338,6 +352,7 @@ module.exports = {
         network_id: 21,
         skipDryRun: true,
         verify: {
+          apiKey: "MY_API_KEY",
           apiUrl: "https://esc-testnet.elastos.io/api",
           browserURL: "https://esc-testnet.elastos.io/address",
         },
@@ -548,7 +563,7 @@ module.exports = {
         network_id: 1442,
         skipDryRun: true,
         verify: {
-          apiUrl: "http://api-testnet-zkevm.polygonscan.com/api",
+          apiUrl: "https://api-testnet-zkevm.polygonscan.com/api",
           explorerUrl: "https://testnet-zkevm.polygonscan.com/address",
         },
       },

@@ -355,7 +355,7 @@ library Witnet {
         ) {
             return sha256(_bytecode);
         } else {
-            return 0x0;
+            return keccak256(_bytecode);
         }
     }
 
