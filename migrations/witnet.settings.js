@@ -132,6 +132,10 @@ module.exports = {
         host: "localhost",
         port: 8545,
         skipDryRun: true,
+        verify: {
+          apiUrl: "https://api-goerli.etherscan.io/",
+          browserURL: "https://goerli.etherscan.io/",
+        },
       },
       "ethereum.kovan": {
         network_id: 42,
@@ -223,22 +227,10 @@ module.exports = {
           apiKey: "MY_API_KEY",
         },
       },
-      "boba.moonbeam.bobabase": {
-        network_id: 1297,
-        host: "localhost",
-        port: 8518,
-        skipDryRun: true,
-      },
       "boba.ethereum.mainnet": {
         network_id: 288,
         host: "localhost",
         port: 9539,
-        skipDryRun: true,
-      },
-      "boba.ethereum.rinkeby": {
-        network_id: 28,
-        host: "localhost",
-        port: 8539,
         skipDryRun: true,
       },
       "boba.ethereum.goerli": {
@@ -246,6 +238,10 @@ module.exports = {
         host: "localhost",
         port: 8515,
         skipDryRun: true,
+        verify: {
+          apiUrl: "https://api-testnet.bobascan.com/api",
+          browserURL: "https://testnet.bobascan.com/",
+        },
       },
     },
     celo: {
@@ -305,6 +301,10 @@ module.exports = {
         port: 8530,
         network_id: 338,
         skipDryRun: true,
+        verify: {
+          apiUrl: "https://cronos.org/explorer/testnet3/api",
+          browserURL: "https://cronos.org/explorer/testnet3",
+        },
       },
       "cronos.mainnet": {
         host: "localhost",
@@ -335,6 +335,12 @@ module.exports = {
         port: 8519,
         network_id: 568,
         skipDryRun: true,
+        gas: 6000000,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "http://explorer-testnet.dogechain.dog/api",
+          browserURL: "https://explorer-testnet.dogechain.dog/",
+        },
       },
       "dogechain.mainnet": {
         host: "localhost",
@@ -420,6 +426,11 @@ module.exports = {
         port: 8526,
         network_id: 2221,
         skipDryRun: true,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://explorer.testnet.kava.io/api",
+          browserURL: "https://explorer.testnet.kava.io/",
+        },
       },
       "kava.mainnet": {
         host: "localhost",
@@ -435,6 +446,11 @@ module.exports = {
         network_id: 322,
         gasPrice: 10 ** 10,
         skipDryRun: true,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://scan-testnet.kcc.network/api",
+          browserURL: "https://scan-testnet.kcc.network/",
+        },
       },
       "kcc.mainnet": {
         host: "localhost",
@@ -475,7 +491,7 @@ module.exports = {
         verify: {
           apiKey: "MY_API_KEY",
           apiUrl: "https://goerli.explorer.metisdevops.link/api",
-          explorerUrl: "https://goerli.explorer.metisdevops.link//address",
+          explorerUrl: "https://goerli.explorer.metisdevops.link/address",
         },
       },
     },
@@ -534,6 +550,11 @@ module.exports = {
         port: 8520,
         network_id: 420,
         skipDryRun: true,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://optimism-goerli.blockscout.com/api",
+          explorerUrl: "https://optimism-goerli.blockscout.com/",
+        },
       },
       "optimism.mainnet": {
         host: "localhost",
@@ -588,8 +609,8 @@ module.exports = {
         skipDryRun: true,
         gasPrice: 3000000,
         verify: {
-          apiUrl: "https://blockscout.scroll.io/api",
           apiKey: "MY_API_KEY",
+          apiUrl: "https://blockscout.scroll.io/api",
           explorerUrl: "https://blockscout.scroll.io/address",
         },
       },
