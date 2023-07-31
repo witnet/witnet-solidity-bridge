@@ -97,7 +97,7 @@ abstract contract Clonable
     /// @dev See https://eips.ethereum.org/EIPS/eip-1167.
     /// @dev See https://blog.openzeppelin.com/deep-dive-into-the-minimal-proxy-contract/.
     function _cloneDeterministic(bytes32 _salt)
-        internal
+        virtual internal
         returns (address _instance)
     {
         bytes memory ptr = _cloneBytecodePtr();

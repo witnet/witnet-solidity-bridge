@@ -10,6 +10,9 @@ module.exports = {
     boba: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
+    conflux: {
+      WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
+    },
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
@@ -27,11 +30,6 @@ module.exports = {
             runs: 200,
           },
         },
-      },
-    },
-    conflux: {
-      solc: {
-        evmVersion: "petersburg",
       },
     },
   },
