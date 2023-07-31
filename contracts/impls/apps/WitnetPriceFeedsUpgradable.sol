@@ -337,9 +337,9 @@ contract WitnetPriceFeedsUpgradable
                     }
                     __feed.latestValidQueryId = _latestId;
                 } else {
-                    // Otherwise, delete latest query, as it was faulty
+                    // Otherwise, try to delete latest query, as it was faulty
                     // and we are about to post a new update request:
-                    witnet.deleteQuery(_latestId);
+                    try witnet.deleteQuery(_latestId) {} catch {}
                 }
                 // Post update request to the WRB:
                 _latestId = witnet.postRequest{value: _usedFunds}(__feed.radHash, _slaHash);
