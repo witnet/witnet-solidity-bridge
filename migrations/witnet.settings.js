@@ -62,6 +62,13 @@ module.exports = {
         /* _reportResultGasLimit */ 225000,
       ],
     },
+    cronos: {
+      WitnetRequestBoard: [
+        /* _isUpgradable */ true,
+        /* _verstionTag */ fromAscii(packageJson.version + "-trustable"),
+        /* _reportResultGasLimit */ 137500,
+      ],
+    },
     dogechain: {
       WitnetRequestBoard: [
         /* _isUpgradable */ true,
