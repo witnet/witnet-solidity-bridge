@@ -16,9 +16,15 @@ module.exports = {
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
+    "polygon.zkevm.goerli": {
+      WitnetBytecodes: "WitnetBytecodesNoSha256",
+    },
     reef: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
     },
+    scroll: {
+      WitnetBytecodes: "WitnetBytecodesNoSha256",
+    }
   },
   compilers: {
     default: {
@@ -609,9 +615,9 @@ module.exports = {
         skipDryRun: true,
         gasPrice: 3000000,
         verify: {
-          apiKey: "MY_API_KEY",
+          apiKey: "abc",
           apiUrl: "https://blockscout.scroll.io/api",
-          explorerUrl: "https://blockscout.scroll.io/address",
+          explorerUrl: "https://blockscout.scroll.io/",
         },
       },
     },

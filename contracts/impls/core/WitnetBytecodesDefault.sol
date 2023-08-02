@@ -575,7 +575,7 @@ contract WitnetBytecodesDefault
             }
         
             // Calculate radhash and add request metadata and rad bytecode to storage:
-            _radHash = _bytecode.hash();
+            _radHash = _witnetHash(_bytecode);
             __database().rads[hash] = _radHash;
             __database().radsBytecode[_radHash] = _bytecode;
             __database().requests[_radHash] = RadonRequest({
@@ -603,7 +603,7 @@ contract WitnetBytecodesDefault
         bytes memory _bytecode = _sla.encode();
 
         // Calculate hash and add to storage if new:
-        _slaHash = _bytecode.hash();
+        _slaHash = _witnetHash(_bytecode);
         if (__database().slas[_slaHash].numWitnesses == 0) {
             __database().slas[_slaHash] = _sla;
             __database().slasBytecode[_slaHash] = _bytecode;
@@ -658,6 +658,10 @@ contract WitnetBytecodesDefault
         for (uint _ix = 0; _ix < _filters.length; _ix ++) {
             __reducer.filters.push(_filters[_ix]);
         }
+    }
+
+    function _witnetHash(bytes memory chunk) virtual internal pure returns (bytes32) {
+        return sha256(chunk);
     }
 
 }
