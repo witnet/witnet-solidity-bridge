@@ -324,7 +324,7 @@ abstract contract WitnetRequestMalleableBase
             _uint8varint(0x28, _minWitnessingConsensus),
             _uint64varint(0x30, _witnessingCollateral)
         );
-        __storage().hash = __storage().bytecode.hash();
+        __storage().hash = _witnetHash(__storage().bytecode);
         emit WitnessingParamsChanged(
             msg.sender,
             _numWitnesses,
@@ -387,5 +387,20 @@ abstract contract WitnetRequestMalleableBase
         returns (bytes memory)
     {
         return _uint64varint(t, uint64(n));
+    }
+
+    function _witnetHash(bytes memory chunk)
+        virtual internal view
+        returns (bytes32)
+    {
+        if (
+                block.chainid == 1101           // polygon.zkevm.mainnet
+                    || block.chainid == 1442    // polygon.zkevm.goerli
+                    || block.chainid == 534353  // scroll.goerli
+        ) {
+            return keccak256(chunk);
+        } else {
+            return sha256(chunk);
+        }
     }
 }

@@ -16,6 +16,21 @@ contract WitnetRequestPrecompiled
 
     constructor(bytes memory _bytecode) {
         bytecode = _bytecode;
-        hash = Witnet.hash(_bytecode);
+        hash = _witnetHash(_bytecode);
+    }
+
+    function _witnetHash(bytes memory chunk)
+        virtual internal view
+        returns (bytes32)
+    {
+        if (
+                block.chainid == 1101           // polygon.zkevm.mainnet
+                    || block.chainid == 1442    // polygon.zkevm.goerli
+                    || block.chainid == 534353  // scroll.goerli
+        ) {
+            return keccak256(chunk);
+        } else {
+            return sha256(chunk);
+        }
     }
 }

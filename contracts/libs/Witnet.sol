@@ -347,18 +347,6 @@ library Witnet {
     /// ===============================================================================================================
     /// --- 'bytes' helper methods ------------------------------------------------------------------------------------
 
-    /// @dev Witnet function that computes the hash of a CBOR-encoded Data Request.
-    function hash(bytes memory _bytecode) internal view returns (bytes32) {
-        if (
-            block.chainid != 1101           // Polygon zkEVM mainnet
-                && block.chainid != 1442    // Polygon zkEVM testnet
-        ) {
-            return sha256(_bytecode);
-        } else {
-            return keccak256(_bytecode);
-        }
-    }
-
     /// @dev Transform given bytes into a Witnet.Result instance.
     /// @param bytecode Raw bytes representing a CBOR-encoded value.
     /// @return A `Witnet.Result` instance.
