@@ -70,6 +70,11 @@ module.exports = {
         /* _reportResultGasLimit */ 225000,
       ],
     },
+    cronos: {
+      WitnetRequestBoard: [
+        /* _reportResultGasLimit */ 137500,
+      ],
+    },
     dogechain: {
       WitnetRequestBoard: [
         /* _reportResultGasLimit */ 85000,
