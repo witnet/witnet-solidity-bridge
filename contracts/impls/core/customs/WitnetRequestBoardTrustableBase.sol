@@ -46,6 +46,43 @@ abstract contract WitnetRequestBoardTrustableBase
         revert("WitnetRequestBoardTrustableBase: no transfers accepted");
     }
 
+    /// @dev Provide backwards compatibility for dapps bound to versions <= 0.6.1
+    /// @dev (i.e. calling methods in IWitnetRequestBoardDeprecating)
+    // solhint-disable-next-line payable-fallback
+    fallback() override external {
+        bytes4 _newSig = msg.sig;
+        // IWitnetRequestParser.isOk({bool,CBOR}) --> IWitnetRequestBoardDeprecating.isOk({bool,WitnetCBOR.CBOR})
+        if (msg.sig == 0xA8604C1A) {
+            _newSig = IWitnetRequestBoardDeprecating.isOk.selector;
+        } 
+        // IWitnetRequestParser.asBytes32({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asBytes32({bool,WitnetCBOR.CBOR})
+        else if (msg.sig == 0xCF62D115) {
+            _newSig = IWitnetRequestBoardDeprecating.asBytes32.selector;
+        }
+        if (_newSig != msg.sig) {
+            address _self = address(this);
+            assembly {
+                let ptr := mload(0x40)
+                calldatacopy(ptr, 0, calldatasize())
+                mstore(ptr, or(and(mload(ptr), 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff), _newSig))
+                let result := delegatecall(gas(), _self, ptr, calldatasize(), 0, 0)
+                let size := returndatasize()
+                returndatacopy(ptr, 0, size)
+                switch result
+                    case 0 { revert(ptr, size) }
+                    default { return(ptr, size) }
+            }
+        } else {
+            revert(string(abi.encodePacked(
+                "WitnetRequestBoardTrustableBase: not implemented: 0x",
+                Witnet.toHexString(uint8(bytes1(msg.sig))),
+                Witnet.toHexString(uint8(bytes1(msg.sig << 8))),
+                Witnet.toHexString(uint8(bytes1(msg.sig << 16))),
+                Witnet.toHexString(uint8(bytes1(msg.sig << 24)))
+            )));
+        }
+    }
+
 
     // ================================================================================================================
     // --- Overrides IERC165 interface --------------------------------------------------------------------------------

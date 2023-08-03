@@ -451,7 +451,7 @@ library Witnet {
                 res += (uint8(bytes(str)[i]) - 48) * 10 ** (bytes(str).length - i - 1);
             }
             return (res, true);
-        }   
+        }
     }
 
 
