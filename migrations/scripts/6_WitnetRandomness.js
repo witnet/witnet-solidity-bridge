@@ -16,7 +16,6 @@ const WitnetProxy = artifacts.require("WitnetProxy")
 
 const WitnetRandomness = artifacts.require("WitnetRandomness")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
-const WitnetRequestRandomness = artifacts.require("WitnetRequestRandomness")
 
 module.exports = async function (deployer, network, [, from]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
@@ -33,17 +32,6 @@ module.exports = async function (deployer, network, [, from]) {
   }
 
   const create2Factory = await Create2Factory.deployed()
-  if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestRandomness)) {
-    // Invariantly deploy a WitnetRequestRandomness contract if not found in the addresses file
-    await deployer.deploy(WitnetRequestRandomness, { from })
-    addresses[ecosystem][network].WitnetRequestRandomness = WitnetRequestRandomness.address
-    if (!isDryRun) {
-      utils.saveAddresses(addresses)
-    }
-  } else {
-    WitnetRequestRandomness.address = addresses[ecosystem][network]?.WitnetRequestRandomness
-    console.info(`   Skipped: 'WitnetRequestRandomness' deployed at ${WitnetRequestRandomness.address}`)
-  }
 
   const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRandomnessImplementation = artifacts.require(artifactNames.WitnetRandomness)
@@ -70,7 +58,7 @@ module.exports = async function (deployer, network, [, from]) {
           // deploy instance only if not found in current network:
           utils.traceHeader("Singleton inception of 'WitnetRandomness':")
           const balance = await web3.eth.getBalance(from)
-          const gas = singletons.WitnetRandomness.gas
+          const gas = singletons.WitnetRandomness.gas || 1000000
           const tx = await create2Factory.deploy(bytecode, salt, { from, gas })
           utils.traceTx(
             tx.receipt,
@@ -102,7 +90,6 @@ module.exports = async function (deployer, network, [, from]) {
       await deployer.deploy(
         WitnetRandomnessImplementation,
         WitnetRequestBoard.address,
-        WitnetRequestRandomness.address,
         /* _versionTag    */ utils.fromAscii(version),
         { from }
       )
@@ -151,7 +138,6 @@ module.exports = async function (deployer, network, [, from]) {
       await deployer.deploy(
         WitnetRandomnessImplementation,
         WitnetRequestBoard.address,
-        WitnetRequestRandomness.address,
         utils.fromAscii(version),
         { from }
       )
