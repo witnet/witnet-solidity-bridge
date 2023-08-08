@@ -10,14 +10,14 @@ import "./WitnetRequestBoard.sol";
 /// @author The Witnet Foundation.
 abstract contract UsingWitnet {
 
-    WitnetRequestBoard public immutable witnet;
+    WitnetRequestBoard private immutable __witnet;
 
     /// @dev Include an address to specify the WitnetRequestBoard entry point address.
     /// @param _wrb The WitnetRequestBoard entry point address.
     constructor(WitnetRequestBoard _wrb)
     {
         require(address(_wrb) != address(0), "UsingWitnet: no WRB");
-        witnet = _wrb;
+        __witnet = _wrb;
     }
 
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
@@ -28,13 +28,17 @@ abstract contract UsingWitnet {
         _;
     }
 
+    function witnet() virtual public view returns (WitnetRequestBoard) {
+        return __witnet;
+    }
+
     /// @notice Check if given query was already reported back from the Witnet oracle.
     /// @param _id The unique identifier of a previously posted data request.
     function _witnetCheckResultAvailability(uint256 _id)
         internal view
         returns (bool)
     {
-        return witnet.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
+        return __witnet.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
     }
 
     /// @notice Estimate the reward amount.
@@ -44,7 +48,7 @@ abstract contract UsingWitnet {
         internal view
         returns (uint256)
     {
-        return witnet.estimateReward(_gasPrice);
+        return __witnet.estimateReward(_gasPrice);
     }
 
     /// @notice Estimates the reward amount, considering current transaction gas price.
@@ -53,25 +57,7 @@ abstract contract UsingWitnet {
         internal view
         returns (uint256)
     {
-        return witnet.estimateReward(tx.gasprice);
-    }
-
-    /// @notice Post some data request to be eventually solved by the Witnet decentralized oracle network.
-    /// @notice The EVM -> Witnet bridge will read the Witnet Data Request bytecode from `_request`.
-    /// @dev Enough ETH needs to be provided as to cover for the implicit fee.
-    /// @param _request An instance of some contract implementing the `IWitnetRequest` interface.
-    /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
-    /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
-    function _witnetPostRequest(IWitnetRequest _request)
-        virtual internal
-        returns (uint256 _id, uint256 _reward)
-    {
-        _reward = _witnetEstimateReward();
-        require(
-            _reward <= msg.value,
-            "UsingWitnet: reward too low"
-        );
-        _id = witnet.postRequest{value: _reward}(_request);
+        return __witnet.estimateReward(tx.gasprice);
     }
 
     /// @notice Post some data request to be eventually solved by the Witnet decentralized oracle network.
@@ -91,7 +77,7 @@ abstract contract UsingWitnet {
             _reward <= msg.value,
             "UsingWitnet: reward too low"
         );
-        _id = witnet.postRequest{value: _reward}(_radHash, _slaHash);
+        _id = __witnet.postRequest{value: _reward}(_radHash, _slaHash);
     }
 
     /// @notice Post some data request to be eventually solved by the Witnet decentralized oracle network.
@@ -106,7 +92,7 @@ abstract contract UsingWitnet {
         virtual internal
         returns (uint256 _id, uint256 _reward)
     {
-        return _witnetPostRequest(_radHash, witnet.registry().verifyRadonSLA(_slaParams));
+        return _witnetPostRequest(_radHash, __witnet.registry().verifyRadonSLA(_slaParams));
     }
 
     /// @notice Read the Witnet-provided result to a previously posted request.
@@ -118,7 +104,7 @@ abstract contract UsingWitnet {
         virtual
         returns (Witnet.Result memory)
     {
-        return witnet.readResponseResult(_id);
+        return __witnet.readResponseResult(_id);
     }
 
     /// @notice Upgrade the reward of some previously posted data request.
@@ -129,13 +115,13 @@ abstract contract UsingWitnet {
         virtual internal
         returns (uint256)
     {
-        uint256 _currentReward = witnet.readRequestReward(_id);        
+        uint256 _currentReward = __witnet.readRequestReward(_id);        
         uint256 _newReward = _witnetEstimateReward();
         uint256 _fundsToAdd = 0;
         if (_newReward > _currentReward) {
             _fundsToAdd = (_newReward - _currentReward);
         }
-        witnet.upgradeReward{value: _fundsToAdd}(_id); 
+        __witnet.upgradeReward{value: _fundsToAdd}(_id); 
         return _fundsToAdd;
     }
 }
