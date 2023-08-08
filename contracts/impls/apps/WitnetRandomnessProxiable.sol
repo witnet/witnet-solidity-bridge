@@ -80,17 +80,18 @@ contract WitnetRandomnessProxiable
                 "", // no path
                 "", // no query
                 "", // no body
-                abi.decode(hex"", (string[2][])), // no headers
-                hex"" // no retrieval script
+                new string[2][](0), // no headers
+                hex"80" // no retrieval script
             );
+            WitnetV2.RadonFilter[] memory _filters;
             bytes32 _aggregator = _registry.verifyRadonReducer(WitnetV2.RadonReducer({
                 opcode: WitnetV2.RadonReducerOpcodes.Mode,
-                filters: abi.decode(hex"", (WitnetV2.RadonFilter[])), // no filters
+                filters: _filters, // no filters
                 script: hex"" // no aggregation script
             }));
             bytes32 _tally = _registry.verifyRadonReducer(WitnetV2.RadonReducer({
                 opcode: WitnetV2.RadonReducerOpcodes.ConcatenateAndHash,
-                filters: abi.decode(hex"", (WitnetV2.RadonFilter[])), // no filters
+                filters: _filters, // no filters
                 script: hex"" // no aggregation script
             }));
             WitnetRequestTemplate _template = WitnetRequestTemplate(_factory.buildRequestTemplate(
@@ -99,7 +100,7 @@ contract WitnetRandomnessProxiable
                 _tally,
                 0
             ));
-            witnetRandomnessRequest = WitnetRequest(_template.buildRequest(new string[][](1)));
+            witnetRandomnessRequest = WitnetRequest(_template.buildRequest(new string[][](_retrievals.length)));
             __witnetRandomnessRadHash = witnetRandomnessRequest.radHash();
         }
         __initializeWitnetRandomnessSlaHash();

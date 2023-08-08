@@ -404,8 +404,8 @@ contract WitnetBytecodesDefault
             string memory _requestPath,
             string memory _requestQuery,
             string memory _requestBody,
-            string[2][] memory _requestHeaders,
-            bytes memory _requestRadonScript
+            string[2][] memory  _requestHeaders,
+            bytes calldata _requestRadonScript
         )
         external
         virtual override
