@@ -5,9 +5,9 @@ pragma experimental ABIEncoderV2;
 
 import "../apps/WitnetRandomnessProxiable.sol";
 
-/// @title WitnetRandomnessProxiable mock contract implementation. 
+/// @title WitnetRandomness mock contract implementation. 
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
-/// @dev ON SUPPORTED TESTNETS, PLEASE USE THE `WitnetRandomnessProxiable`
+/// @dev ON SUPPORTED TESTNETS, PLEASE USE THE `WitnetRandomness`
 /// @dev CONTRACT ADDRESS PROVIDED BY THE WITNET FOUNDATION.
 /// @dev SEE: https://docs.witnet.io/smart-contracts/witnet-randomness-oracle/contract-addresses
 /// @author Witnet Foundation.
@@ -23,13 +23,12 @@ contract WitnetRandomnessMock
     /// @param _mockRandomizeLatencyBlocks Mocked number of blocks in which a new randomness will be provided after `randomize()`
     /// @param _mockRandomizeFee Mocked randomize fee (will be constant no matter what tx gas price is provided).
     constructor (
-            WitnetRequestRandomness _request,
+            WitnetRequestBoard _wrb,
             uint8 _mockRandomizeLatencyBlocks,
             uint256 _mockRandomizeFee
         )
         WitnetRandomnessProxiable(
-            WitnetRequestBoard(payable(0)),
-            _request,
+            _wrb,
             bytes32("mocked")
         )
     {
@@ -139,7 +138,7 @@ contract WitnetRandomnessMock
                 msg.sender,
                 _prevBlock,
                 _queryId,
-                witnetRandomnessRequest.hash()
+                __witnetRandomnessRadHash
             );
         }
         // Transfer back unused tx value:
