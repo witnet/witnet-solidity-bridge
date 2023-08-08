@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../WitnetRequestBoard.sol";
-import "../requests/WitnetRequestRandomness.sol";
+import "../requests/WitnetRequest.sol";
 
 /// @title The Witnet Randomness generator interface.
 /// @author Witnet Foundation.
@@ -98,5 +98,9 @@ interface IWitnetRandomness {
     function witnet() external view returns (WitnetRequestBoard);
 
     /// @notice Returns address of the WitnetRequestRandomness contract being used for solving randomness.
-    function witnetRandomnessRequest() external view returns (WitnetRequestRandomness);
+    function witnetRandomnessRequest() external view returns (WitnetRequest);
+
+    /// @notice Returns SLA parameters that are being used every time there's a new randomness request.
+    function witnetRandomnessSLA() external view returns (WitnetV2.RadonSLA memory);
+
 }
