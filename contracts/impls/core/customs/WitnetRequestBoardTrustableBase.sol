@@ -48,16 +48,21 @@ abstract contract WitnetRequestBoardTrustableBase
 
     /// @dev Provide backwards compatibility for dapps bound to versions <= 0.6.1
     /// @dev (i.e. calling methods in IWitnetRequestBoardDeprecating)
+    /// @dev (Until 'function ... abi(...)' modifier is allegedly supported in solc versions >= 0.9.1)
     // solhint-disable-next-line payable-fallback
     fallback() override external {
         bytes4 _newSig = msg.sig;
-        // IWitnetRequestParser.isOk({bool,CBOR}) --> IWitnetRequestBoardDeprecating.isOk({bool,WitnetCBOR.CBOR})
         if (msg.sig == 0xA8604C1A) {
+            // IWitnetRequestParser.isOk({bool,CBOR}) --> IWitnetRequestBoardDeprecating.isOk({bool,WitnetCBOR.CBOR})
             _newSig = IWitnetRequestBoardDeprecating.isOk.selector;
-        } 
-        // IWitnetRequestParser.asBytes32({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asBytes32({bool,WitnetCBOR.CBOR})
-        else if (msg.sig == 0xCF62D115) {
+        } else if (msg.sig == 0xCF62D115) {
+            // IWitnetRequestParser.asBytes32({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asBytes32({bool,WitnetCBOR.CBOR})
             _newSig = IWitnetRequestBoardDeprecating.asBytes32.selector;
+        } else if (msg.sig == 0xE99E47F3) {
+            // IWitnetRequestParser.asUint64({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asUint64({bool,WitnetCBOR.CBOR})
+            _newSig = IWitnetRequestBoardDeprecating.asUint64.selector;
+        } else if (msg.sig == 0xD74803BE) {
+            // IWitnetRequestParser.asErrorMessage({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asErrorMessage({bool,WitnetCBOR.CBOR})
         }
         if (_newSig != msg.sig) {
             address _self = address(this);
