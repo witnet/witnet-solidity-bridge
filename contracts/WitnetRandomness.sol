@@ -4,10 +4,12 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/IWitnetRandomness.sol";
+import "./interfaces/IWitnetRandomnessAdmin.sol";
 
 abstract contract WitnetRandomness
     is
-        IWitnetRandomness
+        IWitnetRandomness,
+        IWitnetRandomnessAdmin
 {
     /// Deploys a minimal-proxy clone in which the `witnetRandomnessRequest` is owned by the cloner,
     /// @dev This function should always provide a new address, no matter how many times 

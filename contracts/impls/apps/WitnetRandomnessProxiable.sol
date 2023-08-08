@@ -5,17 +5,19 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
+import "../../UsingWitnet.sol";
 import "../../WitnetRandomness.sol";
 import "../../impls/WitnetUpgradableBase.sol";
 import "../../patterns/Clonable.sol";
 
-import "../../requests/WitnetRequestRandomness.sol";
+import "../../requests/WitnetRequest.sol";
 
 /// @title WitnetRandomnessProxiable: A trustless randomness generator and registry, using the Witnet oracle. 
 /// @author Witnet Foundation.
 contract WitnetRandomnessProxiable
     is
         Clonable,
+        UsingWitnet,
         WitnetRandomness,
         WitnetUpgradableBase
 {
@@ -23,9 +25,10 @@ contract WitnetRandomnessProxiable
     using Witnet for Witnet.Result;
 
     uint256 public override latestRandomizeBlock;
-    
-    WitnetRequestBoard public immutable override witnet;
-    WitnetRequestRandomness public override witnetRandomnessRequest;
+    WitnetRequest public immutable override witnetRandomnessRequest;
+
+    bytes32 internal immutable __witnetRandomnessRadHash;
+    bytes32 internal __witnetRandomnessSlaHash;
     
     mapping (uint256 => RandomizeData) internal __randomize_;
     struct RandomizeData {
@@ -40,13 +43,20 @@ contract WitnetRandomnessProxiable
         _;
     }
 
+    function witnet()
+        virtual override (IWitnetRandomness, UsingWitnet)
+        public view returns (WitnetRequestBoard)
+    {
+        return UsingWitnet.witnet();
+    }
+
     /// Include an address to specify the immutable WitnetRequestBoard entrypoint address.
     /// @param _wrb The WitnetRequestBoard immutable entrypoint address.
     constructor(
             WitnetRequestBoard _wrb,
-            WitnetRequestRandomness _request,
             bytes32 _version
         )
+        UsingWitnet(_wrb)
         WitnetUpgradableBase(
             false, 
             _version,
@@ -58,12 +68,41 @@ contract WitnetRandomnessProxiable
                 || address(_wrb).supportsInterface(type(WitnetRequestBoard).interfaceId),
             "WitnetRandomnessProxiable: uncompliant request board"
         );
-        require(
-            _request.owner() == msg.sender,
-            "WitnetRandomnessProxiable: unowned randomness request"
-        );
-        witnet = _wrb;
-        witnetRandomnessRequest = _request;
+        WitnetBytecodes _registry = witnet().registry();
+        WitnetRequestFactory _factory = witnet().factory();
+        {
+            // Build own Witnet Randomness Request:
+            bytes32[] memory _retrievals = new bytes32[](1);
+            _retrievals[0] = _registry.verifyRadonRetrieval(
+                WitnetV2.DataRequestMethods.Rng,
+                "", // no schema
+                "", // no authority
+                "", // no path
+                "", // no query
+                "", // no body
+                abi.decode(hex"", (string[2][])), // no headers
+                hex"" // no retrieval script
+            );
+            bytes32 _aggregator = _registry.verifyRadonReducer(WitnetV2.RadonReducer({
+                opcode: WitnetV2.RadonReducerOpcodes.Mode,
+                filters: abi.decode(hex"", (WitnetV2.RadonFilter[])), // no filters
+                script: hex"" // no aggregation script
+            }));
+            bytes32 _tally = _registry.verifyRadonReducer(WitnetV2.RadonReducer({
+                opcode: WitnetV2.RadonReducerOpcodes.ConcatenateAndHash,
+                filters: abi.decode(hex"", (WitnetV2.RadonFilter[])), // no filters
+                script: hex"" // no aggregation script
+            }));
+            WitnetRequestTemplate _template = WitnetRequestTemplate(_factory.buildRequestTemplate(
+                _retrievals,
+                _aggregator,
+                _tally,
+                0
+            ));
+            witnetRandomnessRequest = WitnetRequest(_template.buildRequest(new string[][](1)));
+            __witnetRandomnessRadHash = witnetRandomnessRequest.radHash();
+        }
+        __initializeWitnetRandomnessSlaHash();
     }
 
     /// @notice Initializes a cloned instance. 
@@ -77,6 +116,49 @@ contract WitnetRandomnessProxiable
     }
 
 
+    /// ===============================================================================================================
+    /// --- 'WitnetRandomnessAdmin' implementation -------------------------------------------------------------------------
+
+    function owner()
+        virtual override (IWitnetRandomnessAdmin, Ownable)
+        public view 
+        returns (address)
+    {
+        return Ownable.owner();
+    }
+    
+    function acceptOwnership()
+        virtual override (IWitnetRandomnessAdmin, Ownable2Step)
+        public
+    {
+        Ownable2Step.acceptOwnership();
+    }
+
+    function pendingOwner() 
+        virtual override (IWitnetRandomnessAdmin, Ownable2Step)
+        public view
+        returns (address)
+    {
+        return Ownable2Step.pendingOwner();
+    }
+    
+    function transferOwnership(address _newOwner)
+        virtual override (IWitnetRandomnessAdmin, Ownable2Step)
+        public 
+        onlyOwner
+    {
+        Ownable.transferOwnership(_newOwner);
+    }
+
+    function settleWitnetRandomnessSLA(WitnetV2.RadonSLA memory _radonSLA)
+        virtual override
+        public
+        returns (bytes32 _radonSlaHash)
+    {
+        _radonSlaHash = witnet().registry().verifyRadonSLA(_radonSLA);
+        __witnetRandomnessSlaHash = _radonSlaHash;
+    }
+    
     /// ===============================================================================================================
     /// --- 'WitnetRandomness' implementation -------------------------------------------------------------------------
 
@@ -114,7 +196,7 @@ contract WitnetRandomnessProxiable
         virtual override
         returns (uint256)
     {
-        return witnet.estimateReward(_gasPrice);
+        return witnet().estimateReward(_gasPrice);
     }
 
     /// Retrieves data of a randomization request that got successfully posted to the WRB within a given block.
@@ -161,9 +243,9 @@ contract WitnetRandomnessProxiable
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
         require(_queryId != 0, "WitnetRandomnessProxiable: not randomized");
-        Witnet.ResultStatus _resultStatus = witnet.checkResultStatus(_queryId);
+        Witnet.ResultStatus _resultStatus = witnet().checkResultStatus(_queryId);
         if (_resultStatus == Witnet.ResultStatus.Ready) {
-            return witnet.readResponseResult(_queryId).asBytes32();
+            return witnet().readResponseResult(_queryId).asBytes32();
         } else if (_resultStatus == Witnet.ResultStatus.Error) {
             uint256 _nextRandomizeBlock = __randomize_[_block].nextBlock;
             require(_nextRandomizeBlock != 0, "WitnetRandomnessProxiable: faulty randomize");
@@ -215,7 +297,7 @@ contract WitnetRandomnessProxiable
         RandomizeData storage _data = __randomize_[_block];
         return (
             _data.witnetQueryId != 0 
-                && witnet.getQueryStatus(_data.witnetQueryId) == Witnet.QueryStatus.Reported
+                && witnet().getQueryStatus(_data.witnetQueryId) == Witnet.QueryStatus.Reported
         );
     }
 
@@ -275,7 +357,10 @@ contract WitnetRandomnessProxiable
         if (latestRandomizeBlock < block.number) {
             // Post the Witnet Randomness request:
             uint _queryId;
-            (_queryId, _usedFunds) = _witnetPostRequest(witnetRandomnessRequest);
+            (_queryId, _usedFunds) = _witnetPostRequest(
+                __witnetRandomnessRadHash,
+                __witnetRandomnessSlaHash  
+            );
             // Keep Randomize data in storage:
             RandomizeData storage _data = __randomize_[block.number];
             _data.witnetQueryId = _queryId;
@@ -290,7 +375,7 @@ contract WitnetRandomnessProxiable
                 msg.sender,
                 _prevBlock,
                 _queryId,
-                witnetRandomnessRequest.hash()
+                __witnetRandomnessRadHash
             );
             // Transfer back unused tx value:
             if (_usedFunds < msg.value) {
@@ -320,6 +405,15 @@ contract WitnetRandomnessProxiable
         }
     }
 
+    /// @notice Returns SLA parameters that are being used every time there's a new randomness request.
+    function witnetRandomnessSLA()
+        virtual override
+        external view
+        returns (WitnetV2.RadonSLA memory)
+    {
+        return witnet().registry().lookupRadonSLA(__witnetRandomnessSlaHash);
+    }
+
 
     // ================================================================================================================
     // --- 'Upgradeable' extension ------------------------------------------------------------------------------------
@@ -338,8 +432,7 @@ contract WitnetRandomnessProxiable
             // a proxy is being initilized for the first time ...
             __proxiable().proxy = address(this);
             _transferOwnership(msg.sender);
-            witnetRandomnessRequest = new WitnetRequestRandomness();
-            WitnetRequestRandomness(address(witnetRandomnessRequest)).transferOwnership(msg.sender);
+            __initializeWitnetRandomnessSlaHash();
         }
         else if (__proxiable().implementation == base()) {
             revert("WitnetRandomnessProxiable: not upgradeable");
@@ -374,25 +467,31 @@ contract WitnetRandomnessProxiable
         virtual internal
         returns (WitnetRandomness)
     {
-        address _randomnessRequest = address(WitnetRequestRandomness(address(witnetRandomnessRequest)).clone());
-        Ownable(_randomnessRequest).transferOwnership(msg.sender);
-        WitnetRandomnessProxiable(_instance).initializeClone(abi.encode(_randomnessRequest));
+        WitnetRandomnessProxiable(_instance).initializeClone(hex"");
         return WitnetRandomness(_instance);
     }
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
     /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function _initialize(bytes memory _initData)
+    function _initialize(bytes memory)
         virtual internal
     {
-        witnetRandomnessRequest = WitnetRequestRandomness(
-            abi.decode(
-                _initData,
-                (address)
-            )
-        );
-        // make sure that this clone cannot ever get initialized as a proxy.
+        // settle ownership:
+        _transferOwnership(msg.sender);
+        // initialize default Witnet SLA parameters used for every randomness request;
+        __initializeWitnetRandomnessSlaHash();
+        // make sure that this clone cannot ever get initialized as a proxy:
         __proxiable().implementation = base();
+    }
+
+    function __initializeWitnetRandomnessSlaHash() virtual internal {
+        settleWitnetRandomnessSLA(WitnetV2.RadonSLA({
+            numWitnesses: 5,
+            minConsensusPercentage: 51,
+            witnessReward: 10 ** 8,
+            witnessCollateral: 10 ** 9,
+            minerCommitRevealFee: 10 ** 7
+        }));
     }
 
     /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.
@@ -435,38 +534,4 @@ contract WitnetRandomnessProxiable
         );
     }
 
-    /// @notice Post some data request to be eventually solved by the Witnet decentralized oracle network.
-    /// @dev Enough ETH needs to be provided as to cover for the implicit fee.
-    /// @param _request An instance of some contract implementing the `IWitnetRequest` interface.
-    /// @return _id Sequential identifier for the request included in the WitnetRequestBoard.
-    /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
-    function _witnetPostRequest(IWitnetRequest _request)
-        virtual internal
-        returns (uint256 _id, uint256 _reward)
-    {
-        _reward = witnet.estimateReward(tx.gasprice);
-        require(
-            _reward <= msg.value,
-            "WitnetRandomnessProxiable: reward too low"
-        );
-        _id = witnet.postRequest{value: _reward}(_request);
-    }
-
-    /// @notice Upgrade the reward of some previously posted data request.
-    /// @dev Reverts if the data request was already solved.
-    /// @param _id The unique identifier of some previously posted data request.
-    /// @return Amount in which the reward has been increased.
-    function _witnetUpgradeReward(uint256 _id)
-        virtual internal
-        returns (uint256)
-    {
-        uint256 _currentReward = witnet.readRequestReward(_id);        
-        uint256 _newReward = witnet.estimateReward(tx.gasprice);
-        uint256 _fundsToAdd = 0;
-        if (_newReward > _currentReward) {
-            _fundsToAdd = (_newReward - _currentReward);
-        }
-        witnet.upgradeReward{value: _fundsToAdd}(_id); 
-        return _fundsToAdd;
-    }
 }
