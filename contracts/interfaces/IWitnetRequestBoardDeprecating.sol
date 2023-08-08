@@ -33,4 +33,9 @@ interface IWitnetRequestBoardDeprecating {
     /// @return The `uint` decoded from the Witnet.Result.
     function asUint64(Witnet.Result memory _result) external pure returns (uint64);
 
+    /// Decode raw CBOR bytes into a Witnet.Result instance.
+    /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
+    /// @return A `Witnet.Result` instance.
+    function resultFromCborBytes(bytes memory _cborBytes) external pure returns (Witnet.Result memory);
+
 }

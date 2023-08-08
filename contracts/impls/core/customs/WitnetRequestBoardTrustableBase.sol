@@ -58,7 +58,7 @@ abstract contract WitnetRequestBoardTrustableBase
         } else if (msg.sig == 0xCF62D115) {
             // IWitnetRequestParser.asBytes32({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asBytes32({bool,WitnetCBOR.CBOR})
             _newSig = IWitnetRequestBoardDeprecating.asBytes32.selector;
-        } else if (msg.sig == 0xE99E47F3) {
+        } else if (msg.sig == 0xBC7E25FF) {
             // IWitnetRequestParser.asUint64({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asUint64({bool,WitnetCBOR.CBOR})
             _newSig = IWitnetRequestBoardDeprecating.asUint64.selector;
         } else if (msg.sig == 0xD74803BE) {
@@ -744,17 +744,6 @@ abstract contract WitnetRequestBoardTrustableBase
     // ================================================================================================================
     // --- Full implementation of 'IWitnetRequestBoardDeprecating' interface ------------------------------------------
 
-    // /// Decode raw CBOR bytes into a Witnet.Result instance.
-    // /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
-    // /// @return A `Witnet.Result` instance.
-    // function resultFromCborBytes(bytes memory _cborBytes)
-    //     external pure
-    //     override
-    //     returns (Witnet.Result memory)
-    // {
-    //     return WitnetLib.resultFromCborBytes(_cborBytes);
-    // }
-
     /// Tell if a Witnet.Result is successful.
     /// @param _result An instance of Witnet.Result.
     /// @return `true` if successful, `false` if errored.
@@ -802,6 +791,17 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint64)
     {
         return uint64(_result.asUint());
+    }
+
+    /// Decode raw CBOR bytes into a Witnet.Result instance.
+    /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
+    /// @return A `Witnet.Result` instance.
+    function resultFromCborBytes(bytes memory _cborBytes)
+        external pure
+        override
+        returns (Witnet.Result memory)
+    {
+        return Witnet.resultFromCborBytes(_cborBytes);
     }
 
 
