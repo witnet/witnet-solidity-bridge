@@ -63,6 +63,7 @@ abstract contract WitnetRequestBoardTrustableBase
             _newSig = IWitnetRequestBoardDeprecating.asUint64.selector;
         } else if (msg.sig == 0xD74803BE) {
             // IWitnetRequestParser.asErrorMessage({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asErrorMessage({bool,WitnetCBOR.CBOR})
+            _newSig = IWitnetRequestBoardDeprecating.asErrorMessage.selector;
         }
         if (_newSig != msg.sig) {
             address _self = address(this);
