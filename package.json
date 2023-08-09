@@ -15,7 +15,7 @@
     "flatten:all": "npm run clean && npm run flatten:core && npm run flatten:apps && npm run flatten:libs && npm run flatten:proxy",
     "flatten:apps": "npm run flatten contracts/impls/apps/",
     "flatten:core": "npm run flatten contracts/impls/core/",
-    "flatten:libs": "npm run flatten contracts/libs/WitnetErrorsLib.sol && npm run flatten contracts/libs/WitnetEncodingLib.sol",
+    "flatten:libs": "npm run flatten contracts/libs/WitnetErrorsLib.sol && npm run flatten contracts/libs/WitnetEncodingLib.sol && npm run flatten contracts/libs/WitnetPriceFeedsLib.sol",
     "flatten:proxy": "npm run flatten contracts/impls/WitnetProxy.sol",
     "fmt:js": "eslint \"**/*.js\"",
     "fmt:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" && solhint \"test/**/*.sol\" && solhint \"flattened/**/*.sol\"",
@@ -62,7 +62,7 @@
     "solidity-coverage": "0.7.16",
     "truffle": "~5.8.2",
     "truffle-assertions": "0.9.2",
-    "truffle-flattener": "~1.6.0",
+    "truffle-flattener": "",
     "truffle-plugin-verify": "~0.6.2"
   }
 }
