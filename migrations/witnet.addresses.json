@@ -163,8 +163,8 @@
     },
     "celo": {
         "celo.alfajores": {
-            "WitnetProxy": "0x4743325168af9195Aa5b25e491E9bE87d87E7F93",
             "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetProxy": "0x4743325168af9195Aa5b25e491E9bE87d87E7F93",
             "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
             "WitnetPriceFeeds": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
             "WitnetPriceRouter": "0x6f8A7E2bBc1eDb8782145cD1089251f6e2C738AE",
@@ -241,8 +241,8 @@
     },
     "cronos": {
         "cronos.testnet": {
-            "WitnetProxy": "0x7A6C2Aad6b4b08De09477D0F663b8f90b0db9662",
             "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetProxy": "0x7A6C2Aad6b4b08De09477D0F663b8f90b0db9662",
             "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
             "WitnetPriceFeeds": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
             "WitnetPriceRouter": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
