@@ -12,7 +12,7 @@ module.exports = {
     salt: 125920098, // => solc-0.8.17: 0x9999999d139bdBFbF25923ba39F63bBFc7593400
   },
   WitnetRandomness: {
-    salt: 159551166, // => solc-0.8.17: 0x012345000Db5417269d8c70B0142Ae3eF36d7f3e
+    salt: 332121398, // => solc-0.8.17: 0x0123456fbBC59E181D76B6Fe8771953d1953B51a
   },
   WitnetRequestBoard: {
     salt: 198789840, // => solc-0-8.17: 0x777777772C24e6CD34B464D1d71616C444254537

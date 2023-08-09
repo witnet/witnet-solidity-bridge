@@ -154,6 +154,7 @@ contract WitnetRandomnessProxiable
     function settleWitnetRandomnessSLA(WitnetV2.RadonSLA memory _radonSLA)
         virtual override
         public
+        onlyOwner
         returns (bytes32 _radonSlaHash)
     {
         _radonSlaHash = witnet().registry().verifyRadonSLA(_radonSLA);
