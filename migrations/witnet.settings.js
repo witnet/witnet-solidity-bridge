@@ -24,7 +24,7 @@ module.exports = {
     },
     scroll: {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
-    }
+    },
   },
   compilers: {
     default: {

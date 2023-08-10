@@ -51,7 +51,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
         // deploy instance only if not found in current network:
         utils.traceHeader("Singleton inception of 'WitnetRequestBoard':")
         const balance = await web3.eth.getBalance(from)
-        const gas = singletons.WitnetRequestBoard.gas || 5000000
+        const gas = singletons.WitnetRequestBoard.gas
         const tx = await factory.deploy(bytecode, salt, { from, gas })
         utils.traceTx(
           tx.receipt,
