@@ -399,6 +399,58 @@ contract WitnetBytecodesDefault
 
     function verifyRadonRetrieval(
             WitnetV2.DataRequestMethods _requestMethod,
+            string calldata _requestURL,
+            string calldata _requestBody,
+            string[2][] memory  _requestHeaders,
+            bytes calldata _requestRadonScript
+        )
+        public
+        virtual override
+        returns (bytes32 hash)
+    {
+        // validate data source params
+        hash = _requestMethod.validate(_requestURL, _requestBody, _requestHeaders, _requestRadonScript);
+
+        // should it be a new data source:
+        if (
+            __database().retrievals[hash].method == WitnetV2.DataRequestMethods.Unknown
+        ) {
+            // compose data source and save it in storage:
+            __database().retrievals[hash] = WitnetV2.RadonRetrieval({
+                argsCount:
+                    WitnetBuffer.argsCountOf(
+                        abi.encode(
+                            _requestURL, bytes(" "),
+                            _requestBody, bytes(" "),
+                            _requestHeaders, bytes(" "),
+                            _requestRadonScript
+                        )
+                    ),
+
+                method:
+                    _requestMethod,
+
+                resultDataType:
+                    WitnetEncodingLib.verifyRadonScriptResultDataType(_requestRadonScript),
+
+                url:
+                    _requestURL,
+
+                body:
+                    _requestBody,
+
+                headers:
+                    _requestHeaders,
+
+                script:
+                    _requestRadonScript
+            });
+            emit NewRadonRetrievalHash(hash);
+        }
+    }
+
+    function verifyRadonRetrieval(
+            WitnetV2.DataRequestMethods _requestMethod,
             string memory _requestSchema,
             string memory _requestAuthority,
             string memory _requestPath,
@@ -410,11 +462,7 @@ contract WitnetBytecodesDefault
         external
         virtual override
         returns (bytes32 hash)
-    {   
-        // lower case authority and schema, as they ought to be case-insenstive:
-        _requestSchema = _requestSchema.toLowerCase();
-        _requestAuthority = _requestAuthority.toLowerCase();
-
+    {
         // validate data source params
         hash = _requestMethod.validate(
             _requestSchema,

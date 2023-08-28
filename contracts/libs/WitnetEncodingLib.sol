@@ -309,6 +309,37 @@ library WitnetEncodingLib {
 
     function validate(
             WitnetV2.DataRequestMethods method,
+            string memory url,
+            string memory body,
+            string[2][] memory headers,
+            bytes memory script
+        )
+        public pure
+        returns (bytes32)
+    {
+        if (
+            !(
+                bytes(url).length > 0 
+                    && (method == WitnetV2.DataRequestMethods.HttpGet || method == WitnetV2.DataRequestMethods.HttpPost)
+            ) || (
+                method == WitnetV2.DataRequestMethods.Rng
+                    && bytes(url).length == 0
+                    && headers.length == 0
+                    && script.length >= 1
+            ) 
+        ) {
+            revert WitnetV2.UnsupportedDataRequestMethod(
+                uint8(method),
+                url,
+                body,
+                headers
+            );
+        }
+        return keccak256(abi.encode(method, url, body, headers, script));
+    }              
+
+    function validate(
+            WitnetV2.DataRequestMethods method,
             string memory schema,
             string memory authority,
             string memory path,

@@ -54,6 +54,14 @@ interface IWitnetBytecodes {
             bytes calldata requestRadonScript
         ) external returns (bytes32 hash);
     
+    function verifyRadonRetrieval(
+            WitnetV2.DataRequestMethods requestMethod,
+            string calldata requestURL,
+            string calldata requestBody,
+            string[2][] calldata requestHeaders,
+            bytes calldata requestRadonScript
+        ) external returns (bytes32 hash);
+    
     function verifyRadonReducer(WitnetV2.RadonReducer calldata reducer)
         external returns (bytes32 hash);
     
