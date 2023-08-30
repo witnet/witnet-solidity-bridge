@@ -39,7 +39,7 @@ function getRealmNetworkFromArgs () {
 }
 
 function getRealmNetworkFromString (network) {
-  network = network ? network.toLowerCase() : "development"
+  network = network ? network.replaceAll(":", ".").toLowerCase() : "development"
 
   // Try to extract realm/network info from environment
   const envRealm = process.env.WITNET_EVM_REALM
