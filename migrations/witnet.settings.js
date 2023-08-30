@@ -13,6 +13,9 @@ module.exports = {
     conflux: {
       WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
     },
+    mantle: {
+      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+    },
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
@@ -485,6 +488,19 @@ module.exports = {
         network_id: 8217,
         skipDrynRun: true,
         gasPrice: 0,
+      },
+    },
+    mantle: {
+      "mantle.testnet": {
+        host: "localhost",
+        port: 8508,
+        network_id: 5001,
+        skipDryRun: true,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://explorer.testnet.mantle.xyz/api",
+          explorerUrl: "https://explorer.testnet.mantle.xyz/",
+        },
       },
     },
     metis: {
