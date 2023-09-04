@@ -503,7 +503,18 @@ module.exports = {
         verify: {
           apiKey: "MY_API_KEY",
           apiUrl: "https://explorer.testnet.mantle.xyz/api",
-          explorerUrl: "https://explorer.testnet.mantle.xyz/",
+          explorerUrl: "https://explorer.testnet.mantle.xyz/address",
+        },
+      },
+      "mantle.mainnet": {
+        host: "localhost",
+        port: 9508,
+        network_id: 5000,
+        skipDryRun: true,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://explorer.mantle.xyz/api",
+          explorerUrl: "https://explorer.mantle.xyz/address",
         },
       },
     },
