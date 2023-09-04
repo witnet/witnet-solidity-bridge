@@ -275,6 +275,10 @@ module.exports = {
         host: "localhost",
         port: 9538,
         skipDryRun: true,
+        verify: {
+          apiUrl: "https://explorer.celo.org/mainnet/api",
+          browserURL: "https://explorer.celo.org/mainnet/",
+        }
       },
     },
     conflux: {
