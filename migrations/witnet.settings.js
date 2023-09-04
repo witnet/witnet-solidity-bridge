@@ -278,7 +278,7 @@ module.exports = {
         verify: {
           apiUrl: "https://explorer.celo.org/mainnet/api",
           browserURL: "https://explorer.celo.org/mainnet/",
-        }
+        },
       },
     },
     conflux: {
