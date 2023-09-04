@@ -182,10 +182,23 @@
             "WitnetRequestFactoryImplementation": "0x4874cb1732eE1167A006E0Ab047D940ACF04D771"
         },
         "celo.mainnet": {
-            "WitnetLib": "0x46FF6e05fd0a5fb4D794B99eCAE41c43f4D62d15",
+            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetProxy": "0xF1Aba51c5097487a62DA9c72fb9Aa7B0c98676C1",
+            "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
+            "WitnetPriceFeeds": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
             "WitnetPriceRouter": "0x931673904eB6E69D775e35F522c0EA35575297Cb",
-            "WitnetRandomness": "0x6023fF93A3b37791a94B15D6AEaD488933b01Db3",
-            "WitnetRequestBoard": "0x03E709E6422E30C033456FCde38C70A12553E468"
+            "WitnetRandomness": "0x0123456fbBC59E181D76B6Fe8771953d1953B51a",
+            "WitnetRequestBoard": "0x03E709E6422E30C033456FCde38C70A12553E468",
+            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
+            "WitnetErrorsLib": "0x92a68143Ee3C2527C2B07e4354efAF89fd75a359",
+            "WitnetEncodingLib": "0xa239729c399c9eBae7fdc188A1Dbb2c4a06Cd4Bb",
+            "WitnetPriceFeedsLib": "0x760C146699B76c84Cc8050f57728F2Dc374cbf25",
+            "WitnetBytecodesImplementation": "0xf56E739C436EA6e65A17DBfaC9D7E57062D19422",
+            "WitnetPriceFeedsImplementation": "0x76ffF94D527504e90DaCB12d710590ba8227299E",
+            "WitnetRandomnessImplementation": "0x6Af31B632A20185ff96FC47a8576a6980Cd99FEC",
+            "WitnetRandomnessImplementationV061": "0x6023fF93A3b37791a94B15D6AEaD488933b01Db3",
+            "WitnetRequestBoardImplementation": "0xe936a946FA591eCed937996Ef3df5c89d59f4dbb",
+            "WitnetRequestFactoryImplementation": "0x0d13c6058DDE86da77565ED6038C065Af71e9208"
         }
     },
     "conflux": {
