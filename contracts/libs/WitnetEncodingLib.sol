@@ -399,6 +399,7 @@ library WitnetEncodingLib {
                 || dataType == WitnetV2.RadonDataTypes.String
                 || dataType == WitnetV2.RadonDataTypes.Bytes
                 || dataType == WitnetV2.RadonDataTypes.Array
+                || dataType == WitnetV2.RadonDataTypes.Map
         ) {
             if (/*maxDataSize == 0 ||*/maxDataSize > 2048) {
                 revert WitnetV2.UnsupportedRadonDataType(
