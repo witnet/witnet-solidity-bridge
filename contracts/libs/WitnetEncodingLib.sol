@@ -321,7 +321,7 @@ library WitnetEncodingLib {
             !(
                 bytes(url).length > 0 
                     && (method == WitnetV2.DataRequestMethods.HttpGet || method == WitnetV2.DataRequestMethods.HttpPost)
-            ) || (
+            ) || !(
                 method == WitnetV2.DataRequestMethods.Rng
                     && bytes(url).length == 0
                     && headers.length == 0
