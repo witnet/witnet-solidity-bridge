@@ -25,7 +25,7 @@ abstract contract WitnetBoardDataACLs
     modifier onlyReporters {
         require(
             _acls().isReporter_[msg.sender],
-            "WitnetBoardDataACLs: unauthorized reporter"
+            "WitnetRequestBoard: unauthorized reporter"
         );
         _;
     } 

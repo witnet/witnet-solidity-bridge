@@ -34,14 +34,14 @@ abstract contract WitnetBoardData {
 
     /// Asserts the given query was previously posted and that it was not yet deleted.
     modifier notDeleted(uint256 _queryId) {
-        require(_queryId > 0 && _queryId <= __storage().numQueries, "WitnetBoardData: not yet posted");
-        require(__query(_queryId).from  != address(0), "WitnetBoardData: deleted");
+        require(_queryId > 0 && _queryId <= __storage().numQueries, "WitnetRequestBoard: not yet posted");
+        require(__query(_queryId).from  != address(0), "WitnetRequestBoard: deleted");
         _;
     }
 
     /// Asserts the give query was actually posted before calling this method.
     modifier wasPosted(uint256 _queryId) {
-        require(_queryId > 0 && _queryId <= __storage().numQueries, "WitnetBoardData: not yet posted");
+        require(_queryId > 0 && _queryId <= __storage().numQueries, "WitnetRequestBoard: not yet posted");
         _;
     }
 
@@ -110,13 +110,13 @@ abstract contract WitnetBoardData {
       returns (string memory)
     {
       if (_status == Witnet.QueryStatus.Posted) {
-        return "WitnetBoardData: not in Posted status";
+        return "WitnetRequestBoard: not in Posted status";
       } else if (_status == Witnet.QueryStatus.Reported) {
-        return "WitnetBoardData: not in Reported status";
+        return "WitnetRequestBoard: not in Reported status";
       } else if (_status == Witnet.QueryStatus.Deleted) {
-        return "WitnetBoardData: not in Deleted status";
+        return "WitnetRequestBoard: not in Deleted status";
       } else {
-        return "WitnetBoardData: bad mood";
+        return "WitnetRequestBoard: bad mood";
       }
     }
 }
