@@ -123,7 +123,7 @@ module.exports = async function (deployer, network, [, from]) {
     }
     WitnetPriceFeeds.address = proxy.address
 
-    const implementation = await proxy.implementation()
+    const implementation = await proxy.implementation.call({ from })
     if (implementation.toLowerCase() !== router.address.toLowerCase()) {
       const header = `Upgrading 'WitnetPriceFeeds' at ${proxy.address}...`
       console.info()

@@ -97,7 +97,7 @@ module.exports = async function (deployer, network, [, from]) {
     WitnetRequestFactoryImplementation.address = factory.address
   }
 
-  const implementation = await proxy.implementation()
+  const implementation = await proxy.implementation.call({ from })
   if (implementation.toLowerCase() !== factory.address.toLowerCase()) {
     const header = `Upgrading 'WitnetRequestFactory' at ${proxy.address}...`
     console.info()

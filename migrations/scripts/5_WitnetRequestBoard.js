@@ -110,7 +110,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
     await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation)
   }
 
-  const implementation = await proxy.implementation.call()
+  const implementation = await proxy.implementation.call({ from })
   if (implementation.toLowerCase() !== board.address.toLowerCase()) {
     const header = `Upgrading 'WitnetRequestBoard' at ${proxy.address}...`
     console.info()

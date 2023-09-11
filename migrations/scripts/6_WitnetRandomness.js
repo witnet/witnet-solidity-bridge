@@ -106,7 +106,7 @@ module.exports = async function (deployer, network, [, from]) {
       WitnetRandomnessImplementation.address = randomness.address
     }
 
-    const implementation = await proxy.implementation()
+    const implementation = await proxy.implementation.call({ from })
     if (implementation.toLowerCase() !== randomness.address.toLowerCase()) {
       const header = `Upgrading 'WitnetRandomness' at ${proxy.address}...`
       console.info()

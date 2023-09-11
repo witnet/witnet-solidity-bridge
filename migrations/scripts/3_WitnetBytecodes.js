@@ -98,7 +98,7 @@ module.exports = async function (deployer, network, [, from]) {
     await deployer.link(WitnetEncodingLib, WitnetBytecodesImplementation)
   }
 
-  const implementation = await proxy.implementation.call()
+  const implementation = await proxy.implementation.call({ from })
   if (implementation.toLowerCase() !== bytecodes.address.toLowerCase()) {
     const header = `Upgrading 'WitnetBytecodes' at ${proxy.address}...`
     console.info()

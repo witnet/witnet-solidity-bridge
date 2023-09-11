@@ -145,13 +145,13 @@
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
             "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
             "WitnetErrorsLib": "0xf6d52770453166de85B6B6260Cf22196bC460E88",
-            "WitnetEncodingLib": "",
+            "WitnetEncodingLib": "0x7a56A80A9B169c046EdD1d8f584455a394bc9C71",
             "WitnetPriceFeedsLib": "0x6dc0E2AC80550F901cd4d5F5a4C48333A0ca97Ee",
-            "WitnetBytecodesImplementation": "",
+            "WitnetBytecodesImplementation": "0xb6E0e5a64C7c02Fa477A5254dca35ED967570DF5",
             "WitnetPriceFeedsImplementation": "0x4874cb1732eE1167A006E0Ab047D940ACF04D771",
             "WitnetRandomnessImplementation": "0xd8875D7D3087DEec0103d47d4cE0C4a5414874E1",
             "WitnetRandomnessImplementationV061": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
-            "WitnetRequestBoardImplementation": "0x2ef492c5300Ba8002ECC1ee44fD758be1d3B6e89",
+            "WitnetRequestBoardImplementation": "0x685528FA605c31aE076e1ee1707041B7Cb356573",
             "WitnetRequestFactoryImplementation": "0x364E2b91a4C7563288C3ccF7256BA172935CC550"
         },
         "boba.ethereum.mainnet": {
