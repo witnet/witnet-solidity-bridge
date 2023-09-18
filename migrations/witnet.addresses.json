@@ -686,13 +686,13 @@
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
             "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
             "WitnetErrorsLib": "0xA7389B84D6ABC46b40e88aAD2bbDAf9921649E9E",
-            "WitnetEncodingLib": "",
+            "WitnetEncodingLib": "0x800e2b24e2e09A7067802c83516a5bBae8b019E2",
             "WitnetPriceFeedsLib": "0xA149B0ED1D7d506AAB4B48275B9F761336aD916A",
-            "WitnetBytecodesImplementation": "",
+            "WitnetBytecodesImplementation": "0xeBd58d398F273F9877763bbC6494B55b6f931855",
             "WitnetPriceFeedsImplementation": "0x632147c657743906F332EB05E5C775B738254e1b",
             "WitnetRandomnessImplementation": "0xD7C67eA4BFB2e85b5a8a07E295c640F2d1811e41",
             "WitnetRandomnessImplementationv079": "0x24Cc52D0603F161E16c3DB29Da4c2bCc07d17C4b",
-            "WitnetRequestBoardImplementation": "",
+            "WitnetRequestBoardImplementation": "0x22227143A1Ae08568EB5D41e9CF450cc19a01325",
             "WitnetRequestFactoryImplementation": "0x5Acb0fEf96A307660c6B2fBdB271af12Dcdb3E68"
         },
         "polygon.mainnet": {
