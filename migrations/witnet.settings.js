@@ -22,6 +22,9 @@ module.exports = {
     "polygon.zkevm.goerli": {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
     },
+    "polygon.zkevm.mainnet": {
+      WitnetBytecodes: "WitnetBytecodesNoSha256",
+    },
     reef: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
     },
@@ -628,6 +631,16 @@ module.exports = {
           explorerUrl: "https://testnet-zkevm.polygonscan.com/address",
         },
       },
+      "polygon.zkevm.mainnet": {
+        host: "localhost",
+        port: 9512,
+        network_id: 1101,
+        skipDryRun: true,
+        verify: {
+          apiUrl: "https://api-zkevm.polygonscan.com/api",
+          explorerUrl: "https://zkevm.polygonscan.com/address/",
+        }
+      }
     },
     reef: {
       "reef.testnet": {
