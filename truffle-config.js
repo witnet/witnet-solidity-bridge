@@ -45,5 +45,6 @@ module.exports = {
     etherscan: process.env.ETHERSCAN_API_KEY,
     moonscan: process.env.MOONSCAN_API_KEY,
     polygonscan: process.env.POLYGONSCAN_API_KEY,
+    routescan: process.env.ROUTESCAN_API_KEY,
   },
 }

@@ -256,8 +256,8 @@ module.exports = {
         port: 8515,
         skipDryRun: true,
         verify: {
-          apiUrl: "https://api-testnet.bobascan.com/api",
-          browserURL: "https://testnet.bobascan.com/",
+          apiUrl: "https://api.routescan.io/v2/network/testnet/evm/2888/etherscan",
+          browserURL: "https://boba.testnet.routescan.io/",
         },
       },
     },
