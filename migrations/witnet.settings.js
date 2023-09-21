@@ -639,8 +639,8 @@ module.exports = {
         verify: {
           apiUrl: "https://api-zkevm.polygonscan.com/api",
           explorerUrl: "https://zkevm.polygonscan.com/address/",
-        }
-      }
+        },
+      },
     },
     reef: {
       "reef.testnet": {

@@ -42,7 +42,7 @@ abstract contract WitnetRequestBoardTrustableBase
         WitnetRequestBoard(_factory)
     {}
 
-    receive() external payable {
+    receive() external payable { 
         revert("WitnetRequestBoardTrustableBase: no transfers accepted");
     }
 
@@ -50,7 +50,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev (i.e. calling methods in IWitnetRequestBoardDeprecating)
     /// @dev (Until 'function ... abi(...)' modifier is allegedly supported in solc versions >= 0.9.1)
     // solhint-disable-next-line payable-fallback
-    fallback() override external {
+    fallback() override external { /* solhint-disable no-complex-fallback */
         bytes4 _newSig = msg.sig;
         if (msg.sig == 0xA8604C1A) {
             // IWitnetRequestParser.isOk({bool,CBOR}) --> IWitnetRequestBoardDeprecating.isOk({bool,WitnetCBOR.CBOR})
