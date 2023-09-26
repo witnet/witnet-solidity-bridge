@@ -191,13 +191,13 @@
             "WitnetRequestBoard": "0x03E709E6422E30C033456FCde38C70A12553E468",
             "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
             "WitnetErrorsLib": "0x92a68143Ee3C2527C2B07e4354efAF89fd75a359",
-            "WitnetEncodingLib": "",
+            "WitnetEncodingLib": "0x8aE7693F8A560369bcd06c75772974eEe9b293bA",
             "WitnetPriceFeedsLib": "0x760C146699B76c84Cc8050f57728F2Dc374cbf25",
-            "WitnetBytecodesImplementation": "",
+            "WitnetBytecodesImplementation": "0xa696204ac89c8B46D50289D275c39C905c2EcF6A",
             "WitnetPriceFeedsImplementation": "0x76ffF94D527504e90DaCB12d710590ba8227299E",
             "WitnetRandomnessImplementation": "0x6Af31B632A20185ff96FC47a8576a6980Cd99FEC",
             "WitnetRandomnessImplementationV061": "0x6023fF93A3b37791a94B15D6AEaD488933b01Db3",
-            "WitnetRequestBoardImplementation": "",
+            "WitnetRequestBoardImplementation": "0x5A13430A283701BE24cE7E1712B38F31d4B9ac58",
             "WitnetRequestFactoryImplementation": "0x0d13c6058DDE86da77565ED6038C065Af71e9208"
         }
     },
@@ -519,7 +519,7 @@
             "WitnetProxy": "0x0Dd81412825b9C3960195ab47F14dFa9Fd70e36e",
             "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
             "WitnetErrorsLib": "0x1225A47bC743199dFef9FEEf065b3B76695AaaaC",
-            "WitnetEncodingLib": "",
+            "WitnetEncodingLib": "0x278e9082825C38F7F75B6c30AAA2C8B0Adbaf3B4",
             "WitnetPriceFeedsLib": "0xe33bD10fb2f1C5F4c6eF4259aAd4cE8A5868c222",
             "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
             "WitnetPriceFeeds": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
@@ -527,10 +527,10 @@
             "WitnetRandomness": "0x0123456fbBC59E181D76B6Fe8771953d1953B51a",
             "WitnetRequestBoard": "0x777777772C24e6CD34B464D1d71616C444254537",
             "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
-            "WitnetBytecodesImplementation": "",
+            "WitnetBytecodesImplementation": "0xc2e45B0Cd46d5069a76ea387b76A5D25d1f2b31B",
             "WitnetPriceFeedsImplementation": "0x4756097b9184327713D07b3ac4C2a898468220B1",
             "WitnetRandomnessImplementation": "0x92a68143Ee3C2527C2B07e4354efAF89fd75a359",
-            "WitnetRequestBoardImplementation": "",
+            "WitnetRequestBoardImplementation": "0x3eA2fa27D997A938925299f91e49215218Ec4f7d",
             "WitnetRequestFactoryImplementation": "0xc42656C501623859565C6d080a7Feb1f2B72b55a"
         }
     },
