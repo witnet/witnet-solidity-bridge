@@ -228,9 +228,8 @@ module.exports = {
         port: 8510,
         skipDryRun: true,
         verify: {
-          apiUrl: "https://blockexplorer.testnet.bnb.boba.network/api",
-          browserURL: "https://blockexplorer.testnet.bnb.boba.network/",
-          apiKey: "MY_API_KEY",
+          apiUrl: "https://api.routescan.io/v2/network/testnet/evm/2888/etherscan",
+          browserURL: "https://boba.testnet.routescan.io/",
         },
       },
       "boba.bnb.mainnet": {
@@ -249,6 +248,11 @@ module.exports = {
         host: "localhost",
         port: 9539,
         skipDryRun: true,
+        verify: {
+          apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/all/etherscan",
+          browserURL: "https://bobascan.com/address/",
+          apiKey: "MY_API_KEY",
+        },
       },
       "boba.ethereum.goerli": {
         network_id: 2888,
@@ -413,8 +417,8 @@ module.exports = {
         network_id: 10200,
         skipDryRun: true,
         verify: {
-          apiUrl: "https://blockscout.com/gnosis/chiado/api",
-          browserURL: "https://blockscout.com/gnosis/chiado/",
+          apiUrl: "https://gnosis-chiado.blockscout.com/api",
+          browserURL: "https://gnosis-chiado.blockscout.com/address",
           apiKey: "MY_API_KEY",
         },
       },
