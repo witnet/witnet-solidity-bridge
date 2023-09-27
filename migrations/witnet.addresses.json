@@ -346,11 +346,11 @@
             "WitnetErrorsLib": "0xEdb5535994bF19d56c30F5BEa0937232E198F671",
             "WitnetEncodingLib": "0x92628Af07659fDd7f9E434C2532Caf79C2eAA569",
             "WitnetPriceFeedsLib": "0xC1266fA3D24f5d63E2e34633b3F829E9156be0d6",
-            "WitnetBytecodesImplementation": "",
+            "WitnetBytecodesImplementation": "0x16FEe4c2e8e1A69f31AAD50790015Ffb52F7a88b",
             "WitnetPriceFeedsImplementation": "0xdA489690BDfd6e4d76DE3b937f40342bAd281bc9",
             "WitnetRandomnessImplementation": "0x83587BcfD1f75B5D08c4e27F098F99783cc693cb",
             "WitnetRandomnessImplementationV079": "0x9597b5708CDB58fF057ca494574951Fc3d9163f7",
-            "WitnetRequestBoardImplementation": "",
+            "WitnetRequestBoardImplementation": "0xfC62b6B0ec3eCF1Fa031B31b468be51E025a36f1",
             "WitnetRequestFactoryImplementation": "0x4779A692aC089E02FD1301B0b53Fa1a02985a83F"
         },
         "elastos.mainnet": {
