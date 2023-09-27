@@ -31,6 +31,9 @@ module.exports = {
     scroll: {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
     },
+    "syscoin.rollux.testnet": {
+      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+    }
   },
   compilers: {
     default: {
@@ -699,6 +702,12 @@ module.exports = {
         host: "localhost",
         port: 9521,
         network_id: 57,
+        skipDryRun: true,
+      },
+      "syscoin.rollux.testnet": {
+        host: "localhost",
+        port: 8507,
+        network_id: 57000,
         skipDryRun: true,
       },
     },
