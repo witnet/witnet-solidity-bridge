@@ -709,6 +709,11 @@ module.exports = {
         port: 8507,
         network_id: 57000,
         skipDryRun: true,
+        verify: {
+          apiKey: "abc",
+          apiUrl: "https://rollux.tanenbaum.io/api",
+          explorerUrl: "https://rollux.tanenbaum.io/address/",
+        },
       },
     },
     ultron: {
