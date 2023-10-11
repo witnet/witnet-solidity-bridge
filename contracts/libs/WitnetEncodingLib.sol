@@ -319,7 +319,11 @@ library WitnetEncodingLib {
     {
         if (!(
             bytes(url).length > 0 
-                && (method == WitnetV2.DataRequestMethods.HttpGet || method == WitnetV2.DataRequestMethods.HttpPost)
+                && (
+                    method == WitnetV2.DataRequestMethods.HttpGet 
+                        || method == WitnetV2.DataRequestMethods.HttpPost
+                        || method == WitnetV2.DataRequestMethods.HttpHead
+                )
             || method == WitnetV2.DataRequestMethods.Rng
                 && bytes(url).length == 0
                 && headers.length == 0
@@ -349,7 +353,10 @@ library WitnetEncodingLib {
         returns (bytes32)
     {
         if (!(
-            (method == WitnetV2.DataRequestMethods.HttpGet || method == WitnetV2.DataRequestMethods.HttpPost)
+            (method == WitnetV2.DataRequestMethods.HttpGet 
+                || method == WitnetV2.DataRequestMethods.HttpPost
+                || method == WitnetV2.DataRequestMethods.HttpHead
+            )
                 && bytes(authority).length > 0
                 && (
                     bytes(schema).length == 0

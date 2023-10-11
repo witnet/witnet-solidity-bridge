@@ -117,7 +117,8 @@ library WitnetV2 {
         /* 0 */ Unknown,
         /* 1 */ HttpGet,
         /* 2 */ Rng,
-        /* 3 */ HttpPost
+        /* 3 */ HttpPost,
+        /* 4 */ HttpHead
     }
 
     enum RadonDataTypes {
