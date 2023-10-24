@@ -46,5 +46,6 @@ module.exports = {
     moonscan: process.env.MOONSCAN_API_KEY,
     polygonscan: process.env.POLYGONSCAN_API_KEY,
     routescan: process.env.ROUTESCAN_API_KEY,
+    scrollscan: process.env.SCROLLSCAN_API_KEY,
   },
 }

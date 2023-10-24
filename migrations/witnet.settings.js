@@ -676,6 +676,16 @@ module.exports = {
           explorerUrl: "https://blockscout.scroll.io/",
         },
       },
+      "scroll.mainnet": {
+        host: "localhost",
+        port: 9514,
+        network_id: 534352,
+        skipDryRun: true,
+        verify: {
+          apiUrl: "https://api.scrollscan.com/api",
+          explorerUrl: "https://scrollscan.com/address",
+        },
+      },
     },
     smartbch: {
       "smartbch.amber": {
