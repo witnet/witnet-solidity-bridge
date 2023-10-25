@@ -180,6 +180,16 @@ module.exports = {
         host: "localhost",
         port: 8543,
       },
+      "ethereum.sepolia": {
+        network_id: 11155111,
+        host: "localhost",
+        port: 8506,
+        skipDryRun: true,
+        verify: {
+          apiUrl: "https://api-sepolia.etherscan.io/api",
+          browserURL: "https://sepolia.etherscan.io/",
+        },
+      }
     },
     arbitrum: {
       "arbitrum.goerli": {
