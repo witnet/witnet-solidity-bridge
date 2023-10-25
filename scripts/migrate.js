@@ -42,7 +42,7 @@ async function migrate (network) {
   )
   await new Promise((resolve) => {
     const subprocess = require("child_process").spawn(
-      "truffle",
+      "npx truffle",
       [
         "migrate",
         "--reset",
