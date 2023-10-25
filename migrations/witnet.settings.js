@@ -674,16 +674,14 @@ module.exports = {
       },
     },
     scroll: {
-      "scroll.goerli": {
+      "scroll.sepolia": {
         host: "localhost",
         port: 8514,
-        network_id: 534353,
+        network_id: 534351,
         skipDryRun: true,
-        gasPrice: 3000000,
         verify: {
-          apiKey: "abc",
-          apiUrl: "https://blockscout.scroll.io/api",
-          explorerUrl: "https://blockscout.scroll.io/",
+          apiUrl: "https://api-sepolia.etherscan.io/api",
+          explorerUrl: "https://sepolia.etherscan.io/",
         },
       },
       "scroll.mainnet": {
