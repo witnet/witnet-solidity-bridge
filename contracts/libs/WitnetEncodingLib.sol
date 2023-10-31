@@ -305,6 +305,9 @@ library WitnetEncodingLib {
         self.url = WitnetBuffer.replace(self.url, args);
         self.body = WitnetBuffer.replace(self.body, args);
         self.script = replaceCborStringsFromBytes(self.script, args);
+        for (uint _ix = 0 ; _ix < self.headers.length; _ix ++) {
+            self.headers[_ix][1] = WitnetBuffer.replace(self.headers[_ix][1], args);
+        }
     }
 
     function validate(
