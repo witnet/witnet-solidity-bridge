@@ -33,7 +33,7 @@ module.exports = {
     },
     "syscoin.rollux.testnet": {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
-    }
+    },
   },
   compilers: {
     default: {
@@ -189,7 +189,7 @@ module.exports = {
           apiUrl: "https://api-sepolia.etherscan.io/api",
           browserURL: "https://sepolia.etherscan.io/",
         },
-      }
+      },
     },
     arbitrum: {
       "arbitrum.goerli": {
