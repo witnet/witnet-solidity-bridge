@@ -33,7 +33,7 @@ module.exports = {
     },
     "syscoin.rollux.testnet": {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
-    }
+    },
   },
   compilers: {
     default: {
@@ -189,7 +189,7 @@ module.exports = {
           apiUrl: "https://api-sepolia.etherscan.io/api",
           browserURL: "https://sepolia.etherscan.io/",
         },
-      }
+      },
     },
     arbitrum: {
       "arbitrum.goerli": {
@@ -680,8 +680,8 @@ module.exports = {
         network_id: 534351,
         skipDryRun: true,
         verify: {
-          apiUrl: "https://api-sepolia.etherscan.io/api",
-          explorerUrl: "https://sepolia.etherscan.io/",
+          apiUrl: "http://api-sepolia.scrollscan.io/api",
+          explorerUrl: "https://sepolia.scrollscan.io/",
         },
       },
       "scroll.mainnet": {
