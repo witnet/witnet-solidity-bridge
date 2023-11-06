@@ -37,7 +37,7 @@ contract WitnetRequestFactoryData {
         /// @notice Aggregator reducer hash.
         bytes32 aggregator;
         /// @notice Parent IWitnetRequestFactory from which this template was built.
-        WitnetRequestFactory factory;
+        IWitnetRequestFactory factory;
         /// Whether any of the sources is parameterized.
         bool parameterized;
         /// @notice Tally reducer hash.

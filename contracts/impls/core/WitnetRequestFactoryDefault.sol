@@ -3,8 +3,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-
 import "../../WitnetBytecodes.sol";
 import "../../WitnetRequestFactory.sol";
 import "../../data/WitnetRequestFactoryData.sol";
@@ -20,10 +18,8 @@ contract WitnetRequestFactoryDefault
         WitnetRequestFactoryData,
         WitnetUpgradableBase        
 {
-    using ERC165Checker for address;
-
     /// @notice Reference to Witnet Data Requests Bytecode Registry
-    WitnetBytecodes immutable public override(IWitnetRequestFactory, WitnetRequestTemplate) registry;
+    IWitnetBytecodes immutable public override(IWitnetRequestFactory, WitnetRequestTemplate) registry;
 
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
         require(
@@ -51,7 +47,7 @@ contract WitnetRequestFactoryDefault
     }
 
     constructor(
-            WitnetBytecodes _registry,
+            IWitnetBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag
         )
@@ -62,7 +58,7 @@ contract WitnetRequestFactoryDefault
         )
     {
         require(
-            address(_registry).supportsInterface(type(WitnetBytecodes).interfaceId),
+            _registry.class() == type(WitnetBytecodes).interfaceId,
             "WitnetRequestFactoryDefault: uncompliant registry"
         );
         registry = _registry;
@@ -415,7 +411,7 @@ contract WitnetRequestFactoryDefault
         override
         external view
         onlyDelegateCalls
-        returns (WitnetRequestFactory)
+        returns (IWitnetRequestFactory)
     {
         WitnetRequestTemplate _template = __witnetRequest().template;
         if (address(_template) != address(0)) {
