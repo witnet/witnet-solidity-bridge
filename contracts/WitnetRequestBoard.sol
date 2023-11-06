@@ -3,33 +3,22 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetBytecodes.sol";
-import "./WitnetRequestFactory.sol";
-
-import "./interfaces/IWitnetRequestBoardEvents.sol";
-import "./interfaces/IWitnetRequestBoardReporter.sol";
-import "./interfaces/IWitnetRequestBoardRequestor.sol";
-import "./interfaces/IWitnetRequestBoardView.sol";
-
-import "./interfaces/IWitnetRequestBoardDeprecating.sol";
+import "./interfaces/V2/IWitnetRequestBoard.sol";
+import "./interfaces/V2/IWitnetRequestFactory.sol";
 
 /// @title Witnet Request Board functionality base contract.
 /// @author The Witnet Foundation.
-abstract contract WitnetRequestBoard is
-    IWitnetRequestBoardDeprecating,
-    IWitnetRequestBoardEvents,
-    IWitnetRequestBoardReporter,
-    IWitnetRequestBoardRequestor,
-    IWitnetRequestBoardView
+abstract contract WitnetRequestBoard
+    is
+        IWitnetRequestBoard
 {
-    WitnetRequestFactory immutable public factory;
-    WitnetBytecodes immutable public registry;
-    constructor (WitnetRequestFactory _factory) {
+    IWitnetRequestFactory immutable public override factory;
+
+    constructor (IWitnetRequestFactory _factory) {
         require(
-            _factory.class() == type(WitnetRequestFactory).interfaceId,
+            _factory.class() == type(IWitnetRequestFactory).interfaceId,
             "WitnetRequestBoard: uncompliant factory"
         );
         factory = _factory;
-        registry = _factory.registry();
     }
 }

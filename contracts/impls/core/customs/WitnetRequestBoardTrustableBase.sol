@@ -28,7 +28,7 @@ abstract contract WitnetRequestBoardTrustableBase
     using Witnet for Witnet.Result;
     
     constructor(
-            WitnetRequestFactory _factory,
+            IWitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             address _currency
@@ -41,6 +41,10 @@ abstract contract WitnetRequestBoardTrustableBase
         )
         WitnetRequestBoard(_factory)
     {}
+
+    function registry() public view virtual override returns (IWitnetBytecodes) {
+        return factory.registry();
+    }
 
     receive() external payable { 
         revert("WitnetRequestBoardTrustableBase: no transfers accepted");
@@ -540,7 +544,7 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         return postRequest(
             _radHash,
-            registry.verifyRadonSLA(_slaParams)
+            registry().verifyRadonSLA(_slaParams)
         );
     }
     
@@ -646,7 +650,7 @@ abstract contract WitnetRequestBoardTrustableBase
         if (_request.addr != address(0)) {
             _bytecode = IWitnetRequest(_request.addr).bytecode();
         } else if (_request.radHash != bytes32(0)) {
-            _bytecode = registry.bytecodeOf(
+            _bytecode = registry().bytecodeOf(
                 _request.radHash,
                 _request.slaHash
             );

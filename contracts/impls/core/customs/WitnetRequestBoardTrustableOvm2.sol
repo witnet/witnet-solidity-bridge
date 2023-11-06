@@ -25,7 +25,7 @@ contract WitnetRequestBoardTrustableOvm2
     OVM_GasPriceOracle immutable public gasPriceOracleL1;
 
     constructor(
-            WitnetRequestFactory _factory,
+            IWitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasLimit

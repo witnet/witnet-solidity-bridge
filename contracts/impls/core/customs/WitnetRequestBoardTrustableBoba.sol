@@ -33,7 +33,7 @@ contract WitnetRequestBoardTrustableBoba
     }
             
     constructor(
-            WitnetRequestFactory _factory,
+            IWitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _layer2ReportResultGasLimit,
