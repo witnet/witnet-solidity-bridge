@@ -9,6 +9,8 @@ interface IWitnetBytecodes {
     function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
     function bytecodeOf(bytes32 radHash, bytes32 slahHash) external view returns (bytes memory);
 
+    function class() external view returns (bytes4);
+
     function hashOf(
             bytes32[] calldata sources,
             bytes32 aggregator,

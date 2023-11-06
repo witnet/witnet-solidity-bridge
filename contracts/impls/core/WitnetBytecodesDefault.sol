@@ -31,7 +31,9 @@ contract WitnetBytecodesDefault
     using WitnetEncodingLib for WitnetV2.RadonRetrieval[];
     using WitnetEncodingLib for WitnetV2.RadonReducer;
     using WitnetEncodingLib for WitnetV2.RadonSLA;
-    using WitnetEncodingLib for WitnetV2.RadonDataTypes;    
+    using WitnetEncodingLib for WitnetV2.RadonDataTypes;
+
+    bytes4 public immutable override class = type(IWitnetBytecodes).interfaceId;
     
     constructor(
             bool _upgradable,
