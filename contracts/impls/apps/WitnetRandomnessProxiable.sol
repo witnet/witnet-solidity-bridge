@@ -68,8 +68,8 @@ contract WitnetRandomnessProxiable
                 || address(_wrb).supportsInterface(type(WitnetRequestBoard).interfaceId),
             "WitnetRandomnessProxiable: uncompliant request board"
         );
-        WitnetBytecodes _registry = witnet().registry();
-        WitnetRequestFactory _factory = witnet().factory();
+        IWitnetRequestFactory _factory = witnet().factory();
+        IWitnetBytecodes _registry = _factory.registry();
         {
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
