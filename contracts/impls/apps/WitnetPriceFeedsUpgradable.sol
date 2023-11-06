@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../../WitnetPriceFeeds.sol";
+import "../../WitnetRequestBoard.sol";
 import "../../data/WitnetPriceFeedsData.sol";
 import "../../impls/WitnetUpgradableBase.sol";
 
@@ -20,19 +21,26 @@ contract WitnetPriceFeedsUpgradable
 {
     using Witnet for Witnet.Result;
     using WitnetV2 for WitnetV2.RadonSLA;
+
+    IWitnetRequestBoard immutable public override witnet;
     
     constructor(
             IWitnetRequestBoard _wrb,
             bool _upgradable,
             bytes32 _version
         )
-        WitnetPriceFeeds(_wrb)
         WitnetUpgradableBase(
             _upgradable,
             _version,
             "io.witnet.proxiable.router"
         )
-    {}
+    {
+        require(
+            _wrb.class() == type(WitnetRequestBoard).interfaceId,
+            "WitnetPriceFeedsUpgradable: uncompliant request board"
+        );
+        witnet = _wrb;
+    }
 
     // solhint-disable-next-line payable-fallback
     fallback() override external {

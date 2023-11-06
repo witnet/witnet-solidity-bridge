@@ -33,7 +33,7 @@ contract WitnetBytecodesDefault
     using WitnetEncodingLib for WitnetV2.RadonSLA;
     using WitnetEncodingLib for WitnetV2.RadonDataTypes;
 
-    bytes4 public immutable override class = type(IWitnetBytecodes).interfaceId;
+    bytes4 public immutable override class = type(WitnetBytecodes).interfaceId;
     
     constructor(
             bool _upgradable,

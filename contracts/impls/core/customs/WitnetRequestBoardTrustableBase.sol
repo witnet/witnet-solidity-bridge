@@ -5,11 +5,12 @@ pragma experimental ABIEncoderV2;
 
 import "../../WitnetUpgradableBase.sol";
 import "../../../WitnetRequestBoard.sol";
+import "../../../WitnetRequestFactory.sol";
+
 import "../../../data/WitnetBoardDataACLs.sol";
 import "../../../interfaces/IWitnetRequestBoardAdminACLs.sol";
-import "../../../patterns/Payable.sol";
-
 import "../../../libs/WitnetErrorsLib.sol";
+import "../../../patterns/Payable.sol";
 
 /// @title Witnet Request Board "trustable" base implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -26,6 +27,9 @@ abstract contract WitnetRequestBoardTrustableBase
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
+
+    bytes4 public immutable override class = type(WitnetRequestBoard).interfaceId;
+    IWitnetRequestFactory immutable public override factory;
     
     constructor(
             IWitnetRequestFactory _factory,
@@ -39,8 +43,13 @@ abstract contract WitnetRequestBoardTrustableBase
             _versionTag,
             "io.witnet.proxiable.board"
         )
-        WitnetRequestBoard(_factory)
-    {}
+    {
+        require(
+            _factory.class() == type(WitnetRequestFactory).interfaceId,
+            "WitnetRequestBoard: uncompliant factory"
+        );
+        factory = _factory;
+    }
 
     function registry() public view virtual override returns (IWitnetBytecodes) {
         return factory.registry();

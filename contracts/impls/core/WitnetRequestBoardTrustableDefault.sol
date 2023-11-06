@@ -20,8 +20,6 @@ contract WitnetRequestBoardTrustableDefault
 {
     uint256 internal immutable _ESTIMATED_REPORT_RESULT_GAS;
 
-    bytes4 public immutable override class = type(WitnetRequestBoard).interfaceId;
-
     constructor(
             IWitnetRequestFactory _factory,
             bool _upgradable,

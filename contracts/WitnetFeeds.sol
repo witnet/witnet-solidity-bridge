@@ -15,17 +15,14 @@ abstract contract WitnetFeeds
         IWitnetFeedsEvents
 {
     WitnetV2.RadonDataTypes immutable public override dataType;
-    IWitnetRequestBoard immutable public override witnet;
 
     bytes32 immutable internal __prefix;
 
     constructor(
-            IWitnetRequestBoard _wrb,
             WitnetV2.RadonDataTypes _dataType,
             string memory _prefix
         )
     {
-        witnet = _wrb;
         dataType = _dataType;
         __prefix = Witnet.toBytes32(bytes(_prefix));
     }
