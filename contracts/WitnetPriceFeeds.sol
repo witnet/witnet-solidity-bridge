@@ -14,7 +14,7 @@ abstract contract WitnetPriceFeeds
         IWitnetPriceSolverDeployer,
         WitnetFeeds
 {   
-    constructor(WitnetRequestBoard _wrb)
+    constructor(IWitnetRequestBoard _wrb)
         WitnetFeeds(
             _wrb,
             WitnetV2.RadonDataTypes.Integer,

@@ -22,7 +22,7 @@ contract WitnetPriceFeedsUpgradable
     using WitnetV2 for WitnetV2.RadonSLA;
     
     constructor(
-            WitnetRequestBoard _wrb,
+            IWitnetRequestBoard _wrb,
             bool _upgradable,
             bytes32 _version
         )
@@ -174,7 +174,7 @@ contract WitnetPriceFeedsUpgradable
         public view
         returns (WitnetV2.RadonSLA memory)
     {
-        return registry.lookupRadonSLA(__storage().defaultSlaHash);
+        return registry().lookupRadonSLA(__storage().defaultSlaHash);
     }
     
     function estimateUpdateBaseFee(bytes4, uint256 _evmGasPrice, uint256)
@@ -253,7 +253,7 @@ contract WitnetPriceFeedsUpgradable
             __record.radHash != 0,
             "WitnetPriceFeedsUpgradable: no RAD hash"
         );
-        return registry.bytecodeOf(
+        return registry().bytecodeOf(
             __record.radHash,
             __storage().defaultSlaHash
         );
@@ -270,11 +270,15 @@ contract WitnetPriceFeedsUpgradable
         override external view
         returns (WitnetV2.RadonRetrieval[] memory _retrievals)
     {
-        bytes32[] memory _hashes = registry.lookupRadonRequestSources(lookupRadHash(feedId));
+        bytes32[] memory _hashes = registry().lookupRadonRequestSources(lookupRadHash(feedId));
         _retrievals = new WitnetV2.RadonRetrieval[](_hashes.length);
         for (uint _ix = 0; _ix < _retrievals.length; _ix ++) {
-            _retrievals[_ix] = registry.lookupRadonRetrieval(_hashes[_ix]);
+            _retrievals[_ix] = registry().lookupRadonRetrieval(_hashes[_ix]);
         }
+    }
+
+    function registry() public view virtual override returns (IWitnetBytecodes) {
+        return witnet.registry();
     }
 
     function requestUpdate(bytes4 feedId)
@@ -291,7 +295,7 @@ contract WitnetPriceFeedsUpgradable
         returns (uint256 _usedFunds)
     {
         require(
-            registry.lookupRadonSLA(_slaHash).equalOrGreaterThan(defaultRadonSLA()),
+            registry().lookupRadonSLA(_slaHash).equalOrGreaterThan(defaultRadonSLA()),
             "WitnetPriceFeedsUpgradable: unsecure update"
         );
         return _requestUpdate(feedId, _slaHash);
@@ -385,7 +389,7 @@ contract WitnetPriceFeedsUpgradable
         override public
         onlyOwner
     {
-        __storage().defaultSlaHash = registry.verifyRadonSLA(sla);
+        __storage().defaultSlaHash = registry().verifyRadonSLA(sla);
     }
     
     function settleFeedRequest(string calldata caption, bytes32 radHash)
@@ -393,7 +397,7 @@ contract WitnetPriceFeedsUpgradable
         onlyOwner
     {
         require(
-            registry.lookupRadonRequestResultDataType(radHash) == dataType,
+            registry().lookupRadonRequestResultDataType(radHash) == dataType,
             "WitnetPriceFeedsUpgradable: bad result data type"
         );
         bytes4 feedId = hash(caption);
