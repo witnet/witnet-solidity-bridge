@@ -2,8 +2,8 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+import "../WitnetRequest.sol";
 import "../WitnetRequestBoard.sol";
-import "../requests/WitnetRequest.sol";
 
 /// @title The Witnet Randomness generator interface.
 /// @author Witnet Foundation.

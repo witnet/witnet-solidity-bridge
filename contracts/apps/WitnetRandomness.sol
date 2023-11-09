@@ -3,25 +3,25 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "../UsingWitnet.sol";
+import "../WitnetRequest.sol";
+import "../core/WitnetUpgradableBase.sol";
+import "../interfaces/IWitnetRandomness.sol";
+import "../interfaces/IWitnetRandomnessAdmin.sol";
+import "../patterns/Clonable.sol";
+import "../patterns/Ownable2Step.sol";
 
-import "../../UsingWitnet.sol";
-import "../../WitnetRandomness.sol";
-import "../../impls/WitnetUpgradableBase.sol";
-import "../../patterns/Clonable.sol";
+/// @title WitnetRandomness: Randomness oracle reliant on the Witnet Solidity Bridge.
+/// @author Guillermo Díaz <guillermo@otherplane.com>
 
-import "../../requests/WitnetRequest.sol";
-
-/// @title WitnetRandomnessProxiable: A trustless randomness generator and registry, using the Witnet oracle. 
-/// @author Witnet Foundation.
-contract WitnetRandomnessProxiable
+contract WitnetRandomness
     is
+        IWitnetRandomness,
+        IWitnetRandomnessAdmin,
         Clonable,
-        UsingWitnet,
-        WitnetRandomness,
-        WitnetUpgradableBase
+        Ownable2Step,
+        UsingWitnet
 {
-    using ERC165Checker for address;
     using Witnet for Witnet.Result;
 
     uint256 public override latestRandomizeBlock;
@@ -38,47 +38,19 @@ contract WitnetRandomnessProxiable
         uint256 witnetQueryId;
     }
 
-    modifier onlyDelegateCalls override(Clonable, Upgradeable) {
-        require(address(this) != base(), "WitnetRandomnessProxiable: not a delegate call");
-        _;
-    }
-
-    function witnet()
-        virtual override (IWitnetRandomness, UsingWitnet)
-        public view returns (WitnetRequestBoard)
-    {
-        return UsingWitnet.witnet();
-    }
-
-    /// Include an address to specify the immutable WitnetRequestBoard entrypoint address.
-    /// @param _wrb The WitnetRequestBoard immutable entrypoint address.
-    constructor(
-            WitnetRequestBoard _wrb,
-            bytes32 _version
-        )
+    constructor(address _operator, WitnetRequestBoard _wrb)
         UsingWitnet(_wrb)
-        WitnetUpgradableBase(
-            false, 
-            _version,
-            "io.witnet.proxiable.randomness"
-        )
     {
-        require(
-            address(_wrb) == address(0)
-                || address(_wrb).supportsInterface(type(WitnetRequestBoard).interfaceId),
-            "WitnetRandomnessProxiable: uncompliant request board"
-        );
-        IWitnetRequestFactory _factory = witnet().factory();
-        IWitnetBytecodes _registry = _factory.registry();
+        _transferOwnership(_operator);
+        assert(_wrb.class() == type(IWitnetRequestBoard).interfaceId);
+        WitnetRequestFactory _factory = witnet().factory();
+        WitnetBytecodes _registry = witnet().registry();
         {
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
             _retrievals[0] = _registry.verifyRadonRetrieval(
                 WitnetV2.DataRequestMethods.Rng,
-                "", // no schema
-                "", // no authority
-                "", // no path
-                "", // no query
+                "", // no url
                 "", // no body
                 new string[2][](0), // no headers
                 hex"80" // no retrieval script
@@ -106,6 +78,31 @@ contract WitnetRandomnessProxiable
         __initializeWitnetRandomnessSlaHash();
     }
 
+    /// Deploys and returns the address of a minimal proxy clone that replicates contract
+    /// behaviour while using its own EVM storage.
+    /// @dev This function should always provide a new address, no matter how many times 
+    /// @dev is actually called from the same `msg.sender`.
+    function clone()
+        virtual public
+        wasInitialized
+        returns (WitnetRandomness)
+    {
+        return __afterClone(_clone());
+    }
+
+    /// Deploys and returns the address of a minimal proxy clone that replicates contract 
+    /// behaviour while using its own EVM storage.
+    /// @dev This function uses the CREATE2 opcode and a `_salt` to deterministically deploy
+    /// @dev the clone. Using the same `_salt` multiple time will revert, since
+    /// @dev no contract can be deployed more than once at the same address.
+    function cloneDeterministic(bytes32 _salt)
+        virtual public
+        wasInitialized
+        returns (WitnetRandomness)
+    {
+        return __afterClone(_cloneDeterministic(_salt));
+    }
+
     /// @notice Initializes a cloned instance. 
     /// @dev Every cloned instance can only get initialized once.
     function initializeClone(bytes memory _initData)
@@ -113,12 +110,12 @@ contract WitnetRandomnessProxiable
         initializer // => ensure a cloned instance can only be initialized once
         onlyDelegateCalls // => this method can only be called upon cloned instances
     {
-        _initialize(_initData);
+        __initialize(_initData);
     }
 
 
     /// ===============================================================================================================
-    /// --- 'WitnetRandomnessAdmin' implementation -------------------------------------------------------------------------
+    /// --- 'IWitnetRandomnessAdmin' implementation -------------------------------------------------------------------
 
     function owner()
         virtual override (IWitnetRandomnessAdmin, Ownable)
@@ -155,41 +152,14 @@ contract WitnetRandomnessProxiable
         virtual override
         public
         onlyOwner
-        returns (bytes32 _radonSlaHash)
+        returns (bytes32)
     {
-        _radonSlaHash = witnet().registry().verifyRadonSLA(_radonSLA);
-        __witnetRandomnessSlaHash = _radonSlaHash;
+        return __settleWitnetRandomnessSLA(_radonSLA);
     }
+
     
     /// ===============================================================================================================
-    /// --- 'WitnetRandomness' implementation -------------------------------------------------------------------------
-
-    /// Deploys and returns the address of a minimal proxy clone that replicates contract
-    /// behaviour while using its own EVM storage.
-    /// @dev This function should always provide a new address, no matter how many times 
-    /// @dev is actually called from the same `msg.sender`.
-    function clone()
-        virtual override
-        public
-        wasInitialized
-        returns (WitnetRandomness)
-    {
-        return _afterClone(_clone());
-    }
-
-    /// Deploys and returns the address of a minimal proxy clone that replicates contract 
-    /// behaviour while using its own EVM storage.
-    /// @dev This function uses the CREATE2 opcode and a `_salt` to deterministically deploy
-    /// @dev the clone. Using the same `_salt` multiple time will revert, since
-    /// @dev no contract can be deployed more than once at the same address.
-    function cloneDeterministic(bytes32 _salt)
-        virtual override
-        public
-        wasInitialized
-        returns (WitnetRandomness)
-    {
-        return _afterClone(_cloneDeterministic(_salt));
-    }
+    /// --- 'IWitnetRandomness' implementation -------------------------------------------------------------------------
 
     /// Returns amount of wei required to be paid as a fee when requesting randomization with a 
     /// transaction gas price as the one given.
@@ -244,16 +214,16 @@ contract WitnetRandomnessProxiable
             _block = getRandomnessNextBlock(_block);
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
-        require(_queryId != 0, "WitnetRandomnessProxiable: not randomized");
+        require(_queryId != 0, "WitnetRandomness: not randomized");
         Witnet.ResultStatus _resultStatus = witnet().checkResultStatus(_queryId);
         if (_resultStatus == Witnet.ResultStatus.Ready) {
             return witnet().readResponseResult(_queryId).asBytes32();
         } else if (_resultStatus == Witnet.ResultStatus.Error) {
             uint256 _nextRandomizeBlock = __randomize_[_block].nextBlock;
-            require(_nextRandomizeBlock != 0, "WitnetRandomnessProxiable: faulty randomize");
+            require(_nextRandomizeBlock != 0, "WitnetRandomness: faulty randomize");
             return getRandomnessAfter(_nextRandomizeBlock);
         } else {
-            revert("WitnetRandomnessProxiable: pending randomize");
+            revert("WitnetRandomness: pending randomize");
         }
     }
 
@@ -407,6 +377,14 @@ contract WitnetRandomnessProxiable
         }
     }
 
+    /// @notice Result the WitnetRequestBoard address upon which this contract relies on. 
+    function witnet()
+        virtual override (IWitnetRandomness, UsingWitnet)
+        public view returns (WitnetRequestBoard)
+    {
+        return UsingWitnet.witnet();
+    }
+
     /// @notice Returns SLA parameters that are being used every time there's a new randomness request.
     function witnetRandomnessSLA()
         virtual override
@@ -414,37 +392,6 @@ contract WitnetRandomnessProxiable
         returns (WitnetV2.RadonSLA memory)
     {
         return witnet().registry().lookupRadonSLA(__witnetRandomnessSlaHash);
-    }
-
-
-    // ================================================================================================================
-    // --- 'Upgradeable' extension ------------------------------------------------------------------------------------
-
-    /// Initialize storage-context when invoked as delegatecall. 
-    /// @dev Must fail when trying to initialize same instance more than once.
-    function initialize(bytes memory) 
-        public
-        virtual override
-        onlyDelegateCalls // => we don't want the logic base contract to be ever initialized
-    {
-        if (
-            __proxiable().proxy == address(0)
-                && __proxiable().implementation == address(0)
-        ) {
-            // a proxy is being initilized for the first time ...
-            __proxiable().proxy = address(this);
-            _transferOwnership(msg.sender);
-            __initializeWitnetRandomnessSlaHash();
-        }
-        else if (__proxiable().implementation == base()) {
-            revert("WitnetRandomnessProxiable: not upgradeable");
-        }
-        __proxiable().implementation = base();
-    }
-
-    /// Tells whether provided address could eventually upgrade the contract.
-    function isUpgradableFrom(address) external pure override returns (bool) {
-        return false;
     }
 
 
@@ -465,35 +412,41 @@ contract WitnetRandomnessProxiable
     // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------
 
     /// @dev Common steps for both deterministic and non-deterministic cloning.
-    function _afterClone(address _instance)
+    function __afterClone(address _instance)
         virtual internal
         returns (WitnetRandomness)
     {
-        WitnetRandomnessProxiable(_instance).initializeClone(hex"");
+        WitnetRandomness(_instance).initializeClone(hex"");
         return WitnetRandomness(_instance);
     }
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
     /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function _initialize(bytes memory)
+    function __initialize(bytes memory)
         virtual internal
     {
         // settle ownership:
         _transferOwnership(msg.sender);
         // initialize default Witnet SLA parameters used for every randomness request;
         __initializeWitnetRandomnessSlaHash();
-        // make sure that this clone cannot ever get initialized as a proxy:
-        __proxiable().implementation = base();
     }
 
     function __initializeWitnetRandomnessSlaHash() virtual internal {
-        settleWitnetRandomnessSLA(WitnetV2.RadonSLA({
+        __settleWitnetRandomnessSLA(WitnetV2.RadonSLA({
             numWitnesses: 5,
             minConsensusPercentage: 51,
             witnessReward: 10 ** 8,
             witnessCollateral: 10 ** 9,
             minerCommitRevealFee: 10 ** 7
         }));
+    }
+
+    function __settleWitnetRandomnessSLA(WitnetV2.RadonSLA memory _radonSLA) 
+        internal
+        returns (bytes32 _radonSlaHash)
+    {
+        _radonSlaHash = witnet().registry().verifyRadonSLA(_radonSLA);
+        __witnetRandomnessSlaHash = _radonSlaHash;
     }
 
     /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.

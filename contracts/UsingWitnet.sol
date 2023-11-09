@@ -16,7 +16,7 @@ abstract contract UsingWitnet {
     /// @param _wrb The WitnetRequestBoard entry point address.
     constructor(WitnetRequestBoard _wrb)
     {
-        require(address(_wrb) != address(0), "UsingWitnet: no WRB");
+        require(address(_wrb) != address(0), "UsingWitnet: no WRB?");
         __witnet = _wrb;
     }
 

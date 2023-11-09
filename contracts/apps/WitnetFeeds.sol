@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity >=0.7.0 <0.9.0;
 
-import "./interfaces/V2/IFeeds.sol";
-import "./interfaces/V2/IWitnetFeeds.sol";
-import "./interfaces/V2/IWitnetFeedsAdmin.sol";
-import "./interfaces/V2/IWitnetFeedsEvents.sol";
+import "../interfaces/V2/IFeeds.sol";
+import "../interfaces/V2/IWitnetFeeds.sol";
+import "../interfaces/V2/IWitnetFeedsAdmin.sol";
 
 abstract contract WitnetFeeds
     is 
         IFeeds,
         IWitnetFeeds,
-        IWitnetFeedsAdmin,
-        IWitnetFeedsEvents
+        IWitnetFeedsAdmin
 {
     WitnetV2.RadonDataTypes immutable public override dataType;
 
