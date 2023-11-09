@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../requests/WitnetRequest.sol";
+import "../WitnetRequest.sol";
 
 contract WitnetRequestFactoryData {
 
@@ -37,7 +37,7 @@ contract WitnetRequestFactoryData {
         /// @notice Aggregator reducer hash.
         bytes32 aggregator;
         /// @notice Parent IWitnetRequestFactory from which this template was built.
-        IWitnetRequestFactory factory;
+        WitnetRequestFactory factory;
         /// Whether any of the sources is parameterized.
         bool parameterized;
         /// @notice Tally reducer hash.

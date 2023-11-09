@@ -3,15 +3,16 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/V2/IWitnetRequestFactory.sol";
+import "./WitnetBytecodes.sol";
+import "./WitnetRequestFactory.sol";
 
 abstract contract WitnetRequestTemplate
 {
     event WitnetRequestBuilt(address indexed request, bytes32 indexed radHash, string[][] args);
 
     function class() virtual external view returns (bytes4);
-    function factory() virtual external view returns (IWitnetRequestFactory);
-    function registry() virtual external view returns (IWitnetBytecodes);
+    function factory() virtual external view returns (WitnetRequestFactory);
+    function registry() virtual external view returns (WitnetBytecodes);
     function version() virtual external view returns (string memory);
 
     function aggregator() virtual external view returns (bytes32);

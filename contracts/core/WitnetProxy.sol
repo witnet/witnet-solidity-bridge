@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../patterns/Upgradeable.sol";
 
 /// @title WitnetProxy: upgradable delegate-proxy contract. 
-/// @author The Witnet Foundation.
+/// @author Guillermo Díaz <guillermo@otherplane.com>
 contract WitnetProxy {
 
     /// Event emitted every time the implementation gets updated.
@@ -75,7 +75,7 @@ contract WitnetProxy {
                     msg.sender
                 )
             );
-            require(_wasCalled, "WitnetProxy: not compliant");
+            require(_wasCalled, "WitnetProxy: uncompliant implementation");
             require(abi.decode(_result, (bool)), "WitnetProxy: not authorized");
             require(
                 Upgradeable(_oldImplementation).proxiableUUID() == Upgradeable(_newImplementation).proxiableUUID(),
@@ -84,16 +84,26 @@ contract WitnetProxy {
         }
 
         // Initialize new implementation within proxy-context storage:
-        (bool _wasInitialized,) = _newImplementation.delegatecall(
+        (bool _wasInitialized, bytes memory _returnData) = _newImplementation.delegatecall(
             abi.encodeWithSignature(
                 "initialize(bytes)",
                 _initData
             )
         );
-        require(_wasInitialized, "WitnetProxy: unable to initialize");
+        if (!_wasInitialized) {
+            if (_returnData.length < 68) {
+                revert("WitnetProxy: initialization failed");
+            } else {
+                assembly {
+                    _returnData := add(_returnData, 0x04)
+                }
+                revert(abi.decode(_returnData, (string)));
+            }
+        }
 
         // If all checks and initialization pass, update implementation address:
         __proxySlot().implementation = _newImplementation;
+    
         emit Upgraded(_newImplementation);
 
         // Asserts new implementation complies w/ minimal implementation of Upgradeable interface:
@@ -101,7 +111,7 @@ contract WitnetProxy {
             return _isUpgradable;
         }
         catch {
-            revert ("WitnetProxy: not compliant");
+            revert ("WitnetProxy: uncompliant implementation");
         }
     }
 

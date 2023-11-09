@@ -4,7 +4,6 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../patterns/ERC165.sol";
 import "../patterns/Ownable2Step.sol";
 import "../patterns/ReentrancyGuard.sol";
 import "../patterns/Upgradeable.sol";
@@ -12,20 +11,16 @@ import "../patterns/Upgradeable.sol";
 import "./WitnetProxy.sol";
 
 /// @title Witnet Request Board base contract, with an Upgradeable (and Destructible) touch.
-/// @author The Witnet Foundation.
+/// @author Guillermo Díaz <guillermo@otherplane.com>
 abstract contract WitnetUpgradableBase
     is
-        ERC165,
         Ownable2Step,
         Upgradeable, 
         ReentrancyGuard
 {
     bytes32 internal immutable _WITNET_UPGRADABLE_VERSION;
 
-    error AlreadyUpgraded(address implementation);
-    error NotCompliant(bytes4 interfaceId);
-    error NotUpgradable(address self);
-    error OnlyOwner(address owner);
+    address public immutable deployer = msg.sender;
 
     constructor(
             bool _upgradable,
@@ -43,22 +38,7 @@ abstract contract WitnetUpgradableBase
         revert("WitnetUpgradableBase: not implemented");
     }
 
-
-    // ================================================================================================================
-    // --- Overrides IERC165 interface --------------------------------------------------------------------------------
-
-    /// @dev See {IERC165-supportsInterface}.
-    function supportsInterface(bytes4 _interfaceId)
-      public view
-      virtual override
-      returns (bool)
-    {
-        return _interfaceId == type(Ownable2Step).interfaceId
-            || _interfaceId == type(Upgradeable).interfaceId
-            || super.supportsInterface(_interfaceId);
-    }
-
-    
+   
     // ================================================================================================================
     // --- Overrides 'Proxiable' --------------------------------------------------------------------------------------
 
