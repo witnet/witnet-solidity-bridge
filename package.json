@@ -1,6 +1,6 @@
 {
   "name": "witnet-solidity-bridge",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Witnet Solidity Bridge contracts for EVM-compatible chains",
   "main": "",
   "scripts": {
