@@ -76,8 +76,20 @@ async function deploy(target) {
             console.info("  ", "> gas price:        ", tx.receipt.effectiveGasPrice / 10 ** 9, "gwei")
             console.info("  ", "> total cost:       ", web3.utils.fromWei(BigInt(tx.receipt.gasUsed * tx.receipt.effectiveGasPrice).toString(), 'ether'), "ETH")
         } else {
-            console.info("  ", "> already proxified ;-)")
-            // TODO: check that proxy's class matches impl's class
+            try {
+                const oldImplAddr = await getProxyImplementation(from, proxyAddr)
+                const oldImpl = await artifacts.require(targets[key]).at(oldImplAddr)
+                const oldClass = await oldImpl.class.call({ from })
+                const newClass = await impl.class.call({ from })
+                if (oldClass !== newClass) {
+                    console.info(`Error: proxy address already taken (\"${oldClass}\" != \"${newClass}\")`)
+                    process.exit(1)
+                } else {
+                    console.info("  ", `> recovered proxy address on class \"${oldClass}\" ;-)`)
+                } 
+            } catch (ex) {
+                console.info("Error: cannot check proxy recoverability:", ex)
+            }
         }
         if ((await web3.eth.getCode(proxyAddr)).length > 3) {
             addresses[ecosystem][network][key] = proxyAddr
