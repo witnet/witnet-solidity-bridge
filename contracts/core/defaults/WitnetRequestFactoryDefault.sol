@@ -3,12 +3,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
+import "../WitnetUpgradableBase.sol";
 import "../../WitnetBytecodes.sol";
 import "../../WitnetRequestFactory.sol";
 import "../../data/WitnetRequestFactoryData.sol";
-import "../../impls/WitnetUpgradableBase.sol";
 import "../../patterns/Clonable.sol";
-import "../../requests/WitnetRequest.sol";
 
 contract WitnetRequestFactoryDefault
     is
@@ -19,7 +18,7 @@ contract WitnetRequestFactoryDefault
         WitnetUpgradableBase        
 {
     /// @notice Reference to Witnet Data Requests Bytecode Registry
-    IWitnetBytecodes immutable public override(IWitnetRequestFactory, WitnetRequestTemplate) registry;
+    WitnetBytecodes immutable public override(WitnetRequestFactory, WitnetRequestTemplate) registry;
 
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
         require(
@@ -47,7 +46,7 @@ contract WitnetRequestFactoryDefault
     }
 
     constructor(
-            IWitnetBytecodes _registry,
+            WitnetBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag
         )
@@ -57,10 +56,6 @@ contract WitnetRequestFactoryDefault
             "io.witnet.requests.factory"
         )
     {
-        require(
-            _registry.class() == type(WitnetBytecodes).interfaceId,
-            "WitnetRequestFactoryDefault: uncompliant registry"
-        );
         registry = _registry;
         // let logic contract be used as a factory, while avoiding further initializations:
         __proxiable().proxy = address(this);
@@ -184,7 +179,7 @@ contract WitnetRequestFactoryDefault
     }
 
     function class() 
-        virtual override(IWitnetRequestFactory, WitnetRequestTemplate)
+        virtual override(WitnetRequestFactory, WitnetRequestTemplate)
         external view
         returns (bytes4)
     {
@@ -192,39 +187,11 @@ contract WitnetRequestFactoryDefault
             address(this) == _SELF
                 || address(this) == __proxy()
         ) {
-            return type(WitnetRequestFactory).interfaceId;
+            return type(IWitnetRequestFactory).interfaceId;
         } else if (__witnetRequest().radHash != bytes32(0)) {
             return type(WitnetRequest).interfaceId;
         } else {
             return type(WitnetRequestTemplate).interfaceId;
-        }
-    }
-
-
-    // ================================================================================================================
-    // ---Overrides 'IERC165' -----------------------------------------------------------------------------------------
-
-    /// @dev See {IERC165-supportsInterface}.
-    function supportsInterface(bytes4 _interfaceId)
-      public view
-      virtual override
-      returns (bool)
-    {
-        if (__witnetRequest().radHash != bytes32(0)) {
-            return (
-                _interfaceId == type(IWitnetRequest).interfaceId
-                    || _interfaceId == type(WitnetRequest).interfaceId
-                    || _interfaceId  == type(WitnetRequestTemplate).interfaceId
-            );
-        }
-        else if (__witnetRequestTemplate().retrievals.length > 0) {
-            return (_interfaceId == type(WitnetRequestTemplate).interfaceId);
-        }
-        else {
-            return (
-                _interfaceId == type(WitnetRequestFactory).interfaceId
-                    || super.supportsInterface(_interfaceId)
-            );
         }
     }
 
@@ -281,7 +248,7 @@ contract WitnetRequestFactoryDefault
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory) 
+    function initialize(bytes memory _initData) 
         virtual override
         public
         onlyDelegateCalls
@@ -291,13 +258,13 @@ contract WitnetRequestFactoryDefault
 
         address _owner = __witnetRequestFactory().owner;
         if (_owner == address(0)) {
-            // set owner if none set yet
-            _owner = msg.sender;
+            // set owner from  the one specified in _initData
+            _owner = abi.decode(_initData, (address));
             __witnetRequestFactory().owner = _owner;
         } else {
             // only owner can initialize the proxy
             if (msg.sender != _owner) {
-                revert WitnetUpgradableBase.OnlyOwner(_owner);
+                revert("WitnetRequestFactoryDefault: not the owner");
             }
         }
 
@@ -309,10 +276,13 @@ contract WitnetRequestFactoryDefault
         if (__proxiable().implementation != address(0)) {
             // same implementation cannot be initialized more than once:
             if(__proxiable().implementation == base()) {
-                revert WitnetUpgradableBase.AlreadyUpgraded(base());
+                revert("WitnetRequestFactoryDefault: already initialized");
             }
         }        
         __proxiable().implementation = base();
+
+        require(address(registry).code.length > 0, "WitnetRequestFactoryDefault: inexistent registry");
+        require(registry.class() == type(IWitnetBytecodes).interfaceId, "WitnetRequestFactoryDefault: uncompliant registry");
 
         emit Upgraded(msg.sender, base(), codehash(), version());
     }
@@ -411,7 +381,7 @@ contract WitnetRequestFactoryDefault
         override
         external view
         onlyDelegateCalls
-        returns (IWitnetRequestFactory)
+        returns (WitnetRequestFactory)
     {
         WitnetRequestTemplate _template = __witnetRequest().template;
         if (address(_template) != address(0)) {

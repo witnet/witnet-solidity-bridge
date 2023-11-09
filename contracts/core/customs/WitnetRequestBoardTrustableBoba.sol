@@ -9,7 +9,7 @@ pragma experimental ABIEncoderV2;
 import "./WitnetRequestBoardTrustableBase.sol";
 
 // Uses:
-import "../../../interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @title Witnet Request Board OVM-compatible (Optimism) "trustable" implementation.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -33,7 +33,7 @@ contract WitnetRequestBoardTrustableBoba
     }
             
     constructor(
-            IWitnetRequestFactory _factory,
+            WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _layer2ReportResultGasLimit,

@@ -5,8 +5,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./customs/WitnetRequestBoardTrustableBase.sol";
-import "../../patterns/Destructible.sol";
+import "../customs/WitnetRequestBoardTrustableBase.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -15,13 +14,12 @@ import "../../patterns/Destructible.sol";
 /// @author The Witnet Foundation
 contract WitnetRequestBoardTrustableDefault
     is 
-        Destructible,
         WitnetRequestBoardTrustableBase
 {
     uint256 internal immutable _ESTIMATED_REPORT_RESULT_GAS;
 
     constructor(
-            IWitnetRequestFactory _factory,
+            WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasLimit
@@ -48,15 +46,6 @@ contract WitnetRequestBoardTrustableDefault
         returns (uint256)
     {
         return _gasPrice * _ESTIMATED_REPORT_RESULT_GAS;
-    }
-
-
-    // ================================================================================================================
-    // --- Overrides 'Destructible' -----------------------------------------------------------------------------------
-
-    /// Destroys current instance. Only callable by the owner.
-    function destruct() external override onlyOwner {
-        selfdestruct(payable(msg.sender));
     }
 
 

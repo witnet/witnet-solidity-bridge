@@ -2,12 +2,9 @@
 
 pragma solidity >=0.8.4 <0.9.0;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-
 import "../WitnetUpgradableBase.sol";
 import "../../WitnetBytecodes.sol";
 import "../../data/WitnetBytecodesData.sol";
-
 import "../../libs/WitnetEncodingLib.sol";
 
 /// @title Witnet Request Board EVM-default implementation contract.
@@ -20,9 +17,7 @@ contract WitnetBytecodesDefault
         WitnetBytecodes,
         WitnetBytecodesData,
         WitnetUpgradableBase
-{
-    using ERC165Checker for address;
-    
+{   
     using Witnet for bytes;
     using Witnet for string;
     
@@ -33,12 +28,9 @@ contract WitnetBytecodesDefault
     using WitnetEncodingLib for WitnetV2.RadonSLA;
     using WitnetEncodingLib for WitnetV2.RadonDataTypes;
 
-    bytes4 public immutable override class = type(WitnetBytecodes).interfaceId;
+    bytes4 public immutable override class = type(IWitnetBytecodes).interfaceId;
     
-    constructor(
-            bool _upgradable,
-            bytes32 _versionTag
-        )
+    constructor(bool _upgradable, bytes32 _versionTag)
         WitnetUpgradableBase(
             _upgradable,
             _versionTag,
@@ -48,20 +40,6 @@ contract WitnetBytecodesDefault
 
     receive() external payable {
         revert("WitnetBytecodesDefault: no transfers");
-    }
-
-
-    // ================================================================================================================
-    // --- Overrides IERC165 interface --------------------------------------------------------------------------------
-
-    /// @dev See {IERC165-supportsInterface}.
-    function supportsInterface(bytes4 _interfaceId)
-      public view
-      virtual override
-      returns (bool)
-    {
-        return _interfaceId == type(WitnetBytecodes).interfaceId
-            || super.supportsInterface(_interfaceId);
     }
 
     
@@ -117,32 +95,32 @@ contract WitnetBytecodesDefault
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory) 
+    function initialize(bytes memory _initData) 
         public
         override
     {
         address _owner = __bytecodes().owner;
         if (_owner == address(0)) {
-            // set owner if none set yet
-            _owner = msg.sender;
+            // set owner from  the one specified in _initData
+            _owner = abi.decode(_initData, (address));
             __bytecodes().owner = _owner;
         } else {
             // only owner can initialize:
             if (msg.sender != _owner) {
-                revert WitnetUpgradableBase.OnlyOwner(_owner);
+                revert("WitnetBytecodesDefault: not the owner");
             }
         }
 
         if (__bytecodes().base != address(0)) {
             // current implementation cannot be initialized more than once:
             if(__bytecodes().base == base()) {
-                revert WitnetUpgradableBase.AlreadyUpgraded(base());
+                revert("WitnetBytecodesDefault: already initialized");
             }
         }        
         __bytecodes().base = base();
 
         emit Upgraded(
-            msg.sender,
+            _owner,
             base(),
             codehash(),
             version()
@@ -177,7 +155,7 @@ contract WitnetBytecodesDefault
     {
         WitnetV2.RadonSLA storage __sla = __database().slas[_slaHash];
         if (__sla.numWitnesses == 0) {
-            revert IWitnetBytecodesErrors.UnknownRadonSLA(_slaHash);
+            revert UnknownRadonSLA(_slaHash);
         }
         bytes memory _radBytecode = bytecodeOf(_radHash);
         return abi.encodePacked(
@@ -290,7 +268,7 @@ contract WitnetBytecodesDefault
     {
         _source = __database().retrievals[_hash];
         if (_source.method == WitnetV2.DataRequestMethods.Unknown) {
-            revert IWitnetBytecodesErrors.UnknownRadonRetrieval(_hash);
+            revert UnknownRadonRetrieval(_hash);
         }
     }
 
@@ -300,7 +278,7 @@ contract WitnetBytecodesDefault
         returns (uint8)
     {
         if (__database().retrievals[_hash].method == WitnetV2.DataRequestMethods.Unknown) {
-            revert IWitnetBytecodesErrors.UnknownRadonRetrieval(_hash);
+            revert UnknownRadonRetrieval(_hash);
         }
         return __database().retrievals[_hash].argsCount;
     }
@@ -311,7 +289,7 @@ contract WitnetBytecodesDefault
         returns (WitnetV2.RadonDataTypes)
     {
         if (__database().retrievals[_hash].method == WitnetV2.DataRequestMethods.Unknown) {
-            revert IWitnetBytecodesErrors.UnknownRadonRetrieval(_hash);
+            revert UnknownRadonRetrieval(_hash);
         }
         return __database().retrievals[_hash].resultDataType;
     }
@@ -323,7 +301,7 @@ contract WitnetBytecodesDefault
     {   
         _reducer = __database().reducers[_hash];
         if (uint8(_reducer.opcode) == 0) {
-            revert IWitnetBytecodesErrors.UnknownRadonReducer(_hash);
+            revert UnknownRadonReducer(_hash);
         }
     }
 
@@ -386,7 +364,7 @@ contract WitnetBytecodesDefault
     {
         sla = __database().slas[_slaHash];
         if (sla.numWitnesses == 0) {
-            revert IWitnetBytecodesErrors.UnknownRadonSLA(_slaHash);
+            revert UnknownRadonSLA(_slaHash);
         }
     }
 

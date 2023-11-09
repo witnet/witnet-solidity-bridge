@@ -3,14 +3,15 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../WitnetUpgradableBase.sol";
-import "../../../WitnetRequestBoard.sol";
-import "../../../WitnetRequestFactory.sol";
+import "../WitnetUpgradableBase.sol";
+import "../../WitnetRequestBoard.sol";
+import "../../WitnetRequestFactory.sol";
 
-import "../../../data/WitnetBoardDataACLs.sol";
-import "../../../interfaces/IWitnetRequestBoardAdminACLs.sol";
-import "../../../libs/WitnetErrorsLib.sol";
-import "../../../patterns/Payable.sol";
+import "../../data/WitnetBoardDataACLs.sol";
+import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
+import "../../interfaces/IWitnetRequestBoardReporter.sol";
+import "../../libs/WitnetErrorsLib.sol";
+import "../../patterns/Payable.sol";
 
 /// @title Witnet Request Board "trustable" base implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -22,17 +23,18 @@ abstract contract WitnetRequestBoardTrustableBase
         WitnetUpgradableBase,
         WitnetRequestBoard,
         WitnetBoardDataACLs,
+        IWitnetRequestBoardReporter,
         IWitnetRequestBoardAdminACLs,
         Payable 
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
 
-    bytes4 public immutable override class = type(WitnetRequestBoard).interfaceId;
-    IWitnetRequestFactory immutable public override factory;
+    bytes4 public immutable override class = type(IWitnetRequestBoard).interfaceId;
+    WitnetRequestFactory immutable public override factory;
     
     constructor(
-            IWitnetRequestFactory _factory,
+            WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
             address _currency
@@ -44,14 +46,10 @@ abstract contract WitnetRequestBoardTrustableBase
             "io.witnet.proxiable.board"
         )
     {
-        require(
-            _factory.class() == type(WitnetRequestFactory).interfaceId,
-            "WitnetRequestBoard: uncompliant factory"
-        );
         factory = _factory;
     }
 
-    function registry() public view virtual override returns (IWitnetBytecodes) {
+    function registry() public view virtual override returns (WitnetBytecodes) {
         return factory.registry();
     }
 
@@ -60,23 +58,23 @@ abstract contract WitnetRequestBoardTrustableBase
     }
 
     /// @dev Provide backwards compatibility for dapps bound to versions <= 0.6.1
-    /// @dev (i.e. calling methods in IWitnetRequestBoardDeprecating)
+    /// @dev (i.e. calling methods in IWitnetRequestBoard)
     /// @dev (Until 'function ... abi(...)' modifier is allegedly supported in solc versions >= 0.9.1)
     // solhint-disable-next-line payable-fallback
     fallback() override external { /* solhint-disable no-complex-fallback */
         bytes4 _newSig = msg.sig;
         if (msg.sig == 0xA8604C1A) {
-            // IWitnetRequestParser.isOk({bool,CBOR}) --> IWitnetRequestBoardDeprecating.isOk({bool,WitnetCBOR.CBOR})
-            _newSig = IWitnetRequestBoardDeprecating.isOk.selector;
+            // IWitnetRequestParser.isOk({bool,CBOR}) --> IWitnetRequestBoard.isOk({bool,WitnetCBOR.CBOR})
+            _newSig = IWitnetRequestBoard.isOk.selector;
         } else if (msg.sig == 0xCF62D115) {
-            // IWitnetRequestParser.asBytes32({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asBytes32({bool,WitnetCBOR.CBOR})
-            _newSig = IWitnetRequestBoardDeprecating.asBytes32.selector;
+            // IWitnetRequestParser.asBytes32({bool,CBOR}) --> IWitnetRequestBoard.asBytes32({bool,WitnetCBOR.CBOR})
+            _newSig = IWitnetRequestBoard.asBytes32.selector;
         } else if (msg.sig == 0xBC7E25FF) {
-            // IWitnetRequestParser.asUint64({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asUint64({bool,WitnetCBOR.CBOR})
-            _newSig = IWitnetRequestBoardDeprecating.asUint64.selector;
+            // IWitnetRequestParser.asUint64({bool,CBOR}) --> IWitnetRequestBoard.asUint64({bool,WitnetCBOR.CBOR})
+            _newSig = IWitnetRequestBoard.asUint64.selector;
         } else if (msg.sig == 0xD74803BE) {
-            // IWitnetRequestParser.asErrorMessage({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asErrorMessage({bool,WitnetCBOR.CBOR})
-            _newSig = IWitnetRequestBoardDeprecating.asErrorMessage.selector;
+            // IWitnetRequestParser.asErrorMessage({bool,CBOR}) --> IWitnetRequestBoard.asErrorMessage({bool,WitnetCBOR.CBOR})
+            _newSig = IWitnetRequestBoard.asErrorMessage.selector;
         }
         if (_newSig != msg.sig) {
             address _self = address(this);
@@ -104,21 +102,6 @@ abstract contract WitnetRequestBoardTrustableBase
 
 
     // ================================================================================================================
-    // --- Overrides IERC165 interface --------------------------------------------------------------------------------
-
-    /// @dev See {IERC165-supportsInterface}.
-    function supportsInterface(bytes4 _interfaceId)
-      public view
-      virtual override
-      returns (bool)
-    {
-        return _interfaceId == type(WitnetRequestBoard).interfaceId
-            || _interfaceId == type(IWitnetRequestBoardAdminACLs).interfaceId
-            || super.supportsInterface(_interfaceId);
-    }
-
-
-    // ================================================================================================================
     // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
@@ -128,16 +111,22 @@ abstract contract WitnetRequestBoardTrustableBase
         override
     {
         address _owner = __storage().owner;
+        address[] memory _reporters;
+
         if (_owner == address(0)) {
-            // set owner if none set yet
-            _owner = msg.sender;
+            // get owner (and reporters) from _initData
+            bytes memory _reportersRaw;
+            (_owner, _reportersRaw) = abi.decode(_initData, (address, bytes));
             __storage().owner = _owner;
+            _reporters = abi.decode(_reportersRaw, (address[]));
         } else {
             // only owner can initialize:
             require(
                 msg.sender == _owner,
-                "WitnetRequestBoardTrustableBase: only owner"
+                "WitnetRequestBoardTrustableBase: not the owner"
             );
+            // get reporters from _initData
+            _reporters = abi.decode(_initData, (address[]));
         }
 
         if (__storage().base != address(0)) {
@@ -149,10 +138,13 @@ abstract contract WitnetRequestBoardTrustableBase
         }        
         __storage().base = base();
 
-        emit Upgraded(msg.sender, base(), codehash(), version());
+        require(address(factory).code.length > 0, "WitnetRequestBoardTrustableBase: inexistent factory");
+        require(factory.class() == type(IWitnetRequestFactory).interfaceId, "WitnetRequestBoardTrustableBase: uncompliant factory");
 
-        // Do actual base initialization:
-        setReporters(abi.decode(_initData, (address[])));
+        // Set reporters
+        __setReporters(_reporters);
+
+        emit Upgraded(_owner, base(), codehash(), version());
     }
 
     /// Tells whether provided address could eventually upgrade the contract.
@@ -210,11 +202,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         onlyOwner
     {
-        for (uint ix = 0; ix < _reporters.length; ix ++) {
-            address _reporter = _reporters[ix];
-            _acls().isReporter_[_reporter] = true;
-        }
-        emit ReportersSet(_reporters);
+        __setReporters(_reporters);
     }
 
     /// Removes given addresses from the active reporters control list.
@@ -756,7 +744,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
 
     // ================================================================================================================
-    // --- Full implementation of 'IWitnetRequestBoardDeprecating' interface ------------------------------------------
+    // --- Full implementation of 'IWitnetRequestBoard' interface ------------------------------------------
 
     /// Tell if a Witnet.Result is successful.
     /// @param _result An instance of Witnet.Result.
@@ -846,5 +834,13 @@ abstract contract WitnetRequestBoardTrustableBase
 
         // Request data won't be needed anymore, so it can just get deleted right now:  
         delete _query.request;
+    }
+
+    function __setReporters(address[] memory _reporters) internal {
+        for (uint ix = 0; ix < _reporters.length; ix ++) {
+            address _reporter = _reporters[ix];
+            _acls().isReporter_[_reporter] = true;
+        }
+        emit ReportersSet(_reporters);
     }
 }
