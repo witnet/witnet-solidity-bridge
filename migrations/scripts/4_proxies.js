@@ -9,7 +9,7 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (_, network, [, from, reporter]) {
-    const isDryRun = false // network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
+    const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
     const ecosystem = utils.getRealmNetworkFromArgs()[0]
     network = network.split("-")[0]
 

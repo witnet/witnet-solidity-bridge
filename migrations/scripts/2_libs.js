@@ -6,7 +6,7 @@ const utils = require("../../scripts/utils")
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
-    const isDryRun = false // network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
+    const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
     const ecosystem = utils.getRealmNetworkFromArgs()[0]
     network = network.split("-")[0]
 
