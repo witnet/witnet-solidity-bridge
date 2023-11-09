@@ -2,8 +2,11 @@ module.exports = {
   artifacts: {
     default: {
       WitnetBytecodes: "WitnetBytecodesDefault",
-      WitnetPriceFeeds: "WitnetPriceFeedsUpgradable",
-      WitnetRandomness: "WitnetRandomnessProxiable",
+      WitnetEncodingLib: "WitnetEncodingLib",
+      WitnetErrorsLib: "WitnetErrorsLib",
+      WitnetPriceFeeds: "WitnetPriceFeeds",
+      WitnetPriceFeedsLib: "WitnetPriceFeedsLib",
+      WitnetRandomness: "WitnetRandomness",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
     },
@@ -46,103 +49,6 @@ module.exports = {
           },
         },
       },
-    },
-  },
-  constructorParams: {
-    default: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 133000,
-      ],
-    },
-    avalanche: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 155000,
-      ],
-    },
-    celo: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 114000,
-      ],
-    },
-    conflux: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 78500,
-      ],
-    },
-    "conflux.espace.testnet": {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 225000,
-      ],
-    },
-    "conflux.espace.mainnet": {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 225000,
-      ],
-    },
-    cronos: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 137500,
-      ],
-    },
-    dogechain: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 85000,
-      ],
-    },
-    harmony: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 530000,
-      ],
-    },
-    hsc: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 85000,
-      ],
-    },
-    kcc: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 92500,
-      ],
-    },
-    klaytn: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 105000,
-      ],
-    },
-    meter: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 85000,
-      ],
-    },
-    metis: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 134800,
-      ],
-    },
-    moonbeam: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 115000,
-      ],
-    },
-    okxchain: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 145000,
-      ],
-    },
-    optimism: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 135000,
-      ],
-    },
-    reef: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ "0x3100A1CAC7EF19DC",
-      ],
-    },
-    ultron: {
-      WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 83949,
-      ],
     },
   },
   networks: {
@@ -746,6 +652,196 @@ module.exports = {
         port: 9516,
         network_id: 1231,
         skipDryRun: true,
+      },
+    },
+  },
+  specs: {
+    default: {
+      WitnetBytecodes: {
+        libs: [ "WitnetEncodingLib", ],
+        vanity: 172582,
+      },
+      WitnetRandomness: {
+        vanity: 4,
+      },
+      WitnetRequestBoard: {
+        immutables: {
+          types: [ 'uint256', ],
+          values: [
+              /* _reportResultGasLimit */ 133000,
+          ]
+        },
+        libs: [ "WitnetErrorsLib", ],
+        vanity: 83581,
+      },
+      WitnetRequestFactory: {
+        vanity: 178848,
+      },
+      WitnetPriceFeeds: {
+        libs: [ "WitnetPriceFeedsLib", ],
+        vanity: 5,
+      }
+    },
+    avalanche: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 155000,
+          ]
+        },
+      },
+    },
+    celo: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 114000,
+          ]
+        },
+      },
+    },
+    conflux: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 78500,
+          ]
+        },
+      },
+    },
+    "conflux.espace.testnet": {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 225000,
+          ]
+        },
+      },
+    },
+    "conflux.espace.mainnet": {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 225000,
+          ]
+        },
+      },
+    },
+    cronos: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 137500,
+          ]
+        },
+      },
+    },
+    dogechain: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 85000,
+          ]
+        },
+      },
+    },
+    harmony: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 530000,
+          ]
+        },
+      },
+    },
+    hsc: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 85000,
+          ]
+        },
+      },
+    },
+    kcc: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 92500,
+          ]
+        },
+      },
+    },
+    klaytn: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 105000,
+          ]
+        },
+      },
+    },
+    meter: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 85000,
+          ]
+        },
+      },
+    },
+    metis: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 134800,
+          ]
+        },
+      },
+    },
+    moonbeam: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 115000,
+          ]
+        },
+      },
+    },
+    okxchain: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 145000,
+          ]
+        },
+      },
+    },
+    optimism: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 135000,
+          ]
+        },
+      },
+    },
+    reef: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ "0x3100A1CAC7EF19DC",
+          ]
+        },
+      },
+    },
+    ultron: {
+      WitnetRequestBoard: {
+        immutables: {
+          values: [
+              /* _reportResultGasLimit */ 83949,
+          ]
+        },
       },
     },
   },
