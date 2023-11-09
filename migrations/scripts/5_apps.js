@@ -89,10 +89,7 @@ async function deploy(specs) {
         console.info("  ", "> account:          ", from)
         console.info("  ", "> balance:          ", web3.utils.fromWei(await web3.eth.getBalance(from), 'ether'), "ETH")
         const tx = await deployer.deploy(dappInitCode, salt, { from })
-        console.info("  ", "> transaction hash: ", tx.receipt.transactionHash)
-        console.info("  ", "> gas used:         ", tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
-        console.info("  ", "> gas price:        ", tx.receipt.effectiveGasPrice / 10 ** 9, "gwei")
-        console.info("  ", "> total cost:       ", web3.utils.fromWei(BigInt(tx.receipt.gasUsed * tx.receipt.effectiveGasPrice).toString(), 'ether'), "ETH")
+        utils.traceTx(tx)
         if ((await web3.eth.getCode(dappAddr)).length > 3) {
             addresses[ecosystem][network][key] = dappAddr
             // save/overwrite exportable abi file
@@ -103,7 +100,7 @@ async function deploy(specs) {
             process.exit(1)
         }
     } else {
-        utils.traceHeader(`Deployed '${key}'`)
+        utils.traceHeader(`Skipped '${key}'`)
     }
     artifact.address = addresses[ecosystem][network][key]
     console.info("  ", "> contract address: ", artifact.address)

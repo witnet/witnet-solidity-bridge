@@ -71,6 +71,7 @@ async function deploy(target) {
                 console.info("  ", "> initialize params:", mutables.values)
             }
             const tx = await deployer.proxify(proxy_salt, impl.address, initdata, { from })
+            utils.traceTx(tx)
             // save/overwrite exportable abi file
             utils.saveJsonAbi(key, proxy.abi)
         } else {
@@ -92,7 +93,7 @@ async function deploy(target) {
         if ((await web3.eth.getCode(proxyAddr)).length > 3) {
             addresses[ecosystem][network][key] = proxyAddr
         } else {
-            console.info(`Contract was not deployed on expected address: ${proxyAddr}`)
+            console.info(`Error: Contract was not deployed on expected address: ${proxyAddr}`)
             process.exit(1)
         }
     } else {
@@ -114,11 +115,12 @@ async function deploy(target) {
                     console.info("  ", "> initialize params:", mutables.values)
                 }
                 const tx = await upgradeProxyTo(from, proxy, newImpl.address, initdata)
+                utils.traceTx(tx)
                 // save/overwrite exportable abi file
                 utils.saveJsonAbi(key, proxy.abi)
             }
         } else {
-            utils.traceHeader(`Deployed '${key}'`)
+            utils.traceHeader(`Skipped '${key}'`)
         }
     }
     proxy.address = addresses[ecosystem][network][key]

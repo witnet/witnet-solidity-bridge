@@ -102,24 +102,21 @@ async function deploy(specs) {
         const coreBytecode = link(contract.toJSON().bytecode, libs, targets)
         if (coreBytecode.indexOf("__") > -1) {
             console.info(bytecode)
-            console.info("Cannot deploy due to some missing libs")
+            console.info("Error: Cannot deploy due to some missing libs")
             process.exit(1)
         }
         const coreInitCode = coreBytecode + constructorArgs.slice(2)
         const coreAddr = await deployer.determineAddr.call(coreInitCode, "0x0", { from })
         const tx = await deployer.deploy(coreInitCode, "0x0", { from })
-        console.info("  ", "> transaction hash: ", tx.receipt.transactionHash)
-        console.info("  ", "> gas used:         ", tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
-        console.info("  ", "> gas price:        ", tx.receipt.effectiveGasPrice / 10 ** 9, "gwei")
-        console.info("  ", "> total cost:       ", web3.utils.fromWei(BigInt(tx.receipt.gasUsed * tx.receipt.effectiveGasPrice).toString(), 'ether'), "ETH")
+        utils.traceTx(tx)
         if ((await web3.eth.getCode(coreAddr)).length > 3) {
             addresses[ecosystem][network][key] = coreAddr
         } else {
-            console.info(`Contract was not deployed on expected address: ${coreAddr}`)
+            console.info(`Error: Contract was not deployed on expected address: ${coreAddr}`)
             process.exit(1)
         }
     } else {
-        utils.traceHeader(`Deployed '${key}'`)
+        utils.traceHeader(`Skipped '${key}'`)
     }
     contract.address = addresses[ecosystem][network][key]
     console.info("  ", "> contract address: ", contract.address)

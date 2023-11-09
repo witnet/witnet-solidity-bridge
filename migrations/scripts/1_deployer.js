@@ -19,7 +19,7 @@ module.exports = async function (deployer, network, [, from,, master]) {
     } else {
         factory = await WitnetDeployer.at(addresses[ecosystem][network].WitnetDeployer)
         WitnetDeployer.address = factory.address
-        utils.traceHeader("Skipping 'WitnetDeployer'")
+        utils.traceHeader("Skipped 'WitnetDeployer'")
         console.info("   > Contract address:", factory.address)
         console.info()
     }
