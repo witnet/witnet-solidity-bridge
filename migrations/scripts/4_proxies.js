@@ -71,10 +71,8 @@ async function deploy(target) {
                 console.info("  ", "> initialize params:", mutables.values)
             }
             const tx = await deployer.proxify(proxy_salt, impl.address, initdata, { from })
-            console.info("  ", "> transaction hash: ", tx.receipt.transactionHash)
-            console.info("  ", "> gas used:         ", tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
-            console.info("  ", "> gas price:        ", tx.receipt.effectiveGasPrice / 10 ** 9, "gwei")
-            console.info("  ", "> total cost:       ", web3.utils.fromWei(BigInt(tx.receipt.gasUsed * tx.receipt.effectiveGasPrice).toString(), 'ether'), "ETH")
+            // save/overwrite exportable abi file
+            utils.saveJsonAbi(key, proxy.abi)
         } else {
             try {
                 const oldImplAddr = await getProxyImplementation(from, proxyAddr)
@@ -116,10 +114,8 @@ async function deploy(target) {
                     console.info("  ", "> initialize params:", mutables.values)
                 }
                 const tx = await upgradeProxyTo(from, proxy, newImpl.address, initdata)
-                console.info("  ", "> transaction hash: ", tx.receipt.transactionHash)
-                console.info("  ", "> gas used:         ", tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
-                console.info("  ", "> gas price:        ", tx.receipt.effectiveGasPrice / 10 ** 9, "gwei")
-                console.info("  ", "> total cost:       ", web3.utils.fromWei(BigInt(tx.receipt.gasUsed * tx.receipt.effectiveGasPrice).toString(), 'ether'), "ETH")
+                // save/overwrite exportable abi file
+                utils.saveJsonAbi(key, proxy.abi)
             }
         } else {
             utils.traceHeader(`Deployed '${key}'`)

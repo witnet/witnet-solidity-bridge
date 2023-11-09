@@ -95,6 +95,8 @@ async function deploy(specs) {
         console.info("  ", "> total cost:       ", web3.utils.fromWei(BigInt(tx.receipt.gasUsed * tx.receipt.effectiveGasPrice).toString(), 'ether'), "ETH")
         if ((await web3.eth.getCode(dappAddr)).length > 3) {
             addresses[ecosystem][network][key] = dappAddr
+            // save/overwrite exportable abi file
+            utils.saveJsonAbi(key, artifact.abi)
         } else {
             console.info(`Contract was not deployed on expected address: ${dappAddr}`)
             console.log(tx.receipt)
