@@ -41,12 +41,13 @@ module.exports = {
   compilers: {
     default: {
       solc: {
-        version: "0.8.17",
+        version: "0.8.22",
         settings: {
           optimizer: {
             enabled: true,
             runs: 200,
           },
+          evmVersion: "paris",
         },
       },
     },

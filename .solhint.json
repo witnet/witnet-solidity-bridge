@@ -16,6 +16,7 @@
     "modifier-name-mixedcase": "warn",
     "no-empty-blocks": "off",
     "no-inline-assembly": "off",
+    "no-global-import": "off",
     "var-name-mixedcase": "off",
     "reason-string": [
       "warn",
