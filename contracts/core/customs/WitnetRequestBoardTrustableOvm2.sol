@@ -27,13 +27,15 @@ contract WitnetRequestBoardTrustableOvm2
             WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
-            uint256 _reportResultGasLimit
+            uint256 _reportResultGasBase,
+            uint256 _sstoreFromZeroGas
         )
         WitnetRequestBoardTrustableDefault(
             _factory,
             _upgradable,
             _versionTag,
-            _reportResultGasLimit
+            _reportResultGasBase,
+            _sstoreFromZeroGas
         )
     {
         gasPriceOracleL1 = OVM_GasPriceOracle(0x420000000000000000000000000000000000000F);
@@ -41,17 +43,21 @@ contract WitnetRequestBoardTrustableOvm2
 
 
     // ================================================================================================================
-    // --- Overrides implementation of 'IWitnetRequestBoardView' ------------------------------------------------------
+    // --- Overrides 'IWitnetRequestBoard' ----------------------------------------------------------------------------
 
-    /// Estimates the amount of reward we need to insert for a given gas price.
-    /// @param _gasPrice The gas price for which we need to calculate the rewards.
-    function estimateReward(uint256 _gasPrice)
-        public view
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
+    function estimateBaseFee(uint256 _gasPrice, uint256 _resultMaxSize)
+        public view 
         virtual override
         returns (uint256)
     {
-        return _gasPrice * _ESTIMATED_REPORT_RESULT_GAS + gasPriceOracleL1.getL1Fee(
-            hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        return WitnetRequestBoardTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize) + (
+            _gasPrice * gasPriceOracleL1.getL1Fee(
+                hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            )
         );
     }
 }

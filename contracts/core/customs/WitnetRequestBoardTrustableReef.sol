@@ -21,28 +21,33 @@ contract WitnetRequestBoardTrustableReef
             WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
-            uint256 _reportResultGasLimit
+            uint256 _reportResultGasBase,
+            uint256 _sstoreFromZeroGas
         )
         WitnetRequestBoardTrustableDefault(
             _factory,
             _upgradable,
             _versionTag,
-            _reportResultGasLimit
+            _reportResultGasBase,
+            _sstoreFromZeroGas
         )
     {}
     
     // ================================================================================================================
-    // --- Overrides implementation of 'IWitnetRequestBoardView' ------------------------------------------------------
+    // --- Overrides 'IWitnetRequestBoard' ----------------------------------------------------------------------------
 
-    /// @dev Estimate the minimal amount of reward we need to insert for a given gas price.
-    /// @return The minimal reward to be included for the given gas price.
-    function estimateReward(uint256)
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
+    function estimateBaseFee(uint256 _gasPrice, uint256 _resultMaxSize)
         public view
         virtual override
         returns (uint256)
     {
-        return _ESTIMATED_REPORT_RESULT_GAS;
+        return WitnetRequestBoardTrustableDefault.estimateBaseFee(1, _resultMaxSize);
     }
+
 
     // ================================================================================================================
     // --- Overrides 'Payable' ----------------------------------------------------------------------------------------

@@ -106,9 +106,11 @@ abstract contract WitnetRequestBoardTrustableBase
     // ================================================================================================================
     // --- Yet to be implemented virtual methods ----------------------------------------------------------------------
 
-    /// Estimates the amount of reward we need to insert for a given gas price.
-    /// @param _gasPrice The gas price for which we need to calculate the rewards.
-    function estimateBaseFee(uint256 _gasPrice) virtual override public view returns (uint256); 
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
+    function estimateBaseFee(uint256 _gasPrice, uint256 _resultMaxSize) virtual public view returns (uint256); 
 
     
     // ================================================================================================================
@@ -602,7 +604,7 @@ abstract contract WitnetRequestBoardTrustableBase
         // If gas price is increased, then check if new rewards cover gas costs
         if (_newGasPrice > __request.gasprice) {
             // Checks the reward is covering gas cost
-            uint256 _minResultReward = estimateReward(_newGasPrice, 32);
+            uint256 _minResultReward = estimateBaseFee(_newGasPrice, 32);
             require(
                 _newReward >= _minResultReward,
                 "WitnetRequestBoardTrustableBase: reward too low"

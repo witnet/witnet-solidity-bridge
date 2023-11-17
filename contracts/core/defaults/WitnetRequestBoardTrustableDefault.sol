@@ -16,13 +16,15 @@ contract WitnetRequestBoardTrustableDefault
     is 
         WitnetRequestBoardTrustableBase
 {
-    uint256 internal immutable _ESTIMATED_REPORT_RESULT_GAS;
+    uint256 internal immutable __reportResultGasBase;
+    uint256 internal immutable __sstoreFromZeroGas;
 
     constructor(
             WitnetRequestFactory _factory,
             bool _upgradable,
             bytes32 _versionTag,
-            uint256 _reportResultGasLimit
+            uint256 _reportResultGasBase,
+            uint256 _sstoreFromZeroGas
         )
         WitnetRequestBoardTrustableBase(
             _factory, 
@@ -31,21 +33,29 @@ contract WitnetRequestBoardTrustableDefault
             address(0)
         )
     {   
-        _ESTIMATED_REPORT_RESULT_GAS = _reportResultGasLimit;
+        __reportResultGasBase = _reportResultGasBase;
+        __sstoreFromZeroGas = _sstoreFromZeroGas;
     }
 
 
     // ================================================================================================================
-    // --- Overrides implementation of 'IWitnetRequestBoardView' ------------------------------------------------------
+    // --- Overrides 'IWitnetRequestBoard' ----------------------------------------------------------------------------
 
-    /// Estimates the amount of reward we need to insert for a given gas price.
-    /// @param _gasPrice The gas price for which we need to calculate the rewards.
-    function estimateReward(uint256 _gasPrice)
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
+    function estimateBaseFee(uint256 _gasPrice, uint256 _resultMaxSize)
         public view
         virtual override
         returns (uint256)
     {
-        return _gasPrice * _ESTIMATED_REPORT_RESULT_GAS;
+        return _gasPrice * (
+            __reportResultGasBase
+                + __sstoreFromZeroGas * (
+                    3 + _resultMaxSize / 32
+                )
+        );
     }
 
 
