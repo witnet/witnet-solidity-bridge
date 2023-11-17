@@ -2,13 +2,13 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./WitnetBoardData.sol";
+import "./WitnetRequestBoardData.sol";
 
 /// @title Witnet Access Control Lists storage layout, for Witnet-trusted request boards.
 /// @author The Witnet Foundation.
-abstract contract WitnetBoardDataACLs
+abstract contract WitnetRequestBoardDataACLs
     is
-        WitnetBoardData
+        WitnetRequestBoardData
 {
     bytes32 internal constant _WITNET_BOARD_ACLS_SLOTHASH =
         /* keccak256("io.witnet.boards.data.acls") */

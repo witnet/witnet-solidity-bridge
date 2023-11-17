@@ -6,9 +6,9 @@ import "../libs/Witnet.sol";
 
 /// @title Witnet Request Board base data model. 
 /// @author The Witnet Foundation.
-abstract contract WitnetBoardData {  
+abstract contract WitnetRequestBoardData {  
 
-    bytes32 internal constant _WITNET_BOARD_DATA_SLOTHASH =
+    bytes32 internal constant _WITNET_REQUEST_BOARD_DATA_SLOTHASH =
         /* keccak256("io.witnet.boards.data") */
         0xf595240b351bc8f951c2f53b26f4e78c32cb62122cf76c19b7fdda7d4968e183;
 
@@ -75,7 +75,7 @@ abstract contract WitnetBoardData {
       returns (WitnetBoardState storage _ptr)
     {
         assembly {
-            _ptr.slot := _WITNET_BOARD_DATA_SLOTHASH
+            _ptr.slot := _WITNET_REQUEST_BOARD_DATA_SLOTHASH
         }
     }
 

@@ -7,7 +7,7 @@ import "../WitnetUpgradableBase.sol";
 import "../../WitnetRequestBoard.sol";
 import "../../WitnetRequestFactory.sol";
 
-import "../../data/WitnetBoardDataACLs.sol";
+import "../../data/WitnetRequestBoardDataACLs.sol";
 import "../../interfaces/IWitnetRequest.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
 import "../../interfaces/IWitnetRequestBoardReporter.sol";
@@ -23,7 +23,7 @@ abstract contract WitnetRequestBoardTrustableBase
     is 
         WitnetUpgradableBase,
         WitnetRequestBoard,
-        WitnetBoardDataACLs,
+        WitnetRequestBoardDataACLs,
         IWitnetRequestBoardReporter,
         IWitnetRequestBoardAdminACLs,
         Payable 
