@@ -499,41 +499,6 @@ abstract contract WitnetRequestBoardTrustableBase
     /// result to this request.
     /// @dev Fails if:
     /// @dev - provided reward is too low.
-    /// @dev - provided address is zero.
-    /// @param _requestInterface The address of a IWitnetRequest contract, containing the actual Data Request seralized bytecode.
-    /// @return _queryId An unique query identifier.
-    function postRequest(address _requestInterface)
-        virtual override
-        public payable
-        returns (uint256 _queryId)
-    {
-        uint256 _value = _getMsgValue();
-        uint256 _gasPrice = _getGasPrice();
-
-        // check base reward
-        uint256 _baseReward = estimateBaseFee(_gasPrice, 32);
-        require(_value >= _baseReward, "WitnetRequestBoardTrustableBase: reward too low");
-
-        // Validates provided script:
-        require(IWitnetRequest(_requestInterface).hash() != bytes32(0), "WitnetRequestBoardTrustableBase: no precompiled request");
-
-        _queryId = ++ __storage().numQueries;
-        __storage().queries[_queryId].from = msg.sender;
-
-        Witnet.Request storage __request = __seekQueryRequest(_queryId);
-        __request.addr = _requestInterface;
-        __request.gasprice = _gasPrice;
-        __request.reward = _value;
-
-        // Let observers know that a new request has been posted
-        emit PostedRequest(_queryId, msg.sender);
-    }
-
-    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
-    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
-    /// result to this request.
-    /// @dev Fails if:
-    /// @dev - provided reward is too low.
     /// @param _radHash The radHash of the Witnet Data Request.
     /// @param _slaHash The slaHash of the Witnet Data Request.
     function postRequest(bytes32 _radHash, bytes32 _slaHash)
@@ -819,6 +784,38 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint256)
     {
         return estimateBaseFee(_gasPrice, 32);
+    }
+
+    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// result to this request.
+    /// @dev Fails if:
+    /// @dev - provided reward is too low.
+    /// @dev - provided address is zero.
+    /// @param _requestInterface The address of a IWitnetRequest contract, containing the actual Data Request seralized bytecode.
+    /// @return _queryId An unique query identifier.
+    function postRequest(address _requestInterface)
+        virtual override
+        public payable
+        returns (uint256 _queryId)
+    {
+        uint256 _value = _getMsgValue();
+        uint256 _gasPrice = _getGasPrice();
+
+        // check base reward
+        uint256 _baseFee = estimateBaseFee(_gasPrice, 32);
+        require(_value >= _baseFee, "WitnetRequestBoardTrustableBase: reward too low");
+
+        _queryId = ++ __storage().numQueries;
+        __storage().queries[_queryId].from = msg.sender;
+
+        Witnet.Request storage __request = __seekQueryRequest(_queryId);
+        __request._addr = _requestInterface;
+        __request.gasprice = _gasPrice;
+        __request.reward = _value;
+
+        // Let observers know that a new request has been posted
+        emit PostedRequest(_queryId, msg.sender);
     }
 
     /// Decode raw CBOR bytes into a Witnet.Result instance.

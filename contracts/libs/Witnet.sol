@@ -28,7 +28,7 @@ library Witnet {
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct Request {
-        address addr;       // Address of the IWitnetRequest contract containing Witnet data request raw bytecode.
+        address _addr;          // Deprecating: Address of the IWitnetRequest contract containing Witnet data request raw bytecode.
         bytes32 slaHash;    // Radon SLA hash of the Witnet data request.
         bytes32 radHash;    // Radon radHash of the Witnet data request.
         uint256 gasprice;   // Minimum gas price the DR resolver should pay on the solving tx.
