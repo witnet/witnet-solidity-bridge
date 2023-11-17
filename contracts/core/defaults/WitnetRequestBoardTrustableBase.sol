@@ -102,9 +102,17 @@ abstract contract WitnetRequestBoardTrustableBase
         }
     }
 
-
+    
     // ================================================================================================================
-    // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
+    // --- Yet to be implemented virtual methods ----------------------------------------------------------------------
+
+    /// Estimates the amount of reward we need to insert for a given gas price.
+    /// @param _gasPrice The gas price for which we need to calculate the rewards.
+    function estimateBaseFee(uint256 _gasPrice) virtual override public view returns (uint256); 
+
+    
+    // ================================================================================================================
+    // --- Overrides 'Upgradeable' ------------------------------------------------------------------------------------
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     /// @dev Must fail when trying to upgrade to same logic contract more than once.
@@ -226,7 +234,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
 
     // ================================================================================================================
-    // --- Full implementation of 'IWitnetRequestBoardReporter' -------------------------------------------------------
+    // --- IWitnetRequestBoard Reporter methods -----------------------------------------------------------------------
 
     /// Reports the Witnet-provided result to a previously posted request. 
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
@@ -375,7 +383,20 @@ abstract contract WitnetRequestBoardTrustableBase
     
 
     // ================================================================================================================
-    // --- Full implementation of 'IWitnetRequestBoardRequestor' ------------------------------------------------------
+    // --- IWitnetRequestBoard Requester methods ----------------------------------------------------------------------
+
+    /// @notice Delete query without further ado.
+    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
+    /// @dev the one that actually posted the given request.
+    /// @param _queryId The unique query identifier.
+    function burnQuery(uint256 _queryId) 
+        external
+        virtual override
+        onlyRequester(_queryId)
+        inStatus(_queryId, Witnet.QueryStatus.Reported)
+    {
+        delete __storage().queries[_queryId];
+    }   
 
     /// @notice Returns query's result current status from a requester's point of view:
     /// @notice   - 0 => Void: the query is either non-existent or deleted;
@@ -456,19 +477,6 @@ abstract contract WitnetRequestBoardTrustableBase
         );
     }
 
-    /// @notice Delete query without further ado.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
-    /// @dev the one that actually posted the given request.
-    /// @param _queryId The unique query identifier.
-    function burnQuery(uint256 _queryId) 
-        external
-        virtual override
-        onlyRequester(_queryId)
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
-    {
-        delete __storage().queries[_queryId];
-    }    
-
     /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
     /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
     /// @dev the one that actually posted the given request.
@@ -501,7 +509,7 @@ abstract contract WitnetRequestBoardTrustableBase
         uint256 _gasPrice = _getGasPrice();
 
         // check base reward
-        uint256 _baseReward = estimateReward(_gasPrice);
+        uint256 _baseReward = estimateBaseFee(_gasPrice, 32);
         require(_value >= _baseReward, "WitnetRequestBoardTrustableBase: reward too low");
 
         // Validates provided script:
@@ -535,7 +543,7 @@ abstract contract WitnetRequestBoardTrustableBase
         uint256 _gasPrice = _getGasPrice();
 
         // check base reward
-        uint256 _baseReward = estimateReward(_gasPrice);
+        uint256 _baseReward = estimateBaseFee(_gasPrice, 32);
         require(
             _value >= _baseReward,
             "WitnetRequestBoardTrustableBase: reward too low"
@@ -594,7 +602,7 @@ abstract contract WitnetRequestBoardTrustableBase
         // If gas price is increased, then check if new rewards cover gas costs
         if (_newGasPrice > __request.gasprice) {
             // Checks the reward is covering gas cost
-            uint256 _minResultReward = estimateReward(_newGasPrice);
+            uint256 _minResultReward = estimateReward(_newGasPrice, 32);
             require(
                 _newReward >= _minResultReward,
                 "WitnetRequestBoardTrustableBase: reward too low"
@@ -606,14 +614,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
 
     // ================================================================================================================
-    // --- Full implementation of 'IWitnetRequestBoardView' -----------------------------------------------------------
-
-    /// Estimates the amount of reward we need to insert for a given gas price.
-    /// @param _gasPrice The gas price for which we need to calculate the rewards.
-    function estimateReward(uint256 _gasPrice)
-        public view
-        virtual override
-        returns (uint256);
+    // --- 'IWitnetRequestBoard' Viewer methods -----------------------------------------------------------------------
 
     /// Returns next request id to be generated by the Witnet Request Board.
     function getNextQueryId()
@@ -771,7 +772,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
 
     // ================================================================================================================
-    // --- Full implementation of 'IWitnetRequestBoard' interface ------------------------------------------
+    // --- Deprecating methods from 'IWitnetRequestBoard' -------------------------------------------------------------
 
     /// Tell if a Witnet.Result is successful.
     /// @param _result An instance of Witnet.Result.
@@ -820,6 +821,16 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint64)
     {
         return uint64(_result.asUint());
+    }
+
+    /// Estimates the amount of reward we need to insert for a given gas price.
+    /// @param _gasPrice The gas price for which we need to calculate the rewards.
+    function estimateReward(uint256 _gasPrice)
+        external view
+        override
+        returns (uint256)
+    {
+        return estimateBaseFee(_gasPrice, 32);
     }
 
     /// Decode raw CBOR bytes into a Witnet.Result instance.

@@ -17,8 +17,14 @@ interface IWitnetRequestBoard {
 
     
     /// ===============================================================================================================
-    /// --- Requestor interface ---------------------------------------------------------------------------------------
+    /// --- Requester interface ---------------------------------------------------------------------------------------
     
+    /// @notice Delete query without further ado.
+    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
+    /// @dev the one that actually posted the given request.
+    /// @param _queryId The unique query identifier.
+    function burnQuery(uint256 _queryId) external;
+
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
     /// @param _queryId The unique query identifier.
     function checkResultError(uint256 _queryId) external view returns (Witnet.ResultError memory);
@@ -31,13 +37,11 @@ interface IWitnetRequestBoard {
     /// @param _queryId The unique query identifier.
     function checkResultStatus(uint256 _queryId) external view returns (Witnet.ResultStatus);
 
-    function checkResultTraceability(uint256 _queryId) external view returns (uint256, bytes32);
-    
-    /// @notice Delete query without further ado.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
-    /// @dev the one that actually posted the given request.
+    /// @notice Returns query's result traceability data
     /// @param _queryId The unique query identifier.
-    function burnQuery(uint256 _queryId) external;
+    /// @return _resultTimestamp Timestamp at which the query was solved by the Witnet blockchain.
+    /// @return _resultDrTxHash Witnet blockchain hash of the commit/reveal act that solved the query.
+    function checkResultTraceability(uint256 _queryId) external view returns (uint256 _resultTimestamp, bytes32 _resultDrTxHash);
 
     /// @notice Retrieves a copy of all Witnet-provided data related to a previously posted request, removing the whole query from the WRB storage.
     /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
