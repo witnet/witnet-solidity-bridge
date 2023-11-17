@@ -24,6 +24,7 @@ contract WitnetRandomness
 {
     using Witnet for Witnet.Result;
 
+    bytes4 public immutable class = type(IWitnetRandomness).interfaceId;
     uint256 public override latestRandomizeBlock;
     WitnetRequest public immutable override witnetRandomnessRequest;
 
@@ -328,10 +329,10 @@ contract WitnetRandomness
     {
         if (latestRandomizeBlock < block.number) {
             // Post the Witnet Randomness request:
-            uint _queryId;
-            (_queryId, _usedFunds) = _witnetPostRequest(
+            _usedFunds = _witnetEstimateBaseFee(tx.gasprice);
+            uint _queryId = witnet().postRequest{value: _usedFunds}(
                 __witnetRandomnessRadHash,
-                __witnetRandomnessSlaHash  
+                __witnetRandomnessSlaHash
             );
             // Keep Randomize data in storage:
             RandomizeData storage _data = __randomize_[block.number];
@@ -366,15 +367,13 @@ contract WitnetRandomness
     function upgradeRandomizeFee(uint256 _block)
         public payable
         virtual override
-        returns (uint256 _usedFunds)
+        returns (uint256)
     {
         RandomizeData storage _data = __randomize_[_block];
         if (_data.witnetQueryId != 0) {
-            _usedFunds = _witnetUpgradeReward(_data.witnetQueryId);
+            __witnet.upgradeReward{value: msg.value}(_data.witnetQueryId);
         }
-        if (_usedFunds < msg.value) {
-            payable(msg.sender).transfer(msg.value - _usedFunds);
-        }
+        return msg.value;
     }
 
     /// @notice Result the WitnetRequestBoard address upon which this contract relies on. 

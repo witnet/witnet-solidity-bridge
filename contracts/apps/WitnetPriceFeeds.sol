@@ -29,7 +29,8 @@ contract WitnetPriceFeeds
     using Witnet for Witnet.Result;
     using WitnetV2 for WitnetV2.RadonSLA;
 
-    IWitnetRequestBoard immutable public override witnet;
+    bytes4 immutable public class = type(IWitnetPriceFeeds).interfaceId;
+    WitnetRequestBoard immutable public override witnet;
     
     constructor(address _operator, WitnetRequestBoard _wrb)
         WitnetFeeds(
@@ -242,7 +243,7 @@ contract WitnetPriceFeeds
         }
     }
 
-    function registry() public view virtual override returns (IWitnetBytecodes) {
+    function registry() public view virtual override returns (WitnetBytecodes) {
         return WitnetRequestBoard(address(witnet)).registry();
     }
 
