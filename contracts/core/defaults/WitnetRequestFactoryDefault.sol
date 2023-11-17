@@ -17,8 +17,11 @@ contract WitnetRequestFactoryDefault
         WitnetRequestFactoryData,
         WitnetUpgradableBase        
 {
-    /// @notice Reference to Witnet Data Requests Bytecode Registry
+    /// @notice Reference to Witnet Data Requests Bytecode Registry.
     WitnetBytecodes immutable public override(WitnetRequestFactory, WitnetRequestTemplate) registry;
+
+     /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
+    WitnetRequestBoard immutable public override(WitnetRequestFactory, WitnetRequestTemplate) witnet;
 
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
         require(
@@ -46,6 +49,7 @@ contract WitnetRequestFactoryDefault
     }
 
     constructor(
+            WitnetRequestBoard _witnet,
             WitnetBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag
@@ -56,6 +60,8 @@ contract WitnetRequestFactoryDefault
             "io.witnet.requests.factory"
         )
     {
+        assert(address(_witnet) != address(0) && address(_registry) != address(0));
+        witnet = _witnet;
         registry = _registry;
         // let logic contract be used as a factory, while avoiding further initializations:
         __proxiable().proxy = address(this);
@@ -281,9 +287,9 @@ contract WitnetRequestFactoryDefault
         }        
         __proxiable().implementation = base();
 
-        require(address(registry).code.length > 0, "WitnetRequestFactoryDefault: inexistent registry");
-        require(registry.class() == type(IWitnetBytecodes).interfaceId, "WitnetRequestFactoryDefault: uncompliant registry");
-
+        require(address(registry).code.length > 0, "WitnetRequestFactoryDefault: inexistent requests registry");
+        require(registry.class() == type(IWitnetBytecodes).interfaceId, "WitnetRequestFactoryDefault: uncompliant requests registry");
+        
         emit Upgraded(msg.sender, base(), codehash(), version());
     }
 

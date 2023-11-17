@@ -7,11 +7,12 @@ import "../defaults/WitnetRequestFactoryDefault.sol";
 
 contract WitnetRequestFactoryCfxCore is WitnetRequestFactoryDefault {
     constructor(
+            WitnetRequestBoard _witnet,
             WitnetBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag
         )
-        WitnetRequestFactoryDefault(_registry, _upgradable, _versionTag)
+        WitnetRequestFactoryDefault(_witnet, _registry, _upgradable, _versionTag)
     {}
 
     function _cloneDeterministic(bytes32 _salt)

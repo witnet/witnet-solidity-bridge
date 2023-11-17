@@ -8,6 +8,7 @@ import "../../WitnetRequestBoard.sol";
 import "../../WitnetRequestFactory.sol";
 
 import "../../data/WitnetBoardDataACLs.sol";
+import "../../interfaces/IWitnetRequest.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
 import "../../interfaces/IWitnetRequestBoardReporter.sol";
 import "../../libs/WitnetErrorsLib.sol";
@@ -46,6 +47,7 @@ abstract contract WitnetRequestBoardTrustableBase
             "io.witnet.proxiable.board"
         )
     {
+        assert(address(_factory) != address(0));
         factory = _factory;
     }
 
@@ -140,6 +142,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
         require(address(factory).code.length > 0, "WitnetRequestBoardTrustableBase: inexistent factory");
         require(factory.class() == type(IWitnetRequestFactory).interfaceId, "WitnetRequestBoardTrustableBase: uncompliant factory");
+        require(address(factory.witnet()) == address(this), "WitnetRequestBoardTrustableBase: discordant factory");
 
         // Set reporters
         __setReporters(_reporters);
@@ -465,7 +468,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev - provided address is zero.
     /// @param _requestInterface The address of a IWitnetRequest contract, containing the actual Data Request seralized bytecode.
     /// @return _queryId An unique query identifier.
-    function postRequest(IWitnetRequest _requestInterface)
+    function postRequest(address _requestInterface)
         virtual override
         public payable
         returns (uint256 _queryId)
@@ -484,7 +487,7 @@ abstract contract WitnetRequestBoardTrustableBase
         __storage().queries[_queryId].from = msg.sender;
 
         Witnet.Request storage _request = __request(_queryId);
-        _request.addr = address(_requestInterface);
+        _request.addr = _requestInterface;
         _request.gasprice = _gasPrice;
         _request.reward = _value;
 

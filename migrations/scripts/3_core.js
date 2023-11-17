@@ -54,7 +54,8 @@ module.exports = async function (_, network, [, from]) {
             key: targets.WitnetRequestFactory, 
             libs: specs.WitnetRequestFactory.libs,
             immutables: specs.WitnetRequestFactory.immutables,
-            intrinsics: { types: [ 'address', 'bool', 'bytes32' ], values: [ 
+            intrinsics: { types: [  'address', 'address', 'bool', 'bytes32' ], values: [ 
+                /* _witnet     */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3), 
                 /* _registry   */ await determineProxyAddr(from, specs.WitnetBytecodes?.vanity || 1), 
                 /* _upgradable */ true, 
                 /* _versionTag */ utils.fromAscii(version),
@@ -72,7 +73,7 @@ module.exports = async function (_, network, [, from]) {
             libs: specs.WitnetRequestBoard.libs,
             immutables: specs.WitnetRequestBoard.immutables,
             intrinsics: { types: [ 'address', 'bool', 'bytes32' ], values: [ 
-                /* _registry   */ await determineProxyAddr(from, specs.WitnetRequestFactory?.vanity || 2), 
+                /* _factory    */ await determineProxyAddr(from, specs.WitnetRequestFactory?.vanity || 2), 
                 /* _upgradable */ true, 
                 /* _versionTag */ utils.fromAscii(version),
             ]},
