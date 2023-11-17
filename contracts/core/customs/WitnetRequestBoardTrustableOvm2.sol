@@ -60,4 +60,19 @@ contract WitnetRequestBoardTrustableOvm2
             )
         );
     }
+
+    /// @notice Estimate the minimum reward required for posting a data request with a callback.
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
+    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _maxCallbackGas)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return WitnetRequestBoardTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _maxCallbackGas) + (
+            _gasPrice * gasPriceOracleL1.getL1Fee(
+                hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            )
+        );
+    }
 }
