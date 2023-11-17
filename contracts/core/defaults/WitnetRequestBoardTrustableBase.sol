@@ -510,9 +510,9 @@ abstract contract WitnetRequestBoardTrustableBase
         uint256 _gasPrice = _getGasPrice();
 
         // check base reward
-        uint256 _baseReward = estimateBaseFee(_gasPrice, 32);
+        uint256 _baseFee = estimateBaseFee(_gasPrice, 32);
         require(
-            _value >= _baseReward,
+            _value >= _baseFee,
             "WitnetRequestBoardTrustableBase: reward too low"
         );
 
@@ -522,7 +522,6 @@ abstract contract WitnetRequestBoardTrustableBase
         Witnet.Request storage __request = __seekQueryRequest(_queryId);
         __request.radHash = _radHash;
         __request.slaHash = _slaHash;
-        __request.gasprice = _gasPrice;
         __request.reward = _value;
 
         // Let observers know that a new request has been posted
@@ -545,6 +544,19 @@ abstract contract WitnetRequestBoardTrustableBase
             _radHash,
             registry().verifyRadonSLA(_slaParams)
         );
+    }
+
+    /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// @notice result to this request.
+    /// @dev Fails if, provided reward is too low.
+    /// @dev The caller must be a contract implementing the IWitnetConsumer interface.
+    function postRequestWithCallback(bytes32, WitnetV2.RadonSLA calldata)
+        virtual override
+        external payable 
+        returns (uint256)
+    {
+        revert("WitnetRequestBoardTrustableBase: not implemented");
     }
     
     
@@ -625,28 +637,14 @@ abstract contract WitnetRequestBoardTrustableBase
             "WitnetRequestBoardTrustableBase: not yet posted"
         );
         Witnet.Request storage __request = __seekQueryRequest(_queryId);
-        if (__request.addr != address(0)) {
-            _bytecode = IWitnetRequest(__request.addr).bytecode();
+        if (__request._addr != address(0)) {
+            _bytecode = IWitnetRequest(__request._addr).bytecode();
         } else if (__request.radHash != bytes32(0)) {
             _bytecode = registry().bytecodeOf(
                 __request.radHash,
                 __request.slaHash
             );
         }
-    }
-
-    /// Retrieves the gas price that any assigned reporter will have to pay when reporting 
-    /// result to a previously posted Witnet data request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
-    /// @dev reported, or deleted. 
-    /// @param _queryId The unique query identifier
-    function readRequestGasPrice(uint256 _queryId)
-        external view
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Posted)
-        returns (uint256)
-    {
-        return __storage().queries[_queryId].request.gasprice;
     }
 
     /// Retrieves the reward currently set for a previously posted request.
@@ -811,11 +809,25 @@ abstract contract WitnetRequestBoardTrustableBase
 
         Witnet.Request storage __request = __seekQueryRequest(_queryId);
         __request._addr = _requestInterface;
-        __request.gasprice = _gasPrice;
+        __request._gasprice = _gasPrice;
         __request.reward = _value;
 
         // Let observers know that a new request has been posted
         emit PostedRequest(_queryId, msg.sender);
+    }
+
+    /// Retrieves the gas price that any assigned reporter will have to pay when reporting 
+    /// result to a previously posted Witnet data request.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
+    /// @dev reported, or deleted. 
+    /// @param _queryId The unique query identifier
+    function readRequestGasPrice(uint256 _queryId)
+        external view
+        override
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
+        returns (uint256)
+    {
+        return __storage().queries[_queryId].request._gasprice;
     }
 
     /// Decode raw CBOR bytes into a Witnet.Result instance.
@@ -848,14 +860,14 @@ abstract contract WitnetRequestBoardTrustableBase
         uint256 _newGasPrice = _getGasPrice();
 
         // If gas price is increased, then check if new rewards cover gas costs
-        if (_newGasPrice > __request.gasprice) {
+        if (_newGasPrice > __request._gasprice) {
             // Checks the reward is covering gas cost
             uint256 _minResultReward = estimateBaseFee(_newGasPrice, 32);
             require(
                 _newReward >= _minResultReward,
                 "WitnetRequestBoardTrustableBase: reward too low"
             );
-            __request.gasprice = _newGasPrice;
+            __request._gasprice = _newGasPrice;
         }
         __request.reward = _newReward;
     }

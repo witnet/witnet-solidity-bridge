@@ -110,13 +110,6 @@ interface IWitnetRequestBoard {
     /// @param _queryId The unique query identifier.
     function readRequestBytecode(uint256 _queryId) external view returns (bytes memory);
 
-    /// @notice Retrieves the gas price that any assigned reporter will have to pay when reporting 
-    /// result to a previously posted Witnet data request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
-    /// @dev reported, or deleted. 
-    /// @param _queryId The unique query identifie
-    function readRequestGasPrice(uint256 _queryId) external view returns (uint256);
-
     /// @notice Retrieves the reward currently set for the referred query.
     /// @dev Fails if the `_queryId` is not valid or, if it has already been 
     /// @dev reported, or deleted. 
@@ -197,6 +190,13 @@ interface IWitnetRequestBoard {
     /// @param slaHash The SLA hash of the data request to be solved by Witnet.
     /// @return _queryId Unique query identifier.
     function postRequest(bytes32 radHash, bytes32 slaHash) external payable returns (uint256 _queryId);
+
+    /// @notice Retrieves the gas price that any assigned reporter will have to pay when reporting 
+    /// result to a previously posted Witnet data request.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
+    /// @dev reported, or deleted. 
+    /// @param _queryId The unique query identifie
+    function readRequestGasPrice(uint256 _queryId) external view returns (uint256);
 
     /// Decode raw CBOR bytes into a Witnet.Result instance.
     /// @param _cborBytes Raw bytes representing a CBOR-encoded value.

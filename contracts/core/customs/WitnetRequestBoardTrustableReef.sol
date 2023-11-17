@@ -38,9 +38,8 @@ contract WitnetRequestBoardTrustableReef
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
     /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256 _gasPrice, uint256 _resultMaxSize)
+    function estimateBaseFee(uint256, uint256 _resultMaxSize)
         public view
         virtual override
         returns (uint256)
@@ -49,9 +48,8 @@ contract WitnetRequestBoardTrustableReef
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
     /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _maxCallbackGas)
+    function estimateBaseFeeWithCallback(uint256, uint256 _maxCallbackGas)
         public view
         virtual override
         returns (uint256)
