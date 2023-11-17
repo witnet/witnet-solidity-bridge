@@ -439,6 +439,23 @@ abstract contract WitnetRequestBoardTrustableBase
             }
         }
     }
+
+    /// @notice Returns query's result traceability data
+    /// @param _queryId The unique query identifier.
+    /// @return _resultTimestamp Timestamp at which the query was solved by the Witnet blockchain.
+    /// @return _resultDrTxHash Witnet blockchain hash of the commit/reveal act that solved the query.
+    function checkResultTraceability(uint256 _queryId)
+        external view
+        override
+        returns (uint256, bytes32)
+    {
+        Witnet.Response storage __response = __seekQueryResponse(_queryId);
+        return (
+            __response.timestamp,
+            __response.drTxHash
+        );
+    }
+
     /// @notice Delete query without further ado.
     /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
     /// @dev the one that actually posted the given request.
