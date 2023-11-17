@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetRequestBoard.sol";
+import "../WitnetRequestBoard.sol";
 
 /// @title The UsingWitnet contract
 /// @dev Witnet-aware contracts can inherit from this contract in order to interact with Witnet.

@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../UsingWitnet.sol";
+import "./UsingWitnet.sol";
 import "../WitnetRequest.sol";
 import "../core/WitnetUpgradableBase.sol";
 import "../interfaces/IWitnetRandomness.sol";
