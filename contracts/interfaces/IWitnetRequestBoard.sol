@@ -19,6 +19,10 @@ interface IWitnetRequestBoard {
     /// ===============================================================================================================
     /// --- Requestor interface ---------------------------------------------------------------------------------------
     
+    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
+    /// @param _queryId The unique query identifier.
+    function checkResultError(uint256 _queryId) external view returns (Witnet.ResultError memory);
+
     /// @notice Returns query's result current status from a requester's point of view:
     /// @notice   - 0 => Void: the query is either non-existent or deleted;
     /// @notice   - 1 => Awaiting: the query has not yet been reported;
@@ -27,7 +31,7 @@ interface IWitnetRequestBoard {
     /// @param _queryId The unique query identifier.
     function checkResultStatus(uint256 _queryId) external view returns (Witnet.ResultStatus);
 
-    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
+    function checkResultTraceability(uint256 _queryId) external view returns (uint256, bytes32);
     /// @param _queryId The unique query identifier.
     function checkResultError(uint256 _queryId) external view returns (Witnet.ResultError memory);
 
@@ -40,22 +44,12 @@ interface IWitnetRequestBoard {
     /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
     /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
     /// @notice result to this request.
-    /// @dev Fails if:
-    /// @dev - provided reward is too low.
-    /// @dev - provided script is zero address.
-    /// @dev - provided script bytecode is empty.
-    /// @param addr The address of the IWitnetRequest contract that can provide the actual Data Request bytecode.
-    /// @return _queryId Unique query identifier.
-    function postRequest(IWitnetRequest addr) external payable returns (uint256 _queryId);
-
-    /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
-    /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
-    /// @notice result to this request.
-    /// @dev Fails if, provided reward is too low.
+    /// @dev Fails if provided reward is too low.
+    /// @dev The result to the query will be saved into the WitnetRequestBoard storage.
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
-    /// @param slaHash The SLA hash of the data request to be solved by Witnet.
+    /// @param querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @return _queryId Unique query identifier.
-    function postRequest(bytes32 radHash, bytes32 slaHash) external payable returns (uint256 _queryId);
+    function postRequest(bytes32 radHash, WitnetV2.RadonSLA calldata querySLA) external payable returns (uint256 _queryId);
 
     /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
     /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
@@ -67,22 +61,14 @@ interface IWitnetRequestBoard {
     function postRequest(bytes32 radHash, WitnetV2.RadonSLA calldata slaParams) external payable returns (uint256 _queryId);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
-    /// @dev Updates request `gasPrice` in case this method is called with a higher 
-    /// @dev gas price value than the one used in previous calls to `postRequest` or
-    /// @dev `upgradeReward`. 
-    /// @dev Fails if the `_queryId` is not in 'Posted' status.
-    /// @dev Fails also in case the request `gasPrice` is increased, and the new 
-    /// @dev reward value gets below new recalculated threshold. 
     /// @param _queryId The unique query identifier.
-    function upgradeReward(uint256 _queryId) external payable;
+    function upgradeQueryReward(uint256 _queryId) external payable;
     
 
     /// ===============================================================================================================
     /// --- Reader interface ------------------------------------------------------------------------------------------
 
-        /// @notice Estimates the amount of reward we need to insert for a given gas price.
-    /// @param _gasPrice The gas price for which we need to calculate the rewards.
-    function estimateReward(uint256 _gasPrice) external view returns (uint256);
+    function estimateBaseFee(uint256 _gasPrice, uint256 _resultMaxSize) external view returns (uint256);
 
     /// @notice Returns next query id to be generated by the Witnet Request Board.
     function getNextQueryId() external view returns (uint256);
@@ -169,9 +155,34 @@ interface IWitnetRequestBoard {
     /// @return The `uint` decoded from the Witnet.Result.
     function asUint64(Witnet.Result memory _result) external pure returns (uint64);
 
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than 32 bytes. 
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    function estimateReward(uint256 _gasPrice) external view returns (uint256);
+
+    /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// @notice result to this request.
+    /// @dev Fails if:
+    /// @dev - provided reward is too low.
+    /// @dev - provided script is zero address.
+    /// @dev - provided script bytecode is empty.
+    /// @param _requestAddr The address of the IWitnetRequest contract that can provide the actual Data Request bytecode.
+    /// @return _queryId Unique query identifier.
+    function postRequest(address _requestAddr) external payable returns (uint256 _queryId);
+
     /// Decode raw CBOR bytes into a Witnet.Result instance.
     /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
     /// @return A `Witnet.Result` instance.
     function resultFromCborBytes(bytes memory _cborBytes) external pure returns (Witnet.Result memory);
 
+    /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
+    /// @dev Updates request `gasPrice` in case this method is called with a higher 
+    /// @dev gas price value than the one used in previous calls to `postRequest` or
+    /// @dev `upgradeReward`. 
+    /// @dev Fails if the `_queryId` is not in 'Posted' status.
+    /// @dev Fails also in case the request `gasPrice` is increased, and the new 
+    /// @dev reward value gets below new recalculated threshold. 
+    /// @param _queryId The unique query identifier.
+    function upgradeReward(uint256 _queryId) external payable;
 }
