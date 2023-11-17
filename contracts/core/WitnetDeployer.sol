@@ -23,7 +23,6 @@ contract WitnetDeployer {
     {
         _deployed = determineAddr(_initCode, _salt);
         if (_deployed.code.length == 0) {
-            // address _justDeployed;
             assembly {
                 _deployed := create2(0, add(_initCode, 0x20), mload(_initCode), _salt)
             }
