@@ -591,27 +591,13 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Fails also in case the request `gasPrice` is increased, and the new 
     /// @dev reward value gets below new recalculated threshold. 
     /// @param _queryId The unique query identifier.
-    function upgradeReward(uint256 _queryId)
+    function upgradeQueryReward(uint256 _queryId)
         public payable
         virtual override      
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        Witnet.Request storage __request = __seekQueryRequest(_queryId);
-
-        uint256 _newReward = __request.reward + _getMsgValue();
-        uint256 _newGasPrice = _getGasPrice();
-
-        // If gas price is increased, then check if new rewards cover gas costs
-        if (_newGasPrice > __request.gasprice) {
-            // Checks the reward is covering gas cost
-            uint256 _minResultReward = estimateBaseFee(_newGasPrice, 32);
-            require(
-                _newReward >= _minResultReward,
-                "WitnetRequestBoardTrustableBase: reward too low"
-            );
-            __request.gasprice = _newGasPrice;
-        }
-        __request.reward = _newReward;
+        __seekQueryRequest(_queryId).reward += _getMsgValue();
+        emit UpgradedReward(_queryId);
     }
 
 
@@ -844,6 +830,37 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (Witnet.Result memory)
     {
         return Witnet.resultFromCborBytes(_cborBytes);
+    }
+
+    /// Increments the reward of a previously posted request by adding the transaction value to it.
+    /// @dev Updates request `gasPrice` in case this method is called with a higher 
+    /// @dev gas price value than the one used in previous calls to `postRequest` or
+    /// @dev `upgradeReward`. 
+    /// @dev Fails if the `_queryId` is not in 'Posted' status.
+    /// @dev Fails also in case the request `gasPrice` is increased, and the new 
+    /// @dev reward value gets below new recalculated threshold. 
+    /// @param _queryId The unique query identifier.
+    function upgradeReward(uint256 _queryId)
+        public payable
+        virtual override      
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
+    {
+        Witnet.Request storage __request = __seekQueryRequest(_queryId);
+
+        uint256 _newReward = __request.reward + _getMsgValue();
+        uint256 _newGasPrice = _getGasPrice();
+
+        // If gas price is increased, then check if new rewards cover gas costs
+        if (_newGasPrice > __request.gasprice) {
+            // Checks the reward is covering gas cost
+            uint256 _minResultReward = estimateBaseFee(_newGasPrice, 32);
+            require(
+                _newReward >= _minResultReward,
+                "WitnetRequestBoardTrustableBase: reward too low"
+            );
+            __request.gasprice = _newGasPrice;
+        }
+        __request.reward = _newReward;
     }
 
 

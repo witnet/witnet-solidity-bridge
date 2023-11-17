@@ -7,10 +7,13 @@ import "../libs/WitnetV2.sol";
 interface IWitnetRequestBoard {
     
     /// Emitted when a Witnet Data Request is posted to the WRB.
-    event PostedRequest(uint256 queryId, address from);
+    event PostedRequest(uint256 indexed queryId, address from);
 
     /// Emitted when a Witnet-solved result is reported to the WRB.
-    event PostedResult(uint256 queryId, address from);
+    event PostedResult(uint256 indexed queryId, address from);
+
+    /// Emitted when the reward of some not-yet reported query is upgraded.
+    event UpgradedReward(uint256 indexed queryId);
 
     
     /// ===============================================================================================================
