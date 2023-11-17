@@ -439,6 +439,18 @@ abstract contract WitnetRequestBoardTrustableBase
             }
         }
     }
+    /// @notice Delete query without further ado.
+    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
+    /// @dev the one that actually posted the given request.
+    /// @param _queryId The unique query identifier.
+    function burnQuery(uint256 _queryId) 
+        external
+        virtual override
+        onlyRequester(_queryId)
+        inStatus(_queryId, Witnet.QueryStatus.Reported)
+    {
+        delete __storage().queries[_queryId];
+    }    
 
     /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
     /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
