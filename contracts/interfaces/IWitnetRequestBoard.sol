@@ -12,9 +12,6 @@ interface IWitnetRequestBoard {
     /// Emitted when a Witnet-solved result is reported to the WRB.
     event PostedResult(uint256 queryId, address from);
 
-    /// Emitted when all data related to given query is deleted from the WRB.
-    event DeletedQuery(uint256 queryId, address from);
-
     
     /// ===============================================================================================================
     /// --- Requester interface ---------------------------------------------------------------------------------------
