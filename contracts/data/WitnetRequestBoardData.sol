@@ -28,33 +28,47 @@ abstract contract WitnetRequestBoardData {
       require(
           _statusOf(_queryId) == _status,
           _statusOfRevertMessage(_status)
-        );
-      _;
+      ); _;
     }
 
     /// Asserts the given query was previously posted and that it was not yet deleted.
     modifier notDeleted(uint256 _queryId) {
-        require(_queryId > 0 && _queryId <= __storage().numQueries, "WitnetRequestBoard: not yet posted");
-        require(__query(_queryId).from  != address(0), "WitnetRequestBoard: deleted");
-        _;
+        require(
+            _queryId > 0 && _queryId <= __storage().numQueries, 
+            "WitnetRequestBoard: not yet posted"
+        );
+        require(
+            __seekQuery(_queryId).from  != address(0), 
+            "WitnetRequestBoard: deleted"
+        ); _;
     }
 
-    /// Asserts the give query was actually posted before calling this method.
+    /// Asserts the caller actually posted the referred query.
+    modifier onlyRequester(uint256 _queryId) {
+        require(
+            msg.sender == __seekQuery(_queryId).from, 
+            "WitnetRequestBoardBase: not the requester"
+        ); _;
+    }
+
+    /// Asserts the given query was actually posted before calling this method.
     modifier wasPosted(uint256 _queryId) {
-        require(_queryId > 0 && _queryId <= __storage().numQueries, "WitnetRequestBoard: not yet posted");
-        _;
+        require(
+            _queryId > 0 && _queryId <= __storage().numQueries, 
+            "WitnetRequestBoard: not yet posted"
+        ); _;
     }
 
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
 
     /// Gets query storage by query id.
-    function __query(uint256 _queryId) internal view returns (Witnet.Query storage) {
+    function __seekQuery(uint256 _queryId) internal view returns (Witnet.Query storage) {
       return __storage().queries[_queryId];
     }
 
     /// Gets the Witnet.Request part of a given query.
-    function __request(uint256 _queryId)
+    function __seekQueryRequest(uint256 _queryId)
       internal view
       returns (Witnet.Request storage)
     {
@@ -62,7 +76,7 @@ abstract contract WitnetRequestBoardData {
     }   
 
     /// Gets the Witnet.Result part of a given query.
-    function __response(uint256 _queryId)
+    function __seekQueryResponse(uint256 _queryId)
       internal view
       returns (Witnet.Response storage)
     {
