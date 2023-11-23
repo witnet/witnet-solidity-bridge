@@ -531,13 +531,14 @@ abstract contract WitnetRequestBoardTrustableBase
         emit NewQuery(_queryId, _getMsgValue());
     }
 
-    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
-    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
-    /// result to this request.
-    /// @dev Fails if:
-    /// @dev - provided reward is too low.
-    /// @param _radHash The RAD hash of the data tequest to be solved by Witnet.
-    /// @param _querySLA The SLA param of the data request to be solved by Witnet.
+    /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and 
+    /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
+    /// @notice transferred to the reporter who relays back the Witnet-provided result to this request.
+    /// @dev Fails if provided reward is too low.
+    /// @dev The result to the query will be saved into the WitnetRequestBoard storage.
+    /// @param _radHash The RAD hash of the data request to be solved by Witnet.
+    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
+    /// @return _queryId Unique query identifier.
     function postRequest(
             bytes32 _radHash, 
             WitnetV2.RadonSLA calldata _querySLA
@@ -555,13 +556,42 @@ abstract contract WitnetRequestBoardTrustableBase
         // Let observers know that a new request has been posted
         emit NewQuery(_queryId, _getMsgValue());
     }
+
+    /// @notice Requests the execution of the given Witnet Data Request bytecode, in expectation that it will be relayed and 
+    /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
+    /// @notice transferred to the reporter who relays back the Witnet-provided result to this request.
+    /// @dev Fails if provided reward is too low.
+    /// @dev The result to the query will be saved into the WitnetRequestBoard storage.
+    /// @param _radBytecode The raw bytecode of the Witnet Data Request to be solved by Witnet.
+    /// @param _querySLA The data query SLA to be fulfilled by the Witnet blockchain.
+    /// @return _queryId A unique query identifier.
+    function postRequest(
+            bytes calldata _radBytecode, 
+            WitnetV2.RadonSLA calldata _querySLA
+        )
+        virtual override
+        public payable
+        checkReward(estimateBaseFee(_getGasPrice(), 32))
+        checkSLA(_querySLA)
+        returns (uint256 _queryId)
+    {
+        _queryId = __postRequest(
+            registry().hashOf(_radBytecode), 
+            _querySLA.packed()
+        );
+        // Let observers know that a new request has been posted
+        emit NewQueryWithBytecode(_queryId, _getMsgValue(), _radBytecode);
     }
    
-    /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
-    /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
-    /// @notice result to this request.
+    /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
+    /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
+    /// @notice reporter who relays back the Witnet-provided result to this request.
     /// @dev Fails if, provided reward is too low.
     /// @dev The caller must be a contract implementing the IWitnetConsumer interface.
+    /// @param _radHash The RAD hash of the data request to be solved by Witnet.
+    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
+    /// @param _queryMaxCallbackGas Maximum gas to be spent when reporting the data request result.
+    /// @return _queryId Unique query identifier.
     function postRequestWithCallback(
             bytes32 _radHash, 
             WitnetV2.RadonSLA calldata _querySLA,
@@ -580,6 +610,35 @@ abstract contract WitnetRequestBoardTrustableBase
         );
         __seekQueryRequest(_queryId).maxCallbackGas = _queryMaxCallbackGas;
         emit NewQuery(_queryId, _getMsgValue());
+    }
+
+    /// @notice Requests the execution of the given Witnet Data Request bytecode, in expectation that it will be 
+    /// @notice relayed and solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board 
+    /// @notice that will be transferred to the reporter who relays back the Witnet-provided result to this request.
+    /// @dev Fails if, provided reward is too low.
+    /// @dev The caller must be a contract implementing the IWitnetConsumer interface.
+    /// @param _radBytecode The RAD hash of the data request to be solved by Witnet.
+    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
+    /// @param _queryMaxCallbackGas Maximum gas to be spent when reporting the data request result.
+    /// @return _queryId A unique query identifier.
+    function postRequestWithCallback(
+            bytes calldata _radBytecode,
+            WitnetV2.RadonSLA calldata _querySLA,
+            uint256 _queryMaxCallbackGas
+        )
+        virtual override
+        external payable
+        checkCallbackRecipient(msg.sender)
+        checkReward(estimateBaseFeeWithCallback(_getGasPrice(), _queryMaxCallbackGas))
+        checkSLA(_querySLA)
+        returns (uint256 _queryId)
+    {
+        _queryId = __postRequest(
+            registry().hashOf(_radBytecode),
+            _querySLA.packed()
+        );
+        __seekQueryRequest(_queryId).maxCallbackGas = _queryMaxCallbackGas;
+        emit NewQueryWithBytecode(_queryId, _getMsgValue(), _radBytecode);
     }
     
     /// Increments the reward of a previously posted request by adding the transaction value to it.
@@ -843,4 +902,5 @@ abstract contract WitnetRequestBoardTrustableBase
         }
         emit ReportersSet(_reporters);
     }
+
 }

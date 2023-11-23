@@ -15,6 +15,7 @@ interface IWitnetBytecodes {
     event NewRadHash(bytes32 hash);
 
     function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
+    function hashOf(bytes calldata) external view returns (bytes32);
 
     function lookupDataProvider(uint256 index) external view returns (string memory, uint);
     function lookupDataProviderIndex(string calldata authority) external view returns (uint);

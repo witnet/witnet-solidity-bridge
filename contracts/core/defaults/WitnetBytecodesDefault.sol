@@ -149,6 +149,11 @@ contract WitnetBytecodesDefault
         return __database().radsBytecode[_radHash];
     }
 
+    function hashOf(bytes calldata _radBytecode) external pure override returns (bytes32) {
+        // todo: validate correctness of _radBytecode
+        return _witnetHash(_radBytecode);
+    }
+
     function lookupDataProvider(uint256 _index)
         external view
         override
