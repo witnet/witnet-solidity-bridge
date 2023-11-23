@@ -33,6 +33,14 @@ abstract contract WitnetRequestBoardTrustableBase
 
     bytes4 public immutable override class = type(IWitnetRequestBoard).interfaceId;
     WitnetRequestFactory immutable public override factory;
+
+    modifier checkReward(uint256 _baseFee) {
+        require(
+            _getMsgValue() >= _baseFee, 
+            "WitnetRequestBoardTrustableBase: reward too low"
+        ); _;
+    }
+
     
     constructor(
             WitnetRequestFactory _factory,
@@ -229,10 +237,16 @@ abstract contract WitnetRequestBoardTrustableBase
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        require(_drTxHash != 0, "WitnetRequestBoardTrustableDefault: Witnet drTxHash cannot be zero");
+        require(
+            _drTxHash != 0, 
+            "WitnetRequestBoardTrustableDefault: Witnet drTxHash cannot be zero"
+        );
         // Ensures the result bytes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
-        require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
+        require(
+            _cborBytes.length != 0, 
+            "WitnetRequestBoardTrustableDefault: result cannot be empty"
+        );
         // solhint-disable not-rely-on-time
         _safeTransferTo(
             payable(msg.sender),
@@ -243,7 +257,6 @@ abstract contract WitnetRequestBoardTrustableBase
                 _cborBytes
             )
         );
-        emit PostedResult(_queryId, msg.sender);
     }
 
     /// Reports the Witnet-provided result to a previously posted request.
@@ -267,21 +280,27 @@ abstract contract WitnetRequestBoardTrustableBase
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        require(_timestamp <= block.timestamp, "WitnetRequestBoardTrustableDefault: bad timestamp");
-        require(_drTxHash != 0, "WitnetRequestBoardTrustableDefault: Witnet drTxHash cannot be zero");
-        // Ensures the result bytes do not have zero length
-        // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
-        require(_cborBytes.length != 0, "WitnetRequestBoardTrustableDefault: result cannot be empty");
-        _safeTransferTo(
-            payable(msg.sender),
-            __reportResult(
-                _queryId,
-                _timestamp,
-                _drTxHash,
-                _cborBytes
-            )
+        require(
+            _timestamp <= block.timestamp, 
+            "WitnetRequestBoardTrustableDefault: bad timestamp"
         );
-        emit PostedResult(_queryId, msg.sender);
+        require(
+            _drTxHash != 0, 
+            "WitnetRequestBoardTrustableDefault: Witnet drTxHash cannot be zero"
+        );
+        // Ensures the result bytes do not have zero length (this would not be a valid CBOR encoding 
+        // and could trigger a reentrancy attack)
+        require(
+            _cborBytes.length != 0, 
+            "WitnetRequestBoardTrustableDefault: result cannot be empty"
+        );
+        // Transfer query's reward to the reporter:
+        _safeTransferTo(payable(msg.sender), __reportResult(
+            _queryId,
+            _timestamp,
+            _drTxHash,
+            _cborBytes
+        ));
     }
 
     /// Reports Witnet-provided results to multiple requests within a single EVM tx.
@@ -339,10 +358,6 @@ abstract contract WitnetRequestBoardTrustableBase
                     _result.timestamp == 0 ? block.timestamp : _result.timestamp,
                     _result.drTxHash,
                     _result.cborBytes
-                );
-                emit PostedResult(
-                    _result.queryId,
-                    msg.sender
                 );
             }
         }   
@@ -464,28 +479,12 @@ abstract contract WitnetRequestBoardTrustableBase
     function postRequest(bytes32 _radHash, bytes32 _slaHash)
         virtual override
         public payable
+        checkReward(estimateBaseFee(_getGasPrice(), 32))
         returns (uint256 _queryId)
     {
-        uint256 _value = _getMsgValue();
-        uint256 _gasPrice = _getGasPrice();
-
-        // check base reward
-        uint256 _baseFee = estimateBaseFee(_gasPrice, 32);
-        require(
-            _value >= _baseFee,
-            "WitnetRequestBoardTrustableBase: reward too low"
-        );
-
-        _queryId = ++ __storage().numQueries;
-        __storage().queries[_queryId].from = msg.sender;
-
-        Witnet.Request storage __request = __seekQueryRequest(_queryId);
-        __request.radHash = _radHash;
-        __request.slaHash = _slaHash;
-        __request.reward = _value;
-
+        _queryId = __postRequest(_radHash, _slaHash);
         // Let observers know that a new request has been posted
-        emit PostedRequest(_queryId, msg.sender);
+        emit NewQuery(_queryId, _getMsgValue());
     }
 
     /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
@@ -494,18 +493,25 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Fails if:
     /// @dev - provided reward is too low.
     /// @param _radHash The RAD hash of the data tequest to be solved by Witnet.
-    /// @param _slaParams The SLA param of the data request to be solved by Witnet.
-    function postRequest(bytes32 _radHash, WitnetV2.RadonSLA calldata _slaParams)
+    /// @param _querySLA The SLA param of the data request to be solved by Witnet.
+    function postRequest(
+            bytes32 _radHash, 
+            Witnet.RadonSLA calldata _querySLA
+        )
         virtual override
         public payable
+        checkReward(estimateBaseFee(_getGasPrice(), 32))
         returns (uint256 _queryId)
     {
-        return postRequest(
-            _radHash,
-            registry().verifyRadonSLA(_slaParams)
+        _queryId = __postRequest(
+            _radHash, 
+            registry().verifyRadonSLA(_querySLA)
         );
+        // Let observers know that a new request has been posted
+        emit NewQuery(_queryId, _getMsgValue());
     }
-
+    }
+   
     /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
     /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
     /// @notice result to this request.
@@ -534,7 +540,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
         __seekQueryRequest(_queryId).reward += _getMsgValue();
-        emit UpgradedReward(_queryId);
+        emit QueryRewardUpgraded(_queryId, __seekQueryRequest(_queryId).reward);
     }
 
 

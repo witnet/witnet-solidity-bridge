@@ -2,19 +2,21 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../libs/WitnetV2.sol";
+import "../libs/Witnet.sol";
 
 interface IWitnetRequestBoard {
-    
-    /// Emitted when a Witnet Data Request is posted to the WRB.
-    event PostedRequest(uint256 indexed queryId, address from);
+
+    /// Emitted every time a new query containing some verified data request is posted to the WRB.
+    event NewQuery(uint256 indexed id, uint256 evmReward);
 
     /// Emitted when a Witnet-solved result is reported to the WRB.
     event PostedResult(uint256 indexed queryId, address from);
 
     /// Emitted when the reward of some not-yet reported query is upgraded.
-    event UpgradedReward(uint256 indexed queryId);
+    event QueryRewardUpgraded(uint256 indexed id, uint256 evmReward);
 
+    /// Emitted when a query with no callback gets reported into the WRB.
+    event QueryReport(uint256 indexed id, uint256 evmGasPrice);
     
     /// ===============================================================================================================
     /// --- Requester interface ---------------------------------------------------------------------------------------
