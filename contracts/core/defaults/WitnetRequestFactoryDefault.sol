@@ -184,6 +184,23 @@ contract WitnetRequestFactoryDefault
         );
     }
 
+    function class()
+        virtual override(WitnetRequestFactory, WitnetRequestTemplate)
+        external view
+        returns (string memory)
+    {
+        if (
+            address(this) == _SELF
+                || address(this) == __proxy()
+        ) {
+            return type(WitnetRequestFactory).name;
+        } else if (__witnetRequest().radHash != bytes32(0)) {
+            return type(WitnetRequest).name;
+        } else {
+            return type(WitnetRequestTemplate).name;
+        }
+    }
+
     function specs() 
         virtual override(WitnetRequestFactory, WitnetRequestTemplate)
         external view

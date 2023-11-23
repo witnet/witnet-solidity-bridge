@@ -11,6 +11,7 @@ abstract contract WitnetRequestFactory
     is
         IWitnetRequestFactory
 {
+    function class() virtual external view returns (string memory);
     function registry() virtual external view returns (WitnetBytecodes);
     function specs() virtual external view returns (bytes4);
     function witnet() virtual external view returns (WitnetRequestBoard);

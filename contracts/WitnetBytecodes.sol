@@ -9,5 +9,8 @@ abstract contract WitnetBytecodes
     is
         IWitnetBytecodes
 {
+    function class() virtual external view returns (string memory) {
+        return type(WitnetBytecodes).name;
+    }   
     function specs() virtual external view returns (bytes4);
 }
