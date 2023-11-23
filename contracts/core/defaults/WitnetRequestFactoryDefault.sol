@@ -80,7 +80,7 @@ contract WitnetRequestFactoryDefault
         returns (WitnetRequestTemplate)
     {
         // check that at least one retrieval is provided
-        WitnetV2.RadonDataTypes _resultDataType;
+        Witnet.RadonDataTypes _resultDataType;
         require(
             _retrievalsIds.length > 0,
             "WitnetRequestTemplate: no retrievals?"
@@ -443,7 +443,7 @@ contract WitnetRequestFactoryDefault
         override
         external view
         onlyDelegateCalls
-        returns (WitnetV2.RadonDataTypes)
+        returns (Witnet.RadonDataTypes)
     {
         WitnetRequestTemplate _template = __witnetRequest().template;
         if (address(_template) != address(0)) {
@@ -486,7 +486,7 @@ contract WitnetRequestFactoryDefault
         override
         external view
         onlyDelegateCalls
-        returns (WitnetV2.RadonReducer memory)
+        returns (Witnet.RadonReducer memory)
     {
         WitnetRequestTemplate _template = __witnetRequest().template;
         if (address(_template) != address(0)) {
@@ -502,7 +502,7 @@ contract WitnetRequestFactoryDefault
         override
         external view
         onlyDelegateCalls
-        returns (WitnetV2.RadonRetrieval memory)
+        returns (Witnet.RadonRetrieval memory)
     {
         WitnetRequestTemplate _template = __witnetRequest().template;
         if (address(_template) != address(0)) {
@@ -536,7 +536,7 @@ contract WitnetRequestFactoryDefault
         override
         external view
         onlyDelegateCalls
-        returns (WitnetV2.RadonReducer memory)
+        returns (Witnet.RadonReducer memory)
     {
         WitnetRequestTemplate _template = __witnetRequest().template;
         if (address(_template) != address(0)) {

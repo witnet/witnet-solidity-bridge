@@ -12,12 +12,12 @@ abstract contract WitnetFeeds
         IWitnetFeeds,
         IWitnetFeedsAdmin
 {
-    WitnetV2.RadonDataTypes immutable public override dataType;
+    Witnet.RadonDataTypes immutable public override dataType;
 
     bytes32 immutable internal __prefix;
 
     constructor(
-            WitnetV2.RadonDataTypes _dataType,
+            Witnet.RadonDataTypes _dataType,
             string memory _prefix
         )
     {

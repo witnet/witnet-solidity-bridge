@@ -27,14 +27,14 @@ contract WitnetPriceFeeds
         WitnetPriceFeedsData
 {
     using Witnet for Witnet.Result;
-    using WitnetV2 for WitnetV2.RadonSLA;
+    using Witnet for Witnet.RadonSLA;
 
     bytes4 immutable public class = type(IWitnetPriceFeeds).interfaceId;
     WitnetRequestBoard immutable public override witnet;
     
     constructor(address _operator, WitnetRequestBoard _wrb)
         WitnetFeeds(
-            WitnetV2.RadonDataTypes.Integer,
+            Witnet.RadonDataTypes.Integer,
             "Price-"
         )
     {
@@ -44,7 +44,7 @@ contract WitnetPriceFeeds
             "WitnetPriceFeeds: uncompliant request board"
         );
         witnet = _wrb;
-        __settleDefaultRadonSLA(WitnetV2.RadonSLA({
+        __settleDefaultRadonSLA(Witnet.RadonSLA({
             numWitnesses: 5,
             witnessCollateral: 15 * 10 ** 9,
             witnessReward: 15 * 10 ** 7,
@@ -138,7 +138,7 @@ contract WitnetPriceFeeds
     function defaultRadonSLA()
         override
         public view
-        returns (WitnetV2.RadonSLA memory)
+        returns (Witnet.RadonSLA memory)
     {
         return registry().lookupRadonSLA(__storage().defaultSlaHash);
     }
@@ -149,7 +149,7 @@ contract WitnetPriceFeeds
         returns (uint)
     {
         // TODO: refactor when WRB.estimateBaseFee(bytes32,bytes32,uint256,uint256) is implemented.
-        return witnet.estimateReward(_evmGasPrice);
+        return witnet.estimateBaseFee(_evmGasPrice, 32);
     }
     
     function estimateUpdateBaseFee(bytes4, uint256 _evmGasPrice, uint256, bytes32)
@@ -158,21 +158,21 @@ contract WitnetPriceFeeds
         returns (uint)
     {
         // TODO: refactor when WRB.estimateBaseFee(bytes32,bytes32,uint256,uint256) is implemented.
-        return witnet.estimateReward(_evmGasPrice);
+        return witnet.estimateBaseFee(_evmGasPrice, 32);
     }
 
     function latestResponse(bytes4 feedId)
         override public view
         returns (Witnet.Response memory)
     {
-        return witnet.readResponse(_latestValidQueryId(feedId));
+        return witnet.getQueryResponse(_latestValidQueryId(feedId));
     }
     
     function latestResult(bytes4 feedId)
         override external view
         returns (Witnet.Result memory)
     {
-        return witnet.readResponseResult(_latestValidQueryId(feedId));
+        return witnet.getQueryResponseResult(_latestValidQueryId(feedId));
     }
 
     function latestUpdateQueryId(bytes4 feedId)
@@ -186,14 +186,14 @@ contract WitnetPriceFeeds
         override external view 
         returns (Witnet.Request memory)
     {
-        return witnet.readRequest(latestUpdateQueryId(feedId));
+        return witnet.getQueryRequest(latestUpdateQueryId(feedId));
     }
 
     function latestUpdateResponse(bytes4 feedId)
         override external view
         returns (Witnet.Response memory)
     {
-        return witnet.readResponse(latestUpdateQueryId(feedId));
+        return witnet.getQueryResponse(latestUpdateQueryId(feedId));
     }
 
     function latestUpdateResultError(bytes4 feedId)
@@ -234,10 +234,10 @@ contract WitnetPriceFeeds
 
     function lookupRetrievals(bytes4 feedId)
         override external view
-        returns (WitnetV2.RadonRetrieval[] memory _retrievals)
+        returns (Witnet.RadonRetrieval[] memory _retrievals)
     {
         bytes32[] memory _hashes = registry().lookupRadonRequestSources(lookupRadHash(feedId));
-        _retrievals = new WitnetV2.RadonRetrieval[](_hashes.length);
+        _retrievals = new Witnet.RadonRetrieval[](_hashes.length);
         for (uint _ix = 0; _ix < _retrievals.length; _ix ++) {
             _retrievals[_ix] = registry().lookupRadonRetrieval(_hashes[_ix]);
         }
@@ -321,7 +321,7 @@ contract WitnetPriceFeeds
         emit DeletedFeed(msg.sender, feedId, caption);
     }
 
-    function settleDefaultRadonSLA(WitnetV2.RadonSLA memory sla)
+    function settleDefaultRadonSLA(Witnet.RadonSLA memory sla)
         override public
         onlyOwner
     {
@@ -630,10 +630,10 @@ contract WitnetPriceFeeds
             if (_latestStatus == Witnet.ResultStatus.Awaiting) {
                 // latest update is still pending, so just increase the reward
                 // accordingly to current tx gasprice:
-                int _deltaReward = int(witnet.readRequestReward(_latestId)) - int(_usedFunds);
+                int _deltaReward = int(witnet.getQueryReward(_latestId)) - int(_usedFunds);
                 if (_deltaReward > 0) {
                     _usedFunds = uint(_deltaReward);
-                    witnet.upgradeReward{value: _usedFunds}(_latestId);
+                    witnet.upgradeQueryReward{value: _usedFunds}(_latestId);
                     emit UpdatingFeedReward(msg.sender, feedId, _usedFunds);
                 } else {
                     _usedFunds = 0;
@@ -668,7 +668,7 @@ contract WitnetPriceFeeds
         }
     }
 
-    function __settleDefaultRadonSLA(WitnetV2.RadonSLA memory sla) internal {
+    function __settleDefaultRadonSLA(Witnet.RadonSLA memory sla) internal {
         __storage().defaultSlaHash = registry().verifyRadonSLA(sla);
     }
 }

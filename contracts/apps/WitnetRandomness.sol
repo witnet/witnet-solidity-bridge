@@ -50,22 +50,20 @@ contract WitnetRandomness
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
             _retrievals[0] = _registry.verifyRadonRetrieval(
-                WitnetV2.DataRequestMethods.Rng,
+                Witnet.RadonDataRequestMethods.Rng,
                 "", // no url
                 "", // no body
                 new string[2][](0), // no headers
                 hex"80" // no retrieval script
             );
-            WitnetV2.RadonFilter[] memory _filters;
-            bytes32 _aggregator = _registry.verifyRadonReducer(WitnetV2.RadonReducer({
-                opcode: WitnetV2.RadonReducerOpcodes.Mode,
-                filters: _filters, // no filters
-                script: hex"" // no aggregation script
+            Witnet.RadonFilter[] memory _filters;
+            bytes32 _aggregator = _registry.verifyRadonReducer(Witnet.RadonReducer({
+                opcode: Witnet.RadonReducerOpcodes.Mode,
+                filters: _filters // no filters
             }));
-            bytes32 _tally = _registry.verifyRadonReducer(WitnetV2.RadonReducer({
-                opcode: WitnetV2.RadonReducerOpcodes.ConcatenateAndHash,
-                filters: _filters, // no filters
-                script: hex"" // no aggregation script
+            bytes32 _tally = _registry.verifyRadonReducer(Witnet.RadonReducer({
+                opcode: Witnet.RadonReducerOpcodes.ConcatenateAndHash,
+                filters: _filters // no filters
             }));
             WitnetRequestTemplate _template = WitnetRequestTemplate(_factory.buildRequestTemplate(
                 _retrievals,
@@ -149,7 +147,7 @@ contract WitnetRandomness
         Ownable.transferOwnership(_newOwner);
     }
 
-    function settleWitnetRandomnessSLA(WitnetV2.RadonSLA memory _radonSLA)
+    function settleWitnetRandomnessSLA(Witnet.RadonSLA memory _radonSLA)
         virtual override
         public
         onlyOwner
@@ -169,7 +167,7 @@ contract WitnetRandomness
         virtual override
         returns (uint256)
     {
-        return witnet().estimateReward(_gasPrice);
+        return witnet().estimateBaseFee(_gasPrice, 32);
     }
 
     /// Retrieves data of a randomization request that got successfully posted to the WRB within a given block.
@@ -218,7 +216,7 @@ contract WitnetRandomness
         require(_queryId != 0, "WitnetRandomness: not randomized");
         Witnet.ResultStatus _resultStatus = witnet().checkResultStatus(_queryId);
         if (_resultStatus == Witnet.ResultStatus.Ready) {
-            return witnet().readResponseResult(_queryId).asBytes32();
+            return witnet().getQueryResponseResult(_queryId).asBytes32();
         } else if (_resultStatus == Witnet.ResultStatus.Error) {
             uint256 _nextRandomizeBlock = __randomize_[_block].nextBlock;
             require(_nextRandomizeBlock != 0, "WitnetRandomness: faulty randomize");
@@ -371,7 +369,7 @@ contract WitnetRandomness
     {
         RandomizeData storage _data = __randomize_[_block];
         if (_data.witnetQueryId != 0) {
-            __witnet.upgradeReward{value: msg.value}(_data.witnetQueryId);
+            __witnet.upgradeQueryReward{value: msg.value}(_data.witnetQueryId);
         }
         return msg.value;
     }
@@ -388,7 +386,7 @@ contract WitnetRandomness
     function witnetRandomnessSLA()
         virtual override
         external view
-        returns (WitnetV2.RadonSLA memory)
+        returns (Witnet.RadonSLA memory)
     {
         return witnet().registry().lookupRadonSLA(__witnetRandomnessSlaHash);
     }
@@ -431,7 +429,7 @@ contract WitnetRandomness
     }
 
     function __initializeWitnetRandomnessSlaHash() virtual internal {
-        __settleWitnetRandomnessSLA(WitnetV2.RadonSLA({
+        __settleWitnetRandomnessSLA(Witnet.RadonSLA({
             numWitnesses: 5,
             minConsensusPercentage: 51,
             witnessReward: 10 ** 8,
@@ -440,7 +438,7 @@ contract WitnetRandomness
         }));
     }
 
-    function __settleWitnetRandomnessSLA(WitnetV2.RadonSLA memory _radonSLA) 
+    function __settleWitnetRandomnessSLA(Witnet.RadonSLA memory _radonSLA) 
         internal
         returns (bytes32 _radonSlaHash)
     {

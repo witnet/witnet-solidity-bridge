@@ -57,7 +57,7 @@ interface IWitnetRequestBoard {
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     /// @param querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @return _queryId Unique query identifier.
-    function postRequest(bytes32 radHash, WitnetV2.RadonSLA calldata querySLA) external payable returns (uint256 _queryId);
+    function postRequest(bytes32 radHash, Witnet.RadonSLA calldata querySLA) external payable returns (uint256 _queryId);
 
     /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
     /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
@@ -67,7 +67,7 @@ interface IWitnetRequestBoard {
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     /// @param querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @return _queryId Unique query identifier.
-    function postRequestWithCallback(bytes32 radHash, WitnetV2.RadonSLA calldata querySLA) external payable returns (uint256 _queryId);
+    function postRequestWithCallback(bytes32 radHash, Witnet.RadonSLA calldata querySLA, uint256 maxCallbackGas) external payable returns (uint256 _queryId);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     /// @param _queryId The unique query identifier.

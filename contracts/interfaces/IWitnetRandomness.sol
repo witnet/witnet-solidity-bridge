@@ -101,6 +101,6 @@ interface IWitnetRandomness {
     function witnetRandomnessRequest() external view returns (WitnetRequest);
 
     /// @notice Returns SLA parameters that are being used every time there's a new randomness request.
-    function witnetRandomnessSLA() external view returns (WitnetV2.RadonSLA memory);
+    function witnetRandomnessSLA() external view returns (Witnet.RadonSLA memory);
 
 }

@@ -176,6 +176,131 @@ library Witnet {
         UnhandledIntercept
     }
 
+    /// Possible Radon data request methods that can be used within a Radon Retrieval. 
+    enum RadonDataRequestMethods {
+        /* 0 */ Unknown,
+        /* 1 */ HttpGet,
+        /* 2 */ Rng,
+        /* 3 */ HttpPost,
+        /* 4 */ HttpHead
+    }
+
+    /// Possible types either processed by Witnet Radon Scripts or included within results to Witnet Data Requests.
+    enum RadonDataTypes {
+        /* 0x00 */ Any, 
+        /* 0x01 */ Array,
+        /* 0x02 */ Bool,
+        /* 0x03 */ Bytes,
+        /* 0x04 */ Integer,
+        /* 0x05 */ Float,
+        /* 0x06 */ Map,
+        /* 0x07 */ String,
+        Unused0x08, Unused0x09, Unused0x0A, Unused0x0B,
+        Unused0x0C, Unused0x0D, Unused0x0E, Unused0x0F,
+        /* 0x10 */ Same,
+        /* 0x11 */ Inner,
+        /* 0x12 */ Match,
+        /* 0x13 */ Subscript
+    }
+
+    /// Structure defining some data filtering that can be applied at the Aggregation or the Tally stages
+    /// within a Witnet Data Request resolution workflow.
+    struct RadonFilter {
+        RadonFilterOpcodes opcode;
+        bytes args;
+    }
+
+    /// Filtering methods currently supported on the Witnet blockchain. 
+    enum RadonFilterOpcodes {
+        /* 0x00 */ Reserved0x00, //GreaterThan,
+        /* 0x01 */ Reserved0x01, //LessThan,
+        /* 0x02 */ Reserved0x02, //Equals,
+        /* 0x03 */ Reserved0x03, //AbsoluteDeviation,
+        /* 0x04 */ Reserved0x04, //RelativeDeviation
+        /* 0x05 */ StandardDeviation,
+        /* 0x06 */ Reserved0x06, //Top,
+        /* 0x07 */ Reserved0x07, //Bottom,
+        /* 0x08 */ Mode,
+        /* 0x09 */ Reserved0x09  //LessOrEqualThan
+    }
+
+    /// Structure defining the array of filters and reducting function to be applied at either the Aggregation
+    /// or the Tally stages within a Witnet Data Request resolution workflow.
+    struct RadonReducer {
+        RadonReducerOpcodes opcode;
+        RadonFilter[] filters;
+        // bytes script;
+    }
+
+    /// Reducting functions currently supported on the Witnet blockchain.
+    enum RadonReducerOpcodes {
+        /* 0x00 */ Reserved0x00, //Minimum,
+        /* 0x01 */ Reserved0x01, //Maximum,
+        /* 0x02 */ Mode,
+        /* 0x03 */ AverageMean,
+        /* 0x04 */ Reserved0x04, //AverageMeanWeighted,
+        /* 0x05 */ AverageMedian,
+        /* 0x06 */ Reserved0x06, //AverageMedianWeighted,
+        /* 0x07 */ StandardDeviation,
+        /* 0x08 */ Reserved0x08, //AverageDeviation,
+        /* 0x09 */ Reserved0x09, //MedianDeviation,
+        /* 0x0A */ Reserved0x10, //MaximumDeviation,
+        /* 0x0B */ ConcatenateAndHash
+    }
+
+    /// Structure containing all the parameters that fully describe a Witnet Radon Retrieval within a Witnet Data Request.
+    struct RadonRetrieval {
+        uint8 argsCount;
+        RadonDataRequestMethods method;
+        RadonDataTypes resultDataType;
+        string url;
+        string body;
+        string[2][] headers;
+        bytes script;
+    }
+
+    /// Structure containing the Retrieve-Attestation-Delivery parts of a Witnet Data Request.
+    struct RadonRAD {
+        RadonRetrieval[] retrieve;
+        RadonReducer aggregate;
+        RadonReducer tally;
+    }
+
+    /// Structure containing the Service Level Aggreement parameters of a Witnet Data Request.
+    struct RadonSLA {
+        uint8 numWitnesses;
+        uint8 minConsensusPercentage;
+        uint64 witnessReward;
+        uint64 witnessCollateral;
+        uint64 minerCommitRevealFee;
+    }
+
+
+    /// @notice Returns `true` if all witnessing parameters in `b` have same
+    /// @notice value or greater than the ones in `a`.
+    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
+        internal pure returns (bool)
+    {
+        return (
+            a.numWitnesses >= b.numWitnesses
+                && a.minConsensusPercentage >= b.minConsensusPercentage
+                && a.witnessReward >= b.witnessReward
+                && a.witnessCollateral >= b.witnessCollateral
+                && a.minerCommitRevealFee >= b.minerCommitRevealFee
+        );
+    }
+
+    function isValid(Witnet.RadonSLA memory sla)
+        internal pure returns (bool)
+    {
+        return (
+            sla.witnessReward > 0
+                && sla.numWitnesses > 0 && sla.numWitnesses <= 127
+                && sla.minConsensusPercentage > 50 && sla.minConsensusPercentage < 100
+                && sla.witnessCollateral > 0
+                && sla.witnessCollateral / sla.witnessReward <= 127
+        );
+    }
 
     /// ===============================================================================================================
     /// --- 'Witnet.Result' helper methods ----------------------------------------------------------------------------

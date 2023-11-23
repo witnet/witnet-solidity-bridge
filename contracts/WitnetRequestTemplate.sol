@@ -20,14 +20,14 @@ abstract contract WitnetRequestTemplate
     function aggregator() virtual external view returns (bytes32);
     function parameterized() virtual external view returns (bool);
     function resultDataMaxSize() virtual external view returns (uint16);
-    function resultDataType() virtual external view returns (WitnetV2.RadonDataTypes);
+    function resultDataType() virtual external view returns (Witnet.RadonDataTypes);
     function retrievals() virtual external view returns (bytes32[] memory);
     function tally() virtual external view returns (bytes32);
     
-    function getRadonAggregator() virtual external view returns (WitnetV2.RadonReducer memory);
-    function getRadonRetrievalByIndex(uint256) virtual external view returns (WitnetV2.RadonRetrieval memory);
+    function getRadonAggregator() virtual external view returns (Witnet.RadonReducer memory);
+    function getRadonRetrievalByIndex(uint256) virtual external view returns (Witnet.RadonRetrieval memory);
     function getRadonRetrievalsCount() virtual external view returns (uint256);
-    function getRadonTally() virtual external view returns (WitnetV2.RadonReducer memory);
+    function getRadonTally() virtual external view returns (Witnet.RadonReducer memory);
     
     function buildRequest(string[][] calldata args) virtual external returns (address);
     function verifyRadonRequest(string[][] calldata args) virtual external returns (bytes32);
