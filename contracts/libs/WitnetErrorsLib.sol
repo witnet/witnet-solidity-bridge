@@ -28,6 +28,25 @@ library WitnetErrorsLib {
         );
     }
 
+    function asResultError(Witnet.ResultStatus _status, bytes memory _cborBytes)
+        public pure
+        returns (Witnet.ResultError memory)
+    {
+        if (_status == Witnet.ResultStatus.Awaiting) {
+            return Witnet.ResultError({
+                code: Witnet.ResultErrorCodes.Unknown,
+                reason: "WitnetRequestBoard: not yet solved"
+            });
+        } else if (_status == Witnet.ResultStatus.Void) {
+            return Witnet.ResultError({
+                code: Witnet.ResultErrorCodes.Unknown,
+                reason: "WitnetRequestBoard: unknown query"
+            });
+        } else {
+            return resultErrorFromCborBytes(_cborBytes);
+        }
+    }
+
     /// @notice Extract error code and description string from given CBOR-encoded value.
     /// @dev Client contracts should wrap this function into a try-catch foreseeing potential parsing errors.
     /// @return _error Witnet.ResultError data struct containing error code and description.

@@ -62,44 +62,16 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Provide backwards compatibility for dapps bound to versions <= 0.6.1
     /// @dev (i.e. calling methods in IWitnetRequestBoard)
     /// @dev (Until 'function ... abi(...)' modifier is allegedly supported in solc versions >= 0.9.1)
-    // solhint-disable-next-line payable-fallback
-    fallback() override external { /* solhint-disable no-complex-fallback */
-        bytes4 _newSig = msg.sig;
-        if (msg.sig == 0xA8604C1A) {
-            // IWitnetRequestParser.isOk({bool,CBOR}) --> IWitnetRequestBoard.isOk({bool,WitnetCBOR.CBOR})
-            _newSig = IWitnetRequestBoard.isOk.selector;
-        } else if (msg.sig == 0xCF62D115) {
-            // IWitnetRequestParser.asBytes32({bool,CBOR}) --> IWitnetRequestBoard.asBytes32({bool,WitnetCBOR.CBOR})
-            _newSig = IWitnetRequestBoard.asBytes32.selector;
-        } else if (msg.sig == 0xBC7E25FF) {
-            // IWitnetRequestParser.asUint64({bool,CBOR}) --> IWitnetRequestBoard.asUint64({bool,WitnetCBOR.CBOR})
-            _newSig = IWitnetRequestBoard.asUint64.selector;
-        } else if (msg.sig == 0xD74803BE) {
-            // IWitnetRequestParser.asErrorMessage({bool,CBOR}) --> IWitnetRequestBoard.asErrorMessage({bool,WitnetCBOR.CBOR})
-            _newSig = IWitnetRequestBoard.asErrorMessage.selector;
-        }
-        if (_newSig != msg.sig) {
-            address _self = address(this);
-            assembly {
-                let ptr := mload(0x40)
-                calldatacopy(ptr, 0, calldatasize())
-                mstore(ptr, or(and(mload(ptr), 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff), _newSig))
-                let result := delegatecall(gas(), _self, ptr, calldatasize(), 0, 0)
-                let size := returndatasize()
-                returndatacopy(ptr, 0, size)
-                switch result
-                    case 0 { revert(ptr, size) }
-                    default { return(ptr, size) }
-            }
-        } else {
-            revert(string(abi.encodePacked(
-                "WitnetRequestBoardTrustableBase: not implemented: 0x",
-                Witnet.toHexString(uint8(bytes1(msg.sig))),
-                Witnet.toHexString(uint8(bytes1(msg.sig << 8))),
-                Witnet.toHexString(uint8(bytes1(msg.sig << 16))),
-                Witnet.toHexString(uint8(bytes1(msg.sig << 24)))
-            )));
-        }
+    /* solhint-disable payable-fallback */
+    /* solhint-disable no-complex-fallback */
+    fallback() override external { 
+        revert(string(abi.encodePacked(
+            "WitnetRequestBoardTrustableBase: not implemented: 0x",
+            Witnet.toHexString(uint8(bytes1(msg.sig))),
+            Witnet.toHexString(uint8(bytes1(msg.sig << 8))),
+            Witnet.toHexString(uint8(bytes1(msg.sig << 16))),
+            Witnet.toHexString(uint8(bytes1(msg.sig << 24)))
+        )));
     }
 
     
@@ -432,34 +404,22 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (Witnet.ResultError memory)
     {
         Witnet.ResultStatus _status = checkResultStatus(_queryId);
-        if (_status == Witnet.ResultStatus.Awaiting) {
+        try WitnetErrorsLib.asResultError(_status, __seekQueryResponse(_queryId).cborBytes)
+            returns (Witnet.ResultError memory _resultError)
+        {
+            return _resultError;
+        } 
+        catch Error(string memory _reason) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
-                reason: "WitnetRequestBoardTrustableBase: not yet solved"
+                reason: string(abi.encodePacked("WitnetErrorsLib: ", _reason))
             });
-        } else if (_status == Witnet.ResultStatus.Void) {
+        }
+        catch (bytes memory) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
-                reason: "WitnetRequestBoardTrustableBase: unknown query"
+                reason: "WitnetErrorsLib: assertion failed"
             });
-        } else {
-            try WitnetErrorsLib.resultErrorFromCborBytes(__seekQueryResponse(_queryId).cborBytes)
-                returns (Witnet.ResultError memory _error)
-            {
-                return _error;
-            }
-            catch Error(string memory _reason) {
-                return Witnet.ResultError({
-                    code: Witnet.ResultErrorCodes.Unknown,
-                    reason: string(abi.encodePacked("WitnetErrorsLib: ", _reason))
-                });
-            }
-            catch (bytes memory) {
-                return Witnet.ResultError({
-                    code: Witnet.ResultErrorCodes.Unknown,
-                    reason: "WitnetErrorsLib: assertion failed"
-                });
-            }
         }
     }
 
@@ -657,30 +617,6 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (Witnet.Response memory _response)
     {
         return __seekQueryResponse(_queryId);
-    }
-
-    /// Retrieves the hash of the Witnet transaction that actually solved the referred query.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier.
-    function readResponseDrTxHash(uint256 _queryId)
-        external view        
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
-        returns (bytes32)
-    {
-        return __seekQueryResponse(_queryId).drTxHash;
-    }
-
-    /// Retrieves the address that reported the result to a previously-posted request.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier
-    function readResponseReporter(uint256 _queryId)
-        external view
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
-        returns (address)
-    {
-        return __seekQueryResponse(_queryId).reporter;
     }
 
     /// Retrieves the Witnet-provided CBOR-bytes result of a previously posted request.
