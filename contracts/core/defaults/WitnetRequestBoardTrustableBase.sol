@@ -613,7 +613,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Fails if the `_queryId` is not valid or, if it has already been reported
     /// @dev or deleted.
     /// @param _queryId The unique identifier of a previously posted query.
-    function readRequest(uint256 _queryId)
+    function getQueryRequest(uint256 _queryId)
         external view
         override
         inStatus(_queryId, Witnet.QueryStatus.Posted)
@@ -627,7 +627,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev got changed after being posted. Returns empty array once it gets reported, 
     /// @dev or deleted.
     /// @param _queryId The unique query identifier.
-    function readRequestBytecode(uint256 _queryId)
+    function getQueryRequestBytecode(uint256 _queryId)
         external view
         virtual override
         returns (bytes memory _bytecode)
@@ -647,23 +647,10 @@ abstract contract WitnetRequestBoardTrustableBase
         }
     }
 
-    /// Retrieves the reward currently set for a previously posted request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
-    /// @dev reported, or deleted. 
-    /// @param _queryId The unique query identifier
-    function readRequestReward(uint256 _queryId)
-        external view
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Posted)
-        returns (uint256)
-    {
-        return __storage().queries[_queryId].request.reward;
-    }
-
     /// Retrieves the Witnet-provided result, and metadata, to a previously posted request.    
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier
-    function readResponse(uint256 _queryId)
+    function getQueryResponse(uint256 _queryId)
         external view
         override
         inStatus(_queryId, Witnet.QueryStatus.Reported)
@@ -699,7 +686,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// Retrieves the Witnet-provided CBOR-bytes result of a previously posted request.
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier
-    function readResponseResult(uint256 _queryId)
+    function getQueryResponseResult(uint256 _queryId)
         external view
         override
         inStatus(_queryId, Witnet.QueryStatus.Reported)
@@ -709,18 +696,18 @@ abstract contract WitnetRequestBoardTrustableBase
         return _response.cborBytes.resultFromCborBytes();
     }
 
-    /// Retrieves the timestamp in which the result to the referred query was solved by the Witnet DON.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier.
-    function readResponseTimestamp(uint256 _queryId)
+    /// Retrieves the reward currently set for a previously posted request.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
+    /// @dev reported, or deleted. 
+    /// @param _queryId The unique query identifier
+    function getQueryReward(uint256 _queryId)
         external view
         override
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (uint256)
     {
-        return __seekQueryResponse(_queryId).timestamp;
+        return __storage().queries[_queryId].request.reward;
     }
-
 
     // ================================================================================================================
     // --- Deprecating methods from 'IWitnetRequestBoard' -------------------------------------------------------------

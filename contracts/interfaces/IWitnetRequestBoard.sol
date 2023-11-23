@@ -101,30 +101,25 @@ interface IWitnetRequestBoard {
     /// @dev Fails if the `_queryId` is not valid or, if it has already been reported
     /// @dev or deleted.
     /// @param _queryId The unique identifier of a previously posted query.
-    function readRequest(uint256 _queryId) external view returns (Witnet.Request memory);
+    function getQueryRequest(uint256 _queryId) external view returns (Witnet.Request memory);
 
     /// @notice Retrieves the serialized bytecode of a previously posted Witnet Data Request.
     /// @dev Fails if the `_queryId` is not valid, or if the related script bytecode 
     /// @dev got changed after being posted. Returns empty array once it gets reported, 
     /// @dev or deleted.
     /// @param _queryId The unique query identifier.
-    function readRequestBytecode(uint256 _queryId) external view returns (bytes memory);
+    function getQueryRequestBytecode(uint256 _queryId) external view returns (bytes memory);
+    
+    /// @notice Retrieves the whole `Witnet.Response` record referred to a previously posted Witnet Data Request.
+    /// @dev Fails if the `_queryId` is not in 'Reported' status.
+    /// @param _queryId The unique query identifier.
+    function getQueryResponse(uint256 _queryId) external view returns (Witnet.Response memory);
 
     /// @notice Retrieves the reward currently set for the referred query.
     /// @dev Fails if the `_queryId` is not valid or, if it has already been 
     /// @dev reported, or deleted. 
     /// @param _queryId The unique query identifier.
-    function readRequestReward(uint256 _queryId) external view returns (uint256);
-
-    /// @notice Retrieves the whole `Witnet.Response` record referred to a previously posted Witnet Data Request.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier.
-    function readResponse(uint256 _queryId) external view returns (Witnet.Response memory);
-
-    /// @notice Retrieves error codes of given query.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status, or if no actual error.
-    /// @param _queryId The unique query identifier.
-    function readResponseDrTxHash(uint256 _queryId) external view returns (bytes32);
+    function getQueryReward(uint256 _queryId) external view returns (uint256);
 
     /// @notice Retrieves the address that reported the result to a previously-posted request.
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
@@ -134,7 +129,7 @@ interface IWitnetRequestBoard {
     /// @notice Retrieves the Witnet-provided CBOR-bytes result of a previously posted request.
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier.
-    function readResponseResult(uint256 _queryId) external view returns (Witnet.Result memory);
+    function getQueryResponseResult(uint256 _queryId) external view returns (Witnet.Result memory);
 
     /// @notice Retrieves the timestamp in which the result to the referred query was solved by the Witnet DON.
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
