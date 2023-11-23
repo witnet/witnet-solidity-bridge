@@ -11,6 +11,7 @@ import "../../data/WitnetRequestBoardDataACLs.sol";
 import "../../interfaces/IWitnetRequest.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
 import "../../interfaces/IWitnetRequestBoardReporter.sol";
+import "../../interfaces/V2/IWitnetConsumer.sol";
 import "../../libs/WitnetErrorsLib.sol";
 import "../../patterns/Payable.sol";
 
@@ -30,6 +31,7 @@ abstract contract WitnetRequestBoardTrustableBase
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
+    using WitnetCBOR for WitnetCBOR.CBOR;
 
     bytes4 public immutable override class = type(IWitnetRequestBoard).interfaceId;
     WitnetRequestFactory immutable public override factory;
@@ -41,6 +43,12 @@ abstract contract WitnetRequestBoardTrustableBase
         ); _;
     }
 
+    modifier checkCallbackRecipient(address _addr) {
+        require(
+            _addr.code.length > 0 && IWitnetConsumer(_addr).reportableFrom(address(this)),
+            "WitnetRequestBoardTrustableBase: invalid callback recipient"
+        ); _;
+    }
     
     constructor(
             WitnetRequestFactory _factory,
@@ -91,6 +99,11 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
     /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
     function estimateBaseFee(uint256 _gasPrice, uint256 _resultMaxSize) virtual public view returns (uint256); 
+
+    /// @notice Estimate the minimum reward required for posting a data request with a callback.
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
+    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _maxCallbackGas) virtual public view returns (uint256);
 
     
     // ================================================================================================================
@@ -517,14 +530,24 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @notice result to this request.
     /// @dev Fails if, provided reward is too low.
     /// @dev The caller must be a contract implementing the IWitnetConsumer interface.
-    function postRequestWithCallback(bytes32, WitnetV2.RadonSLA calldata)
+    function postRequestWithCallback(
+            bytes32 _radHash, 
+            Witnet.RadonSLA calldata _querySLA,
+            uint256 _queryMaxCallbackGas
+        )
         virtual override
         external payable 
-        returns (uint256)
+        checkCallbackRecipient(msg.sender)
+        checkReward(estimateBaseFeeWithCallback(_getGasPrice(), _queryMaxCallbackGas))
+        returns (uint256 _queryId)
     {
-        revert("WitnetRequestBoardTrustableBase: not implemented");
+        _queryId = __postRequest(
+            _radHash, 
+            registry().verifyRadonSLA(_querySLA)
+        );
+        __seekQueryRequest(_queryId).maxCallbackGas = _queryMaxCallbackGas;
+        emit NewQuery(_queryId, _getMsgValue());
     }
-    
     
     /// Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Updates request `gasPrice` in case this method is called with a higher 
@@ -651,159 +674,28 @@ abstract contract WitnetRequestBoardTrustableBase
         return __storage().queries[_queryId].request.reward;
     }
 
-    // ================================================================================================================
-    // --- Deprecating methods from 'IWitnetRequestBoard' -------------------------------------------------------------
-
-    /// Tell if a Witnet.Result is successful.
-    /// @param _result An instance of Witnet.Result.
-    /// @return `true` if successful, `false` if errored.
-    function isOk(Witnet.Result memory _result)
-        external pure
-        override
-        returns (bool)
-    {
-        return _result.success;
-    }
-
-    /// Decode a bytes value from a Witnet.Result as a `bytes32` value.
-    /// @param _result An instance of Witnet.Result.
-    /// @return The `bytes32` decoded from the Witnet.Result.
-    function asBytes32(Witnet.Result memory _result)
-        external pure
-        override
-        returns (bytes32)
-    {
-        return _result.asBytes32();
-    }
-
-    /// Generate a suitable error message for a member of `Witnet.ResultErrorCodes` and its corresponding arguments.
-    /// @dev WARN: Note that client contracts should wrap this function into a try-catch foreseing potential errors generated in this function
-    /// @param _result An instance of `Witnet.Result`.
-    /// @return A tuple containing the `CBORValue.Error memory` decoded from the `Witnet.Result`, plus a loggable error message.
-    function asErrorMessage(Witnet.Result memory _result)
-        external pure
-        override
-        returns (Witnet.ResultErrorCodes, string memory)
-    {
-        Witnet.ResultError memory _resultError = WitnetErrorsLib.asError(_result);
-        return (
-            _resultError.code,
-            _resultError.reason
-        );
-    }
-    
-    /// Decode a natural numeric value from a Witnet.Result as a `uint` value.
-    /// @param _result An instance of Witnet.Result.
-    /// @return The `uint` decoded from the Witnet.Result.
-    function asUint64(Witnet.Result memory _result)
-        external pure 
-        override
-        returns (uint64)
-    {
-        return uint64(_result.asUint());
-    }
-
-    /// Estimates the amount of reward we need to insert for a given gas price.
-    /// @param _gasPrice The gas price for which we need to calculate the rewards.
-    function estimateReward(uint256 _gasPrice)
-        external view
-        override
-        returns (uint256)
-    {
-        return estimateBaseFee(_gasPrice, 32);
-    }
-
-    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
-    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
-    /// result to this request.
-    /// @dev Fails if:
-    /// @dev - provided reward is too low.
-    /// @dev - provided address is zero.
-    /// @param _requestInterface The address of a IWitnetRequest contract, containing the actual Data Request seralized bytecode.
-    /// @return _queryId An unique query identifier.
-    function postRequest(address _requestInterface)
-        virtual override
-        public payable
-        returns (uint256 _queryId)
-    {
-        uint256 _value = _getMsgValue();
-        uint256 _gasPrice = _getGasPrice();
-
-        // check base reward
-        uint256 _baseFee = estimateBaseFee(_gasPrice, 32);
-        require(_value >= _baseFee, "WitnetRequestBoardTrustableBase: reward too low");
-
-        _queryId = ++ __storage().numQueries;
-        __storage().queries[_queryId].from = msg.sender;
-
-        Witnet.Request storage __request = __seekQueryRequest(_queryId);
-        __request._addr = _requestInterface;
-        __request._gasprice = _gasPrice;
-        __request.reward = _value;
-
-        // Let observers know that a new request has been posted
-        emit PostedRequest(_queryId, msg.sender);
-    }
-
-    /// Retrieves the gas price that any assigned reporter will have to pay when reporting 
-    /// result to a previously posted Witnet data request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
-    /// @dev reported, or deleted. 
-    /// @param _queryId The unique query identifier
-    function readRequestGasPrice(uint256 _queryId)
-        external view
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Posted)
-        returns (uint256)
-    {
-        return __storage().queries[_queryId].request._gasprice;
-    }
-
-    /// Decode raw CBOR bytes into a Witnet.Result instance.
-    /// @param _cborBytes Raw bytes representing a CBOR-encoded value.
-    /// @return A `Witnet.Result` instance.
-    function resultFromCborBytes(bytes memory _cborBytes)
-        external pure
-        override
-        returns (Witnet.Result memory)
-    {
-        return Witnet.resultFromCborBytes(_cborBytes);
-    }
-
-    /// Increments the reward of a previously posted request by adding the transaction value to it.
-    /// @dev Updates request `gasPrice` in case this method is called with a higher 
-    /// @dev gas price value than the one used in previous calls to `postRequest` or
-    /// @dev `upgradeReward`. 
-    /// @dev Fails if the `_queryId` is not in 'Posted' status.
-    /// @dev Fails also in case the request `gasPrice` is increased, and the new 
-    /// @dev reward value gets below new recalculated threshold. 
-    /// @param _queryId The unique query identifier.
-    function upgradeReward(uint256 _queryId)
-        public payable
-        virtual override      
-        inStatus(_queryId, Witnet.QueryStatus.Posted)
-    {
-        Witnet.Request storage __request = __seekQueryRequest(_queryId);
-
-        uint256 _newReward = __request.reward + _getMsgValue();
-        uint256 _newGasPrice = _getGasPrice();
-
-        // If gas price is increased, then check if new rewards cover gas costs
-        if (_newGasPrice > __request._gasprice) {
-            // Checks the reward is covering gas cost
-            uint256 _minResultReward = estimateBaseFee(_newGasPrice, 32);
-            require(
-                _newReward >= _minResultReward,
-                "WitnetRequestBoardTrustableBase: reward too low"
-            );
-            __request._gasprice = _newGasPrice;
-        }
-        __request.reward = _newReward;
-    }
-
 
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
+
+    function __newQuery()
+        virtual internal returns (uint256)
+    {
+        return ++ __storage().numQueries;
+    }
+
+    function __postRequest(bytes32 _radHash, bytes32 _slaHash)
+        virtual internal
+        returns (uint256 _queryId)
+    {
+        _queryId = __newQuery();
+        Witnet.Request storage __request = __seekQueryRequest(_queryId);
+        {
+            __request.radHash = _radHash;
+            __request.slaHash = _slaHash;
+            __request.reward = _getMsgValue();
+        }
+    }
 
     function __reportResult(
             uint256 _queryId,
@@ -812,20 +704,105 @@ abstract contract WitnetRequestBoardTrustableBase
             bytes memory _cborBytes
         )
         internal
-        returns (uint256 _reward)
+        returns (uint256 _evmReward)
     {
         Witnet.Query storage __query = __seekQuery(_queryId);
+                
+        // read and erase query report reward
         Witnet.Request storage __request = __query.request;
-        Witnet.Response storage __response = __query.response;
+        _evmReward = __request.reward;
+        __request.reward = 0; 
 
+        // write report traceability data in storage 
+        // (could potentially be deleted from a callback method within same transaction)
+        Witnet.Response storage __response = __query.response;
         // solhint-disable not-rely-on-time
         __response.timestamp = _timestamp;
         __response.drTxHash = _drTxHash;
         __response.reporter = msg.sender;
-        __response.cborBytes = _cborBytes;
 
-        // return request latest reward
-        _reward = __request.reward;
+        // determine whether a callback is required
+        if (__request.maxCallbackGas > 0) {
+            uint _evmCallbackGas = gasleft();
+            bool _evmCallbackSuccess; 
+            bytes memory _evmCallbackRevertBytes;
+            // if callback is required, select which callback method to call 
+            // depending on whether the query was solved with or without errors:
+            if (_cborBytes[0] == bytes1(0xd8)) {
+                WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(_cborBytes).readArray();
+                if (_errors.length < 2) {
+                    // result with unknown error:
+                    (_evmCallbackSuccess, _evmCallbackRevertBytes) = __query.from.call{gas: __request.maxCallbackGas}(
+                        abi.encodeWithSelector(IWitnetConsumer.reportWitnetQueryError.selector,
+                            _queryId,
+                            Witnet.ResultErrorCodes.Unknown,
+                            WitnetCBOR.CBOR({
+                                buffer: WitnetBuffer.Buffer({ data: hex"", cursor: 0}),
+                                initialByte: 0,
+                                majorType: 0,
+                                additionalInformation: 0,
+                                len: 0,
+                                tag: 0
+                            })
+                        )
+                    );
+                } else {
+                    // result with parsable error:
+                    (_evmCallbackSuccess, _evmCallbackRevertBytes) = __query.from.call{gas: __request.maxCallbackGas}(
+                        abi.encodeWithSelector(IWitnetConsumer.reportWitnetQueryError.selector,
+                            _queryId,
+                            Witnet.ResultErrorCodes(_errors[0].readUint()),
+                            _errors[0]
+                        )
+                    );
+                }
+            } else {
+                // result with no error
+                (_evmCallbackSuccess, _evmCallbackRevertBytes) = __query.from.call{gas: __request.maxCallbackGas}(
+                    abi.encodeWithSelector(IWitnetConsumer.reportWitnetQueryResult.selector,
+                        _queryId, 
+                        WitnetCBOR.fromBytes(_cborBytes)
+                    )
+                );
+            }
+            _evmCallbackGas -= gasleft();
+            if (_evmCallbackSuccess) {
+                emit QueryCallback(
+                    _queryId, 
+                    _getGasPrice(), 
+                    _evmCallbackGas
+                );
+            } else {
+                if (_evmCallbackRevertBytes.length < 68) {
+                    emit QueryCallbackRevert(
+                        _queryId,
+                        _getGasPrice(),
+                        _evmCallbackGas,
+                        "WitnetRequestBoardTrustableDefault: unhandled callback revert"
+                    );    
+                } else {
+                    assembly {
+                        _evmCallbackRevertBytes := add(_evmCallbackRevertBytes, 0x04)
+                    }
+                    emit QueryCallbackRevert(
+                        _queryId,
+                        _getGasPrice(),
+                        _evmCallbackGas,
+                        string(abi.encodePacked(
+                            "WitnetRequestBoardTrustableDefault: callback revert: ",
+                            _evmCallbackRevertBytes
+                        ))
+                    );
+                }
+            }
+        } else {
+            // no callback is involved, so just keep the cbor-encoded result in storage:
+            __response.cborBytes = _cborBytes;
+            emit QueryReport(
+                _queryId, 
+                _getGasPrice()
+            );
+        }        
     }
 
     function __setReporters(address[] memory _reporters) internal {
