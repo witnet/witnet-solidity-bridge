@@ -33,12 +33,6 @@ interface IWitnetConsumer {
             WitnetCBOR.CBOR calldata errorArgs
         ) external;
 
-    /// @notice Method to be called from the WitnetRequestBoard contract as soon as some dispute
-    /// @notice arises concerning the given Witnet `queryId`. 
-    /// @param queryId The unique identifier of the Witnet query being disputed.
-    /// @param resolutionBlock The EVM block number at which the query resolution is expected to be final.
-    function reportWitnetQueryDispute(uint256 queryId, uint256 resolutionBlock) external;
-
     /// @notice Determines if Witnet queries can be reported from given address.
     /// @dev In practice, must only be true on the WitnetRequestBoard address that's being used by
     /// @dev the WitnetConsumer to post queries. 
