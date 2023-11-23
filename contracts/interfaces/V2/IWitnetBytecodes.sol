@@ -54,17 +54,6 @@ interface IWitnetBytecodes {
     function lookupRadonSLA(bytes32 slaHash) external view returns (Witnet.RadonSLA memory);
     function lookupRadonSLAReward(bytes32 slaHash) external view returns (uint);
     
-    // function verifyRadonRetrieval(
-    //         Witnet.RadonDataRequestMethods requestMethod,
-    //         string calldata requestSchema,
-    //         string calldata requestAuthority,
-    //         string calldata requestPath,
-    //         string calldata requestQuery,
-    //         string calldata requestBody,
-    //         string[2][] calldata requestHeaders,
-    //         bytes calldata requestRadonScript
-    //     ) external returns (bytes32 hash);
-    
     function verifyRadonRetrieval(
             Witnet.RadonDataRequestMethods requestMethod,
             string calldata requestURL,

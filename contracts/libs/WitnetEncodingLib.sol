@@ -350,59 +350,7 @@ library WitnetEncodingLib {
             );
         }
         return keccak256(abi.encode(method, url, body, headers, script));
-    }              
-
-    // function validate(
-    //         Witnet.RadonDataRequestMethods method,
-    //         string memory schema,
-    //         string memory authority,
-    //         string memory path,
-    //         string memory query,
-    //         string memory body,
-    //         string[2][] memory headers,
-    //         bytes memory script
-    //     )
-    //     public pure
-    //     returns (bytes32)
-    // {
-    //     if (!(
-    //         (method == Witnet.RadonDataRequestMethods.HttpGet 
-    //             || method == Witnet.RadonDataRequestMethods.HttpPost
-    //             || method == Witnet.RadonDataRequestMethods.HttpHead
-    //         )
-    //             && bytes(authority).length > 0
-    //             && (
-    //                 bytes(schema).length == 0
-    //                     || keccak256(bytes(schema)) == keccak256(bytes("https://")) 
-    //                     || keccak256(bytes(schema)) == keccak256(bytes("http://"))
-    //             )
-    //         || method == Witnet.RadonDataRequestMethods.Rng
-    //             && bytes(schema).length == 0
-    //             && bytes(authority).length == 0
-    //             && bytes(path).length == 0
-    //             && bytes(query).length == 0
-    //             && bytes(body).length == 0
-    //             && headers.length == 0
-    //             && script.length >= 1
-    //     )) {
-    //         revert UnsupportedDataRequestMethod(
-    //             uint8(method),
-    //             schema,
-    //             body,
-    //             headers
-    //         );
-    //     }
-    //     return keccak256(abi.encode(
-    //         method,
-    //         schema,
-    //         authority,
-    //         path,
-    //         query,
-    //         body,
-    //         headers,
-    //         script
-    //     ));
-    // }
+    }
     
     function validate(
             Witnet.RadonDataTypes dataType,
