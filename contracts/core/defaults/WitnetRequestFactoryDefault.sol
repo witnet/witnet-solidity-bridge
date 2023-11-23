@@ -184,7 +184,7 @@ contract WitnetRequestFactoryDefault
         );
     }
 
-    function class() 
+    function specs() 
         virtual override(WitnetRequestFactory, WitnetRequestTemplate)
         external view
         returns (bytes4)
@@ -288,7 +288,7 @@ contract WitnetRequestFactoryDefault
         __proxiable().implementation = base();
 
         require(address(registry).code.length > 0, "WitnetRequestFactoryDefault: inexistent requests registry");
-        require(registry.class() == type(IWitnetBytecodes).interfaceId, "WitnetRequestFactoryDefault: uncompliant requests registry");
+        require(registry.specs() == type(IWitnetBytecodes).interfaceId, "WitnetRequestFactoryDefault: uncompliant requests registry");
         
         emit Upgraded(msg.sender, base(), codehash(), version());
     }

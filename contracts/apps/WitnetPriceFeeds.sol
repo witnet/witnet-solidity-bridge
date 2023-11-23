@@ -29,7 +29,7 @@ contract WitnetPriceFeeds
     using Witnet for Witnet.Result;
     using WitnetV2 for WitnetV2.RadonSLA;
 
-    bytes4 immutable public class = type(IWitnetPriceFeeds).interfaceId;
+    bytes4 immutable public specs = type(IWitnetPriceFeeds).interfaceId;
     WitnetRequestBoard immutable public override witnet;
     
     constructor(address _operator, WitnetRequestBoard _wrb)
@@ -40,7 +40,7 @@ contract WitnetPriceFeeds
     {
         _transferOwnership(_operator);
         require(
-            _wrb.class() == type(IWitnetRequestBoard).interfaceId,
+            _wrb.specs() == type(IWitnetRequestBoard).interfaceId,
             "WitnetPriceFeeds: uncompliant request board"
         );
         witnet = _wrb;

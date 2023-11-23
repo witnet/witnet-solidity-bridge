@@ -11,9 +11,9 @@ abstract contract WitnetRequestTemplate
 {
     event WitnetRequestBuilt(address indexed request, bytes32 indexed radHash, string[][] args);
 
-    function class() virtual external view returns (bytes4);
     function factory() virtual external view returns (WitnetRequestFactory);
     function registry() virtual external view returns (WitnetBytecodes);
+    function specs() virtual external view returns (bytes4);
     function version() virtual external view returns (string memory);
     function witnet() virtual external view returns (WitnetRequestBoard);
 

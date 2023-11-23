@@ -39,7 +39,7 @@ library WitnetPriceFeedsLib {
             }
             assert(_solver == _createdContract);
             require(
-                IWitnetPriceSolver(_solver).class() == type(IWitnetPriceSolver).interfaceId,
+                IWitnetPriceSolver(_solver).specs() == type(IWitnetPriceSolver).interfaceId,
                 "WitnetPriceFeedsLib: uncompliant solver implementation"
             );
         }

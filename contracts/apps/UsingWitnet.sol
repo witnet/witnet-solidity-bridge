@@ -16,7 +16,7 @@ abstract contract UsingWitnet {
     /// @param _wrb The WitnetRequestBoard entry point address.
     constructor(WitnetRequestBoard _wrb) {
         require(
-            _wrb.class() == type(IWitnetRequestBoard).interfaceId,
+            _wrb.specs() == type(IWitnetRequestBoard).interfaceId,
             "UsingWitnet: uncompliant WitnetRequestBoard"
         );
         __witnet = _wrb;

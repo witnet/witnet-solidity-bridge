@@ -15,7 +15,7 @@ abstract contract UsingWitnetRequestTemplate
         UsingWitnet(_requestTemplate.witnet())
     {
         require(
-            _requestTemplate.class() == type(WitnetRequestTemplate).interfaceId,
+            _requestTemplate.specs() == type(WitnetRequestTemplate).interfaceId,
             "UsingWitnetRequestTemplate: uncompliant WitnetRequestTemplate"
         );
         dataRequestTemplate = _requestTemplate;

@@ -26,7 +26,7 @@ contract WitnetRandomness
     using WitnetV2 for bytes32;
     using WitnetV2 for WitnetV2.RadonSLA;
 
-    bytes4 public immutable class = type(IWitnetRandomness).interfaceId;
+    bytes4 public immutable specs = type(IWitnetRandomness).interfaceId;
     uint256 public override latestRandomizeBlock;
     WitnetRequest public immutable override witnetRandomnessRequest;
 
@@ -45,7 +45,7 @@ contract WitnetRandomness
         UsingWitnet(_wrb)
     {
         _transferOwnership(_operator);
-        assert(_wrb.class() == type(IWitnetRequestBoard).interfaceId);
+        assert(_wrb.specs() == type(IWitnetRequestBoard).interfaceId);
         WitnetRequestFactory _factory = witnet().factory();
         WitnetBytecodes _registry = witnet().registry();
         {

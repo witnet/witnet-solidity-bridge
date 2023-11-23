@@ -34,7 +34,7 @@ abstract contract WitnetRequestBoardTrustableBase
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetV2 for WitnetV2.RadonSLA;
 
-    bytes4 public immutable override class = type(IWitnetRequestBoard).interfaceId;
+    bytes4 public immutable override specs = type(IWitnetRequestBoard).interfaceId;
     WitnetRequestFactory immutable public override factory;
 
     modifier checkCallbackRecipient(address _addr) {
@@ -152,7 +152,7 @@ abstract contract WitnetRequestBoardTrustableBase
         __storage().base = base();
 
         require(address(factory).code.length > 0, "WitnetRequestBoardTrustableBase: inexistent factory");
-        require(factory.class() == type(IWitnetRequestFactory).interfaceId, "WitnetRequestBoardTrustableBase: uncompliant factory");
+        require(factory.specs() == type(IWitnetRequestFactory).interfaceId, "WitnetRequestBoardTrustableBase: uncompliant factory");
         require(address(factory.witnet()) == address(this), "WitnetRequestBoardTrustableBase: discordant factory");
 
         // Set reporters
