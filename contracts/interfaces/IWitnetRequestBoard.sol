@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../libs/Witnet.sol";
+import "../libs/WitnetV2.sol";
 
 interface IWitnetRequestBoard {
 
@@ -84,8 +83,8 @@ interface IWitnetRequestBoard {
     /// @dev The result to the query will be saved into the WitnetRequestBoard storage.
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     /// @param querySLA The data query SLA to be fulfilled on the Witnet blockchain.
-    /// @return _queryId Unique query identifier.
-    function postRequest(bytes32 radHash, Witnet.RadonSLA calldata querySLA) external payable returns (uint256 _queryId);
+    /// @return queryId Unique query identifier.
+    function postRequest(bytes32 radHash, WitnetV2.RadonSLA calldata querySLA) external payable returns (uint256 queryId);
 
     /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
     /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
@@ -95,12 +94,12 @@ interface IWitnetRequestBoard {
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     /// @param querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @param maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    /// @return _queryId Unique query identifier.
-    function postRequestWithCallback(bytes32 radHash, Witnet.RadonSLA calldata querySLA, uint256 maxCallbackGas) external payable returns (uint256 _queryId);
+    /// @return queryId Unique query identifier.
+    function postRequestWithCallback(bytes32 radHash, WitnetV2.RadonSLA calldata querySLA, uint256 maxCallbackGas) external payable returns (uint256 queryId);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
-    /// @param _queryId The unique query identifier.
-    function upgradeQueryReward(uint256 _queryId) external payable;
+    /// @param queryId The unique query identifier.
+    function upgradeQueryReward(uint256 queryId) external payable;
   
 
     /// ===============================================================================================================
@@ -134,15 +133,21 @@ interface IWitnetRequestBoard {
     function getQueryResponse(uint256 _queryId) external view returns (Witnet.Response memory);
 
     /// @notice Retrieves the reward currently set for the referred query.
-    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
+    /// @dev Fails if the `queryId` is not valid or, if it has already been 
     /// @dev reported, or deleted. 
-    /// @param _queryId The unique query identifier.
-    function getQueryReward(uint256 _queryId) external view returns (uint256);
+    /// @param queryId The unique query identifier.
+    function getQueryReward(uint256 queryId) external view returns (uint256);
 
-    /// @notice Retrieves the Witnet-provided CBOR-bytes result of a previously posted request.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier.
-    function getQueryResponseResult(uint256 _queryId) external view returns (Witnet.Result memory);
+    /// ===============================================================================================================
+    /// --- Deprecating methods ---------------------------------------------------------------------------------------
 
+    /// @notice Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// @notice A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// @notice result to this request.
+    /// @dev Fails if, provided reward is too low.
+    /// @param radHash The RAD hash of the data request to be solved by Witnet.
+    /// @param slaHash The SLA hash of the data request to be solved by Witnet.
+    /// @return queryId Unique query identifier.
+    function postRequest(bytes32 radHash, bytes32 slaHash) external payable returns (uint256 queryId);
 
 }

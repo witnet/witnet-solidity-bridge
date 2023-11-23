@@ -28,11 +28,12 @@ library Witnet {
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct Request {
-        address _addr;          // Deprecating: Address of the IWitnetRequest contract containing Witnet data request raw bytecode.
-        bytes32 slaHash;        // Radon SLA hash of the Witnet data request.
+        address _addr;          // Deprecating: Formerly used as address of the (deprecated) IWitnetRequest contract.
+        bytes32 slaPacked;      // Radon SLA of the Witnet data request (packed).
         bytes32 radHash;        // Radon radHash of the Witnet data request.
-        uint256 _gasprice;      // Deprecating: Minimum gas price the DR resolver should pay on the solving tx.
-        uint256 reward;         // Escrowed reward to be paid to the DR resolver.
+        uint256 _gasprice;      // Deprecating: Formerly used as minimum gas price the DR resolver should pay on the solving tx.
+        uint256 evmReward;      // Escrowed reward to be paid to the DR resolver.
+        uint256 maxCallbackGas; // Maximum gas to be spent when reporting the data request result.
     }
 
     /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
@@ -275,7 +276,6 @@ library Witnet {
         uint64 minerCommitRevealFee;
     }
 
-
     /// @notice Returns `true` if all witnessing parameters in `b` have same
     /// @notice value or greater than the ones in `a`.
     function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
@@ -301,6 +301,33 @@ library Witnet {
                 && sla.witnessCollateral / sla.witnessReward <= 127
         );
     }
+
+    function packed(RadonSLA memory sla) internal pure returns (bytes32) {
+        return bytes32(
+            uint(sla.witnessReward)
+                | sla.witnessCollateral << 64
+                | sla.minerCommitRevealFee << 128
+                | sla.numWitnesses << 248
+                | sla.minConsensusPercentage << 232
+        );
+    }
+
+    function toRadonSLA(bytes32 _packed) internal pure returns (RadonSLA memory) {
+        return RadonSLA({
+            numWitnesses: uint8(uint(_packed >> 248)),
+            minConsensusPercentage: uint8(uint(_packed >> 232) & 0xff),
+            witnessReward: uint64(uint(_packed) & 0xffffffffffffffff),
+            witnessCollateral: uint64(uint(_packed >> 64) & 0xffffffffffffffff),
+            minerCommitRevealFee: uint64(uint(_packed >> 128) & 0xffffffffffffffff)
+        });
+    }
+
+    function totalWitnessingReward(Witnet.RadonSLA memory sla)
+        internal pure returns (uint64)
+    {
+        return sla.witnessReward * sla.numWitnesses;
+    }
+
 
     /// ===============================================================================================================
     /// --- 'Witnet.Result' helper methods ----------------------------------------------------------------------------

@@ -8,30 +8,13 @@ interface IWitnetBytecodes {
     error UnknownRadonRetrieval(bytes32 hash);
     error UnknownRadonReducer(bytes32 hash);
     error UnknownRadonRequest(bytes32 hash);
-    error UnknownRadonSLA(bytes32 hash);  
 
     event NewDataProvider(uint256 index);
     event NewRadonRetrievalHash(bytes32 hash);
     event NewRadonReducerHash(bytes32 hash);
     event NewRadHash(bytes32 hash);
-    event NewSlaHash(bytes32 hash);
 
     function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
-    function bytecodeOf(bytes32 radHash, bytes32 slahHash) external view returns (bytes memory);
-
-    function hashOf(
-            bytes32[] calldata sources,
-            bytes32 aggregator,
-            bytes32 tally,
-            uint16 resultMaxSize,
-            string[][] calldata args
-        ) external pure returns (bytes32);
-    function hashOf(bytes32 radHash, bytes32 slaHash) external pure returns (bytes32 drQueryHash);
-    function hashWeightWitsOf(bytes32 radHash, bytes32 slaHash) external view returns (
-            bytes32 drQueryHash,
-            uint32  drQueryWeight,
-            uint256 drQueryWits
-        );
 
     function lookupDataProvider(uint256 index) external view returns (string memory, uint);
     function lookupDataProviderIndex(string calldata authority) external view returns (uint);
@@ -51,8 +34,6 @@ interface IWitnetBytecodes {
     function lookupRadonRequestTally(bytes32 radHash) external view returns (Witnet.RadonReducer memory);
     
     function lookupRadonRAD(bytes32 radHash) external view returns (Witnet.RadonRAD memory);
-    function lookupRadonSLA(bytes32 slaHash) external view returns (Witnet.RadonSLA memory);
-    function lookupRadonSLAReward(bytes32 slaHash) external view returns (uint);
     
     function verifyRadonRetrieval(
             Witnet.RadonDataRequestMethods requestMethod,
@@ -72,10 +53,12 @@ interface IWitnetBytecodes {
             uint16 resultMaxSize,
             string[][] calldata args
         ) external returns (bytes32 radHash);
-    
-    function verifyRadonSLA(Witnet.RadonSLA calldata sla)
-        external returns (bytes32 slaHash);
 
     function totalDataProviders() external view returns (uint);
+
+    /// ===============================================================================================================
+    /// --- Deprecating methods ---------------------------------------------------------------------------------------
+
+    // function lookupRadonSLA(bytes32 slaHash) external view returns (Witnet.RadonSLA memory);
    
 }

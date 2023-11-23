@@ -32,9 +32,17 @@ abstract contract WitnetRequestBoardTrustableBase
     using Witnet for bytes;
     using Witnet for Witnet.Result;
     using WitnetCBOR for WitnetCBOR.CBOR;
+    using WitnetV2 for WitnetV2.RadonSLA;
 
     bytes4 public immutable override class = type(IWitnetRequestBoard).interfaceId;
     WitnetRequestFactory immutable public override factory;
+
+    modifier checkCallbackRecipient(address _addr) {
+        require(
+            _addr.code.length > 0 && IWitnetConsumer(_addr).reportableFrom(address(this)),
+            "WitnetRequestBoardTrustableBase: invalid callback recipient"
+        ); _;
+    }
 
     modifier checkReward(uint256 _baseFee) {
         require(
@@ -43,10 +51,10 @@ abstract contract WitnetRequestBoardTrustableBase
         ); _;
     }
 
-    modifier checkCallbackRecipient(address _addr) {
+    modifier checkSLA(WitnetV2.RadonSLA calldata sla) {
         require(
-            _addr.code.length > 0 && IWitnetConsumer(_addr).reportableFrom(address(this)),
-            "WitnetRequestBoardTrustableBase: invalid callback recipient"
+            WitnetV2.isValid(sla), 
+            "WitnetRequestBoardTrustableBase: invalid SLA"
         ); _;
     }
     
@@ -482,6 +490,29 @@ abstract contract WitnetRequestBoardTrustableBase
         delete __storage().queries[_queryId];
     }
 
+    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
+    /// @notice based on the gas price of the calling transaction. 
+    /// @dev Data requesters should consider upgrading the reward on queries providing no actual earnings.
+    function estimateQueryEarnings(uint256 _queryId)
+        virtual override
+        external view
+        returns (int256 _earnings)
+    {
+        Witnet.Request storage __request = __seekQueryRequest(_queryId);
+        _earnings = int(__request.evmReward);
+        if (__request.maxCallbackGas > 0) {
+            _earnings -= int(estimateBaseFeeWithCallback(
+                _getGasPrice(), 
+                __request.maxCallbackGas
+            ));
+        } else {
+            _earnings -= int(estimateBaseFee(
+                _getGasPrice(),
+                registry().lookupRadonRequestResultMaxSize(__request.radHash)
+            ));
+        }
+    }
+
     /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
     /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
     /// result to this request.
@@ -509,16 +540,17 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @param _querySLA The SLA param of the data request to be solved by Witnet.
     function postRequest(
             bytes32 _radHash, 
-            Witnet.RadonSLA calldata _querySLA
+            WitnetV2.RadonSLA calldata _querySLA
         )
         virtual override
         public payable
         checkReward(estimateBaseFee(_getGasPrice(), 32))
+        checkSLA(_querySLA)
         returns (uint256 _queryId)
     {
         _queryId = __postRequest(
             _radHash, 
-            registry().verifyRadonSLA(_querySLA)
+            _querySLA.packed()
         );
         // Let observers know that a new request has been posted
         emit NewQuery(_queryId, _getMsgValue());
@@ -532,18 +564,19 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev The caller must be a contract implementing the IWitnetConsumer interface.
     function postRequestWithCallback(
             bytes32 _radHash, 
-            Witnet.RadonSLA calldata _querySLA,
+            WitnetV2.RadonSLA calldata _querySLA,
             uint256 _queryMaxCallbackGas
         )
         virtual override
         external payable 
         checkCallbackRecipient(msg.sender)
         checkReward(estimateBaseFeeWithCallback(_getGasPrice(), _queryMaxCallbackGas))
+        checkSLA(_querySLA)
         returns (uint256 _queryId)
     {
         _queryId = __postRequest(
             _radHash, 
-            registry().verifyRadonSLA(_querySLA)
+            _querySLA.packed()
         );
         __seekQueryRequest(_queryId).maxCallbackGas = _queryMaxCallbackGas;
         emit NewQuery(_queryId, _getMsgValue());
@@ -562,8 +595,9 @@ abstract contract WitnetRequestBoardTrustableBase
         virtual override      
         inStatus(_queryId, Witnet.QueryStatus.Posted)
     {
-        __seekQueryRequest(_queryId).reward += _getMsgValue();
-        emit QueryRewardUpgraded(_queryId, __seekQueryRequest(_queryId).reward);
+        Witnet.Request storage __request = __seekQueryRequest(_queryId);
+        __request.evmReward += _getMsgValue();
+        emit QueryRewardUpgraded(_queryId, __request.evmReward);
     }
 
 
@@ -629,10 +663,7 @@ abstract contract WitnetRequestBoardTrustableBase
         if (__request._addr != address(0)) {
             _bytecode = IWitnetRequest(__request._addr).bytecode();
         } else if (__request.radHash != bytes32(0)) {
-            _bytecode = registry().bytecodeOf(
-                __request.radHash,
-                __request.slaHash
-            );
+            _bytecode = registry().bytecodeOf(__request.radHash);
         }
     }
 
@@ -671,7 +702,7 @@ abstract contract WitnetRequestBoardTrustableBase
         inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (uint256)
     {
-        return __storage().queries[_queryId].request.reward;
+        return __seekQueryRequest(_queryId).evmReward;
     }
 
 
@@ -684,7 +715,7 @@ abstract contract WitnetRequestBoardTrustableBase
         return ++ __storage().numQueries;
     }
 
-    function __postRequest(bytes32 _radHash, bytes32 _slaHash)
+    function __postRequest(bytes32 _radHash, bytes32 _slaPacked)
         virtual internal
         returns (uint256 _queryId)
     {
@@ -692,8 +723,8 @@ abstract contract WitnetRequestBoardTrustableBase
         Witnet.Request storage __request = __seekQueryRequest(_queryId);
         {
             __request.radHash = _radHash;
-            __request.slaHash = _slaHash;
-            __request.reward = _getMsgValue();
+            __request.slaPacked = _slaPacked;
+            __request.evmReward = _getMsgValue();
         }
     }
 
@@ -710,8 +741,8 @@ abstract contract WitnetRequestBoardTrustableBase
                 
         // read and erase query report reward
         Witnet.Request storage __request = __query.request;
-        _evmReward = __request.reward;
-        __request.reward = 0; 
+        _evmReward = __request.evmReward;
+        __request.evmReward = 0; 
 
         // write report traceability data in storage 
         // (could potentially be deleted from a callback method within same transaction)

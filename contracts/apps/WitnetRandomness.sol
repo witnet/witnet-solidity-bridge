@@ -23,13 +23,15 @@ contract WitnetRandomness
         UsingWitnet
 {
     using Witnet for Witnet.Result;
+    using WitnetV2 for bytes32;
+    using WitnetV2 for WitnetV2.RadonSLA;
 
     bytes4 public immutable class = type(IWitnetRandomness).interfaceId;
     uint256 public override latestRandomizeBlock;
     WitnetRequest public immutable override witnetRandomnessRequest;
 
     bytes32 internal immutable __witnetRandomnessRadHash;
-    bytes32 internal __witnetRandomnessSlaHash;
+    bytes32 internal __witnetRandomnessPackedSLA;
     
     mapping (uint256 => RandomizeData) internal __randomize_;
     struct RandomizeData {
@@ -74,7 +76,7 @@ contract WitnetRandomness
             witnetRandomnessRequest = WitnetRequest(_template.buildRequest(new string[][](_retrievals.length)));
             __witnetRandomnessRadHash = witnetRandomnessRequest.radHash();
         }
-        __initializeWitnetRandomnessSlaHash();
+        __initializeWitnetRandomnessSLA();
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
@@ -147,13 +149,14 @@ contract WitnetRandomness
         Ownable.transferOwnership(_newOwner);
     }
 
-    function settleWitnetRandomnessSLA(Witnet.RadonSLA memory _radonSLA)
+    function settleWitnetRandomnessSLA(WitnetV2.RadonSLA calldata sla)
         virtual override
         public
         onlyOwner
         returns (bytes32)
     {
-        return __settleWitnetRandomnessSLA(_radonSLA);
+        require(sla.isValid(), "WitnetRandomness: invalid SLA");
+        return __settleWitnetRandomnessSLA(sla);
     }
 
     
@@ -330,7 +333,7 @@ contract WitnetRandomness
             _usedFunds = _witnetEstimateBaseFee(tx.gasprice);
             uint _queryId = witnet().postRequest{value: _usedFunds}(
                 __witnetRandomnessRadHash,
-                __witnetRandomnessSlaHash
+                __witnetRandomnessPackedSLA.toRadonSLA()
             );
             // Keep Randomize data in storage:
             RandomizeData storage _data = __randomize_[block.number];
@@ -386,9 +389,9 @@ contract WitnetRandomness
     function witnetRandomnessSLA()
         virtual override
         external view
-        returns (Witnet.RadonSLA memory)
+        returns (WitnetV2.RadonSLA memory)
     {
-        return witnet().registry().lookupRadonSLA(__witnetRandomnessSlaHash);
+        return __witnetRandomnessPackedSLA.toRadonSLA();
     }
 
 
@@ -407,44 +410,6 @@ contract WitnetRandomness
 
     // ================================================================================================================
     // --- INTERNAL FUNCTIONS -----------------------------------------------------------------------------------------
-
-    /// @dev Common steps for both deterministic and non-deterministic cloning.
-    function __afterClone(address _instance)
-        virtual internal
-        returns (WitnetRandomness)
-    {
-        WitnetRandomness(_instance).initializeClone(hex"");
-        return WitnetRandomness(_instance);
-    }
-
-    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function __initialize(bytes memory)
-        virtual internal
-    {
-        // settle ownership:
-        _transferOwnership(msg.sender);
-        // initialize default Witnet SLA parameters used for every randomness request;
-        __initializeWitnetRandomnessSlaHash();
-    }
-
-    function __initializeWitnetRandomnessSlaHash() virtual internal {
-        __settleWitnetRandomnessSLA(Witnet.RadonSLA({
-            numWitnesses: 5,
-            minConsensusPercentage: 51,
-            witnessReward: 10 ** 8,
-            witnessCollateral: 10 ** 9,
-            minerCommitRevealFee: 10 ** 7
-        }));
-    }
-
-    function __settleWitnetRandomnessSLA(Witnet.RadonSLA memory _radonSLA) 
-        internal
-        returns (bytes32 _radonSlaHash)
-    {
-        _radonSlaHash = witnet().registry().verifyRadonSLA(_radonSLA);
-        __witnetRandomnessSlaHash = _radonSlaHash;
-    }
 
     /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.
     function _msbDeBruijn32(uint32 _v)
@@ -484,6 +449,41 @@ contract WitnetRandomness
             ? _latest
             : _searchPrevBlock(_target, __randomize_[_latest].prevBlock)
         );
+    }
+
+    /// @dev Common steps for both deterministic and non-deterministic cloning.
+    function __afterClone(address _instance)
+        virtual internal
+        returns (WitnetRandomness)
+    {
+        WitnetRandomness(_instance).initializeClone(hex"");
+        return WitnetRandomness(_instance);
+    }
+
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function __initialize(bytes memory)
+        virtual internal
+    {
+        // settle ownership:
+        _transferOwnership(msg.sender);
+        // initialize default Witnet SLA parameters used for every randomness request;
+        __initializeWitnetRandomnessSLA();
+    }
+
+    function __initializeWitnetRandomnessSLA() virtual internal {
+        __settleWitnetRandomnessSLA(WitnetV2.RadonSLA({
+            numWitnesses: 5,
+            witnessingCollateralRatio: 10
+        }));
+    }
+
+    function __settleWitnetRandomnessSLA(WitnetV2.RadonSLA memory sla) 
+        internal
+        returns (bytes32 _packed)
+    {
+        _packed = sla.packed();
+        __witnetRandomnessPackedSLA = _packed;
     }
 
 }

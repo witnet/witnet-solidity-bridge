@@ -35,7 +35,7 @@ abstract contract UsingWitnetRequestTemplate
     }
 
     function _witnetEstimateBaseFee()
-        internal view
+        virtual internal view
         returns (uint256)
     {
         return __witnet.estimateBaseFee(
@@ -53,8 +53,8 @@ abstract contract UsingWitnetRequestTemplate
     {
         return __witnetRequestData(
             _witnetEvmReward,
-            _witnetQuerySLA,
-            _witnetBuildRadHash(_witnetRequestArgs)
+            _witnetBuildRadHash(_witnetRequestArgs),
+            _witnetQuerySLA
         );
     }
 

@@ -27,7 +27,7 @@ contract WitnetPriceFeeds
         WitnetPriceFeedsData
 {
     using Witnet for Witnet.Result;
-    using Witnet for Witnet.RadonSLA;
+    using WitnetV2 for WitnetV2.RadonSLA;
 
     bytes4 immutable public class = type(IWitnetPriceFeeds).interfaceId;
     WitnetRequestBoard immutable public override witnet;
@@ -44,12 +44,9 @@ contract WitnetPriceFeeds
             "WitnetPriceFeeds: uncompliant request board"
         );
         witnet = _wrb;
-        __settleDefaultRadonSLA(Witnet.RadonSLA({
+        __settleDefaultRadonSLA(WitnetV2.RadonSLA({
             numWitnesses: 5,
-            witnessCollateral: 15 * 10 ** 9,
-            witnessReward: 15 * 10 ** 7,
-            minerCommitRevealFee: 10 ** 7,
-            minConsensusPercentage: 51
+            witnessingCollateralRatio: 10
         }));
     }
 
@@ -138,26 +135,16 @@ contract WitnetPriceFeeds
     function defaultRadonSLA()
         override
         public view
-        returns (Witnet.RadonSLA memory)
+        returns (WitnetV2.RadonSLA memory)
     {
-        return registry().lookupRadonSLA(__storage().defaultSlaHash);
+        return WitnetV2.toRadonSLA(__storage().packedDefaultSLA);
     }
     
-    function estimateUpdateBaseFee(bytes4, uint256 _evmGasPrice, uint256)
+    function estimateUpdateBaseFee(uint256 _evmGasPrice)
         virtual override
         public view
         returns (uint)
     {
-        // TODO: refactor when WRB.estimateBaseFee(bytes32,bytes32,uint256,uint256) is implemented.
-        return witnet.estimateBaseFee(_evmGasPrice, 32);
-    }
-    
-    function estimateUpdateBaseFee(bytes4, uint256 _evmGasPrice, uint256, bytes32)
-        virtual override
-        public view
-        returns (uint)
-    {
-        // TODO: refactor when WRB.estimateBaseFee(bytes32,bytes32,uint256,uint256) is implemented.
         return witnet.estimateBaseFee(_evmGasPrice, 32);
     }
 
@@ -219,10 +206,7 @@ contract WitnetPriceFeeds
             __record.radHash != 0,
             "WitnetPriceFeeds: no RAD hash"
         );
-        return registry().bytecodeOf(
-            __record.radHash,
-            __storage().defaultSlaHash
-        );
+        return registry().bytecodeOf(__record.radHash);
     }
     
     function lookupRadHash(bytes4 feedId)
@@ -252,19 +236,22 @@ contract WitnetPriceFeeds
         virtual override
         returns (uint256)
     {
-        return __requestUpdate(feedId, __storage().defaultSlaHash);
+        return __requestUpdate(
+            feedId, 
+            WitnetV2.toRadonSLA(__storage().packedDefaultSLA)
+        );
     }
     
-    function requestUpdate(bytes4 feedId, bytes32 _slaHash)
+    function requestUpdate(bytes4 feedId, WitnetV2.RadonSLA calldata updateSLA)
         public payable
         virtual override
         returns (uint256 _usedFunds)
     {
         require(
-            registry().lookupRadonSLA(_slaHash).equalOrGreaterThan(defaultRadonSLA()),
+            updateSLA.equalOrGreaterThan(defaultRadonSLA()),
             "WitnetPriceFeeds: unsecure update"
         );
-        return __requestUpdate(feedId, _slaHash);
+        return __requestUpdate(feedId, updateSLA);
     }
 
 
@@ -321,11 +308,11 @@ contract WitnetPriceFeeds
         emit DeletedFeed(msg.sender, feedId, caption);
     }
 
-    function settleDefaultRadonSLA(Witnet.RadonSLA memory sla)
+    function settleDefaultRadonSLA(WitnetV2.RadonSLA memory defaultSLA)
         override public
         onlyOwner
     {
-        __settleDefaultRadonSLA(sla);
+        __settleDefaultRadonSLA(defaultSLA);
     }
     
     function settleFeedRequest(string calldata caption, bytes32 radHash)
@@ -607,24 +594,27 @@ contract WitnetPriceFeeds
         }
     }
 
-    function __requestUpdate(bytes4[] memory _deps, bytes32 slaHash)
+    function __requestUpdate(bytes4[] memory _deps, WitnetV2.RadonSLA memory sla)
         virtual internal
         returns (uint256 _usedFunds)
     {
         uint _partial = msg.value / _deps.length;
         for (uint _ix = 0; _ix < _deps.length; _ix ++) {
-            _usedFunds += this.requestUpdate{value: _partial}(_deps[_ix], slaHash);
+            _usedFunds += this.requestUpdate{value: _partial}(_deps[_ix], sla);
         }
     }
 
-    function __requestUpdate(bytes4 feedId, bytes32 _slaHash)
+    function __requestUpdate(bytes4 feedId, WitnetV2.RadonSLA memory querySLA)
         virtual internal
         returns (uint256 _usedFunds)
     {
         Record storage __feed = __records_(feedId);
         if (__feed.radHash != 0) {
-            _usedFunds = estimateUpdateBaseFee(feedId, tx.gasprice, 0, _slaHash);
-            require(msg.value>= _usedFunds, "WitnetPriceFeeds: reward too low");
+            _usedFunds = estimateUpdateBaseFee(tx.gasprice);
+            require(
+                msg.value >= _usedFunds, 
+                "WitnetPriceFeeds: reward too low"
+            );
             uint _latestId = __feed.latestUpdateQueryId;
             Witnet.ResultStatus _latestStatus = _checkQueryResultStatus(_latestId);
             if (_latestStatus == Witnet.ResultStatus.Awaiting) {
@@ -652,13 +642,24 @@ contract WitnetPriceFeeds
                     try witnet.deleteQuery(_latestId) {} catch {}
                 }
                 // Post update request to the WRB:
-                _latestId = witnet.postRequest{value: _usedFunds}(__feed.radHash, _slaHash);
+                _latestId = witnet.postRequest{value: _usedFunds}(
+                    __feed.radHash,
+                    querySLA
+                );
                 // Update latest query id:
                 __feed.latestUpdateQueryId = _latestId;
-                emit UpdatingFeed(msg.sender, feedId, _slaHash, _usedFunds);
+                emit UpdatingFeed(
+                    msg.sender, 
+                    feedId, 
+                    querySLA.packed(), 
+                    _usedFunds
+                );
             }            
         } else if (__feed.solver != address(0)) {
-            _usedFunds = __requestUpdate(_depsOf(feedId), _slaHash);
+            _usedFunds = __requestUpdate(
+                _depsOf(feedId), 
+                querySLA
+            );
         } else {
             revert("WitnetPriceFeeds: unknown feed");
         }
@@ -668,7 +669,7 @@ contract WitnetPriceFeeds
         }
     }
 
-    function __settleDefaultRadonSLA(Witnet.RadonSLA memory sla) internal {
-        __storage().defaultSlaHash = registry().verifyRadonSLA(sla);
+    function __settleDefaultRadonSLA(WitnetV2.RadonSLA memory sla) internal {
+        __storage().packedDefaultSLA = WitnetV2.packed(sla);
     }
 }

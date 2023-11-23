@@ -149,78 +149,6 @@ contract WitnetBytecodesDefault
         return __database().radsBytecode[_radHash];
     }
 
-    function bytecodeOf(bytes32 _radHash, bytes32 _slaHash)
-        external view
-        returns (bytes memory)
-    {
-        Witnet.RadonSLA storage __sla = __database().slas[_slaHash];
-        if (__sla.numWitnesses == 0) {
-            revert("WitnetBytecodesDefault: unknown Radon SLA");
-        }
-        bytes memory _radBytecode = bytecodeOf(_radHash);
-        return abi.encodePacked(
-            WitnetEncodingLib.encode(uint64(_radBytecode.length), 0x0a),
-            _radBytecode,
-            __database().slasBytecode[_slaHash]
-        );
-    }
-
-    function hashOf(
-            bytes32[] calldata _retrievalsIds,
-            bytes32 _aggregatorId,
-            bytes32 _tallyId,
-            uint16 _resultMaxSize,
-            string[][] calldata _args
-        )
-        external pure
-        virtual override
-        returns (bytes32)
-    {
-        return keccak256(abi.encode(
-            _retrievalsIds,
-            _aggregatorId,
-            _tallyId,
-            _resultMaxSize,
-            _args
-        ));
-    }
-
-    function hashOf(bytes32 _radHash, bytes32 _slaHash)
-        public pure 
-        virtual override
-        returns (bytes32)
-    {
-        return sha256(abi.encode(
-            _radHash,
-            _slaHash
-        ));
-    }
-
-    function hashWeightWitsOf(
-            bytes32 _radHash, 
-            bytes32 _slaHash
-        ) 
-        external view
-        virtual override
-        returns (bytes32, uint32, uint256)
-    {
-        Witnet.RadonSLA storage __sla = __database().slas[_slaHash];
-        {
-            uint _numWitnesses = __sla.numWitnesses;
-            uint _weight = __database().radsBytecode[_radHash].length;
-            uint _witnessWits = __sla.witnessReward + 2 * __sla.minerCommitRevealFee;
-            return (
-                hashOf(_radHash, _slaHash),
-                uint32(_weight
-                    + _numWitnesses * 636
-                    // + (8 + 2 + 8 + 4 + 8)
-                    + 100
-                ),
-                _numWitnesses * _witnessWits
-            );
-        }
-    }
-
     function lookupDataProvider(uint256 _index)
         external view
         override
@@ -371,25 +299,16 @@ contract WitnetBytecodesDefault
         rad.tally = __database().reducers[__request.tally];
     }
 
-    function lookupRadonSLA(bytes32 _slaHash)
-        external view
-        override
-        returns (Witnet.RadonSLA memory sla)
-    {
-        sla = __database().slas[_slaHash];
-        if (sla.numWitnesses == 0) {
-            revert UnknownRadonSLA(_slaHash);
-        }
-    }
-
-    function lookupRadonSLAReward(bytes32 _slaHash)
-        public view
-        override
-        returns (uint)
-    {
-        Witnet.RadonSLA storage __sla = __database().slas[_slaHash];
-        return __sla.numWitnesses * __sla.witnessReward;
-    }
+    // function lookupRadonSLA(bytes32 _slaHash)
+    //     external view
+    //     override
+    //     returns (Witnet.RadonSLA memory sla)
+    // {
+    //     sla = __database().slas[_slaHash];
+    //     if (sla.numWitnesses == 0) {
+    //         revert UnknownRadonSLA(_slaHash);
+    //     }
+    // }
 
     function verifyRadonRetrieval(
             Witnet.RadonDataRequestMethods _requestMethod,
@@ -546,27 +465,6 @@ contract WitnetBytecodesDefault
                 tally: _tallyId
             });
             emit NewRadHash(_radHash);
-        }
-    }
-
-    function verifyRadonSLA(Witnet.RadonSLA calldata _sla)
-        external 
-        virtual override
-        returns (bytes32 _slaHash)
-    {        
-        // Build RadonSLA bytecode:
-        bytes memory _bytecode = _sla.encode();
-
-        // Add it to storage if not verified yet:
-        _slaHash = _witnetHash(_bytecode);
-        if (__database().slas[_slaHash].numWitnesses == 0) {
-            // validate SLA params:
-            _sla.validate();
-            // save parameters and encoded bytecode in storage:
-            __database().slas[_slaHash] = _sla;
-            __database().slasBytecode[_slaHash] = _bytecode;
-            // emit event
-            emit NewSlaHash(_slaHash);
         }
     }
 

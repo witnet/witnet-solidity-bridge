@@ -42,8 +42,8 @@ abstract contract UsingWitnetRequest
     {
         return __witnetRequestData(
             _witnetEvmReward,
-            _witnetQuerySLA,
-            __witnetRequestRadHash
+            __witnetRequestRadHash,
+            _witnetQuerySLA
         );
     }
 

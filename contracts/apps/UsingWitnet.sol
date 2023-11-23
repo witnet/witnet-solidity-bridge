@@ -89,8 +89,8 @@ abstract contract UsingWitnet {
 
     function __witnetRequestData(
             uint256 _witnetEvmReward, 
-            WitnetV2.RadonSLA calldata _witnetQuerySLA,
-            bytes32 _witnetRadHash
+            bytes32 _witnetRadHash,
+            WitnetV2.RadonSLA calldata _witnetQuerySLA
         )
         virtual internal returns (uint256)
     {
