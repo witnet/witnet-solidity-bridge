@@ -8,7 +8,9 @@ abstract contract WitnetConsumer
     is
         IWitnetConsumer,
         UsingWitnet
-{    
+{   
+    uint256 private immutable __witnetReportCallbackMaxGas;
+
     modifier burnQueryAfterReport(uint256 _witnetQueryId) {
         _;
         __witnet.burnQuery(_witnetQueryId);
@@ -19,26 +21,64 @@ abstract contract WitnetConsumer
         _;
     }
 
+    constructor (uint256 _maxCallbackGas) {
+        __witnetReportCallbackMaxGas = _maxCallbackGas;
+    }
+
+    
+    /// ===============================================================================================================
+    /// --- Base implementation of IWitnetConsumer --------------------------------------------------------------------
+
+    function reportableFrom(address _from) virtual override external view returns (bool) {
+        return _from == address(__witnet);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- WitnetConsumer virtual methods ----------------------------------------------------------------------------
+
     function _witnetEstimateBaseFee()
-        virtual internal view 
+        virtual internal view
         returns (uint256)
     {
         return _witnetEstimateBaseFeeWithCallback(_witnetReportCallbackMaxGas());
     }
 
+    function _witnetReportCallbackMaxGas()
+        virtual internal view 
+        returns (uint256)
+    {
+        return __witnetReportCallbackMaxGas;
+    }
+
     function __witnetRequestData(
             uint256 _witnetEvmReward, 
-            WitnetV2.RadonSLA calldata _witnetQuerySLA,
-            bytes32 _witnetRadHash
+            bytes32 _witnetRadHash,
+            WitnetV2.RadonSLA calldata _witnetQuerySLA
         )
         virtual override internal
         returns (uint256)
     {
         return __witnet.postRequestWithCallback{value: _witnetEvmReward}(
             _witnetRadHash,
-            _witnetQuerySLA
+            _witnetQuerySLA,
+            __witnetReportCallbackMaxGas
         );
     }
 
-    function _witnetReportCallbackMaxGas() virtual internal view returns (uint256);
+    function __witnetRequestData(
+            uint256 _witnetEvmReward,
+            bytes calldata _witnetRadBytecode,
+            WitnetV2.RadonSLA calldata _witnetQuerySLA
+        )
+        virtual override internal
+        returns (uint256)
+    {
+        return __witnet.postRequestWithCallback{value: _witnetEvmReward}(
+            _witnetRadBytecode,
+            _witnetQuerySLA,
+            __witnetReportCallbackMaxGas
+        );
+    }
+
 }

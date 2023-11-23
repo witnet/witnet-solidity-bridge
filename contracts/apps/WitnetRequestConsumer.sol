@@ -11,17 +11,15 @@ abstract contract WitnetRequestConsumer
 {
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
-
-    uint256 private immutable __witnetReportCallbackMaxGas;
     
     constructor(WitnetRequest _witnetRequest, uint256 _maxCallbackGas)
         UsingWitnetRequest(_witnetRequest)
+        WitnetConsumer(_maxCallbackGas)
     {
         require(
             _witnetEstimateBaseFeeWithCallback(_maxCallbackGas) > UsingWitnetRequest._witnetEstimateBaseFee(),
             "WitnetRequestConsumer: max callback gas too low"
         );
-        __witnetReportCallbackMaxGas = _maxCallbackGas;
     }
 
     function _witnetEstimateBaseFee() 
@@ -32,46 +30,33 @@ abstract contract WitnetRequestConsumer
         return WitnetConsumer._witnetEstimateBaseFee();
     } 
 
-    function _witnetReportCallbackMaxGas() virtual override internal view returns (uint256) {
-        return __witnetReportCallbackMaxGas;
-    }
-
     function __witnetRequestData(
             uint256 _witnetEvmReward,
-            WitnetV2.RadonSLA calldata _witnetQuerySLA,
-            bytes32 _witnetRadHash
+            bytes32 _witnetRadHash,
+            WitnetV2.RadonSLA calldata _witnetQuerySLA
         )
         virtual override(UsingWitnet, WitnetConsumer) internal
         returns (uint256)
     {
        return WitnetConsumer.__witnetRequestData(
             _witnetEvmReward,
-            _witnetQuerySLA,
-            _witnetRadHash
+            _witnetRadHash,
+            _witnetQuerySLA
        );
     }
 
-    function reportWitnetQueryResult(
-            uint256 _witnetQueryId, 
-            WitnetCBOR.CBOR calldata _value
+    function __witnetRequestData(
+            uint256 _witnetEvmReward,
+            bytes calldata _witnetRadBytecode,
+            WitnetV2.RadonSLA calldata _witnetQuerySLA
         )
-        virtual override 
-        external
-        onlyFromWitnet
-        // optional: burnQueryAfterReport(_witnetQueryId)
+        virtual override(UsingWitnet, WitnetConsumer) internal
+        returns (uint256)
     {
-        // TODO ...
-    }
-
-    function reportWitnetQueryError(
-            uint256 _witnetQueryId,
-            Witnet.ResultErrorCodes,
-            uint256
-        )
-        virtual override external
-        onlyFromWitnet
-        // optional: burnQueryAfterReport(_witnetQueryId)
-    {
-        // TODO ...
+        return WitnetConsumer.__witnetRequestData(
+            _witnetEvmReward,
+            _witnetRadBytecode,
+            _witnetQuerySLA
+        );
     }
 }
