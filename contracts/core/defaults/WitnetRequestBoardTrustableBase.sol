@@ -785,6 +785,7 @@ abstract contract WitnetRequestBoardTrustableBase
             __request.slaPacked = _slaPacked;
             __request.evmReward = _getMsgValue();
         }
+        __seekQuery(_queryId).from = msg.sender;
     }
 
     function __reportResult(
