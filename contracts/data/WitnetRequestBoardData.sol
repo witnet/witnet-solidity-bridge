@@ -15,7 +15,7 @@ abstract contract WitnetRequestBoardData {
     struct WitnetBoardState {
         address base;
         address owner;    
-        uint256 numQueries;
+        uint256 nonce;
         mapping (uint => Witnet.Query) queries;
     }
 
@@ -34,7 +34,7 @@ abstract contract WitnetRequestBoardData {
     /// Asserts the given query was previously posted and that it was not yet deleted.
     modifier notDeleted(uint256 _queryId) {
         require(
-            _queryId > 0 && _queryId <= __storage().numQueries, 
+            _queryId > 0 && _queryId <= __storage().nonce, 
             "WitnetRequestBoard: not yet posted"
         );
         require(
@@ -54,7 +54,7 @@ abstract contract WitnetRequestBoardData {
     /// Asserts the given query was actually posted before calling this method.
     modifier wasPosted(uint256 _queryId) {
         require(
-            _queryId > 0 && _queryId <= __storage().numQueries, 
+            _queryId > 0 && _queryId <= __storage().nonce, 
             "WitnetRequestBoard: not yet posted"
         ); _;
     }
@@ -110,7 +110,7 @@ abstract contract WitnetRequestBoardData {
         // is kept in storage, the query remains in "Posted" status:
         return Witnet.QueryStatus.Posted;
       }
-      else if (_queryId > __storage().numQueries) {
+      else if (_queryId > __storage().nonce) {
         // Requester's address is removed from storage only if
         // the query gets "Deleted" by its requester.
         return Witnet.QueryStatus.Deleted;

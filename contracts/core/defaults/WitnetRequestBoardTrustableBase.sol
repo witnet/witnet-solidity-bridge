@@ -669,7 +669,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (uint256)
     {
-        return __storage().numQueries + 1;
+        return __storage().nonce + 1;
     }
 
     /// Gets the whole Query data contents, if any, no matter its current status.
@@ -771,7 +771,7 @@ abstract contract WitnetRequestBoardTrustableBase
     function __newQuery()
         virtual internal returns (uint256)
     {
-        return ++ __storage().numQueries;
+        return ++ __storage().nonce;
     }
 
     function __postRequest(bytes32 _radHash, bytes32 _slaPacked)
