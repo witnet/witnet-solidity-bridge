@@ -35,7 +35,6 @@ contract WitnetRandomness
     
     mapping (uint256 => RandomizeData) internal __randomize_;
     struct RandomizeData {
-        address from;
         uint256 prevBlock;
         uint256 nextBlock;
         uint256 witnetQueryId;
@@ -170,13 +169,12 @@ contract WitnetRandomness
         virtual override
         returns (uint256)
     {
-        return witnet().estimateBaseFee(_gasPrice, 32);
+        return __witnet.estimateBaseFee(_gasPrice, 32);
     }
 
     /// Retrieves data of a randomization request that got successfully posted to the WRB within a given block.
     /// @dev Returns zero values if no randomness request was actually posted within a given block.
     /// @param _block Block number whose randomness request is being queried for.
-    /// @return _from Address from which the latest randomness request was posted.
     /// @return _id Unique request identifier as provided by the WRB.
     /// @return _prevBlock Block number in which a randomness request got posted just before this one. 0 if none.
     /// @return _nextBlock Block number in which a randomness request got posted just after this one, 0 if none.
@@ -184,7 +182,6 @@ contract WitnetRandomness
         external view
         virtual override
         returns (
-            address _from,
             uint256 _id,
             uint256 _prevBlock,
             uint256 _nextBlock
@@ -192,7 +189,6 @@ contract WitnetRandomness
     {
         RandomizeData storage _data = __randomize_[_block];
         _id = _data.witnetQueryId;
-        _from = _data.from;
         _prevBlock = _data.prevBlock;
         _nextBlock = _data.nextBlock;
     }
@@ -212,7 +208,7 @@ contract WitnetRandomness
         virtual override
         returns (bytes32)
     {
-        if (__randomize_[_block].from == address(0)) {
+        if (__randomize_[_block].witnetQueryId == 0) {
             _block = getRandomnessNextBlock(_block);
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
@@ -237,7 +233,7 @@ contract WitnetRandomness
         virtual override
         returns (uint256)
     {
-        return ((__randomize_[_block].from != address(0))
+        return ((__randomize_[_block].witnetQueryId != 0)
             ? __randomize_[_block].nextBlock
             // start search from the latest block
             : _searchNextBlock(_block, latestRandomizeBlock)
@@ -326,22 +322,21 @@ contract WitnetRandomness
     function randomize()
         external payable
         virtual override
-        returns (uint256 _usedFunds)
+        returns (uint256)
     {
         if (latestRandomizeBlock < block.number) {
             // Post the Witnet Randomness request:
-            _usedFunds = _witnetEstimateBaseFee(tx.gasprice);
-            uint _queryId = witnet().postRequest{value: _usedFunds}(
+            uint _queryId = __witnetRequestData(
+                msg.value,
                 __witnetRandomnessRadHash,
                 __witnetRandomnessPackedSLA.toRadonSLA()
             );
             // Keep Randomize data in storage:
-            RandomizeData storage _data = __randomize_[block.number];
-            _data.witnetQueryId = _queryId;
-            _data.from = msg.sender;
+            RandomizeData storage __data = __randomize_[block.number];
+            __data.witnetQueryId = _queryId;
             // Update block links:
             uint256 _prevBlock = latestRandomizeBlock;
-            _data.prevBlock = _prevBlock;
+            __data.prevBlock = _prevBlock;
             __randomize_[_prevBlock].nextBlock = block.number;
             latestRandomizeBlock = block.number;
             // Throw event:
@@ -351,13 +346,10 @@ contract WitnetRandomness
                 _queryId,
                 __witnetRandomnessRadHash
             );
-            // Transfer back unused tx value:
-            if (_usedFunds < msg.value) {
-                payable(msg.sender).transfer(msg.value - _usedFunds);
-            }
         } else {
             return upgradeRandomizeFee(block.number);
         }
+        return msg.value;
     }
 
     /// Increases Witnet fee related to a pending-to-be-solved randomness request, as much as it

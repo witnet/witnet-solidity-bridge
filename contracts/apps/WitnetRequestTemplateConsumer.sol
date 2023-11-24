@@ -34,7 +34,7 @@ abstract contract WitnetRequestTemplateConsumer
     function __witnetRequestData(
             uint256 _witnetEvmReward,
             bytes32 _witnetRadHash,
-            WitnetV2.RadonSLA calldata _witnetQuerySLA
+            WitnetV2.RadonSLA memory _witnetQuerySLA
         )
         virtual override(UsingWitnet, WitnetConsumer) internal
         returns (uint256)
@@ -49,7 +49,7 @@ abstract contract WitnetRequestTemplateConsumer
     function __witnetRequestData(
             uint256 _witnetEvmReward,
             bytes calldata _witnetRadBytecode,
-            WitnetV2.RadonSLA calldata _witnetQuerySLA
+            WitnetV2.RadonSLA memory _witnetQuerySLA
         )
         virtual override(UsingWitnet, WitnetConsumer) internal
         returns (uint256)

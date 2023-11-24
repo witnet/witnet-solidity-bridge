@@ -72,11 +72,11 @@ abstract contract UsingWitnetRandomness
     /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.
     function _msbDeBruijn32(uint32 _v) private pure returns (uint8) {
         uint8[32] memory _bitPosition = [
-                0, 9, 1, 10, 13, 21, 2, 29,
-                11, 14, 16, 18, 22, 25, 3, 30,
-                8, 12, 20, 28, 15, 17, 24, 7,
-                19, 27, 23, 6, 26, 5, 4, 31
-            ];
+            0, 9, 1, 10, 13, 21, 2, 29,
+            11, 14, 16, 18, 22, 25, 3, 30,
+            8, 12, 20, 28, 15, 17, 24, 7,
+            19, 27, 23, 6, 26, 5, 4, 31
+        ];
         _v |= _v >> 1;
         _v |= _v >> 2;
         _v |= _v >> 4;

@@ -45,7 +45,6 @@ contract WitnetRandomnessMock
     /// Retrieves data of a randomization request that got successfully posted to the WRB within a given block.
     /// @dev Returns zero values if no randomness request was actually posted within a given block.
     /// @param _block Block number whose randomness request is being queried for.
-    /// @return _from Address from which the latest randomness request was posted.
     /// @return _id Unique request identifier as provided by the WRB.
     /// @return _prevBlock Block number in which a randomness request got posted just before this one. 0 if none.
     /// @return _nextBlock Block number in which a randomness request got posted just after this one, 0 if none.
@@ -53,7 +52,6 @@ contract WitnetRandomnessMock
         external view
         virtual override
         returns (
-            address _from,
             uint256 _id,
             uint256 _prevBlock,
             uint256 _nextBlock
@@ -61,7 +59,6 @@ contract WitnetRandomnessMock
     {
         RandomizeData storage _data = __randomize_[_block];
         _id = _data.witnetQueryId;
-        _from = _data.from;
         _prevBlock = _data.prevBlock;
         _nextBlock = _data.nextBlock;
     }
@@ -80,7 +77,7 @@ contract WitnetRandomnessMock
         virtual override
         returns (bytes32)
     {
-        if (__randomize_[_block].from == address(0)) {
+        if (__randomize_[_block].witnetQueryId == 0) {
             _block = getRandomnessNextBlock(_block);
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
@@ -123,7 +120,6 @@ contract WitnetRandomnessMock
             // Post the Witnet Randomness request:
             uint _queryId = ++ __mockRandomizeLatestId;
             RandomizeData storage _data = __randomize_[block.number];
-            _data.from = msg.sender;
             _data.witnetQueryId = _queryId;            
             // Update block links:
             uint256 _prevBlock = latestRandomizeBlock;

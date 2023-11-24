@@ -46,7 +46,7 @@ abstract contract UsingWitnetRequestTemplate
 
     function __witnetRequestData(
             uint256 _witnetEvmReward,
-            WitnetV2.RadonSLA calldata _witnetQuerySLA,
+            WitnetV2.RadonSLA memory _witnetQuerySLA,
             string[][] memory _witnetRequestArgs
         )
         virtual internal returns (uint256)
