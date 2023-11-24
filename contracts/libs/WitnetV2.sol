@@ -45,8 +45,8 @@ library WitnetV2 {
         internal pure returns (RadonSLA memory)
     {
         return RadonSLA({
-            numWitnesses: uint8(uint(_packed >> 248)),
-            witnessingCollateralRatio: uint8(uint(_packed >> 240))
+            numWitnesses: uint8(uint(_packed) >> 248),
+            witnessingCollateralRatio: uint8(uint(_packed) >> 240)
         });
     }
 
