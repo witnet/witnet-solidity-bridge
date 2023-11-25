@@ -28,6 +28,8 @@ contract WitnetRequestBoardTrustableOvm2
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasBase,
+            uint256 _reportResultWithCallbackGasBase,
+            uint256 _reportResultWithCallbackRevertGasBase,
             uint256 _sstoreFromZeroGas
         )
         WitnetRequestBoardTrustableDefault(
@@ -35,6 +37,8 @@ contract WitnetRequestBoardTrustableOvm2
             _upgradable,
             _versionTag,
             _reportResultGasBase,
+            _reportResultWithCallbackGasBase,
+            _reportResultWithCallbackRevertGasBase,
             _sstoreFromZeroGas
         )
     {
@@ -63,13 +67,18 @@ contract WitnetRequestBoardTrustableOvm2
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
     /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _maxCallbackGas)
+    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _resultMaxSize, uint256 _maxCallbackGas)
         public view
         virtual override
         returns (uint256)
     {
-        return WitnetRequestBoardTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _maxCallbackGas) + (
+        return WitnetRequestBoardTrustableDefault.estimateBaseFeeWithCallback(
+            _gasPrice, 
+            _resultMaxSize, 
+            _maxCallbackGas
+        ) + (
             _gasPrice * gasPriceOracleL1.getL1Fee(
                 hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
             )

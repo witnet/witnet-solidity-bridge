@@ -17,18 +17,27 @@ abstract contract WitnetRequestTemplateConsumer
         WitnetConsumer(_maxCallbackGas)
     {
         require(
-            _witnetEstimateBaseFeeWithCallback(_maxCallbackGas) > UsingWitnetRequestTemplate._witnetEstimateBaseFee(),
-            "WitnetRequestTemplateConsumer: max callback gas too low"
+            _witnetEstimateBaseFeeWithCallback(_requestTemplate.resultDataMaxSize(), _maxCallbackGas)
+                > UsingWitnetRequestTemplate._witnetEstimateBaseFee(),
+            "WitnetRequestTemplateConsumer: callback gas limit too low"
         );
 
     }
 
-    function _witnetEstimateBaseFee() 
-        virtual override(UsingWitnetRequestTemplate, WitnetConsumer) 
+    function _witnetEstimateBaseFee()
+        virtual override
         internal view
         returns (uint256)
     {
-        return WitnetConsumer._witnetEstimateBaseFee();
+        return WitnetConsumer._witnetEstimateBaseFee(__witnetResultMaxSize);
+    }
+
+    function _witnetEstimateBaseFee(uint256 _resultMaxSize) 
+        virtual override(UsingWitnet, WitnetConsumer) 
+        internal view
+        returns (uint256)
+    {
+        return WitnetConsumer._witnetEstimateBaseFee(_resultMaxSize);
     } 
 
     function __witnetRequestData(
@@ -46,18 +55,4 @@ abstract contract WitnetRequestTemplateConsumer
        );
     }
 
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
-            bytes calldata _witnetRadBytecode,
-            WitnetV2.RadonSLA memory _witnetQuerySLA
-        )
-        virtual override(UsingWitnet, WitnetConsumer) internal
-        returns (uint256)
-    {
-        return WitnetConsumer.__witnetRequestData(
-            _witnetEvmReward,
-            _witnetRadBytecode,
-            _witnetQuerySLA
-        );
-    }
 }

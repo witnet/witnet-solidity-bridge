@@ -19,7 +19,7 @@ interface IWitnetRequestBoardReporter {
             uint256 _queryId,
             bytes32 _drTxHash,
             bytes calldata _result
-        ) external;
+        ) external returns (uint256);
 
     /// @notice Reports the Witnet-provided result to a previously posted request.
     /// @dev Fails if:
@@ -36,7 +36,7 @@ interface IWitnetRequestBoardReporter {
             uint256 _timestamp,
             bytes32 _drTxHash,
             bytes calldata _result
-        ) external;
+        ) external returns (uint256);
 
     /// @notice Reports Witnet-provided results to multiple requests within a single EVM tx.
     /// @dev Must emit a PostedResult event for every succesfully reported result.
@@ -46,7 +46,7 @@ interface IWitnetRequestBoardReporter {
     ///         - hash of the corresponding data request tx at the Witnet side-chain level;
     ///         - data request result in raw bytes.
     /// @param _verbose If true, must emit a BatchReportError event for every failing report, if any. 
-    function reportResultBatch(BatchResult[] calldata _batchResults, bool _verbose) external;
+    function reportResultBatch(BatchResult[] calldata _batchResults, bool _verbose) external returns (uint256);
         
         struct BatchResult {
             uint256 queryId;

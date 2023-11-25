@@ -22,6 +22,8 @@ contract WitnetRequestBoardTrustableReef
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasBase,
+            uint256 _reportResultWithCallbackGasBase,
+            uint256 _reportResultWithCallbackRevertGasBase,
             uint256 _sstoreFromZeroGas
         )
         WitnetRequestBoardTrustableDefault(
@@ -29,6 +31,8 @@ contract WitnetRequestBoardTrustableReef
             _upgradable,
             _versionTag,
             _reportResultGasBase,
+            _reportResultWithCallbackGasBase,
+            _reportResultWithCallbackRevertGasBase,
             _sstoreFromZeroGas
         )
     {}
@@ -48,13 +52,14 @@ contract WitnetRequestBoardTrustableReef
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
     /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256, uint256 _maxCallbackGas)
+    function estimateBaseFeeWithCallback(uint256, uint256 _resultMaxSize, uint256 _maxCallbackGas)
         public view
         virtual override
         returns (uint256)
     {
-        return WitnetRequestBoardTrustableDefault.estimateBaseFeeWithCallback(1, _maxCallbackGas);
+        return WitnetRequestBoardTrustableDefault.estimateBaseFeeWithCallback(1, _resultMaxSize, _maxCallbackGas);
     }
 
 

@@ -66,7 +66,7 @@ abstract contract UsingWitnetRandomness
     }
 
     function _estimateRandomizeBaseFee() internal view returns (uint256) {
-        return _witnetEstimateBaseFee(32);
+        return _witnetEstimateBaseFee(35);
     }
 
     /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.
@@ -102,7 +102,8 @@ abstract contract UsingWitnetRandomness
     }
 
     function __randomize(uint256 _witnetEvmReward) virtual internal returns (uint256) {
-        return __witnet.postRequest{value: _witnetEvmReward}(
+        return __witnetRequestData(
+            _witnetEvmReward,
             __witnetRandomnessRadHash,
             _defaultRandomizeSLA()
         );
@@ -115,7 +116,8 @@ abstract contract UsingWitnetRandomness
         virtual internal 
         returns (uint256 _randomizeId)
     {
-        return __witnet.postRequest{value: _witnetEvmReward}(
+        return __witnetRequestData(
+            _witnetEvmReward,
             __witnetRandomnessRadHash,
             _witnetQuerySLA
         );

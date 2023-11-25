@@ -169,7 +169,7 @@ contract WitnetRandomness
         virtual override
         returns (uint256)
     {
-        return __witnet.estimateBaseFee(_gasPrice, 32);
+        return __witnet.estimateBaseFee(_gasPrice, 35);
     }
 
     /// Retrieves data of a randomization request that got successfully posted to the WRB within a given block.

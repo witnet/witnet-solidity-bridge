@@ -10,12 +10,7 @@ abstract contract WitnetConsumer
         UsingWitnet
 {   
     uint256 private immutable __witnetReportCallbackMaxGas;
-
-    modifier burnQueryAfterReport(uint256 _witnetQueryId) {
-        _;
-        __witnet.burnQuery(_witnetQueryId);
-    }
-    
+  
     modifier onlyFromWitnet {
         require(msg.sender == address(__witnet), "WitnetConsumer: unauthorized");
         _;
@@ -37,11 +32,11 @@ abstract contract WitnetConsumer
     /// ===============================================================================================================
     /// --- WitnetConsumer virtual methods ----------------------------------------------------------------------------
 
-    function _witnetEstimateBaseFee()
-        virtual internal view
+    function _witnetEstimateBaseFee(uint256 _resultMaxSize)
+        virtual override internal view
         returns (uint256)
     {
-        return _witnetEstimateBaseFeeWithCallback(_witnetReportCallbackMaxGas());
+        return _witnetEstimateBaseFeeWithCallback(_resultMaxSize, _witnetReportCallbackMaxGas());
     }
 
     function _witnetReportCallbackMaxGas()
@@ -61,21 +56,6 @@ abstract contract WitnetConsumer
     {
         return __witnet.postRequestWithCallback{value: _witnetEvmReward}(
             _witnetRadHash,
-            _witnetQuerySLA,
-            __witnetReportCallbackMaxGas
-        );
-    }
-
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
-            bytes calldata _witnetRadBytecode,
-            WitnetV2.RadonSLA memory _witnetQuerySLA
-        )
-        virtual override internal
-        returns (uint256)
-    {
-        return __witnet.postRequestWithCallback{value: _witnetEvmReward}(
-            _witnetRadBytecode,
             _witnetQuerySLA,
             __witnetReportCallbackMaxGas
         );

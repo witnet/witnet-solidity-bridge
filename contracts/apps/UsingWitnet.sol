@@ -8,8 +8,10 @@ import "../WitnetRequestBoard.sol";
 /// @title The UsingWitnet contract
 /// @dev Witnet-aware contracts can inherit from this contract in order to interact with Witnet.
 /// @author The Witnet Foundation.
-abstract contract UsingWitnet {
-
+abstract contract UsingWitnet
+    is
+        IWitnetRequestBoardEvents
+{
     WitnetRequestBoard internal immutable __witnet;
 
     /// @dev Include an address to specify the WitnetRequestBoard entry point address.
@@ -47,7 +49,7 @@ abstract contract UsingWitnet {
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
     /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
     function _witnetEstimateBaseFee(uint256 _resultMaxSize)
-        internal view
+        virtual internal view
         returns (uint256)
     {
         return __witnet.estimateBaseFee(tx.gasprice, _resultMaxSize);
@@ -55,12 +57,13 @@ abstract contract UsingWitnet {
 
     /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).    
     /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    function _witnetEstimateBaseFeeWithCallback(uint256 _maxCallbackGas)
+    function _witnetEstimateBaseFeeWithCallback(uint256 _resultMaxSize, uint256 _maxCallbackGas)
         internal view
         returns (uint256)
     {
-        return __witnet.estimateBaseFeeWithCallback(tx.gasprice, _maxCallbackGas);
+        return __witnet.estimateBaseFeeWithCallback(tx.gasprice, _resultMaxSize, _maxCallbackGas);
     }
 
     function _witnetCheckQueryResultTraceability(uint256 _witnetQueryId)
@@ -105,7 +108,7 @@ abstract contract UsingWitnet {
             bytes calldata _witnetRadBytecode,
             WitnetV2.RadonSLA memory _witnetQuerySLA
         )
-        virtual internal returns (uint256)
+        internal returns (uint256)
     {
         return __witnet.postRequest{value: _witnetEvmReward}(
             _witnetRadBytecode,

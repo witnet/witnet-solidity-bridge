@@ -44,12 +44,12 @@ interface IWitnetRequestBoard {
     /// @param gasPrice Expected gas price to pay upon posting the data request.
     /// @param resultMaxSize Maximum expected size of returned data (in bytes).
     /// @param maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 gasPrice, uint256 maxCallbackGas) external view returns (uint256);
+    function estimateBaseFeeWithCallback(uint256 gasPrice, uint256 resultMaxSize, uint256 maxCallbackGas) external view returns (uint256);
     
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. 
     /// @dev Data requesters should consider upgrading the reward on queries providing no actual earnings.
-    function estimateQueryEarnings(uint256 queryId) external view returns (int256);
+    function estimateQueryEarnings(uint256 queryId, uint256 gasPrice) external view returns (int256);
 
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and 
     /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
@@ -91,21 +91,6 @@ interface IWitnetRequestBoard {
             WitnetV2.RadonSLA calldata querySLA, 
             uint256 maxCallbackGas
         ) external payable returns (uint256 queryId);
-
-    /// @notice Requests the execution of the given Witnet Data Request bytecode, in expectation that it will be 
-    /// @notice relayed and solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board 
-    /// @notice that will be transferred to the reporter who relays back the Witnet-provided result to this request.
-    /// @dev Fails if, provided reward is too low.
-    /// @dev The caller must be a contract implementing the IWitnetConsumer interface.
-    /// @param radBytecode The RAD hash of the data request to be solved by Witnet.
-    /// @param querySLA The data query SLA to be fulfilled on the Witnet blockchain.
-    /// @param maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    /// @return A unique query identifier.
-    function postRequestWithCallback(
-            bytes calldata radBytecode, 
-            WitnetV2.RadonSLA calldata querySLA, 
-            uint256 maxCallbackGas
-        ) external payable returns (uint256);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     /// @param queryId The unique query identifier.

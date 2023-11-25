@@ -667,9 +667,12 @@ module.exports = {
       },
       WitnetRequestBoard: {
         immutables: {
-          types: [ 'uint256', ],
+          types: [ 'uint256', 'uint256', 'uint256', 'uint256', ],
           values: [
-              /* _reportResultGasLimit */ 133000,
+              /* _reportResultGasBase */ 57898,
+              /* _reportResultWithCallbackGasBase */ 72140,
+              /* _reportResultWithCallbackRevertGasBase */ 66685,
+              /* _sstoreFromZeroGas */ 20000,
           ]
         },
         libs: [ "WitnetErrorsLib", ],

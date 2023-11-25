@@ -20,5 +20,5 @@ abstract contract Payable {
     function _getMsgValue() internal view virtual returns (uint256);
 
     /// Perform safe transfer or whatever token is used for paying rewards.
-    function _safeTransferTo(address payable, uint256) internal virtual;
+    function __safeTransferTo(address payable, uint256) internal virtual;
 }

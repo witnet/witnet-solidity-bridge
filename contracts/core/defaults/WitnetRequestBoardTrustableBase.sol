@@ -110,8 +110,9 @@ abstract contract WitnetRequestBoardTrustableBase
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
     /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _maxCallbackGas) virtual public view returns (uint256);
+    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _resultMaxSize, uint256 _maxCallbackGas) virtual public view returns (uint256);
 
     
     // ================================================================================================================
@@ -257,6 +258,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
+        returns (uint256)
     {
         require(
             _drTxHash != 0, 
@@ -268,15 +270,13 @@ abstract contract WitnetRequestBoardTrustableBase
             _cborBytes.length != 0, 
             "WitnetRequestBoardTrustableDefault: result cannot be empty"
         );
+        // Do actual report:
         // solhint-disable not-rely-on-time
-        _safeTransferTo(
-            payable(msg.sender),
-            __reportResult(
-                _queryId,
-                block.timestamp,
-                _drTxHash,
-                _cborBytes
-            )
+        return __reportResultAndReward(
+            _queryId,
+            block.timestamp,
+            _drTxHash,
+            _cborBytes
         );
     }
 
@@ -300,6 +300,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         onlyReporters
         inStatus(_queryId, Witnet.QueryStatus.Posted)
+        returns (uint256)
     {
         require(
             _timestamp <= block.timestamp, 
@@ -315,13 +316,13 @@ abstract contract WitnetRequestBoardTrustableBase
             _cborBytes.length != 0, 
             "WitnetRequestBoardTrustableDefault: result cannot be empty"
         );
-        // Transfer query's reward to the reporter:
-        _safeTransferTo(payable(msg.sender), __reportResult(
+        // Do actual report and return reward transfered to the reproter:
+        return  __reportResultAndReward(
             _queryId,
             _timestamp,
             _drTxHash,
             _cborBytes
-        ));
+        );
     }
 
     /// Reports Witnet-provided results to multiple requests within a single EVM tx.
@@ -334,57 +335,55 @@ abstract contract WitnetRequestBoardTrustableBase
     ///         - data request result in raw bytes.
     /// @param _verbose If true, emits a BatchReportError event for every failing report, if any. 
     function reportResultBatch(
-            IWitnetRequestBoardReporter.BatchResult[] memory _batchResults,
+            IWitnetRequestBoardReporter.BatchResult[] calldata _batchResults,
             bool _verbose
         )
         external
         override
         onlyReporters
+        returns (uint256 _batchReward)
     {
-        uint _batchReward;
-        uint _batchSize = _batchResults.length;
-        for ( uint _i = 0; _i < _batchSize; _i ++) {
-            BatchResult memory _result = _batchResults[_i];
-            if (_statusOf(_result.queryId) != Witnet.QueryStatus.Posted) {
+        for ( uint _i = 0; _i < _batchResults.length; _i ++) {
+            if (_statusOf(_batchResults[_i].queryId) != Witnet.QueryStatus.Posted) {
                 if (_verbose) {
                     emit BatchReportError(
-                        _result.queryId,
+                        _batchResults[_i].queryId,
                         "WitnetRequestBoardTrustableBase: bad queryId"
                     );
                 }
-            } else if (_result.drTxHash == 0) {
+            } else if (_batchResults[_i].drTxHash == 0) {
                 if (_verbose) {
                     emit BatchReportError(
-                        _result.queryId,
+                        _batchResults[_i].queryId,
                         "WitnetRequestBoardTrustableBase: bad drTxHash"
                     );
                 }
-            } else if (_result.cborBytes.length == 0) {
+            } else if (_batchResults[_i].cborBytes.length == 0) {
                 if (_verbose) {
                     emit BatchReportError(
-                        _result.queryId, 
+                        _batchResults[_i].queryId, 
                         "WitnetRequestBoardTrustableBase: bad cborBytes"
                     );
                 }
-            } else if (_result.timestamp > 0 && _result.timestamp > block.timestamp) {
+            } else if (_batchResults[_i].timestamp > 0 && _batchResults[_i].timestamp > block.timestamp) {
                 if (_verbose) {
                     emit BatchReportError(
-                        _result.queryId,
+                        _batchResults[_i].queryId,
                         "WitnetRequestBoardTrustableBase: bad timestamp"
                     );
                 }
             } else {
                 _batchReward += __reportResult(
-                    _result.queryId,
-                    _result.timestamp == 0 ? block.timestamp : _result.timestamp,
-                    _result.drTxHash,
-                    _result.cborBytes
+                    _batchResults[_i].queryId,
+                    _batchResults[_i].timestamp == 0 ? block.timestamp : _batchResults[_i].timestamp,
+                    _batchResults[_i].drTxHash,
+                    _batchResults[_i].cborBytes
                 );
             }
         }   
-        // Transfer all successful rewards in one single shot to the authorized reporter, if any:
+        // Transfer rewards to all reported results in one single transfer to the reporter:
         if (_batchReward > 0) {
-            _safeTransferTo(
+            __safeTransferTo(
                 payable(msg.sender),
                 _batchReward
             );
@@ -465,22 +464,25 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. 
     /// @dev Data requesters should consider upgrading the reward on queries providing no actual earnings.
-    function estimateQueryEarnings(uint256 _queryId)
+    function estimateQueryEarnings(uint256 _queryId, uint256 _gasPrice)
         virtual override
         external view
         returns (int256 _earnings)
     {
         Witnet.Request storage __request = __seekQueryRequest(_queryId);
+
+        uint _maxResultSize = registry().lookupRadonRequestResultMaxSize(__request.radHash);
         _earnings = int(__request.evmReward);
         if (__request.maxCallbackGas > 0) {
             _earnings -= int(estimateBaseFeeWithCallback(
-                _getGasPrice(), 
+                _gasPrice, 
+                _maxResultSize,
                 __request.maxCallbackGas
             ));
         } else {
             _earnings -= int(estimateBaseFee(
-                _getGasPrice(),
-                registry().lookupRadonRequestResultMaxSize(__request.radHash)
+                _gasPrice,
+                _maxResultSize
             ));
         }
     }
@@ -587,7 +589,7 @@ abstract contract WitnetRequestBoardTrustableBase
         virtual override
         external payable 
         checkCallbackRecipient(msg.sender)
-        checkReward(estimateBaseFeeWithCallback(_getGasPrice(), _queryMaxCallbackGas))
+        checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  32, _queryMaxCallbackGas))
         checkSLA(_querySLA)
         returns (uint256 _queryId)
     {
@@ -597,35 +599,6 @@ abstract contract WitnetRequestBoardTrustableBase
         );
         __seekQueryRequest(_queryId).maxCallbackGas = _queryMaxCallbackGas;
         emit NewQuery(_queryId, _getMsgValue());
-    }
-
-    /// @notice Requests the execution of the given Witnet Data Request bytecode, in expectation that it will be 
-    /// @notice relayed and solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board 
-    /// @notice that will be transferred to the reporter who relays back the Witnet-provided result to this request.
-    /// @dev Fails if, provided reward is too low.
-    /// @dev The caller must be a contract implementing the IWitnetConsumer interface.
-    /// @param _radBytecode The RAD hash of the data request to be solved by Witnet.
-    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
-    /// @param _queryMaxCallbackGas Maximum gas to be spent when reporting the data request result.
-    /// @return _queryId A unique query identifier.
-    function postRequestWithCallback(
-            bytes calldata _radBytecode,
-            WitnetV2.RadonSLA calldata _querySLA,
-            uint256 _queryMaxCallbackGas
-        )
-        virtual override
-        external payable
-        checkCallbackRecipient(msg.sender)
-        checkReward(estimateBaseFeeWithCallback(_getGasPrice(), _queryMaxCallbackGas))
-        checkSLA(_querySLA)
-        returns (uint256 _queryId)
-    {
-        _queryId = __postRequest(
-            registry().hashOf(_radBytecode),
-            _querySLA.packed()
-        );
-        __seekQueryRequest(_queryId).maxCallbackGas = _queryMaxCallbackGas;
-        emit NewQueryWithBytecode(_queryId, _getMsgValue(), _radBytecode);
     }
     
     /// Increments the reward of a previously posted request by adding the transaction value to it.
@@ -777,9 +750,9 @@ abstract contract WitnetRequestBoardTrustableBase
 
     function __reportResult(
             uint256 _queryId,
-            uint256 _timestamp,
+            uint256 _drTxTimestamp,
             bytes32 _drTxHash,
-            bytes memory _cborBytes
+            bytes calldata _cborBytes
         )
         internal
         returns (uint256 _evmReward)
@@ -791,96 +764,129 @@ abstract contract WitnetRequestBoardTrustableBase
         _evmReward = __request.evmReward;
         __request.evmReward = 0; 
 
-        // write report traceability data in storage 
-        // (could potentially be deleted from a callback method within same transaction)
-        Witnet.Response storage __response = __query.response;
-        // solhint-disable not-rely-on-time
-        __response.timestamp = _timestamp;
-        __response.drTxHash = _drTxHash;
-        __response.reporter = msg.sender;
-
         // determine whether a callback is required
         if (__request.maxCallbackGas > 0) {
-            uint _evmCallbackGas = gasleft();
-            bool _evmCallbackSuccess; 
-            bytes memory _evmCallbackRevertBytes;
+            uint _evmCallbackActualGas = gasleft() - 6295;
+            bool _evmCallbackSuccess = false;
+            string memory _evmCallbackRevertMessage;
             // if callback is required, select which callback method to call 
             // depending on whether the query was solved with or without errors:
             if (_cborBytes[0] == bytes1(0xd8)) {
                 WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(_cborBytes).readArray();
                 if (_errors.length < 2) {
-                    // result with unknown error:
-                    (_evmCallbackSuccess, _evmCallbackRevertBytes) = __query.from.call{gas: __request.maxCallbackGas}(
-                        abi.encodeWithSelector(IWitnetConsumer.reportWitnetQueryError.selector,
-                            _queryId,
-                            Witnet.ResultErrorCodes.Unknown,
-                            WitnetCBOR.CBOR({
-                                buffer: WitnetBuffer.Buffer({ data: hex"", cursor: 0}),
-                                initialByte: 0,
-                                majorType: 0,
-                                additionalInformation: 0,
-                                len: 0,
-                                tag: 0
-                            })
-                        )
-                    );
-                } else {
-                    // result with parsable error:
-                    (_evmCallbackSuccess, _evmCallbackRevertBytes) = __query.from.call{gas: __request.maxCallbackGas}(
-                        abi.encodeWithSelector(IWitnetConsumer.reportWitnetQueryError.selector,
-                            _queryId,
-                            Witnet.ResultErrorCodes(_errors[0].readUint()),
-                            _errors[0]
-                        )
-                    );
-                }
-            } else {
-                // result with no error
-                (_evmCallbackSuccess, _evmCallbackRevertBytes) = __query.from.call{gas: __request.maxCallbackGas}(
-                    abi.encodeWithSelector(IWitnetConsumer.reportWitnetQueryResult.selector,
-                        _queryId, 
-                        WitnetCBOR.fromBytes(_cborBytes)
-                    )
-                );
-            }
-            _evmCallbackGas -= gasleft();
-            if (_evmCallbackSuccess) {
-                emit QueryCallback(
-                    _queryId, 
-                    _getGasPrice(), 
-                    _evmCallbackGas
-                );
-            } else {
-                if (_evmCallbackRevertBytes.length < 68) {
-                    emit QueryCallbackRevert(
+                    // try to report result with unknown error:
+                    try IWitnetConsumer(__query.from).reportWitnetQueryError{gas: __request.maxCallbackGas}(
                         _queryId,
-                        _getGasPrice(),
-                        _evmCallbackGas,
-                        "WitnetRequestBoardTrustableDefault: unhandled callback revert"
-                    );    
+                        _drTxHash,
+                        _drTxTimestamp,
+                        block.number,
+                        Witnet.ResultErrorCodes.Unknown,
+                        WitnetCBOR.CBOR({
+                            buffer: WitnetBuffer.Buffer({ data: hex"", cursor: 0}),
+                            initialByte: 0,
+                            majorType: 0,
+                            additionalInformation: 0,
+                            len: 0,
+                            tag: 0
+                        })
+                    ) {
+                        _evmCallbackSuccess = true;
+                    } catch Error(string memory err) {
+                        _evmCallbackRevertMessage = err;
+                    } 
                 } else {
-                    assembly {
-                        _evmCallbackRevertBytes := add(_evmCallbackRevertBytes, 0x04)
+                    // try to report result with parsable error:
+                    try IWitnetConsumer(__query.from).reportWitnetQueryError{gas: __request.maxCallbackGas}(
+                        _queryId,
+                        _drTxHash,
+                        _drTxTimestamp,
+                        block.number,
+                        Witnet.ResultErrorCodes(_errors[0].readUint()),
+                        _errors[0]
+                    ) {
+                        _evmCallbackSuccess = true;
+                    } catch Error(string memory err) {
+                        _evmCallbackRevertMessage = err;
                     }
-                    emit QueryCallbackRevert(
-                        _queryId,
-                        _getGasPrice(),
-                        _evmCallbackGas,
-                        string(abi.encodePacked(
-                            "WitnetRequestBoardTrustableDefault: callback revert: ",
-                            _evmCallbackRevertBytes
-                        ))
-                    );
                 }
+            } else {
+                // try to report result result with no error :
+                try IWitnetConsumer(__query.from).reportWitnetQueryResult{gas: __request.maxCallbackGas}(
+                    _queryId,
+                    _drTxHash,
+                    _drTxTimestamp,
+                    block.number,
+                    WitnetCBOR.fromBytes(_cborBytes)
+                ) {
+                    _evmCallbackSuccess = true;
+                } catch Error(string memory err) {
+                    _evmCallbackRevertMessage = err;
+                } catch (bytes memory) {}
             }
+            if (_evmCallbackSuccess) {
+                // => the callback run successfully
+                emit QueryCallback(
+                    _queryId,
+                    _getGasPrice(),
+                    _evmCallbackActualGas - gasleft()
+                );
+                // after successfull report, remove the whole query from storage:
+                delete __storage().queries[_queryId];
+            } else {
+                // => the callback reverted
+                emit QueryCallbackRevert(
+                    _queryId,
+                    _getGasPrice(),
+                    _evmCallbackActualGas - gasleft(),
+                    bytes(_evmCallbackRevertMessage).length > 0
+                        ? _evmCallbackRevertMessage 
+                        : "WitnetRequestBoardTrustableDefault: callback gas limit exceeded?"
+                );
+                // write query result and traceability data into storage:
+                __writeQueryResponse(_queryId, _drTxHash, _drTxTimestamp, _cborBytes);
+            }           
         } else {
-            // no callback is involved, so just keep the cbor-encoded result in storage:
-            __response.cborBytes = _cborBytes;
+            // => no callback is involved
             emit QueryReport(
                 _queryId, 
                 _getGasPrice()
             );
-        }        
+            // write query result and traceability data into storage 
+            __writeQueryResponse(_queryId, _drTxHash, _drTxTimestamp, _cborBytes);
+        }
+    }
+
+    function __writeQueryResponse(
+            uint256 _queryId, 
+            bytes32 _drTxHash, 
+            uint256 _drTxTimestamp, 
+            bytes memory _cborBytes
+        )
+        internal
+    {
+        __seekQuery(_queryId).response = Witnet.Response({
+            timestamp: _drTxTimestamp,
+            drTxHash: _drTxHash,
+            reporter: msg.sender,
+            cborBytes: _cborBytes
+        });
+    }
+
+    function __reportResultAndReward(
+            uint256 _queryId,
+            uint256 _timestamp,
+            bytes32 _drTxHash,
+            bytes calldata _cborBytes
+        )
+        internal
+        returns (uint256 _evmReward)
+    {
+        _evmReward = __reportResult(_queryId, _timestamp, _drTxHash, _cborBytes);
+        // transfer reward to reporter
+        __safeTransferTo(
+            payable(msg.sender),
+            _evmReward
+        );
     }
 
     function __setReporters(address[] memory _reporters) internal {

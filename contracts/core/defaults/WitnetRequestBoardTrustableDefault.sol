@@ -17,6 +17,8 @@ contract WitnetRequestBoardTrustableDefault
         WitnetRequestBoardTrustableBase
 {
     uint256 internal immutable __reportResultGasBase;
+    uint256 internal immutable __reportResultWithCallbackGasBase;
+    uint256 internal immutable __reportResultWithCallbackRevertGasBase;
     uint256 internal immutable __sstoreFromZeroGas;
 
     constructor(
@@ -24,6 +26,8 @@ contract WitnetRequestBoardTrustableDefault
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasBase,
+            uint256 _reportResultWithCallbackGasBase,
+            uint256 _reportResultWithCallbackRevertGasBase,
             uint256 _sstoreFromZeroGas
         )
         WitnetRequestBoardTrustableBase(
@@ -34,6 +38,8 @@ contract WitnetRequestBoardTrustableDefault
         )
     {   
         __reportResultGasBase = _reportResultGasBase;
+        __reportResultWithCallbackGasBase = _reportResultWithCallbackGasBase;
+        __reportResultWithCallbackRevertGasBase = _reportResultWithCallbackRevertGasBase;
         __sstoreFromZeroGas = _sstoreFromZeroGas;
     }
 
@@ -53,24 +59,39 @@ contract WitnetRequestBoardTrustableDefault
         return _gasPrice * (
             __reportResultGasBase
                 + __sstoreFromZeroGas * (
-                    3 + _resultMaxSize / 32
+                    5 + _resultMaxSize / 32
                 )
         );
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
     /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _maxCallbackGas)
+    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _resultMaxSize, uint256 _maxCallbackGas)
         public view
         virtual override
         returns (uint256)
     {
-        return _gasPrice * (
-            __reportResultGasBase
-                + 3 * __sstoreFromZeroGas
-                + _maxCallbackGas
+        uint _reportResultWithetCallbackGasThreshold = (
+            __reportResultWithCallbackRevertGasBase
+                + __sstoreFromZeroGas * (
+                    5 + _resultMaxSize / 32
+                )
         );
+        if (
+            _maxCallbackGas < _reportResultWithetCallbackGasThreshold
+                || __reportResultWithCallbackGasBase + _maxCallbackGas < _reportResultWithetCallbackGasThreshold
+        ) {
+            return (_gasPrice * _reportResultWithetCallbackGasThreshold);
+        } else {
+            return (
+                _gasPrice * (
+                    __reportResultWithCallbackGasBase
+                        + _maxCallbackGas
+                )
+            );
+        }
     }
 
 
@@ -98,7 +119,7 @@ contract WitnetRequestBoardTrustableDefault
     /// Transfers ETHs to given address.
     /// @param _to Recipient address.
     /// @param _amount Amount of ETHs to transfer.
-    function _safeTransferTo(address payable _to, uint256 _amount)
+    function __safeTransferTo(address payable _to, uint256 _amount)
         internal
         virtual override
     {

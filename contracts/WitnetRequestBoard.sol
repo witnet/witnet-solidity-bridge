@@ -5,12 +5,14 @@ pragma solidity >=0.7.0 <0.9.0;
 import "./WitnetBytecodes.sol";
 import "./WitnetRequestFactory.sol";
 import "./interfaces/IWitnetRequestBoard.sol";
+import "./interfaces/IWitnetRequestBoardEvents.sol";
 
 /// @title Witnet Request Board functionality base contract.
 /// @author The Witnet Foundation.
 abstract contract WitnetRequestBoard
     is
-        IWitnetRequestBoard
+        IWitnetRequestBoard,
+        IWitnetRequestBoardEvents
 {
     function class() virtual external view returns (string memory) {
         return type(WitnetRequestBoard).name;
