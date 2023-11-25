@@ -159,7 +159,7 @@ contract WitnetPriceFeeds
         override external view
         returns (Witnet.Result memory)
     {
-        return witnet.getQueryResponseResult(_latestValidQueryId(feedId));
+        return witnet.getQueryResult(_latestValidQueryId(feedId));
     }
 
     function latestUpdateQueryId(bytes4 feedId)
@@ -187,7 +187,7 @@ contract WitnetPriceFeeds
         override external view 
         returns (Witnet.ResultError memory)
     {
-        return witnet.checkResultError(latestUpdateQueryId(feedId));
+        return witnet.getQueryResultError(latestUpdateQueryId(feedId));
     }
     
     function latestUpdateResultStatus(bytes4 feedId)
@@ -560,7 +560,7 @@ contract WitnetPriceFeeds
         returns (Witnet.ResultStatus)
     {
         if (_queryId > 0) {
-            return witnet.checkResultStatus(_queryId);
+            return witnet.getQueryResultStatus(_queryId);
         } else {
             return Witnet.ResultStatus.Ready;
         }
@@ -573,7 +573,7 @@ contract WitnetPriceFeeds
         uint _latestUpdateQueryId = latestUpdateQueryId(feedId);
         if (
             _latestUpdateQueryId > 0
-                && witnet.checkResultStatus(_latestUpdateQueryId) == Witnet.ResultStatus.Ready
+                && witnet.getQueryResultStatus(_latestUpdateQueryId) == Witnet.ResultStatus.Ready
         ) {
             return _latestUpdateQueryId;
         } else {

@@ -213,9 +213,9 @@ contract WitnetRandomness
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
         require(_queryId != 0, "WitnetRandomness: not randomized");
-        Witnet.ResultStatus _resultStatus = witnet().checkResultStatus(_queryId);
+        Witnet.ResultStatus _resultStatus = witnet().getQueryResultStatus(_queryId);
         if (_resultStatus == Witnet.ResultStatus.Ready) {
-            return witnet().getQueryResponseResult(_queryId).asBytes32();
+            return witnet().getQueryResult(_queryId).asBytes32();
         } else if (_resultStatus == Witnet.ResultStatus.Error) {
             uint256 _nextRandomizeBlock = __randomize_[_block].nextBlock;
             require(_nextRandomizeBlock != 0, "WitnetRandomness: faulty randomize");

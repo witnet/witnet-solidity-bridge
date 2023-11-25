@@ -175,74 +175,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
     // ================================================================================================================
     // --- Partial implementation of IWitnetRequestBoard --------------------------------------------------------------
-
-    /// @notice Returns query's result current status from a requester's point of view:
-    /// @notice   - 0 => Void: the query is either non-existent or deleted;
-    /// @notice   - 1 => Awaiting: the query has not yet been reported;
-    /// @notice   - 2 => Ready: the query has been succesfully solved;
-    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
-    /// @param _queryId The unique query identifier.
-    function checkResultStatus(uint256 _queryId)
-        virtual public view
-        returns (Witnet.ResultStatus)
-    {
-        Witnet.QueryStatus _queryStatus = _statusOf(_queryId);
-        if (_queryStatus == Witnet.QueryStatus.Reported) {
-            bytes storage __cborValues = __seekQueryResponse(_queryId).cborBytes;
-            // determine whether reported result is an error by peeking the first byte
-            return (__cborValues[0] == bytes1(0xd8) 
-                ? Witnet.ResultStatus.Error
-                : Witnet.ResultStatus.Ready
-            );
-        } else if (_queryStatus == Witnet.QueryStatus.Posted) {
-            return Witnet.ResultStatus.Awaiting;
-        } else {
-            return Witnet.ResultStatus.Void;
-        }
-    }
-
-    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
-    /// @param _queryId The unique query identifier.
-    function checkResultError(uint256 _queryId)
-        override external view
-        returns (Witnet.ResultError memory)
-    {
-        Witnet.ResultStatus _status = checkResultStatus(_queryId);
-        try WitnetErrorsLib.asResultError(_status, __seekQueryResponse(_queryId).cborBytes)
-            returns (Witnet.ResultError memory _resultError)
-        {
-            return _resultError;
-        } 
-        catch Error(string memory _reason) {
-            return Witnet.ResultError({
-                code: Witnet.ResultErrorCodes.Unknown,
-                reason: string(abi.encodePacked("WitnetErrorsLib: ", _reason))
-            });
-        }
-        catch (bytes memory) {
-            return Witnet.ResultError({
-                code: Witnet.ResultErrorCodes.Unknown,
-                reason: "WitnetErrorsLib: assertion failed"
-            });
-        }
-    }
-
-    /// @notice Returns query's result traceability data
-    /// @param _queryId The unique query identifier.
-    /// @return _resultTimestamp Timestamp at which the query was solved by the Witnet blockchain.
-    /// @return _resultDrTxHash Witnet blockchain hash of the commit/reveal act that solved the query.
-    function checkResultTraceability(uint256 _queryId)
-        external view
-        override
-        returns (uint256, bytes32)
-    {
-        Witnet.Response storage __response = __seekQueryResponse(_queryId);
-        return (
-            __response.timestamp,
-            __response.drTxHash
-        );
-    }
-
+    
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. 
     /// @dev Data requesters should consider upgrading the reward on queries providing no actual earnings.
@@ -293,16 +226,6 @@ abstract contract WitnetRequestBoardTrustableBase
         return __storage().queries[_queryId];
     }
 
-    /// Gets current status of given query.
-    function getQueryStatus(uint256 _queryId)
-        external view
-        override
-        returns (Witnet.QueryStatus)
-    {
-        return _statusOf(_queryId);
-
-    }
-
     /// Retrieves the whole Request record posted to the Witnet Request Board.
     /// @dev Fails if the `_queryId` is not valid or, if it has already been reported
     /// @dev or deleted.
@@ -310,7 +233,7 @@ abstract contract WitnetRequestBoardTrustableBase
     function getQueryRequest(uint256 _queryId)
         external view
         override
-        inStatus(_queryId, Witnet.QueryStatus.Posted)
+        // inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (Witnet.Request memory)
     {
         return __seekQueryRequest(_queryId);
@@ -344,7 +267,7 @@ abstract contract WitnetRequestBoardTrustableBase
     function getQueryResponse(uint256 _queryId)
         external view
         override
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        // inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (Witnet.Response memory _response)
     {
         return __seekQueryResponse(_queryId);
@@ -353,14 +276,81 @@ abstract contract WitnetRequestBoardTrustableBase
     /// Retrieves the Witnet-provided CBOR-bytes result of a previously posted request.
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier
-    function getQueryResponseResult(uint256 _queryId)
+    function getQueryResult(uint256 _queryId)
         external view
         override
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        // inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (Witnet.Result memory)
     {
         Witnet.Response storage _response = __seekQueryResponse(_queryId);
         return _response.cborBytes.resultFromCborBytes();
+    }
+
+    /// @notice Returns query's result traceability data
+    /// @param _queryId The unique query identifier.
+    /// @return _resultTimestamp Timestamp at which the query was solved by the Witnet blockchain.
+    /// @return _resultDrTxHash Witnet blockchain hash of the commit/reveal act that solved the query.
+    function getQueryResultAuditTrail(uint256 _queryId)
+        external view
+        override
+        returns (uint256, bytes32)
+    {
+        Witnet.Response storage __response = __seekQueryResponse(_queryId);
+        return (
+            __response.timestamp,
+            __response.drTxHash
+        );
+    }
+
+    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
+    /// @param _queryId The unique query identifier.
+    function getQueryResultError(uint256 _queryId)
+        override external view
+        returns (Witnet.ResultError memory)
+    {
+        Witnet.ResultStatus _status = getQueryResultStatus(_queryId);
+        try WitnetErrorsLib.asResultError(_status, __seekQueryResponse(_queryId).cborBytes)
+            returns (Witnet.ResultError memory _resultError)
+        {
+            return _resultError;
+        } 
+        catch Error(string memory _reason) {
+            return Witnet.ResultError({
+                code: Witnet.ResultErrorCodes.Unknown,
+                reason: string(abi.encodePacked("WitnetErrorsLib: ", _reason))
+            });
+        }
+        catch (bytes memory) {
+            return Witnet.ResultError({
+                code: Witnet.ResultErrorCodes.Unknown,
+                reason: "WitnetErrorsLib: assertion failed"
+            });
+        }
+    }
+
+    /// @notice Returns query's result current status from a requester's point of view:
+    /// @notice   - 0 => Void: the query is either non-existent or deleted;
+    /// @notice   - 1 => Awaiting: the query has not yet been reported;
+    /// @notice   - 2 => Ready: the query has been succesfully solved;
+    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
+    /// @param _queryId The unique query identifier.
+    function getQueryResultStatus(uint256 _queryId)
+        virtual public view
+        returns (Witnet.ResultStatus)
+    {
+        Witnet.QueryStatus _queryStatus = _statusOf(_queryId);
+        if (_queryStatus == Witnet.QueryStatus.Reported) {
+            bytes storage __cborValues = __seekQueryResponse(_queryId).cborBytes;
+            // determine whether reported result is an error by peeking the first byte
+            return (__cborValues[0] == bytes1(0xd8) 
+                ? Witnet.ResultStatus.Error
+                : Witnet.ResultStatus.Ready
+            );
+        } else if (_queryStatus == Witnet.QueryStatus.Posted) {
+            return Witnet.ResultStatus.Awaiting;
+        } else {
+            return Witnet.ResultStatus.Void;
+        }
     }
 
     /// Retrieves the reward currently set for a previously posted request.
@@ -374,6 +364,16 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint256)
     {
         return __seekQueryRequest(_queryId).evmReward;
+    }
+
+    /// Gets current status of given query.
+    function getQueryStatus(uint256 _queryId)
+        external view
+        override
+        returns (Witnet.QueryStatus)
+    {
+        return _statusOf(_queryId);
+
     }
 
     /// Returns next request id to be generated by the Witnet Request Board.
@@ -481,7 +481,29 @@ abstract contract WitnetRequestBoardTrustableBase
             _querySLA.packed()
         );
         __seekQueryRequest(_queryId).maxCallbackGas = _queryMaxCallbackGas;
-        emit NewQuery(_queryId, _getMsgValue());
+        emit NewWitnetQuery(_queryId, _getMsgValue());
+    }
+
+    function retryQuery(uint256 _queryId)
+        virtual override
+        external payable
+        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        onlyRequester(_queryId)
+        returns (uint256 _newQuery)
+    {
+        _newQuery = __newQuery();
+        __storage().queries[_newQuery] = __storage().queries[_queryId];
+        // todo ...
+    }
+
+    function retryQueryWithCallback(uint256 _queryId, uint256)
+        virtual override
+        external payable
+        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        onlyRequester(_queryId)
+        returns (uint256)
+    {
+        // TODO
     }
     
     /// Increments the reward of a previously posted request by adding the transaction value to it.

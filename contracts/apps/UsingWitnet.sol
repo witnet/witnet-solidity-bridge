@@ -66,28 +66,28 @@ abstract contract UsingWitnet
         return __witnet.estimateBaseFeeWithCallback(tx.gasprice, _resultMaxSize, _maxCallbackGas);
     }
 
-    function _witnetCheckQueryResultTraceability(uint256 _witnetQueryId)
+    function _witnetCheckQueryResultAuditTrail(uint256 _witnetQueryId)
         internal view
         returns (
             uint256 _witnetQueryResponseTimestamp,
             bytes32 _witnetQueryResponseDrTxHash
         )
     {
-        return __witnet.checkResultTraceability(_witnetQueryId);
+        return __witnet.getQueryResultAuditTrail(_witnetQueryId);
     }
 
     function _witnetCheckQueryResultStatus(uint256 _witnetQueryId)
         internal view
         returns (Witnet.ResultStatus)
     {
-        return __witnet.checkResultStatus(_witnetQueryId);
+        return __witnet.getQueryResultStatus(_witnetQueryId);
     }
 
     function _witnetCheckQueryResultError(uint256 _witnetQueryId)
         internal view
         returns (Witnet.ResultError memory)
     {
-        return __witnet.checkResultError(_witnetQueryId);
+        return __witnet.getQueryResultError(_witnetQueryId);
     }
 
     function __witnetRequestData(

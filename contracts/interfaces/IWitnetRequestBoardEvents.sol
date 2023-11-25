@@ -8,12 +8,12 @@ interface IWitnetRequestBoardEvents {
 
     /// Emitted every time a new query containing non-verified data request is posted to the WRB.
     event NewQueryWithBytecode(uint256 indexed id, uint256 evmReward, bytes radBytecode);
-    
-    /// Emitted when the reward of some not-yet reported query is upgraded.
-    event WitnetQueryRewardUpgraded(uint256 indexed id, uint256 evmReward);
 
     /// Emitted when a query with no callback gets reported into the WRB.
     event WitnetQueryReported(uint256 indexed id, uint256 evmGasPrice);
+
+    /// Emitted when the reward of some not-yet reported query is upgraded.
+    event WitnetQueryRewardUpgraded(uint256 indexed id, uint256 evmReward);
 
     /// Emitted when a query with a callback gets successfully reported into the WRB.
     event WitnetResponseDelivered(uint256 indexed id, uint256 evmGasPrice, uint256 evmCallbackGas);
