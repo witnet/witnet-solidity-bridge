@@ -174,71 +174,337 @@ abstract contract WitnetRequestBoardTrustableBase
 
 
     // ================================================================================================================
-    // --- Full implementation of 'IWitnetRequestBoardAdmin' ----------------------------------------------------------
+    // --- Partial implementation of IWitnetRequestBoard --------------------------------------------------------------
 
-    /// Gets admin/owner address.
-    function owner()
-        public view
-        override
-        returns (address)
+    /// @notice Returns query's result current status from a requester's point of view:
+    /// @notice   - 0 => Void: the query is either non-existent or deleted;
+    /// @notice   - 1 => Awaiting: the query has not yet been reported;
+    /// @notice   - 2 => Ready: the query has been succesfully solved;
+    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
+    /// @param _queryId The unique query identifier.
+    function checkResultStatus(uint256 _queryId)
+        virtual public view
+        returns (Witnet.ResultStatus)
     {
-        return __storage().owner;
+        Witnet.QueryStatus _queryStatus = _statusOf(_queryId);
+        if (_queryStatus == Witnet.QueryStatus.Reported) {
+            bytes storage __cborValues = __seekQueryResponse(_queryId).cborBytes;
+            // determine whether reported result is an error by peeking the first byte
+            return (__cborValues[0] == bytes1(0xd8) 
+                ? Witnet.ResultStatus.Error
+                : Witnet.ResultStatus.Ready
+            );
+        } else if (_queryStatus == Witnet.QueryStatus.Posted) {
+            return Witnet.ResultStatus.Awaiting;
+        } else {
+            return Witnet.ResultStatus.Void;
+        }
     }
 
-    /// Transfers ownership.
-    function transferOwnership(address _newOwner)
-        public
+    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
+    /// @param _queryId The unique query identifier.
+    function checkResultError(uint256 _queryId)
+        override external view
+        returns (Witnet.ResultError memory)
+    {
+        Witnet.ResultStatus _status = checkResultStatus(_queryId);
+        try WitnetErrorsLib.asResultError(_status, __seekQueryResponse(_queryId).cborBytes)
+            returns (Witnet.ResultError memory _resultError)
+        {
+            return _resultError;
+        } 
+        catch Error(string memory _reason) {
+            return Witnet.ResultError({
+                code: Witnet.ResultErrorCodes.Unknown,
+                reason: string(abi.encodePacked("WitnetErrorsLib: ", _reason))
+            });
+        }
+        catch (bytes memory) {
+            return Witnet.ResultError({
+                code: Witnet.ResultErrorCodes.Unknown,
+                reason: "WitnetErrorsLib: assertion failed"
+            });
+        }
+    }
+
+    /// @notice Returns query's result traceability data
+    /// @param _queryId The unique query identifier.
+    /// @return _resultTimestamp Timestamp at which the query was solved by the Witnet blockchain.
+    /// @return _resultDrTxHash Witnet blockchain hash of the commit/reveal act that solved the query.
+    function checkResultTraceability(uint256 _queryId)
+        external view
+        override
+        returns (uint256, bytes32)
+    {
+        Witnet.Response storage __response = __seekQueryResponse(_queryId);
+        return (
+            __response.timestamp,
+            __response.drTxHash
+        );
+    }
+
+    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
+    /// @notice based on the gas price of the calling transaction. 
+    /// @dev Data requesters should consider upgrading the reward on queries providing no actual earnings.
+    function estimateQueryEarnings(uint256 _queryId, uint256 _gasPrice)
         virtual override
-        onlyOwner
+        external view
+        returns (int256 _earnings)
     {
-        address _owner = __storage().owner;
-        if (_newOwner != _owner) {
-            __storage().owner = _newOwner;
-            emit OwnershipTransferred(_owner, _newOwner);
+        Witnet.Request storage __request = __seekQueryRequest(_queryId);
+
+        uint _maxResultSize = registry().lookupRadonRequestResultMaxSize(__request.radHash);
+        _earnings = int(__request.evmReward);
+        if (__request.maxCallbackGas > 0) {
+            _earnings -= int(estimateBaseFeeWithCallback(
+                _gasPrice, 
+                _maxResultSize,
+                __request.maxCallbackGas
+            ));
+        } else {
+            _earnings -= int(estimateBaseFee(
+                _gasPrice,
+                _maxResultSize
+            ));
         }
     }
 
-
-    // ================================================================================================================
-    // --- Full implementation of 'IWitnetRequestBoardAdminACLs' ------------------------------------------------------
-
-    /// Tells whether given address is included in the active reporters control list.
-    /// @param _reporter The address to be checked.
-    function isReporter(address _reporter) public view override returns (bool) {
-        return _acls().isReporter_[_reporter];
+    /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
+    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
+    /// @dev the one that actually posted the given request.
+    /// @param _queryId The unique query identifier.
+    function fetchQueryResponse(uint256 _queryId)
+        virtual override
+        external
+        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        onlyRequester(_queryId)
+        returns (Witnet.Response memory _response)
+    {
+        _response = __seekQuery(_queryId).response;
+        delete __storage().queries[_queryId];
     }
 
-    /// Adds given addresses to the active reporters control list.
-    /// @dev Can only be called from the owner address.
-    /// @dev Emits the `ReportersSet` event. 
-    /// @param _reporters List of addresses to be added to the active reporters control list.
-    function setReporters(address[] memory _reporters)
-        public
-        override
-        onlyOwner
+    /// Gets the whole Query data contents, if any, no matter its current status.
+    function getQueryData(uint256 _queryId)
+      external view
+      override
+      returns (Witnet.Query memory)
     {
-        __setReporters(_reporters);
+        return __storage().queries[_queryId];
     }
 
-    /// Removes given addresses from the active reporters control list.
-    /// @dev Can only be called from the owner address.
-    /// @dev Emits the `ReportersUnset` event. 
-    /// @param _exReporters List of addresses to be added to the active reporters control list.
-    function unsetReporters(address[] memory _exReporters)
-        public
+    /// Gets current status of given query.
+    function getQueryStatus(uint256 _queryId)
+        external view
         override
-        onlyOwner
+        returns (Witnet.QueryStatus)
     {
-        for (uint ix = 0; ix < _exReporters.length; ix ++) {
-            address _reporter = _exReporters[ix];
-            _acls().isReporter_[_reporter] = false;
+        return _statusOf(_queryId);
+
+    }
+
+    /// Retrieves the whole Request record posted to the Witnet Request Board.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been reported
+    /// @dev or deleted.
+    /// @param _queryId The unique identifier of a previously posted query.
+    function getQueryRequest(uint256 _queryId)
+        external view
+        override
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
+        returns (Witnet.Request memory)
+    {
+        return __seekQueryRequest(_queryId);
+    }
+    
+    /// Retrieves the serialized bytecode of a previously posted Witnet Data Request.
+    /// @dev Fails if the `_queryId` is not valid, or if the related script bytecode 
+    /// @dev got changed after being posted. Returns empty array once it gets reported, 
+    /// @dev or deleted.
+    /// @param _queryId The unique query identifier.
+    function getQueryRequestBytecode(uint256 _queryId)
+        external view
+        virtual override
+        returns (bytes memory _bytecode)
+    {
+        require(
+            _statusOf(_queryId) != Witnet.QueryStatus.Unknown,
+            "WitnetRequestBoardTrustableBase: not yet posted"
+        );
+        Witnet.Request storage __request = __seekQueryRequest(_queryId);
+        if (__request._addr != address(0)) {
+            _bytecode = IWitnetRequest(__request._addr).bytecode();
+        } else if (__request.radHash != bytes32(0)) {
+            _bytecode = registry().bytecodeOf(__request.radHash);
         }
-        emit ReportersUnset(_exReporters);
     }
 
+    /// Retrieves the Witnet-provided result, and metadata, to a previously posted request.    
+    /// @dev Fails if the `_queryId` is not in 'Reported' status.
+    /// @param _queryId The unique query identifier
+    function getQueryResponse(uint256 _queryId)
+        external view
+        override
+        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        returns (Witnet.Response memory _response)
+    {
+        return __seekQueryResponse(_queryId);
+    }
 
+    /// Retrieves the Witnet-provided CBOR-bytes result of a previously posted request.
+    /// @dev Fails if the `_queryId` is not in 'Reported' status.
+    /// @param _queryId The unique query identifier
+    function getQueryResponseResult(uint256 _queryId)
+        external view
+        override
+        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        returns (Witnet.Result memory)
+    {
+        Witnet.Response storage _response = __seekQueryResponse(_queryId);
+        return _response.cborBytes.resultFromCborBytes();
+    }
+
+    /// Retrieves the reward currently set for a previously posted request.
+    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
+    /// @dev reported, or deleted. 
+    /// @param _queryId The unique query identifier
+    function getQueryReward(uint256 _queryId)
+        external view
+        override
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
+        returns (uint256)
+    {
+        return __seekQueryRequest(_queryId).evmReward;
+    }
+
+    /// Returns next request id to be generated by the Witnet Request Board.
+    function getNextQueryId()
+        external view 
+        override
+        returns (uint256)
+    {
+        return __storage().nonce + 1;
+    }
+
+    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
+    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
+    /// result to this request.
+    /// @dev Fails if:
+    /// @dev - provided reward is too low.
+    /// @param _radHash The radHash of the Witnet Data Request.
+    /// @param _slaHash The slaHash of the Witnet Data Request.
+    function postRequest(bytes32 _radHash, bytes32 _slaHash)
+        virtual override
+        external payable
+        checkReward(estimateBaseFee(_getGasPrice(), 32))
+        returns (uint256 _queryId)
+    {
+        _queryId = __postRequest(_radHash, _slaHash);
+        // Let observers know that a new request has been posted
+        emit NewQuery(_queryId, _getMsgValue());
+    }
+
+    /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and 
+    /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
+    /// @notice transferred to the reporter who relays back the Witnet-provided result to this request.
+    /// @dev Fails if provided reward is too low.
+    /// @dev The result to the query will be saved into the WitnetRequestBoard storage.
+    /// @param _radHash The RAD hash of the data request to be solved by Witnet.
+    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
+    /// @return _queryId Unique query identifier.
+    function postRequest(
+            bytes32 _radHash, 
+            WitnetV2.RadonSLA calldata _querySLA
+        )
+        virtual override
+        external payable
+        checkReward(estimateBaseFee(_getGasPrice(), 32))
+        checkSLA(_querySLA)
+        returns (uint256 _queryId)
+    {
+        _queryId = __postRequest(
+            _radHash, 
+            _querySLA.packed()
+        );
+        // Let observers know that a new request has been posted
+        emit NewQuery(_queryId, _getMsgValue());
+    }
+
+    /// @notice Requests the execution of the given Witnet Data Request bytecode, in expectation that it will be relayed and 
+    /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
+    /// @notice transferred to the reporter who relays back the Witnet-provided result to this request.
+    /// @dev Fails if provided reward is too low.
+    /// @dev The result to the query will be saved into the WitnetRequestBoard storage.
+    /// @param _radBytecode The raw bytecode of the Witnet Data Request to be solved by Witnet.
+    /// @param _querySLA The data query SLA to be fulfilled by the Witnet blockchain.
+    /// @return _queryId A unique query identifier.
+    function postRequest(
+            bytes calldata _radBytecode, 
+            WitnetV2.RadonSLA calldata _querySLA
+        )
+        virtual override
+        external payable
+        checkReward(estimateBaseFee(_getGasPrice(), 32))
+        checkSLA(_querySLA)
+        returns (uint256 _queryId)
+    {
+        _queryId = __postRequest(
+            registry().hashOf(_radBytecode), 
+            _querySLA.packed()
+        );
+        // Let observers know that a new request has been posted
+        emit NewQueryWithBytecode(_queryId, _getMsgValue(), _radBytecode);
+    }
+   
+    /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
+    /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
+    /// @notice reporter who relays back the Witnet-provided result to this request.
+    /// @dev Fails if, provided reward is too low.
+    /// @dev The caller must be a contract implementing the IWitnetConsumer interface.
+    /// @param _radHash The RAD hash of the data request to be solved by Witnet.
+    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
+    /// @param _queryMaxCallbackGas Maximum gas to be spent when reporting the data request result.
+    /// @return _queryId Unique query identifier.
+    function postRequestWithCallback(
+            bytes32 _radHash, 
+            WitnetV2.RadonSLA calldata _querySLA,
+            uint256 _queryMaxCallbackGas
+        )
+        virtual override
+        external payable 
+        checkCallbackRecipient(msg.sender)
+        checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  32, _queryMaxCallbackGas))
+        checkSLA(_querySLA)
+        returns (uint256 _queryId)
+    {
+        _queryId = __postRequest(
+            _radHash, 
+            _querySLA.packed()
+        );
+        __seekQueryRequest(_queryId).maxCallbackGas = _queryMaxCallbackGas;
+        emit NewQuery(_queryId, _getMsgValue());
+    }
+    
+    /// Increments the reward of a previously posted request by adding the transaction value to it.
+    /// @dev Updates request `gasPrice` in case this method is called with a higher 
+    /// @dev gas price value than the one used in previous calls to `postRequest` or
+    /// @dev `upgradeReward`. 
+    /// @dev Fails if the `_queryId` is not in 'Posted' status.
+    /// @dev Fails also in case the request `gasPrice` is increased, and the new 
+    /// @dev reward value gets below new recalculated threshold. 
+    /// @param _queryId The unique query identifier.
+    function upgradeQueryReward(uint256 _queryId)
+        external payable
+        virtual override      
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
+    {
+        Witnet.Request storage __request = __seekQueryRequest(_queryId);
+        __request.evmReward += _getMsgValue();
+        emit QueryRewardUpgraded(_queryId, __request.evmReward);
+    }
+
+    
     // ================================================================================================================
-    // --- IWitnetRequestBoard Reporter methods -----------------------------------------------------------------------
+    // --- Full implementation of IWitnetRequestBoardReporter ---------------------------------------------------------
 
     /// Reports the Witnet-provided result to a previously posted request. 
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
@@ -389,339 +655,69 @@ abstract contract WitnetRequestBoardTrustableBase
             );
         }
     }
-    
+
 
     // ================================================================================================================
-    // --- IWitnetRequestBoard Requester methods ----------------------------------------------------------------------
+    // --- Full implementation of 'IWitnetRequestBoardAdmin' ----------------------------------------------------------
 
-    /// @notice Returns query's result current status from a requester's point of view:
-    /// @notice   - 0 => Void: the query is either non-existent or deleted;
-    /// @notice   - 1 => Awaiting: the query has not yet been reported;
-    /// @notice   - 2 => Ready: the query has been succesfully solved;
-    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
-    /// @param _queryId The unique query identifier.
-    function checkResultStatus(uint256 _queryId)
-        virtual public view
-        returns (Witnet.ResultStatus)
-    {
-        Witnet.QueryStatus _queryStatus = _statusOf(_queryId);
-        if (_queryStatus == Witnet.QueryStatus.Reported) {
-            bytes storage __cborValues = __seekQueryResponse(_queryId).cborBytes;
-            // determine whether reported result is an error by peeking the first byte
-            return (__cborValues[0] == bytes1(0xd8) 
-                ? Witnet.ResultStatus.Error
-                : Witnet.ResultStatus.Ready
-            );
-        } else if (_queryStatus == Witnet.QueryStatus.Posted) {
-            return Witnet.ResultStatus.Awaiting;
-        } else {
-            return Witnet.ResultStatus.Void;
-        }
-    }
-
-    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
-    /// @param _queryId The unique query identifier.
-    function checkResultError(uint256 _queryId)
-        override external view
-        returns (Witnet.ResultError memory)
-    {
-        Witnet.ResultStatus _status = checkResultStatus(_queryId);
-        try WitnetErrorsLib.asResultError(_status, __seekQueryResponse(_queryId).cborBytes)
-            returns (Witnet.ResultError memory _resultError)
-        {
-            return _resultError;
-        } 
-        catch Error(string memory _reason) {
-            return Witnet.ResultError({
-                code: Witnet.ResultErrorCodes.Unknown,
-                reason: string(abi.encodePacked("WitnetErrorsLib: ", _reason))
-            });
-        }
-        catch (bytes memory) {
-            return Witnet.ResultError({
-                code: Witnet.ResultErrorCodes.Unknown,
-                reason: "WitnetErrorsLib: assertion failed"
-            });
-        }
-    }
-
-    /// @notice Returns query's result traceability data
-    /// @param _queryId The unique query identifier.
-    /// @return _resultTimestamp Timestamp at which the query was solved by the Witnet blockchain.
-    /// @return _resultDrTxHash Witnet blockchain hash of the commit/reveal act that solved the query.
-    function checkResultTraceability(uint256 _queryId)
-        external view
+    /// Gets admin/owner address.
+    function owner()
+        public view
         override
-        returns (uint256, bytes32)
+        returns (address)
     {
-        Witnet.Response storage __response = __seekQueryResponse(_queryId);
-        return (
-            __response.timestamp,
-            __response.drTxHash
-        );
+        return __storage().owner;
     }
 
-    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
-    /// @notice based on the gas price of the calling transaction. 
-    /// @dev Data requesters should consider upgrading the reward on queries providing no actual earnings.
-    function estimateQueryEarnings(uint256 _queryId, uint256 _gasPrice)
-        virtual override
-        external view
-        returns (int256 _earnings)
-    {
-        Witnet.Request storage __request = __seekQueryRequest(_queryId);
-
-        uint _maxResultSize = registry().lookupRadonRequestResultMaxSize(__request.radHash);
-        _earnings = int(__request.evmReward);
-        if (__request.maxCallbackGas > 0) {
-            _earnings -= int(estimateBaseFeeWithCallback(
-                _gasPrice, 
-                _maxResultSize,
-                __request.maxCallbackGas
-            ));
-        } else {
-            _earnings -= int(estimateBaseFee(
-                _gasPrice,
-                _maxResultSize
-            ));
-        }
-    }
-
-    /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
-    /// @dev the one that actually posted the given request.
-    /// @param _queryId The unique query identifier.
-    function fetchQueryResponse(uint256 _queryId)
+    /// Transfers ownership.
+    function transferOwnership(address _newOwner)
         public
         virtual override
-        onlyRequester(_queryId)
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
-        returns (Witnet.Response memory _response)
+        onlyOwner
     {
-        _response = __seekQuery(_queryId).response;
-        delete __storage().queries[_queryId];
-    }
-
-    /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.
-    /// A reward amount is escrowed by the Witnet Request Board that will be transferred to the reporter who relays back the Witnet-provided 
-    /// result to this request.
-    /// @dev Fails if:
-    /// @dev - provided reward is too low.
-    /// @param _radHash The radHash of the Witnet Data Request.
-    /// @param _slaHash The slaHash of the Witnet Data Request.
-    function postRequest(bytes32 _radHash, bytes32 _slaHash)
-        virtual override
-        public payable
-        checkReward(estimateBaseFee(_getGasPrice(), 32))
-        returns (uint256 _queryId)
-    {
-        _queryId = __postRequest(_radHash, _slaHash);
-        // Let observers know that a new request has been posted
-        emit NewQuery(_queryId, _getMsgValue());
-    }
-
-    /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and 
-    /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
-    /// @notice transferred to the reporter who relays back the Witnet-provided result to this request.
-    /// @dev Fails if provided reward is too low.
-    /// @dev The result to the query will be saved into the WitnetRequestBoard storage.
-    /// @param _radHash The RAD hash of the data request to be solved by Witnet.
-    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
-    /// @return _queryId Unique query identifier.
-    function postRequest(
-            bytes32 _radHash, 
-            WitnetV2.RadonSLA calldata _querySLA
-        )
-        virtual override
-        public payable
-        checkReward(estimateBaseFee(_getGasPrice(), 32))
-        checkSLA(_querySLA)
-        returns (uint256 _queryId)
-    {
-        _queryId = __postRequest(
-            _radHash, 
-            _querySLA.packed()
-        );
-        // Let observers know that a new request has been posted
-        emit NewQuery(_queryId, _getMsgValue());
-    }
-
-    /// @notice Requests the execution of the given Witnet Data Request bytecode, in expectation that it will be relayed and 
-    /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
-    /// @notice transferred to the reporter who relays back the Witnet-provided result to this request.
-    /// @dev Fails if provided reward is too low.
-    /// @dev The result to the query will be saved into the WitnetRequestBoard storage.
-    /// @param _radBytecode The raw bytecode of the Witnet Data Request to be solved by Witnet.
-    /// @param _querySLA The data query SLA to be fulfilled by the Witnet blockchain.
-    /// @return _queryId A unique query identifier.
-    function postRequest(
-            bytes calldata _radBytecode, 
-            WitnetV2.RadonSLA calldata _querySLA
-        )
-        virtual override
-        public payable
-        checkReward(estimateBaseFee(_getGasPrice(), 32))
-        checkSLA(_querySLA)
-        returns (uint256 _queryId)
-    {
-        _queryId = __postRequest(
-            registry().hashOf(_radBytecode), 
-            _querySLA.packed()
-        );
-        // Let observers know that a new request has been posted
-        emit NewQueryWithBytecode(_queryId, _getMsgValue(), _radBytecode);
-    }
-   
-    /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
-    /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
-    /// @notice reporter who relays back the Witnet-provided result to this request.
-    /// @dev Fails if, provided reward is too low.
-    /// @dev The caller must be a contract implementing the IWitnetConsumer interface.
-    /// @param _radHash The RAD hash of the data request to be solved by Witnet.
-    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
-    /// @param _queryMaxCallbackGas Maximum gas to be spent when reporting the data request result.
-    /// @return _queryId Unique query identifier.
-    function postRequestWithCallback(
-            bytes32 _radHash, 
-            WitnetV2.RadonSLA calldata _querySLA,
-            uint256 _queryMaxCallbackGas
-        )
-        virtual override
-        external payable 
-        checkCallbackRecipient(msg.sender)
-        checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  32, _queryMaxCallbackGas))
-        checkSLA(_querySLA)
-        returns (uint256 _queryId)
-    {
-        _queryId = __postRequest(
-            _radHash, 
-            _querySLA.packed()
-        );
-        __seekQueryRequest(_queryId).maxCallbackGas = _queryMaxCallbackGas;
-        emit NewQuery(_queryId, _getMsgValue());
-    }
-    
-    /// Increments the reward of a previously posted request by adding the transaction value to it.
-    /// @dev Updates request `gasPrice` in case this method is called with a higher 
-    /// @dev gas price value than the one used in previous calls to `postRequest` or
-    /// @dev `upgradeReward`. 
-    /// @dev Fails if the `_queryId` is not in 'Posted' status.
-    /// @dev Fails also in case the request `gasPrice` is increased, and the new 
-    /// @dev reward value gets below new recalculated threshold. 
-    /// @param _queryId The unique query identifier.
-    function upgradeQueryReward(uint256 _queryId)
-        public payable
-        virtual override      
-        inStatus(_queryId, Witnet.QueryStatus.Posted)
-    {
-        Witnet.Request storage __request = __seekQueryRequest(_queryId);
-        __request.evmReward += _getMsgValue();
-        emit QueryRewardUpgraded(_queryId, __request.evmReward);
+        address _owner = __storage().owner;
+        if (_newOwner != _owner) {
+            __storage().owner = _newOwner;
+            emit OwnershipTransferred(_owner, _newOwner);
+        }
     }
 
 
     // ================================================================================================================
-    // --- 'IWitnetRequestBoard' Viewer methods -----------------------------------------------------------------------
+    // --- Full implementation of 'IWitnetRequestBoardAdminACLs' ------------------------------------------------------
 
-    /// Returns next request id to be generated by the Witnet Request Board.
-    function getNextQueryId()
-        external view 
+    /// Tells whether given address is included in the active reporters control list.
+    /// @param _reporter The address to be checked.
+    function isReporter(address _reporter) public view override returns (bool) {
+        return _acls().isReporter_[_reporter];
+    }
+
+    /// Adds given addresses to the active reporters control list.
+    /// @dev Can only be called from the owner address.
+    /// @dev Emits the `ReportersSet` event. 
+    /// @param _reporters List of addresses to be added to the active reporters control list.
+    function setReporters(address[] memory _reporters)
+        public
         override
-        returns (uint256)
+        onlyOwner
     {
-        return __storage().nonce + 1;
+        __setReporters(_reporters);
     }
 
-    /// Gets the whole Query data contents, if any, no matter its current status.
-    function getQueryData(uint256 _queryId)
-      external view
-      override
-      returns (Witnet.Query memory)
-    {
-        return __storage().queries[_queryId];
-    }
-
-    /// Gets current status of given query.
-    function getQueryStatus(uint256 _queryId)
-        external view
+    /// Removes given addresses from the active reporters control list.
+    /// @dev Can only be called from the owner address.
+    /// @dev Emits the `ReportersUnset` event. 
+    /// @param _exReporters List of addresses to be added to the active reporters control list.
+    function unsetReporters(address[] memory _exReporters)
+        public
         override
-        returns (Witnet.QueryStatus)
+        onlyOwner
     {
-        return _statusOf(_queryId);
-
-    }
-
-    /// Retrieves the whole Request record posted to the Witnet Request Board.
-    /// @dev Fails if the `_queryId` is not valid or, if it has already been reported
-    /// @dev or deleted.
-    /// @param _queryId The unique identifier of a previously posted query.
-    function getQueryRequest(uint256 _queryId)
-        external view
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Posted)
-        returns (Witnet.Request memory)
-    {
-        return __seekQueryRequest(_queryId);
-    }
-    
-    /// Retrieves the serialized bytecode of a previously posted Witnet Data Request.
-    /// @dev Fails if the `_queryId` is not valid, or if the related script bytecode 
-    /// @dev got changed after being posted. Returns empty array once it gets reported, 
-    /// @dev or deleted.
-    /// @param _queryId The unique query identifier.
-    function getQueryRequestBytecode(uint256 _queryId)
-        external view
-        virtual override
-        returns (bytes memory _bytecode)
-    {
-        require(
-            _statusOf(_queryId) != Witnet.QueryStatus.Unknown,
-            "WitnetRequestBoardTrustableBase: not yet posted"
-        );
-        Witnet.Request storage __request = __seekQueryRequest(_queryId);
-        if (__request._addr != address(0)) {
-            _bytecode = IWitnetRequest(__request._addr).bytecode();
-        } else if (__request.radHash != bytes32(0)) {
-            _bytecode = registry().bytecodeOf(__request.radHash);
+        for (uint ix = 0; ix < _exReporters.length; ix ++) {
+            address _reporter = _exReporters[ix];
+            _acls().isReporter_[_reporter] = false;
         }
-    }
-
-    /// Retrieves the Witnet-provided result, and metadata, to a previously posted request.    
-    /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier
-    function getQueryResponse(uint256 _queryId)
-        external view
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
-        returns (Witnet.Response memory _response)
-    {
-        return __seekQueryResponse(_queryId);
-    }
-
-    /// Retrieves the Witnet-provided CBOR-bytes result of a previously posted request.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status.
-    /// @param _queryId The unique query identifier
-    function getQueryResponseResult(uint256 _queryId)
-        external view
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
-        returns (Witnet.Result memory)
-    {
-        Witnet.Response storage _response = __seekQueryResponse(_queryId);
-        return _response.cborBytes.resultFromCborBytes();
-    }
-
-    /// Retrieves the reward currently set for a previously posted request.
-    /// @dev Fails if the `_queryId` is not valid or, if it has already been 
-    /// @dev reported, or deleted. 
-    /// @param _queryId The unique query identifier
-    function getQueryReward(uint256 _queryId)
-        external view
-        override
-        inStatus(_queryId, Witnet.QueryStatus.Posted)
-        returns (uint256)
-    {
-        return __seekQueryRequest(_queryId).evmReward;
+        emit ReportersUnset(_exReporters);
     }
 
 
