@@ -395,19 +395,6 @@ abstract contract WitnetRequestBoardTrustableBase
     // ================================================================================================================
     // --- IWitnetRequestBoard Requester methods ----------------------------------------------------------------------
 
-    /// @notice Delete query without further ado.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
-    /// @dev the one that actually posted the given request.
-    /// @param _queryId The unique query identifier.
-    function burnQuery(uint256 _queryId) 
-        external
-        virtual override
-        onlyRequester(_queryId)
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
-    {
-        delete __storage().queries[_queryId];
-    }   
-
     /// @notice Returns query's result current status from a requester's point of view:
     /// @notice   - 0 => Void: the query is either non-existent or deleted;
     /// @notice   - 1 => Awaiting: the query has not yet been reported;
@@ -475,21 +462,6 @@ abstract contract WitnetRequestBoardTrustableBase
         );
     }
 
-    /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
-    /// @dev the one that actually posted the given request.
-    /// @param _queryId The unique query identifier.
-    function deleteQuery(uint256 _queryId)
-        public
-        virtual override
-        onlyRequester(_queryId)
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
-        returns (Witnet.Response memory _response)
-    {
-        _response = __seekQuery(_queryId).response;
-        delete __storage().queries[_queryId];
-    }
-
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. 
     /// @dev Data requesters should consider upgrading the reward on queries providing no actual earnings.
@@ -511,6 +483,21 @@ abstract contract WitnetRequestBoardTrustableBase
                 registry().lookupRadonRequestResultMaxSize(__request.radHash)
             ));
         }
+    }
+
+    /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
+    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
+    /// @dev the one that actually posted the given request.
+    /// @param _queryId The unique query identifier.
+    function fetchQueryResponse(uint256 _queryId)
+        public
+        virtual override
+        onlyRequester(_queryId)
+        inStatus(_queryId, Witnet.QueryStatus.Reported)
+        returns (Witnet.Response memory _response)
+    {
+        _response = __seekQuery(_queryId).response;
+        delete __storage().queries[_queryId];
     }
 
     /// Requests the execution of the given Witnet Data Request in expectation that it will be relayed and solved by the Witnet DON.

@@ -23,7 +23,7 @@ library Witnet {
         Unknown,
         Posted,
         Reported,
-        Deleted
+        Delivered
     }
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.

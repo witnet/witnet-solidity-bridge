@@ -633,13 +633,13 @@ contract WitnetPriceFeeds
                 if (_latestStatus == Witnet.ResultStatus.Ready) {
                     // If so, remove previous last valid query from the WRB:
                     if (__feed.latestValidQueryId > 0) {
-                        witnet.deleteQuery(__feed.latestValidQueryId);
+                        witnet.fetchQueryResponse(__feed.latestValidQueryId);
                     }
                     __feed.latestValidQueryId = _latestId;
                 } else {
                     // Otherwise, try to delete latest query, as it was faulty
                     // and we are about to post a new update request:
-                    try witnet.deleteQuery(_latestId) {} catch {}
+                    try witnet.fetchQueryResponse(_latestId) {} catch {}
                 }
                 // Post update request to the WRB:
                 _latestId = witnet.postRequest{value: _usedFunds}(

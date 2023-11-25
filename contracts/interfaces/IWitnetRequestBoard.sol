@@ -26,12 +26,6 @@ interface IWitnetRequestBoard {
     /// ===============================================================================================================
     /// --- Requester interface ---------------------------------------------------------------------------------------
     
-    /// @notice Delete query without further ado.
-    /// @dev Fails if the `queryId` is not in 'Reported' status, or called from an address different to
-    /// @dev the one that actually posted the given request.
-    /// @param queryId The unique query identifier.
-    function burnQuery(uint256 queryId) external;
-
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
     /// @param queryId The unique query identifier.
     function checkResultError(uint256 queryId) external view returns (Witnet.ResultError memory);
@@ -50,20 +44,23 @@ interface IWitnetRequestBoard {
     /// @return _resultDrTxHash Witnet blockchain hash of the commit/reveal act that solved the query.
     function checkResultTraceability(uint256 queryId) external view returns (uint256 _resultTimestamp, bytes32 _resultDrTxHash);
 
-    /// @notice Retrieves a copy of all Witnet-provided data related to a previously posted request, removing the whole query from the WRB storage.
-    /// @dev Fails if the `queryId` is not in 'Reported' status, or called from an address different to
-    /// @dev the one that actually posted the given request.
-    /// @param queryId The unique query identifier.
-    function deleteQuery(uint256 queryId) external returns (Witnet.Response memory);
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
     /// @param gasPrice Expected gas price to pay upon posting the data request.
     /// @param resultMaxSize Maximum expected size of returned data (in bytes).  
     function estimateBaseFee(uint256 gasPrice, uint256 resultMaxSize) external view returns (uint256);
+
+    /// @notice Retrieves a copy of all Witnet-provided data related to a previously posted request, 
+    /// removing the whole query from the WRB storage.
+    /// @dev Fails if the `queryId` is not in 'Reported' status, or called from an address different to
+    /// @dev the one that actually posted the given request.
+    /// @param queryId The unique query identifier.
+    function fetchQueryResponse(uint256 queryId) external returns (Witnet.Response memory);
     
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param gasPrice Expected gas price to pay upon posting the data request.
+    /// @param resultMaxSize Maximum expected size of returned data (in bytes).
     /// @param maxCallbackGas Maximum gas to be spent when reporting the data request result.
     function estimateBaseFeeWithCallback(uint256 gasPrice, uint256 maxCallbackGas) external view returns (uint256);
     

@@ -113,7 +113,7 @@ abstract contract WitnetRequestBoardData {
       else if (_queryId > __storage().nonce) {
         // Requester's address is removed from storage only if
         // the query gets "Deleted" by its requester.
-        return Witnet.QueryStatus.Deleted;
+        return Witnet.QueryStatus.Delivered;
       } else {
         return Witnet.QueryStatus.Unknown;
       }
@@ -127,8 +127,8 @@ abstract contract WitnetRequestBoardData {
         return "WitnetRequestBoard: not in Posted status";
       } else if (_status == Witnet.QueryStatus.Reported) {
         return "WitnetRequestBoard: not in Reported status";
-      } else if (_status == Witnet.QueryStatus.Deleted) {
-        return "WitnetRequestBoard: not in Deleted status";
+      } else if (_status == Witnet.QueryStatus.Delivered) {
+        return "WitnetRequestBoard: not in Delivered status";
       } else {
         return "WitnetRequestBoard: bad mood";
       }
