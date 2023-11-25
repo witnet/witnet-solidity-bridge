@@ -400,7 +400,7 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         _queryId = __postRequest(_radHash, _slaHash);
         // Let observers know that a new request has been posted
-        emit NewQuery(_queryId, _getMsgValue());
+        emit NewWitnetQuery(_queryId, _getMsgValue());
     }
 
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and 
@@ -426,7 +426,7 @@ abstract contract WitnetRequestBoardTrustableBase
             _querySLA.packed()
         );
         // Let observers know that a new request has been posted
-        emit NewQuery(_queryId, _getMsgValue());
+        emit NewWitnetQuery(_queryId, _getMsgValue());
     }
 
     /// @notice Requests the execution of the given Witnet Data Request bytecode, in expectation that it will be relayed and 
@@ -499,7 +499,7 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         Witnet.Request storage __request = __seekQueryRequest(_queryId);
         __request.evmReward += _getMsgValue();
-        emit QueryRewardUpgraded(_queryId, __request.evmReward);
+        emit WitnetQueryRewardUpgraded(_queryId, __request.evmReward);
     }
 
     
@@ -821,7 +821,7 @@ abstract contract WitnetRequestBoardTrustableBase
             }
             if (_evmCallbackSuccess) {
                 // => the callback run successfully
-                emit QueryCallback(
+                emit WitnetResponseDelivered(
                     _queryId,
                     _getGasPrice(),
                     _evmCallbackActualGas - gasleft()
@@ -830,7 +830,7 @@ abstract contract WitnetRequestBoardTrustableBase
                 delete __storage().queries[_queryId];
             } else {
                 // => the callback reverted
-                emit QueryCallbackRevert(
+                emit WitnetResponseDeliveryFailed(
                     _queryId,
                     _getGasPrice(),
                     _evmCallbackActualGas - gasleft(),
@@ -843,7 +843,7 @@ abstract contract WitnetRequestBoardTrustableBase
             }           
         } else {
             // => no callback is involved
-            emit QueryReport(
+            emit WitnetQueryReported(
                 _queryId, 
                 _getGasPrice()
             );
