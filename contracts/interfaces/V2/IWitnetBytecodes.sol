@@ -28,7 +28,7 @@ interface IWitnetBytecodes {
     function lookupRadonRetrievalResultDataType(bytes32 hash) external view returns (Witnet.RadonDataTypes);
     
     function lookupRadonRequestAggregator(bytes32 radHash) external view returns (Witnet.RadonReducer memory);
-    function lookupRadonRequestResultMaxSize(bytes32 radHash) external view returns (uint256);
+    function lookupRadonRequestResultMaxSize(bytes32 radHash) external view returns (uint16);
     function lookupRadonRequestResultDataType(bytes32 radHash) external view returns (Witnet.RadonDataTypes);
     function lookupRadonRequestSources(bytes32 radHash) external view returns (bytes32[] memory);
     function lookupRadonRequestSourcesCount(bytes32 radHash) external view returns (uint);

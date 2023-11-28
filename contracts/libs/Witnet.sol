@@ -15,7 +15,6 @@ library Witnet {
     struct Query {
         Request request;
         Response response;
-        address from;      // Address from which the request was posted.
     }
 
     /// Possible status of a Witnet query.
@@ -23,25 +22,29 @@ library Witnet {
         Unknown,
         Posted,
         Reported,
-        Delivered
+        Undeliverable,
+        Finalized
     }
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct Request {
-        address _addr;          // Deprecating: Formerly used as address of the (deprecated) IWitnetRequest contract.
-        bytes32 slaPacked;      // Radon SLA of the Witnet data request (packed).
-        bytes32 radHash;        // Radon radHash of the Witnet data request.
-        uint256 _gasprice;      // Deprecating: Formerly used as minimum gas price the DR resolver should pay on the solving tx.
-        uint256 evmReward;      // Escrowed reward to be paid to the DR resolver.
-        uint256 maxCallbackGas; // Maximum gas to be spent when reporting the data request result.
+        bytes32 fromCallbackGas; // Packed: contains requester address in most significant bytes20, 
+                                 //         and max callback gas limit if a callback is required.
+        bytes32 SLA;             // Packed: Service-Level Aggreement parameters upon which the data request 
+                                 //         will be solved by the Witnet blockchain.
+        bytes32 RAD;             // Verified hash of the actual data request to be solved by the Witnet blockchain.
+        uint256 reserved1;       // Reserved uint256 slot.
+        uint256 evmReward;       // EVM reward to be paid to the relayer of the Witnet resolution to the data request.
+        bytes   bytecode;        // Raw bytecode of the data request to be solved by the Witnet blockchain (only if not yet verified).
     }
 
     /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
     struct Response {
-        address reporter;       // Address from which the result was reported.
-        uint256 timestamp;      // Timestamp of the Witnet-provided result.
-        bytes32 drTxHash;       // Hash of the Witnet transaction that solved the queried Data Request.
-        bytes   cborBytes;      // Witnet-provided result CBOR-bytes to the queried Data Request.
+        bytes32 fromFinality;  // Packed: contains address from which the result to the data request was reported, and 
+                               //         the EVM block at which the provided result can be considered to be final.        
+        uint256 timestamp;     // Timestamp at which data from data sources were retrieved by the Witnet blockchain. 
+        bytes32 tallyHash;     // Hash of the Witnet commit/reveal act that solved the data request.
+        bytes   cborBytes;     // CBOR-encoded result to the data request, as resolved by the Witnet blockchain. 
     }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
@@ -55,7 +58,9 @@ library Witnet {
         Void,
         Awaiting,
         Ready,
-        Error
+        Error,
+        AwaitingReady,
+        AwaitingError
     }
 
     /// Data struct describing an error when trying to fetch a Witnet-provided result to a Data Request.
@@ -276,66 +281,219 @@ library Witnet {
         uint64 minerCommitRevealFee;
     }
 
-    /// @notice Returns `true` if all witnessing parameters in `b` have same
-    /// @notice value or greater than the ones in `a`.
-    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
-        internal pure returns (bool)
+
+    /// ===============================================================================================================
+    /// --- 'uint*' helper methods ------------------------------------------------------------------------------------
+
+    /// @notice Convert a `uint8` into a 2 characters long `string` representing its two less significant hexadecimal values.
+    function toHexString(uint8 _u)
+        internal pure
+        returns (string memory)
     {
-        return (
-            a.numWitnesses >= b.numWitnesses
-                && a.minConsensusPercentage >= b.minConsensusPercentage
-                && a.witnessReward >= b.witnessReward
-                && a.witnessCollateral >= b.witnessCollateral
-                && a.minerCommitRevealFee >= b.minerCommitRevealFee
-        );
+        bytes memory b2 = new bytes(2);
+        uint8 d0 = uint8(_u / 16) + 48;
+        uint8 d1 = uint8(_u % 16) + 48;
+        if (d0 > 57)
+            d0 += 7;
+        if (d1 > 57)
+            d1 += 7;
+        b2[0] = bytes1(d0);
+        b2[1] = bytes1(d1);
+        return string(b2);
     }
 
-    function isValid(Witnet.RadonSLA memory sla)
-        internal pure returns (bool)
+    /// @notice Convert a `uint8` into a 1, 2 or 3 characters long `string` representing its.
+    /// three less significant decimal values.
+    function toString(uint8 _u)
+        internal pure
+        returns (string memory)
     {
-        return (
-            sla.witnessReward > 0
-                && sla.numWitnesses > 0 && sla.numWitnesses <= 127
-                && sla.minConsensusPercentage > 50 && sla.minConsensusPercentage < 100
-                && sla.witnessCollateral > 0
-                && sla.witnessCollateral / sla.witnessReward <= 127
-        );
+        if (_u < 10) {
+            bytes memory b1 = new bytes(1);
+            b1[0] = bytes1(uint8(_u) + 48);
+            return string(b1);
+        } else if (_u < 100) {
+            bytes memory b2 = new bytes(2);
+            b2[0] = bytes1(uint8(_u / 10) + 48);
+            b2[1] = bytes1(uint8(_u % 10) + 48);
+            return string(b2);
+        } else {
+            bytes memory b3 = new bytes(3);
+            b3[0] = bytes1(uint8(_u / 100) + 48);
+            b3[1] = bytes1(uint8(_u % 100 / 10) + 48);
+            b3[2] = bytes1(uint8(_u % 10) + 48);
+            return string(b3);
+        }
     }
 
-    function packed(RadonSLA memory sla) internal pure returns (bytes32) {
-        return bytes32(
-            uint(sla.witnessReward)
-                | sla.witnessCollateral << 64
-                | sla.minerCommitRevealFee << 128
-                | sla.numWitnesses << 248
-                | sla.minConsensusPercentage << 232
-        );
-    }
-
-    function toRadonSLA(bytes32 _packed) internal pure returns (RadonSLA memory) {
-        return RadonSLA({
-            numWitnesses: uint8(uint(_packed >> 248)),
-            minConsensusPercentage: uint8(uint(_packed >> 232) & 0xff),
-            witnessReward: uint64(uint(_packed) & 0xffffffffffffffff),
-            witnessCollateral: uint64(uint(_packed >> 64) & 0xffffffffffffffff),
-            minerCommitRevealFee: uint64(uint(_packed >> 128) & 0xffffffffffffffff)
-        });
-    }
-
-    function totalWitnessingReward(Witnet.RadonSLA memory sla)
-        internal pure returns (uint64)
+    /// @notice Convert a `uint` into a string` representing its value.
+    function toString(uint v)
+        internal pure 
+        returns (string memory)
     {
-        return sla.witnessReward * sla.numWitnesses;
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        do {
+            uint8 remainder = uint8(v % 10);
+            v = v / 10;
+            reversed[i ++] = bytes1(48 + remainder);
+        } while (v != 0);
+        bytes memory buf = new bytes(i);
+        for (uint j = 1; j <= i; j ++) {
+            buf[j - 1] = reversed[i - j];
+        }
+        return string(buf);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'bytes' helper methods ------------------------------------------------------------------------------------
+
+    /// @dev Transform given bytes into a Witnet.Result instance.
+    /// @param bytecode Raw bytes representing a CBOR-encoded value.
+    /// @return A `Witnet.Result` instance.
+    function resultFromCborBytes(bytes memory bytecode)
+        internal pure
+        returns (Witnet.Result memory)
+    {
+        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(bytecode);
+        return _resultFromCborValue(cborValue);
+    }
+
+    function toAddress(bytes memory _value) internal pure returns (address) {
+        return address(toBytes20(_value));
+    }
+
+    function toBytes4(bytes memory _value) internal pure returns (bytes4) {
+        return bytes4(toFixedBytes(_value, 4));
+    }
+    
+    function toBytes20(bytes memory _value) internal pure returns (bytes20) {
+        return bytes20(toFixedBytes(_value, 20));
+    }
+    
+    function toBytes32(bytes memory _value) internal pure returns (bytes32) {
+        return toFixedBytes(_value, 32);
+    }
+
+    function toFixedBytes(bytes memory _value, uint8 _numBytes)
+        internal pure
+        returns (bytes32 _bytes32)
+    {
+        assert(_numBytes <= 32);
+        unchecked {
+            uint _len = _value.length > _numBytes ? _numBytes : _value.length;
+            for (uint _i = 0; _i < _len; _i ++) {
+                _bytes32 |= bytes32(_value[_i] & 0xff) >> (_i * 8);
+            }
+        }
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'string' helper methods -----------------------------------------------------------------------------------
+
+    function toLowerCase(string memory str)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory lowered = new bytes(bytes(str).length);
+        unchecked {
+            for (uint i = 0; i < lowered.length; i ++) {
+                uint8 char = uint8(bytes(str)[i]);
+                if (char >= 65 && char <= 90) {
+                    lowered[i] = bytes1(char + 32);
+                } else {
+                    lowered[i] = bytes1(char);
+                }
+            }
+        }
+        return string(lowered);
+    }
+
+    /// @notice Converts bytes32 into string.
+    function toString(bytes32 _bytes32)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory _bytes = new bytes(_toStringLength(_bytes32));
+        for (uint _i = 0; _i < _bytes.length;) {
+            _bytes[_i] = _bytes32[_i];
+            unchecked {
+                _i ++;
+            }
+        }
+        return string(_bytes);
+    }
+
+    function tryUint(string memory str)
+        internal pure
+        returns (uint res, bool)
+    {
+        unchecked {
+            for (uint256 i = 0; i < bytes(str).length; i++) {
+                if (
+                    (uint8(bytes(str)[i]) - 48) < 0
+                        || (uint8(bytes(str)[i]) - 48) > 9
+                ) {
+                    return (0, false);
+                }
+                res += (uint8(bytes(str)[i]) - 48) * 10 ** (bytes(str).length - i - 1);
+            }
+            return (res, true);
+        }
+    }
+
+    
+    /// ===============================================================================================================
+    /// --- 'Witnet.Request' helper methods ---------------------------------------------------------------------------
+
+    function packRequesterCallbackGasLimit(address requester, uint96 callbackGasLimit) internal pure returns (bytes32) {
+        return bytes32(uint(bytes32(bytes20(requester))) | callbackGasLimit);
+    }
+
+    function unpackRequester(Request storage self) internal view returns (address) {
+        return address(bytes20(self.fromCallbackGas));
+    }
+
+    function unpackCallbackGasLimit(Request storage self) internal view returns (uint96) {
+        return uint96(uint(self.fromCallbackGas));
+    }
+
+    function unpackRequesterAndCallbackGasLimit(Request storage self) internal view returns (address, uint96) {
+        bytes32 _packed = self.fromCallbackGas;
+        return (address(bytes20(_packed)), uint96(uint(_packed)));
+    }
+
+    
+    /// ===============================================================================================================
+    /// --- 'Witnet.Response' helper methods --------------------------------------------------------------------------
+
+    function packReporterEvmFinalityBlock(address reporter, uint256 evmFinalityBlock) internal pure returns (bytes32) {
+        return bytes32(uint(bytes32(bytes20(reporter))) << 96 | uint96(evmFinalityBlock));
+    }
+
+    function unpackWitnetReporter(Response storage self) internal view returns (address) {
+        return address(bytes20(self.fromFinality));
+    }
+
+    function unpackEvmFinalityBlock(Response storage self) internal view returns (uint256) {
+        return uint(uint96(uint(self.fromFinality)));
+    }
+
+    function unpackEvmFinalityBlock(bytes32 fromFinality) internal pure returns (uint256) {
+        return uint(uint96(uint(fromFinality)));
+    }
+
+    function unpackWitnetReporterAndEvmFinalityBlock(Response storage self) internal view returns (address, uint256) {
+        bytes32 _packed = self.fromFinality;
+        return (address(bytes20(_packed)), uint(uint96(uint(_packed))));
     }
 
 
     /// ===============================================================================================================
     /// --- 'Witnet.Result' helper methods ----------------------------------------------------------------------------
-
-    modifier _isError(Result memory result) {
-        require(!result.success, "Witnet: no actual errors");
-        _;
-    }
 
     modifier _isReady(Result memory result) {
         require(result.success, "Witnet: tried to decode value from errored result.");
@@ -496,166 +654,58 @@ library Witnet {
 
 
     /// ===============================================================================================================
-    /// --- 'bytes' helper methods ------------------------------------------------------------------------------------
+    /// --- 'Witnet.RadonSLA' helper methods --------------------------------------------------------------------------
 
-    /// @dev Transform given bytes into a Witnet.Result instance.
-    /// @param bytecode Raw bytes representing a CBOR-encoded value.
-    /// @return A `Witnet.Result` instance.
-    function resultFromCborBytes(bytes memory bytecode)
-        internal pure
-        returns (Witnet.Result memory)
+    /// @notice Returns `true` if all witnessing parameters in `b` have same
+    /// @notice value or greater than the ones in `a`.
+    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
+        internal pure returns (bool)
     {
-        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(bytecode);
-        return _resultFromCborValue(cborValue);
+        return (
+            a.numWitnesses >= b.numWitnesses
+                && a.minConsensusPercentage >= b.minConsensusPercentage
+                && a.witnessReward >= b.witnessReward
+                && a.witnessCollateral >= b.witnessCollateral
+                && a.minerCommitRevealFee >= b.minerCommitRevealFee
+        );
     }
 
-    function toAddress(bytes memory _value) internal pure returns (address) {
-        return address(toBytes20(_value));
-    }
-
-    function toBytes4(bytes memory _value) internal pure returns (bytes4) {
-        return bytes4(toFixedBytes(_value, 4));
-    }
-    
-    function toBytes20(bytes memory _value) internal pure returns (bytes20) {
-        return bytes20(toFixedBytes(_value, 20));
-    }
-    
-    function toBytes32(bytes memory _value) internal pure returns (bytes32) {
-        return toFixedBytes(_value, 32);
-    }
-
-    function toFixedBytes(bytes memory _value, uint8 _numBytes)
-        internal pure
-        returns (bytes32 _bytes32)
+    function isValid(Witnet.RadonSLA memory sla)
+        internal pure returns (bool)
     {
-        assert(_numBytes <= 32);
-        unchecked {
-            uint _len = _value.length > _numBytes ? _numBytes : _value.length;
-            for (uint _i = 0; _i < _len; _i ++) {
-                _bytes32 |= bytes32(_value[_i] & 0xff) >> (_i * 8);
-            }
-        }
+        return (
+            sla.witnessReward > 0
+                && sla.numWitnesses > 0 && sla.numWitnesses <= 127
+                && sla.minConsensusPercentage > 50 && sla.minConsensusPercentage < 100
+                && sla.witnessCollateral > 0
+                && sla.witnessCollateral / sla.witnessReward <= 127
+        );
     }
 
-
-    /// ===============================================================================================================
-    /// --- 'string' helper methods -----------------------------------------------------------------------------------
-
-    function toLowerCase(string memory str)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory lowered = new bytes(bytes(str).length);
-        unchecked {
-            for (uint i = 0; i < lowered.length; i ++) {
-                uint8 char = uint8(bytes(str)[i]);
-                if (char >= 65 && char <= 90) {
-                    lowered[i] = bytes1(char + 32);
-                } else {
-                    lowered[i] = bytes1(char);
-                }
-            }
-        }
-        return string(lowered);
+    function toBytes32(RadonSLA memory sla) internal pure returns (bytes32) {
+        return bytes32(
+            uint(sla.witnessReward)
+                | sla.witnessCollateral << 64
+                | sla.minerCommitRevealFee << 128
+                | sla.numWitnesses << 248
+                | sla.minConsensusPercentage << 232
+        );
     }
 
-    /// @notice Converts bytes32 into string.
-    function toString(bytes32 _bytes32)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory _bytes = new bytes(_toStringLength(_bytes32));
-        for (uint _i = 0; _i < _bytes.length;) {
-            _bytes[_i] = _bytes32[_i];
-            unchecked {
-                _i ++;
-            }
-        }
-        return string(_bytes);
+    function toRadonSLA(bytes32 _packed) internal pure returns (RadonSLA memory) {
+        return RadonSLA({
+            numWitnesses: uint8(uint(_packed >> 248)),
+            minConsensusPercentage: uint8(uint(_packed >> 232) & 0xff),
+            witnessReward: uint64(uint(_packed) & 0xffffffffffffffff),
+            witnessCollateral: uint64(uint(_packed >> 64) & 0xffffffffffffffff),
+            minerCommitRevealFee: uint64(uint(_packed >> 128) & 0xffffffffffffffff)
+        });
     }
 
-    function tryUint(string memory str)
-        internal pure
-        returns (uint res, bool)
+    function totalWitnessingReward(Witnet.RadonSLA memory sla)
+        internal pure returns (uint64)
     {
-        unchecked {
-            for (uint256 i = 0; i < bytes(str).length; i++) {
-                if (
-                    (uint8(bytes(str)[i]) - 48) < 0
-                        || (uint8(bytes(str)[i]) - 48) > 9
-                ) {
-                    return (0, false);
-                }
-                res += (uint8(bytes(str)[i]) - 48) * 10 ** (bytes(str).length - i - 1);
-            }
-            return (res, true);
-        }
-    }
-
-
-    /// ===============================================================================================================
-    /// --- 'uint8' helper methods ------------------------------------------------------------------------------------
-
-    /// @notice Convert a `uint8` into a 2 characters long `string` representing its two less significant hexadecimal values.
-    function toHexString(uint8 _u)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory b2 = new bytes(2);
-        uint8 d0 = uint8(_u / 16) + 48;
-        uint8 d1 = uint8(_u % 16) + 48;
-        if (d0 > 57)
-            d0 += 7;
-        if (d1 > 57)
-            d1 += 7;
-        b2[0] = bytes1(d0);
-        b2[1] = bytes1(d1);
-        return string(b2);
-    }
-
-    /// @notice Convert a `uint8` into a 1, 2 or 3 characters long `string` representing its.
-    /// three less significant decimal values.
-    function toString(uint8 _u)
-        internal pure
-        returns (string memory)
-    {
-        if (_u < 10) {
-            bytes memory b1 = new bytes(1);
-            b1[0] = bytes1(uint8(_u) + 48);
-            return string(b1);
-        } else if (_u < 100) {
-            bytes memory b2 = new bytes(2);
-            b2[0] = bytes1(uint8(_u / 10) + 48);
-            b2[1] = bytes1(uint8(_u % 10) + 48);
-            return string(b2);
-        } else {
-            bytes memory b3 = new bytes(3);
-            b3[0] = bytes1(uint8(_u / 100) + 48);
-            b3[1] = bytes1(uint8(_u % 100 / 10) + 48);
-            b3[2] = bytes1(uint8(_u % 10) + 48);
-            return string(b3);
-        }
-    }
-
-    /// @notice Convert a `uint` into a string` representing its value.
-    function toString(uint v)
-        internal pure 
-        returns (string memory)
-    {
-        uint maxlength = 100;
-        bytes memory reversed = new bytes(maxlength);
-        uint i = 0;
-        do {
-            uint8 remainder = uint8(v % 10);
-            v = v / 10;
-            reversed[i ++] = bytes1(48 + remainder);
-        } while (v != 0);
-        bytes memory buf = new bytes(i);
-        for (uint j = 1; j <= i; j ++) {
-            buf[j - 1] = reversed[i - j];
-        }
-        return string(buf);
+        return sla.witnessReward * sla.numWitnesses;
     }
 
 

@@ -12,16 +12,16 @@ interface IWitnetConsumer {
     /// @dev can call to the WRB as to retrieve the Witnet tracking information (i.e. the `witnetDrTxHash` 
     /// @dev and `witnetDrCommitTxTimestamp`), or the finality status, of the result being reported.
     /// @param witnetQueryId The unique identifier of the Witnet query being reported.
-    /// @param witnetCommitRevealHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
-    /// @param witnetCommitTimestamp Timestamp when the reported value was captured by the Witnet blockchain. 
+    /// @param witnetResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param witnetResultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
     /// @param witnetEvmFinalityBlock EVM block at which the provided data can be considered to be final.
-    /// @param cborValue The CBOR-encoded resulting value of the Witnet query being reported.
+    /// @param witnetResultCborValue The CBOR-encoded resulting value of the Witnet query being reported.
     function reportWitnetQueryResult(
             uint256 witnetQueryId, 
-            bytes32 witnetCommitRevealHash,
-            uint256 witnetCommitTimestamp,
+            uint64  witnetResultTimestamp,
+            bytes32 witnetResultTallyHash,
             uint256 witnetEvmFinalityBlock,
-            WitnetCBOR.CBOR calldata cborValue
+            WitnetCBOR.CBOR calldata witnetResultCborValue
         ) external;
 
     /// @notice Method to be called from the WitnetRequestBoard contract as soon as the given Witnet `queryId`
@@ -32,15 +32,15 @@ interface IWitnetConsumer {
     /// @dev and `witnetDrCommitTxTimestamp`), or the finality status, of the result being reported.
     /// @param witnetQueryId The unique identifier of the Witnet query being reported.
     /// @param witnetQueryId The unique identifier of the Witnet query being reported.
-    /// @param witnetCommitRevealHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
-    /// @param witnetCommitTimestamp Timestamp when the reported value was captured by the Witnet blockchain. 
+    /// @param witnetResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param witnetResultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
     /// @param witnetEvmFinalityBlock EVM block at which the provided data can be considered to be final.
     /// @param errorCode The error code enum identifying the error produced during resolution on the Witnet blockchain.
     /// @param errorArgs Error arguments, if any. An empty buffer is to be passed if no error arguments apply.
     function reportWitnetQueryError(
             uint256 witnetQueryId, 
-            bytes32 witnetCommitRevealHash,
-            uint256 witnetCommitTimestamp,
+            uint64  witnetResultTimestamp,
+            bytes32 witnetResultTallyHash,
             uint256 witnetEvmFinalityBlock,
             Witnet.ResultErrorCodes errorCode, 
             WitnetCBOR.CBOR calldata errorArgs

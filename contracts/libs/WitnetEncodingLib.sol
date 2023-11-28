@@ -366,7 +366,7 @@ library WitnetEncodingLib {
                 || dataType == Witnet.RadonDataTypes.Array
                 || dataType == Witnet.RadonDataTypes.Map
         ) {
-            if (/*maxDataSize == 0 ||*/maxDataSize > 2048) {
+            if (maxDataSize == 0) {
                 revert UnsupportedRadonDataType(
                     uint8(dataType),
                     maxDataSize
@@ -378,7 +378,7 @@ library WitnetEncodingLib {
                 || dataType == Witnet.RadonDataTypes.Float
                 || dataType == Witnet.RadonDataTypes.Bool
         ) {
-            return 0; // TBD: size(dataType);
+            return 9; // TBD: size(dataType);
         } else {
             revert UnsupportedRadonDataType(
                 uint8(dataType),

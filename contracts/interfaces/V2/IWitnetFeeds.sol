@@ -26,7 +26,7 @@ interface IWitnetFeeds {
     function latestResult(bytes4 feedId) external view returns (Witnet.Result memory);
 
     function latestUpdateQueryId(bytes4 feedId) external view returns (uint256);
-    function latestUpdateRequest(bytes4 feedId) external view returns (Witnet.Request memory);
+    function latestUpdateRequest(bytes4 feedId) external view returns (bytes32, WitnetV2.RadonSLA memory);
     function latestUpdateResponse(bytes4 feedId) external view returns (Witnet.Response memory);
     function latestUpdateResultError(bytes4 feedId) external view returns (Witnet.ResultError memory);
     function latestUpdateResultStatus(bytes4 feedId) external view returns (Witnet.ResultStatus);

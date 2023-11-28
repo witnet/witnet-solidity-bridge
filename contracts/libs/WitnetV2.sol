@@ -14,30 +14,37 @@ library WitnetV2 {
     uint256 internal constant _WITNET_2_0_TIMESTAMP = _WITNET_GENESIS_TIMESTAMP + _WITNET_2_0_EPOCH * _WITNET_GENESIS_EPOCH_SECONDS;
 
     struct RadonSLA {
-        uint8  numWitnesses;
-        uint8  witnessingCollateralRatio;
+        /// @dev Number of witnessing nodes that will take part in the resolution of a data request within the Witnet blockchain:
+        uint8   witnessingCommitteeSize;   
+        /// @dev Collateral-to-reward ratio that witnessing nodes will have to commit with when taking part in a data request resolution.
+        uint8   witnessingCollateralRatio;
+        /// @dev Minimum amount of $nanoWIT that all Witnet nodes participating in the resolution of a data request will receive as a reward:
+        uint64  witnessingWitReward;
     }
 
     function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
         internal pure returns (bool)
     {
         return (
-            a.numWitnesses * a.witnessingCollateralRatio 
-                >= b.numWitnesses * b.witnessingCollateralRatio
+            a.witnessingCommitteeSize * a.witnessingCollateralRatio * a.witnessingWitReward
+                >= b.witnessingCommitteeSize * b.witnessingCollateralRatio * b.witnessingWitReward
         );
     }
      
     function isValid(RadonSLA calldata sla) internal pure returns (bool) {
         return (
-            sla.numWitnesses > 0 && sla.numWitnesses <= 127
+            sla.witnessingWitReward > 0 
+                && sla.witnessingCommitteeSize > 0 && sla.witnessingCommitteeSize <= 127
                 && sla.witnessingCollateralRatio > 0 && sla.witnessingCollateralRatio <= 127
         );
     }
 
-    function packed(RadonSLA memory sla) internal pure returns (bytes32) {
+    function toBytes32(RadonSLA memory sla) internal pure returns (bytes32) {
         return bytes32(
-            uint(sla.numWitnesses) << 248
+            uint(sla.witnessingCommitteeSize) << 248
                 | uint(sla.witnessingCollateralRatio) << 240
+                // | uint(sla.witnessingNotBeforeTimestamp) << 64
+                | uint(sla.witnessingWitReward)
         );
     }
 
@@ -45,9 +52,25 @@ library WitnetV2 {
         internal pure returns (RadonSLA memory)
     {
         return RadonSLA({
-            numWitnesses: uint8(uint(_packed) >> 248),
-            witnessingCollateralRatio: uint8(uint(_packed) >> 240)
+            witnessingCommitteeSize: uint8(uint(_packed) >> 248),
+            witnessingCollateralRatio: uint8(uint(_packed) >> 240),
+            // witnessingNotBeforeTimestamp: uint64(uint(_packed) >> 64),
+            witnessingWitReward: uint64(uint(_packed))
         });
+    }
+
+    function totalWitnessingReward(WitnetV2.RadonSLA calldata sla) internal pure returns (uint64) {
+        return (
+            (3 + sla.witnessingCommitteeSize)
+                * sla.witnessingWitReward
+        );
+    }
+
+    function totalWitnessingReward(bytes32 _packed) internal pure returns (uint64) {
+        return (
+            (3 + (uint8(uint(_packed) << 248))) // 3 + witnessingCommitteSize
+                * uint64(uint(_packed))         // witnessingWitReward
+        );      
     }
 
     function timestampToWitnetEpoch(uint _timestamp) internal pure returns (uint) {

@@ -98,22 +98,19 @@ abstract contract WitnetRequestBoardData {
       internal view
       returns (Witnet.QueryStatus)
     {
-      Witnet.Query storage _query = __storage().queries[_queryId];
-      if (_query.response.drTxHash != 0) {
-        // Query is in "Reported" status as soon as the hash of the
-        // Witnet transaction that solved the query is reported
-        // back from a Witnet bridge:
-        return Witnet.QueryStatus.Reported;
-      }
-      else if (_query.from != address(0)) {
-        // Otherwise, while address from which the query was posted
-        // is kept in storage, the query remains in "Posted" status:
+      Witnet.Query storage __query = __storage().queries[_queryId];
+      if (__query.response.tallyHash != bytes32(0)) {
+        if (__query.response.timestamp != 0) {  
+          if (block.number >= Witnet.unpackEvmFinalityBlock(__query.response.fromFinality)) {
+            return Witnet.QueryStatus.Finalized;
+          } else {
+            return Witnet.QueryStatus.Reported;
+          }
+        } else {
+          return Witnet.QueryStatus.Undeliverable;
+        }
+      } else if (__query.request.fromCallbackGas != bytes32(0)) {
         return Witnet.QueryStatus.Posted;
-      }
-      else if (_queryId > __storage().nonce) {
-        // Requester's address is removed from storage only if
-        // the query gets "Deleted" by its requester.
-        return Witnet.QueryStatus.Delivered;
       } else {
         return Witnet.QueryStatus.Unknown;
       }
@@ -127,8 +124,10 @@ abstract contract WitnetRequestBoardData {
         return "WitnetRequestBoard: not in Posted status";
       } else if (_status == Witnet.QueryStatus.Reported) {
         return "WitnetRequestBoard: not in Reported status";
-      } else if (_status == Witnet.QueryStatus.Delivered) {
-        return "WitnetRequestBoard: not in Delivered status";
+      } else if (_status == Witnet.QueryStatus.Finalized) {
+        return "WitnetRequestBoard: not in Finalized status";
+      } else if (_status == Witnet.QueryStatus.Undeliverable) {
+        return "WitnetRequestBoard: not in Undeliverable status";
       } else {
         return "WitnetRequestBoard: bad mood";
       }
