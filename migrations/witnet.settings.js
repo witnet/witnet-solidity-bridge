@@ -669,14 +669,14 @@ module.exports = {
         immutables: {
           types: [ 'uint256', 'uint256', 'uint256', 'uint256', ],
           values: [
-              /* _reportResultGasBase */ 57898,
-              /* _reportResultWithCallbackGasBase */ 72140,
-              /* _reportResultWithCallbackRevertGasBase */ 66685,
+              /* _reportResultGasBase */ 58282,
+              /* _reportResultWithCallbackGasBase */ 65273,
+              /* _reportResultWithCallbackRevertGasBase */ 69546,
               /* _sstoreFromZeroGas */ 20000,
           ]
         },
         libs: [ "WitnetErrorsLib", ],
-        vanity: 83581,
+        vanity: 899032812, // => 0x000071F0c823bD30D2Bf4CD1E829Eba5A6070000
       },
       WitnetRequestFactory: {
         vanity: 178848,
@@ -690,7 +690,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 155000,
+              /* _reportResultGasBase */ 155000,
           ]
         },
       },
@@ -699,7 +699,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 114000,
+              /* _reportResultGasBase */ 114000,
           ]
         },
       },
@@ -708,7 +708,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 78500,
+              /* _reportResultGasBase */ 78500,
           ]
         },
       },
@@ -717,7 +717,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 225000,
+              /* _reportResultGasBase */ 225000,
           ]
         },
       },
@@ -726,7 +726,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 225000,
+              /* _reportResultGasBase */ 225000,
           ]
         },
       },
@@ -735,7 +735,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 137500,
+              /* _reportResultGasBase */ 137500,
           ]
         },
       },
@@ -744,7 +744,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 85000,
+              /* _reportResultGasBase */ 85000,
           ]
         },
       },
@@ -753,7 +753,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 530000,
+              /* _reportResultGasBase */ 530000,
           ]
         },
       },
@@ -762,7 +762,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 85000,
+              /* _reportResultGasBase */ 85000,
           ]
         },
       },
@@ -771,7 +771,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 92500,
+              /* _reportResultGasBase */ 92500,
           ]
         },
       },
@@ -780,7 +780,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 105000,
+              /* _reportResultGasBase */ 105000,
           ]
         },
       },
@@ -789,7 +789,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 85000,
+              /* _reportResultGasBase */ 85000,
           ]
         },
       },
@@ -798,7 +798,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 134800,
+              /* _reportResultGasBase */ 134800,
           ]
         },
       },
@@ -807,7 +807,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 115000,
+              /* _reportResultGasBase */ 115000,
           ]
         },
       },
@@ -816,7 +816,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 145000,
+              /* _reportResultGasBase */ 145000,
           ]
         },
       },
@@ -825,7 +825,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 135000,
+              /* _reportResultGasBase */ 135000,
           ]
         },
       },
@@ -834,7 +834,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ "0x3100A1CAC7EF19DC",
+              /* _reportResultGasBase */ "0x3100A1CAC7EF19DC",
           ]
         },
       },
@@ -843,7 +843,7 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasLimit */ 83949,
+              /* _reportResultGasBase */ 83949,
           ]
         },
       },

@@ -23,6 +23,7 @@ contract WitnetRequestBoardTrustableDefault
 
     constructor(
             WitnetRequestFactory _factory,
+            WitnetBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasBase,
@@ -32,6 +33,7 @@ contract WitnetRequestBoardTrustableDefault
         )
         WitnetRequestBoardTrustableBase(
             _factory, 
+            _registry,
             _upgradable, 
             _versionTag, 
             address(0)
@@ -51,7 +53,7 @@ contract WitnetRequestBoardTrustableDefault
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
     /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256 _gasPrice, uint256 _resultMaxSize)
+    function estimateBaseFee(uint256 _gasPrice, uint16 _resultMaxSize)
         public view
         virtual override
         returns (uint256)
@@ -59,37 +61,38 @@ contract WitnetRequestBoardTrustableDefault
         return _gasPrice * (
             __reportResultGasBase
                 + __sstoreFromZeroGas * (
-                    5 + _resultMaxSize / 32
+                    5 + (_resultMaxSize == 0 ? 0 : _resultMaxSize - 1) / 32
                 )
         );
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint256 _resultMaxSize, uint256 _maxCallbackGas)
+    /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
+    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint96 _callbackGasLimit)
         public view
         virtual override
         returns (uint256)
     {
-        uint _reportResultWithetCallbackGasThreshold = (
+        uint _reportResultWithCallbackGasThreshold = (
             __reportResultWithCallbackRevertGasBase
-                + __sstoreFromZeroGas * (
-                    5 + _resultMaxSize / 32
-                )
+                + 3 * __sstoreFromZeroGas
         );
         if (
-            _maxCallbackGas < _reportResultWithetCallbackGasThreshold
-                || __reportResultWithCallbackGasBase + _maxCallbackGas < _reportResultWithetCallbackGasThreshold
+            _callbackGasLimit < _reportResultWithCallbackGasThreshold
+                || __reportResultWithCallbackGasBase + _callbackGasLimit < _reportResultWithCallbackGasThreshold
         ) {
-            return (_gasPrice * _reportResultWithetCallbackGasThreshold);
+            return (
+                _gasPrice
+                    * _reportResultWithCallbackGasThreshold
+            );
         } else {
             return (
-                _gasPrice * (
-                    __reportResultWithCallbackGasBase
-                        + _maxCallbackGas
-                )
+                _gasPrice 
+                    * (
+                        __reportResultWithCallbackGasBase
+                            + _callbackGasLimit
+                    )
             );
         }
     }

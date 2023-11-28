@@ -8,6 +8,8 @@ import "../libs/Witnet.sol";
 /// @author The Witnet Foundation.
 abstract contract WitnetRequestBoardData {  
 
+    using Witnet for Witnet.Request;
+
     bytes32 internal constant _WITNET_REQUEST_BOARD_DATA_SLOTHASH =
         /* keccak256("io.witnet.boards.data") */
         0xf595240b351bc8f951c2f53b26f4e78c32cb62122cf76c19b7fdda7d4968e183;
@@ -31,33 +33,14 @@ abstract contract WitnetRequestBoardData {
       ); _;
     }
 
-    /// Asserts the given query was previously posted and that it was not yet deleted.
-    modifier notDeleted(uint256 _queryId) {
-        require(
-            _queryId > 0 && _queryId <= __storage().nonce, 
-            "WitnetRequestBoard: not yet posted"
-        );
-        require(
-            __seekQuery(_queryId).from  != address(0), 
-            "WitnetRequestBoard: deleted"
-        ); _;
-    }
-
     /// Asserts the caller actually posted the referred query.
     modifier onlyRequester(uint256 _queryId) {
         require(
-            msg.sender == __seekQuery(_queryId).from, 
+            msg.sender == __seekQueryRequest(_queryId).unpackRequester(), 
             "WitnetRequestBoardBase: not the requester"
         ); _;
     }
 
-    /// Asserts the given query was actually posted before calling this method.
-    modifier wasPosted(uint256 _queryId) {
-        require(
-            _queryId > 0 && _queryId <= __storage().nonce, 
-            "WitnetRequestBoard: not yet posted"
-        ); _;
-    }
 
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------

@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
+import "../libs/WitnetV2.sol";
+
 interface IWitnetRequestBoardEvents {
     
     /// Emitted every time a new query containing some verified data request is posted to the WRB.
-    event NewWitnetQuery(uint256 indexed id, uint256 evmReward);
-
-    /// Emitted every time a new query containing non-verified data request is posted to the WRB.
-    event NewQueryWithBytecode(uint256 indexed id, uint256 evmReward, bytes radBytecode);
+    event WitnetQuery(uint256 indexed id, uint64 witReward, uint256 evmReward);
 
     /// Emitted when a query with no callback gets reported into the WRB.
     event WitnetQueryReported(uint256 indexed id, uint256 evmGasPrice);
@@ -19,5 +18,11 @@ interface IWitnetRequestBoardEvents {
     event WitnetResponseDelivered(uint256 indexed id, uint256 evmGasPrice, uint256 evmCallbackGas);
 
     /// Emitted when a query with a callback cannot get reported into the WRB.
-    event WitnetResponseDeliveryFailed(uint256 indexed id, uint256 evmGasPrice, uint256 evmCallbackGas, string evmReason);
+    event WitnetResponseDeliveryFailed(
+            uint256 indexed id, 
+            bytes   resultCborBytes,
+            uint256 evmGasPrice, 
+            uint256 evmCallbackGas, 
+            string  evmCallbackRevertReason
+        );
 }

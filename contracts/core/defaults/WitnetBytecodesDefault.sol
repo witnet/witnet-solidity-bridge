@@ -259,9 +259,9 @@ contract WitnetBytecodesDefault
     function lookupRadonRequestResultMaxSize(bytes32 _radHash)
         external view
         override
-        returns (uint256)
+        returns (uint16)
     {
-        return __requests(_radHash).resultMaxSize;
+        return uint16(__requests(_radHash).resultMaxSize);
     }    
 
     function lookupRadonRequestSources(bytes32 _radHash)

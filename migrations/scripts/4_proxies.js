@@ -100,7 +100,7 @@ async function deploy(target) {
         const oldAddr = await getProxyImplementation(from, addresses[ecosystem][network][key])
         const oldImpl = await artifacts.require(targets[key]).at(oldAddr)
         const newImpl = await artifacts.require(targets[key]).deployed()
-        if (oldAddr != newImpl.address) {
+        if (oldAddr !== newImpl.address) {
             utils.traceHeader(`Upgrading '${key}'...`)
             const oldVersion = await oldImpl.version.call({ from })
             const newVersion = await newImpl.version.call({ from })
