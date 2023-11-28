@@ -27,6 +27,7 @@ contract WitnetPriceFeeds
         WitnetPriceFeedsData
 {
     using Witnet for Witnet.Result;
+    using Witnet for Witnet.Response;
     using WitnetV2 for WitnetV2.RadonSLA;
 
     bytes4 immutable public specs = type(IWitnetPriceFeeds).interfaceId;
@@ -45,8 +46,9 @@ contract WitnetPriceFeeds
         );
         witnet = _wrb;
         __settleDefaultRadonSLA(WitnetV2.RadonSLA({
-            numWitnesses: 5,
-            witnessingCollateralRatio: 10
+            witnessingCommitteeSize: 5,
+            witnessingCollateralRatio: 10,
+            witnessingWitReward: 10 ** 9
         }));
     }
 
@@ -171,7 +173,7 @@ contract WitnetPriceFeeds
 
     function latestUpdateRequest(bytes4 feedId)
         override external view 
-        returns (Witnet.Request memory)
+        returns (bytes32, WitnetV2.RadonSLA memory)
     {
         return witnet.getQueryRequest(latestUpdateQueryId(feedId));
     }
@@ -459,7 +461,7 @@ contract WitnetPriceFeeds
             return IWitnetPriceSolver.Price({
                 value: _latestResult.asUint(),
                 timestamp: _latestResponse.timestamp,
-                drTxHash: _latestResponse.drTxHash,
+                tallyHash: _latestResponse.tallyHash,
                 status: latestUpdateResultStatus(feedId)
             });
         } else {
@@ -485,7 +487,7 @@ contract WitnetPriceFeeds
                 return IWitnetPriceSolver.Price({
                     value: 0,
                     timestamp: 0,
-                    drTxHash: 0,
+                    tallyHash: 0,
                     status: latestUpdateResultStatus(feedId)
                 });
             }
@@ -613,7 +615,7 @@ contract WitnetPriceFeeds
             _usedFunds = estimateUpdateBaseFee(tx.gasprice);
             require(
                 msg.value >= _usedFunds, 
-                "WitnetPriceFeeds: reward too low"
+                "WitnetPriceFeeds: insufficient reward"
             );
             uint _latestId = __feed.latestUpdateQueryId;
             Witnet.ResultStatus _latestStatus = _checkQueryResultStatus(_latestId);
@@ -651,7 +653,7 @@ contract WitnetPriceFeeds
                 emit UpdatingFeed(
                     msg.sender, 
                     feedId, 
-                    querySLA.packed(), 
+                    querySLA.toBytes32(), 
                     _usedFunds
                 );
             }            
@@ -670,6 +672,6 @@ contract WitnetPriceFeeds
     }
 
     function __settleDefaultRadonSLA(WitnetV2.RadonSLA memory sla) internal {
-        __storage().packedDefaultSLA = WitnetV2.packed(sla);
+        __storage().packedDefaultSLA = WitnetV2.toBytes32(sla);
     }
 }

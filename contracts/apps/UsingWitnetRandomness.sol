@@ -18,9 +18,9 @@ abstract contract UsingWitnetRandomness
     bytes32 internal immutable __witnetRandomnessRadHash;
     bytes32 private __defaultRandomizePackedSLA;
 
-    constructor(WitnetRequestBoard _wrb, uint256 _maxRandomizeCallbackGas)
+    constructor(WitnetRequestBoard _wrb, uint96 _randomizeCallbackGasLimit)
         UsingWitnet(_wrb)
-        WitnetConsumer(_maxRandomizeCallbackGas)
+        WitnetConsumer(_randomizeCallbackGasLimit)
     {
         // Build Witnet randomness request
         {
@@ -48,7 +48,7 @@ abstract contract UsingWitnetRandomness
                 _retrievals,
                 _aggregator,
                 _tally,
-                0
+                35 // CBOR overhead (3 bytes) + payload (32 bytes)
             ));
             __witnetRandomnessRadHash = WitnetRequest(
                 _template.buildRequest(new string[][](_retrievals.length))
@@ -56,9 +56,10 @@ abstract contract UsingWitnetRandomness
         }
         // Settle default randomize SLA:
         __defaultRandomizePackedSLA = WitnetV2.RadonSLA({
-            numWitnesses: 7,
-            witnessingCollateralRatio: 10
-        }).packed();
+            witnessingCommitteeSize: 7,
+            witnessingCollateralRatio: 10,
+            witnessingWitReward: 10 ** 9
+        }).toBytes32();
     }
 
     function _defaultRandomizeSLA() internal view returns (WitnetV2.RadonSLA memory) {
@@ -69,32 +70,13 @@ abstract contract UsingWitnetRandomness
         return _witnetEstimateBaseFee(35);
     }
 
-    /// @dev Returns index of the Most Significant Bit of the given number, applying De Bruijn O(1) algorithm.
-    function _msbDeBruijn32(uint32 _v) private pure returns (uint8) {
-        uint8[32] memory _bitPosition = [
-            0, 9, 1, 10, 13, 21, 2, 29,
-            11, 14, 16, 18, 22, 25, 3, 30,
-            8, 12, 20, 28, 15, 17, 24, 7,
-            19, 27, 23, 6, 26, 5, 4, 31
-        ];
-        _v |= _v >> 1;
-        _v |= _v >> 2;
-        _v |= _v >> 4;
-        _v |= _v >> 8;
-        _v |= _v >> 16;
-        return _bitPosition[
-            uint32(_v * uint256(0x07c4acdd)) >> 27
-        ];
-    }
-
     function _randomUniform(uint32 _range, uint256 _nonce, bytes32 _seed) internal pure returns (uint32) {
-        uint8 _flagBits = uint8(255 - _msbDeBruijn32(_range));
         uint256 _number = uint256(
             keccak256(
                 abi.encode(_seed, _nonce)
             )
-        ) & uint256(2 ** _flagBits - 1);
-        return uint32((_number * _range) >> _flagBits);
+        ) & uint256(2 ** 224 - 1);
+        return uint32((_number * _range) >> 224);
     }
 
     function _readRandomnessFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
@@ -104,8 +86,8 @@ abstract contract UsingWitnetRandomness
     function __randomize(uint256 _witnetEvmReward) virtual internal returns (uint256) {
         return __witnetRequestData(
             _witnetEvmReward,
-            __witnetRandomnessRadHash,
-            _defaultRandomizeSLA()
+            _defaultRandomizeSLA(),
+            __witnetRandomnessRadHash
         );
     }
 
@@ -118,12 +100,12 @@ abstract contract UsingWitnetRandomness
     {
         return __witnetRequestData(
             _witnetEvmReward,
-            __witnetRandomnessRadHash,
-            _witnetQuerySLA
+            _witnetQuerySLA,
+            __witnetRandomnessRadHash
         );
     }
 
     function __settleRandomizeDefaultSLA(WitnetV2.RadonSLA calldata sla) virtual internal {
-        __defaultRandomizePackedSLA = sla.packed();
+        __defaultRandomizePackedSLA = sla.toBytes32();
     }
 }

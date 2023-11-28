@@ -9,7 +9,7 @@ abstract contract UsingWitnetRequestTemplate
 {
     WitnetRequestTemplate immutable public dataRequestTemplate;
     
-    uint256 immutable internal __witnetResultMaxSize;
+    uint16 immutable internal __witnetResultMaxSize;
  
     constructor (WitnetRequestTemplate _requestTemplate)
         UsingWitnet(_requestTemplate.witnet())
@@ -53,8 +53,8 @@ abstract contract UsingWitnetRequestTemplate
     {
         return __witnetRequestData(
             _witnetEvmReward,
-            _witnetBuildRadHash(_witnetRequestArgs),
-            _witnetQuerySLA
+            _witnetQuerySLA,
+            _witnetBuildRadHash(_witnetRequestArgs)
         );
     }
 

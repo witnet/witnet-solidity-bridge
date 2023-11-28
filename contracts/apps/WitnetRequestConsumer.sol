@@ -12,14 +12,14 @@ abstract contract WitnetRequestConsumer
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
     
-    constructor(WitnetRequest _witnetRequest, uint256 _maxCallbackGas)
+    constructor(WitnetRequest _witnetRequest, uint96 _callbackGasLimit)
         UsingWitnetRequest(_witnetRequest)
-        WitnetConsumer(_maxCallbackGas)
+        WitnetConsumer(_callbackGasLimit)
     {
         require(
-            _witnetEstimateBaseFeeWithCallback(_witnetRequest.resultDataMaxSize(), _maxCallbackGas)
+            _witnetEstimateBaseFeeWithCallback(_callbackGasLimit)
                 > UsingWitnetRequest._witnetEstimateBaseFee(),
-            "WitnetRequestConsumer: callback gas limit too low"
+            "WitnetRequestConsumer: insufficient callback gas limit"
         );
     }
 
@@ -31,7 +31,7 @@ abstract contract WitnetRequestConsumer
         return WitnetConsumer._witnetEstimateBaseFee(__witnetResultMaxSize);
     } 
 
-    function _witnetEstimateBaseFee(uint256 _resultMaxSize)
+    function _witnetEstimateBaseFee(uint16 _resultMaxSize)
         virtual override(UsingWitnet, WitnetConsumer)
         internal view
         returns (uint256)
@@ -41,17 +41,31 @@ abstract contract WitnetRequestConsumer
 
     function __witnetRequestData(
             uint256 _witnetEvmReward,
-            bytes32 _witnetRadHash,
-            WitnetV2.RadonSLA memory _witnetQuerySLA
+            WitnetV2.RadonSLA memory _witnetQuerySLA,
+            bytes32 _witnetRadHash
         )
         virtual override(UsingWitnet, WitnetConsumer) internal
         returns (uint256)
     {
        return WitnetConsumer.__witnetRequestData(
             _witnetEvmReward,
-            _witnetRadHash,
-            _witnetQuerySLA
+            _witnetQuerySLA,
+            _witnetRadHash
        );
+    }
+
+    function __witnetRequestData(
+            uint256 _witnetEvmReward,
+            WitnetV2.RadonSLA memory _witnetQuerySLA
+        )
+        virtual override internal
+        returns (uint256)
+    {
+        return WitnetConsumer.__witnetRequestData(
+            _witnetEvmReward,
+            _witnetQuerySLA,
+            __witnetRequestRadHash
+        );
     }
 
 }

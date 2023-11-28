@@ -12,14 +12,14 @@ abstract contract WitnetRequestTemplateConsumer
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
     
-    constructor(WitnetRequestTemplate _requestTemplate, uint256 _maxCallbackGas)
+    constructor(WitnetRequestTemplate _requestTemplate, uint96 _callbackGasLimit)
         UsingWitnetRequestTemplate(_requestTemplate)
-        WitnetConsumer(_maxCallbackGas)
+        WitnetConsumer(_callbackGasLimit)
     {
         require(
-            _witnetEstimateBaseFeeWithCallback(_requestTemplate.resultDataMaxSize(), _maxCallbackGas)
+            _witnetEstimateBaseFeeWithCallback(_callbackGasLimit)
                 > UsingWitnetRequestTemplate._witnetEstimateBaseFee(),
-            "WitnetRequestTemplateConsumer: callback gas limit too low"
+            "WitnetRequestTemplateConsumer: insufficient callback gas limit"
         );
 
     }
@@ -32,7 +32,7 @@ abstract contract WitnetRequestTemplateConsumer
         return WitnetConsumer._witnetEstimateBaseFee(__witnetResultMaxSize);
     }
 
-    function _witnetEstimateBaseFee(uint256 _resultMaxSize) 
+    function _witnetEstimateBaseFee(uint16 _resultMaxSize) 
         virtual override(UsingWitnet, WitnetConsumer) 
         internal view
         returns (uint256)
@@ -42,17 +42,34 @@ abstract contract WitnetRequestTemplateConsumer
 
     function __witnetRequestData(
             uint256 _witnetEvmReward,
-            bytes32 _witnetRadHash,
-            WitnetV2.RadonSLA memory _witnetQuerySLA
+            WitnetV2.RadonSLA memory _witnetQuerySLA,
+            bytes32 _witnetRadHash
         )
         virtual override(UsingWitnet, WitnetConsumer) internal
         returns (uint256)
     {
        return WitnetConsumer.__witnetRequestData(
             _witnetEvmReward,
-            _witnetRadHash,
-            _witnetQuerySLA
+            _witnetQuerySLA,
+            _witnetRadHash
        );
     }
+
+    function __witnetRequestData(
+            uint256 _witnetEvmReward,
+            WitnetV2.RadonSLA memory _witnetQuerySLA,
+            string[][] memory _witnetRequestArgs
+        )
+        virtual override internal
+        returns (uint256)
+    {
+        return WitnetConsumer.__witnetRequestData(
+            _witnetEvmReward,
+            _witnetQuerySLA,
+            _witnetBuildRadHash(_witnetRequestArgs)
+        );
+    }
+
+
 
 }

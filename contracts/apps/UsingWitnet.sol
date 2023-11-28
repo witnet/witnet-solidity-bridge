@@ -48,29 +48,19 @@ abstract contract UsingWitnet
     /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
     /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function _witnetEstimateBaseFee(uint256 _resultMaxSize)
+    function _witnetEstimateBaseFee(uint16 _resultMaxSize)
         virtual internal view
         returns (uint256)
     {
         return __witnet.estimateBaseFee(tx.gasprice, _resultMaxSize);
     }
 
-    /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).    
-    /// @param _maxCallbackGas Maximum gas to be spent when reporting the data request result.
-    function _witnetEstimateBaseFeeWithCallback(uint256 _resultMaxSize, uint256 _maxCallbackGas)
-        internal view
-        returns (uint256)
-    {
-        return __witnet.estimateBaseFeeWithCallback(tx.gasprice, _resultMaxSize, _maxCallbackGas);
-    }
-
     function _witnetCheckQueryResultAuditTrail(uint256 _witnetQueryId)
         internal view
         returns (
-            uint256 _witnetQueryResponseTimestamp,
-            bytes32 _witnetQueryResponseDrTxHash
+            uint256 _witnetResultTimestamp,
+            bytes32 _witnetResultTallyHash,
+            uint256 _witnetEvmFinalityBlock
         )
     {
         return __witnet.getQueryResultAuditTrail(_witnetQueryId);
@@ -92,26 +82,13 @@ abstract contract UsingWitnet
 
     function __witnetRequestData(
             uint256 _witnetEvmReward, 
-            bytes32 _witnetRadHash,
-            WitnetV2.RadonSLA memory _witnetQuerySLA
+            WitnetV2.RadonSLA memory _witnetQuerySLA,
+            bytes32 _witnetRadHash
         )
         virtual internal returns (uint256)
     {
         return __witnet.postRequest{value: _witnetEvmReward}(
             _witnetRadHash, 
-            _witnetQuerySLA
-        );
-    }
-
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
-            bytes calldata _witnetRadBytecode,
-            WitnetV2.RadonSLA memory _witnetQuerySLA
-        )
-        internal returns (uint256)
-    {
-        return __witnet.postRequest{value: _witnetEvmReward}(
-            _witnetRadBytecode,
             _witnetQuerySLA
         );
     }

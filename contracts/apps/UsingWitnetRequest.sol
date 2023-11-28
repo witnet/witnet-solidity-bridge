@@ -10,7 +10,7 @@ abstract contract UsingWitnetRequest
     WitnetRequest immutable public dataRequest;
     
     bytes32 immutable internal __witnetRequestRadHash;
-    uint256 immutable internal __witnetResultMaxSize;
+    uint16  immutable internal __witnetResultMaxSize;
  
     constructor (WitnetRequest _witnetRequest)
         UsingWitnet(_witnetRequest.witnet())
@@ -42,8 +42,8 @@ abstract contract UsingWitnetRequest
     {
         return __witnetRequestData(
             _witnetEvmReward,
-            __witnetRequestRadHash,
-            _witnetQuerySLA
+            _witnetQuerySLA,
+            __witnetRequestRadHash
         );
     }
 

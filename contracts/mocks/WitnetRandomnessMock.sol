@@ -115,7 +115,7 @@ contract WitnetRandomnessMock
             _usedFunds = __mockRandomizeFee;
             require(
                 msg.value >= _usedFunds,
-                "WitnetRandomnessMock: reward too low"
+                "WitnetRandomnessMock: insufficient reward"
             );
             // Post the Witnet Randomness request:
             uint _queryId = ++ __mockRandomizeLatestId;

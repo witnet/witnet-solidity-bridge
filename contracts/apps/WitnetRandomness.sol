@@ -70,7 +70,7 @@ contract WitnetRandomness
                 _retrievals,
                 _aggregator,
                 _tally,
-                0
+                35 // CBOR overhead (3 bytes) + payload (32 bytes)
             ));
             witnetRandomnessRequest = WitnetRequest(_template.buildRequest(new string[][](_retrievals.length)));
             __witnetRandomnessRadHash = witnetRandomnessRequest.radHash();
@@ -328,8 +328,8 @@ contract WitnetRandomness
             // Post the Witnet Randomness request:
             uint _queryId = __witnetRequestData(
                 msg.value,
-                __witnetRandomnessRadHash,
-                __witnetRandomnessPackedSLA.toRadonSLA()
+                __witnetRandomnessPackedSLA.toRadonSLA(),
+                __witnetRandomnessRadHash
             );
             // Keep Randomize data in storage:
             RandomizeData storage __data = __randomize_[block.number];
@@ -465,8 +465,9 @@ contract WitnetRandomness
 
     function __initializeWitnetRandomnessSLA() virtual internal {
         __settleWitnetRandomnessSLA(WitnetV2.RadonSLA({
-            numWitnesses: 5,
-            witnessingCollateralRatio: 10
+            witnessingCommitteeSize: 5,
+            witnessingCollateralRatio: 10,
+            witnessingWitReward: 10 ** 9
         }));
     }
 
@@ -474,7 +475,7 @@ contract WitnetRandomness
         internal
         returns (bytes32 _packed)
     {
-        _packed = sla.packed();
+        _packed = sla.toBytes32();
         __witnetRandomnessPackedSLA = _packed;
     }
 
