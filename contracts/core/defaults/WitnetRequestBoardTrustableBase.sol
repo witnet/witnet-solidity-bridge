@@ -37,7 +37,6 @@ abstract contract WitnetRequestBoardTrustableBase
     using WitnetV2 for WitnetV2.Response;
 
     bytes4 public immutable override specs = type(IWitnetRequestBoard).interfaceId;
-    bytes4 public immutable group = bytes4(keccak256(abi.encode(address(this), block.chainid)));
     
     WitnetRequestFactory immutable public override factory;
     WitnetBytecodes immutable public override registry;
@@ -99,6 +98,10 @@ abstract contract WitnetRequestBoardTrustableBase
             Witnet.toHexString(uint8(bytes1(msg.sig << 16))),
             Witnet.toHexString(uint8(bytes1(msg.sig << 24)))
         )));
+    }
+
+    function ddrTag() virtual public view returns (bytes4) {
+        return bytes4(keccak256(abi.encode(address(this), block.chainid)));
     }
 
     
@@ -771,7 +774,7 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint256)
     {
         return uint(keccak256(abi.encode(
-            group,
+            ddrTag(),
             block.number,
             msg.sender,
             _queryRAD,
