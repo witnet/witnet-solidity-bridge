@@ -4,8 +4,8 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "./WitnetBytecodes.sol";
 import "./WitnetRequestFactory.sol";
-import "./interfaces/IWitnetRequestBoard.sol";
-import "./interfaces/IWitnetRequestBoardEvents.sol";
+import "./interfaces/V2/IWitnetRequestBoard.sol";
+import "./interfaces/V2/IWitnetRequestBoardEvents.sol";
 
 /// @title Witnet Request Board functionality base contract.
 /// @author The Witnet Foundation.
