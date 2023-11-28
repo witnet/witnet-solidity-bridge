@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./Witnet.sol";
+import "./WitnetV2.sol";
 
 /// @title A library for interpreting Witnet resolution errors
 /// @author The Witnet Foundation.
@@ -28,16 +28,16 @@ library WitnetErrorsLib {
         );
     }
 
-    function asResultError(Witnet.ResultStatus _status, bytes memory _cborBytes)
+    function asResultError(WitnetV2.ResultStatus _status, bytes memory _cborBytes)
         public pure
         returns (Witnet.ResultError memory)
     {
-        if (_status == Witnet.ResultStatus.Awaiting) {
+        if (_status == WitnetV2.ResultStatus.Awaiting) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "WitnetRequestBoard: not yet solved"
             });
-        } else if (_status == Witnet.ResultStatus.Void) {
+        } else if (_status == WitnetV2.ResultStatus.Void) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "WitnetRequestBoard: unknown query"

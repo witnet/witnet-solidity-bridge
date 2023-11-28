@@ -9,7 +9,7 @@ interface IWitnetPriceSolver {
         uint value;
         uint timestamp;
         bytes32 tallyHash;
-        Witnet.ResultStatus status;
+        WitnetV2.ResultStatus status;
     }
     function delegator() external view returns (address);
     function solve(bytes4 feedId) external view returns (Price memory);

@@ -30,11 +30,11 @@ abstract contract WitnetRequestBoardTrustableBase
         Payable 
 {
     using Witnet for bytes;
-    using Witnet for Witnet.Request;
-    using Witnet for Witnet.Response;
     using Witnet for Witnet.Result;
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetV2 for WitnetV2.RadonSLA;
+    using WitnetV2 for WitnetV2.Request;
+    using WitnetV2 for WitnetV2.Response;
 
     bytes4 public immutable override specs = type(IWitnetRequestBoard).interfaceId;
     bytes4 public immutable group = bytes4(keccak256(abi.encode(address(this), block.chainid)));
@@ -217,7 +217,7 @@ abstract contract WitnetRequestBoardTrustableBase
         external view
         returns (int256 _earnings)
     {
-        Witnet.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
 
         _earnings = int(__request.evmReward);
         uint96 _callbackGasLimit = __request.unpackCallbackGasLimit();
@@ -241,9 +241,9 @@ abstract contract WitnetRequestBoardTrustableBase
     function fetchQueryResponse(uint256 _witnetQueryId)
         virtual override
         external
-        inStatus(_witnetQueryId, Witnet.QueryStatus.Reported)
+        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Reported)
         onlyRequester(_witnetQueryId)
-        returns (Witnet.Response memory _response)
+        returns (WitnetV2.Response memory _response)
     {
         _response = __seekQuery(_witnetQueryId).response;
         delete __storage().queries[_witnetQueryId];
@@ -253,7 +253,7 @@ abstract contract WitnetRequestBoardTrustableBase
     function getQuery(uint256 _witnetQueryId)
       external view
       override
-      returns (Witnet.Query memory)
+      returns (WitnetV2.Query memory)
     {
         return __storage().queries[_witnetQueryId];
     }
@@ -267,10 +267,10 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (bytes memory)
     {
         require(
-            _statusOf(_witnetQueryId) != Witnet.QueryStatus.Unknown,
+            _statusOf(_witnetQueryId) != WitnetV2.QueryStatus.Unknown,
             "WitnetRequestBoardTrustableBase: unknown query"
         );
-        Witnet.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
         if (__request.RAD != bytes32(0)) {
             return registry.bytecodeOf(__request.RAD);
         } else {
@@ -285,7 +285,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override
         returns (bytes32, WitnetV2.RadonSLA memory)
     {
-        Witnet.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
         return (
             __request.RAD == bytes32(0) ? registry.hashOf(__request.bytecode) : __request.RAD,
             WitnetV2.toRadonSLA(__request.SLA)
@@ -298,7 +298,7 @@ abstract contract WitnetRequestBoardTrustableBase
     function getQueryResponse(uint256 _witnetQueryId)
         external view
         override
-        returns (Witnet.Response memory _response)
+        returns (WitnetV2.Response memory _response)
     {
         return __seekQueryResponse(_witnetQueryId);
     }
@@ -311,7 +311,7 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (Witnet.Result memory)
     {
         // todo: fail if not in finalized status ?
-        Witnet.Response storage _response = __seekQueryResponse(_witnetQueryId);
+        WitnetV2.Response storage _response = __seekQueryResponse(_witnetQueryId);
         return _response.cborBytes.resultFromCborBytes();
     }
 
@@ -329,7 +329,7 @@ abstract contract WitnetRequestBoardTrustableBase
             uint256 _witnetEvmFinalityBlock
         )
     {
-        Witnet.Response storage __response = __seekQueryResponse(_witnetQueryId);
+        WitnetV2.Response storage __response = __seekQueryResponse(_witnetQueryId);
         return (
             __response.timestamp,
             __response.tallyHash,
@@ -343,7 +343,7 @@ abstract contract WitnetRequestBoardTrustableBase
         override external view
         returns (Witnet.ResultError memory)
     {
-        Witnet.ResultStatus _status = getQueryResultStatus(_witnetQueryId);
+        WitnetV2.ResultStatus _status = getQueryResultStatus(_witnetQueryId);
         try WitnetErrorsLib.asResultError(_status, __seekQueryResponse(_witnetQueryId).cborBytes)
             returns (Witnet.ResultError memory _resultError)
         {
@@ -371,31 +371,31 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @param _witnetQueryId The unique query identifier.
     function getQueryResultStatus(uint256 _witnetQueryId)
         virtual public view
-        returns (Witnet.ResultStatus)
+        returns (WitnetV2.ResultStatus)
     {
-        Witnet.QueryStatus _queryStatus = _statusOf(_witnetQueryId);
+        WitnetV2.QueryStatus _queryStatus = _statusOf(_witnetQueryId);
         if (
-            _queryStatus == Witnet.QueryStatus.Finalized
-                || _queryStatus == Witnet.QueryStatus.Reported
+            _queryStatus == WitnetV2.QueryStatus.Finalized
+                || _queryStatus == WitnetV2.QueryStatus.Reported
         ) {
             bytes storage __cborValues = __seekQueryResponse(_witnetQueryId).cborBytes;
             // determine whether reported result is an error by peeking the first byte
             return (__cborValues[0] == bytes1(0xd8)
-                ? (_queryStatus == Witnet.QueryStatus.Finalized 
-                    ? Witnet.ResultStatus.Error 
-                    : Witnet.ResultStatus.AwaitingError
-                ) : (_queryStatus == Witnet.QueryStatus.Finalized
-                    ? Witnet.ResultStatus.Ready
-                    : Witnet.ResultStatus.AwaitingReady
+                ? (_queryStatus == WitnetV2.QueryStatus.Finalized 
+                    ? WitnetV2.ResultStatus.Error 
+                    : WitnetV2.ResultStatus.AwaitingError
+                ) : (_queryStatus == WitnetV2.QueryStatus.Finalized
+                    ? WitnetV2.ResultStatus.Ready
+                    : WitnetV2.ResultStatus.AwaitingReady
                 )
             );
         } else if (
-            _queryStatus == Witnet.QueryStatus.Posted
-                || _queryStatus == Witnet.QueryStatus.Undeliverable
+            _queryStatus == WitnetV2.QueryStatus.Posted
+                || _queryStatus == WitnetV2.QueryStatus.Undeliverable
         ) {
-            return Witnet.ResultStatus.Awaiting;
+            return WitnetV2.ResultStatus.Awaiting;
         } else {
-            return Witnet.ResultStatus.Void;
+            return WitnetV2.ResultStatus.Void;
         }
     }
 
@@ -406,7 +406,7 @@ abstract contract WitnetRequestBoardTrustableBase
     function getQueryReward(uint256 _witnetQueryId)
         override
         external view
-        inStatus(_witnetQueryId, Witnet.QueryStatus.Posted)
+        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
         returns (uint256)
     {
         return __seekQueryRequest(_witnetQueryId).evmReward;
@@ -416,7 +416,7 @@ abstract contract WitnetRequestBoardTrustableBase
     function getQueryStatus(uint256 _witnetQueryId)
         external view
         override
-        returns (Witnet.QueryStatus)
+        returns (WitnetV2.QueryStatus)
     {
         return _statusOf(_witnetQueryId);
 
@@ -537,9 +537,9 @@ abstract contract WitnetRequestBoardTrustableBase
     function upgradeQueryReward(uint256 _witnetQueryId)
         external payable
         virtual override      
-        inStatus(_witnetQueryId, Witnet.QueryStatus.Posted)
+        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
     {
-        Witnet.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
         __request.evmReward += _getMsgValue();
         emit WitnetQueryRewardUpgraded(_witnetQueryId, __request.evmReward);
     }
@@ -565,7 +565,7 @@ abstract contract WitnetRequestBoardTrustableBase
         external
         override
         onlyReporters
-        inStatus(_witnetQueryId, Witnet.QueryStatus.Posted)
+        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
         returns (uint256)
     {
         require(
@@ -607,7 +607,7 @@ abstract contract WitnetRequestBoardTrustableBase
         external
         override
         onlyReporters
-        inStatus(_witnetQueryId, Witnet.QueryStatus.Posted)
+        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
         returns (uint256)
     {
         require(
@@ -652,7 +652,7 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint256 _batchReward)
     {
         for ( uint _i = 0; _i < _batchResults.length; _i ++) {
-            if (_statusOf(_batchResults[_i].queryId) != Witnet.QueryStatus.Posted) {
+            if (_statusOf(_batchResults[_i].queryId) != WitnetV2.QueryStatus.Posted) {
                 if (_verbose) {
                     emit BatchReportError(
                         _batchResults[_i].queryId,
@@ -784,13 +784,13 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint256 _witnetQueryId)
     {
         _witnetQueryId = __newQueryId(_radHash, _packedSLA);
-        Witnet.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
         require(
             __request.fromCallbackGas == bytes32(0), 
             "WitnetRequestBoardTrustableBase: already posted"
         );
         {
-            __request.fromCallbackGas = Witnet.packRequesterCallbackGasLimit(msg.sender, _callbackGasLimit);
+            __request.fromCallbackGas = WitnetV2.packRequesterCallbackGasLimit(msg.sender, _callbackGasLimit);
             __request.RAD = _radHash;
             __request.SLA = _packedSLA;
             __request.evmReward = _getMsgValue();
@@ -807,7 +807,7 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint256 _evmReward)
     {
         // read requester address and whether a callback was requested:
-        Witnet.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
         (address _evmRequester, uint96 _evmCallbackGasLimit) = __request.unpackRequesterAndCallbackGasLimit();
                 
         // read query EVM reward:
@@ -993,8 +993,8 @@ abstract contract WitnetRequestBoardTrustableBase
         )
         virtual internal
     {
-        __seekQuery(_witnetQueryId).response = Witnet.Response({
-            fromFinality: Witnet.packReporterEvmFinalityBlock(msg.sender, block.number),
+        __seekQuery(_witnetQueryId).response = WitnetV2.Response({
+            fromFinality: WitnetV2.packReporterEvmFinalityBlock(msg.sender, block.number),
             timestamp: _witnetResultTimestamp,
             tallyHash: _witnetResultTallyHash,
             cborBytes: _witnetResultCborBytes

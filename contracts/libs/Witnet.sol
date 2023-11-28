@@ -11,41 +11,41 @@ library Witnet {
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
 
-    /// Struct containing both request and response data related to every query posted to the Witnet Request Board
-    struct Query {
-        Request request;
-        Response response;
-    }
+    // /// Struct containing both request and response data related to every query posted to the Witnet Request Board
+    // struct Query {
+    //     Request request;
+    //     Response response;
+    // }
 
-    /// Possible status of a Witnet query.
-    enum QueryStatus {
-        Unknown,
-        Posted,
-        Reported,
-        Undeliverable,
-        Finalized
-    }
+    // /// Possible status of a Witnet query.
+    // enum QueryStatus {
+    //     Unknown,
+    //     Posted,
+    //     Reported,
+    //     Undeliverable,
+    //     Finalized
+    // }
 
-    /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
-    struct Request {
-        bytes32 fromCallbackGas; // Packed: contains requester address in most significant bytes20, 
-                                 //         and max callback gas limit if a callback is required.
-        bytes32 SLA;             // Packed: Service-Level Aggreement parameters upon which the data request 
-                                 //         will be solved by the Witnet blockchain.
-        bytes32 RAD;             // Verified hash of the actual data request to be solved by the Witnet blockchain.
-        uint256 reserved1;       // Reserved uint256 slot.
-        uint256 evmReward;       // EVM reward to be paid to the relayer of the Witnet resolution to the data request.
-        bytes   bytecode;        // Raw bytecode of the data request to be solved by the Witnet blockchain (only if not yet verified).
-    }
+    // /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
+    // struct Request {
+    //     bytes32 fromCallbackGas; // Packed: contains requester address in most significant bytes20, 
+    //                              //         and max callback gas limit if a callback is required.
+    //     bytes32 SLA;             // Packed: Service-Level Aggreement parameters upon which the data request 
+    //                              //         will be solved by the Witnet blockchain.
+    //     bytes32 RAD;             // Verified hash of the actual data request to be solved by the Witnet blockchain.
+    //     uint256 reserved1;       // Reserved uint256 slot.
+    //     uint256 evmReward;       // EVM reward to be paid to the relayer of the Witnet resolution to the data request.
+    //     bytes   bytecode;        // Raw bytecode of the data request to be solved by the Witnet blockchain (only if not yet verified).
+    // }
 
-    /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
-    struct Response {
-        bytes32 fromFinality;  // Packed: contains address from which the result to the data request was reported, and 
-                               //         the EVM block at which the provided result can be considered to be final.        
-        uint256 timestamp;     // Timestamp at which data from data sources were retrieved by the Witnet blockchain. 
-        bytes32 tallyHash;     // Hash of the Witnet commit/reveal act that solved the data request.
-        bytes   cborBytes;     // CBOR-encoded result to the data request, as resolved by the Witnet blockchain. 
-    }
+    // /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
+    // struct Response {
+    //     bytes32 fromFinality;  // Packed: contains address from which the result to the data request was reported, and 
+    //                            //         the EVM block at which the provided result can be considered to be final.        
+    //     uint256 timestamp;     // Timestamp at which data from data sources were retrieved by the Witnet blockchain. 
+    //     bytes32 tallyHash;     // Hash of the Witnet commit/reveal act that solved the data request.
+    //     bytes   cborBytes;     // CBOR-encoded result to the data request, as resolved by the Witnet blockchain. 
+    // }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
     struct Result {
@@ -53,15 +53,15 @@ library Witnet {
         WitnetCBOR.CBOR value;  // Resulting value, in CBOR-serialized bytes.
     }
 
-    /// Final query's result status from a requester's point of view.
-    enum ResultStatus {
-        Void,
-        Awaiting,
-        Ready,
-        Error,
-        AwaitingReady,
-        AwaitingError
-    }
+    // /// Final query's result status from a requester's point of view.
+    // enum ResultStatus {
+    //     Void,
+    //     Awaiting,
+    //     Ready,
+    //     Error,
+    //     AwaitingReady,
+    //     AwaitingError
+    // }
 
     /// Data struct describing an error when trying to fetch a Witnet-provided result to a Data Request.
     struct ResultError {
@@ -446,50 +446,50 @@ library Witnet {
     }
 
     
-    /// ===============================================================================================================
-    /// --- 'Witnet.Request' helper methods ---------------------------------------------------------------------------
+    // /// ===============================================================================================================
+    // /// --- 'Witnet.Request' helper methods ---------------------------------------------------------------------------
 
-    function packRequesterCallbackGasLimit(address requester, uint96 callbackGasLimit) internal pure returns (bytes32) {
-        return bytes32(uint(bytes32(bytes20(requester))) | callbackGasLimit);
-    }
+    // function packRequesterCallbackGasLimit(address requester, uint96 callbackGasLimit) internal pure returns (bytes32) {
+    //     return bytes32(uint(bytes32(bytes20(requester))) | callbackGasLimit);
+    // }
 
-    function unpackRequester(Request storage self) internal view returns (address) {
-        return address(bytes20(self.fromCallbackGas));
-    }
+    // function unpackRequester(Request storage self) internal view returns (address) {
+    //     return address(bytes20(self.fromCallbackGas));
+    // }
 
-    function unpackCallbackGasLimit(Request storage self) internal view returns (uint96) {
-        return uint96(uint(self.fromCallbackGas));
-    }
+    // function unpackCallbackGasLimit(Request storage self) internal view returns (uint96) {
+    //     return uint96(uint(self.fromCallbackGas));
+    // }
 
-    function unpackRequesterAndCallbackGasLimit(Request storage self) internal view returns (address, uint96) {
-        bytes32 _packed = self.fromCallbackGas;
-        return (address(bytes20(_packed)), uint96(uint(_packed)));
-    }
+    // function unpackRequesterAndCallbackGasLimit(Request storage self) internal view returns (address, uint96) {
+    //     bytes32 _packed = self.fromCallbackGas;
+    //     return (address(bytes20(_packed)), uint96(uint(_packed)));
+    // }
 
     
-    /// ===============================================================================================================
-    /// --- 'Witnet.Response' helper methods --------------------------------------------------------------------------
+    // /// ===============================================================================================================
+    // /// --- 'Witnet.Response' helper methods --------------------------------------------------------------------------
 
-    function packReporterEvmFinalityBlock(address reporter, uint256 evmFinalityBlock) internal pure returns (bytes32) {
-        return bytes32(uint(bytes32(bytes20(reporter))) << 96 | uint96(evmFinalityBlock));
-    }
+    // function packReporterEvmFinalityBlock(address reporter, uint256 evmFinalityBlock) internal pure returns (bytes32) {
+    //     return bytes32(uint(bytes32(bytes20(reporter))) << 96 | uint96(evmFinalityBlock));
+    // }
 
-    function unpackWitnetReporter(Response storage self) internal view returns (address) {
-        return address(bytes20(self.fromFinality));
-    }
+    // function unpackWitnetReporter(Response storage self) internal view returns (address) {
+    //     return address(bytes20(self.fromFinality));
+    // }
 
-    function unpackEvmFinalityBlock(Response storage self) internal view returns (uint256) {
-        return uint(uint96(uint(self.fromFinality)));
-    }
+    // function unpackEvmFinalityBlock(Response storage self) internal view returns (uint256) {
+    //     return uint(uint96(uint(self.fromFinality)));
+    // }
 
-    function unpackEvmFinalityBlock(bytes32 fromFinality) internal pure returns (uint256) {
-        return uint(uint96(uint(fromFinality)));
-    }
+    // function unpackEvmFinalityBlock(bytes32 fromFinality) internal pure returns (uint256) {
+    //     return uint(uint96(uint(fromFinality)));
+    // }
 
-    function unpackWitnetReporterAndEvmFinalityBlock(Response storage self) internal view returns (address, uint256) {
-        bytes32 _packed = self.fromFinality;
-        return (address(bytes20(_packed)), uint(uint96(uint(_packed))));
-    }
+    // function unpackWitnetReporterAndEvmFinalityBlock(Response storage self) internal view returns (address, uint256) {
+    //     bytes32 _packed = self.fromFinality;
+    //     return (address(bytes20(_packed)), uint(uint96(uint(_packed))));
+    // }
 
 
     /// ===============================================================================================================
@@ -653,60 +653,60 @@ library Witnet {
     }
 
 
-    /// ===============================================================================================================
-    /// --- 'Witnet.RadonSLA' helper methods --------------------------------------------------------------------------
+    // /// ===============================================================================================================
+    // /// --- 'Witnet.RadonSLA' helper methods --------------------------------------------------------------------------
 
-    /// @notice Returns `true` if all witnessing parameters in `b` have same
-    /// @notice value or greater than the ones in `a`.
-    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
-        internal pure returns (bool)
-    {
-        return (
-            a.numWitnesses >= b.numWitnesses
-                && a.minConsensusPercentage >= b.minConsensusPercentage
-                && a.witnessReward >= b.witnessReward
-                && a.witnessCollateral >= b.witnessCollateral
-                && a.minerCommitRevealFee >= b.minerCommitRevealFee
-        );
-    }
+    // /// @notice Returns `true` if all witnessing parameters in `b` have same
+    // /// @notice value or greater than the ones in `a`.
+    // function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
+    //     internal pure returns (bool)
+    // {
+    //     return (
+    //         a.numWitnesses >= b.numWitnesses
+    //             && a.minConsensusPercentage >= b.minConsensusPercentage
+    //             && a.witnessReward >= b.witnessReward
+    //             && a.witnessCollateral >= b.witnessCollateral
+    //             && a.minerCommitRevealFee >= b.minerCommitRevealFee
+    //     );
+    // }
 
-    function isValid(Witnet.RadonSLA memory sla)
-        internal pure returns (bool)
-    {
-        return (
-            sla.witnessReward > 0
-                && sla.numWitnesses > 0 && sla.numWitnesses <= 127
-                && sla.minConsensusPercentage > 50 && sla.minConsensusPercentage < 100
-                && sla.witnessCollateral > 0
-                && sla.witnessCollateral / sla.witnessReward <= 127
-        );
-    }
+    // function isValid(Witnet.RadonSLA memory sla)
+    //     internal pure returns (bool)
+    // {
+    //     return (
+    //         sla.witnessReward > 0
+    //             && sla.numWitnesses > 0 && sla.numWitnesses <= 127
+    //             && sla.minConsensusPercentage > 50 && sla.minConsensusPercentage < 100
+    //             && sla.witnessCollateral > 0
+    //             && sla.witnessCollateral / sla.witnessReward <= 127
+    //     );
+    // }
 
-    function toBytes32(RadonSLA memory sla) internal pure returns (bytes32) {
-        return bytes32(
-            uint(sla.witnessReward)
-                | sla.witnessCollateral << 64
-                | sla.minerCommitRevealFee << 128
-                | sla.numWitnesses << 248
-                | sla.minConsensusPercentage << 232
-        );
-    }
+    // function toBytes32(RadonSLA memory sla) internal pure returns (bytes32) {
+    //     return bytes32(
+    //         uint(sla.witnessReward)
+    //             | sla.witnessCollateral << 64
+    //             | sla.minerCommitRevealFee << 128
+    //             | sla.numWitnesses << 248
+    //             | sla.minConsensusPercentage << 232
+    //     );
+    // }
 
-    function toRadonSLA(bytes32 _packed) internal pure returns (RadonSLA memory) {
-        return RadonSLA({
-            numWitnesses: uint8(uint(_packed >> 248)),
-            minConsensusPercentage: uint8(uint(_packed >> 232) & 0xff),
-            witnessReward: uint64(uint(_packed) & 0xffffffffffffffff),
-            witnessCollateral: uint64(uint(_packed >> 64) & 0xffffffffffffffff),
-            minerCommitRevealFee: uint64(uint(_packed >> 128) & 0xffffffffffffffff)
-        });
-    }
+    // function toRadonSLA(bytes32 _packed) internal pure returns (RadonSLA memory) {
+    //     return RadonSLA({
+    //         numWitnesses: uint8(uint(_packed >> 248)),
+    //         minConsensusPercentage: uint8(uint(_packed >> 232) & 0xff),
+    //         witnessReward: uint64(uint(_packed) & 0xffffffffffffffff),
+    //         witnessCollateral: uint64(uint(_packed >> 64) & 0xffffffffffffffff),
+    //         minerCommitRevealFee: uint64(uint(_packed >> 128) & 0xffffffffffffffff)
+    //     });
+    // }
 
-    function totalWitnessingReward(Witnet.RadonSLA memory sla)
-        internal pure returns (uint64)
-    {
-        return sla.witnessReward * sla.numWitnesses;
-    }
+    // function totalWitnessingReward(Witnet.RadonSLA memory sla)
+    //     internal pure returns (uint64)
+    // {
+    //     return sla.witnessReward * sla.numWitnesses;
+    // }
 
 
     /// ===============================================================================================================

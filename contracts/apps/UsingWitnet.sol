@@ -42,7 +42,7 @@ abstract contract UsingWitnet
         internal view
         returns (bool)
     {
-        return __witnet.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
+        return __witnet.getQueryStatus(_id) == WitnetV2.QueryStatus.Reported;
     }
 
     /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
@@ -68,7 +68,7 @@ abstract contract UsingWitnet
 
     function _witnetCheckQueryResultStatus(uint256 _witnetQueryId)
         internal view
-        returns (Witnet.ResultStatus)
+        returns (WitnetV2.ResultStatus)
     {
         return __witnet.getQueryResultStatus(_witnetQueryId);
     }

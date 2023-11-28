@@ -2,13 +2,13 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../libs/Witnet.sol";
+import "../libs/WitnetV2.sol";
 
 /// @title Witnet Request Board base data model. 
 /// @author The Witnet Foundation.
 abstract contract WitnetRequestBoardData {  
 
-    using Witnet for Witnet.Request;
+    using WitnetV2 for WitnetV2.Request;
 
     bytes32 internal constant _WITNET_REQUEST_BOARD_DATA_SLOTHASH =
         /* keccak256("io.witnet.boards.data") */
@@ -18,7 +18,7 @@ abstract contract WitnetRequestBoardData {
         address base;
         address owner;    
         uint256 nonce;
-        mapping (uint => Witnet.Query) queries;
+        mapping (uint => WitnetV2.Query) queries;
     }
 
     constructor() {
@@ -26,7 +26,7 @@ abstract contract WitnetRequestBoardData {
     }
 
     /// Asserts the given query is currently in the given status.
-    modifier inStatus(uint256 _queryId, Witnet.QueryStatus _status) {
+    modifier inStatus(uint256 _queryId, WitnetV2.QueryStatus _status) {
       require(
           _statusOf(_queryId) == _status,
           _statusOfRevertMessage(_status)
@@ -46,14 +46,14 @@ abstract contract WitnetRequestBoardData {
     // --- Internal functions -----------------------------------------------------------------------------------------
 
     /// Gets query storage by query id.
-    function __seekQuery(uint256 _queryId) internal view returns (Witnet.Query storage) {
+    function __seekQuery(uint256 _queryId) internal view returns (WitnetV2.Query storage) {
       return __storage().queries[_queryId];
     }
 
     /// Gets the Witnet.Request part of a given query.
     function __seekQueryRequest(uint256 _queryId)
       internal view
-      returns (Witnet.Request storage)
+      returns (WitnetV2.Request storage)
     {
         return __storage().queries[_queryId].request;
     }   
@@ -61,7 +61,7 @@ abstract contract WitnetRequestBoardData {
     /// Gets the Witnet.Result part of a given query.
     function __seekQueryResponse(uint256 _queryId)
       internal view
-      returns (Witnet.Response storage)
+      returns (WitnetV2.Response storage)
     {
         return __storage().queries[_queryId].response;
     }
@@ -79,37 +79,37 @@ abstract contract WitnetRequestBoardData {
     /// Gets current status of given query.
     function _statusOf(uint256 _queryId)
       internal view
-      returns (Witnet.QueryStatus)
+      returns (WitnetV2.QueryStatus)
     {
-      Witnet.Query storage __query = __storage().queries[_queryId];
+      WitnetV2.Query storage __query = __storage().queries[_queryId];
       if (__query.response.tallyHash != bytes32(0)) {
         if (__query.response.timestamp != 0) {  
-          if (block.number >= Witnet.unpackEvmFinalityBlock(__query.response.fromFinality)) {
-            return Witnet.QueryStatus.Finalized;
+          if (block.number >= WitnetV2.unpackEvmFinalityBlock(__query.response.fromFinality)) {
+            return WitnetV2.QueryStatus.Finalized;
           } else {
-            return Witnet.QueryStatus.Reported;
+            return WitnetV2.QueryStatus.Reported;
           }
         } else {
-          return Witnet.QueryStatus.Undeliverable;
+          return WitnetV2.QueryStatus.Undeliverable;
         }
       } else if (__query.request.fromCallbackGas != bytes32(0)) {
-        return Witnet.QueryStatus.Posted;
+        return WitnetV2.QueryStatus.Posted;
       } else {
-        return Witnet.QueryStatus.Unknown;
+        return WitnetV2.QueryStatus.Unknown;
       }
     }
 
-    function _statusOfRevertMessage(Witnet.QueryStatus _status)
+    function _statusOfRevertMessage(WitnetV2.QueryStatus _status)
       internal pure
       returns (string memory)
     {
-      if (_status == Witnet.QueryStatus.Posted) {
+      if (_status == WitnetV2.QueryStatus.Posted) {
         return "WitnetRequestBoard: not in Posted status";
-      } else if (_status == Witnet.QueryStatus.Reported) {
+      } else if (_status == WitnetV2.QueryStatus.Reported) {
         return "WitnetRequestBoard: not in Reported status";
-      } else if (_status == Witnet.QueryStatus.Finalized) {
+      } else if (_status == WitnetV2.QueryStatus.Finalized) {
         return "WitnetRequestBoard: not in Finalized status";
-      } else if (_status == Witnet.QueryStatus.Undeliverable) {
+      } else if (_status == WitnetV2.QueryStatus.Undeliverable) {
         return "WitnetRequestBoard: not in Undeliverable status";
       } else {
         return "WitnetRequestBoard: bad mood";

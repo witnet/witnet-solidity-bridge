@@ -213,10 +213,10 @@ contract WitnetRandomness
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
         require(_queryId != 0, "WitnetRandomness: not randomized");
-        Witnet.ResultStatus _resultStatus = witnet().getQueryResultStatus(_queryId);
-        if (_resultStatus == Witnet.ResultStatus.Ready) {
+        WitnetV2.ResultStatus _resultStatus = witnet().getQueryResultStatus(_queryId);
+        if (_resultStatus == WitnetV2.ResultStatus.Ready) {
             return witnet().getQueryResult(_queryId).asBytes32();
-        } else if (_resultStatus == Witnet.ResultStatus.Error) {
+        } else if (_resultStatus == WitnetV2.ResultStatus.Error) {
             uint256 _nextRandomizeBlock = __randomize_[_block].nextBlock;
             require(_nextRandomizeBlock != 0, "WitnetRandomness: faulty randomize");
             return getRandomnessAfter(_nextRandomizeBlock);
@@ -265,9 +265,10 @@ contract WitnetRandomness
         returns (bool)
     {
         RandomizeData storage _data = __randomize_[_block];
+        WitnetV2.QueryStatus _qstatus = witnet().getQueryStatus(_data.witnetQueryId);
         return (
             _data.witnetQueryId != 0 
-                && witnet().getQueryStatus(_data.witnetQueryId) == Witnet.QueryStatus.Reported
+                && (_qstatus == WitnetV2.QueryStatus.Finalized)
         );
     }
 

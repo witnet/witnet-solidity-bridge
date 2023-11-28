@@ -27,7 +27,7 @@ contract WitnetPriceFeeds
         WitnetPriceFeedsData
 {
     using Witnet for Witnet.Result;
-    using Witnet for Witnet.Response;
+    using WitnetV2 for WitnetV2.Response;
     using WitnetV2 for WitnetV2.RadonSLA;
 
     bytes4 immutable public specs = type(IWitnetPriceFeeds).interfaceId;
@@ -152,7 +152,7 @@ contract WitnetPriceFeeds
 
     function latestResponse(bytes4 feedId)
         override public view
-        returns (Witnet.Response memory)
+        returns (WitnetV2.Response memory)
     {
         return witnet.getQueryResponse(_latestValidQueryId(feedId));
     }
@@ -180,7 +180,7 @@ contract WitnetPriceFeeds
 
     function latestUpdateResponse(bytes4 feedId)
         override external view
-        returns (Witnet.Response memory)
+        returns (WitnetV2.Response memory)
     {
         return witnet.getQueryResponse(latestUpdateQueryId(feedId));
     }
@@ -194,7 +194,7 @@ contract WitnetPriceFeeds
     
     function latestUpdateResultStatus(bytes4 feedId)
         override public view
-        returns (Witnet.ResultStatus)
+        returns (WitnetV2.ResultStatus)
     {
         return _checkQueryResultStatus(latestUpdateQueryId(feedId));
     }
@@ -456,7 +456,7 @@ contract WitnetPriceFeeds
     {
         uint _queryId = _latestValidQueryId(feedId);
         if (_queryId > 0) {
-            Witnet.Response memory _latestResponse = latestResponse(feedId);
+            WitnetV2.Response memory _latestResponse = latestResponse(feedId);
             Witnet.Result memory _latestResult = Witnet.resultFromCborBytes(_latestResponse.cborBytes);
             return IWitnetPriceSolver.Price({
                 value: _latestResult.asUint(),
@@ -545,11 +545,13 @@ contract WitnetPriceFeeds
         return (
             int(_latestPrice.value),
             _latestPrice.timestamp,
-            _latestPrice.status == Witnet.ResultStatus.Ready 
+            _latestPrice.status == WitnetV2.ResultStatus.Ready 
                 ? 200
-                : _latestPrice.status == Witnet.ResultStatus.Awaiting 
-                    ? 404
-                    : 400
+                : (
+                    _latestPrice.status == WitnetV2.ResultStatus.Awaiting 
+                        || _latestPrice.status == WitnetV2.ResultStatus.AwaitingReady
+                        || _latestPrice.status == WitnetV2.ResultStatus.AwaitingError
+                ) ? 404 : 400
         );
     }
 
@@ -559,12 +561,12 @@ contract WitnetPriceFeeds
 
     function _checkQueryResultStatus(uint _queryId)
         internal view
-        returns (Witnet.ResultStatus)
+        returns (WitnetV2.ResultStatus)
     {
         if (_queryId > 0) {
             return witnet.getQueryResultStatus(_queryId);
         } else {
-            return Witnet.ResultStatus.Ready;
+            return WitnetV2.ResultStatus.Ready;
         }
     }
 
@@ -575,7 +577,7 @@ contract WitnetPriceFeeds
         uint _latestUpdateQueryId = latestUpdateQueryId(feedId);
         if (
             _latestUpdateQueryId > 0
-                && witnet.getQueryResultStatus(_latestUpdateQueryId) == Witnet.ResultStatus.Ready
+                && witnet.getQueryResultStatus(_latestUpdateQueryId) == WitnetV2.ResultStatus.Ready
         ) {
             return _latestUpdateQueryId;
         } else {
@@ -618,8 +620,8 @@ contract WitnetPriceFeeds
                 "WitnetPriceFeeds: insufficient reward"
             );
             uint _latestId = __feed.latestUpdateQueryId;
-            Witnet.ResultStatus _latestStatus = _checkQueryResultStatus(_latestId);
-            if (_latestStatus == Witnet.ResultStatus.Awaiting) {
+            WitnetV2.ResultStatus _latestStatus = _checkQueryResultStatus(_latestId);
+            if (_latestStatus == WitnetV2.ResultStatus.Awaiting) {
                 // latest update is still pending, so just increase the reward
                 // accordingly to current tx gasprice:
                 int _deltaReward = int(witnet.getQueryReward(_latestId)) - int(_usedFunds);
@@ -632,7 +634,7 @@ contract WitnetPriceFeeds
                 }
             } else {
                 // Check if latest update ended successfully:
-                if (_latestStatus == Witnet.ResultStatus.Ready) {
+                if (_latestStatus == WitnetV2.ResultStatus.Ready) {
                     // If so, remove previous last valid query from the WRB:
                     if (__feed.latestValidQueryId > 0) {
                         witnet.fetchQueryResponse(__feed.latestValidQueryId);
