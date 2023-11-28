@@ -11,41 +11,37 @@ library Witnet {
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
 
-    // /// Struct containing both request and response data related to every query posted to the Witnet Request Board
-    // struct Query {
-    //     Request request;
-    //     Response response;
-    // }
+    /// Struct containing both request and response data related to every query posted to the Witnet Request Board
+    struct Query {
+        Request request;
+        Response response;
+        address from;      // Address from which the request was posted.
+    }
 
-    // /// Possible status of a Witnet query.
-    // enum QueryStatus {
-    //     Unknown,
-    //     Posted,
-    //     Reported,
-    //     Undeliverable,
-    //     Finalized
-    // }
+    /// Possible status of a Witnet query.
+    enum QueryStatus {
+        Unknown,
+        Posted,
+        Reported,
+        Deleted
+    }
 
-    // /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
-    // struct Request {
-    //     bytes32 fromCallbackGas; // Packed: contains requester address in most significant bytes20, 
-    //                              //         and max callback gas limit if a callback is required.
-    //     bytes32 SLA;             // Packed: Service-Level Aggreement parameters upon which the data request 
-    //                              //         will be solved by the Witnet blockchain.
-    //     bytes32 RAD;             // Verified hash of the actual data request to be solved by the Witnet blockchain.
-    //     uint256 reserved1;       // Reserved uint256 slot.
-    //     uint256 evmReward;       // EVM reward to be paid to the relayer of the Witnet resolution to the data request.
-    //     bytes   bytecode;        // Raw bytecode of the data request to be solved by the Witnet blockchain (only if not yet verified).
-    // }
+    /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
+    struct Request {
+        address addr;       // Address of the IWitnetRequest contract containing Witnet data request raw bytecode.
+        bytes32 slaHash;    // Radon SLA hash of the Witnet data request.
+        bytes32 radHash;    // Radon radHash of the Witnet data request.
+        uint256 gasprice;   // Minimum gas price the DR resolver should pay on the solving tx.
+        uint256 reward;     // Escrowed reward to be paid to the DR resolver.
+    }
 
-    // /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
-    // struct Response {
-    //     bytes32 fromFinality;  // Packed: contains address from which the result to the data request was reported, and 
-    //                            //         the EVM block at which the provided result can be considered to be final.        
-    //     uint256 timestamp;     // Timestamp at which data from data sources were retrieved by the Witnet blockchain. 
-    //     bytes32 tallyHash;     // Hash of the Witnet commit/reveal act that solved the data request.
-    //     bytes   cborBytes;     // CBOR-encoded result to the data request, as resolved by the Witnet blockchain. 
-    // }
+    /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
+    struct Response {
+        address reporter;       // Address from which the result was reported.
+        uint256 timestamp;      // Timestamp of the Witnet-provided result.
+        bytes32 drTxHash;       // Hash of the Witnet transaction that solved the queried Data Request.
+        bytes   cborBytes;      // Witnet-provided result CBOR-bytes to the queried Data Request.
+    }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
     struct Result {
@@ -53,15 +49,13 @@ library Witnet {
         WitnetCBOR.CBOR value;  // Resulting value, in CBOR-serialized bytes.
     }
 
-    // /// Final query's result status from a requester's point of view.
-    // enum ResultStatus {
-    //     Void,
-    //     Awaiting,
-    //     Ready,
-    //     Error,
-    //     AwaitingReady,
-    //     AwaitingError
-    // }
+    /// Final query's result status from a requester's point of view.
+    enum ResultStatus {
+        Void,
+        Awaiting,
+        Ready,
+        Error
+    }
 
     /// Data struct describing an error when trying to fetch a Witnet-provided result to a Data Request.
     struct ResultError {
