@@ -19,12 +19,12 @@ abstract contract WitnetRequestBoardDataACLs
     }
 
     constructor() {
-        _acls().isReporter_[msg.sender] = true;
+        __acls().isReporter_[msg.sender] = true;
     }
 
     modifier onlyReporters {
         require(
-            _acls().isReporter_[msg.sender],
+            __acls().isReporter_[msg.sender],
             "WitnetRequestBoard: unauthorized reporter"
         );
         _;
@@ -33,7 +33,7 @@ abstract contract WitnetRequestBoardDataACLs
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
 
-    function _acls() internal pure returns (WitnetBoardACLs storage _struct) {
+    function __acls() internal pure returns (WitnetBoardACLs storage _struct) {
         assembly {
             _struct.slot := _WITNET_BOARD_ACLS_SLOTHASH
         }

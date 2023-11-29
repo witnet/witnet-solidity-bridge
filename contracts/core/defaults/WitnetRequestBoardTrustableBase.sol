@@ -37,9 +37,9 @@ abstract contract WitnetRequestBoardTrustableBase
     using WitnetV2 for WitnetV2.Response;
 
     bytes4 public immutable override specs = type(IWitnetRequestBoard).interfaceId;
-    
-    WitnetRequestFactory immutable public override factory;
     WitnetBytecodes immutable public override registry;
+    
+    WitnetRequestFactory immutable private __factory;
 
     modifier checkCallbackRecipient(address _addr, uint96 _callbackGasLimit) {
         require(
@@ -76,8 +76,7 @@ abstract contract WitnetRequestBoardTrustableBase
             "io.witnet.proxiable.board"
         )
     {
-        assert(address(_factory) != address(0) && address(_registry) != address(0));
-        factory = _factory;
+        __factory = _factory;
         registry = _registry;
     }
 
@@ -102,6 +101,10 @@ abstract contract WitnetRequestBoardTrustableBase
 
     function channel() virtual override public view returns (bytes4) {
         return bytes4(keccak256(abi.encode(address(this), block.chainid)));
+    }
+
+    function factory() virtual override public view returns (WitnetRequestFactory) {
+        return __factory;
     }
 
     
@@ -158,16 +161,16 @@ abstract contract WitnetRequestBoardTrustableBase
         __storage().base = base();
 
         require(
-            address(factory).code.length > 0,
+            address(__factory).code.length > 0,
             "WitnetRequestBoardTrustableBase: inexistent factory"
         );
         require(
-            factory.specs() == type(IWitnetRequestFactory).interfaceId, 
+            __factory.specs() == type(IWitnetRequestFactory).interfaceId, 
             "WitnetRequestBoardTrustableBase: uncompliant factory"
         );
         require(
-            address(factory.witnet()) == address(this) 
-                && address(factory.registry()) == address(registry),
+            address(__factory.witnet()) == address(this) 
+                && address(__factory.registry()) == address(registry),
             "WitnetRequestBoardTrustableBase: discordant factory"
         );
 
@@ -734,7 +737,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// Tells whether given address is included in the active reporters control list.
     /// @param _reporter The address to be checked.
     function isReporter(address _reporter) public view override returns (bool) {
-        return _acls().isReporter_[_reporter];
+        return __acls().isReporter_[_reporter];
     }
 
     /// Adds given addresses to the active reporters control list.
@@ -760,7 +763,7 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         for (uint ix = 0; ix < _exReporters.length; ix ++) {
             address _reporter = _exReporters[ix];
-            _acls().isReporter_[_reporter] = false;
+            __acls().isReporter_[_reporter] = false;
         }
         emit ReportersUnset(_exReporters);
     }
@@ -983,7 +986,7 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         for (uint ix = 0; ix < _reporters.length; ix ++) {
             address _reporter = _reporters[ix];
-            _acls().isReporter_[_reporter] = true;
+            __acls().isReporter_[_reporter] = true;
         }
         emit ReportersSet(_reporters);
     }

@@ -60,7 +60,6 @@ contract WitnetRequestFactoryDefault
             "io.witnet.requests.factory"
         )
     {
-        assert(address(_witnet) != address(0) && address(_registry) != address(0));
         witnet = _witnet;
         registry = _registry;
         // let logic contract be used as a factory, while avoiding further initializations:
