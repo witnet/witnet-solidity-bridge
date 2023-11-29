@@ -3,16 +3,19 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetBytecodesMock.sol";
+import "./WitnetMockedBytecodes.sol";
+import "./WitnetMockedRequestFactory.sol";
 import "../core/defaults/WitnetRequestBoardTrustableDefault.sol";
 
-contract WitnetRequestBoardMock
+import "./WitnetMockedPriceFeeds.sol";
+
+contract WitnetMockedRequestBoard
     is
         WitnetRequestBoardTrustableDefault
 {
     WitnetRequestFactory private __factory;
 
-    constructor(WitnetBytecodesMock _registry) 
+    constructor(WitnetMockedBytecodes _registry) 
         WitnetRequestBoardTrustableDefault(
             WitnetRequestFactory(address(0)), 
             WitnetBytecodes(address(_registry)),
@@ -28,7 +31,7 @@ contract WitnetRequestBoardMock
         return __factory;
     }
 
-    function setFactory(WitnetRequestFactory _factory) external onlyOwner {
-        __factory = _factory; 
+    function setFactory(WitnetMockedRequestFactory _factory) external onlyOwner {
+        __factory = WitnetRequestFactory(address(_factory)); 
     }
 } 

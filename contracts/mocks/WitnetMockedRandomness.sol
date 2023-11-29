@@ -11,7 +11,7 @@ import "../apps/WitnetRandomness.sol";
 /// @dev CONTRACT ADDRESS PROVIDED BY THE WITNET FOUNDATION.
 /// @dev SEE: https://docs.witnet.io/smart-contracts/witnet-randomness-oracle/contract-addresses
 /// @author Witnet Foundation.
-contract WitnetRandomnessMock
+contract WitnetMockedRandomness
     is
         WitnetRandomness
 {
@@ -19,7 +19,7 @@ contract WitnetRandomnessMock
     uint256 internal __mockRandomizeFee;
     uint256 internal __mockRandomizeLatestId;
 
-    /// Constructor: new WitnetRandomnessMock contract
+    /// Constructor: new WitnetMockedRandomness contract
     /// @param _mockRandomizeLatencyBlocks Mocked number of blocks in which a new randomness will be provided after `randomize()`
     /// @param _mockRandomizeFee Mocked randomize fee (will be constant no matter what tx gas price is provided).
     constructor (
@@ -81,8 +81,8 @@ contract WitnetRandomnessMock
             _block = getRandomnessNextBlock(_block);
         }
         uint256 _queryId = __randomize_[_block].witnetQueryId;
-        require(_queryId != 0, "WitnetRandomnessMock: not randomized");
-        require(block.number >= _block + __mockRandomizeLatencyBlocks, "WitnetRandomnessMock: pending randomize");
+        require(_queryId != 0, "WitnetMockedRandomness: not randomized");
+        require(block.number >= _block + __mockRandomizeLatencyBlocks, "WitnetMockedRandomness: pending randomize");
         return blockhash(_block);
     }
 
@@ -115,7 +115,7 @@ contract WitnetRandomnessMock
             _usedFunds = __mockRandomizeFee;
             require(
                 msg.value >= _usedFunds,
-                "WitnetRandomnessMock: insufficient reward"
+                "WitnetMockedRandomness: insufficient reward"
             );
             // Post the Witnet Randomness request:
             uint _queryId = ++ __mockRandomizeLatestId;

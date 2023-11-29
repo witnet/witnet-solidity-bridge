@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "../apps/WitnetPriceFeeds.sol";
 
-contract WitnetPriceFeedsMock is WitnetPriceFeeds {
+contract WitnetMockedPriceFeeds is WitnetPriceFeeds {
     constructor(WitnetRequestBoard _wrb)
         WitnetPriceFeeds(
             msg.sender,

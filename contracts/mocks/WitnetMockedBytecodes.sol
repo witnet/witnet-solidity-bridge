@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "../core/defaults/WitnetBytecodesDefault.sol";
 
-contract WitnetBytecodesMock is WitnetBytecodesDefault {
+contract WitnetMockedBytecodes is WitnetBytecodesDefault {
     constructor()
         WitnetBytecodesDefault(
             false,
