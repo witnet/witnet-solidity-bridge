@@ -17,6 +17,7 @@ abstract contract WitnetRequestBoard
     function class() virtual external view returns (string memory) {
         return type(WitnetRequestBoard).name;
     }
+    function channel() virtual external view returns (bytes4);
     function factory() virtual external view returns (WitnetRequestFactory);
     function registry() virtual external view returns (WitnetBytecodes);
     function specs() virtual external view returns (bytes4);

@@ -100,7 +100,7 @@ abstract contract WitnetRequestBoardTrustableBase
         )));
     }
 
-    function ddrTag() virtual public view returns (bytes4) {
+    function channel() virtual override public view returns (bytes4) {
         return bytes4(keccak256(abi.encode(address(this), block.chainid)));
     }
 
@@ -774,7 +774,7 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint256)
     {
         return uint(keccak256(abi.encode(
-            ddrTag(),
+            channel(),
             block.number,
             msg.sender,
             _queryRAD,
