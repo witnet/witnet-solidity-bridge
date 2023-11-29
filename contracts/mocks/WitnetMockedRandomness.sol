@@ -5,12 +5,11 @@ pragma experimental ABIEncoderV2;
 
 import "../apps/WitnetRandomness.sol";
 
-/// @title WitnetRandomness mock contract implementation. 
+/// @title Mocked implementation of `WitnetRandomness`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
-/// @dev ON SUPPORTED TESTNETS, PLEASE USE THE `WitnetRandomness`
-/// @dev CONTRACT ADDRESS PROVIDED BY THE WITNET FOUNDATION.
-/// @dev SEE: https://docs.witnet.io/smart-contracts/witnet-randomness-oracle/contract-addresses
-/// @author Witnet Foundation.
+/// @dev ON SUPPORTED TESTNETS AND MAINNETS, PLEASE USE 
+/// @dev THE `WitnetRandomness` CONTRACT ADDRESS PROVIDED 
+/// @dev BY THE WITNET FOUNDATION.
 contract WitnetMockedRandomness
     is
         WitnetRandomness

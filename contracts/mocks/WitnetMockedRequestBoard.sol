@@ -9,6 +9,11 @@ import "../core/defaults/WitnetRequestBoardTrustableDefault.sol";
 
 import "./WitnetMockedPriceFeeds.sol";
 
+/// @title Mocked implementation of `WitnetRequestBoard`.
+/// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
+/// @dev ON SUPPORTED TESTNETS AND MAINNETS, PLEASE USE 
+/// @dev THE `WitnetRequestBoard` CONTRACT ADDRESS PROVIDED 
+/// @dev BY THE WITNET FOUNDATION.
 contract WitnetMockedRequestBoard
     is
         WitnetRequestBoardTrustableDefault

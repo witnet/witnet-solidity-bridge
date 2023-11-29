@@ -6,6 +6,11 @@ pragma experimental ABIEncoderV2;
 import "./WitnetMockedRequestBoard.sol";
 import "../core/defaults/WitnetRequestFactoryDefault.sol";
 
+/// @title Mocked implementation of `WitnetRequestFactory`.
+/// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
+/// @dev ON SUPPORTED TESTNETS AND MAINNETS, PLEASE USE 
+/// @dev THE `WitnetRequestFactory` CONTRACT ADDRESS PROVIDED 
+/// @dev BY THE WITNET FOUNDATION.
 contract WitnetMockedRequestFactory
     is 
         WitnetRequestFactoryDefault
