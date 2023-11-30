@@ -62,15 +62,15 @@ abstract contract UsingWitnetRandomness
         __defaultRandomizePackedSLA = _defaultSLA.toBytes32();
     }
 
-    function _defaultRandomizeSLA() internal view returns (WitnetV2.RadonSLA memory) {
+    function _witnetDefaultSLA() virtual internal view returns (WitnetV2.RadonSLA memory) {
         return __defaultRandomizePackedSLA.toRadonSLA();
     }
 
-    function _estimateRandomizeBaseFee() internal view returns (uint256) {
-        return _witnetEstimateBaseFee(35);
+    function _witnetEstimateRandomizeBaseFee() internal view returns (uint256) {
+        return _witnetEstimateBaseFee(32);
     }
 
-    function _randomUniform(uint32 _range, uint256 _nonce, bytes32 _seed) internal pure returns (uint32) {
+    function _witnetRandomUniformUint32(uint32 _range, uint256 _nonce, bytes32 _seed) internal pure returns (uint32) {
         uint256 _number = uint256(
             keccak256(
                 abi.encode(_seed, _nonce)
@@ -79,19 +79,15 @@ abstract contract UsingWitnetRandomness
         return uint32((_number * _range) >> 224);
     }
 
-    function _readRandomnessFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
-        return cborValue.readBytes().toBytes32();
-    }
-
-    function __randomize(uint256 _witnetEvmReward) virtual internal returns (uint256) {
+    function __witnetRandomize(uint256 _witnetEvmReward) virtual internal returns (uint256) {
         return __witnetRequestData(
             _witnetEvmReward,
-            _defaultRandomizeSLA(),
+            _witnetDefaultSLA(),
             __witnetRandomnessRadHash
         );
     }
 
-    function __randomize(
+    function __witnetRandomize(
             uint256 _witnetEvmReward,
             WitnetV2.RadonSLA calldata _witnetQuerySLA
         )
@@ -105,7 +101,11 @@ abstract contract UsingWitnetRandomness
         );
     }
 
-    function __settleRandomizeDefaultSLA(WitnetV2.RadonSLA calldata sla) virtual internal {
+    function _witnetReadRandomizeFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
+        return cborValue.readBytes().toBytes32();
+    }
+
+    function __witnetSettleDefaultSLA(WitnetV2.RadonSLA calldata sla) virtual internal {
         __defaultRandomizePackedSLA = sla.toBytes32();
     }
 }
