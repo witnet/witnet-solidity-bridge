@@ -12,8 +12,12 @@ abstract contract WitnetRequestTemplateConsumer
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
     
-    constructor(WitnetRequestTemplate _requestTemplate, uint96 _callbackGasLimit)
-        UsingWitnetRequestTemplate(_requestTemplate)
+    constructor(
+            WitnetRequestTemplate _requestTemplate, 
+            uint96 _callbackGasLimit,
+            WitnetV2.RadonSLA memory _defaultSLA
+        )
+        UsingWitnetRequestTemplate(_requestTemplate, _defaultSLA)
         WitnetConsumer(_callbackGasLimit)
     {
         require(
@@ -57,6 +61,20 @@ abstract contract WitnetRequestTemplateConsumer
 
     function __witnetRequestData(
             uint256 _witnetEvmReward,
+            bytes32 _witnetRadHash
+        )
+        virtual override internal 
+        returns (uint256)
+    {
+        return WitnetConsumer.__witnetRequestData(
+            _witnetEvmReward,
+            _witnetDefaultSLA(),
+            _witnetRadHash
+        );
+    }
+
+    function __witnetRequestData(
+            uint256 _witnetEvmReward,
             WitnetV2.RadonSLA memory _witnetQuerySLA,
             string[][] memory _witnetRequestArgs
         )
@@ -70,6 +88,18 @@ abstract contract WitnetRequestTemplateConsumer
         );
     }
 
-
+    function __witnetRequestData(
+            uint256 _witnetEvmReward,
+            string[][] memory _witnetRequestArgs
+        )
+        virtual override internal
+        returns (uint256)
+    {
+        return WitnetConsumer.__witnetRequestData(
+            _witnetEvmReward,
+            _witnetDefaultSLA(),
+            _witnetBuildRadHash(_witnetRequestArgs)
+        );
+    }
 
 }

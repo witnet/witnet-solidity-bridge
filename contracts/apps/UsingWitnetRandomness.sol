@@ -16,7 +16,6 @@ abstract contract UsingWitnetRandomness
     using WitnetV2 for WitnetV2.RadonSLA;
 
     bytes32 internal immutable __witnetRandomnessRadHash;
-    bytes32 private __defaultRandomizePackedSLA;
 
     constructor(
             WitnetRequestBoard _wrb, 
@@ -59,11 +58,7 @@ abstract contract UsingWitnetRandomness
             ).radHash();
         }
         // Settle default randomize SLA:
-        __defaultRandomizePackedSLA = _defaultSLA.toBytes32();
-    }
-
-    function _witnetDefaultSLA() virtual internal view returns (WitnetV2.RadonSLA memory) {
-        return __defaultRandomizePackedSLA.toRadonSLA();
+        __witnetSetDefaultSLA(_defaultSLA);
     }
 
     function _witnetEstimateRandomizeBaseFee() internal view returns (uint256) {
@@ -103,9 +98,5 @@ abstract contract UsingWitnetRandomness
 
     function _witnetReadRandomizeFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
         return cborValue.readBytes().toBytes32();
-    }
-
-    function __witnetSettleDefaultSLA(WitnetV2.RadonSLA calldata sla) virtual internal {
-        __defaultRandomizePackedSLA = sla.toBytes32();
     }
 }

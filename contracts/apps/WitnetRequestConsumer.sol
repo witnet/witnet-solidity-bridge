@@ -12,8 +12,12 @@ abstract contract WitnetRequestConsumer
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
     
-    constructor(WitnetRequest _witnetRequest, uint96 _callbackGasLimit)
-        UsingWitnetRequest(_witnetRequest)
+    constructor(
+            WitnetRequest _witnetRequest, 
+            uint96 _callbackGasLimit,
+            WitnetV2.RadonSLA memory _defaultSLA
+        )
+        UsingWitnetRequest(_witnetRequest, _defaultSLA)
         WitnetConsumer(_callbackGasLimit)
     {
         require(

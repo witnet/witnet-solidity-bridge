@@ -11,7 +11,10 @@ abstract contract UsingWitnetRequestTemplate
     
     uint16 immutable internal __witnetResultMaxSize;
  
-    constructor (WitnetRequestTemplate _requestTemplate)
+    constructor (
+            WitnetRequestTemplate _requestTemplate, 
+            WitnetV2.RadonSLA memory _defaultSLA
+        )
         UsingWitnet(_requestTemplate.witnet())
     {
         require(
@@ -20,6 +23,7 @@ abstract contract UsingWitnetRequestTemplate
         );
         dataRequestTemplate = _requestTemplate;
         __witnetResultMaxSize = _requestTemplate.resultDataMaxSize();
+        __witnetSetDefaultSLA(_defaultSLA);
     }
 
     function _witnetBuildRadHash(string[][] memory _witnetRequestArgs)
@@ -54,6 +58,18 @@ abstract contract UsingWitnetRequestTemplate
         return __witnetRequestData(
             _witnetEvmReward,
             _witnetQuerySLA,
+            _witnetBuildRadHash(_witnetRequestArgs)
+        );
+    }
+
+    function __witnetRequestData(
+            uint256 _witnetEvmReward,
+            string[][] memory _witnetRequestArgs
+        )
+        virtual internal returns (uint256)
+    {
+        return __witnetRequestData(
+            _witnetEvmReward,
             _witnetBuildRadHash(_witnetRequestArgs)
         );
     }

@@ -13,6 +13,7 @@ abstract contract UsingWitnet
         IWitnetRequestBoardEvents
 {
     WitnetRequestBoard internal immutable __witnet;
+    bytes32 private __witnetDefaultPackedSLA;
 
     /// @dev Include an address to specify the WitnetRequestBoard entry point address.
     /// @param _wrb The WitnetRequestBoard entry point address.
@@ -22,6 +23,10 @@ abstract contract UsingWitnet
             "UsingWitnet: uncompliant WitnetRequestBoard"
         );
         __witnet = _wrb;
+        __witnetDefaultPackedSLA = WitnetV2.toBytes32(WitnetV2.RadonSLA({
+            witnessingCommitteeSize: 10,
+            witnessingWitTotalReward: 10 ** 9
+        }));
     }
 
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
@@ -80,6 +85,10 @@ abstract contract UsingWitnet
         return __witnet.getQueryResultError(_witnetQueryId);
     }
 
+    function _witnetDefaultSLA() virtual internal view returns (WitnetV2.RadonSLA memory) {
+        return WitnetV2.toRadonSLA(__witnetDefaultPackedSLA);
+    }
+
     function __witnetRequestData(
             uint256 _witnetEvmReward, 
             WitnetV2.RadonSLA memory _witnetQuerySLA,
@@ -91,5 +100,20 @@ abstract contract UsingWitnet
             _witnetRadHash, 
             _witnetQuerySLA
         );
+    }
+
+    function __witnetRequestData(
+            uint256 _witnetEvmReward,
+            bytes32 _witnetRadHash
+        )
+        virtual internal returns (uint256)
+    {
+        return __witnet.postRequest{value: _witnetEvmReward}(
+            _witnetRadHash,
+            _witnetDefaultSLA()
+        );
+    }
+    function __witnetSetDefaultSLA(WitnetV2.RadonSLA memory _defaultSLA) virtual internal {
+        __witnetDefaultPackedSLA = WitnetV2.toBytes32(_defaultSLA);
     }
 }
