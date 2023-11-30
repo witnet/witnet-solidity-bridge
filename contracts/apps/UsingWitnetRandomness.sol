@@ -18,11 +18,15 @@ abstract contract UsingWitnetRandomness
     bytes32 internal immutable __witnetRandomnessRadHash;
     bytes32 private __defaultRandomizePackedSLA;
 
-    constructor(WitnetRequestBoard _wrb, uint96 _randomizeCallbackGasLimit)
+    constructor(
+            WitnetRequestBoard _wrb, 
+            uint96 _randomizeCallbackGasLimit,
+            WitnetV2.RadonSLA memory _defaultSLA
+        )
         UsingWitnet(_wrb)
         WitnetConsumer(_randomizeCallbackGasLimit)
     {
-        // Build Witnet randomness request
+        // On-chain building of the Witnet Randomness Request:
         {
             WitnetRequestFactory _factory = witnet().factory();
             WitnetBytecodes _registry = witnet().registry();
@@ -48,18 +52,14 @@ abstract contract UsingWitnetRandomness
                 _retrievals,
                 _aggregator,
                 _tally,
-                35 // CBOR overhead (3 bytes) + payload (32 bytes)
+                32 // 256 bits of pure entropy ;-)
             ));
             __witnetRandomnessRadHash = WitnetRequest(
                 _template.buildRequest(new string[][](_retrievals.length))
             ).radHash();
         }
         // Settle default randomize SLA:
-        __defaultRandomizePackedSLA = WitnetV2.RadonSLA({
-            witnessingCommitteeSize: 7,
-            witnessingCollateralRatio: 10,
-            witnessingWitReward: 10 ** 9
-        }).toBytes32();
+        __defaultRandomizePackedSLA = _defaultSLA.toBytes32();
     }
 
     function _defaultRandomizeSLA() internal view returns (WitnetV2.RadonSLA memory) {

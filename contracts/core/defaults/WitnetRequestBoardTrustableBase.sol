@@ -445,7 +445,7 @@ abstract contract WitnetRequestBoardTrustableBase
         )
         virtual override
         external payable
-        checkReward(estimateBaseFee(_getGasPrice(), _queryRAD))//32))// _queryRAD))
+        checkReward(estimateBaseFee(_getGasPrice(), _queryRAD))
         checkSLA(_querySLA)
         returns (uint256 _witnetQueryId)
     {
@@ -453,7 +453,7 @@ abstract contract WitnetRequestBoardTrustableBase
         // Let Web3 observers know that a new request has been posted
         emit WitnetQuery(
             _witnetQueryId, 
-            _querySLA.totalWitnessingReward(), 
+            _querySLA.witnessingWitTotalReward, 
             _getMsgValue()
         );
     }
@@ -492,7 +492,7 @@ abstract contract WitnetRequestBoardTrustableBase
         );
         emit WitnetQuery(
             _witnetQueryId, 
-            _querySLA.totalWitnessingReward(),
+            _querySLA.witnessingWitTotalReward,
             _getMsgValue()
         );
     }
@@ -532,7 +532,7 @@ abstract contract WitnetRequestBoardTrustableBase
         __seekQueryRequest(_witnetQueryId).bytecode = _queryUnverifiedBytecode;
         emit WitnetQuery(
             _witnetQueryId,
-            _querySLA.totalWitnessingReward(),
+            _querySLA.witnessingWitTotalReward,
             _getMsgValue()
         );
     }

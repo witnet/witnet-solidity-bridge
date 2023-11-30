@@ -229,7 +229,6 @@ library Witnet {
     struct RadonReducer {
         RadonReducerOpcodes opcode;
         RadonFilter[] filters;
-        // bytes script;
     }
 
     /// Reducting functions currently supported on the Witnet blockchain.
@@ -696,7 +695,7 @@ library Witnet {
     //     });
     // }
 
-    // function totalWitnessingReward(Witnet.RadonSLA memory sla)
+    // function witnessingWitTotalReward(Witnet.RadonSLA memory sla)
     //     internal pure returns (uint64)
     // {
     //     return sla.witnessReward * sla.numWitnesses;

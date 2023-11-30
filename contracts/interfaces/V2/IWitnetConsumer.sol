@@ -8,9 +8,7 @@ interface IWitnetConsumer {
     /// @notice Method to be called from the WitnetRequestBoard contract as soon as the given Witnet `queryId`
     /// @notice gets reported, if reported with no errors.
     /// @dev It should revert if called from any other address different to the WitnetRequestBoard being used
-    /// @dev by the WitnetConsumer contract. Within the implementation of this method, the WitnetConsumer
-    /// @dev can call to the WRB as to retrieve the Witnet tracking information (i.e. the `witnetDrTxHash` 
-    /// @dev and `witnetDrCommitTxTimestamp`), or the finality status, of the result being reported.
+    /// @dev by the WitnetConsumer contract. 
     /// @param witnetQueryId The unique identifier of the Witnet query being reported.
     /// @param witnetResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
     /// @param witnetResultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
@@ -27,9 +25,7 @@ interface IWitnetConsumer {
     /// @notice Method to be called from the WitnetRequestBoard contract as soon as the given Witnet `queryId`
     /// @notice gets reported, if reported WITH errors.
     /// @dev It should revert if called from any other address different to the WitnetRequestBoard being used
-    /// @dev by the WitnetConsumer contract. Within the implementation of this method, the WitnetConsumer
-    /// @dev can call to the WRB as to retrieve the Witnet tracking information (i.e. the `witnetDrTxHash` 
-    /// @dev and `witnetDrCommitTxTimestamp`), or the finality status, of the result being reported.
+    /// @dev by the WitnetConsumer contract. 
     /// @param witnetQueryId The unique identifier of the Witnet query being reported.
     /// @param witnetQueryId The unique identifier of the Witnet query being reported.
     /// @param witnetResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.

@@ -70,7 +70,7 @@ contract WitnetRandomness
                 _retrievals,
                 _aggregator,
                 _tally,
-                35 // CBOR overhead (3 bytes) + payload (32 bytes)
+                32 // 256 bits of pure entropy ;-)
             ));
             witnetRandomnessRequest = WitnetRequest(_template.buildRequest(new string[][](_retrievals.length)));
             __witnetRandomnessRadHash = witnetRandomnessRequest.radHash();
@@ -466,9 +466,8 @@ contract WitnetRandomness
 
     function __initializeWitnetRandomnessSLA() virtual internal {
         __settleWitnetRandomnessSLA(WitnetV2.RadonSLA({
-            witnessingCommitteeSize: 5,
-            witnessingCollateralRatio: 10,
-            witnessingWitReward: 10 ** 9
+            witnessingCommitteeSize: 10,
+            witnessingWitTotalReward: 10 ** 9
         }));
     }
 
