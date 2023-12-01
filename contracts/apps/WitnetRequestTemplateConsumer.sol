@@ -12,36 +12,34 @@ abstract contract WitnetRequestTemplateConsumer
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
     
+    /// @param _witnetRequestTemplate Address of the WitnetRequestTemplate from which actual data requests will get built.
+    /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
+    /// @param _callbackGasLimit Maximum gas to be spent by the IWitnetConsumer's callback methods.
+    /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.
     constructor(
-            WitnetRequestTemplate _requestTemplate, 
+            WitnetRequestTemplate _witnetRequestTemplate, 
+            uint16 _baseFeeOverheadPercentage,
             uint96 _callbackGasLimit,
             WitnetV2.RadonSLA memory _defaultSLA
         )
-        UsingWitnetRequestTemplate(_requestTemplate, _defaultSLA)
+        UsingWitnetRequestTemplate(_witnetRequestTemplate, _baseFeeOverheadPercentage, _defaultSLA)
         WitnetConsumer(_callbackGasLimit)
-    {
-        require(
-            _witnetEstimateBaseFeeWithCallback(_callbackGasLimit)
-                > UsingWitnetRequestTemplate._witnetEstimateBaseFee(),
-            "WitnetRequestTemplateConsumer: insufficient callback gas limit"
-        );
+    {}
 
-    }
-
-    function _witnetEstimateBaseFee()
-        virtual override
+    function _witnetEstimateEvmReward()
+        virtual override(UsingWitnetRequestTemplate, WitnetConsumer)
         internal view
         returns (uint256)
     {
-        return WitnetConsumer._witnetEstimateBaseFee(__witnetResultMaxSize);
+        return WitnetConsumer._witnetEstimateEvmReward(__witnetResultMaxSize);
     }
 
-    function _witnetEstimateBaseFee(uint16 _resultMaxSize) 
+    function _witnetEstimateEvmReward(uint16) 
         virtual override(UsingWitnet, WitnetConsumer) 
         internal view
         returns (uint256)
     {
-        return WitnetConsumer._witnetEstimateBaseFee(_resultMaxSize);
+        return WitnetConsumer._witnetEstimateEvmReward();
     } 
 
     function __witnetRequestData(

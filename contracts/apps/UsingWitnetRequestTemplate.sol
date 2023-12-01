@@ -11,19 +11,24 @@ abstract contract UsingWitnetRequestTemplate
     
     uint16 immutable internal __witnetResultMaxSize;
  
+    /// @param _witnetRequestTemplate Address of the WitnetRequestTemplate from which actual data requests will get built.
+    /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
+    /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.
     constructor (
-            WitnetRequestTemplate _requestTemplate, 
+            WitnetRequestTemplate _witnetRequestTemplate, 
+            uint16 _baseFeeOverheadPercentage,
             WitnetV2.RadonSLA memory _defaultSLA
         )
-        UsingWitnet(_requestTemplate.witnet())
+        UsingWitnet(_witnetRequestTemplate.witnet())
     {
         require(
-            _requestTemplate.specs() == type(WitnetRequestTemplate).interfaceId,
+            _witnetRequestTemplate.specs() == type(WitnetRequestTemplate).interfaceId,
             "UsingWitnetRequestTemplate: uncompliant WitnetRequestTemplate"
         );
-        dataRequestTemplate = _requestTemplate;
-        __witnetResultMaxSize = _requestTemplate.resultDataMaxSize();
+        dataRequestTemplate = _witnetRequestTemplate;
+        __witnetResultMaxSize = _witnetRequestTemplate.resultDataMaxSize();
         __witnetSetDefaultSLA(_defaultSLA);
+        __witnetSetBaseFeeOverheadPercentage(_baseFeeOverheadPercentage);
     }
 
     function _witnetBuildRadHash(string[][] memory _witnetRequestArgs)
@@ -38,14 +43,11 @@ abstract contract UsingWitnetRequestTemplate
         return WitnetRequest(dataRequestTemplate.buildRequest(_witnetRequestArgs));
     }
 
-    function _witnetEstimateBaseFee()
+    function _witnetEstimateEvmReward()
         virtual internal view
         returns (uint256)
     {
-        return __witnet.estimateBaseFee(
-            tx.gasprice,
-            __witnetResultMaxSize
-        );
+        return _witnetEstimateEvmReward(__witnetResultMaxSize);
     }
 
     function __witnetRequestData(

@@ -12,8 +12,12 @@ abstract contract UsingWitnetRequest
     bytes32 immutable internal __witnetRequestRadHash;
     uint16  immutable internal __witnetResultMaxSize;
  
+    /// @param _witnetRequest Address of the WitnetRequest contract containing the actual data request.
+    /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
+    /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.
     constructor (
             WitnetRequest _witnetRequest,
+            uint16 _baseFeeOverheadPercentage,
             WitnetV2.RadonSLA memory _defaultSLA
         )
         UsingWitnet(_witnetRequest.witnet())
@@ -26,16 +30,14 @@ abstract contract UsingWitnetRequest
         __witnetResultMaxSize = _witnetRequest.resultDataMaxSize();
         __witnetRequestRadHash = _witnetRequest.radHash();
         __witnetSetDefaultSLA(_defaultSLA);
+        __witnetSetBaseFeeOverheadPercentage(_baseFeeOverheadPercentage);
     }
 
-    function _witnetEstimateBaseFee()
+    function _witnetEstimateEvmReward()
         virtual internal view
         returns (uint256)
     {
-        return __witnet.estimateBaseFee(
-            tx.gasprice,
-            __witnetResultMaxSize
-        );
+        return _witnetEstimateEvmReward(__witnetResultMaxSize);
     }
 
     function __witnetRequestData(

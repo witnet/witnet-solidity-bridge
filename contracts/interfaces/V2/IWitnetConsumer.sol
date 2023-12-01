@@ -27,7 +27,6 @@ interface IWitnetConsumer {
     /// @dev It should revert if called from any other address different to the WitnetRequestBoard being used
     /// @dev by the WitnetConsumer contract. 
     /// @param witnetQueryId The unique identifier of the Witnet query being reported.
-    /// @param witnetQueryId The unique identifier of the Witnet query being reported.
     /// @param witnetResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
     /// @param witnetResultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
     /// @param witnetEvmFinalityBlock EVM block at which the provided data can be considered to be final.

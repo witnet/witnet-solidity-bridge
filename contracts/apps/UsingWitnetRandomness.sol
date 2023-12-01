@@ -17,13 +17,18 @@ abstract contract UsingWitnetRandomness
 
     bytes32 internal immutable __witnetRandomnessRadHash;
 
+    /// @param _wrb Address of the WitnetRequestBoard contract.
+    /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
+    /// @param _callbackGasLimit Maximum gas to be spent by the IWitnetConsumer's callback methods.
+    /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.
     constructor(
             WitnetRequestBoard _wrb, 
-            uint96 _randomizeCallbackGasLimit,
+            uint16 _baseFeeOverheadPercentage,
+            uint96 _callbackGasLimit,
             WitnetV2.RadonSLA memory _defaultSLA
         )
         UsingWitnet(_wrb)
-        WitnetConsumer(_randomizeCallbackGasLimit)
+        WitnetConsumer(_callbackGasLimit)
     {
         // On-chain building of the Witnet Randomness Request:
         {
@@ -59,10 +64,11 @@ abstract contract UsingWitnetRandomness
         }
         // Settle default randomize SLA:
         __witnetSetDefaultSLA(_defaultSLA);
+        __witnetSetBaseFeeOverheadPercentage(_baseFeeOverheadPercentage);
     }
 
-    function _witnetEstimateRandomizeBaseFee() internal view returns (uint256) {
-        return _witnetEstimateBaseFee(32);
+    function _witnetEstimateEvmReward() virtual override internal view returns (uint256) {
+        return _witnetEstimateEvmReward(32);
     }
 
     function _witnetRandomUniformUint32(uint32 _range, uint256 _nonce, bytes32 _seed) internal pure returns (uint32) {

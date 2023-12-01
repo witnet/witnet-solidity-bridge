@@ -11,36 +11,35 @@ abstract contract WitnetRequestConsumer
 {
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
-    
+
+    /// @param _witnetRequest Address of the WitnetRequest contract containing the actual data request.
+    /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
+    /// @param _callbackGasLimit Maximum gas to be spent by the IWitnetConsumer's callback methods.
+    /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.   
     constructor(
             WitnetRequest _witnetRequest, 
+            uint16 _baseFeeOverheadPercentage,
             uint96 _callbackGasLimit,
             WitnetV2.RadonSLA memory _defaultSLA
         )
-        UsingWitnetRequest(_witnetRequest, _defaultSLA)
+        UsingWitnetRequest(_witnetRequest, _baseFeeOverheadPercentage, _defaultSLA)
         WitnetConsumer(_callbackGasLimit)
-    {
-        require(
-            _witnetEstimateBaseFeeWithCallback(_callbackGasLimit)
-                > UsingWitnetRequest._witnetEstimateBaseFee(),
-            "WitnetRequestConsumer: insufficient callback gas limit"
-        );
-    }
+    {}
 
-    function _witnetEstimateBaseFee() 
-        virtual override
+    function _witnetEstimateEvmReward() 
+        virtual override(UsingWitnetRequest, WitnetConsumer)
         internal view
         returns (uint256)
     {
-        return WitnetConsumer._witnetEstimateBaseFee(__witnetResultMaxSize);
+        return WitnetConsumer._witnetEstimateEvmReward();
     } 
 
-    function _witnetEstimateBaseFee(uint16 _resultMaxSize)
+    function _witnetEstimateEvmReward(uint16)
         virtual override(UsingWitnet, WitnetConsumer)
         internal view
         returns (uint256)
     {
-        return WitnetConsumer._witnetEstimateBaseFee(_resultMaxSize);
+        return WitnetConsumer._witnetEstimateEvmReward();
     }
 
     function __witnetRequestData(
