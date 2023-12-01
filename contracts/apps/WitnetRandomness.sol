@@ -327,10 +327,9 @@ contract WitnetRandomness
     {
         if (latestRandomizeBlock < block.number) {
             // Post the Witnet Randomness request:
-            uint _queryId = __witnetRequestData(
-                msg.value,
-                __witnetRandomnessPackedSLA.toRadonSLA(),
-                __witnetRandomnessRadHash
+            uint _queryId = __witnet.postRequest{value: msg.value}(
+                __witnetRandomnessRadHash,
+                __witnetRandomnessPackedSLA.toRadonSLA()
             );
             // Keep Randomize data in storage:
             RandomizeData storage __data = __randomize_[block.number];

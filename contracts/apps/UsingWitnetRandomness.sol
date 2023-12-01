@@ -80,29 +80,24 @@ abstract contract UsingWitnetRandomness
         return uint32((_number * _range) >> 224);
     }
 
+    function _witnetReadRandomizeFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
+        return cborValue.readBytes().toBytes32();
+    }
+
     function __witnetRandomize(uint256 _witnetEvmReward) virtual internal returns (uint256) {
-        return __witnetRequestData(
-            _witnetEvmReward,
-            _witnetDefaultSLA(),
-            __witnetRandomnessRadHash
-        );
+        return __witnetRandomize(_witnetEvmReward, _witnetDefaultSLA());
     }
 
     function __witnetRandomize(
             uint256 _witnetEvmReward,
-            WitnetV2.RadonSLA calldata _witnetQuerySLA
+            WitnetV2.RadonSLA memory _witnetQuerySLA
         )
         virtual internal 
         returns (uint256 _randomizeId)
     {
-        return __witnetRequestData(
-            _witnetEvmReward,
-            _witnetQuerySLA,
-            __witnetRandomnessRadHash
+        return __witnet.postRequest{value: _witnetEvmReward}(
+            __witnetRandomnessRadHash,
+            _witnetQuerySLA
         );
-    }
-
-    function _witnetReadRandomizeFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
-        return cborValue.readBytes().toBytes32();
     }
 }

@@ -52,28 +52,23 @@ abstract contract UsingWitnetRequestTemplate
 
     function __witnetRequestData(
             uint256 _witnetEvmReward,
-            WitnetV2.RadonSLA memory _witnetQuerySLA,
             string[][] memory _witnetRequestArgs
         )
         virtual internal returns (uint256)
     {
-        return __witnetRequestData(
-            _witnetEvmReward,
-            _witnetQuerySLA,
-            _witnetBuildRadHash(_witnetRequestArgs)
-        );
+        return __witnetRequestData(_witnetEvmReward, _witnetRequestArgs, _witnetDefaultSLA());
     }
 
     function __witnetRequestData(
             uint256 _witnetEvmReward,
-            string[][] memory _witnetRequestArgs
+            string[][] memory _witnetRequestArgs,
+            WitnetV2.RadonSLA memory _witnetQuerySLA
         )
         virtual internal returns (uint256)
     {
-        return __witnetRequestData(
-            _witnetEvmReward,
-            _witnetBuildRadHash(_witnetRequestArgs)
+        return __witnet.postRequest{value: _witnetEvmReward}(
+            _witnetBuildRadHash(_witnetRequestArgs),
+            _witnetQuerySLA
         );
     }
-
 }

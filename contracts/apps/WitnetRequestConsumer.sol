@@ -42,33 +42,4 @@ abstract contract WitnetRequestConsumer
         return WitnetConsumer._witnetEstimateEvmReward();
     }
 
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
-            WitnetV2.RadonSLA memory _witnetQuerySLA,
-            bytes32 _witnetRadHash
-        )
-        virtual override(UsingWitnet, WitnetConsumer) internal
-        returns (uint256)
-    {
-       return WitnetConsumer.__witnetRequestData(
-            _witnetEvmReward,
-            _witnetQuerySLA,
-            _witnetRadHash
-       );
-    }
-
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
-            WitnetV2.RadonSLA memory _witnetQuerySLA
-        )
-        virtual override internal
-        returns (uint256)
-    {
-        return WitnetConsumer.__witnetRequestData(
-            _witnetEvmReward,
-            _witnetQuerySLA,
-            __witnetRequestRadHash
-        );
-    }
-
 }

@@ -66,36 +66,12 @@ abstract contract WitnetConsumer
         virtual internal view
         returns (uint256)
     {
-        return __witnet.estimateBaseFeeWithCallback(tx.gasprice, _callbackGasLimit);
+        return (
+            (100 + _witnetBaseFeeOverheadPercentage())
+                * __witnet.estimateBaseFeeWithCallback(
+                    tx.gasprice, 
+                    _callbackGasLimit
+                )
+        ) / 100;
     }
-
-    function __witnetRequestData(
-            uint256 _witnetEvmReward, 
-            WitnetV2.RadonSLA memory _witnetQuerySLA,
-            bytes32 _witnetRadHash
-        )
-        virtual override internal
-        returns (uint256)
-    {
-        return __witnet.postRequestWithCallback{value: _witnetEvmReward}(
-            _witnetRadHash,
-            _witnetQuerySLA,
-            __witnetCallbackGasLimit
-        );
-    }
-
-    function __witnetRequestData(
-            uint256 _witnetEvmReward, 
-            WitnetV2.RadonSLA memory _witnetQuerySLA,
-            bytes calldata _witnetRequestBytecode
-        )
-        virtual internal returns (uint256)
-    {
-        return __witnet.postRequestWithCallback{value: _witnetEvmReward}(
-            _witnetRequestBytecode, 
-            _witnetQuerySLA,
-            __witnetCallbackGasLimit
-        );
-    }
-
 }

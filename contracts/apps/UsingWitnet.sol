@@ -107,30 +107,6 @@ abstract contract UsingWitnet
         return __witnetBaseFeeOverheadPercentage;
     }
 
-    function __witnetRequestData(
-            uint256 _witnetEvmReward, 
-            WitnetV2.RadonSLA memory _witnetQuerySLA,
-            bytes32 _witnetRadHash
-        )
-        virtual internal returns (uint256)
-    {
-        return __witnet.postRequest{value: _witnetEvmReward}(
-            _witnetRadHash, 
-            _witnetQuerySLA
-        );
-    }
-
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
-            bytes32 _witnetRadHash
-        )
-        virtual internal returns (uint256)
-    {
-        return __witnet.postRequest{value: _witnetEvmReward}(
-            _witnetRadHash,
-            _witnetDefaultSLA()
-        );
-    }
     function __witnetSetDefaultSLA(WitnetV2.RadonSLA memory _defaultSLA) virtual internal {
         __witnetDefaultPackedSLA = WitnetV2.toBytes32(_defaultSLA);
     }

@@ -40,26 +40,21 @@ abstract contract UsingWitnetRequest
         return _witnetEstimateEvmReward(__witnetResultMaxSize);
     }
 
+    function __witnetRequestData(uint256 _witnetEvmReward)
+        virtual internal returns (uint256)
+    {
+        return __witnetRequestData(_witnetEvmReward, _witnetDefaultSLA());
+    }
+
     function __witnetRequestData(
             uint256 _witnetEvmReward,
             WitnetV2.RadonSLA memory _witnetQuerySLA
         )
         virtual internal returns (uint256)
     {
-        return __witnetRequestData(
-            _witnetEvmReward,
-            _witnetQuerySLA,
-            __witnetRequestRadHash
-        );
-    }
-
-    function __witnetRequestData(uint256 _witnetEvmReward)
-        virtual internal returns (uint256)
-    {
-        return __witnetRequestData(
-            _witnetEvmReward,
-            _witnetDefaultSLA(),
-            __witnetRequestRadHash
+        return __witnet.postRequest{value: _witnetEvmReward}(
+            __witnetRequestRadHash,
+            _witnetQuerySLA
         );
     }
 }
