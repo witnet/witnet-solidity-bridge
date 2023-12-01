@@ -213,32 +213,6 @@ abstract contract WitnetRequestBoardTrustableBase
             _resultMaxSize
         );
     }
-    
-    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
-    /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
-    /// @notice queries providing no actual earnings.
-    /// @dev Fails if the query does not exist, or if deleted.
-    function estimateQueryEarnings(uint256 _witnetQueryId, uint256 _gasPrice)
-        virtual override
-        external view
-        returns (int256 _earnings)
-    {
-        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
-
-        _earnings = int(__request.evmReward);
-        uint96 _callbackGasLimit = __request.unpackCallbackGasLimit();
-        if (_callbackGasLimit > 0) {
-            _earnings -= int(estimateBaseFeeWithCallback(
-                _gasPrice,
-                _callbackGasLimit
-            ));
-        } else {
-            _earnings -= int(estimateBaseFee(
-                _gasPrice,
-                __request.RAD
-            ));
-        }
-    }
 
     /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
     /// @dev Fails if the `_witnetQueryId` is not in 'Reported' status, or called from an address different to
@@ -553,6 +527,26 @@ abstract contract WitnetRequestBoardTrustableBase
     
     // ================================================================================================================
     // --- Full implementation of IWitnetRequestBoardReporter ---------------------------------------------------------
+
+    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
+    /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
+    /// @notice queries providing no actual earnings.
+    /// @dev Fails if the query does not exist, or if deleted.
+    function estimateQueryEarnings(uint256[] calldata _witnetQueryIds, uint256 _gasPrice)
+        virtual override
+        external view
+        returns (int256 _earnings)
+    {
+        uint256 _expenses; uint256 _revenues;
+        for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
+            if (_statusOf(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
+                WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryIds[_ix]);
+                _revenues += __request.evmReward;
+                _expenses += _gasPrice * __request.unpackCallbackGasLimit();
+            }
+        }
+        return int256(_revenues) - int256(_expenses);
+    }
 
     /// Reports the Witnet-provable result to a previously posted request. 
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.

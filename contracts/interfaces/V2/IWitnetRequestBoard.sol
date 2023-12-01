@@ -21,13 +21,7 @@ interface IWitnetRequestBoard {
     /// @param gasPrice Expected gas price to pay upon posting the data request.
     /// @param callbackGasLimit Maximum gas to be spent when reporting the data request result.
     function estimateBaseFeeWithCallback(uint256 gasPrice, uint96 callbackGasLimit) external view returns (uint256);
-    
-    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
-    /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
-    /// @notice queries providing no actual earnings.
-    /// @dev Fails if the query does not exist, or if deleted.
-    function estimateQueryEarnings(uint256 queryId, uint256 gasPrice) external view returns (int256);
-    
+       
     /// @notice Retrieves a copy of all Witnet-provable data related to a previously posted request, 
     /// removing the whole query from the WRB storage.
     /// @dev Fails if the query was not in 'Reported' status, or called from an address different to

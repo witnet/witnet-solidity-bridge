@@ -6,6 +6,12 @@ pragma solidity >=0.7.0 <0.9.0;
 /// @author The Witnet Foundation.
 interface IWitnetRequestBoardReporter {
 
+    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
+    /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
+    /// @notice queries providing no actual earnings.
+    /// @dev Fails if the query does not exist, or if deleted.
+    function estimateQueryEarnings(uint256[] calldata queryIds, uint256 gasPrice) external view returns (int256);
+
     /// @notice Reports the Witnet-provided result to a previously posted request. 
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
     /// @dev Fails if:
