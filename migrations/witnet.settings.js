@@ -16,6 +16,9 @@ module.exports = {
     mantle: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
+    "okxchain.x1.sepolia": {
+      WitnetBytecodes: "WitnetBytecodesNoSha256",
+    },
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
@@ -603,6 +606,12 @@ module.exports = {
         host: "localhost",
         port: 9528,
         network_id: 66,
+        skipDryRun: true,
+      },
+      "okxchain.x1.sepolia": {
+        host: "localhost",
+        port: 8505,
+        network_id: 195,
         skipDryRun: true,
       },
     },
