@@ -16,7 +16,7 @@ module.exports = {
     mantle: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
-    "okxchain.x1.sepolia": {
+    "okx.x1.sepolia": {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
     },
     optimism: {
@@ -127,7 +127,7 @@ module.exports = {
         /* _reportResultGasLimit */ 115000,
       ],
     },
-    okxchain: {
+    okx: {
       WitnetRequestBoard: [
         /* _reportResultGasLimit */ 145000,
       ],
@@ -595,20 +595,20 @@ module.exports = {
         gasPrice: 3 * 10 ** 9,
       },
     },
-    okxchain: {
-      "okxchain.testnet": {
+    okx: {
+      "okx.okxchain.testnet": {
         host: "localhost",
         port: 8528,
         network_id: 65,
         skipDryRun: true,
       },
-      "okxchain.mainnet": {
+      "okx.okxchain.mainnet": {
         host: "localhost",
         port: 9528,
         network_id: 66,
         skipDryRun: true,
       },
-      "okxchain.x1.sepolia": {
+      "okx.x1.sepolia": {
         host: "localhost",
         port: 8505,
         network_id: 195,

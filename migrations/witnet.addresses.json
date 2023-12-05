@@ -650,8 +650,8 @@
             "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
         }
     },
-    "okxchain": {
-        "okxchain.testnet": {
+    "okx": {
+        "okx.okxchain.testnet": {
             "WitnetProxy": "0x1b91eAB33362f10A5F803Fe3f0d181F42caFaac3",
             "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
             "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
@@ -661,22 +661,23 @@
             "WitnetRequestBoard": "0x58D8ECe142c60f5707594a7C1D90e46eAE5AF431",
             "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
             "WitnetErrorsLib": "0xf6d52770453166de85B6B6260Cf22196bC460E88",
-            "WitnetEncodingLib": "",
+            "WitnetEncodingLib": "0xd8875D7D3087DEec0103d47d4cE0C4a5414874E1",
             "WitnetPriceFeedsLib": "0x6dc0E2AC80550F901cd4d5F5a4C48333A0ca97Ee",
-            "WitnetBytecodesImplementation": "",
+            "WitnetBytecodesImplementation": "0x12E5FBdaB02cC2336114353CA7BE9e2cc8E4Cc25",
             "WitnetPriceFeedsImplementation": "0x7A6C2Aad6b4b08De09477D0F663b8f90b0db9662",
             "WitnetRandomnessImplementation": "0x078EE90E16e2e5332EDaA87da19d2743cD8C64DD",
             "WitnetRandomnessImplementationV061": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
             "WitnetRequestBoardImplementation": "0x20f4B1793bb81FFa357E1705AD954BdC232Edc00",
             "WitnetRequestFactoryImplementation": "0x364E2b91a4C7563288C3ccF7256BA172935CC550"
         },
-        "okxchain.mainnet": {
+        "okx.okxchain.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
             "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
             "WitnetRandomness": "0x1ebD93231a7fE551E1d6405404Df34909eff4c2C",
             "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a"
         },
-        "okxchain.x1.sepolia": {
+        "okx.x1.sepolia": {
+            "WitnetProxy": "0x078EE90E16e2e5332EDaA87da19d2743cD8C64DD",
             "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
             "WitnetErrorsLib": "0x1b91eAB33362f10A5F803Fe3f0d181F42caFaac3",
             "WitnetEncodingLib": "0xf6d52770453166de85B6B6260Cf22196bC460E88",
