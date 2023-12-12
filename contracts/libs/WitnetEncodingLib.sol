@@ -13,15 +13,15 @@ library WitnetEncodingLib {
     using WitnetCBOR for WitnetCBOR.CBOR[];
 
     bytes internal constant WITNET_RADON_OPCODES_RESULT_TYPES =
-        hex"10ffffffffffffffffffffffffffffff040100010203050406071311ff01ffff07ff02ffffffffffffffffffffffffff0703ffffffffffffffffffffffffffff0405070202ff04040404ffffffffffff05070402040205050505ff04ff04ffffff010203050406070101ffffffffffff02ff050404000106060707070701ffff";
+        hex"10ffffffffffffffffffffffffffffff040100010203050406071311ff01ffff07ff02ffffffffffffffffffffffffff070304ff04ffffffffffffff03ffffff0405070202ff0404040403ffffffffff05070402040205050505ff04ff04ffffff010203050406070101ffffffffffff0203050404000106060707070701ffff";
             // 10ffffffffffffffffffffffffffffff
             // 040100001203050406070100ff01ffff
             // 07ff02ffffffffffffffffffffffffff
-            // 0703ffffffffffffffffffffffffffff
-            // 0405070202ff04040404ffffffffffff
+            // 070304ff04ffffffffffffff03ffffff
+            // 0405070202ff0404040403ffffffffff
             // 05070402040205050505ff04ff04ffff
             // ff010203050406070101ffffffffffff
-            // 02ff050404000106060707070701ffff
+            // 0203050404000106060707070701ffff
 
     error UnsupportedDataRequestMethod(uint8 method, string schema, string body, string[2][] headers);
     error UnsupportedRadonDataType(uint8 datatype, uint256 maxlength);
