@@ -83,6 +83,23 @@ module.exports = async function (_, network, [, from]) {
             utils.saveAddresses(addresses);
         }
     }
+    // Deploy/upgrade WitnetTraps target implementation, if required
+    {
+        await deploy({
+            from, ecosystem, network, targets,
+            key: targets.WitnetTraps, 
+            libs: specs.WitnetTraps.libs,
+            immutables: specs.WitnetTraps.immutables,
+            intrinsics: { types: [ 'address', 'bool', 'bytes32' ], values: [ 
+                /* _registry   */ await determineProxyAddr(from, specs.WitnetBytecodes?.vanity || 1), 
+                /* _upgradable */ true, 
+                /* _versionTag */ utils.fromAscii(version),
+            ]},
+        });
+        if (!isDryRun) {
+            utils.saveAddresses(addresses);
+        }
+    }
 }
 
 async function deploy(specs) {
@@ -98,12 +115,12 @@ async function deploy(specs) {
         if (immutables?.values) values = [ ...values, ...immutables.values ]
         const constructorArgs = web3.eth.abi.encodeParameters(types, values)
         if (constructorArgs.length > 2) {
-            console.info("  ", "> constructor types:", types)
+            console.info("  ", "> constructor types:", JSON.stringify(types))
             console.info("  ", "> constructor args: ", constructorArgs.slice(2))
         }
         const coreBytecode = link(contract.toJSON().bytecode, libs, targets)
         if (coreBytecode.indexOf("__") > -1) {
-            console.info(bytecode)
+            console.info(coreBytecode)
             console.info("Error: Cannot deploy due to some missing libs")
             process.exit(1)
         }

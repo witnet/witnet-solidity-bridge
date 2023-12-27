@@ -30,12 +30,19 @@ module.exports = async function (_, network, [, from, reporter]) {
         "WitnetBytecodes",
         "WitnetRequestFactory",
         "WitnetRequestBoard",
+        "WitnetTraps",
     ]
 
     specs["WitnetRequestBoard"].mutables = merge({
             types: [ 'address[]', ],
             values: [ [ reporter, ], ], 
         }, specs["WitnetRequestBoard"].mutables
+    )
+
+    specs["WitnetTraps"].mutables = merge({
+            types: [ 'address[]', ],
+            values: [ [ reporter, ], ],
+        }, specs["WitnetTraps"].mutables
     )
 
     // Deploy/upgrade singleton proxies, if required

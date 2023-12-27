@@ -9,6 +9,7 @@ module.exports = {
       WitnetRandomness: "WitnetRandomness",
       WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
+      WitnetTraps: "WitnetTrapsTrustableDefault",
     },
     boba: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
@@ -684,6 +685,16 @@ module.exports = {
       WitnetPriceFeeds: {
         libs: [ "WitnetPriceFeedsLib", ],
         vanity: 5,
+      },
+      WitnetTraps: {
+        immutables: {
+          types: [ 'uint256', 'uint256', ], 
+          values: [
+            /* _reportResultGasBase */ 58282,
+            /* _sstoreFromZeroGas */ 20000,
+          ],
+        },
+        vanity: 7,
       }
     },
     avalanche: {
