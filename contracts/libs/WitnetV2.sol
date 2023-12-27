@@ -36,7 +36,7 @@ library WitnetV2 {
     /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
     struct Response {
         bytes32 fromFinality;  // Packed: contains address from which the result to the data request was reported, and 
-                               //         the EVM block at which the provided result can be considered to be final.        
+                               //         the EVM block at which the provided result can be considered to be final. 
         uint256 timestamp;     // Timestamp at which data from data sources were retrieved by the Witnet blockchain. 
         bytes32 tallyHash;     // Hash of the Witnet commit/reveal act that solved the data request.
         bytes   cborBytes;     // CBOR-encoded result to the data request, as resolved by the Witnet blockchain. 

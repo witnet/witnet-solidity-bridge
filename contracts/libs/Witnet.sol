@@ -466,55 +466,8 @@ library Witnet {
         }
     }
 
-    
-    // /// ===============================================================================================================
-    // /// --- 'Witnet.Request' helper methods ---------------------------------------------------------------------------
-
-    // function packRequesterCallbackGasLimit(address requester, uint96 callbackGasLimit) internal pure returns (bytes32) {
-    //     return bytes32(uint(bytes32(bytes20(requester))) | callbackGasLimit);
-    // }
-
-    // function unpackRequester(Request storage self) internal view returns (address) {
-    //     return address(bytes20(self.fromCallbackGas));
-    // }
-
-    // function unpackCallbackGasLimit(Request storage self) internal view returns (uint96) {
-    //     return uint96(uint(self.fromCallbackGas));
-    // }
-
-    // function unpackRequesterAndCallbackGasLimit(Request storage self) internal view returns (address, uint96) {
-    //     bytes32 _packed = self.fromCallbackGas;
-    //     return (address(bytes20(_packed)), uint96(uint(_packed)));
-    // }
-
-    
-    // /// ===============================================================================================================
-    // /// --- 'Witnet.Response' helper methods --------------------------------------------------------------------------
-
-    // function packReporterEvmFinalityBlock(address reporter, uint256 evmFinalityBlock) internal pure returns (bytes32) {
-    //     return bytes32(uint(bytes32(bytes20(reporter))) << 96 | uint96(evmFinalityBlock));
-    // }
-
-    // function unpackWitnetReporter(Response storage self) internal view returns (address) {
-    //     return address(bytes20(self.fromFinality));
-    // }
-
-    // function unpackEvmFinalityBlock(Response storage self) internal view returns (uint256) {
-    //     return uint(uint96(uint(self.fromFinality)));
-    // }
-
-    // function unpackEvmFinalityBlock(bytes32 fromFinality) internal pure returns (uint256) {
-    //     return uint(uint96(uint(fromFinality)));
-    // }
-
-    // function unpackWitnetReporterAndEvmFinalityBlock(Response storage self) internal view returns (address, uint256) {
-    //     bytes32 _packed = self.fromFinality;
-    //     return (address(bytes20(_packed)), uint(uint96(uint(_packed))));
-    // }
-
-
     /// ===============================================================================================================
-    /// --- 'Witnet.Result' helper methods ----------------------------------------------------------------------------
+    /// --- Witnet.* helper methods -----------------------------------------------------------------------------------
 
     modifier _isReady(Result memory result) {
         require(result.success, "Witnet: tried to decode value from errored result.");
@@ -673,62 +626,54 @@ library Witnet {
         return result.value.readUintArray();
     }
 
+    function dataType(Witnet.Result memory result)
+        internal pure
+        returns (Witnet.RadonDataTypes)
+    {
+        uint8 _majorType = result.value.majorType;
+        if (_majorType == 0 || _majorType == 1) {
+            return Witnet.RadonDataTypes.Integer;
+        }
+        if (_majorType == 2) {
+            return Witnet.RadonDataTypes.Bytes;
+        } else if (_majorType == 3) {
+            return Witnet.RadonDataTypes.String;
+        } else if (_majorType == 4) {
+            return Witnet.RadonDataTypes.Array;
+        } else if (_majorType == 5) {
+            return Witnet.RadonDataTypes.Map;
+        } else if (_majorType == 7) {
+            if (result.value.additionalInformation == 20 || result.value.additionalInformation ==21) {
+                return Witnet.RadonDataTypes.Bool;
+            } else if (result.value.additionalInformation >= 25 && result.value.additionalInformation <= 27) {
+                return Witnet.RadonDataTypes.Float;
+            } else {
+                return Witnet.RadonDataTypes.Any;
+            }
+        } else {
+            return Witnet.RadonDataTypes.Any;
+        }
+    }
 
-    // /// ===============================================================================================================
-    // /// --- 'Witnet.RadonSLA' helper methods --------------------------------------------------------------------------
-
-    // /// @notice Returns `true` if all witnessing parameters in `b` have same
-    // /// @notice value or greater than the ones in `a`.
-    // function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
-    //     internal pure returns (bool)
-    // {
-    //     return (
-    //         a.numWitnesses >= b.numWitnesses
-    //             && a.minConsensusPercentage >= b.minConsensusPercentage
-    //             && a.witnessReward >= b.witnessReward
-    //             && a.witnessCollateral >= b.witnessCollateral
-    //             && a.minerCommitRevealFee >= b.minerCommitRevealFee
-    //     );
-    // }
-
-    // function isValid(Witnet.RadonSLA memory sla)
-    //     internal pure returns (bool)
-    // {
-    //     return (
-    //         sla.witnessReward > 0
-    //             && sla.numWitnesses > 0 && sla.numWitnesses <= 127
-    //             && sla.minConsensusPercentage > 50 && sla.minConsensusPercentage < 100
-    //             && sla.witnessCollateral > 0
-    //             && sla.witnessCollateral / sla.witnessReward <= 127
-    //     );
-    // }
-
-    // function toBytes32(RadonSLA memory sla) internal pure returns (bytes32) {
-    //     return bytes32(
-    //         uint(sla.witnessReward)
-    //             | sla.witnessCollateral << 64
-    //             | sla.minerCommitRevealFee << 128
-    //             | sla.numWitnesses << 248
-    //             | sla.minConsensusPercentage << 232
-    //     );
-    // }
-
-    // function toRadonSLA(bytes32 _packed) internal pure returns (RadonSLA memory) {
-    //     return RadonSLA({
-    //         numWitnesses: uint8(uint(_packed >> 248)),
-    //         minConsensusPercentage: uint8(uint(_packed >> 232) & 0xff),
-    //         witnessReward: uint64(uint(_packed) & 0xffffffffffffffff),
-    //         witnessCollateral: uint64(uint(_packed >> 64) & 0xffffffffffffffff),
-    //         minerCommitRevealFee: uint64(uint(_packed >> 128) & 0xffffffffffffffff)
-    //     });
-    // }
-
-    // function witnessingWitTotalReward(Witnet.RadonSLA memory sla)
-    //     internal pure returns (uint64)
-    // {
-    //     return sla.witnessReward * sla.numWitnesses;
-    // }
-
+    function toString(Witnet.RadonDataTypes _dataType) internal pure returns (string memory) {
+        if (_dataType == RadonDataTypes.Integer) {
+            return "integer";
+        } else if (_dataType == RadonDataTypes.String) {
+            return "string";
+        } else if (_dataType == RadonDataTypes.Map) {
+            return "object";
+        } else if (_dataType == RadonDataTypes.Array) {
+            return "array";
+        } else if (_dataType == RadonDataTypes.Bool) {
+            return "boolean";     
+        } else if (_dataType == RadonDataTypes.Float) {
+            return "float";
+        } else if (_dataType == RadonDataTypes.Subscript) {
+            return "script";
+        } else {
+            return "any";
+        }
+    }
 
     /// ===============================================================================================================
     /// --- Witnet library private methods ----------------------------------------------------------------------------
