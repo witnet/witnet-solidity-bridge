@@ -10,9 +10,17 @@ abstract contract WitnetRequestBoardData {
 
     using WitnetV2 for WitnetV2.Request;
 
+    bytes32 internal constant _WITNET_ACLS_DATA_SLOTHASH =
+        /* keccak256("io.witnet.boards.data.acls") */
+        0xa6db7263983f337bae2c9fb315730227961d1c1153ae1e10a56b5791465dd6fd;
+
     bytes32 internal constant _WITNET_REQUEST_BOARD_DATA_SLOTHASH =
         /* keccak256("io.witnet.boards.data") */
         0xf595240b351bc8f951c2f53b26f4e78c32cb62122cf76c19b7fdda7d4968e183;
+
+    struct WitnetBoardACLs {
+        mapping (address => bool) isReporter_;
+    }
 
     struct WitnetBoardState {
         address base;
@@ -37,13 +45,27 @@ abstract contract WitnetRequestBoardData {
     modifier onlyRequester(uint256 _queryId) {
         require(
             msg.sender == __seekQueryRequest(_queryId).unpackRequester(), 
-            "WitnetRequestBoardBase: not the requester"
+            "WitnetRequestBoard: not the requester"
         ); _;
     }
+
+    modifier onlyReporters {
+        require(
+            __acls().isReporter_[msg.sender],
+            "WitnetRequestBoard: unauthorized reporter"
+        );
+        _;
+    } 
 
 
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
+
+    function __acls() internal pure returns (WitnetBoardACLs storage _struct) {
+        assembly {
+            _struct.slot := _WITNET_ACLS_DATA_SLOTHASH
+        }
+    }
 
     /// Gets query storage by query id.
     function __seekQuery(uint256 _queryId) internal view returns (WitnetV2.Query storage) {

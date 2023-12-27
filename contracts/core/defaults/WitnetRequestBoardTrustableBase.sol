@@ -7,7 +7,7 @@ import "../WitnetUpgradableBase.sol";
 import "../../WitnetRequestBoard.sol";
 import "../../WitnetRequestFactory.sol";
 
-import "../../data/WitnetRequestBoardDataACLs.sol";
+import "../../data/WitnetRequestBoardData.sol";
 import "../../interfaces/IWitnetRequest.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
 import "../../interfaces/V2/IWitnetRequestBoardReporter.sol";
@@ -24,7 +24,7 @@ abstract contract WitnetRequestBoardTrustableBase
     is 
         WitnetUpgradableBase,
         WitnetRequestBoard,
-        WitnetRequestBoardDataACLs,
+        WitnetRequestBoardData,
         IWitnetRequestBoardReporter,
         IWitnetRequestBoardAdminACLs,
         Payable 
@@ -206,7 +206,7 @@ abstract contract WitnetRequestBoardTrustableBase
         uint16 _resultMaxSize = registry.lookupRadonRequestResultMaxSize(radHash);
         require(
             _resultMaxSize > 0, 
-            "WitnetRequestBoardTrustableDefault: invalid RAD"
+            "WitnetRequestBoardTrustableBase: invalid RAD"
         );
         return estimateBaseFee(
             gasPrice,
@@ -570,13 +570,13 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         require(
             _witnetResultTallyHash != 0, 
-            "WitnetRequestBoardTrustableDefault: tally has cannot be zero"
+            "WitnetRequestBoardTrustableBase: tally hash cannot be zero"
         );
         // Ensures the result bytes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(
             _witnetResultCborBytes.length != 0, 
-            "WitnetRequestBoardTrustableDefault: result cannot be empty"
+            "WitnetRequestBoardTrustableBase: result cannot be empty"
         );
         // Do actual report:
         // solhint-disable not-rely-on-time
@@ -612,17 +612,17 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         require(
             _witnetResultTimestamp <= block.timestamp, 
-            "WitnetRequestBoardTrustableDefault: bad timestamp"
+            "WitnetRequestBoardTrustableBase: bad timestamp"
         );
         require(
             _witnetResultTallyHash != 0, 
-            "WitnetRequestBoardTrustableDefault: Witnet tallyHash cannot be zero"
+            "WitnetRequestBoardTrustableBase: Witnet tallyHash cannot be zero"
         );
         // Ensures the result bytes do not have zero length (this would not be a valid CBOR encoding 
         // and could trigger a reentrancy attack)
         require(
             _witnetResultCborBytes.length != 0, 
-            "WitnetRequestBoardTrustableDefault: result cannot be empty"
+            "WitnetRequestBoardTrustableBase: result cannot be empty"
         );
         // Do actual report and return reward transfered to the reproter:
         return  __reportResultAndReward(
