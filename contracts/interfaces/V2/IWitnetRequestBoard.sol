@@ -141,5 +141,4 @@ interface IWitnetRequestBoard {
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     /// @param queryId The unique query identifier.
     function upgradeQueryReward(uint256 queryId) external payable;
-
 }

@@ -122,6 +122,12 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
     function estimateBaseFeeWithCallback(uint256 _gasPrice, uint96 _callbackGasLimit) virtual public view returns (uint256);
 
+    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
+    /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
+    /// @notice queries providing no actual earnings.
+    /// @dev Fails if the query does not exist, or if deleted.
+    function estimateQueryEarnings(uint256[] calldata _witnetQueryIds, uint256 _gasPrice) virtual external view returns (int256);
+    
     
     // ================================================================================================================
     // --- Overrides 'Upgradeable' ------------------------------------------------------------------------------------
@@ -527,26 +533,6 @@ abstract contract WitnetRequestBoardTrustableBase
     
     // ================================================================================================================
     // --- Full implementation of IWitnetRequestBoardReporter ---------------------------------------------------------
-
-    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
-    /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
-    /// @notice queries providing no actual earnings.
-    /// @dev Fails if the query does not exist, or if deleted.
-    function estimateQueryEarnings(uint256[] calldata _witnetQueryIds, uint256 _gasPrice)
-        virtual override
-        external view
-        returns (int256 _earnings)
-    {
-        uint256 _expenses; uint256 _revenues;
-        for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            if (_statusOf(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
-                WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryIds[_ix]);
-                _revenues += __request.evmReward;
-                _expenses += _gasPrice * __request.unpackCallbackGasLimit();
-            }
-        }
-        return int256(_revenues) - int256(_expenses);
-    }
 
     /// Reports the Witnet-provable result to a previously posted request. 
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
