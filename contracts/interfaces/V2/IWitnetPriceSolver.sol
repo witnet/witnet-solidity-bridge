@@ -8,11 +8,11 @@ interface IWitnetPriceSolver {
     struct Price {
         uint value;
         uint timestamp;
-        bytes32 drTxHash;
-        Witnet.ResultStatus status;
+        bytes32 tallyHash;
+        WitnetV2.ResultStatus status;
     }
-    function class() external pure returns (bytes4);
     function delegator() external view returns (address);
     function solve(bytes4 feedId) external view returns (Price memory);
+    function specs() external pure returns (bytes4);
     function validate(bytes4 feedId, string[] calldata initdata) external;
 }

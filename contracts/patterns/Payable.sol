@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity >=0.6.0 <0.9.0;
 
-import "../interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 abstract contract Payable {
     IERC20 public immutable currency;
@@ -21,5 +20,5 @@ abstract contract Payable {
     function _getMsgValue() internal view virtual returns (uint256);
 
     /// Perform safe transfer or whatever token is used for paying rewards.
-    function _safeTransferTo(address payable, uint256) internal virtual;
+    function __safeTransferTo(address payable, uint256) internal virtual;
 }

@@ -6,9 +6,9 @@ pragma experimental ABIEncoderV2;
 import "../interfaces/V2/IWitnetPriceSolver.sol";
 import "../interfaces/V2/IWitnetPriceSolverDeployer.sol";
 
-import "./Slices.sol";
+import "../libs/Slices.sol";
 
-/// @title Ancillary external library for WitnetPriceFeeds implementations.
+/// @title Ancillary deployable library for WitnetPriceFeeds.
 /// @dev Features:
 /// @dev - deployment of counter-factual IWitnetPriceSolver instances.
 /// @dev - validation of feed caption strings.
@@ -39,7 +39,7 @@ library WitnetPriceFeedsLib {
             }
             assert(_solver == _createdContract);
             require(
-                IWitnetPriceSolver(_solver).class() == type(IWitnetPriceSolver).interfaceId,
+                IWitnetPriceSolver(_solver).specs() == type(IWitnetPriceSolver).interfaceId,
                 "WitnetPriceFeedsLib: uncompliant solver implementation"
             );
         }

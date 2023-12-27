@@ -3,7 +3,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/IWitnetRequest.sol";
 import "./WitnetCBOR.sol";
 
 library Witnet {
@@ -177,14 +176,298 @@ library Witnet {
         UnhandledIntercept
     }
 
+    /// Possible Radon data request methods that can be used within a Radon Retrieval. 
+    enum RadonDataRequestMethods {
+        /* 0 */ Unknown,
+        /* 1 */ HttpGet,
+        /* 2 */ Rng,
+        /* 3 */ HttpPost,
+        /* 4 */ HttpHead
+    }
+
+    /// Possible types either processed by Witnet Radon Scripts or included within results to Witnet Data Requests.
+    enum RadonDataTypes {
+        /* 0x00 */ Any, 
+        /* 0x01 */ Array,
+        /* 0x02 */ Bool,
+        /* 0x03 */ Bytes,
+        /* 0x04 */ Integer,
+        /* 0x05 */ Float,
+        /* 0x06 */ Map,
+        /* 0x07 */ String,
+        Unused0x08, Unused0x09, Unused0x0A, Unused0x0B,
+        Unused0x0C, Unused0x0D, Unused0x0E, Unused0x0F,
+        /* 0x10 */ Same,
+        /* 0x11 */ Inner,
+        /* 0x12 */ Match,
+        /* 0x13 */ Subscript
+    }
+
+    /// Structure defining some data filtering that can be applied at the Aggregation or the Tally stages
+    /// within a Witnet Data Request resolution workflow.
+    struct RadonFilter {
+        RadonFilterOpcodes opcode;
+        bytes args;
+    }
+
+    /// Filtering methods currently supported on the Witnet blockchain. 
+    enum RadonFilterOpcodes {
+        /* 0x00 */ Reserved0x00, //GreaterThan,
+        /* 0x01 */ Reserved0x01, //LessThan,
+        /* 0x02 */ Reserved0x02, //Equals,
+        /* 0x03 */ Reserved0x03, //AbsoluteDeviation,
+        /* 0x04 */ Reserved0x04, //RelativeDeviation
+        /* 0x05 */ StandardDeviation,
+        /* 0x06 */ Reserved0x06, //Top,
+        /* 0x07 */ Reserved0x07, //Bottom,
+        /* 0x08 */ Mode,
+        /* 0x09 */ Reserved0x09  //LessOrEqualThan
+    }
+
+    /// Structure defining the array of filters and reducting function to be applied at either the Aggregation
+    /// or the Tally stages within a Witnet Data Request resolution workflow.
+    struct RadonReducer {
+        RadonReducerOpcodes opcode;
+        RadonFilter[] filters;
+    }
+
+    /// Reducting functions currently supported on the Witnet blockchain.
+    enum RadonReducerOpcodes {
+        /* 0x00 */ Reserved0x00, //Minimum,
+        /* 0x01 */ Reserved0x01, //Maximum,
+        /* 0x02 */ Mode,
+        /* 0x03 */ AverageMean,
+        /* 0x04 */ Reserved0x04, //AverageMeanWeighted,
+        /* 0x05 */ AverageMedian,
+        /* 0x06 */ Reserved0x06, //AverageMedianWeighted,
+        /* 0x07 */ StandardDeviation,
+        /* 0x08 */ Reserved0x08, //AverageDeviation,
+        /* 0x09 */ Reserved0x09, //MedianDeviation,
+        /* 0x0A */ Reserved0x10, //MaximumDeviation,
+        /* 0x0B */ ConcatenateAndHash
+    }
+
+    /// Structure containing all the parameters that fully describe a Witnet Radon Retrieval within a Witnet Data Request.
+    struct RadonRetrieval {
+        uint8 argsCount;
+        RadonDataRequestMethods method;
+        RadonDataTypes resultDataType;
+        string url;
+        string body;
+        string[2][] headers;
+        bytes script;
+    }
+
+    /// Structure containing the Retrieve-Attestation-Delivery parts of a Witnet Data Request.
+    struct RadonRAD {
+        RadonRetrieval[] retrieve;
+        RadonReducer aggregate;
+        RadonReducer tally;
+    }
+
+    /// Structure containing the Service Level Aggreement parameters of a Witnet Data Request.
+    struct RadonSLA {
+        uint8 numWitnesses;
+        uint8 minConsensusPercentage;
+        uint64 witnessReward;
+        uint64 witnessCollateral;
+        uint64 minerCommitRevealFee;
+    }
+
 
     /// ===============================================================================================================
-    /// --- 'Witnet.Result' helper methods ----------------------------------------------------------------------------
+    /// --- 'uint*' helper methods ------------------------------------------------------------------------------------
 
-    modifier _isError(Result memory result) {
-        require(!result.success, "Witnet: no actual errors");
-        _;
+    /// @notice Convert a `uint8` into a 2 characters long `string` representing its two less significant hexadecimal values.
+    function toHexString(uint8 _u)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory b2 = new bytes(2);
+        uint8 d0 = uint8(_u / 16) + 48;
+        uint8 d1 = uint8(_u % 16) + 48;
+        if (d0 > 57)
+            d0 += 7;
+        if (d1 > 57)
+            d1 += 7;
+        b2[0] = bytes1(d0);
+        b2[1] = bytes1(d1);
+        return string(b2);
     }
+
+    /// @notice Convert a `uint8` into a 1, 2 or 3 characters long `string` representing its.
+    /// three less significant decimal values.
+    function toString(uint8 _u)
+        internal pure
+        returns (string memory)
+    {
+        if (_u < 10) {
+            bytes memory b1 = new bytes(1);
+            b1[0] = bytes1(uint8(_u) + 48);
+            return string(b1);
+        } else if (_u < 100) {
+            bytes memory b2 = new bytes(2);
+            b2[0] = bytes1(uint8(_u / 10) + 48);
+            b2[1] = bytes1(uint8(_u % 10) + 48);
+            return string(b2);
+        } else {
+            bytes memory b3 = new bytes(3);
+            b3[0] = bytes1(uint8(_u / 100) + 48);
+            b3[1] = bytes1(uint8(_u % 100 / 10) + 48);
+            b3[2] = bytes1(uint8(_u % 10) + 48);
+            return string(b3);
+        }
+    }
+
+    /// @notice Convert a `uint` into a string` representing its value.
+    function toString(uint v)
+        internal pure 
+        returns (string memory)
+    {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        do {
+            uint8 remainder = uint8(v % 10);
+            v = v / 10;
+            reversed[i ++] = bytes1(48 + remainder);
+        } while (v != 0);
+        bytes memory buf = new bytes(i);
+        for (uint j = 1; j <= i; j ++) {
+            buf[j - 1] = reversed[i - j];
+        }
+        return string(buf);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'bytes' helper methods ------------------------------------------------------------------------------------
+
+    /// @dev Transform given bytes into a Witnet.Result instance.
+    /// @param bytecode Raw bytes representing a CBOR-encoded value.
+    /// @return A `Witnet.Result` instance.
+    function resultFromCborBytes(bytes memory bytecode)
+        internal pure
+        returns (Witnet.Result memory)
+    {
+        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(bytecode);
+        return _resultFromCborValue(cborValue);
+    }
+
+    function toAddress(bytes memory _value) internal pure returns (address) {
+        return address(toBytes20(_value));
+    }
+
+    function toBytes4(bytes memory _value) internal pure returns (bytes4) {
+        return bytes4(toFixedBytes(_value, 4));
+    }
+    
+    function toBytes20(bytes memory _value) internal pure returns (bytes20) {
+        return bytes20(toFixedBytes(_value, 20));
+    }
+    
+    function toBytes32(bytes memory _value) internal pure returns (bytes32) {
+        return toFixedBytes(_value, 32);
+    }
+
+    function toFixedBytes(bytes memory _value, uint8 _numBytes)
+        internal pure
+        returns (bytes32 _bytes32)
+    {
+        assert(_numBytes <= 32);
+        unchecked {
+            uint _len = _value.length > _numBytes ? _numBytes : _value.length;
+            for (uint _i = 0; _i < _len; _i ++) {
+                _bytes32 |= bytes32(_value[_i] & 0xff) >> (_i * 8);
+            }
+        }
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'bytes32' helper methods ----------------------------------------------------------------------------------
+
+    function recoverAddr(bytes32 hash, bytes memory signature)
+        internal pure
+        returns (address addr)
+    {
+        if (signature.length != 65) {
+            return (address(0));
+        }
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+        assembly {
+            r := mload(add(signature, 0x20))
+            s := mload(add(signature, 0x40))
+            v := byte(0, mload(add(signature, 0x60)))
+        }
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+            return address(0);
+        }
+        if (v != 27 && v != 28) {
+            return address(0);
+        }
+        return ecrecover(hash, v, r, s);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'string' helper methods -----------------------------------------------------------------------------------
+
+    function toLowerCase(string memory str)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory lowered = new bytes(bytes(str).length);
+        unchecked {
+            for (uint i = 0; i < lowered.length; i ++) {
+                uint8 char = uint8(bytes(str)[i]);
+                if (char >= 65 && char <= 90) {
+                    lowered[i] = bytes1(char + 32);
+                } else {
+                    lowered[i] = bytes1(char);
+                }
+            }
+        }
+        return string(lowered);
+    }
+
+    /// @notice Converts bytes32 into string.
+    function toString(bytes32 _bytes32)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory _bytes = new bytes(_toStringLength(_bytes32));
+        for (uint _i = 0; _i < _bytes.length;) {
+            _bytes[_i] = _bytes32[_i];
+            unchecked {
+                _i ++;
+            }
+        }
+        return string(_bytes);
+    }
+
+    function tryUint(string memory str)
+        internal pure
+        returns (uint res, bool)
+    {
+        unchecked {
+            for (uint256 i = 0; i < bytes(str).length; i++) {
+                if (
+                    (uint8(bytes(str)[i]) - 48) < 0
+                        || (uint8(bytes(str)[i]) - 48) > 9
+                ) {
+                    return (0, false);
+                }
+                res += (uint8(bytes(str)[i]) - 48) * 10 ** (bytes(str).length - i - 1);
+            }
+            return (res, true);
+        }
+    }
+
+    /// ===============================================================================================================
+    /// --- Witnet.* helper methods -----------------------------------------------------------------------------------
 
     modifier _isReady(Result memory result) {
         require(result.success, "Witnet: tried to decode value from errored result.");
@@ -343,170 +626,54 @@ library Witnet {
         return result.value.readUintArray();
     }
 
-
-    /// ===============================================================================================================
-    /// --- 'bytes' helper methods ------------------------------------------------------------------------------------
-
-    /// @dev Transform given bytes into a Witnet.Result instance.
-    /// @param bytecode Raw bytes representing a CBOR-encoded value.
-    /// @return A `Witnet.Result` instance.
-    function resultFromCborBytes(bytes memory bytecode)
+    function dataType(Witnet.Result memory result)
         internal pure
-        returns (Witnet.Result memory)
+        returns (Witnet.RadonDataTypes)
     {
-        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(bytecode);
-        return _resultFromCborValue(cborValue);
-    }
-
-    function toAddress(bytes memory _value) internal pure returns (address) {
-        return address(toBytes20(_value));
-    }
-
-    function toBytes4(bytes memory _value) internal pure returns (bytes4) {
-        return bytes4(toFixedBytes(_value, 4));
-    }
-    
-    function toBytes20(bytes memory _value) internal pure returns (bytes20) {
-        return bytes20(toFixedBytes(_value, 20));
-    }
-    
-    function toBytes32(bytes memory _value) internal pure returns (bytes32) {
-        return toFixedBytes(_value, 32);
-    }
-
-    function toFixedBytes(bytes memory _value, uint8 _numBytes)
-        internal pure
-        returns (bytes32 _bytes32)
-    {
-        assert(_numBytes <= 32);
-        unchecked {
-            uint _len = _value.length > _numBytes ? _numBytes : _value.length;
-            for (uint _i = 0; _i < _len; _i ++) {
-                _bytes32 |= bytes32(_value[_i] & 0xff) >> (_i * 8);
-            }
+        uint8 _majorType = result.value.majorType;
+        if (_majorType == 0 || _majorType == 1) {
+            return Witnet.RadonDataTypes.Integer;
         }
-    }
-
-
-    /// ===============================================================================================================
-    /// --- 'string' helper methods -----------------------------------------------------------------------------------
-
-    function toLowerCase(string memory str)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory lowered = new bytes(bytes(str).length);
-        unchecked {
-            for (uint i = 0; i < lowered.length; i ++) {
-                uint8 char = uint8(bytes(str)[i]);
-                if (char >= 65 && char <= 90) {
-                    lowered[i] = bytes1(char + 32);
-                } else {
-                    lowered[i] = bytes1(char);
-                }
+        if (_majorType == 2) {
+            return Witnet.RadonDataTypes.Bytes;
+        } else if (_majorType == 3) {
+            return Witnet.RadonDataTypes.String;
+        } else if (_majorType == 4) {
+            return Witnet.RadonDataTypes.Array;
+        } else if (_majorType == 5) {
+            return Witnet.RadonDataTypes.Map;
+        } else if (_majorType == 7) {
+            if (result.value.additionalInformation == 20 || result.value.additionalInformation ==21) {
+                return Witnet.RadonDataTypes.Bool;
+            } else if (result.value.additionalInformation >= 25 && result.value.additionalInformation <= 27) {
+                return Witnet.RadonDataTypes.Float;
+            } else {
+                return Witnet.RadonDataTypes.Any;
             }
-        }
-        return string(lowered);
-    }
-
-    /// @notice Converts bytes32 into string.
-    function toString(bytes32 _bytes32)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory _bytes = new bytes(_toStringLength(_bytes32));
-        for (uint _i = 0; _i < _bytes.length;) {
-            _bytes[_i] = _bytes32[_i];
-            unchecked {
-                _i ++;
-            }
-        }
-        return string(_bytes);
-    }
-
-    function tryUint(string memory str)
-        internal pure
-        returns (uint res, bool)
-    {
-        unchecked {
-            for (uint256 i = 0; i < bytes(str).length; i++) {
-                if (
-                    (uint8(bytes(str)[i]) - 48) < 0
-                        || (uint8(bytes(str)[i]) - 48) > 9
-                ) {
-                    return (0, false);
-                }
-                res += (uint8(bytes(str)[i]) - 48) * 10 ** (bytes(str).length - i - 1);
-            }
-            return (res, true);
-        }
-    }
-
-
-    /// ===============================================================================================================
-    /// --- 'uint8' helper methods ------------------------------------------------------------------------------------
-
-    /// @notice Convert a `uint8` into a 2 characters long `string` representing its two less significant hexadecimal values.
-    function toHexString(uint8 _u)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory b2 = new bytes(2);
-        uint8 d0 = uint8(_u / 16) + 48;
-        uint8 d1 = uint8(_u % 16) + 48;
-        if (d0 > 57)
-            d0 += 7;
-        if (d1 > 57)
-            d1 += 7;
-        b2[0] = bytes1(d0);
-        b2[1] = bytes1(d1);
-        return string(b2);
-    }
-
-    /// @notice Convert a `uint8` into a 1, 2 or 3 characters long `string` representing its.
-    /// three less significant decimal values.
-    function toString(uint8 _u)
-        internal pure
-        returns (string memory)
-    {
-        if (_u < 10) {
-            bytes memory b1 = new bytes(1);
-            b1[0] = bytes1(uint8(_u) + 48);
-            return string(b1);
-        } else if (_u < 100) {
-            bytes memory b2 = new bytes(2);
-            b2[0] = bytes1(uint8(_u / 10) + 48);
-            b2[1] = bytes1(uint8(_u % 10) + 48);
-            return string(b2);
         } else {
-            bytes memory b3 = new bytes(3);
-            b3[0] = bytes1(uint8(_u / 100) + 48);
-            b3[1] = bytes1(uint8(_u % 100 / 10) + 48);
-            b3[2] = bytes1(uint8(_u % 10) + 48);
-            return string(b3);
+            return Witnet.RadonDataTypes.Any;
         }
     }
 
-    /// @notice Convert a `uint` into a string` representing its value.
-    function toString(uint v)
-        internal pure 
-        returns (string memory)
-    {
-        uint maxlength = 100;
-        bytes memory reversed = new bytes(maxlength);
-        uint i = 0;
-        do {
-            uint8 remainder = uint8(v % 10);
-            v = v / 10;
-            reversed[i ++] = bytes1(48 + remainder);
-        } while (v != 0);
-        bytes memory buf = new bytes(i);
-        for (uint j = 1; j <= i; j ++) {
-            buf[j - 1] = reversed[i - j];
+    function toString(Witnet.RadonDataTypes _dataType) internal pure returns (string memory) {
+        if (_dataType == RadonDataTypes.Integer) {
+            return "integer";
+        } else if (_dataType == RadonDataTypes.String) {
+            return "string";
+        } else if (_dataType == RadonDataTypes.Map) {
+            return "object";
+        } else if (_dataType == RadonDataTypes.Array) {
+            return "array";
+        } else if (_dataType == RadonDataTypes.Bool) {
+            return "boolean";     
+        } else if (_dataType == RadonDataTypes.Float) {
+            return "float";
+        } else if (_dataType == RadonDataTypes.Subscript) {
+            return "script";
+        } else {
+            return "any";
         }
-        return string(buf);
     }
-
 
     /// ===============================================================================================================
     /// --- Witnet library private methods ----------------------------------------------------------------------------

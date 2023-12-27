@@ -22,29 +22,35 @@ abstract contract WitnetBytecodesData {
         // ...
     }
 
-    struct RadonRequest {
+    struct DataProvider {
+        string  authority;
+        uint256 totalEndpoints;
+        mapping (uint256 => bytes32) endpoints;
+    }
+
+    struct DataRequest {
         string[][] args;
         bytes32 aggregator;
         bytes32 radHash;
-        WitnetV2.RadonDataTypes resultDataType;
+        Witnet.RadonDataTypes resultDataType;
         uint16 resultMaxSize;
         bytes32[] retrievals;
         bytes32 tally;
     }
 
     struct Database {
-        mapping (uint256 => WitnetV2.DataProvider) providers;
+        mapping (uint256 => DataProvider) providers;
         mapping (bytes32 => uint256) providersIndex;
         
-        mapping (bytes32 => WitnetV2.RadonReducer) reducers;
-        mapping (bytes32 => WitnetV2.RadonRetrieval) retrievals;
-        mapping (bytes32 => WitnetV2.RadonSLA) slas;
+        mapping (bytes32 => Witnet.RadonReducer) reducers;
+        mapping (bytes32 => Witnet.RadonRetrieval) retrievals;
+        mapping (bytes32 => Witnet.RadonSLA) _slas;
         
-        mapping (bytes32 => RadonRequest) requests;
+        mapping (bytes32 => DataRequest) requests;
         mapping (bytes32 => bytes32) rads;
 
         mapping (bytes32 => bytes) radsBytecode;
-        mapping (bytes32 => bytes) slasBytecode;
+        mapping (bytes32 => bytes) _slasBytecode;
     }
 
     constructor() {
@@ -74,10 +80,10 @@ abstract contract WitnetBytecodesData {
         return __bytecodes().db;
     }
 
-    function __requests(bytes32 _drRetrievalHash)
+    function __requests(bytes32 _radHash)
         internal view
-        returns (RadonRequest storage _ptr)
+        returns (DataRequest storage _ptr)
     {
-        return __database().requests[_drRetrievalHash];
+        return __database().requests[_radHash];
     }
 }

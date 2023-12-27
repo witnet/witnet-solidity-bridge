@@ -1,5 +1,6 @@
 const fs = require("fs")
 require("dotenv").config()
+const { isEqual } = require("lodash")
 const readline = require("readline")
 const web3 = require("web3")
 
@@ -14,6 +15,7 @@ module.exports = {
   padLeft,
   prompt,
   saveAddresses,
+  saveJsonAbi,
   traceHeader,
   traceTx,
 }
@@ -115,4 +117,24 @@ function saveAddresses (addrs) {
     JSON.stringify(addrs, null, 4),
     { flag: "w+" }
   )
+}
+
+function saveJsonAbi (key, abi) {
+  const version = require("../../package.json").version
+  const latest_fn = `./migrations/abis/${key}.json`;
+  const version_fn = `./migrations/abis/${key}-${version}.json`
+  let latest_abi = []
+  if (fs.existsSync(latest_fn)) {
+    try {
+      latest_abi = JSON.parse(fs.readFileSync(latest_fn))
+    } catch {}
+  }
+  if (!isEqual(abi, latest_abi)) {
+    const json = JSON.stringify(abi, null, 4)
+    if (fs.existsSync(latest_fn)) {
+      // avoid creating versioned abi upon first deployment
+      fs.writeFileSync(version_fn, json, { flag: "w+" })
+    }
+    fs.writeFileSync(latest_fn, json, { flag: "w+" })
+  }
 }
