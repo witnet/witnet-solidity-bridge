@@ -659,7 +659,7 @@ module.exports = {
   specs: {
     default: {
       WitnetBytecodes: {
-        libs: [ "WitnetEncodingLib", ],
+        libs: ["WitnetEncodingLib"],
         vanity: 172582,
       },
       WitnetRandomness: {
@@ -667,31 +667,31 @@ module.exports = {
       },
       WitnetRequestBoard: {
         immutables: {
-          types: [ 'uint256', 'uint256', 'uint256', 'uint256', ],
+          types: ["uint256", "uint256", "uint256", "uint256"],
           values: [
-              /* _reportResultGasBase */ 58282,
-              /* _reportResultWithCallbackGasBase */ 65273,
-              /* _reportResultWithCallbackRevertGasBase */ 69546,
-              /* _sstoreFromZeroGas */ 20000,
-          ]
+            /* _reportResultGasBase */ 58282,
+            /* _reportResultWithCallbackGasBase */ 65273,
+            /* _reportResultWithCallbackRevertGasBase */ 69546,
+            /* _sstoreFromZeroGas */ 20000,
+          ],
         },
-        libs: [ "WitnetErrorsLib", ],
+        libs: ["WitnetErrorsLib"],
         vanity: 899032812, // => 0x000071F0c823bD30D2Bf4CD1E829Eba5A6070000
       },
       WitnetRequestFactory: {
         vanity: 178848,
       },
       WitnetPriceFeeds: {
-        libs: [ "WitnetPriceFeedsLib", ],
+        libs: ["WitnetPriceFeedsLib"],
         vanity: 5,
-      }
+      },
     },
     avalanche: {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 155000,
-          ]
+            /* _reportResultGasBase */ 155000,
+          ],
         },
       },
     },
@@ -699,8 +699,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 114000,
-          ]
+            /* _reportResultGasBase */ 114000,
+          ],
         },
       },
     },
@@ -708,8 +708,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 78500,
-          ]
+            /* _reportResultGasBase */ 78500,
+          ],
         },
       },
     },
@@ -717,8 +717,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 225000,
-          ]
+            /* _reportResultGasBase */ 225000,
+          ],
         },
       },
     },
@@ -726,8 +726,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 225000,
-          ]
+            /* _reportResultGasBase */ 225000,
+          ],
         },
       },
     },
@@ -735,8 +735,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 137500,
-          ]
+            /* _reportResultGasBase */ 137500,
+          ],
         },
       },
     },
@@ -744,8 +744,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 85000,
-          ]
+            /* _reportResultGasBase */ 85000,
+          ],
         },
       },
     },
@@ -753,8 +753,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 530000,
-          ]
+            /* _reportResultGasBase */ 530000,
+          ],
         },
       },
     },
@@ -762,8 +762,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 85000,
-          ]
+            /* _reportResultGasBase */ 85000,
+          ],
         },
       },
     },
@@ -771,8 +771,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 92500,
-          ]
+            /* _reportResultGasBase */ 92500,
+          ],
         },
       },
     },
@@ -780,8 +780,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 105000,
-          ]
+            /* _reportResultGasBase */ 105000,
+          ],
         },
       },
     },
@@ -789,8 +789,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 85000,
-          ]
+            /* _reportResultGasBase */ 85000,
+          ],
         },
       },
     },
@@ -798,8 +798,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 134800,
-          ]
+            /* _reportResultGasBase */ 134800,
+          ],
         },
       },
     },
@@ -807,8 +807,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 115000,
-          ]
+            /* _reportResultGasBase */ 115000,
+          ],
         },
       },
     },
@@ -816,8 +816,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 145000,
-          ]
+            /* _reportResultGasBase */ 145000,
+          ],
         },
       },
     },
@@ -825,8 +825,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 135000,
-          ]
+            /* _reportResultGasBase */ 135000,
+          ],
         },
       },
     },
@@ -834,8 +834,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ "0x3100A1CAC7EF19DC",
-          ]
+            /* _reportResultGasBase */ "0x3100A1CAC7EF19DC",
+          ],
         },
       },
     },
@@ -843,8 +843,8 @@ module.exports = {
       WitnetRequestBoard: {
         immutables: {
           values: [
-              /* _reportResultGasBase */ 83949,
-          ]
+            /* _reportResultGasBase */ 83949,
+          ],
         },
       },
     },

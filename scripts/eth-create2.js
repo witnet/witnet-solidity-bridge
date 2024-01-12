@@ -1,6 +1,6 @@
-const assert = require('nanoassert')
-const { utils } = require('eth-helpers')
-const keccak = require('sha3-wasm').keccak256
+const assert = require("nanoassert")
+const { utils } = require("eth-helpers")
+const keccak = require("sha3-wasm").keccak256
 
 const prefix = Buffer.from([0xff])
 
@@ -16,13 +16,13 @@ const prefix = Buffer.from([0xff])
  *                                   `eth-checksum` or similar modules
  */
 module.exports = function create2 (address, salt, initCode) {
-  if (typeof address === 'string') address = utils.parse.address(address)
-  if (typeof salt === 'string') salt = utils.parse.uint256(salt)
-  if (typeof initCode === 'string') initCode = utils.parse.bytes(initCode)
+  if (typeof address === "string") address = utils.parse.address(address)
+  if (typeof salt === "string") salt = utils.parse.uint256(salt)
+  if (typeof initCode === "string") initCode = utils.parse.bytes(initCode)
 
-  assert(address.byteLength === 20, 'address must be 20 bytes')
-  assert(salt.byteLength === 32, 'salt must be 32 bytes')
-  assert(initCode.byteLength != null, 'initCode must be Buffer')
+  assert(address.byteLength === 20, "address must be 20 bytes")
+  assert(salt.byteLength === 32, "salt must be 32 bytes")
+  assert(initCode.byteLength != null, "initCode must be Buffer")
 
   const codeHash = keccak().update(initCode).digest()
 
@@ -34,4 +34,3 @@ module.exports = function create2 (address, salt, initCode) {
     .digest()
     .slice(-20))
 }
-

@@ -1,6 +1,6 @@
-const assert = require('nanoassert')
-const { utils } = require('eth-helpers')
-const keccak = require('sha3-wasm').keccak256
+const assert = require("nanoassert")
+const { utils } = require("eth-helpers")
+const keccak = require("sha3-wasm").keccak256
 
 const factoryPrefix = Buffer.from([0xff])
 
@@ -15,11 +15,11 @@ const factoryPrefix = Buffer.from([0xff])
  *                                   `eth-checksum` or similar modules
  */
 module.exports = function create3 (address, salt) {
-  if (typeof address === 'string') address = utils.parse.address(address)
-  if (typeof salt === 'string') salt = utils.parse.uint256(salt)
+  if (typeof address === "string") address = utils.parse.address(address)
+  if (typeof salt === "string") salt = utils.parse.uint256(salt)
 
-  assert(address.byteLength === 20, 'address must be 20 bytes')
-  assert(salt.byteLength === 32, 'salt must be 32 bytes')
+  assert(address.byteLength === 20, "address must be 20 bytes")
+  assert(salt.byteLength === 32, "salt must be 32 bytes")
 
   const factoryHash = utils.parse.uint256("0x21c35dbe1b344a2488cf3321d6ce542f8e9f305544ff09e4993a62319a497c1f")
   const factoryAddr = keccak()
@@ -29,8 +29,8 @@ module.exports = function create3 (address, salt) {
     .update(factoryHash)
     .digest()
     .slice(-20)
-  ;
-  assert(factoryAddr.byteLength === 20, 'address must be 20 bytes')
+
+  assert(factoryAddr.byteLength === 20, "address must be 20 bytes")
 
   return utils.format.address(keccak()
     .update(Buffer.from([0xd6, 0x94]))
@@ -38,6 +38,5 @@ module.exports = function create3 (address, salt) {
     .update(Buffer.from([0x01]))
     .digest()
     .slice(-20)
-  )  
+  )
 }
-

@@ -121,7 +121,7 @@ function saveAddresses (addrs) {
 
 function saveJsonAbi (key, abi) {
   const version = require("../../package.json").version
-  const latest_fn = `./migrations/abis/${key}.json`;
+  const latest_fn = `./migrations/abis/${key}.json`
   const version_fn = `./migrations/abis/${key}-${version}.json`
   let latest_abi = []
   if (fs.existsSync(latest_fn)) {

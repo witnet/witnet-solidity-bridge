@@ -14,7 +14,7 @@ module.exports = async function () {
   let network = "default"
   let prefix = "0x00"
   let suffix = "0x00"
-  let hexArgs = ""
+  const hexArgs = ""
   process.argv.map((argv, index, args) => {
     if (argv === "--offset") {
       offset = parseInt(args[index + 1])
