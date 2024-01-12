@@ -13,14 +13,14 @@ library WitnetEncodingLib {
     using WitnetCBOR for WitnetCBOR.CBOR[];
 
     bytes internal constant WITNET_RADON_OPCODES_RESULT_TYPES =
-        hex"10ffffffffffffffffffffffffffffff040100010203050406071311ff01ffff07ff02ffffffffffffffffffffffffff070304ff04ffffffffffffff03ffffff0405070202ff0404040403ffffffffff05070402040205050505ff04ff04ffffff010203050406070101ffffffffffff0203050404000106060707070701ffff";
+        hex"10ffffffffffffffffffffffffffffff040100010203050406071311ff0101ff07ff02ffffffffffffffffffffffffff070304ff04ffffffffffffff03ffffff0405070202ff0404040403ffffffffff05070402040205050505ff04ff04ffff07010203050406070101ff06ffff06ff0203050404000106060707070701ffff";
             // 10ffffffffffffffffffffffffffffff
-            // 040100001203050406070100ff01ffff
+            // 040100001203050406070100ff0101ff
             // 07ff02ffffffffffffffffffffffffff
             // 070304ff04ffffffffffffff03ffffff
             // 0405070202ff0404040403ffffffffff
             // 05070402040205050505ff04ff04ffff
-            // ff010203050406070101ffffffffffff
+            // 07010203050406070101ff06ffff06ff
             // 0203050404000106060707070701ffff
 
     error UnsupportedDataRequestMethod(uint8 method, string schema, string body, string[2][] headers);
@@ -34,7 +34,7 @@ library WitnetEncodingLib {
     error UnsupportedRadonTallyScript(bytes32 hash);
 
     /// ===============================================================================================================
-    /// --- WitnetLib internal methods --------------------------------------------------------------------------------
+    /// --- WitnetEncodingLib internal methods --------------------------------------------------------------------------------
 
     function size(Witnet.RadonDataTypes _type) internal pure returns (uint16) {
         if (_type == Witnet.RadonDataTypes.Integer
@@ -51,7 +51,7 @@ library WitnetEncodingLib {
 
 
     /// ===============================================================================================================
-    /// --- WitnetLib public methods (if used library will have to linked to calling contracts) -----------------------
+    /// --- WitnetEncodingLib public methods (if used library will have to linked to calling contracts) -----------------------
 
     /// @notice Encode bytes array into given major type (UTF-8 not yet supported)
     /// @param buf Bytes array
@@ -474,7 +474,7 @@ library WitnetEncodingLib {
 
 
     /// ===============================================================================================================
-    /// --- WitnetLib private methods ---------------------------------------------------------------------------------
+    /// --- WitnetEncodingLib private methods ---------------------------------------------------------------------------------
 
     function _replaceCborWildcards(
             WitnetCBOR.CBOR memory self,
