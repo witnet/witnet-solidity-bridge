@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../requests/WitnetRequest.sol";
+import "../WitnetRequest.sol";
 
 contract WitnetRequestFactoryData {
 
@@ -45,7 +45,7 @@ contract WitnetRequestFactoryData {
         /// @notice Array of retrievals hashes passed upon construction.
         bytes32[] retrievals;
         /// @notice Result data type.
-        WitnetV2.RadonDataTypes resultDataType;
+        Witnet.RadonDataTypes resultDataType;
         /// @notice Result max size or rank (if variable type).
         uint16 resultDataMaxSize; 
     }

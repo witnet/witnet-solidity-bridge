@@ -6,208 +6,182 @@ import "./Witnet.sol";
 
 library WitnetV2 {
 
-    error IndexOutOfBounds(uint256 index, uint256 range);
-    error InsufficientBalance(uint256 weiBalance, uint256 weiExpected);
-    error InsufficientFee(uint256 weiProvided, uint256 weiExpected);
-    error Unauthorized(address violator);
-
-    error RadonFilterMissingArgs(uint8 opcode);
-
-    error RadonRequestNoSources();
-    error RadonRequestSourcesArgsMismatch(uint expected, uint actual);
-    error RadonRequestMissingArgs(uint index, uint expected, uint actual);
-    error RadonRequestResultsMismatch(uint index, uint8 read, uint8 expected);
-    error RadonRequestTooHeavy(bytes bytecode, uint weight);
-
-    error RadonSlaNoReward();
-    error RadonSlaNoWitnesses();
-    error RadonSlaTooManyWitnesses(uint256 numWitnesses);
-    error RadonSlaConsensusOutOfRange(uint256 percentage);
-    error RadonSlaLowCollateral(uint256 witnessCollateral);
-
-    error UnsupportedDataRequestMethod(uint8 method, string schema, string body, string[2][] headers);
-    error UnsupportedRadonDataType(uint8 datatype, uint256 maxlength);
-    error UnsupportedRadonFilterOpcode(uint8 opcode);
-    error UnsupportedRadonFilterArgs(uint8 opcode, bytes args);
-    error UnsupportedRadonReducerOpcode(uint8 opcode);
-    error UnsupportedRadonReducerScript(uint8 opcode, bytes script, uint256 offset);
-    error UnsupportedRadonScript(bytes script, uint256 offset);
-    error UnsupportedRadonScriptOpcode(bytes script, uint256 cursor, uint8 opcode);
-    error UnsupportedRadonTallyScript(bytes32 hash);
-
-    function toEpoch(uint _timestamp) internal pure returns (uint) {
-        return 1 + (_timestamp - 11111) / 15;
+    /// Struct containing both request and response data related to every query posted to the Witnet Request Board
+    struct Query {
+        Request request;
+        Response response;
     }
 
-    function toTimestamp(uint _epoch) internal pure returns (uint) {
-        return 111111+ _epoch * 15;
+    /// Possible status of a Witnet query.
+    enum QueryStatus {
+        Unknown,
+        Posted,
+        Reported,
+        Undeliverable,
+        Finalized
     }
 
-    struct Beacon {
-        uint256 escrow;
-        uint256 evmBlock;
-        uint256 gasprice;
-        address relayer;
-        address slasher;
-        uint256 superblockIndex;
-        uint256 superblockRoot;        
-    }
-
-    enum BeaconStatus {
-        Idle
-    }
-
-    struct Block {
-        bytes32 blockHash;
-        bytes32 drTxsRoot;
-        bytes32 drTallyTxsRoot;
-    }
-    
-    enum BlockStatus {
-        Idle
-    }
-
-    struct DrPost {
-        uint256 block;
-        DrPostStatus status;
-        DrPostRequest request;
-        DrPostResponse response;
-    }
-    
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
-    struct DrPostRequest {
-        uint256 epoch;
-        address requester;
-        address reporter;
-        bytes32 radHash;
-        bytes32 slaHash;
-        uint256 weiReward;
+    struct Request {
+        bytes32 fromCallbackGas; // Packed: contains requester address in most significant bytes20, 
+                                 //         and max callback gas limit if a callback is required.
+        bytes32 SLA;             // Packed: Service-Level Aggreement parameters upon which the data request 
+                                 //         will be solved by the Witnet blockchain.
+        bytes32 RAD;             // Verified hash of the actual data request to be solved by the Witnet blockchain.
+        uint256 reserved1;       // Reserved uint256 slot.
+        uint256 evmReward;       // EVM reward to be paid to the relayer of the Witnet resolution to the data request.
+        bytes   bytecode;        // Raw bytecode of the data request to be solved by the Witnet blockchain (only if not yet verified).
     }
 
     /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
-    struct DrPostResponse {
-        address disputer;
-        address reporter;
-        uint256 escrowed;
-        uint256 drCommitTxEpoch;
-        uint256 drTallyTxEpoch;
-        bytes32 drTallyTxHash;
-        bytes   drTallyResultCborBytes;
+    struct Response {
+        bytes32 fromFinality;  // Packed: contains address from which the result to the data request was reported, and 
+                               //         the EVM block at which the provided result can be considered to be final.        
+        uint256 timestamp;     // Timestamp at which data from data sources were retrieved by the Witnet blockchain. 
+        bytes32 tallyHash;     // Hash of the Witnet commit/reveal act that solved the data request.
+        bytes   cborBytes;     // CBOR-encoded result to the data request, as resolved by the Witnet blockchain. 
     }
 
-    enum DrPostStatus {
+        /// Final query's result status from a requester's point of view.
+    enum ResultStatus {
         Void,
-        Deleted,
-        Expired,
-        Posted,
-        Disputed,
-        Reported,
-        Finalized,
-        Accepted,
-        Rejected
-    }
-
-    struct DataProvider {
-        string  authority;
-        uint256 totalEndpoints;
-        mapping (uint256 => bytes32) endpoints;
-    }
-
-    enum DataRequestMethods {
-        /* 0 */ Unknown,
-        /* 1 */ HttpGet,
-        /* 2 */ Rng,
-        /* 3 */ HttpPost,
-        /* 4 */ HttpHead
-    }
-
-    enum RadonDataTypes {
-        /* 0x00 */ Any, 
-        /* 0x01 */ Array,
-        /* 0x02 */ Bool,
-        /* 0x03 */ Bytes,
-        /* 0x04 */ Integer,
-        /* 0x05 */ Float,
-        /* 0x06 */ Map,
-        /* 0x07 */ String,
-        Unused0x08, Unused0x09, Unused0x0A, Unused0x0B,
-        Unused0x0C, Unused0x0D, Unused0x0E, Unused0x0F,
-        /* 0x10 */ Same,
-        /* 0x11 */ Inner,
-        /* 0x12 */ Match,
-        /* 0x13 */ Subscript
-    }
-
-    struct RadonFilter {
-        RadonFilterOpcodes opcode;
-        bytes args;
-    }
-
-    enum RadonFilterOpcodes {
-        /* 0x00 */ GreaterThan,
-        /* 0x01 */ LessThan,
-        /* 0x02 */ Equals,
-        /* 0x03 */ AbsoluteDeviation,
-        /* 0x04 */ RelativeDeviation,
-        /* 0x05 */ StandardDeviation,
-        /* 0x06 */ Top,
-        /* 0x07 */ Bottom,
-        /* 0x08 */ Mode,
-        /* 0x09 */ LessOrEqualThan
-    }
-
-    struct RadonReducer {
-        RadonReducerOpcodes opcode;
-        RadonFilter[] filters;
-        bytes script;
-    }
-
-    enum RadonReducerOpcodes {
-        /* 0x00 */ Minimum,
-        /* 0x01 */ Maximum,
-        /* 0x02 */ Mode,
-        /* 0x03 */ AverageMean,
-        /* 0x04 */ AverageMeanWeighted,
-        /* 0x05 */ AverageMedian,
-        /* 0x06 */ AverageMedianWeighted,
-        /* 0x07 */ StandardDeviation,
-        /* 0x08 */ AverageDeviation,
-        /* 0x09 */ MedianDeviation,
-        /* 0x0A */ MaximumDeviation,
-        /* 0x0B */ ConcatenateAndHash
-    }
-
-    struct RadonRetrieval {
-        uint8 argsCount;
-        DataRequestMethods method;
-        RadonDataTypes resultDataType;
-        string url;
-        string body;
-        string[2][] headers;
-        bytes script;
+        Awaiting,
+        Ready,
+        Error,
+        AwaitingReady,
+        AwaitingError
     }
 
     struct RadonSLA {
-        uint numWitnesses;
-        uint minConsensusPercentage;
-        uint witnessReward;
-        uint witnessCollateral;
-        uint minerCommitRevealFee;
+        /// @dev Number of witnessing nodes that will take part in the resolution 
+        /// @dev of a data request within the Witnet blockchain:
+        uint8   witnessingCommitteeSize;   
+        
+        /// @dev Total reward in $nanoWIT that will be equally distributed to all nodes
+        /// @dev involved in the resolution of a data request in the Witnet blockchain:
+        uint64  witnessingWitTotalReward;
     }
 
-    /// @notice Returns `true` if all witnessing parameters in `b` have same
-    /// @notice value or greater than the ones in `a`.
-    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
-        internal pure
-        returns (bool)
+    /// ===============================================================================================================
+    /// --- 'WitnetV2.Request' helper methods -------------------------------------------------------------------------
+
+    function packRequesterCallbackGasLimit(address requester, uint96 callbackGasLimit) internal pure returns (bytes32) {
+        return bytes32(uint(bytes32(bytes20(requester))) | callbackGasLimit);
+    }
+
+    function unpackRequester(Request storage self) internal view returns (address) {
+        return address(bytes20(self.fromCallbackGas));
+    }
+
+    function unpackCallbackGasLimit(Request storage self) internal view returns (uint96) {
+        return uint96(uint(self.fromCallbackGas));
+    }
+
+    function unpackRequesterAndCallbackGasLimit(Request storage self) internal view returns (address, uint96) {
+        bytes32 _packed = self.fromCallbackGas;
+        return (address(bytes20(_packed)), uint96(uint(_packed)));
+    }
+
+    
+    /// ===============================================================================================================
+    /// --- 'WitnetV2.Response' helper methods ------------------------------------------------------------------------
+
+    function packReporterEvmFinalityBlock(address reporter, uint256 evmFinalityBlock) internal pure returns (bytes32) {
+        return bytes32(uint(bytes32(bytes20(reporter))) << 96 | uint96(evmFinalityBlock));
+    }
+
+    function unpackWitnetReporter(Response storage self) internal view returns (address) {
+        return address(bytes20(self.fromFinality));
+    }
+
+    function unpackEvmFinalityBlock(Response storage self) internal view returns (uint256) {
+        return uint(uint96(uint(self.fromFinality)));
+    }
+
+    function unpackEvmFinalityBlock(bytes32 fromFinality) internal pure returns (uint256) {
+        return uint(uint96(uint(fromFinality)));
+    }
+
+    function unpackWitnetReporterAndEvmFinalityBlock(Response storage self) internal view returns (address, uint256) {
+        bytes32 _packed = self.fromFinality;
+        return (address(bytes20(_packed)), uint(uint96(uint(_packed))));
+    }
+
+    
+    /// ===============================================================================================================
+    /// --- 'WitnetV2.RadonSLA' helper methods ------------------------------------------------------------------------
+
+    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
+        internal pure returns (bool)
     {
+        return (a.witnessingCommitteeSize >= b.witnessingCommitteeSize);
+    }
+     
+    function isValid(RadonSLA calldata sla) internal pure returns (bool) {
         return (
-            a.numWitnesses >= b.numWitnesses
-                && a.minConsensusPercentage >= b.minConsensusPercentage
-                && a.witnessReward >= b.witnessReward
-                && a.witnessCollateral >= b.witnessCollateral
-                && a.minerCommitRevealFee >= b.minerCommitRevealFee
+            sla.witnessingWitTotalReward > 0 
+                && sla.witnessingCommitteeSize > 0 && sla.witnessingCommitteeSize <= 127
         );
     }
 
+    function toBytes32(RadonSLA memory sla) internal pure returns (bytes32) {
+        return bytes32(
+            uint(sla.witnessingCommitteeSize) << 248
+                // | uint(sla.witnessingCollateralRatio) << 240
+                // | uint(sla.witnessingNotBeforeTimestamp) << 64
+                | uint(sla.witnessingWitTotalReward)
+        );
+    }
+
+    function toRadonSLA(bytes32 _packed)
+        internal pure returns (RadonSLA memory)
+    {
+        return RadonSLA({
+            witnessingCommitteeSize: uint8(uint(_packed) >> 248),
+            // witnessingCollateralRatio: uint8(uint(_packed) >> 240),
+            // witnessingNotBeforeTimestamp: uint64(uint(_packed) >> 64),
+            witnessingWitTotalReward: uint64(uint(_packed))
+        });
+    }
+
+    function witnessingWitTotalReward(bytes32 _packed) internal pure returns (uint64) {
+        return uint64(uint(_packed));
+    }
+
+    uint256 internal constant _WITNET_GENESIS_TIMESTAMP = 1602666045;
+    uint256 internal constant _WITNET_GENESIS_EPOCH_SECONDS = 45;
+
+    uint256 internal constant _WITNET_2_0_EPOCH = 1234567;
+    uint256 internal constant _WITNET_2_0_EPOCH_SECONDS = 30;
+    uint256 internal constant _WITNET_2_0_TIMESTAMP = _WITNET_GENESIS_TIMESTAMP + _WITNET_2_0_EPOCH * _WITNET_GENESIS_EPOCH_SECONDS;
+
+    function timestampToWitnetEpoch(uint _timestamp) internal pure returns (uint) {
+        if (_timestamp > _WITNET_2_0_TIMESTAMP ) {
+            return (
+                _WITNET_2_0_EPOCH + (
+                    _timestamp - _WITNET_2_0_TIMESTAMP
+                ) / _WITNET_2_0_EPOCH_SECONDS
+            );
+        } else if (_timestamp > _WITNET_GENESIS_TIMESTAMP) {
+            return (
+                1 + (
+                    _timestamp - _WITNET_GENESIS_TIMESTAMP
+                ) / _WITNET_GENESIS_EPOCH_SECONDS
+            );
+        } else {
+            return 0;
+        }
+    }
+
+    function witnetEpochToTimestamp(uint _epoch) internal pure returns (uint) {
+        if (_epoch >= _WITNET_2_0_EPOCH) {
+            return (
+                _WITNET_2_0_TIMESTAMP + (
+                    _epoch - _WITNET_2_0_EPOCH
+                ) * _WITNET_2_0_EPOCH_SECONDS
+            );
+        } else {
+            return (_WITNET_GENESIS_TIMESTAMP + _epoch * _WITNET_GENESIS_EPOCH_SECONDS);
+        }
+    }
 }
