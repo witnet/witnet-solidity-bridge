@@ -11,8 +11,10 @@ library WitnetErrorsLib {
 
     using Witnet for uint8;
     using Witnet for uint256;
+    using Witnet for Witnet.ResultErrorCodes;
     using WitnetCBOR for WitnetCBOR.CBOR;
 
+    
     // ================================================================================================================
     // --- Library public methods -------------------------------------------------------------------------------------
     
@@ -32,18 +34,45 @@ library WitnetErrorsLib {
         public pure
         returns (Witnet.ResultError memory)
     {
-        if (_status == WitnetV2.ResultStatus.Awaiting) {
+        if (
+            _status == WitnetV2.ResultStatus.Error
+                || _status == WitnetV2.ResultStatus.Ready
+        ) {
+            return resultErrorFromCborBytes(_cborBytes);
+        } else if (
+            _status == WitnetV2.ResultStatus.AwaitingError 
+                || _status == WitnetV2.ResultStatus.AwaitingReady
+        ) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
-                reason: "WitnetRequestBoard: not yet solved"
+                reason: "WitnetErrorsLib: not yet finalized"
             });
-        } else if (_status == WitnetV2.ResultStatus.Void) {
+        } if (_status == WitnetV2.ResultStatus.Awaiting) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
-                reason: "WitnetRequestBoard: unknown query"
+                reason: "WitnetErrorsLib: not yet solved"
             });
         } else {
-            return resultErrorFromCborBytes(_cborBytes);
+            return Witnet.ResultError({
+                code: Witnet.ResultErrorCodes.Unknown,
+                reason: "WitnetErrorsLib: unknown query"
+            });
+        }
+    }
+
+    function resultErrorCodesFromCborBytes(bytes memory cborBytes)
+        public pure
+        returns (
+            Witnet.ResultErrorCodes _code, 
+            Witnet.ResultErrorCodes _subcode
+        )
+    {
+        WitnetCBOR.CBOR[] memory _errors = _errorsFromResult(Witnet.resultFromCborBytes(cborBytes));
+        if (_errors.length > 1) {
+            _code = Witnet.ResultErrorCodes(_errors[0].readUint());
+            if (_errors.length > 2) {
+                _subcode = Witnet.ResultErrorCodes(_errors[1].readUint());
+            } 
         }
     }
 
@@ -92,177 +121,154 @@ library WitnetErrorsLib {
         if (errors.length < 2) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
-                reason: "Unknown error: no error code was found."
+                reason: "Critical: no error code was found."
             });
-        }
-        else {
+        } else {
             _error.code = Witnet.ResultErrorCodes(errors[0].readUint());
         }
-        // switch on _error.code
-        if (
-            _error.code == Witnet.ResultErrorCodes.SourceScriptNotCBOR
-                && errors.length > 1
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: invalid CBOR value."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.SourceScriptNotArray
-                && errors.length > 1
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: CBOR value expected to be an array of calls."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.SourceScriptNotRADON
-                && errors.length > 1
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: CBOR value expected to be a data request."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.RequestTooManySources
-                && errors.length > 1
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: too many sources."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.ScriptTooManyCalls
-                && errors.length > 1
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: too many calls."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.UnsupportedOperator
-                && errors.length > 3
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Radon: unsupported '",
-                errors[2].readString(),
-                "' for input type '",
-                errors[1].readString(),
-                "'."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.HTTP
-                && errors.length > 2
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Retrieval: HTTP/",
-                errors[1].readUint().toString(), 
-                " error."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.RetrievalTimeout
-                && errors.length > 1
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Retrieval: timeout."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.Underflow
-                && errors.length > 1
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Aggregation: math underflow."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.Overflow
-                && errors.length > 1
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Aggregation: math overflow."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.DivisionByZero
-                && errors.length > 1
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Aggregation: division by zero."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.BridgeMalformedRequest
-        ) {
-            _error.reason = "Witnet: Bridge: malformed data request cannot be processed.";
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.BridgePoorIncentives
-        ) {
-            _error.reason = "Witnet: Bridge: rejected due to poor witnessing incentives.";
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.BridgeOversizedResult
-        ) {
-            _error.reason = "Witnet: Bridge: rejected due to poor bridging incentives.";
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.InsufficientConsensus
-                && errors.length > 3
-        ) {
-            uint reached = (errors[1].additionalInformation == 25
-                ? uint(int(errors[1].readFloat16() / 10 ** 4))
-                : uint(int(errors[1].readFloat64() / 10 ** 15))
-            );
-            uint expected = (errors[2].additionalInformation == 25
-                ? uint(int(errors[2].readFloat16() / 10 ** 4))
-                : uint(int(errors[2].readFloat64() / 10 ** 15))
-            );
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Tally: insufficient consensus: ",
-                reached.toString(), 
-                "% <= ",
-                expected.toString(), 
-                "%."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.InsufficientCommits
-        ) {
-            _error.reason = "Witnet: Tally: insufficient commits.";
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.TallyExecution
-                && errors.length > 3
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Tally: execution error: ",
-                errors[2].readString(),
-                "."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.ArrayIndexOutOfBounds
-                && errors.length > 2
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Aggregation: tried to access a value from an array with an index (",
-                errors[1].readUint().toString(),
-                ") out of bounds."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.MapKeyNotFound
-                && errors.length > 2
-        ) {
-            _error.reason = string(abi.encodePacked(
-                "Witnet: Aggregation: tried to access a value from a map with a key (\"",
-                errors[1].readString(),
-                "\") that was not found."
-            ));
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.NoReveals
-        ) {
-            _error.reason = "Witnet: Tally: no reveals.";
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.MalformedReveal
-        ) {
-            _error.reason = "Witnet: Tally: malformed reveal.";
-        } else if (
-            _error.code == Witnet.ResultErrorCodes.UnhandledIntercept
-        ) {
-            _error.reason = "Witnet: Tally: unhandled intercept.";
+        string memory _prefix;
+        if (_error.code.isCircumstantial()) {
+            _prefix = "Circumstantial: ";
+        } else if (_error.code.poorIncentives()) {
+            _prefix = "Poor incentives: ";
+        } else if (_error.code.lackOfConsensus()) {
+            _prefix = "Consensual: ";
         } else {
-            _error.reason = string(abi.encodePacked(
-                "Unhandled error: 0x",
-                Witnet.toHexString(uint8(_error.code)),
-                errors.length > 2
-                    ? string(abi.encodePacked(" (", uint(errors.length - 1).toString(), " params)."))
-                    : "."
+            _prefix = "Critical: ";
+        } 
+        _error.reason = string(abi.encodePacked(_prefix, _stringify(_error.code, errors)));
+    }
+
+    function _stringify(Witnet.ResultErrorCodes code, WitnetCBOR.CBOR[] memory args)
+        private pure
+        returns (string memory)
+    {
+        if (code == Witnet.ResultErrorCodes.InsufficientCommits) {
+            return "insufficient commits.";
+
+        } else if (
+            code == Witnet.ResultErrorCodes.CircumstantialFailure
+                && args.length > 2
+        ) {
+            return _stringify(args[1].readUint(), args);
+        
+        } else if (code == Witnet.ResultErrorCodes.InsufficientMajority) {
+            return "insufficient majority.";
+
+        } else if (code == Witnet.ResultErrorCodes.InsufficientQuorum) {
+            return "insufficient quorum.";
+
+        } else if (code == Witnet.ResultErrorCodes.BridgePoorIncentives) {
+            return "as for the bridge.";
+
+        } else if (
+            code == Witnet.ResultErrorCodes.OversizedTallyResult
+                || code == Witnet.ResultErrorCodes.BridgeOversizedTallyResult
+        ) {
+            return "oversized result.";
+
+        } else if (code == Witnet.ResultErrorCodes.InconsistentSources) {
+            return "inconsistent sources.";
+
+        } else if (
+            code == Witnet.ResultErrorCodes.MalformedResponses
+                && args.length > 2
+        ) {
+            return string(abi.encodePacked(
+                "malformed response: ",
+                _stringify(args[1].readUint(), args)
+            ));
+
+        } else if (
+            code == Witnet.ResultErrorCodes.MalformedDataRequest 
+                || code == Witnet.ResultErrorCodes.BridgeMalformedDataRequest
+
+        ) {
+            if (args.length > 2) {
+                return string(abi.encodePacked(
+                    "malformed request: ",
+                    _stringify(args[1].readUint(), args)
+                ));
+            } else {
+                return "malformed request.";
+            }
+
+        } else if (code == Witnet.ResultErrorCodes.UnhandledIntercept) {
+            if (args.length > 2) {
+                return string(abi.encodePacked(
+                    "unhandled intercept on tally (+",
+                    (args.length - 2).toString(),
+                    " args)."
+                ));
+            } else {
+                return "unhandled intercept on tally.";
+            }
+        
+        } else {
+            return string(abi.encodePacked(
+                "0x",
+                uint8(code).toHexString()
+            ));
+        }
+    }
+
+    function _stringify(uint subcode, WitnetCBOR.CBOR[] memory args)
+        private pure 
+        returns (string memory)
+    {
+        Witnet.ResultErrorCodes _code = Witnet.ResultErrorCodes(subcode);
+
+        // circumstantial subcodes:
+        if (_code == Witnet.ResultErrorCodes.HttpErrors) {
+            if (args.length > 3) {
+                return string(abi.encodePacked(
+                    "http/",
+                    args[2].readUint().toString()
+                ));
+            } else {
+                return "unspecific http status code.";
+            }
+
+        } else if (_code == Witnet.ResultErrorCodes.RetrievalsTimeout) {
+            return "response timeout.";
+
+        } else if (_code == Witnet.ResultErrorCodes.ArrayIndexOutOfBounds) {
+            if (args.length > 3) {
+                return string(abi.encodePacked(
+                    "array index out of bounds: ",
+                    args[2].readUint().toString()
+                ));
+            } else {
+                return "array index out of bounds.";
+            }
+
+        } else if (_code == Witnet.ResultErrorCodes.MapKeyNotFound) {
+            if (args.length > 3) {
+                return string(abi.encodePacked(
+                    "map key not found: ",
+                    args[2].readString()
+                ));
+            } else {
+                return "map key not found.";
+            }
+
+        } else if (_code == Witnet.ResultErrorCodes.JsonPathNotFound) {
+            if (args.length > 3) {
+                return string(abi.encodePacked(
+                    "json path returned no values: ",
+                    args[2].readString()
+                ));
+            } else {
+                return "json path returned no values.";
+            }
+        
+        } else {
+            return string(abi.encodePacked(
+                "0x",
+                Witnet.toHexString(uint8(_code)),
+                args.length > 3
+                    ? string(abi.encodePacked(" (+", uint(args.length - 3).toString(), " args)"))
+                    : ""
             ));
         }
     }
