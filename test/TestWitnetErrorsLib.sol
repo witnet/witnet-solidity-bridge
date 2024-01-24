@@ -109,13 +109,13 @@ contract TestWitnetErrorsLib {
     Witnet.ResultError memory error0xff = WitnetErrorsLib.resultErrorFromCborBytes(hex"D8278118FF");
     Assert.equal(
       uint(error0x50.code),
-      uint(Witnet.ResultErrorCodes.NoReveals),
-      "Error code #0x50 should be `Witnet.ResultErrorCodes.NoReveals`"
+      uint(Witnet.ResultErrorCodes.InsufficientQuorum),
+      "Error code #0x50 should be `Witnet.ResultErrorCodes.InsufficientQuorum`"
     );
     Assert.equal(
       uint(error0x51.code),
-      uint(Witnet.ResultErrorCodes.InsufficientConsensus),
-      "Error code #0x51 should be `Witnet.ResultErrorCodes.InsufficientConsensus`"
+      uint(Witnet.ResultErrorCodes.InsufficientMajority),
+      "Error code #0x51 should be `Witnet.ResultErrorCodes.InsufficientMajority`"
     );
     Assert.equal(
       uint(error0x52.code),
@@ -144,8 +144,8 @@ contract TestWitnetErrorsLib {
     );
     Assert.equal(
       uint(error0xe0.code),
-      uint(Witnet.ResultErrorCodes.BridgeMalformedRequest),
-      "Error code #0xE0 should be `Witnet.ResultErrorCodes.BridgeMalformedRequest`"
+      uint(Witnet.ResultErrorCodes.BridgeMalformedDataRequest),
+      "Error code #0xE0 should be `Witnet.ResultErrorCodes.BridgeMalformedDataRequest`"
     );
     Assert.equal(
       uint(error0xe1.code),
@@ -154,8 +154,8 @@ contract TestWitnetErrorsLib {
     );
     Assert.equal(
       uint(error0xe2.code),
-      uint(Witnet.ResultErrorCodes.BridgeOversizedResult),
-      "Error code #0xE2 should be `Witnet.ResultErrorCodes.BridgeOversizedResult`"
+      uint(Witnet.ResultErrorCodes.BridgeOversizedTallyResult),
+      "Error code #0xE2 should be `Witnet.ResultErrorCodes.BridgeOversizedTallyResult`"
     );
     Assert.equal(
       uint(error0xff.code),
