@@ -246,6 +246,36 @@ library Witnet {
         UnhandledIntercept
     }
 
+    function isCircumstantial(ResultErrorCodes self) internal pure returns (bool) {
+        return (self == ResultErrorCodes.CircumstantialFailure);
+    }
+
+    function lackOfConsensus(ResultErrorCodes self) internal pure returns (bool) {
+        return (
+            self == ResultErrorCodes.InsufficientCommits
+                || self == ResultErrorCodes.InsufficientMajority
+                || self == ResultErrorCodes.InsufficientQuorum
+        );
+    }
+
+    function isRetriable(ResultErrorCodes self) internal pure returns (bool) {
+        return (
+            lackOfConsensus(self)
+                || isCircumstantial(self)
+                || poorIncentives(self)
+        );
+    }
+
+    function poorIncentives(ResultErrorCodes self) internal pure returns (bool) {
+        return (
+            self == ResultErrorCodes.OversizedTallyResult
+                || self == ResultErrorCodes.InsufficientCommits
+                || self == ResultErrorCodes.BridgePoorIncentives
+                || self == ResultErrorCodes.BridgeOversizedTallyResult
+        );
+    }
+    
+
     /// Possible Radon data request methods that can be used within a Radon Retrieval. 
     enum RadonDataRequestMethods {
         /* 0 */ Unknown,
