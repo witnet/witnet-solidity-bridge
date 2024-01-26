@@ -620,8 +620,8 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev or deleted.
     /// @param _queryId The unique identifier of a previously posted query.
     function readRequest(uint256 _queryId)
-        external view
-        override
+        public view
+        virtual override
         inStatus(_queryId, Witnet.QueryStatus.Posted)
         returns (Witnet.Request memory _request)
     {
@@ -684,8 +684,8 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier
     function readResponse(uint256 _queryId)
-        external view
-        override
+        public view
+        virtual override
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (Witnet.Response memory _response)
     {
@@ -720,8 +720,8 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier
     function readResponseResult(uint256 _queryId)
-        external view
-        override
+        public view
+        virtual override
         inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (Witnet.Result memory)
     {

@@ -39,6 +39,11 @@ abstract contract WitnetBoardData {
         _;
     }
 
+    modifier onlyRequester(uint256 _queryId) {
+      require(__query(_queryId).from == msg.sender, "WitnetRequestBoard: only the requester");
+      _;
+    }
+
     /// Asserts the give query was actually posted before calling this method.
     modifier wasPosted(uint256 _queryId) {
         require(_queryId > 0 && _queryId <= __storage().numQueries, "WitnetRequestBoard: not yet posted");
