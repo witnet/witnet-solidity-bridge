@@ -746,6 +746,14 @@ module.exports = {
         },
       },
     },
+    ten: {
+      "ten.testnet": {
+        host: "localhost",
+        port: 8504,
+        network_id: 443,
+        skipDryRun: true,
+      }
+    },
     ultron: {
       "ultron.testnet": {
         host: "localhost",
