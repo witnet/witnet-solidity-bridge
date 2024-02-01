@@ -3,13 +3,22 @@
   "version": "2.0.1",
   "description": "Witnet Solidity Bridge contracts for EVM-compatible chains",
   "main": "",
+  "type": "commonjs",
+  "export": {
+    ".": "./index.js"
+  },
+  "files": [
+    "build",
+    "contracts",
+    "migrations/witnet.*"
+  ],
   "scripts": {
     "addresses": "node ./scripts/addresses.js 2>&1",
     "clean": "npm run clean:build && npm run clean:flattened",
     "clean:build": "node ./scripts/clean.js build",
     "clean:flattened": "node ./scripts/clean.js flattened",
-    "compile": "truffle compile --all --network",
-    "console": "truffle console",
+    "compile": "npx truffle compile --all --network",
+    "console": "npx truffle console",
     "coverage": "solidity-coverage",
     "flatten": "node ./scripts/flatten.js 2>&1",
     "flatten:all": "npm run clean && npm run flatten:core && npm run flatten:apps && npm run flatten:libs && npm run flatten:proxy",
