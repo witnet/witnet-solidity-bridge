@@ -10,11 +10,10 @@ const version = `${
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
-  const isDryRun = utils.isDryRun(network);//network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
+  const addresses = await utils.readAddresses(network)
 
-  const addresses = await utils.readAddresses(network);
-  const specs = settings.getSpecs(network);
-  const targets = settings.getArtifacts(network);
+  const specs = settings.getSpecs(network)
+  const targets = settings.getArtifacts(network)
 
   // Deploy/upgrade WitnetBytecodes target implementation, if required
   await deploy({
@@ -32,7 +31,7 @@ module.exports = async function (_, network, [, from]) {
       ],
     },
   })
-  
+
   // Deploy/upgrade WitnetRequestFactory target implementation, if required
   await deploy({
     addresses,
@@ -51,7 +50,7 @@ module.exports = async function (_, network, [, from]) {
       ],
     },
   })
-  
+
   // Deploy/upgrade WitnetRequestBoard target implementation, if required
   await deploy({
     addresses,
@@ -72,7 +71,7 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // save addresses file if required
-  if (!isDryRun) {
+  if (!utils.isDryRun(network)) {
     await utils.saveAddresses(network, addresses)
   }
 }

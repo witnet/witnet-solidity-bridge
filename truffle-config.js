@@ -9,7 +9,7 @@ if (ecosystem) {
 }
 
 module.exports = {
-  build_directory: `./build/`,
+  build_directory: "./build/",
   contracts_directory: "./contracts/",
   migrations_directory: "./migrations/scripts/",
   networks: settings.getNetworks(network),

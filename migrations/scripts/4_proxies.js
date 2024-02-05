@@ -7,12 +7,11 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (_, network, [, from, reporter]) {
-  const isDryRun = utils.isDryRun(network);//network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
-  
-  const addresses = await utils.readAddresses(network);
-  const targets = settings.getArtifacts(network);
-  const specs = settings.getSpecs(network);
-  
+  const addresses = await utils.readAddresses(network)
+
+  const targets = settings.getArtifacts(network)
+  const specs = settings.getSpecs(network)
+
   const singletons = [
     "WitnetBytecodes",
     "WitnetRequestFactory",
@@ -29,13 +28,13 @@ module.exports = async function (_, network, [, from, reporter]) {
   // Deploy/upgrade singleton proxies, if required
   for (const index in singletons) {
     await deploy({
-      addresses, 
+      addresses,
       from,
       specs,
       targets,
       key: singletons[index],
     })
-    if (!isDryRun) {
+    if (!utils.isDryRun(network)) {
       await utils.saveAddresses(network, addresses)
     }
   }

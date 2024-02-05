@@ -2,8 +2,9 @@ const utils = require("../../src/utils")
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
-module.exports = async function (deployer, network, [, from,, master]) {  
+module.exports = async function (deployer, network, [, from,, master]) {
   const addresses = await utils.readAddresses(network)
+
   let factory
   if (utils.isNullAddress(addresses?.WitnetDeployer)) {
     await deployer.deploy(WitnetDeployer, { from: master })

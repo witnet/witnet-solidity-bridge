@@ -5,53 +5,48 @@ const utils = require("../../src/utils")
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [,,, from]) {
-  const isDryRun = utils.isDryRun(network);
+  const addresses = await utils.readAddresses(network)
 
-  const addresses = await utils.readAddresses(network);
-  const specs = settings.getSpecs(network);
-  const targets = settings.getArtifacts(network);
+  const specs = settings.getSpecs(network)
+  const targets = settings.getArtifacts(network)
 
   // Deploy the WitnetPriceFeeds oracle, if required
-  {
-    await deploy({
-      addresses,
-      from,
-      targets,
-      key: targets.WitnetPriceFeeds,
-      libs: specs.WitnetPriceFeeds.libs,
-      vanity: specs.WitnetPriceFeeds?.vanity || 0,
-      immutables: specs.WitnetPriceFeeds.immutables,
-      intrinsics: {
-        types: ["address", "address"],
-        values: [
-        /* _operator */ from,
-          /* _wrb      */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
-        ],
-      },
-    })
-  }
+  await deploy({
+    addresses,
+    from,
+    targets,
+    key: targets.WitnetPriceFeeds,
+    libs: specs.WitnetPriceFeeds.libs,
+    vanity: specs.WitnetPriceFeeds?.vanity || 0,
+    immutables: specs.WitnetPriceFeeds.immutables,
+    intrinsics: {
+      types: ["address", "address"],
+      values: [
+      /* _operator */ from,
+        /* _wrb      */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
+      ],
+    },
+  })
   // Deploy the WitnetRandomness oracle, if required
-  {
-    await deploy({
-      addresses,
-      from,
-      targets,
-      key: targets.WitnetRandomness,
-      libs: specs.WitnetRandomness?.libs,
-      vanity: specs.WitnetRandomness?.vanity || 0,
-      immutables: specs.WitnetRandomness?.immutables,
-      intrinsics: {
-        types: ["address", "address"],
-        values: [
-        /* _operator */ from,
-          /* _wrb      */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
-        ],
-      },
-    })
-  }
+  await deploy({
+    addresses,
+    from,
+    targets,
+    key: targets.WitnetRandomness,
+    libs: specs.WitnetRandomness?.libs,
+    vanity: specs.WitnetRandomness?.vanity || 0,
+    immutables: specs.WitnetRandomness?.immutables,
+    intrinsics: {
+      types: ["address", "address"],
+      values: [
+      /* _operator */ from,
+        /* _wrb      */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
+      ],
+    },
+  })
 
   // save addresses file if required
-  if (!isDryRun) {
+  if (!utils.isDryRun(network)) {
     await utils.saveAddresses(network, addresses)
   }
 }
@@ -73,7 +68,7 @@ async function deploy (specs) {
     }
     const coreBytecode = link(artifact.toJSON().bytecode, libs, targets)
     if (coreBytecode.indexOf("__") > -1) {
-      console.info(bytecode)
+      console.info(coreBytecode)
       console.info("Cannot deploy due to some missing libs")
       process.exit(1)
     }
@@ -111,7 +106,7 @@ async function determineProxyAddr (from, nonce) {
 
 function link (bytecode, libs, targets) {
   if (libs && Array.isArray(libs) && libs.length > 0) {
-    for (index in libs) {
+    for (const index in libs) {
       const key = targets[libs[index]]
       const lib = artifacts.require(key)
       bytecode = bytecode.replaceAll(`__${key}${"_".repeat(38 - key.length)}`, lib.address.slice(2))

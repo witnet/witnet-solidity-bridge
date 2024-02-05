@@ -4,9 +4,9 @@ const utils = require("../../src/utils")
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
-  const addresses = await utils.readAddresses(network);
+  const addresses = await utils.readAddresses(network)
 
-  const targets = settings.getArtifacts(network);
+  const targets = settings.getArtifacts(network)
   const libs = [
     targets.WitnetErrorsLib,
     targets.WitnetEncodingLib,

@@ -1,7 +1,7 @@
 const fs = require("fs")
 require("dotenv").config()
 const { isEqual } = require("lodash")
-const lockfile = require('proper-lockfile');
+const lockfile = require("proper-lockfile")
 const readline = require("readline")
 const web3 = require("web3")
 
@@ -16,7 +16,7 @@ module.exports = {
   isNullAddress,
   padLeft,
   prompt,
-  readAddresses: readAddresses,
+  readAddresses,
   saveAddresses,
   saveJsonArtifact,
   traceHeader,
@@ -53,7 +53,7 @@ function getRealmNetworkFromString (network) {
 }
 
 function isDryRun (network) {
-  return network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop";
+  return network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
 }
 
 function isNullAddress (addr) {
@@ -92,42 +92,42 @@ async function prompt (text) {
 
 async function readAddresses (network) {
   const filename = "./migrations/witnet.addresses.json"
-  lockfile.lockSync(filename);
+  lockfile.lockSync(filename)
   const addrs = JSON.parse(await fs.readFileSync(filename))
-  lockfile.unlockSync(filename);
-  return addrs[network] || {};
+  lockfile.unlockSync(filename)
+  return addrs[network] || {}
 }
 
 async function saveAddresses (network, addrs) {
   const filename = "./migrations/witnet.addresses.json"
-  lockfile.lockSync(filename);
+  lockfile.lockSync(filename)
   const json = JSON.parse(fs.readFileSync(filename))
   json[network] = addrs
-  fs.writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" });
-  lockfile.unlockSync(filename);
+  fs.writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" })
+  lockfile.unlockSync(filename)
 }
 
 function saveJsonArtifact (key, artifact) {
-  const { abi, ast, bytecode, deployedBytecode, contractName } = artifact;
+  const { abi, ast, bytecode, deployedBytecode, contractName } = artifact
   const version = require("../../package.json").version
-  const latest_fn = `./artifacts/${key}.json`
-  const version_fn = `./artifacts/${key}-${version}.json`
+  const latestFileName = `./artifacts/${key}.json`
+  const versionFileName = `./artifacts/${key}-${version}.json`
   const current = {
     contractName,
     sourceName: ast?.absolutePath.split("project:/")[1],
     abi,
     bytecode,
-    deployedBytecode
-  };
+    deployedBytecode,
+  }
   let latest = []
-  if (fs.existsSync(latest_fn)) {
+  if (fs.existsSync(latestFileName)) {
     try {
-      latest = JSON.parse(fs.readFileSync(latest_fn))
+      latest = JSON.parse(fs.readFileSync(latestFileName))
     } catch {}
   }
   if (!isEqual(current, latest)) {
     const json = JSON.stringify(current, null, 4)
-    fs.writeFileSync(version_fn, json, { flag: "w+" })
-    fs.writeFileSync(latest_fn, json, { flag: "w+" })
+    fs.writeFileSync(versionFileName, json, { flag: "w+" })
+    fs.writeFileSync(latestFileName, json, { flag: "w+" })
   }
 }
