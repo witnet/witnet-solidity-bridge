@@ -41,9 +41,9 @@ contract WitnetRandomness
     }
 
     constructor(address _operator, WitnetRequestBoard _wrb)
+        Ownable(_operator)
         UsingWitnet(_wrb)
     {
-        _transferOwnership(_operator);
         assert(_wrb.specs() == type(IWitnetRequestBoard).interfaceId);
         WitnetRequestFactory _factory = witnet().factory();
         WitnetBytecodes _registry = witnet().registry();

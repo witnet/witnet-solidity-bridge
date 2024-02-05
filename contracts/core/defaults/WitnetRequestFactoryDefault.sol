@@ -54,6 +54,7 @@ contract WitnetRequestFactoryDefault
             bool _upgradable,
             bytes32 _versionTag
         )
+        Ownable(address(msg.sender))
         WitnetUpgradableBase(
             _upgradable,
             _versionTag,
@@ -88,23 +89,26 @@ contract WitnetRequestFactoryDefault
         // and they all return the same data type
         bool _parameterized;
         for (uint _ix = 0; _ix < _retrievalsIds.length; _ix ++) {
+            bytes32 _retrievalHash = _retrievalsIds[_ix];
             if (_ix == 0) {
-                _resultDataType = registry.lookupRadonRetrievalResultDataType(_retrievalsIds[_ix]);
+                _resultDataType = registry.lookupRadonRetrievalResultDataType(_retrievalHash);
             } else {
                 require(
-                    _resultDataType == registry.lookupRadonRetrievalResultDataType(_retrievalsIds[_ix]),
+                    _resultDataType == registry.lookupRadonRetrievalResultDataType(_retrievalHash),
                     "WitnetRequestTemplate: mismatching retrievals"
                 );
             }
             if (!_parameterized) {
                 // check whether at least one of the retrievals is parameterized
-                _parameterized = registry.lookupRadonRetrievalArgsCount(_retrievalsIds[_ix]) > 0;
+                _parameterized = registry.lookupRadonRetrievalArgsCount(_retrievalHash) > 0;
             }
         }
-        // check that the aggregator and tally reducers actually exist in the registry
-        registry.lookupRadonReducer(_aggregatorId);
-        registry.lookupRadonReducer(_tallyId);
         {
+            // check that the aggregator and tally reducers actually exist in the registry
+            registry.lookupRadonReducer(_aggregatorId);
+            registry.lookupRadonReducer(_tallyId);
+
+            // write data into storage:
             WitnetRequestTemplateSlot storage __data = __witnetRequestTemplate();
             __data.aggregator = _aggregatorId;
             __data.factory = WitnetRequestFactory(msg.sender);

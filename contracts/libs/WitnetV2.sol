@@ -42,7 +42,7 @@ library WitnetV2 {
         bytes   cborBytes;     // CBOR-encoded result to the data request, as resolved by the Witnet blockchain. 
     }
 
-        /// Final query's result status from a requester's point of view.
+    /// Final query's result status from a requester's point of view.
     enum ResultStatus {
         Void,
         Awaiting,

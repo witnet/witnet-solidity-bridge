@@ -31,6 +31,7 @@ contract WitnetBytecodesDefault
     bytes4 public immutable override specs = type(IWitnetBytecodes).interfaceId;
     
     constructor(bool _upgradable, bytes32 _versionTag)
+        Ownable(address(msg.sender))
         WitnetUpgradableBase(
             _upgradable,
             _versionTag,

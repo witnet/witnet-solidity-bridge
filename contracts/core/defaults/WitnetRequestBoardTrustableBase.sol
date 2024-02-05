@@ -69,6 +69,7 @@ abstract contract WitnetRequestBoardTrustableBase
             bytes32 _versionTag,
             address _currency
         )
+        Ownable(address(msg.sender))
         Payable(_currency)
         WitnetUpgradableBase(
             _upgradable,

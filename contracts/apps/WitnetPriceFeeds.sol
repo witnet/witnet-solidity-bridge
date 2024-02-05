@@ -34,12 +34,12 @@ contract WitnetPriceFeeds
     WitnetRequestBoard immutable public override witnet;
     
     constructor(address _operator, WitnetRequestBoard _wrb)
+        Ownable(_operator)
         WitnetFeeds(
             Witnet.RadonDataTypes.Integer,
             "Price-"
         )
     {
-        _transferOwnership(_operator);
         require(
             _wrb.specs() == type(IWitnetRequestBoard).interfaceId,
             "WitnetPriceFeeds: uncompliant request board"
