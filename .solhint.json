@@ -6,6 +6,8 @@
       ">=0.6.0 <0.9.0"
     ],
     "constructor-syntax": "warn",
+    "custom-errors": "off",
+    "explicit-types": "off",
     "func-param-name-mixedcase": "warn",
     "func-visibility": [
       "warn",
@@ -13,6 +15,7 @@
         "ignoreConstructors": true
       }
     ],
+    "immutable-vars-naming": "off",
     "modifier-name-mixedcase": "warn",
     "no-empty-blocks": "off",
     "no-inline-assembly": "off",
