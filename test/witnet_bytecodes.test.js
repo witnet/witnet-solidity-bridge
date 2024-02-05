@@ -1,9 +1,10 @@
-const utils = require("../scripts/utils")
+const utils = require("../src/utils")
 const { expectEvent, expectRevert } = require("@openzeppelin/test-helpers")
 const { assert } = require("chai")
 const { expectRevertCustomError } = require("custom-error-test-helper")
 
-const WitnetBytecodes = artifacts.require("WitnetBytecodes")
+const WitnetBytecodes = artifacts.require("WitnetBytecodesDefault")
+const WitnetEncodingLib = artifacts.require("WitnetEncodingLib")
 const WitnetV2 = artifacts.require("WitnetV2")
 
 contract("WitnetBytecodes", (accounts) => {
@@ -14,6 +15,7 @@ contract("WitnetBytecodes", (accounts) => {
   let bytecodes
 
   before(async () => {
+    await WitnetBytecodes.link(WitnetEncodingLib, WitnetEncodingLib.address)
     bytecodes = await WitnetBytecodes.new(
       true,
       utils.fromAscii("testing")
@@ -104,7 +106,7 @@ contract("WitnetBytecodes", (accounts) => {
     let btcUsdPriceFeedHash
 
     context("verifyRadonRetrieval(..)", async () => {
-      context("WitnetV2.DataRequestMethods.Rng", async () => {
+      context("WitnetV2.RadonDataRequestMethods.Rng", async () => {
         it("emits appropiate single event when verifying randomness data source for the first time", async () => {
           const tx = await bytecodes.verifyRadonRetrieval(
             2, // requestMethod
@@ -150,7 +152,7 @@ contract("WitnetBytecodes", (accounts) => {
         })
         // ... reverts
       })
-      context("WitnetV2.DataRequestMethods.HttpGet", async () => {
+      context("WitnetV2.RadonDataRequestMethods.HttpGet", async () => {
         it(
           "emits new data provider and source events when verifying a new http-get source for the first time", async () => {
             const tx = await bytecodes.verifyRadonRetrieval(
@@ -201,7 +203,7 @@ contract("WitnetBytecodes", (accounts) => {
           )
         })
       })
-      context("WitnetV2.DataRequestMethods.HttpPost", async () => {
+      context("WitnetV2.RadonDataRequestMethods.HttpPost", async () => {
         it(
           "emits new data provider and source events when verifying a new http-post source for the first time", async () => {
             const tx = await bytecodes.verifyRadonRetrieval(

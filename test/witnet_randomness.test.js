@@ -1,4 +1,4 @@
-const WitnetRandomnessMock = artifacts.require("WitnetRandomnessMock")
+const WitnetRandomnessMock = artifacts.require("WitnetMockedRandomness")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 const RandomnessBareMinimal = artifacts.require("RandomnessBareMinimal")
 
@@ -54,7 +54,7 @@ contract("WitnetRandomnesMock", accounts => {
     it("requesting random number with no fee, fails", async () => {
       await truffleAssert.reverts(
         myContract.requestRandomNumber(),
-        "reward too low"
+        "insufficient reward"
       )
     })
     it("requesting random number with less fee than required, fails", async () => {
@@ -62,7 +62,7 @@ contract("WitnetRandomnesMock", accounts => {
         myContract.requestRandomNumber(
           { value: fee / 2 }
         ),
-        "reward too low"
+        "insufficient reward"
       )
     })
     let randomizingblock1
