@@ -1,6 +1,7 @@
 const fs = require("fs")
 require("dotenv").config()
 const { isEqual } = require("lodash")
+const lockfile = require('proper-lockfile');
 const readline = require("readline")
 const web3 = require("web3")
 
@@ -11,9 +12,11 @@ module.exports = {
   fromAscii,
   getRealmNetworkFromArgs,
   getRealmNetworkFromString,
+  isDryRun,
   isNullAddress,
   padLeft,
   prompt,
+  readAddresses: readAddresses,
   saveAddresses,
   saveJsonArtifact,
   traceHeader,
@@ -47,6 +50,10 @@ function getRealmNetworkFromString (network) {
   } else {
     return [null, network]
   }
+}
+
+function isDryRun (network) {
+  return network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop";
 }
 
 function isNullAddress (addr) {
@@ -83,12 +90,21 @@ async function prompt (text) {
   return answer
 }
 
-function saveAddresses (addrs) {
-  fs.writeFileSync(
-    "./migrations/witnet.addresses.json",
-    JSON.stringify(addrs, null, 4),
-    { flag: "w+" }
-  )
+async function readAddresses (network) {
+  const filename = "./migrations/witnet.addresses.json"
+  lockfile.lockSync(filename);
+  const addrs = JSON.parse(await fs.readFileSync(filename))
+  lockfile.unlockSync(filename);
+  return addrs[network] || {};
+}
+
+async function saveAddresses (network, addrs) {
+  const filename = "./migrations/witnet.addresses.json"
+  lockfile.lockSync(filename);
+  const json = JSON.parse(fs.readFileSync(filename))
+  json[network] = addrs
+  fs.writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" });
+  lockfile.unlockSync(filename);
 }
 
 function saveJsonArtifact (key, artifact) {

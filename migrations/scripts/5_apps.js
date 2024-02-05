@@ -1,4 +1,3 @@
-const addresses = require("../witnet.addresses")
 const ethUtils = require("ethereumjs-util")
 const settings = require("../../settings")
 const utils = require("../../src/utils")
@@ -6,22 +5,17 @@ const utils = require("../../src/utils")
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [,,, from]) {
-  const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
-  const ecosystem = utils.getRealmNetworkFromArgs()[0]
-  network = network.split("-")[0]
+  const isDryRun = utils.isDryRun(network);
 
-  if (!addresses[ecosystem]) addresses[ecosystem] = {}
-  if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
-
+  const addresses = await utils.readAddresses(network);
   const specs = settings.getSpecs(network);
   const targets = settings.getArtifacts(network);
 
   // Deploy the WitnetPriceFeeds oracle, if required
   {
     await deploy({
+      addresses,
       from,
-      ecosystem,
-      network,
       targets,
       key: targets.WitnetPriceFeeds,
       libs: specs.WitnetPriceFeeds.libs,
@@ -35,14 +29,12 @@ module.exports = async function (_, network, [,,, from]) {
         ],
       },
     })
-    if (!isDryRun) utils.saveAddresses(addresses)
   }
   // Deploy the WitnetRandomness oracle, if required
   {
     await deploy({
+      addresses,
       from,
-      ecosystem,
-      network,
       targets,
       key: targets.WitnetRandomness,
       libs: specs.WitnetRandomness?.libs,
@@ -56,15 +48,19 @@ module.exports = async function (_, network, [,,, from]) {
         ],
       },
     })
-    if (!isDryRun) utils.saveAddresses(addresses)
+  }
+
+  // save addresses file if required
+  if (!isDryRun) {
+    await utils.saveAddresses(network, addresses)
   }
 }
 
 async function deploy (specs) {
-  const { from, ecosystem, network, key, libs, intrinsics, immutables, targets, vanity } = specs
+  const { addresses, from, key, libs, intrinsics, immutables, targets, vanity } = specs
   const artifact = artifacts.require(key)
   const salt = vanity ? "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(vanity), 32).toString("hex") : "0x0"
-  if (utils.isNullAddress(addresses[ecosystem][network][key])) {
+  if (utils.isNullAddress(addresses[key])) {
     utils.traceHeader(`Deploying '${key}'...`)
     const deployer = await WitnetDeployer.deployed()
     let { types, values } = intrinsics
@@ -88,7 +84,7 @@ async function deploy (specs) {
     const tx = await deployer.deploy(dappInitCode, salt, { from })
     utils.traceTx(tx)
     if ((await web3.eth.getCode(dappAddr)).length > 3) {
-      addresses[ecosystem][network][key] = dappAddr
+      addresses[key] = dappAddr
       // save/overwrite exportable abi file
       utils.saveJsonArtifact(key, artifact)
     } else {
@@ -99,7 +95,7 @@ async function deploy (specs) {
   } else {
     utils.traceHeader(`Skipped '${key}'`)
   }
-  artifact.address = addresses[ecosystem][network][key]
+  artifact.address = addresses[key]
   console.info("  ", "> contract address: ", artifact.address)
   console.info("  ", "> contract codehash:", web3.utils.soliditySha3(await web3.eth.getCode(artifact.address)))
   console.info()

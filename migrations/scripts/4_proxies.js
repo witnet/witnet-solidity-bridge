@@ -1,4 +1,3 @@
-const addresses = require("../witnet.addresses")
 const ethUtils = require("ethereumjs-util")
 const { merge } = require("lodash")
 const settings = require("../../settings")
@@ -8,13 +7,9 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (_, network, [, from, reporter]) {
-  const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
-  const ecosystem = utils.getRealmNetworkFromArgs()[0]
-  network = network.split("-")[0]
-
-  if (!addresses[ecosystem]) addresses[ecosystem] = {}
-  if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
-
+  const isDryRun = utils.isDryRun(network);//network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
+  
+  const addresses = await utils.readAddresses(network);
   const targets = settings.getArtifacts(network);
   const specs = settings.getSpecs(network);
   
@@ -34,21 +29,20 @@ module.exports = async function (_, network, [, from, reporter]) {
   // Deploy/upgrade singleton proxies, if required
   for (const index in singletons) {
     await deploy({
+      addresses, 
       from,
-      ecosystem,
-      network,
       specs,
       targets,
       key: singletons[index],
     })
     if (!isDryRun) {
-      utils.saveAddresses(addresses)
+      await utils.saveAddresses(network, addresses)
     }
   }
 }
 
 async function deploy (target) {
-  const { from, ecosystem, network, key, specs, targets } = target
+  const { addresses, from, key, specs, targets } = target
 
   const mutables = specs[key].mutables
   const proxy = artifacts.require(key)
@@ -56,7 +50,7 @@ async function deploy (target) {
     ? "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(specs[key].vanity), 32).toString("hex")
     : "0x0"
 
-  if (utils.isNullAddress(addresses[ecosystem][network][key])) {
+  if (utils.isNullAddress(addresses[key])) {
     utils.traceHeader(`Deploying '${key}'...`)
     console.info("  ", "> account:          ", from)
     console.info("  ", "> balance:          ", web3.utils.fromWei(await web3.eth.getBalance(from), "ether"), "ETH")
@@ -90,13 +84,13 @@ async function deploy (target) {
       }
     }
     if ((await web3.eth.getCode(proxyAddr)).length > 3) {
-      addresses[ecosystem][network][key] = proxyAddr
+      addresses[key] = proxyAddr
     } else {
       console.info(`Error: Contract was not deployed on expected address: ${proxyAddr}`)
       process.exit(1)
     }
   } else {
-    const oldAddr = await getProxyImplementation(from, addresses[ecosystem][network][key])
+    const oldAddr = await getProxyImplementation(from, addresses[key])
     const oldImpl = await artifacts.require(targets[key]).at(oldAddr)
     const newImpl = await artifacts.require(targets[key]).deployed()
     if (oldAddr !== newImpl.address) {
@@ -124,7 +118,7 @@ async function deploy (target) {
       utils.traceHeader(`Skipped '${key}'`)
     }
   }
-  proxy.address = addresses[ecosystem][network][key]
+  proxy.address = addresses[key]
   const impl = await artifacts.require(targets[key]).at(proxy.address)
   console.info("  ", "> proxy address:    ", impl.address)
   console.info("  ", "> proxy codehash:   ", web3.utils.soliditySha3(await web3.eth.getCode(impl.address)))

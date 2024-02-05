@@ -69,6 +69,7 @@
     "js-sha256": "^0.11.0",
     "lodash": "^4.17.21",
     "nanoassert": "^2.0.0",
+    "proper-lockfile": "^4.1.2",
     "sha3-wasm": "^1.0.0",
     "solhint": "^4.1.1",
     "truffle": "^5.11.5",
