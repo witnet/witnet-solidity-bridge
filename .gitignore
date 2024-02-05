@@ -1,15 +1,12 @@
 node_modules/
 build/
-coverage/
-coverage.json
-flattened/**
+cache/
+flattened/
+**/*-*.json
 
 .env
 .idea
 .vscode
 
-yarn.lock
-yarn-error.log
-package-lock.json
-
 *.tmp
+.old

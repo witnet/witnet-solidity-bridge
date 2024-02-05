@@ -15,7 +15,7 @@ module.exports = {
   padLeft,
   prompt,
   saveAddresses,
-  saveJsonAbi,
+  saveJsonArtifact,
   traceHeader,
   traceTx,
 }
@@ -41,40 +41,12 @@ function getRealmNetworkFromArgs () {
 }
 
 function getRealmNetworkFromString (network) {
-  network = network ? network.replaceAll(":", ".").toLowerCase() : "development"
-
-  // Try to extract realm/network info from environment
-  const envRealm = process.env.WITNET_EVM_REALM
-    ? process.env.WITNET_EVM_REALM.toLowerCase()
-    : null
-
-  let realm
-  if (network.split(".")[1]) {
-    realm = network.split(".")[0]
-    if (realm === "ethereum") {
-      // Realm in "ethereum.*" networks must be set to "default"
-      realm = "default"
-    }
-    if (envRealm && realm !== envRealm) {
-      // Check that WITNET_EVM_REALM, if defined, and network's realm actually match
-      console.error(
-        `\n> Fatal: network "${network}" and WITNET_EVM_REALM value`,
-        `("${envRealm.toUpperCase()}") don't match.\n`
-      )
-      process.exit(1)
-    }
+  network = network ? network.toLowerCase() : "development"
+  if (network.indexOf(":") > -1) {
+    return [network.split(":")[0], network]
   } else {
-    realm = envRealm || "default"
-    network = `${realm === "default" ? "ethereum" : realm}.${network}`
+    return [null, network]
   }
-  if (realm === "default") {
-    const subnetwork = network.split(".")[1]
-    if (subnetwork === "development" || subnetwork === "test") {
-      // In "default" realm, networks "development" and "test" must be returned without a prefix.
-      network = subnetwork
-    }
-  }
-  return [realm, network]
 }
 
 function isNullAddress (addr) {
@@ -119,22 +91,27 @@ function saveAddresses (addrs) {
   )
 }
 
-function saveJsonAbi (key, abi) {
+function saveJsonArtifact (key, artifact) {
+  const { abi, ast, bytecode, deployedBytecode, contractName } = artifact;
   const version = require("../../package.json").version
-  const latest_fn = `./migrations/abis/${key}.json`
-  const version_fn = `./migrations/abis/${key}-${version}.json`
-  let latest_abi = []
+  const latest_fn = `./artifacts/${key}.json`
+  const version_fn = `./artifacts/${key}-${version}.json`
+  const current = {
+    contractName,
+    sourceName: ast?.absolutePath.split("project:/")[1],
+    abi,
+    bytecode,
+    deployedBytecode
+  };
+  let latest = []
   if (fs.existsSync(latest_fn)) {
     try {
-      latest_abi = JSON.parse(fs.readFileSync(latest_fn))
+      latest = JSON.parse(fs.readFileSync(latest_fn))
     } catch {}
   }
-  if (!isEqual(abi, latest_abi)) {
-    const json = JSON.stringify(abi, null, 4)
-    if (fs.existsSync(latest_fn)) {
-      // avoid creating versioned abi upon first deployment
-      fs.writeFileSync(version_fn, json, { flag: "w+" })
-    }
+  if (!isEqual(current, latest)) {
+    const json = JSON.stringify(current, null, 4)
+    fs.writeFileSync(version_fn, json, { flag: "w+" })
     fs.writeFileSync(latest_fn, json, { flag: "w+" })
   }
 }

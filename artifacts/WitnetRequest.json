@@ -1,4 +1,7 @@
-[
+{
+  "contractName": "WitnetRequest",
+  "sourceName": "contracts/WitnetRequest.sol",
+  "abi": [
     {
       "anonymous": false,
       "inputs": [
@@ -61,9 +64,9 @@
       "name": "class",
       "outputs": [
         {
-          "internalType": "bytes4",
+          "internalType": "string",
           "name": "",
-          "type": "bytes4"
+          "type": "string"
         }
       ],
       "stateMutability": "view",
@@ -89,14 +92,14 @@
         {
           "components": [
             {
-              "internalType": "enum WitnetV2.RadonReducerOpcodes",
+              "internalType": "enum Witnet.RadonReducerOpcodes",
               "name": "opcode",
               "type": "uint8"
             },
             {
               "components": [
                 {
-                  "internalType": "enum WitnetV2.RadonFilterOpcodes",
+                  "internalType": "enum Witnet.RadonFilterOpcodes",
                   "name": "opcode",
                   "type": "uint8"
                 },
@@ -106,17 +109,12 @@
                   "type": "bytes"
                 }
               ],
-              "internalType": "struct WitnetV2.RadonFilter[]",
+              "internalType": "struct Witnet.RadonFilter[]",
               "name": "filters",
               "type": "tuple[]"
-            },
-            {
-              "internalType": "bytes",
-              "name": "script",
-              "type": "bytes"
             }
           ],
-          "internalType": "struct WitnetV2.RadonReducer",
+          "internalType": "struct Witnet.RadonReducer",
           "name": "",
           "type": "tuple"
         }
@@ -142,12 +140,12 @@
               "type": "uint8"
             },
             {
-              "internalType": "enum WitnetV2.DataRequestMethods",
+              "internalType": "enum Witnet.RadonDataRequestMethods",
               "name": "method",
               "type": "uint8"
             },
             {
-              "internalType": "enum WitnetV2.RadonDataTypes",
+              "internalType": "enum Witnet.RadonDataTypes",
               "name": "resultDataType",
               "type": "uint8"
             },
@@ -172,7 +170,7 @@
               "type": "bytes"
             }
           ],
-          "internalType": "struct WitnetV2.RadonRetrieval",
+          "internalType": "struct Witnet.RadonRetrieval",
           "name": "",
           "type": "tuple"
         }
@@ -200,14 +198,14 @@
         {
           "components": [
             {
-              "internalType": "enum WitnetV2.RadonReducerOpcodes",
+              "internalType": "enum Witnet.RadonReducerOpcodes",
               "name": "opcode",
               "type": "uint8"
             },
             {
               "components": [
                 {
-                  "internalType": "enum WitnetV2.RadonFilterOpcodes",
+                  "internalType": "enum Witnet.RadonFilterOpcodes",
                   "name": "opcode",
                   "type": "uint8"
                 },
@@ -217,17 +215,12 @@
                   "type": "bytes"
                 }
               ],
-              "internalType": "struct WitnetV2.RadonFilter[]",
+              "internalType": "struct Witnet.RadonFilter[]",
               "name": "filters",
               "type": "tuple[]"
-            },
-            {
-              "internalType": "bytes",
-              "name": "script",
-              "type": "bytes"
             }
           ],
-          "internalType": "struct WitnetV2.RadonReducer",
+          "internalType": "struct Witnet.RadonReducer",
           "name": "",
           "type": "tuple"
         }
@@ -279,7 +272,7 @@
       "name": "resultDataType",
       "outputs": [
         {
-          "internalType": "enum WitnetV2.RadonDataTypes",
+          "internalType": "enum Witnet.RadonDataTypes",
           "name": "",
           "type": "uint8"
         }
@@ -295,6 +288,19 @@
           "internalType": "bytes32[]",
           "name": "",
           "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "specs",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
         }
       ],
       "stateMutability": "view",
@@ -340,6 +346,19 @@
           "internalType": "string",
           "name": "",
           "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "witnet",
+      "outputs": [
+        {
+          "internalType": "contract WitnetRequestBoard",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -398,3 +417,4 @@
       "type": "function"
     }
   ]
+}

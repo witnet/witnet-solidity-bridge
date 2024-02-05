@@ -1,5 +1,5 @@
 const addresses = require("../witnet.addresses")
-const utils = require("../../scripts/utils")
+const utils = require("../../src/utils")
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 

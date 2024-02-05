@@ -1,7 +1,5 @@
-const { merge } = require("lodash")
-
-const settings = require("../witnet.settings")
-const utils = require("../../scripts/utils")
+const settings = require("../../settings")
+const utils = require("../../src/utils")
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
@@ -14,11 +12,7 @@ module.exports = async function (_, network, [, from]) {
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
-  const targets = merge(
-    settings.artifacts.default,
-    settings.artifacts[ecosystem],
-    settings.artifacts[network]
-  )
+  const targets = settings.getArtifacts(network);
   const libs = [
     targets.WitnetErrorsLib,
     targets.WitnetEncodingLib,
@@ -26,7 +20,7 @@ module.exports = async function (_, network, [, from]) {
   ]
 
   const deployer = await WitnetDeployer.deployed()
-  for (index in libs) {
+  for (const index in libs) {
     const key = libs[index]
     const artifact = artifacts.require(key)
     if (utils.isNullAddress(addresses[ecosystem][network][key])) {

@@ -15,7 +15,10 @@
     "ethereum"
   ],
   "export": {
-    ".": "./index.js"
+    ".": "./src/index.js",
+    "./artifacts": "./artifacts/index.js",
+    "./settings": "./settings/index.js",
+    "./utils": "./src/utils"
   },
   "files": [
     "build",

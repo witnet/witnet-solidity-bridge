@@ -1,9 +1,7 @@
-const ethUtils = require("ethereumjs-util")
-const { merge } = require("lodash")
-
 const addresses = require("../witnet.addresses")
-const settings = require("../witnet.settings")
-const utils = require("../../scripts/utils")
+const ethUtils = require("ethereumjs-util")
+const settings = require("../../settings")
+const utils = require("../../src/utils")
 const version = `${
   require("../../package").version
 }-${
@@ -20,86 +18,72 @@ module.exports = async function (_, network, [, from]) {
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
-  const specs = merge(
-    settings.specs.default,
-    settings.specs[ecosystem],
-    settings.specs[network],
-  )
-  const targets = merge(
-    settings.artifacts.default,
-    settings.artifacts[ecosystem],
-    settings.artifacts[network]
-  )
+  const specs = settings.getSpecs(network);
+  const targets = settings.getArtifacts(network);
 
   // Deploy/upgrade WitnetBytecodes target implementation, if required
-  {
-    await deploy({
-      from,
-      ecosystem,
-      network,
-      targets,
-      key: targets.WitnetBytecodes,
-      libs: specs.WitnetBytecodes.libs,
-      immutables: specs.WitnetBytecodes.immutables,
-      intrinsics: {
-        types: ["bool", "bytes32"],
-        values: [
+  await deploy({
+    from,
+    ecosystem,
+    network,
+    targets,
+    key: targets.WitnetBytecodes,
+    libs: specs.WitnetBytecodes.libs,
+    immutables: specs.WitnetBytecodes.immutables,
+    intrinsics: {
+      types: ["bool", "bytes32"],
+      values: [
         /* _upgradable */ true,
-          /* _versionTag */ utils.fromAscii(version),
-        ],
-      },
-    })
-    if (!isDryRun) {
-      utils.saveAddresses(addresses)
-    }
+        /* _versionTag */ utils.fromAscii(version),
+      ],
+    },
+  })
+  if (!isDryRun) {
+    utils.saveAddresses(addresses)
   }
   // Deploy/upgrade WitnetRequestFactory target implementation, if required
-  {
-    await deploy({
-      from,
-      ecosystem,
-      network,
-      targets,
-      key: targets.WitnetRequestFactory,
-      libs: specs.WitnetRequestFactory.libs,
-      immutables: specs.WitnetRequestFactory.immutables,
-      intrinsics: {
-        types: ["address", "address", "bool", "bytes32"],
-        values: [
+  await deploy({
+    from,
+    ecosystem,
+    network,
+    targets,
+    key: targets.WitnetRequestFactory,
+    libs: specs.WitnetRequestFactory.libs,
+    immutables: specs.WitnetRequestFactory.immutables,
+    intrinsics: {
+      types: ["address", "address", "bool", "bytes32"],
+      values: [
         /* _witnet     */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
-          /* _registry   */ await determineProxyAddr(from, specs.WitnetBytecodes?.vanity || 1),
-          /* _upgradable */ true,
-          /* _versionTag */ utils.fromAscii(version),
-        ],
-      },
-    })
-    if (!isDryRun) {
-      utils.saveAddresses(addresses)
-    }
+        /* _registry   */ await determineProxyAddr(from, specs.WitnetBytecodes?.vanity || 1),
+        /* _upgradable */ true,
+        /* _versionTag */ utils.fromAscii(version),
+      ],
+    },
+  })
+  if (!isDryRun) {
+    utils.saveAddresses(addresses)
   }
   // Deploy/upgrade WitnetRequestBoard target implementation, if required
-  {
-    await deploy({
-      from,
-      ecosystem,
-      network,
-      targets,
-      key: targets.WitnetRequestBoard,
-      libs: specs.WitnetRequestBoard.libs,
-      immutables: specs.WitnetRequestBoard.immutables,
-      intrinsics: {
-        types: ["address", "address", "bool", "bytes32"],
-        values: [
+  await deploy({
+    from,
+    ecosystem,
+    network,
+    targets,
+    key: targets.WitnetRequestBoard,
+    libs: specs.WitnetRequestBoard.libs,
+    immutables: specs.WitnetRequestBoard.immutables,
+    intrinsics: {
+      types: ["address", "address", "bool", "bytes32"],
+      values: [
         /* _factory    */ await determineProxyAddr(from, specs.WitnetRequestFactory?.vanity || 2),
-          /* _registry   */ await determineProxyAddr(from, specs.WitnetBytecodes?.vanity || 1),
-          /* _upgradable */ true,
-          /* _versionTag */ utils.fromAscii(version),
-        ],
-      },
-    })
-    if (!isDryRun) {
-      utils.saveAddresses(addresses)
-    }
+        /* _registry   */ await determineProxyAddr(from, specs.WitnetBytecodes?.vanity || 1),
+        /* _upgradable */ true,
+        /* _versionTag */ utils.fromAscii(version),
+      ],
+    },
+  })
+  if (!isDryRun) {
+    utils.saveAddresses(addresses)
   }
 }
 
@@ -121,7 +105,7 @@ async function deploy (specs) {
     }
     const coreBytecode = link(contract.toJSON().bytecode, libs, targets)
     if (coreBytecode.indexOf("__") > -1) {
-      console.info(bytecode)
+      console.info(coreBytecode)
       console.info("Error: Cannot deploy due to some missing libs")
       process.exit(1)
     }
@@ -153,7 +137,7 @@ async function determineProxyAddr (from, nonce) {
 
 function link (bytecode, libs, targets) {
   if (libs && Array.isArray(libs) && libs.length > 0) {
-    for (index in libs) {
+    for (const index in libs) {
       const key = targets[libs[index]]
       const lib = artifacts.require(key)
       bytecode = bytecode.replaceAll(`__${key}${"_".repeat(38 - key.length)}`, lib.address.slice(2))

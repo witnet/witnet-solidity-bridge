@@ -1,9 +1,7 @@
-const ethUtils = require("ethereumjs-util")
-const { merge } = require("lodash")
-
 const addresses = require("../witnet.addresses")
-const settings = require("../witnet.settings")
-const utils = require("../../scripts/utils")
+const ethUtils = require("ethereumjs-util")
+const settings = require("../../settings")
+const utils = require("../../src/utils")
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
@@ -15,16 +13,8 @@ module.exports = async function (_, network, [,,, from]) {
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
-  const specs = merge(
-    settings.specs.default,
-    settings.specs[ecosystem],
-    settings.specs[network],
-  )
-  const targets = merge(
-    settings.artifacts.default,
-    settings.artifacts[ecosystem],
-    settings.artifacts[network]
-  )
+  const specs = settings.getSpecs(network);
+  const targets = settings.getArtifacts(network);
 
   // Deploy the WitnetPriceFeeds oracle, if required
   {
@@ -100,7 +90,7 @@ async function deploy (specs) {
     if ((await web3.eth.getCode(dappAddr)).length > 3) {
       addresses[ecosystem][network][key] = dappAddr
       // save/overwrite exportable abi file
-      utils.saveJsonAbi(key, artifact.abi)
+      utils.saveJsonArtifact(key, artifact)
     } else {
       console.info(`Contract was not deployed on expected address: ${dappAddr}`)
       console.log(tx.receipt)
