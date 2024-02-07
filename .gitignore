@@ -1,8 +1,9 @@
-node_modules/
+
+artifacts/
 build/
 cache/
 flattened/
-**/*-*.json
+node_modules/
 
 .env
 .idea

@@ -13,7 +13,9 @@ module.exports = {
   contracts_directory: "./contracts/",
   migrations_directory: "./migrations/scripts/",
   networks: settings.getNetworks(network),
-  compilers: settings.getCompilers(network),
+  compilers: {
+    solc: settings.getCompilers(network),
+  },
   mocha: {
     timeout: 300000,
     useColors: true,

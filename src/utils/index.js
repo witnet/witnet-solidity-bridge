@@ -1,6 +1,5 @@
 const fs = require("fs")
 require("dotenv").config()
-const { isEqual } = require("lodash")
 const lockfile = require("proper-lockfile")
 const readline = require("readline")
 const web3 = require("web3")
@@ -18,7 +17,6 @@ module.exports = {
   prompt,
   readAddresses,
   saveAddresses,
-  saveJsonArtifact,
   traceHeader,
   traceTx,
 }
@@ -105,29 +103,4 @@ async function saveAddresses (network, addrs) {
   json[network] = addrs
   fs.writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" })
   lockfile.unlockSync(filename)
-}
-
-function saveJsonArtifact (key, artifact) {
-  const { abi, ast, bytecode, deployedBytecode, contractName } = artifact
-  const version = require("../../package.json").version
-  const latestFileName = `./artifacts/${key}.json`
-  const versionFileName = `./artifacts/${key}-${version}.json`
-  const current = {
-    contractName,
-    sourceName: ast?.absolutePath.split("project:/")[1],
-    abi,
-    bytecode,
-    deployedBytecode,
-  }
-  let latest = []
-  if (fs.existsSync(latestFileName)) {
-    try {
-      latest = JSON.parse(fs.readFileSync(latestFileName))
-    } catch {}
-  }
-  if (!isEqual(current, latest)) {
-    const json = JSON.stringify(current, null, 4)
-    fs.writeFileSync(versionFileName, json, { flag: "w+" })
-    fs.writeFileSync(latestFileName, json, { flag: "w+" })
-  }
 }

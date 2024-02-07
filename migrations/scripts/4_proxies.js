@@ -1,5 +1,5 @@
 const ethUtils = require("ethereumjs-util")
-const { merge } = require("lodash")
+const merge = require("lodash.merge")
 const settings = require("../../settings")
 const utils = require("../../src/utils")
 
@@ -64,8 +64,6 @@ async function deploy (target) {
       }
       const tx = await deployer.proxify(proxySalt, impl.address, initdata, { from })
       utils.traceTx(tx)
-      // save/overwrite exportable abi file
-      utils.saveJsonArtifact(key, proxy)
     } else {
       try {
         const oldImplAddr = await getProxyImplementation(from, proxyAddr)
@@ -110,8 +108,6 @@ async function deploy (target) {
         }
         const tx = await upgradeProxyTo(from, proxy, newImpl.address, initdata)
         utils.traceTx(tx)
-        // save/overwrite exportable abi file
-        utils.saveJsonArtifactAbi(key, proxy)
       }
     } else {
       utils.traceHeader(`Skipped '${key}'`)

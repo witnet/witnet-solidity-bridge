@@ -39,7 +39,7 @@ module.exports = async function (_, network, [,,, from]) {
     intrinsics: {
       types: ["address", "address"],
       values: [
-      /* _operator */ from,
+        /* _operator */ from,
         /* _wrb      */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
       ],
     },
@@ -80,8 +80,6 @@ async function deploy (specs) {
     utils.traceTx(tx)
     if ((await web3.eth.getCode(dappAddr)).length > 3) {
       addresses[key] = dappAddr
-      // save/overwrite exportable abi file
-      utils.saveJsonArtifact(key, artifact)
     } else {
       console.info(`Contract was not deployed on expected address: ${dappAddr}`)
       console.log(tx.receipt)
