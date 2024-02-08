@@ -44,10 +44,10 @@ module.exports = {
   utils,
 }
 
-function supportedNetworks() {
+function supportedNetworks(ecosystem) {
   return Object
     .entries(addresses)
-    .filter(value => value[0].indexOf(":") > -1)
+    .filter(value => value[0].indexOf(":") > -1 && (!ecosystem || value[0].startsWith(ecosystem)))
     .map(value => value[0])
     .sort()
 }

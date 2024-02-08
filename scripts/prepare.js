@@ -9,3 +9,7 @@ if (fs.existsSync("./artifacts")) {
     exec(`find ./artifacts -name '*.dbg.json' -exec rm -r {} \;`)
   }
 }
+
+if (fs.existsSync("./build/contracts")) {
+  exec(`sed -i -- "/\bsourcePath\b/d" build/contracts/*.json`)
+}
