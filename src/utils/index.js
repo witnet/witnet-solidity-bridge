@@ -2,7 +2,6 @@ const fs = require("fs")
 require("dotenv").config()
 const lockfile = require("proper-lockfile")
 const readline = require("readline")
-const web3 = require("web3")
 
 const traceHeader = require("./traceHeader")
 const traceTx = require("./traceTx")
@@ -11,8 +10,9 @@ module.exports = {
   fromAscii,
   getRealmNetworkFromArgs,
   getRealmNetworkFromString,
+  getWitnetArtifactsFromArgs,
+  getWitnetRequestMethodString,
   isDryRun,
-  isNullAddress,
   padLeft,
   prompt,
   readAddresses,
@@ -50,14 +50,34 @@ function getRealmNetworkFromString (network) {
   }
 }
 
-function isDryRun (network) {
-  return network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
+function getWitnetRequestMethodString(method) {
+  if (!method) {
+      return "HTTP-GET"
+  } else {
+      const strings = {
+          0: "UNKNOWN",
+          1: "HTTP-GET",
+          2: "RNG",
+          3: "HTTP-POST",
+          4: "HTTP-HEAD",
+      }
+      return strings[method] || method.toString()
+  }
 }
 
-function isNullAddress (addr) {
-  return !addr ||
-      addr === "0x0000000000000000000000000000000000000000" ||
-      !web3.utils.isAddress(addr)
+function getWitnetArtifactsFromArgs() {
+  let selection = []
+  process.argv.map((argv, index, args) => {
+      if (argv === "--artifacts") {
+          selection = args[index + 1].split(",")
+      }
+      return argv
+  })
+  return selection
+};
+
+function isDryRun (network) {
+  return network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
 }
 
 function padLeft (str, char, size) {

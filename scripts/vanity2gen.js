@@ -1,7 +1,7 @@
 const { assert } = require("chai")
 const create2 = require("./eth-create2")
 const fs = require("fs")
-const utils = require("./utils")
+const utils = require("../src/utils")
 
 const addresses = require("../migrations/witnet.addresses")
 

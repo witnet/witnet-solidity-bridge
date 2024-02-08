@@ -3,24 +3,33 @@ const merge = require("lodash.merge")
 const utils = require("./utils")
 module.exports = {
   getAddresses: (network) => {
-    const [eco, net] = utils.getRealmNetworkFromArgs(network)
+    const [eco, net] = utils.getRealmNetworkFromString(network)
     if (addresses[net]) {
-      return merge(
+      const merged = merge(
         addresses.default,
         addresses[eco],
         addresses[net],
       )
+      return {
+        WitnetPriceFeeds: merged?.WitnetPriceFeeds,
+        WitnetRandomness: merged?.WitnetRandomness,
+        WitnetRequestBoard: merged?.WitnetRequestBoard,        
+      }
     } else {
       return {}
     }
   },
-  listNetworks: () => {
-    return Object
-      .entries(addresses)
-      .filter(value => value[0].indexOf(":") > -1)
-      .map(value => value[0])
-      .sort()
+  supportedEcosystems: () => {
+    let ecosystems = []
+    supportedNetworks().forEach(network => {
+      const [ecosystem,] = utils.getRealmNetworkFromString(network)
+      if (!ecosystems.includes(ecosystem)) {
+        ecosystems.push(ecosystem)
+      }
+    });
+    return ecosystems
   },
+  supportedNetworks,
   artifacts: {
     WitnetBytecodes: require("../artifacts/contracts/WitnetBytecodes.sol/WitnetBytecodes.json"),
     WitnetPriceFeeds: require("../artifacts//contracts/apps/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
@@ -33,4 +42,12 @@ module.exports = {
   },
   settings: require("../settings"),
   utils,
+}
+
+function supportedNetworks() {
+  return Object
+    .entries(addresses)
+    .filter(value => value[0].indexOf(":") > -1)
+    .map(value => value[0])
+    .sort()
 }
