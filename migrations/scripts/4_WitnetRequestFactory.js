@@ -27,15 +27,14 @@ module.exports = async function (deployer, network, [, from]) {
 
   const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRequestFactoryImplementation = artifacts.require(artifactNames.WitnetRequestFactory)
+  const create2FactoryAddr = addresses[ecosystem][network]?.Create2Factory
 
   let proxy
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestFactory)) {
-    const create2Factory = await Create2Factory.deployed()
-    if (
-      create2Factory && !utils.isNullAddress(create2Factory.address) &&
-        singletons?.WitnetRequestFactory
-    ) {
+
+    if (!utils.isNullAddress(create2FactoryAddr) && singletons?.WitnetRequestFactory) {
       // Deploy the proxy via a singleton factory and a salt...
+      const create2Factory = await Create2Factory.at(create2FactoryAddr)
       const bytecode = WitnetProxy.toJSON().bytecode
       const salt = singletons.WitnetRequestFactory?.salt
         ? "0x" + ethUtils.setLengthLeft(

@@ -28,15 +28,14 @@ module.exports = async function (deployer, network, [, from, reporter]) {
 
   const artifactsName = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRequestBoardImplementation = artifacts.require(artifactsName.WitnetRequestBoard)
+  const create2FactoryAddr = addresses[ecosystem][network]?.Create2Factory
+
 
   let proxy
-  const factory = await Create2Factory.deployed()
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoard)) {
-    if (
-      factory && !utils.isNullAddress(factory.address) &&
-        singletons?.WitnetRequestBoard
-    ) {
+    if (!utils.isNullAddress(create2FactoryAddr) && singletons?.WitnetPriceFeeds) {
       // Deploy the proxy via a singleton factory and a salt...
+      const create2Factory = await Create2Factory.at(create2FactoryAddr)
       const bytecode = WitnetProxy.toJSON().bytecode
       const salt = singletons.WitnetRequestBoard?.salt
         ? "0x" + ethUtils.setLengthLeft(
@@ -46,13 +45,13 @@ module.exports = async function (deployer, network, [, from, reporter]) {
         ).toString("hex")
         : "0x0"
 
-      const proxyAddr = await factory.determineAddr.call(bytecode, salt, { from })
+      const proxyAddr = await create2Factory.determineAddr.call(bytecode, salt, { from })
       if ((await web3.eth.getCode(proxyAddr)).length <= 3) {
         // deploy instance only if not found in current network:
         utils.traceHeader("Singleton inception of 'WitnetRequestBoard':")
         const balance = await web3.eth.getBalance(from)
         const gas = singletons.WitnetRequestBoard.gas
-        const tx = await factory.deploy(bytecode, salt, { from, gas })
+        const tx = await create2Factory.deploy(bytecode, salt, { from, gas })
         utils.traceTx(
           tx.receipt,
           web3.utils.fromWei((balance - await web3.eth.getBalance(from)).toString())

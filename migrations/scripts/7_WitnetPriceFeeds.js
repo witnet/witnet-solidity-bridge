@@ -25,6 +25,7 @@ module.exports = async function (deployer, network, [, from]) {
 
   if (!addresses[ecosystem]) addresses[ecosystem] = {}
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
+  const create2FactoryAddr = addresses[ecosystem][network]?.Create2Factory
 
   console.info()
   if (!isDryRun && addresses[ecosystem][network].WitnetPriceFeeds === undefined) {
@@ -54,12 +55,9 @@ module.exports = async function (deployer, network, [, from]) {
   if (addresses[ecosystem][network]?.WitnetPriceFeedsImplementation !== undefined || isDryRun) {
     let proxy
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeeds)) {
-      const create2Factory = await Create2Factory.deployed()
-      if (
-        create2Factory && !utils.isNullAddress(create2Factory.address) &&
-          singletons?.WitnetPriceFeeds
-      ) {
+      if (!utils.isNullAddress(create2FactoryAddr) && singletons?.WitnetPriceFeeds) {
         // Deploy the proxy via a singleton factory and a salt...
+        const create2Factory = await Create2Factory.at(create2FactoryAddr)
         const bytecode = WitnetProxy.toJSON().bytecode
         const salt = singletons.WitnetPriceFeeds?.salt
           ? "0x" + ethUtils.setLengthLeft(
@@ -99,7 +97,6 @@ module.exports = async function (deployer, network, [, from]) {
       proxy = await WitnetProxy.at(addresses[ecosystem][network].WitnetPriceFeeds)
       console.info(`   Skipped: 'WitnetPriceFeeds' deployed at ${proxy.address}`)
     }
-
     let router
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsImplementation)) {
       await deployer.deploy(
