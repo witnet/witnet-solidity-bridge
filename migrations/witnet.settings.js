@@ -752,6 +752,8 @@ module.exports = {
         port: 8504,
         network_id: 443,
         skipDryRun: true,
+        gas: 6000000,
+        gasPrice: 10,
       }
     },
     ultron: {

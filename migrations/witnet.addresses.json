@@ -907,6 +907,23 @@
             "WitnetRequestFactoryImplementation": "0x4743325168af9195Aa5b25e491E9bE87d87E7F93"
         }
     },
+    "ten": {
+        "ten.testnet": {
+            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
+            "WitnetPriceFeeds": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
+            "WitnetPriceRouter": "0xE490b89AfADE571d8Afa158446C603D530608ceA",
+            "WitnetRequestBoard": "0x777777772C24e6CD34B464D1d71616C444254537",
+            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
+            "WitnetErrorsLib": "0x6bF6F65Ad0859e9Ee869DAD252a29c9daAa27449",
+            "WitnetEncodingLib": "0xB4f1f8E27799256ec95C5b5A8d2A5722Bd542E69",
+            "WitnetPriceFeedsLib": "0x9597b5708CDB58fF057ca494574951Fc3d9163f7",
+            "WitnetBytecodesImplementation": "0xdC101573cB42EB7006Ad6C7E08ce8C91fEAcB62C",
+            "WitnetPriceFeedsImplementation": "0x8684d396366C21AA01B120F69df2070f840aC134",
+            "WitnetRequestBoardImplementation": "0xA9cC3101735b248964e90fA8506219A9CF0b1091",
+            "WitnetRequestFactoryImplementation": "0xF58115533e681295CC1F07A135539E72c5116855"
+        }
+    },
     "ultron": {
         "ultron.testnet": {
             "WitnetProxy": "0x4374a050f808d1FF18bCcf73270daE3EdF8D0865",
