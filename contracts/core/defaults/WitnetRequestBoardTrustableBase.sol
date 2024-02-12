@@ -232,8 +232,8 @@ abstract contract WitnetRequestBoardTrustableBase
 
     /// Gets the whole Query data contents, if any, no matter its current status.
     function getQuery(uint256 _witnetQueryId)
-      external view
-      override
+      public view
+      virtual override
       returns (WitnetV2.Query memory)
     {
         return __storage().queries[_witnetQueryId];
@@ -277,8 +277,8 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Fails if the `_witnetQueryId` is not in 'Reported' status.
     /// @param _witnetQueryId The unique query identifier
     function getQueryResponse(uint256 _witnetQueryId)
-        external view
-        override
+        public view
+        virtual override
         returns (WitnetV2.Response memory _response)
     {
         return __seekQueryResponse(_witnetQueryId);
@@ -287,8 +287,8 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @notice Retrieves the Witnet-provable CBOR-bytes result of a previously posted request.
     /// @param _witnetQueryId The unique query identifier.
     function getQueryResult(uint256 _witnetQueryId)
-        external view
-        override
+        public view
+        virtual override
         returns (Witnet.Result memory)
     {
         // todo: fail if not in finalized status ?
