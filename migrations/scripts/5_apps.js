@@ -22,24 +22,7 @@ module.exports = async function (_, network, [,,, from]) {
     intrinsics: {
       types: ["address", "address"],
       values: [
-      /* _operator */ from,
-        /* _wrb      */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
-      ],
-    },
-  })
-  // Deploy the WitnetRandomness oracle, if required
-  await deploy({
-    addresses,
-    from,
-    targets,
-    key: targets.WitnetRandomness,
-    libs: specs.WitnetRandomness?.libs,
-    vanity: specs.WitnetRandomness?.vanity || 0,
-    immutables: specs.WitnetRandomness?.immutables,
-    intrinsics: {
-      types: ["address", "address"],
-      values: [
-        /* _operator */ from,
+        /* _operator */ master,
         /* _wrb      */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
       ],
     },
