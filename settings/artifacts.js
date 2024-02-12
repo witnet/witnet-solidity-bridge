@@ -36,4 +36,7 @@ module.exports = {
   "syscoin.rollux.testnet": {
     WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
   },
+  ten: {
+    WitnetRequestBoard: "WitnetRequestBoardTrustableObscuro",
+  }
 }

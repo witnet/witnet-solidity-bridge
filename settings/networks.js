@@ -361,6 +361,12 @@ module.exports = {
       explorerUrl: "https://rollux.tanenbaum.io/address/",
     },
   },
+  "ten:testnet": {
+    port: 8504,
+    network_id: 443,
+    gas: 6000000,
+    gasPrice: 10,
+  },
   "ultron:testnet": {
     port: 8516,
     network_id: 1230,
