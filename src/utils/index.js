@@ -13,6 +13,7 @@ module.exports = {
   getWitnetArtifactsFromArgs,
   getWitnetRequestMethodString,
   isDryRun,
+  isNullAddress,
   padLeft,
   prompt,
   readAddresses,
@@ -80,6 +81,12 @@ function isDryRun (network) {
   return network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
 }
 
+function isNullAddress(addr) {
+  return !addr ||
+      addr === "" ||
+      addr === "0x0000000000000000000000000000000000000000"
+}
+
 function padLeft (str, char, size) {
   if (str.length < size) {
     return char.repeat((size - str.length) / char.length) + str
@@ -108,19 +115,18 @@ async function prompt (text) {
   return answer
 }
 
-async function readAddresses (network) {
+async function readAddresses () {
   const filename = "./migrations/witnet.addresses.json"
   lockfile.lockSync(filename)
   const addrs = JSON.parse(await fs.readFileSync(filename))
   lockfile.unlockSync(filename)
-  return addrs[network] || {}
+  return addrs || {}
 }
 
-async function saveAddresses (network, addrs) {
+async function saveAddresses (addrs) {
   const filename = "./migrations/witnet.addresses.json"
   lockfile.lockSync(filename)
-  const json = JSON.parse(fs.readFileSync(filename))
-  json[network] = addrs
+  const json = { ...JSON.parse(fs.readFileSync(filename)), ...addrs };
   fs.writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" })
   lockfile.unlockSync(filename)
 }

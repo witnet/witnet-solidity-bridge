@@ -10,16 +10,12 @@ const version = `${
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
-  const addresses = await utils.readAddresses(network)
 
   const specs = settings.getSpecs(network)
   const targets = settings.getArtifacts(network)
 
   // Deploy/upgrade WitnetBytecodes target implementation, if required
-  await deploy({
-    addresses,
-    from,
-    targets,
+  await deploy({ network, from, targets,
     key: targets.WitnetBytecodes,
     libs: specs.WitnetBytecodes.libs,
     immutables: specs.WitnetBytecodes.immutables,
@@ -33,10 +29,7 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // Deploy/upgrade WitnetRequestFactory target implementation, if required
-  await deploy({
-    addresses,
-    from,
-    targets,
+  await deploy({ network, from, targets,
     key: targets.WitnetRequestFactory,
     libs: specs.WitnetRequestFactory.libs,
     immutables: specs.WitnetRequestFactory.immutables,
@@ -52,10 +45,7 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // Deploy/upgrade WitnetRequestBoard target implementation, if required
-  await deploy({
-    addresses,
-    from,
-    targets,
+  await deploy({ network, from, targets,
     key: targets.WitnetRequestBoard,
     libs: specs.WitnetRequestBoard.libs,
     immutables: specs.WitnetRequestBoard.immutables,
@@ -70,16 +60,19 @@ module.exports = async function (_, network, [, from]) {
     },
   })
 
-  // save addresses file if required
-  if (!utils.isDryRun(network)) {
-    await utils.saveAddresses(network, addresses)
-  }
 }
 
 async function deploy (specs) {
-  const { addresses, from, key, libs, intrinsics, immutables, targets } = specs
+  const { from, key, libs, intrinsics, immutables, network, targets } = specs
+  
+  const addresses = await utils.readAddresses()
+  if (!addresses[network]) addresses[network] = {};
+  
   const contract = artifacts.require(key)
-  if (utils.isNullAddress(addresses[key])) {
+  if (
+    utils.isNullAddress(addresses[network][key])
+      || (await web3.eth.getCode(addresses[network][key])).length < 3
+  ) {
     utils.traceHeader(`Deploying '${key}'...`)
     console.info("  ", "> account:          ", from)
     console.info("  ", "> balance:          ", web3.utils.fromWei(await web3.eth.getBalance(from), "ether"), "ETH")
@@ -103,15 +96,19 @@ async function deploy (specs) {
     const tx = await deployer.deploy(coreInitCode, "0x0", { from })
     utils.traceTx(tx)
     if ((await web3.eth.getCode(coreAddr)).length > 3) {
-      addresses[key] = coreAddr
+      addresses[network][key] = coreAddr
     } else {
       console.info(`Error: Contract was not deployed on expected address: ${coreAddr}`)
       process.exit(1)
     }
+    // save addresses file if required
+    if (!utils.isDryRun(network)) {
+      await utils.saveAddresses(addresses)
+    }
   } else {
     utils.traceHeader(`Skipped '${key}'`)
   }
-  contract.address = addresses[key]
+  contract.address = addresses[network][key]
   console.info("  ", "> contract address: ", contract.address)
   console.info("  ", "> contract codehash:", web3.utils.soliditySha3(await web3.eth.getCode(contract.address)))
   console.info()

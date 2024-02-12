@@ -27,35 +27,32 @@ module.exports = async function (_, network, [, from, reporter]) {
 
   // Deploy/upgrade singleton proxies, if required
   for (const index in singletons) {
-    await deploy({
-      addresses,
-      from,
-      specs,
-      targets,
+    await deploy({ network, from, specs, targets,
       key: singletons[index],
     })
-    if (!utils.isDryRun(network)) {
-      await utils.saveAddresses(network, addresses)
-    }
   }
 }
 
 async function deploy (target) {
-  const { addresses, from, key, specs, targets } = target
-
+  const { from, key, network, specs, targets } = target
+  
+  const addresses = await utils.readAddresses(network)
+  if (!addresses[network]) addresses[network] = {};
+  
   const mutables = specs[key].mutables
   const proxy = artifacts.require(key)
   const proxySalt = specs[key].vanity
     ? "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(specs[key].vanity), 32).toString("hex")
     : "0x0"
 
-  if (utils.isNullAddress(addresses[key])) {
+  let proxyAddr = addresses[network][key] || addresses?.default[key] || ""
+  if (utils.isNullAddress(proxyAddr) || (await web3.eth.getCode(proxyAddr)).length < 3) {
     utils.traceHeader(`Deploying '${key}'...`)
     console.info("  ", "> account:          ", from)
     console.info("  ", "> balance:          ", web3.utils.fromWei(await web3.eth.getBalance(from), "ether"), "ETH")
     const deployer = await WitnetDeployer.deployed()
     const impl = await artifacts.require(targets[key]).deployed()
-    const proxyAddr = await deployer.determineProxyAddr.call(proxySalt, { from })
+    proxyAddr = await deployer.determineProxyAddr.call(proxySalt, { from })
     if ((await web3.eth.getCode(proxyAddr)).length < 3) {
       const initdata = mutables ? web3.eth.abi.encodeParameters(mutables.types, mutables.values) : "0x"
       if (initdata.length > 2) {
@@ -81,13 +78,16 @@ async function deploy (target) {
       }
     }
     if ((await web3.eth.getCode(proxyAddr)).length > 3) {
-      addresses[key] = proxyAddr
+      addresses[network][key] = proxyAddr
     } else {
       console.info(`Error: Contract was not deployed on expected address: ${proxyAddr}`)
       process.exit(1)
     }
+    if (!utils.isDryRun(network)) {
+      await utils.saveAddresses(addresses)
+    }
   } else {
-    const oldAddr = await getProxyImplementation(from, addresses[key])
+    const oldAddr = await getProxyImplementation(from, proxyAddr)
     const oldImpl = await artifacts.require(targets[key]).at(oldAddr)
     const newImpl = await artifacts.require(targets[key]).deployed()
     if (oldAddr !== newImpl.address) {
@@ -113,7 +113,7 @@ async function deploy (target) {
       utils.traceHeader(`Skipped '${key}'`)
     }
   }
-  proxy.address = addresses[key]
+  proxy.address = proxyAddr
   const impl = await artifacts.require(targets[key]).at(proxy.address)
   console.info("  ", "> proxy address:    ", impl.address)
   console.info("  ", "> proxy codehash:   ", web3.utils.soliditySha3(await web3.eth.getCode(impl.address)))

@@ -4,18 +4,15 @@ const utils = require("../../src/utils")
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
-module.exports = async function (_, network, [,,, from]) {
-  const addresses = await utils.readAddresses(network)
+module.exports = async function (_, network, [, from,, master]) {
 
   const specs = settings.getSpecs(network)
   const targets = settings.getArtifacts(network)
 
   // Deploy the WitnetPriceFeeds oracle, if required
-  await deploy({
-    addresses,
-    from,
-    targets,
+  await deploy({ network, from, targets,
     key: targets.WitnetPriceFeeds,
+    gas: specs.WitnetPriceFees?.gas || 6000000,
     libs: specs.WitnetPriceFeeds.libs,
     vanity: specs.WitnetPriceFeeds?.vanity || 0,
     immutables: specs.WitnetPriceFeeds.immutables,
@@ -28,17 +25,19 @@ module.exports = async function (_, network, [,,, from]) {
     },
   })
 
-  // save addresses file if required
-  if (!utils.isDryRun(network)) {
-    await utils.saveAddresses(network, addresses)
-  }
 }
 
 async function deploy (specs) {
-  const { addresses, from, key, libs, intrinsics, immutables, targets, vanity } = specs
+  const { from, gas, key, libs, intrinsics, immutables, network, targets, vanity } = specs
+  
+  const addresses = await utils.readAddresses()
+  if (!addresses[network]) addresses[network] = {};
+  
   const artifact = artifacts.require(key)
   const salt = vanity ? "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(vanity), 32).toString("hex") : "0x0"
-  if (utils.isNullAddress(addresses[key])) {
+  
+  let dappAddr = addresses[network][key] || addresses?.default[key] || ""
+  if (utils.isNullAddress(dappAddr) || (await web3.eth.getCode(dappAddr)).length < 3) {
     utils.traceHeader(`Deploying '${key}'...`)
     const deployer = await WitnetDeployer.deployed()
     let { types, values } = intrinsics
@@ -59,19 +58,24 @@ async function deploy (specs) {
     const dappAddr = await deployer.determineAddr.call(dappInitCode, salt, { from })
     console.info("  ", "> account:          ", from)
     console.info("  ", "> balance:          ", web3.utils.fromWei(await web3.eth.getBalance(from), "ether"), "ETH")
-    const tx = await deployer.deploy(dappInitCode, salt, { from })
+    const tx = await deployer.deploy(dappInitCode, salt, { gas, from })
     utils.traceTx(tx)
     if ((await web3.eth.getCode(dappAddr)).length > 3) {
-      addresses[key] = dappAddr
+      addresses[network][key] = dappAddr
     } else {
       console.info(`Contract was not deployed on expected address: ${dappAddr}`)
       console.log(tx.receipt)
       process.exit(1)
     }
+    // save addresses file if required
+    console.log(addresses)
+    if (!utils.isDryRun(network)) {
+      await utils.saveAddresses(addresses)
+    }
   } else {
     utils.traceHeader(`Skipped '${key}'`)
   }
-  artifact.address = addresses[key]
+  artifact.address = dappAddr
   console.info("  ", "> contract address: ", artifact.address)
   console.info("  ", "> contract codehash:", web3.utils.soliditySha3(await web3.eth.getCode(artifact.address)))
   console.info()
