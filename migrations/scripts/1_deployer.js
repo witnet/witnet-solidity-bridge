@@ -3,7 +3,7 @@ const utils = require("../../src/utils")
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (deployer, network, [,,, master]) {
-  const addresses = await utils.readAddresses()
+  const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {};
 
   const factoryAddr = addresses[network]?.WitnetDeployer || addresses?.default?.WitnetDeployer || ""
@@ -15,7 +15,7 @@ module.exports = async function (deployer, network, [,,, master]) {
     const factory = await WitnetDeployer.deployed()
     addresses[network].WitnetDeployer = factory.address
     if (!utils.isDryRun(network)) {
-      await utils.saveAddresses(addresses)
+      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
     }
   } else {
     const factory = await WitnetDeployer.at(factoryAddr)

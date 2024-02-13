@@ -4,7 +4,7 @@ const utils = require("../../src/utils")
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
-  const addresses = await utils.readAddresses()
+  const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {};
 
   const targets = settings.getArtifacts(network)
@@ -39,7 +39,7 @@ module.exports = async function (_, network, [, from]) {
         process.exit(1)
       }
       if (!utils.isDryRun(network)) {
-        await utils.saveAddresses(addresses)
+        await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
       }
     } else {
       utils.traceHeader(`Skipped '${key}'`)

@@ -65,7 +65,7 @@ module.exports = async function (_, network, [, from]) {
 async function deploy (specs) {
   const { from, key, libs, intrinsics, immutables, network, targets } = specs
   
-  const addresses = await utils.readAddresses()
+  const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {};
 
   const selection = utils.getWitnetArtifactsFromArgs()
@@ -107,7 +107,9 @@ async function deploy (specs) {
     }
     // save addresses file if required
     if (!utils.isDryRun(network)) {
-      await utils.saveAddresses(addresses)
+      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+      const args = {}; args[network] = {}; args[network][key] = constructorArgs.slice(2);
+      await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
     }
   } else {
     utils.traceHeader(`Skipped '${key}'`)

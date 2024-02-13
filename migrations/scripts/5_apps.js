@@ -30,7 +30,7 @@ module.exports = async function (_, network, [, from,, master]) {
 async function deploy (specs) {
   const { from, gas, key, libs, intrinsics, immutables, network, targets, vanity } = specs
   
-  const addresses = await utils.readAddresses()
+  const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {};
   
   const artifact = artifacts.require(key)
@@ -69,7 +69,7 @@ async function deploy (specs) {
     }
     // save addresses file if required
     if (!utils.isDryRun(network)) {
-      await utils.saveAddresses(addresses)
+      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
     }
   } else {
     utils.traceHeader(`Skipped '${key}'`)

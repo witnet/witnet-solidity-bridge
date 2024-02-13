@@ -2,9 +2,7 @@ const fs = require("fs")
 require("dotenv").config()
 const lockfile = require("proper-lockfile")
 const readline = require("readline")
-
-const traceHeader = require("./traceHeader")
-const traceTx = require("./traceTx")
+const web3 = require("web3")
 
 module.exports = {
   fromAscii,
@@ -16,8 +14,8 @@ module.exports = {
   isNullAddress,
   padLeft,
   prompt,
-  readAddresses,
-  saveAddresses,
+  readJsonFromFile,
+  overwriteJsonFile,
   traceHeader,
   traceTx,
 }
@@ -115,18 +113,33 @@ async function prompt (text) {
   return answer
 }
 
-async function readAddresses () {
-  const filename = "./migrations/witnet.addresses.json"
+async function readJsonFromFile (filename) {
   lockfile.lockSync(filename)
-  const addrs = JSON.parse(await fs.readFileSync(filename))
+  const json = JSON.parse(await fs.readFileSync(filename))
   lockfile.unlockSync(filename)
-  return addrs || {}
+  return json|| {}
 }
 
-async function saveAddresses (addrs) {
-  const filename = "./migrations/witnet.addresses.json"
+async function overwriteJsonFile (filename, extra) {
   lockfile.lockSync(filename)
-  const json = { ...JSON.parse(fs.readFileSync(filename)), ...addrs };
+  const json = { ...JSON.parse(fs.readFileSync(filename)), ...extra };
   fs.writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" })
   lockfile.unlockSync(filename)
+}
+
+function traceHeader (header) {
+  console.log("")
+  console.log("  ", header)
+  console.log("  ", `${"-".repeat(header.length)}`)
+}
+
+function traceTx (tx) {
+  console.info("  ", "> transaction hash: ", tx.receipt.transactionHash)
+  console.info("  ", "> gas used:         ", tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
+  console.info("  ", "> gas price:        ", tx.receipt.effectiveGasPrice / 10 ** 9, "gwei")
+  console.info("  ", "> total cost:       ", web3.utils.fromWei(
+    BigInt(tx.receipt.gasUsed * tx.receipt.effectiveGasPrice).toString(),
+    "ether"
+  ), "ETH"
+  )
 }

@@ -17,13 +17,13 @@
   "exports": {
     ".": "./src/index.js",
     "./assets": "./src/index.js",
-    "./utils": "./src/utils/index.js"
+    "./utils": "./src/utils.js"
   },
   "files": [
     "artifacts",
     "build/contracts",
     "contracts",
-    "migrations/witnet.addresses.json",
+    "migrations/*.json",
     "settings",
     "src"
   ],

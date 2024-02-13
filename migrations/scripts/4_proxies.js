@@ -41,7 +41,7 @@ module.exports = async function (_, network, [, from, reporter]) {
 async function deploy (target) {
   const { from, key, network, specs, targets } = target
   
-  const addresses = await utils.readAddresses(network)
+  const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {};
   
   const mutables = specs[key].mutables
@@ -89,7 +89,7 @@ async function deploy (target) {
       process.exit(1)
     }
     if (!utils.isDryRun(network)) {
-      await utils.saveAddresses(addresses)
+      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
     }
   } else {
     const oldAddr = await getProxyImplementation(from, proxyAddr)
