@@ -11,6 +11,7 @@ interface IWitnetPriceSolver {
         bytes32 tallyHash;
         WitnetV2.ResultStatus status;
     }
+    function class() external pure returns (string memory);
     function delegator() external view returns (address);
     function solve(bytes4 feedId) external view returns (Price memory);
     function specs() external pure returns (bytes4);

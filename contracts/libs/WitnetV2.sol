@@ -121,7 +121,7 @@ library WitnetV2 {
             minConsensusPercentage: 51,
             witnessReward: _witnessReward,
             witnessCollateral: _witnessReward * 100,
-            minerCommitRevealFee: _witnessReward * 3
+            minerCommitRevealFee: _witnessReward
         });
     }
 
