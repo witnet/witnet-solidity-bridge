@@ -400,7 +400,14 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (WitnetV2.QueryStatus)
     {
         return _statusOf(_witnetQueryId);
+    }
 
+    function getNextQueryId()
+        external view
+        override
+        returns (uint256)
+    {
+        return __storage().nonce;
     }
 
 
@@ -784,7 +791,7 @@ abstract contract WitnetRequestBoardTrustableBase
         virtual internal
         returns (uint256 _witnetQueryId)
     {
-        _witnetQueryId = __newQueryId(_radHash, _packedSLA);
+        _witnetQueryId = ++ __storage().nonce; //__newQueryId(_radHash, _packedSLA);
         WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
         require(
             __request.fromCallbackGas == bytes32(0), 
