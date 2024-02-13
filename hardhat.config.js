@@ -10,6 +10,8 @@ module.exports = {
             .map(([network, config]) => {
                 return [network, {
                     chainId: config.network_id,
+                    gas: config?.gas || "auto",
+                    gasPrice: config?.gasPrice || "auto",
                     url: `http://${config?.host || "localhost"}:${config?.port || 8545}`
                 }]
             })
