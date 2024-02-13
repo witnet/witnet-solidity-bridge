@@ -1,4 +1,4 @@
-const addresses = require("../../../witnet.addresses")
+const addresses = require("../../../addresses")
 const utils = require("../../../../scripts/utils")
 
 const WitnetRandomness = artifacts.require("WitnetRandomness")

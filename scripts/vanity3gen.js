@@ -3,7 +3,7 @@ const create3 = require("./eth-create3")
 const fs = require("fs")
 const utils = require("../src/utils")
 
-const addresses = require("../migrations/witnet.addresses")
+const addresses = require("../migrations/addresses")
 
 module.exports = async function () {
   let count = 0

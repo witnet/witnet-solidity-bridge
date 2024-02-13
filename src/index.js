@@ -1,4 +1,4 @@
-const addresses = require("../migrations/witnet.addresses.json")
+const addresses = require("../migrations/addresses.json")
 const merge = require("lodash.merge")
 const utils = require("./utils")
 module.exports = {

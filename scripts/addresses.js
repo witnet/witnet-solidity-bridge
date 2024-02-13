@@ -1,4 +1,4 @@
-let addresses = require("../migrations/witnet.addresses")
+let addresses = require("../migrations/addresses")
 let realm, network
 if (process.argv.length >= 3) {
   network = process.argv[2].toLowerCase()
