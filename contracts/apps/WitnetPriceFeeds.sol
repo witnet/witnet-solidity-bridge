@@ -22,6 +22,7 @@ contract WitnetPriceFeeds
         IERC2362,
         IWitnetPriceFeeds,
         IWitnetPriceSolverDeployer,
+        IWitnetRequestBoardEvents,
         Ownable2Step,
         WitnetFeeds,
         WitnetPriceFeedsData
@@ -136,9 +137,9 @@ contract WitnetPriceFeeds
     function defaultRadonSLA()
         override
         public view
-        returns (WitnetV2.RadonSLA memory)
+        returns (Witnet.RadonSLA memory)
     {
-        return WitnetV2.toRadonSLA(__storage().packedDefaultSLA);
+        return WitnetV2.toRadonSLA(__storage().packedDefaultSLA).toV1();
     }
     
     function estimateUpdateBaseFee(uint256 _evmGasPrice)
@@ -172,7 +173,7 @@ contract WitnetPriceFeeds
 
     function latestUpdateRequest(bytes4 feedId)
         override external view 
-        returns (bytes32, WitnetV2.RadonSLA memory)
+        returns (bytes32, Witnet.RadonSLA memory)
     {
         return witnet.getQueryRequest(latestUpdateQueryId(feedId));
     }
@@ -249,7 +250,7 @@ contract WitnetPriceFeeds
         returns (uint256 _usedFunds)
     {
         require(
-            updateSLA.equalOrGreaterThan(defaultRadonSLA()),
+            updateSLA.equalOrGreaterThan(WitnetV2.toRadonSLA(__storage().packedDefaultSLA)),
             "WitnetPriceFeeds: unsecure update"
         );
         return __requestUpdate(feedId, updateSLA);
