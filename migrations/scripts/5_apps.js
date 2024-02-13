@@ -35,9 +35,16 @@ async function deploy (specs) {
   
   const artifact = artifacts.require(key)
   const salt = vanity ? "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(vanity), 32).toString("hex") : "0x0"
+
+  const selection = utils.getWitnetArtifactsFromArgs()
   
   let dappAddr = addresses[network][key] || addresses?.default[key] || ""
-  if (utils.isNullAddress(dappAddr) || (await web3.eth.getCode(dappAddr)).length < 3) {
+  if (
+      utils.isNullAddress(dappAddr) 
+        || (await web3.eth.getCode(dappAddr)).length < 3
+        || selection.includes(key)
+        || (libs && selection.filter(item => libs.includes(item)).length > 0)
+  ) {
     utils.traceHeader(`Deploying '${key}'...`)
     const deployer = await WitnetDeployer.deployed()
     let { types, values } = intrinsics
@@ -70,6 +77,8 @@ async function deploy (specs) {
     // save addresses file if required
     if (!utils.isDryRun(network)) {
       await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+      const args = {}; args[network] = {}; args[network][key] = constructorArgs.slice(2);
+      await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
     }
   } else {
     utils.traceHeader(`Skipped '${key}'`)
