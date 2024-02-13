@@ -111,6 +111,20 @@ library WitnetV2 {
     /// ===============================================================================================================
     /// --- 'WitnetV2.RadonSLA' helper methods ------------------------------------------------------------------------
 
+    function toV1(RadonSLA memory self)
+        internal pure 
+        returns (Witnet.RadonSLA memory)
+    {
+        uint64 _witnessReward = self.witnessingWitTotalReward / (self.witnessingCommitteeSize + 3);
+        return Witnet.RadonSLA({
+            numWitnesses: self.witnessingCommitteeSize,
+            minConsensusPercentage: 51,
+            witnessReward: _witnessReward,
+            witnessCollateral: _witnessReward * 100,
+            minerCommitRevealFee: _witnessReward * 3
+        });
+    }
+
     function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
         internal pure returns (bool)
     {

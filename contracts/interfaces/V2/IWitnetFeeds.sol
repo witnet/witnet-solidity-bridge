@@ -19,14 +19,14 @@ interface IWitnetFeeds {
     function registry() external view returns (WitnetBytecodes);
     function witnet() external view returns (WitnetRequestBoard);
     
-    function defaultRadonSLA() external view returns (WitnetV2.RadonSLA memory);
+    function defaultRadonSLA() external view returns (Witnet.RadonSLA memory);
     function estimateUpdateBaseFee(uint256 evmGasPrice) external view returns (uint);
 
     function latestResponse(bytes4 feedId) external view returns (WitnetV2.Response memory);
     function latestResult(bytes4 feedId) external view returns (Witnet.Result memory);
 
     function latestUpdateQueryId(bytes4 feedId) external view returns (uint256);
-    function latestUpdateRequest(bytes4 feedId) external view returns (bytes32, WitnetV2.RadonSLA memory);
+    function latestUpdateRequest(bytes4 feedId) external view returns (bytes32, Witnet.RadonSLA memory);
     function latestUpdateResponse(bytes4 feedId) external view returns (WitnetV2.Response memory);
     function latestUpdateResultError(bytes4 feedId) external view returns (Witnet.ResultError memory);
     function latestUpdateResultStatus(bytes4 feedId) external view returns (WitnetV2.ResultStatus);

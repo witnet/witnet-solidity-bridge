@@ -264,12 +264,12 @@ abstract contract WitnetRequestBoardTrustableBase
     function getQueryRequest(uint256 _witnetQueryId)
         external view 
         override
-        returns (bytes32, WitnetV2.RadonSLA memory)
+        returns (bytes32, Witnet.RadonSLA memory)
     {
         WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
         return (
             __request.RAD == bytes32(0) ? registry.hashOf(__request.bytecode) : __request.RAD,
-            WitnetV2.toRadonSLA(__request.SLA)
+            WitnetV2.toRadonSLA(__request.SLA).toV1()
         );
     }
 

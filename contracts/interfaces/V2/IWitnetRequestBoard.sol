@@ -39,7 +39,7 @@ interface IWitnetRequestBoard {
 
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     /// @param queryId The unique query identifier.
-    function getQueryRequest(uint256 queryId) external view returns (bytes32, WitnetV2.RadonSLA memory);
+    function getQueryRequest(uint256 queryId) external view returns (bytes32, Witnet.RadonSLA memory);
 
     /// @notice Retrieves the whole `Witnet.Response` record referred to a previously posted Witnet Data Request.
     /// @param queryId The unique query identifier.
