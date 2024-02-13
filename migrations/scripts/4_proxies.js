@@ -3,11 +3,16 @@ const merge = require("lodash.merge")
 const settings = require("../../settings")
 const utils = require("../../src/utils")
 
+const version = `${
+  require("../../package").version
+}-${
+  require("child_process").execSync("git rev-parse HEAD").toString().trim().substring(0, 7)
+}`
+
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (_, network, [, from, reporter]) {
-  const addresses = await utils.readAddresses(network)
 
   const targets = settings.getArtifacts(network)
   const specs = settings.getSpecs(network)
@@ -94,11 +99,12 @@ async function deploy (target) {
       utils.traceHeader(`Upgrading '${key}'...`)
       const oldVersion = await oldImpl.version.call({ from })
       const newVersion = await newImpl.version.call({ from })
+      const color = newVersion === version ? `\x1b[1;97m` : `\x1b[93m`
       if (
         (process.argv.length >= 3 && process.argv[2].includes("--upgrade-all")) || (
-          ["y", "yes"].includes(
-            (await utils.prompt(`   > From v${oldVersion} to ${targets[key]} v${newVersion} ? (y/N) `)).toLowerCase().trim()
-          )
+          ["y", "yes"].includes((await 
+            utils.prompt(`   > Upgrade to ${color}${targets[key]} v${newVersion}\x1b[0m? (y/N) `)
+          ).toLowerCase().trim())
         )
       ) {
         const initdata = mutables ? web3.eth.abi.encodeParameters(mutables.types, mutables.values) : "0x"

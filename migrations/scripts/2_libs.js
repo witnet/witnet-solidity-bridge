@@ -14,6 +14,8 @@ module.exports = async function (_, network, [, from]) {
     targets.WitnetPriceFeedsLib,
   ]
 
+  const selection = utils.getWitnetArtifactsFromArgs()
+
   const deployer = await WitnetDeployer.deployed()
   for (const index in libs) {
     const key = libs[index]
@@ -21,6 +23,7 @@ module.exports = async function (_, network, [, from]) {
     if (
       utils.isNullAddress(addresses[network][key])
       || (await web3.eth.getCode(addresses[network][key])).length < 3
+      || selection.includes(key)
     ) {
       utils.traceHeader(`Deploying '${key}'...`)
       const libInitCode = artifact.toJSON().bytecode

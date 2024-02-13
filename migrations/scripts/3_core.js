@@ -67,11 +67,15 @@ async function deploy (specs) {
   
   const addresses = await utils.readAddresses()
   if (!addresses[network]) addresses[network] = {};
+
+  const selection = utils.getWitnetArtifactsFromArgs()
   
   const contract = artifacts.require(key)
   if (
     utils.isNullAddress(addresses[network][key])
       || (await web3.eth.getCode(addresses[network][key])).length < 3
+      || selection.includes(key)
+      || (libs && selection.filter(item => libs.includes(item)).length > 0)
   ) {
     utils.traceHeader(`Deploying '${key}'...`)
     console.info("  ", "> account:          ", from)
@@ -82,7 +86,7 @@ async function deploy (specs) {
     if (immutables?.values) values = [...values, ...immutables.values]
     const constructorArgs = web3.eth.abi.encodeParameters(types, values)
     if (constructorArgs.length > 2) {
-      console.info("  ", "> constructor types:", types)
+      console.info("  ", "> constructor types:", JSON.stringify(types))
       console.info("  ", "> constructor args: ", constructorArgs.slice(2))
     }
     const coreBytecode = link(contract.toJSON().bytecode, libs, targets)
