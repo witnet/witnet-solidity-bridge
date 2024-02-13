@@ -47,8 +47,8 @@ contract WitnetPriceFeeds
         );
         witnet = _wrb;
         __settleDefaultRadonSLA(WitnetV2.RadonSLA({
-            witnessingCommitteeSize: 10,
-            witnessingWitTotalReward: 10 ** 9
+            witnessingCommitteeSize: 7,
+            witnessingWitTotalReward: 7 * 2 ** 8 
         }));
     }
 
