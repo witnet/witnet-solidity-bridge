@@ -12,7 +12,6 @@ module.exports = {
       )
       return {
         WitnetPriceFeeds: merged?.WitnetPriceFeeds,
-        WitnetRandomness: merged?.WitnetRandomness,
         WitnetRequestBoard: merged?.WitnetRequestBoard,        
       }
     } else {
@@ -33,7 +32,6 @@ module.exports = {
   artifacts: {
     WitnetBytecodes: require("../artifacts/contracts/WitnetBytecodes.sol/WitnetBytecodes.json"),
     WitnetPriceFeeds: require("../artifacts//contracts/apps/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
-    WitnetRandomness: require("../artifacts//contracts/apps/WitnetRandomness.sol/WitnetRandomness.json"),
     WitnetRequest: require("../artifacts//contracts/WitnetRequest.sol/WitnetRequest.json"),
     WitnetRequestBoard: require("../artifacts//contracts/WitnetRequestBoard.sol/WitnetRequestBoard.json"),
     WitnetRequestFactory: require("../artifacts//contracts/WitnetRequestFactory.sol/WitnetRequestFactory.json"),

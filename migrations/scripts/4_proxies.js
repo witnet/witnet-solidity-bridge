@@ -97,7 +97,7 @@ async function deploy (target) {
       if (
         (process.argv.length >= 3 && process.argv[2].includes("--upgrade-all")) || (
           ["y", "yes"].includes(
-            (await utils.prompt(`   > From v${oldVersion} to v${newVersion} ? [y / N]`)).toLowerCase().trim()
+            (await utils.prompt(`   > From v${oldVersion} to v${newVersion} ? (y/N) `)).toLowerCase().trim()
           )
         )
       ) {

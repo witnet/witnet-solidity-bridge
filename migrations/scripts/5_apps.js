@@ -68,7 +68,6 @@ async function deploy (specs) {
       process.exit(1)
     }
     // save addresses file if required
-    console.log(addresses)
     if (!utils.isDryRun(network)) {
       await utils.saveAddresses(addresses)
     }
