@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/witnet/witnet-solidity-bridge.git"
+    "url": "https://github.com/witnet/witnet-solidity-bridge/tree/2.0.x"
   },
   "type": "commonjs",
   "keywords": [
