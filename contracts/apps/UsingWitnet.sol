@@ -3,17 +3,17 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../WitnetRequestBoard.sol";
+import "../WitnetOracle.sol";
 
 /// @title The UsingWitnet contract
 /// @dev Witnet-aware contracts can inherit from this contract in order to interact with Witnet.
 /// @author The Witnet Foundation.
 abstract contract UsingWitnet
     is
-        IWitnetRequestBoardEvents
+        IWitnetOracleEvents
 {
     /// @dev Immutable reference to the Witnet Request Board contract.
-    WitnetRequestBoard internal immutable __witnet;
+    WitnetOracle internal immutable __witnet;
     
     /// @dev Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain
     /// @dev when solving a data request.
@@ -25,11 +25,11 @@ abstract contract UsingWitnet
     /// @dev the Witnet blockchain levels, respectivelly. 
     uint16 private __witnetBaseFeeOverheadPercentage;
 
-    /// @param _wrb Address of the WitnetRequestBoard contract.
-    constructor(WitnetRequestBoard _wrb) {
+    /// @param _wrb Address of the WitnetOracle contract.
+    constructor(WitnetOracle _wrb) {
         require(
-            _wrb.specs() == type(IWitnetRequestBoard).interfaceId,
-            "UsingWitnet: uncompliant WitnetRequestBoard"
+            _wrb.specs() == type(IWitnetOracle).interfaceId,
+            "UsingWitnet: uncompliant WitnetOracle"
         );
         __witnet = _wrb;
         __witnetDefaultPackedSLA = WitnetV2.toBytes32(WitnetV2.RadonSLA({
@@ -48,7 +48,7 @@ abstract contract UsingWitnet
         _;
     }
 
-    function witnet() virtual public view returns (WitnetRequestBoard) {
+    function witnet() virtual public view returns (WitnetOracle) {
         return __witnet;
     }
 

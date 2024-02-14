@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../../libs/WitnetV2.sol";
 
-interface IWitnetRequestBoardEvents {
+interface IWitnetOracleEvents {
     
     /// Emitted every time a new query containing some verified data request is posted to the WRB.
     event WitnetQuery(uint256 indexed id, uint64 witReward, uint256 evmReward);

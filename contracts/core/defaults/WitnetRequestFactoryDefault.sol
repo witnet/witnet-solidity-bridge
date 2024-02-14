@@ -21,7 +21,7 @@ contract WitnetRequestFactoryDefault
     WitnetRequestBytecodes immutable public override(WitnetRequestFactory, WitnetRequestTemplate) registry;
 
      /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
-    WitnetRequestBoard immutable public override(WitnetRequestFactory, WitnetRequestTemplate) witnet;
+    WitnetOracle immutable public override(WitnetRequestFactory, WitnetRequestTemplate) witnet;
 
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
         require(
@@ -49,7 +49,7 @@ contract WitnetRequestFactoryDefault
     }
 
     constructor(
-            WitnetRequestBoard _witnet,
+            WitnetOracle _witnet,
             WitnetRequestBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag

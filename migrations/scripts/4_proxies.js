@@ -19,15 +19,15 @@ module.exports = async function (_, network, [, from, reporter]) {
   const singletons = [
     "WitnetRequestBytecodes",
     "WitnetRequestFactory",
-    "WitnetRequestBoard",
+    "WitnetOracle",
     "WitnetPriceFeeds",
   ]
 
   // inject `reporter` within array of addresses as first initialization args
-  specs.WitnetRequestBoard.mutables = merge({
+  specs.WitnetOracle.mutables = merge({
     types: ["address[]"],
     values: [[reporter]],
-  }, specs.WitnetRequestBoard.mutables
+  }, specs.WitnetOracle.mutables
   )
 
   // Deploy/upgrade singleton proxies, if required

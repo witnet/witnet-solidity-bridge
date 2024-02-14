@@ -13,7 +13,7 @@ import "../defaults/WitnetRequestBoardTrustableDefault.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetRequestBoardTrustableReef
+contract WitnetOracleTrustableReef
     is
         WitnetRequestBoardTrustableDefault
 {           
@@ -40,7 +40,7 @@ contract WitnetRequestBoardTrustableReef
     {}
     
     // ================================================================================================================
-    // --- Overrides 'IWitnetRequestBoard' ----------------------------------------------------------------------------
+    // --- Overrides 'IWitnetOracle' ----------------------------------------------------------------------------
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 

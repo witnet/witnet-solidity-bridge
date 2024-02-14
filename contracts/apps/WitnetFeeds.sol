@@ -14,13 +14,13 @@ abstract contract WitnetFeeds
         IFeeds,
         IWitnetFeeds,
         IWitnetFeedsAdmin,
-        IWitnetRequestBoardEvents
+        IWitnetOracleEvents
 {
     Witnet.RadonDataTypes immutable public override dataType;
 
     function class() virtual external view returns (string memory);
     function specs() virtual external view returns (bytes4);
-    function witnet() virtual external view returns (WitnetRequestBoard);
+    function witnet() virtual external view returns (WitnetOracle);
 
     constructor(
             Witnet.RadonDataTypes _dataType,

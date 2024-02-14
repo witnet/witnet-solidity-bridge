@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../../libs/WitnetV2.sol";
 
-interface IWitnetRequestBoard {
+interface IWitnetOracle {
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 

@@ -12,7 +12,7 @@ module.exports = {
       )
       return {
         WitnetPriceFeeds: merged?.WitnetPriceFeeds,
-        WitnetRequestBoard: merged?.WitnetRequestBoard,
+        WitnetOracle: merged?.WitnetOracle,
       }
     } else {
       return {}
@@ -30,10 +30,10 @@ module.exports = {
   },
   supportedNetworks,
   artifacts: {
-    WitnetRequestBytecodes: require("../artifacts/contracts/WitnetRequestBytecodes.sol/WitnetRequestBytecodes.json"),
     WitnetPriceFeeds: require("../artifacts/contracts/apps/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
     WitnetRequest: require("../artifacts/contracts/WitnetRequest.sol/WitnetRequest.json"),
-    WitnetRequestBoard: require("../artifacts/contracts/WitnetRequestBoard.sol/WitnetRequestBoard.json"),
+    WitnetOracle: require("../artifacts/contracts/WitnetOracle.sol/WitnetOracle.json"),
+    WitnetRequestBytecodes: require("../artifacts/contracts/WitnetRequestBytecodes.sol/WitnetRequestBytecodes.json"),
     WitnetRequestFactory: require("../artifacts/contracts/WitnetRequestFactory.sol/WitnetRequestFactory.json"),
     WitnetRequestTemplate: require("../artifacts/contracts/WitnetRequestTemplate.sol/WitnetRequestTemplate.json"),
     WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json"),

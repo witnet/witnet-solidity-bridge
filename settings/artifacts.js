@@ -1,25 +1,24 @@
 module.exports = {
   default: {
+    WitnetOracle: "WitnetRequestBoardTrustableDefault",
+    WitnetPriceFeeds: "WitnetPriceFeedsDefault",
     WitnetRequestBytecodes: "WitnetRequestBytecodesDefault",
+    WitnetRequestFactory: "WitnetRequestFactoryDefault",
     WitnetEncodingLib: "WitnetEncodingLib",
     WitnetErrorsLib: "WitnetErrorsLib",
-    WitnetPriceFeeds: "WitnetPriceFeedsDefault",
     WitnetPriceFeedsLib: "WitnetPriceFeedsLib",
-    WitnetRandomness: "WitnetRandomness",
-    WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
-    WitnetRequestFactory: "WitnetRequestFactoryDefault",
   },
   boba: {
-    WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+    WitnetOracle: "WitnetRequestBoardTrustableOvm2",
   },
   conflux: {
     WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
   },
   mantle: {
-    WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+    WitnetOracle: "WitnetRequestBoardTrustableOvm2",
   },
   optimism: {
-    WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+    WitnetOracle: "WitnetRequestBoardTrustableOvm2",
   },
   "polygon.zkevm.goerli": {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
@@ -28,15 +27,15 @@ module.exports = {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   reef: {
-    WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
+    WitnetOracle: "WitnetOracleTrustableReef",
   },
   scroll: {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   "syscoin.rollux.testnet": {
-    WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+    WitnetOracle: "WitnetRequestBoardTrustableOvm2",
   },
   ten: {
-    WitnetRequestBoard: "WitnetRequestBoardTrustableObscuro",
+    WitnetOracle: "WitnetRequestBoardTrustableObscuro",
   },
 }

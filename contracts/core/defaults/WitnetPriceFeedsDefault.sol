@@ -27,10 +27,10 @@ contract WitnetPriceFeedsDefault
     using WitnetV2 for WitnetV2.RadonSLA;
 
     bytes4 immutable public override specs = type(IWitnetPriceFeeds).interfaceId;
-    WitnetRequestBoard immutable public override witnet;
+    WitnetOracle immutable public override witnet;
     
     constructor(
-            WitnetRequestBoard _wrb,
+            WitnetOracle _wrb,
             bool _upgradable,
             bytes32 _versionTag
         )
@@ -110,7 +110,7 @@ contract WitnetPriceFeedsDefault
             "WitnetPriceFeedsDefault: inexistent oracle"
         );
         require(
-            witnet.specs() == type(IWitnetRequestBoard).interfaceId, 
+            witnet.specs() == type(IWitnetOracle).interfaceId, 
             "WitnetPriceFeedsDefault: uncompliant oracle"
         );
         emit Upgraded(_owner, base(), codehash(), version());
@@ -278,7 +278,7 @@ contract WitnetPriceFeedsDefault
     }
 
     function registry() public view virtual override returns (WitnetRequestBytecodes) {
-        return WitnetRequestBoard(address(witnet)).registry();
+        return WitnetOracle(address(witnet)).registry();
     }
 
     function requestUpdate(bytes4 feedId)

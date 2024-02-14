@@ -39,7 +39,7 @@ contract WitnetRequestBoardTrustableObscuro
     {}
 
     // ================================================================================================================
-    // --- Overrides implementation of 'IWitnetRequestBoardView' ------------------------------------------------------
+    // --- Overrides implementation of 'IWitnetOracleView' ------------------------------------------------------
 
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
     /// @dev Fails if or if `msg.sender` is not the actual requester.

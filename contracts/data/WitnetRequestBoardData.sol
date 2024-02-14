@@ -37,7 +37,7 @@ abstract contract WitnetRequestBoardData {
     modifier onlyRequester(uint256 _queryId) {
         require(
             msg.sender == __seekQueryRequest(_queryId).unpackRequester(), 
-            "WitnetRequestBoardBase: not the requester"
+            "WitnetOracleBase: not the requester"
         ); _;
     }
 
@@ -104,15 +104,15 @@ abstract contract WitnetRequestBoardData {
       returns (string memory)
     {
       if (_status == WitnetV2.QueryStatus.Posted) {
-        return "WitnetRequestBoard: not in Posted status";
+        return "WitnetOracle: not in Posted status";
       } else if (_status == WitnetV2.QueryStatus.Reported) {
-        return "WitnetRequestBoard: not in Reported status";
+        return "WitnetOracle: not in Reported status";
       } else if (_status == WitnetV2.QueryStatus.Finalized) {
-        return "WitnetRequestBoard: not in Finalized status";
+        return "WitnetOracle: not in Finalized status";
       } else if (_status == WitnetV2.QueryStatus.Undeliverable) {
-        return "WitnetRequestBoard: not in Undeliverable status";
+        return "WitnetOracle: not in Undeliverable status";
       } else {
-        return "WitnetRequestBoard: bad mood";
+        return "WitnetOracle: bad mood";
       }
     }
 }

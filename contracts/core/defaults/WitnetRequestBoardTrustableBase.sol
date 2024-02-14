@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../WitnetUpgradableBase.sol";
-import "../../WitnetRequestBoard.sol";
+import "../../WitnetOracle.sol";
 import "../../WitnetRequestFactory.sol";
 
 import "../../data/WitnetRequestBoardDataACLs.sol";
@@ -23,7 +23,7 @@ import "../../patterns/Payable.sol";
 abstract contract WitnetRequestBoardTrustableBase
     is 
         WitnetUpgradableBase,
-        WitnetRequestBoard,
+        WitnetOracle,
         WitnetRequestBoardDataACLs,
         IWitnetRequestBoardReporter,
         IWitnetRequestBoardAdminACLs,
@@ -36,7 +36,7 @@ abstract contract WitnetRequestBoardTrustableBase
     using WitnetV2 for WitnetV2.Request;
     using WitnetV2 for WitnetV2.Response;
 
-    bytes4 public immutable override specs = type(IWitnetRequestBoard).interfaceId;
+    bytes4 public immutable override specs = type(IWitnetOracle).interfaceId;
     WitnetRequestBytecodes immutable public override registry;
     
     WitnetRequestFactory immutable private __factory;
@@ -86,7 +86,7 @@ abstract contract WitnetRequestBoardTrustableBase
     }
 
     /// @dev Provide backwards compatibility for dapps bound to versions <= 0.6.1
-    /// @dev (i.e. calling methods in IWitnetRequestBoard)
+    /// @dev (i.e. calling methods in IWitnetOracle)
     /// @dev (Until 'function ... abi(...)' modifier is allegedly supported in solc versions >= 0.9.1)
     /* solhint-disable payable-fallback */
     /* solhint-disable no-complex-fallback */
@@ -193,7 +193,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
 
     // ================================================================================================================
-    // --- Partial implementation of IWitnetRequestBoard --------------------------------------------------------------
+    // --- Partial implementation of IWitnetOracle --------------------------------------------------------------
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 

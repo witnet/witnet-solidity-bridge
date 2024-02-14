@@ -4,18 +4,18 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "./WitnetRequestBytecodes.sol";
 import "./WitnetRequestFactory.sol";
-import "./interfaces/V2/IWitnetRequestBoard.sol";
-import "./interfaces/V2/IWitnetRequestBoardEvents.sol";
+import "./interfaces/V2/IWitnetOracle.sol";
+import "./interfaces/V2/IWitnetOracleEvents.sol";
 
 /// @title Witnet Request Board functionality base contract.
 /// @author The Witnet Foundation.
-abstract contract WitnetRequestBoard
+abstract contract WitnetOracle
     is
-        IWitnetRequestBoard,
-        IWitnetRequestBoardEvents
+        IWitnetOracle,
+        IWitnetOracleEvents
 {
     function class() virtual external view returns (string memory) {
-        return type(WitnetRequestBoard).name;
+        return type(WitnetOracle).name;
     }
     function channel() virtual external view returns (bytes4);
     function factory() virtual external view returns (WitnetRequestFactory);

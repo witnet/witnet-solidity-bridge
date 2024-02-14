@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "../../WitnetRequestBytecodes.sol";
-import "../../WitnetRequestBoard.sol";
+import "../../WitnetOracle.sol";
 
 interface IWitnetFeeds {
 
@@ -17,7 +17,7 @@ interface IWitnetFeeds {
     function dataType() external view returns (Witnet.RadonDataTypes);
     function prefix() external view returns (string memory);
     function registry() external view returns (WitnetRequestBytecodes);
-    function witnet() external view returns (WitnetRequestBoard);
+    function witnet() external view returns (WitnetOracle);
     
     function defaultRadonSLA() external view returns (Witnet.RadonSLA memory);
     function estimateUpdateBaseFee(uint256 evmGasPrice) external view returns (uint);

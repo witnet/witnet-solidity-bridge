@@ -1,5 +1,5 @@
 const WitnetRandomnessMock = artifacts.require("WitnetMockedRandomness")
-const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
+const WitnetOracle = artifacts.require("WitnetOracle")
 const RandomnessBareMinimal = artifacts.require("RandomnessBareMinimal")
 
 const {
@@ -19,7 +19,7 @@ contract("WitnetRandomnesMock", accounts => {
 
   before(async () => {
     witnet = await WitnetRandomnessMock.new(
-      WitnetRequestBoard.address,
+      WitnetOracle.address,
       2, // _mockRandomizeLatencyBlock
       fee, // _mockRandomizeFee
       { from: deployer }

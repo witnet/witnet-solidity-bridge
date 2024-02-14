@@ -17,12 +17,12 @@ abstract contract UsingWitnetRandomness
 
     bytes32 internal immutable __witnetRandomnessRadHash;
 
-    /// @param _wrb Address of the WitnetRequestBoard contract.
+    /// @param _wrb Address of the WitnetOracle contract.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
     /// @param _callbackGasLimit Maximum gas to be spent by the IWitnetConsumer's callback methods.
     /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.
     constructor(
-            WitnetRequestBoard _wrb, 
+            WitnetOracle _wrb, 
             uint16 _baseFeeOverheadPercentage,
             uint96 _callbackGasLimit,
             WitnetV2.RadonSLA memory _defaultSLA

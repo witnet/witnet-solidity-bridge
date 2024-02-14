@@ -3,13 +3,13 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../WitnetRequest.sol";
-import "../WitnetRequestBoard.sol";
+import "../WitnetOracle.sol";
 
 /// @title The Witnet Randomness generator interface.
 /// @author Witnet Foundation.
 interface IWitnetRandomness {
 
-    /// Thrown every time a new WitnetRandomnessRequest gets succesfully posted to the WitnetRequestBoard.
+    /// Thrown every time a new WitnetRandomnessRequest gets succesfully posted to the WitnetOracle.
     /// @param from Address from which the randomize() function was called. 
     /// @param prevBlock Block number in which a randomness request got posted just before this one. 0 if none.
     /// @param witnetQueryId Unique query id assigned to this request by the WRB.
@@ -93,8 +93,8 @@ interface IWitnetRandomness {
     /// @return _usedFunds Amount of dunds actually used from those provided by the tx sender.
     function upgradeRandomizeFee(uint256 _block) external payable returns (uint256 _usedFunds);
 
-    /// @notice Returns address of the WitnetRequestBoard being used for posting randomness requests to Wtinet.
-    function witnet() external view returns (WitnetRequestBoard);
+    /// @notice Returns address of the WitnetOracle being used for posting randomness requests to Wtinet.
+    function witnet() external view returns (WitnetOracle);
 
     /// @notice Returns address of the WitnetRequestRandomness contract being used for solving randomness.
     function witnetRandomnessRequest() external view returns (WitnetRequest);

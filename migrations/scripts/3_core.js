@@ -41,7 +41,7 @@ module.exports = async function (_, network, [, from]) {
     intrinsics: {
       types: ["address", "address", "bool", "bytes32"],
       values: [
-        /* _witnet     */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
+        /* _witnet     */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
         /* _registry   */ await determineProxyAddr(from, specs.WitnetRequestBytecodes?.vanity || 1),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
@@ -49,14 +49,14 @@ module.exports = async function (_, network, [, from]) {
     },
   })
 
-  // Deploy/upgrade WitnetRequestBoard target implementation, if required
+  // Deploy/upgrade WitnetOracle target implementation, if required
   await deploy({
     network,
     targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetRequestBoard.from || from,
-    key: targets.WitnetRequestBoard,
-    libs: specs.WitnetRequestBoard.libs,
-    immutables: specs.WitnetRequestBoard.immutables,
+    from: utils.isDryRun(network) ? from : specs.WitnetOracle.from || from,
+    key: targets.WitnetOracle,
+    libs: specs.WitnetOracle.libs,
+    immutables: specs.WitnetOracle.immutables,
     intrinsics: {
       types: ["address", "address", "bool", "bytes32"],
       values: [
@@ -79,7 +79,7 @@ module.exports = async function (_, network, [, from]) {
     intrinsics: {
       types: ["address", "bool", "bytes32"],
       values: [
-        /* _witnet     */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
+        /* _witnet     */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],

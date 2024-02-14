@@ -1,10 +1,10 @@
 {
     "default": {
         "WitnetDeployer": "0x03232aBE800D1638B30432FeEF300581De323a4E",
+        "WitnetOracle": "0x00000eBcBDD5B6A1B4f102b165ED2C4d8B6B1000",
+        "WitnetPriceFeeds": "0x159Dd4C95C52fAc17b23de911dD518845c78D022",
         "WitnetRequestBytecodes": "0x0000B677d4a6d20C3B087c52A36E4Bed558De000",
-        "WitnetRequestFactory": "0x0000f7Eb1d08E68C361b8A0c4a36f442c58f1000",
-        "WitnetRequestBoard": "0x00000eBcBDD5B6A1B4f102b165ED2C4d8B6B1000",
-        "WitnetPriceFeeds": "0x159Dd4C95C52fAc17b23de911dD518845c78D022"
+        "WitnetRequestFactory": "0x0000f7Eb1d08E68C361b8A0c4a36f442c58f1000"
     },
     "ethereum:sepolia": {
         "WitnetErrorsLib": "0x38eB91d52dADe5B4Ded868c0eED9DdA4630AE67a",
@@ -21,7 +21,6 @@
         "WitnetRequestBytecodesDefault": "0x62e9D7eD2CEB27F252E46cA52574DF75293ac733",
         "WitnetRequestFactoryDefault": "0xeD6b48575779e0e5b26463533084284c7235c0C4",
         "WitnetRequestBoardTrustableObscuro": "0x4b9afCCb4f1A1827B080b38ae23D09AbA2243ec3",
-        "WitnetRequestBoardTrustableDefault": "0x1B059f8B478312c25e6fBEF5a147121059E53cB3",
-        "WitnetPriceFeeds": "0xbF35a988B9ae7608db0C67cb92f340b44Bb8E980"
+        "WitnetRequestBoardTrustableDefault": "0x1B059f8B478312c25e6fBEF5a147121059E53cB3"
     }
 }
