@@ -6,15 +6,21 @@ import "../interfaces/V2/IFeeds.sol";
 import "../interfaces/V2/IWitnetFeeds.sol";
 import "../interfaces/V2/IWitnetFeedsAdmin.sol";
 
+import "ado-contracts/contracts/interfaces/IERC2362.sol";
+
 abstract contract WitnetFeeds
     is 
+        IERC2362,
         IFeeds,
         IWitnetFeeds,
-        IWitnetFeedsAdmin
+        IWitnetFeedsAdmin,
+        IWitnetRequestBoardEvents
 {
     Witnet.RadonDataTypes immutable public override dataType;
 
-    bytes32 immutable internal __prefix;
+    function class() virtual external view returns (string memory);
+    function specs() virtual external view returns (bytes4);
+    function witnet() virtual external view returns (WitnetRequestBoard);
 
     constructor(
             Witnet.RadonDataTypes _dataType,
@@ -24,6 +30,8 @@ abstract contract WitnetFeeds
         dataType = _dataType;
         __prefix = Witnet.toBytes32(bytes(_prefix));
     }
+
+    bytes32 immutable internal __prefix;
 
     function prefix() override public view returns (string memory) {
         return Witnet.toString(__prefix);

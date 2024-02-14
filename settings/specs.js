@@ -24,6 +24,7 @@ module.exports = {
       vanity: 7945530998, // 0x0000f7Eb1d08E68C361b8A0c4a36f442c58f1000
     },
     WitnetPriceFeeds: {
+      from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",
       libs: ["WitnetPriceFeedsLib"],
       vanity: 7089974217, // 0x000080d4d4896c2c5959883430495AD58436E000
     },

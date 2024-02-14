@@ -21,6 +21,7 @@ module.exports = async function (_, network, [, from, reporter]) {
     "WitnetBytecodes",
     "WitnetRequestFactory",
     "WitnetRequestBoard",
+    "WitnetPriceFeeds",
   ]
 
   // inject `reporter` within array of addresses as first initialization args
@@ -32,8 +33,9 @@ module.exports = async function (_, network, [, from, reporter]) {
 
   // Deploy/upgrade singleton proxies, if required
   for (const index in singletons) {
-    await deploy({ network, from, specs, targets,
-      key: singletons[index],
+    const key = singletons[index]
+    await deploy({ network, specs, targets, key,
+      from: utils.isDryRun(network) ? from : specs[key].from || from,
     })
   }
 }

@@ -10,6 +10,7 @@ abstract contract Proxiable {
     struct ProxiableSlot {
         address implementation;
         address proxy;
+        bytes32 codehash;
     }
 
     function __implementation() internal view returns (address) {

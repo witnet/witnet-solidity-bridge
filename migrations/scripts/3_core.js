@@ -15,7 +15,8 @@ module.exports = async function (_, network, [, from]) {
   const targets = settings.getArtifacts(network)
 
   // Deploy/upgrade WitnetBytecodes target implementation, if required
-  await deploy({ network, from, targets,
+  await deploy({ network, targets,
+    from: utils.isDryRun(network) ? from : specs.WitnetBytecodes.from || from,
     key: targets.WitnetBytecodes,
     libs: specs.WitnetBytecodes.libs,
     immutables: specs.WitnetBytecodes.immutables,
@@ -29,7 +30,8 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // Deploy/upgrade WitnetRequestFactory target implementation, if required
-  await deploy({ network, from, targets,
+  await deploy({ network, targets,
+    from: utils.isDryRun(network) ? from : specs.WitnetRequestFactory.from || from,
     key: targets.WitnetRequestFactory,
     libs: specs.WitnetRequestFactory.libs,
     immutables: specs.WitnetRequestFactory.immutables,
@@ -45,7 +47,8 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // Deploy/upgrade WitnetRequestBoard target implementation, if required
-  await deploy({ network, from, targets,
+  await deploy({ network, targets,
+    from: utils.isDryRun(network) ? from : specs.WitnetRequestBoard.from || from,
     key: targets.WitnetRequestBoard,
     libs: specs.WitnetRequestBoard.libs,
     immutables: specs.WitnetRequestBoard.immutables,
@@ -54,6 +57,22 @@ module.exports = async function (_, network, [, from]) {
       values: [
         /* _factory    */ await determineProxyAddr(from, specs.WitnetRequestFactory?.vanity || 2),
         /* _registry   */ await determineProxyAddr(from, specs.WitnetBytecodes?.vanity || 1),
+        /* _upgradable */ true,
+        /* _versionTag */ utils.fromAscii(version),
+      ],
+    },
+  })
+
+  // Deploy/upgrade WitnetPriceFeeds target implementation, if required
+  await deploy({ network, targets,
+    from: utils.isDryRun(network) ? from : specs.WitnetPriceFeeds.from || from,
+    key: targets.WitnetPriceFeeds,
+    libs: specs.WitnetPriceFeeds.libs,
+    immutables: specs.WitnetPriceFeeds.immutables,
+    intrinsics: {
+      types: ["address", "bool", "bytes32"],
+      values: [
+        /* _witnet     */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],

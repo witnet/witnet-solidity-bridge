@@ -3,7 +3,7 @@ module.exports = {
     WitnetBytecodes: "WitnetBytecodesDefault",
     WitnetEncodingLib: "WitnetEncodingLib",
     WitnetErrorsLib: "WitnetErrorsLib",
-    WitnetPriceFeeds: "WitnetPriceFeeds",
+    WitnetPriceFeeds: "WitnetPriceFeedsDefault",
     WitnetPriceFeedsLib: "WitnetPriceFeedsLib",
     WitnetRandomness: "WitnetRandomness",
     WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
