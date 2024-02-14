@@ -115,8 +115,12 @@ async function deploy (target) {
           console.info("  ", "> initialize types: ", mutables.types)
           console.info("  ", "> initialize params:", mutables.values)
         }
-        const tx = await upgradeProxyTo(from, proxy, newImpl.address, initdata)
-        utils.traceTx(tx)
+        try {
+          const tx = await upgradeProxyTo(from, proxyAddr, newImpl.address, initdata)
+          utils.traceTx(tx)
+        } catch (ex) {
+          console.error("  ", "> Exception:\n",ex)
+        }
       }
     } else {
       utils.traceHeader(`Skipped '${key}'`)
@@ -126,9 +130,9 @@ async function deploy (target) {
   const impl = await artifacts.require(targets[key]).at(proxy.address)
   console.info("  ", "> proxy address:    ", impl.address)
   console.info("  ", "> proxy codehash:   ", web3.utils.soliditySha3(await web3.eth.getCode(impl.address)))
-  console.info("  ", "> proxy operator:   ", await impl.owner.call())
+  console.info("  ", "> proxy operator:   ", await impl.owner.call({ from }))
   console.info("  ", "> impl. address:    ", await getProxyImplementation(from, proxy.address))
-  console.info("  ", "> impl. version:    ", await impl.version.call())
+  console.info("  ", "> impl. version:    ", await impl.version.call({ from }))
   console.info()
   return proxy
 }
@@ -138,7 +142,7 @@ async function getProxyImplementation (from, proxyAddr) {
   return await proxy.implementation.call({ from })
 }
 
-async function upgradeProxyTo (from, proxy, implAddr, initData) {
-  const proxyContract = await WitnetProxy.at(proxy.address)
+async function upgradeProxyTo (from, proxyAddr, implAddr, initData) {
+  const proxyContract = await WitnetProxy.at(proxyAddr)
   return await proxyContract.upgradeTo(implAddr, initData, { from })
 }

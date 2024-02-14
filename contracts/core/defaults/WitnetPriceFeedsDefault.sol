@@ -90,7 +90,6 @@ contract WitnetPriceFeedsDefault
                 witnessingCommitteeSize: 7,
                 witnessingWitTotalReward: (2 * (7 + 3)) * 10 ** 8 
             }));
-        }));
         } else {
             // only the owner can initialize:
             require(

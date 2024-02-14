@@ -35,12 +35,7 @@ abstract contract Upgradeable is Initializable, Proxiable {
 
     constructor (bool _isUpgradable) {
         address _base = address(this);
-        bytes32 _codehash;        
-        assembly {
-            _codehash := extcodehash(_base)
-        }
         _BASE = _base;
-        _CODEHASH = _codehash;
         _UPGRADABLE = _isUpgradable;
     }
 
@@ -50,8 +45,11 @@ abstract contract Upgradeable is Initializable, Proxiable {
     }
 
     /// @dev Retrieves the immutable codehash of this contract, even if invoked as delegatecall.
-    function codehash() public view returns (bytes32) {
-        return _CODEHASH;
+    function codehash() public view returns (bytes32 _codehash) {
+        address _base = _BASE;
+        assembly {
+            _codehash := extcodehash(_base)
+        }
     }
 
     /// @dev Determines whether the logic of this contract is potentially upgradable.

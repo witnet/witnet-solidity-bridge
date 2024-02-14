@@ -133,7 +133,9 @@ async function deploy (specs) {
     // save addresses file if required
     if (!utils.isDryRun(network)) {
       await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-      const args = {}; args[network] = {}; args[network][key] = constructorArgs.slice(2)
+      const args = await utils.readJsonFromFile("./migrations/constructorArgs.json"); 
+      if (!args[network]) args[network] = {}
+      args[network][key] = constructorArgs.slice(2)
       await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
     }
   } else {

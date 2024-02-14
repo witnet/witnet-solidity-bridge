@@ -16,7 +16,7 @@ module.exports = {
     WitnetPriceFeeds: {
       from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",
       libs: ["WitnetPriceFeedsLib"],
-      vanity: 7089974217, // 0x000080d4d4896c2c5959883430495AD58436E000
+      vanity: 6099024547, // 0x11111c2cC3f1af92bA0f1f554f2651cEfb858111
     },
     WitnetRequestBytecodes: {
       libs: ["WitnetEncodingLib"],
