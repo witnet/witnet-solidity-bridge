@@ -30,14 +30,14 @@ module.exports = {
   },
   supportedNetworks,
   artifacts: {
-    WitnetPriceFeeds: require("../artifacts/contracts/apps/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
-    WitnetRequest: require("../artifacts/contracts/WitnetRequest.sol/WitnetRequest.json"),
     WitnetOracle: require("../artifacts/contracts/WitnetOracle.sol/WitnetOracle.json"),
+    WitnetPriceFeeds: require("../artifacts/contracts/apps/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
+    WitnetPriceFeedRoute: require("../artifacts/contracts/interfaces/IWitnetPriceSolver.sol/IWitnetPriceSolver.json"),
+    WitnetRequest: require("../artifacts/contracts/WitnetRequest.sol/WitnetRequest.json"),
     WitnetRequestBytecodes: require("../artifacts/contracts/WitnetRequestBytecodes.sol/WitnetRequestBytecodes.json"),
     WitnetRequestFactory: require("../artifacts/contracts/WitnetRequestFactory.sol/WitnetRequestFactory.json"),
     WitnetRequestTemplate: require("../artifacts/contracts/WitnetRequestTemplate.sol/WitnetRequestTemplate.json"),
-    WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json"),
-    IWitnetPriceSolver: require("../artifacts/contracts/interfaces/IWitnetPriceSolver.sol/IWitnetPriceSolver.json"),
+    WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json")
   },
   settings: require("../settings"),
   utils,
