@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../../libs/WitnetV2.sol";
+import "../libs/WitnetV2.sol";
 
 interface IWitnetOracle {
 

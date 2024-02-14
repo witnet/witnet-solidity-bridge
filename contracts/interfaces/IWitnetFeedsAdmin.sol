@@ -2,8 +2,8 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../libs/WitnetV2.sol";
-import "../../WitnetRequest.sol";
+import "../libs/WitnetV2.sol";
+import "../WitnetRequest.sol";
 
 interface IWitnetFeedsAdmin {
     function acceptOwnership() external;

@@ -2,8 +2,8 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../WitnetRequestBytecodes.sol";
-import "../../WitnetOracle.sol";
+import "../WitnetOracle.sol";
+import "../WitnetRequestBytecodes.sol";
 
 interface IWitnetFeeds {
 

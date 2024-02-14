@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "./WitnetRequestBytecodes.sol";
 import "./WitnetOracle.sol";
-import "./interfaces/V2/IWitnetRequestFactory.sol";
+import "./interfaces/IWitnetRequestFactory.sol";
 
 abstract contract WitnetRequestFactory
     is

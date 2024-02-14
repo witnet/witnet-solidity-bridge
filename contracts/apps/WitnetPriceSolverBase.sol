@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "../data/WitnetPriceFeedsData.sol";
-import "../interfaces/V2/IWitnetPriceFeeds.sol";
+import "../interfaces/IWitnetPriceFeeds.sol";
 
 abstract contract WitnetPriceSolverBase
     is

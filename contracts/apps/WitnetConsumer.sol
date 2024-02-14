@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./UsingWitnet.sol";
-import "../interfaces/V2/IWitnetConsumer.sol";
+import "../interfaces/IWitnetConsumer.sol";
 
 abstract contract WitnetConsumer
     is

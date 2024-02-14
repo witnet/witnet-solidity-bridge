@@ -10,8 +10,8 @@ import "../../WitnetRequestFactory.sol";
 import "../../data/WitnetRequestBoardDataACLs.sol";
 import "../../interfaces/IWitnetRequest.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
-import "../../interfaces/V2/IWitnetRequestBoardReporter.sol";
-import "../../interfaces/V2/IWitnetConsumer.sol";
+import "../../interfaces/IWitnetRequestBoardReporter.sol";
+import "../../interfaces/IWitnetConsumer.sol";
 import "../../libs/WitnetErrorsLib.sol";
 import "../../patterns/Payable.sol";
 

@@ -3,8 +3,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/V2/IWitnetPriceSolver.sol";
-import "../interfaces/V2/IWitnetPriceSolverDeployer.sol";
+import "../interfaces/IWitnetPriceSolver.sol";
+import "../interfaces/IWitnetPriceSolverDeployer.sol";
 
 import "../libs/Slices.sol";
 
