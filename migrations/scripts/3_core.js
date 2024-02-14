@@ -10,12 +10,13 @@ const version = `${
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
-
   const specs = settings.getSpecs(network)
   const targets = settings.getArtifacts(network)
 
   // Deploy/upgrade WitnetBytecodes target implementation, if required
-  await deploy({ network, targets,
+  await deploy({
+    network,
+    targets,
     from: utils.isDryRun(network) ? from : specs.WitnetBytecodes.from || from,
     key: targets.WitnetBytecodes,
     libs: specs.WitnetBytecodes.libs,
@@ -30,7 +31,9 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // Deploy/upgrade WitnetRequestFactory target implementation, if required
-  await deploy({ network, targets,
+  await deploy({
+    network,
+    targets,
     from: utils.isDryRun(network) ? from : specs.WitnetRequestFactory.from || from,
     key: targets.WitnetRequestFactory,
     libs: specs.WitnetRequestFactory.libs,
@@ -47,7 +50,9 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // Deploy/upgrade WitnetRequestBoard target implementation, if required
-  await deploy({ network, targets,
+  await deploy({
+    network,
+    targets,
     from: utils.isDryRun(network) ? from : specs.WitnetRequestBoard.from || from,
     key: targets.WitnetRequestBoard,
     libs: specs.WitnetRequestBoard.libs,
@@ -64,7 +69,9 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // Deploy/upgrade WitnetPriceFeeds target implementation, if required
-  await deploy({ network, targets,
+  await deploy({
+    network,
+    targets,
     from: utils.isDryRun(network) ? from : specs.WitnetPriceFeeds.from || from,
     key: targets.WitnetPriceFeeds,
     libs: specs.WitnetPriceFeeds.libs,
@@ -78,23 +85,22 @@ module.exports = async function (_, network, [, from]) {
       ],
     },
   })
-
 }
 
 async function deploy (specs) {
   const { from, key, libs, intrinsics, immutables, network, targets } = specs
-  
+
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
-  if (!addresses[network]) addresses[network] = {};
+  if (!addresses[network]) addresses[network] = {}
 
   const selection = utils.getWitnetArtifactsFromArgs()
-  
+
   const contract = artifacts.require(key)
   if (
-    utils.isNullAddress(addresses[network][key])
-      || (await web3.eth.getCode(addresses[network][key])).length < 3
-      || selection.includes(key)
-      || (libs && selection.filter(item => libs.includes(item)).length > 0)
+    utils.isNullAddress(addresses[network][key]) ||
+      (await web3.eth.getCode(addresses[network][key])).length < 3 ||
+      selection.includes(key) ||
+      (libs && selection.filter(item => libs.includes(item)).length > 0)
   ) {
     utils.traceHeader(`Deploying '${key}'...`)
     console.info("  ", "> account:          ", from)
@@ -127,7 +133,7 @@ async function deploy (specs) {
     // save addresses file if required
     if (!utils.isDryRun(network)) {
       await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-      const args = {}; args[network] = {}; args[network][key] = constructorArgs.slice(2);
+      const args = {}; args[network] = {}; args[network][key] = constructorArgs.slice(2)
       await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
     }
   } else {

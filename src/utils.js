@@ -49,28 +49,28 @@ function getRealmNetworkFromString (network) {
   }
 }
 
-function getWitnetRequestMethodString(method) {
+function getWitnetRequestMethodString (method) {
   if (!method) {
-      return "HTTP-GET"
+    return "HTTP-GET"
   } else {
-      const strings = {
-          0: "UNKNOWN",
-          1: "HTTP-GET",
-          2: "RNG",
-          3: "HTTP-POST",
-          4: "HTTP-HEAD",
-      }
-      return strings[method] || method.toString()
+    const strings = {
+      0: "UNKNOWN",
+      1: "HTTP-GET",
+      2: "RNG",
+      3: "HTTP-POST",
+      4: "HTTP-HEAD",
+    }
+    return strings[method] || method.toString()
   }
 }
 
-function getWitnetArtifactsFromArgs() {
+function getWitnetArtifactsFromArgs () {
   let selection = []
   process.argv.map((argv, index, args) => {
-      if (argv === "--artifacts") {
-          selection = args[index + 1].split(",")
-      }
-      return argv
+    if (argv === "--artifacts") {
+      selection = args[index + 1].split(",")
+    }
+    return argv
   })
   return selection
 };
@@ -79,7 +79,7 @@ function isDryRun (network) {
   return network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
 }
 
-function isNullAddress(addr) {
+function isNullAddress (addr) {
   return !addr ||
       addr === "" ||
       addr === "0x0000000000000000000000000000000000000000"
@@ -117,12 +117,12 @@ async function readJsonFromFile (filename) {
   lockfile.lockSync(filename)
   const json = JSON.parse(await fs.readFileSync(filename))
   lockfile.unlockSync(filename)
-  return json|| {}
+  return json || {}
 }
 
 async function overwriteJsonFile (filename, extra) {
   lockfile.lockSync(filename)
-  const json = { ...JSON.parse(fs.readFileSync(filename)), ...extra };
+  const json = { ...JSON.parse(fs.readFileSync(filename)), ...extra }
   fs.writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" })
   lockfile.unlockSync(filename)
 }

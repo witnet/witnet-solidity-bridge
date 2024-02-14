@@ -5,7 +5,7 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
-  if (!addresses[network]) addresses[network] = {};
+  if (!addresses[network]) addresses[network] = {}
 
   const targets = settings.getArtifacts(network)
   const libs = [
@@ -21,9 +21,9 @@ module.exports = async function (_, network, [, from]) {
     const key = libs[index]
     const artifact = artifacts.require(key)
     if (
-      utils.isNullAddress(addresses[network][key])
-      || (await web3.eth.getCode(addresses[network][key])).length < 3
-      || selection.includes(key)
+      utils.isNullAddress(addresses[network][key]) ||
+      (await web3.eth.getCode(addresses[network][key])).length < 3 ||
+      selection.includes(key)
     ) {
       utils.traceHeader(`Deploying '${key}'...`)
       const libInitCode = artifact.toJSON().bytecode

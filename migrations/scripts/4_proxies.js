@@ -13,7 +13,6 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (_, network, [, from, reporter]) {
-
   const targets = settings.getArtifacts(network)
   const specs = settings.getSpecs(network)
 
@@ -34,7 +33,11 @@ module.exports = async function (_, network, [, from, reporter]) {
   // Deploy/upgrade singleton proxies, if required
   for (const index in singletons) {
     const key = singletons[index]
-    await deploy({ network, specs, targets, key,
+    await deploy({
+      network,
+      specs,
+      targets,
+      key,
       from: utils.isDryRun(network) ? from : specs[key].from || from,
     })
   }
@@ -42,10 +45,10 @@ module.exports = async function (_, network, [, from, reporter]) {
 
 async function deploy (target) {
   const { from, key, network, specs, targets } = target
-  
+
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
-  if (!addresses[network]) addresses[network] = {};
-  
+  if (!addresses[network]) addresses[network] = {}
+
   const mutables = specs[key].mutables
   const proxy = artifacts.require(key)
   const proxySalt = specs[key].vanity
@@ -95,17 +98,15 @@ async function deploy (target) {
     }
   } else {
     const oldAddr = await getProxyImplementation(from, proxyAddr)
-    const oldImpl = await artifacts.require(targets[key]).at(oldAddr)
     const newImpl = await artifacts.require(targets[key]).deployed()
     if (oldAddr !== newImpl.address) {
       utils.traceHeader(`Upgrading '${key}'...`)
-      const oldVersion = await oldImpl.version.call({ from })
       const newVersion = await newImpl.version.call({ from })
-      const color = newVersion === version ? `\x1b[1;97m` : `\x1b[93m`
+      const color = newVersion === version ? "\x1b[1;97m" : "\x1b[93m"
       if (
         (process.argv.length >= 3 && process.argv[2].includes("--upgrade-all")) || (
-          ["y", "yes"].includes((await 
-            utils.prompt(`   > Upgrade to ${color}${targets[key]} v${newVersion}\x1b[0m? (y/N) `)
+          ["y", "yes"].includes((await
+          utils.prompt(`   > Upgrade to ${color}${targets[key]} v${newVersion}\x1b[0m? (y/N) `)
           ).toLowerCase().trim())
         )
       ) {

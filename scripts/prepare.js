@@ -4,12 +4,12 @@ const fs = require("fs")
 
 if (fs.existsSync("./artifacts")) {
   if (os.type() === "Windows_NT") {
-    exec(`del /s /q artifacts\\*.dbg.json`)
+    exec("del /s /q artifacts\\*.dbg.json")
   } else {
-    exec(`find ./artifacts -name '*.dbg.json' -exec rm -r {} \;`)
+    exec("find ./artifacts -name *.dbg.json -exec rm -r {} \\;")
   }
 }
 
 if (fs.existsSync("./build/contracts")) {
-  exec(`sed -i -- "/\bsourcePath\b/d" build/contracts/*.json`)
+  exec("sed -i -- \"/\bsourcePath\b/d\" build/contracts/*.json")
 }

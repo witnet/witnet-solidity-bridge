@@ -4,12 +4,12 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (deployer, network, [,,, master]) {
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
-  if (!addresses[network]) addresses[network] = {};
+  if (!addresses[network]) addresses[network] = {}
 
   const factoryAddr = addresses[network]?.WitnetDeployer || addresses?.default?.WitnetDeployer || ""
   if (
-    utils.isNullAddress(factoryAddr)
-      || (await web3.eth.getCode(factoryAddr)).length < 3
+    utils.isNullAddress(factoryAddr) ||
+      (await web3.eth.getCode(factoryAddr)).length < 3
   ) {
     await deployer.deploy(WitnetDeployer, { from: master })
     const factory = await WitnetDeployer.deployed()

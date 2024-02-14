@@ -24,7 +24,7 @@ module.exports = {
   },
   getNetworks: () => {
     return Object.fromEntries(Object.entries(networks)
-      .filter(entry => entry[0].indexOf(":") >-1)
+      .filter(entry => entry[0].indexOf(":") > -1)
       .map(entry => {
         const [ecosystem, network] = utils.getRealmNetworkFromString(entry[0])
         return [
@@ -32,10 +32,10 @@ module.exports = {
             { ...networks.default },
             networks[ecosystem],
             networks[entry[0]]
-          )
-        ];
+          ),
+        ]
       })
-    );
+    )
   },
   getSpecs: (network) => {
     const [eco, net] = utils.getRealmNetworkFromArgs(network)

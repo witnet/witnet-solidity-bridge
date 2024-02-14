@@ -12,20 +12,20 @@ module.exports = {
       )
       return {
         WitnetPriceFeeds: merged?.WitnetPriceFeeds,
-        WitnetRequestBoard: merged?.WitnetRequestBoard,        
+        WitnetRequestBoard: merged?.WitnetRequestBoard,
       }
     } else {
       return {}
     }
   },
   supportedEcosystems: () => {
-    let ecosystems = []
+    const ecosystems = []
     supportedNetworks().forEach(network => {
-      const [ecosystem,] = utils.getRealmNetworkFromString(network)
+      const [ecosystem] = utils.getRealmNetworkFromString(network)
       if (!ecosystems.includes(ecosystem)) {
         ecosystems.push(ecosystem)
       }
-    });
+    })
     return ecosystems
   },
   supportedNetworks,
@@ -37,13 +37,13 @@ module.exports = {
     WitnetRequestFactory: require("../artifacts/contracts/WitnetRequestFactory.sol/WitnetRequestFactory.json"),
     WitnetRequestTemplate: require("../artifacts/contracts/WitnetRequestTemplate.sol/WitnetRequestTemplate.json"),
     WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json"),
-    IWitnetPriceSolver: require("../artifacts/contracts/interfaces/V2/IWitnetPriceSolver.sol/IWitnetPriceSolver.json")
+    IWitnetPriceSolver: require("../artifacts/contracts/interfaces/V2/IWitnetPriceSolver.sol/IWitnetPriceSolver.json"),
   },
   settings: require("../settings"),
   utils,
 }
 
-function supportedNetworks(ecosystem) {
+function supportedNetworks (ecosystem) {
   return Object
     .entries(addresses)
     .filter(value => value[0].indexOf(":") > -1 && (!ecosystem || value[0].startsWith(ecosystem)))
