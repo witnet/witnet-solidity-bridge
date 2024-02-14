@@ -31,7 +31,7 @@ module.exports = {
   supportedNetworks,
   artifacts: {
     WitnetOracle: require("../artifacts/contracts/WitnetOracle.sol/WitnetOracle.json"),
-    WitnetPriceFeeds: require("../artifacts/contracts/apps/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
+    WitnetPriceFeeds: require("../artifacts/contracts/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
     WitnetPriceFeedRoute: require("../artifacts/contracts/interfaces/IWitnetPriceSolver.sol/IWitnetPriceSolver.json"),
     WitnetRequest: require("../artifacts/contracts/WitnetRequest.sol/WitnetRequest.json"),
     WitnetRequestBytecodes: require("../artifacts/contracts/WitnetRequestBytecodes.sol/WitnetRequestBytecodes.json"),
