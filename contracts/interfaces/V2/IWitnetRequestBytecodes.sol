@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../../libs/Witnet.sol";
 
-interface IWitnetBytecodes {
+interface IWitnetRequestBytecodes {
 
     error UnknownRadonRetrieval(bytes32 hash);
     error UnknownRadonReducer(bytes32 hash);

@@ -277,7 +277,7 @@ contract WitnetPriceFeedsDefault
         }
     }
 
-    function registry() public view virtual override returns (WitnetBytecodes) {
+    function registry() public view virtual override returns (WitnetRequestBytecodes) {
         return WitnetRequestBoard(address(witnet)).registry();
     }
 

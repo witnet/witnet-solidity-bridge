@@ -3,8 +3,8 @@
 pragma solidity >=0.8.4 <0.9.0;
 
 import "../WitnetUpgradableBase.sol";
-import "../../WitnetBytecodes.sol";
-import "../../data/WitnetBytecodesData.sol";
+import "../../WitnetRequestBytecodes.sol";
+import "../../data/WitnetRequestBytecodesData.sol";
 import "../../libs/WitnetEncodingLib.sol";
 
 /// @title Witnet Request Board EVM-default implementation contract.
@@ -12,10 +12,10 @@ import "../../libs/WitnetEncodingLib.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetBytecodesDefault
+contract WitnetRequestBytecodesDefault
     is 
-        WitnetBytecodes,
-        WitnetBytecodesData,
+        WitnetRequestBytecodes,
+        WitnetRequestBytecodesData,
         WitnetUpgradableBase
 {   
     using Witnet for bytes;
@@ -28,7 +28,7 @@ contract WitnetBytecodesDefault
     using WitnetEncodingLib for Witnet.RadonSLA;
     using WitnetEncodingLib for Witnet.RadonDataTypes;
 
-    bytes4 public immutable override specs = type(IWitnetBytecodes).interfaceId;
+    bytes4 public immutable override specs = type(IWitnetRequestBytecodes).interfaceId;
     
     constructor(bool _upgradable, bytes32 _versionTag)
         Ownable(address(msg.sender))
@@ -40,7 +40,7 @@ contract WitnetBytecodesDefault
     {}
 
     receive() external payable {
-        revert("WitnetBytecodesDefault: no transfers");
+        revert("WitnetRequestBytecodesDefault: no transfers");
     }
 
     
@@ -108,14 +108,14 @@ contract WitnetBytecodesDefault
         } else {
             // only owner can initialize:
             if (msg.sender != _owner) {
-                revert("WitnetBytecodesDefault: not the owner");
+                revert("WitnetRequestBytecodesDefault: not the owner");
             }
         }
 
         if (__bytecodes().base != address(0)) {
             // current implementation cannot be initialized more than once:
             if(__bytecodes().base == base()) {
-                revert("WitnetBytecodesDefault: already initialized");
+                revert("WitnetRequestBytecodesDefault: already initialized");
             }
         }        
         __bytecodes().base = base();
@@ -140,7 +140,7 @@ contract WitnetBytecodesDefault
 
 
     // ================================================================================================================
-    // --- Implementation of 'IWitnetBytecodes' -----------------------------------------------------------------------
+    // --- Implementation of 'IWitnetRequestBytecodes' -----------------------------------------------------------------------
 
     function bytecodeOf(bytes32 _radHash)
         public view
@@ -414,12 +414,12 @@ contract WitnetBytecodesDefault
         
             // Check that at least one source is provided;
             if (_retrievalsIds.length == 0) {
-                revert("WitnetBytecodesDefault: no retrievals");
+                revert("WitnetRequestBytecodesDefault: no retrievals");
             }
             
             // Check that number of args arrays matches the number of sources:
             if ( _retrievalsIds.length != _args.length) {
-                revert("WitnetBytecodesDefault: args mismatch");
+                revert("WitnetRequestBytecodesDefault: args mismatch");
             }
             
             // Check sources and tally reducers:
@@ -435,11 +435,11 @@ contract WitnetBytecodesDefault
                 if (_ix == 0) {
                     _resultDataType = _retrievals[0].resultDataType;
                 } else if (_retrievals[_ix].resultDataType != _resultDataType) {
-                    revert("WitnetBytecodesDefault: mismatching retrievals");
+                    revert("WitnetRequestBytecodesDefault: mismatching retrievals");
                 }
                 // check enough args are provided for each source
                 if (_args[_ix].length < uint(_retrievals[_ix].argsCount)) {
-                    revert("WitnetBytecodesDefault: missing args");
+                    revert("WitnetRequestBytecodesDefault: missing args");
                 }
             }
 
@@ -454,7 +454,7 @@ contract WitnetBytecodesDefault
                 _resultMaxSize
             );
             if (_bytecode.length > 65535) {
-                revert("WitnetBytecodesDefault: too heavy request");
+                revert("WitnetRequestBytecodesDefault: too heavy request");
             }
         
             // Calculate radhash and add request metadata and rad bytecode to storage:

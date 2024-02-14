@@ -1,6 +1,6 @@
 module.exports = {
   default: {
-    WitnetBytecodes: "WitnetBytecodesDefault",
+    WitnetRequestBytecodes: "WitnetRequestBytecodesDefault",
     WitnetEncodingLib: "WitnetEncodingLib",
     WitnetErrorsLib: "WitnetErrorsLib",
     WitnetPriceFeeds: "WitnetPriceFeedsDefault",
@@ -22,16 +22,16 @@ module.exports = {
     WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
   },
   "polygon.zkevm.goerli": {
-    WitnetBytecodes: "WitnetBytecodesNoSha256",
+    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   "polygon.zkevm.mainnet": {
-    WitnetBytecodes: "WitnetBytecodesNoSha256",
+    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   reef: {
     WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
   },
   scroll: {
-    WitnetBytecodes: "WitnetBytecodesNoSha256",
+    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   "syscoin.rollux.testnet": {
     WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",

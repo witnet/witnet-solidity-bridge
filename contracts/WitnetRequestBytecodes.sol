@@ -3,14 +3,14 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./interfaces/V2/IWitnetBytecodes.sol";
+import "./interfaces/V2/IWitnetRequestBytecodes.sol";
 
-abstract contract WitnetBytecodes
+abstract contract WitnetRequestBytecodes
     is
-        IWitnetBytecodes
+        IWitnetRequestBytecodes
 {
     function class() virtual external view returns (string memory) {
-        return type(WitnetBytecodes).name;
+        return type(WitnetRequestBytecodes).name;
     }   
     function specs() virtual external view returns (bytes4);
 }

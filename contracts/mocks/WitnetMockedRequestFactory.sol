@@ -18,7 +18,7 @@ contract WitnetMockedRequestFactory
     constructor (WitnetMockedRequestBoard _wrb)
         WitnetRequestFactoryDefault(
             WitnetRequestBoard(address(_wrb)),
-            WitnetBytecodes(_wrb.registry()),
+            WitnetRequestBytecodes(_wrb.registry()),
             false,
             bytes32("mocked")
         ) 

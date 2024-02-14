@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../WitnetUpgradableBase.sol";
-import "../../WitnetBytecodes.sol";
+import "../../WitnetRequestBytecodes.sol";
 import "../../WitnetRequestFactory.sol";
 import "../../data/WitnetRequestFactoryData.sol";
 import "../../patterns/Clonable.sol";
@@ -18,7 +18,7 @@ contract WitnetRequestFactoryDefault
         WitnetUpgradableBase        
 {
     /// @notice Reference to Witnet Data Requests Bytecode Registry.
-    WitnetBytecodes immutable public override(WitnetRequestFactory, WitnetRequestTemplate) registry;
+    WitnetRequestBytecodes immutable public override(WitnetRequestFactory, WitnetRequestTemplate) registry;
 
      /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
     WitnetRequestBoard immutable public override(WitnetRequestFactory, WitnetRequestTemplate) witnet;
@@ -50,7 +50,7 @@ contract WitnetRequestFactoryDefault
 
     constructor(
             WitnetRequestBoard _witnet,
-            WitnetBytecodes _registry,
+            WitnetRequestBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag
         )
@@ -308,7 +308,7 @@ contract WitnetRequestFactoryDefault
         __proxiable().implementation = base();
 
         require(address(registry).code.length > 0, "WitnetRequestFactoryDefault: inexistent requests registry");
-        require(registry.specs() == type(IWitnetBytecodes).interfaceId, "WitnetRequestFactoryDefault: uncompliant requests registry");
+        require(registry.specs() == type(IWitnetRequestBytecodes).interfaceId, "WitnetRequestFactoryDefault: uncompliant requests registry");
         
         emit Upgraded(msg.sender, base(), codehash(), version());
     }

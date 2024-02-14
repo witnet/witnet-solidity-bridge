@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../WitnetBytecodes.sol";
+import "../../WitnetRequestBytecodes.sol";
 import "../../WitnetRequestBoard.sol";
 
 interface IWitnetFeeds {
@@ -16,7 +16,7 @@ interface IWitnetFeeds {
     
     function dataType() external view returns (Witnet.RadonDataTypes);
     function prefix() external view returns (string memory);
-    function registry() external view returns (WitnetBytecodes);
+    function registry() external view returns (WitnetRequestBytecodes);
     function witnet() external view returns (WitnetRequestBoard);
     
     function defaultRadonSLA() external view returns (Witnet.RadonSLA memory);

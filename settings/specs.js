@@ -1,6 +1,6 @@
 module.exports = {
   default: {
-    WitnetBytecodes: {
+    WitnetRequestBytecodes: {
       libs: ["WitnetEncodingLib"],
       vanity: 2561527884, // 0x0000B677d4a6d20C3B087c52A36E4Bed558De000
     },

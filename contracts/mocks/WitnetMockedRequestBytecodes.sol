@@ -3,16 +3,16 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../core/defaults/WitnetBytecodesDefault.sol";
+import "../core/defaults/WitnetRequestBytecodesDefault.sol";
 
-/// @title Mocked implementation of `WitnetBytecodes`.
+/// @title Mocked implementation of `WitnetRequestBytecodes`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
 /// @dev ON SUPPORTED TESTNETS AND MAINNETS, PLEASE USE 
-/// @dev THE `WitnetBytecodes` CONTRACT ADDRESS PROVIDED 
+/// @dev THE `WitnetRequestBytecodes` CONTRACT ADDRESS PROVIDED 
 /// @dev BY THE WITNET FOUNDATION.
-contract WitnetMockedBytecodes is WitnetBytecodesDefault {
+contract WitnetMockedRequestBytecodes is WitnetRequestBytecodesDefault {
     constructor()
-        WitnetBytecodesDefault(
+        WitnetRequestBytecodesDefault(
             false,
             bytes32("mocked")
         )

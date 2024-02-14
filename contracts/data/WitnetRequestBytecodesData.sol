@@ -6,7 +6,7 @@ import "../libs/WitnetV2.sol";
 
 /// @title Witnet Request Board base data model. 
 /// @author The Witnet Foundation.
-abstract contract WitnetBytecodesData {
+abstract contract WitnetRequestBytecodesData {
     
     bytes32 private constant _WITNET_BYTECODES_DATA_SLOTHASH =
         /* keccak256("io.witnet.bytecodes.data") */

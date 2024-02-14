@@ -37,7 +37,7 @@ abstract contract WitnetRequestBoardTrustableBase
     using WitnetV2 for WitnetV2.Response;
 
     bytes4 public immutable override specs = type(IWitnetRequestBoard).interfaceId;
-    WitnetBytecodes immutable public override registry;
+    WitnetRequestBytecodes immutable public override registry;
     
     WitnetRequestFactory immutable private __factory;
 
@@ -64,7 +64,7 @@ abstract contract WitnetRequestBoardTrustableBase
     
     constructor(
             WitnetRequestFactory _factory,
-            WitnetBytecodes _registry,
+            WitnetRequestBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag,
             address _currency
@@ -198,7 +198,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
     /// @param gasPrice Expected gas price to pay upon posting the data request.
-    /// @param radHash The hash of some Witnet Data Request previously posted in the WitnetBytecodes registry.
+    /// @param radHash The hash of some Witnet Data Request previously posted in the WitnetRequestBytecodes registry.
     function estimateBaseFee(uint256 gasPrice, bytes32 radHash)
         override
         public view
@@ -415,7 +415,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
     /// @notice transferred to the reporter who relays back the Witnet-provable result to this request.
     /// @dev Reasons to fail:
-    /// @dev - the RAD hash was not previously verified by the WitnetBytecodes registry;
+    /// @dev - the RAD hash was not previously verified by the WitnetRequestBytecodes registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
     /// @param _queryRAD The RAD hash of the data request to be solved by Witnet.
@@ -447,7 +447,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @notice will be triggered, and the Witnet audit trail will be saved in storage, but not so the actual CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitnetConsumer interface;
-    /// @dev - the RAD hash was not previously verified by the WitnetBytecodes registry;
+    /// @dev - the RAD hash was not previously verified by the WitnetRequestBytecodes registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - zero callback gas limit is provided;
     /// @dev - insufficient value is paid as reward.

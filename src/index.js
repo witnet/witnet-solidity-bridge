@@ -30,7 +30,7 @@ module.exports = {
   },
   supportedNetworks,
   artifacts: {
-    WitnetBytecodes: require("../artifacts/contracts/WitnetBytecodes.sol/WitnetBytecodes.json"),
+    WitnetRequestBytecodes: require("../artifacts/contracts/WitnetRequestBytecodes.sol/WitnetRequestBytecodes.json"),
     WitnetPriceFeeds: require("../artifacts/contracts/apps/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
     WitnetRequest: require("../artifacts/contracts/WitnetRequest.sol/WitnetRequest.json"),
     WitnetRequestBoard: require("../artifacts/contracts/WitnetRequestBoard.sol/WitnetRequestBoard.json"),

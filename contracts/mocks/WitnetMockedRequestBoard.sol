@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetMockedBytecodes.sol";
+import "./WitnetMockedRequestBytecodes.sol";
 import "./WitnetMockedRequestFactory.sol";
 import "../core/defaults/WitnetRequestBoardTrustableDefault.sol";
 
@@ -20,10 +20,10 @@ contract WitnetMockedRequestBoard
 {
     WitnetRequestFactory private __factory;
 
-    constructor(WitnetMockedBytecodes _registry) 
+    constructor(WitnetMockedRequestBytecodes _registry) 
         WitnetRequestBoardTrustableDefault(
             WitnetRequestFactory(address(0)), 
-            WitnetBytecodes(address(_registry)),
+            WitnetRequestBytecodes(address(_registry)),
             false,
             bytes32("mocked"),
             60000, 65000, 70000, 20000

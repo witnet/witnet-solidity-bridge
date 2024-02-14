@@ -12,7 +12,7 @@ interface IWitnetRequestBoard {
     function estimateBaseFee(uint256 gasPrice, uint16 resultMaxSize) external view returns (uint256);
 
     /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Fails if the RAD hash was not previously verified on the WitnetBytecodes registry.
+    /// @dev Fails if the RAD hash was not previously verified on the WitnetRequestBytecodes registry.
     /// @param gasPrice Expected gas price to pay upon posting the data request.
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     function estimateBaseFee(uint256 gasPrice, bytes32 radHash) external view returns (uint256);
@@ -87,7 +87,7 @@ interface IWitnetRequestBoard {
     /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
     /// @notice transferred to the reporter who relays back the Witnet-provable result to this request.
     /// @dev Reasons to fail:
-    /// @dev - the RAD hash was not previously verified by the WitnetBytecodes registry;
+    /// @dev - the RAD hash was not previously verified by the WitnetRequestBytecodes registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
     /// @param queryRAD The RAD hash of the data request to be solved by Witnet.
@@ -105,7 +105,7 @@ interface IWitnetRequestBoard {
     /// @notice will be triggered, and the Witnet audit trail will be saved in storage, but not so the actual CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitnetConsumer interface;
-    /// @dev - the RAD hash was not previously verified by the WitnetBytecodes registry;
+    /// @dev - the RAD hash was not previously verified by the WitnetRequestBytecodes registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
     /// @param queryRAD The RAD hash of the data request to be solved by Witnet.

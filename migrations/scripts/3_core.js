@@ -13,14 +13,14 @@ module.exports = async function (_, network, [, from]) {
   const specs = settings.getSpecs(network)
   const targets = settings.getArtifacts(network)
 
-  // Deploy/upgrade WitnetBytecodes target implementation, if required
+  // Deploy/upgrade WitnetRequestBytecodes target implementation, if required
   await deploy({
     network,
     targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetBytecodes.from || from,
-    key: targets.WitnetBytecodes,
-    libs: specs.WitnetBytecodes.libs,
-    immutables: specs.WitnetBytecodes.immutables,
+    from: utils.isDryRun(network) ? from : specs.WitnetRequestBytecodes.from || from,
+    key: targets.WitnetRequestBytecodes,
+    libs: specs.WitnetRequestBytecodes.libs,
+    immutables: specs.WitnetRequestBytecodes.immutables,
     intrinsics: {
       types: ["bool", "bytes32"],
       values: [
@@ -42,7 +42,7 @@ module.exports = async function (_, network, [, from]) {
       types: ["address", "address", "bool", "bytes32"],
       values: [
         /* _witnet     */ await determineProxyAddr(from, specs.WitnetRequestBoard?.vanity || 3),
-        /* _registry   */ await determineProxyAddr(from, specs.WitnetBytecodes?.vanity || 1),
+        /* _registry   */ await determineProxyAddr(from, specs.WitnetRequestBytecodes?.vanity || 1),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],
@@ -61,7 +61,7 @@ module.exports = async function (_, network, [, from]) {
       types: ["address", "address", "bool", "bytes32"],
       values: [
         /* _factory    */ await determineProxyAddr(from, specs.WitnetRequestFactory?.vanity || 2),
-        /* _registry   */ await determineProxyAddr(from, specs.WitnetBytecodes?.vanity || 1),
+        /* _registry   */ await determineProxyAddr(from, specs.WitnetRequestBytecodes?.vanity || 1),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],

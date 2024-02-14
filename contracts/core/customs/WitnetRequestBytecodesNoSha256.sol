@@ -3,12 +3,12 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../defaults/WitnetBytecodesDefault.sol";
+import "../defaults/WitnetRequestBytecodesDefault.sol";
 
-contract WitnetBytecodesNoSha256 is WitnetBytecodesDefault {
+contract WitnetRequestBytecodesNoSha256 is WitnetRequestBytecodesDefault {
 
     constructor(bool _upgradable, bytes32 _versionTag)
-        WitnetBytecodesDefault(_upgradable, _versionTag)
+        WitnetRequestBytecodesDefault(_upgradable, _versionTag)
     {}
     
     function _witnetHash(bytes memory chunk) virtual override internal pure returns (bytes32) {

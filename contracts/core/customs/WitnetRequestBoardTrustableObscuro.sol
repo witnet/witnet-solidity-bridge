@@ -18,7 +18,7 @@ contract WitnetRequestBoardTrustableObscuro
 {
     constructor(
             WitnetRequestFactory _factory,
-            WitnetBytecodes _registry,
+            WitnetRequestBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasBase,

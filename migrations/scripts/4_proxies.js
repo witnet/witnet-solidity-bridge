@@ -17,7 +17,7 @@ module.exports = async function (_, network, [, from, reporter]) {
   const specs = settings.getSpecs(network)
 
   const singletons = [
-    "WitnetBytecodes",
+    "WitnetRequestBytecodes",
     "WitnetRequestFactory",
     "WitnetRequestBoard",
     "WitnetPriceFeeds",

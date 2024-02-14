@@ -3,11 +3,11 @@ const { expectEvent, expectRevert } = require("@openzeppelin/test-helpers")
 const { assert } = require("chai")
 const { expectRevertCustomError } = require("custom-error-test-helper")
 
-const WitnetBytecodes = artifacts.require("WitnetBytecodesDefault")
+const WitnetRequestBytecodes = artifacts.require("WitnetRequestBytecodesDefault")
 const WitnetEncodingLib = artifacts.require("WitnetEncodingLib")
 const WitnetV2 = artifacts.require("WitnetV2")
 
-contract("WitnetBytecodes", (accounts) => {
+contract("WitnetRequestBytecodes", (accounts) => {
   const creatorAddress = accounts[0]
   const firstOwnerAddress = accounts[1]
   const unprivilegedAddress = accounts[4]
@@ -15,8 +15,8 @@ contract("WitnetBytecodes", (accounts) => {
   let bytecodes
 
   before(async () => {
-    await WitnetBytecodes.link(WitnetEncodingLib, WitnetEncodingLib.address)
-    bytecodes = await WitnetBytecodes.new(
+    await WitnetRequestBytecodes.link(WitnetEncodingLib, WitnetEncodingLib.address)
+    bytecodes = await WitnetRequestBytecodes.new(
       true,
       utils.fromAscii("testing")
     )
@@ -76,19 +76,19 @@ contract("WitnetBytecodes", (accounts) => {
     })
     it("cannot be initialized more than once", async () => {
       await expectRevertCustomError(
-        WitnetBytecodes,
+        WitnetRequestBytecodes,
         bytecodes.initialize("0x", { from: firstOwnerAddress }),
         "AlreadyUpgraded"
       )
       await expectRevertCustomError(
-        WitnetBytecodes,
+        WitnetRequestBytecodes,
         bytecodes.initialize("0x", { from: unprivilegedAddress }),
         "OnlyOwner"
       )
     })
   })
 
-  context("IWitnetBytecodes", async () => {
+  context("IWitnetRequestBytecodes", async () => {
     let slaHash
 
     let concathashReducerHash
@@ -658,7 +658,7 @@ contract("WitnetBytecodes", (accounts) => {
       context("radon requests", async () => {
         it("reverts if trying to get bytecode from unknown radon request", async () => {
           await expectRevertCustomError(
-            WitnetBytecodes,
+            WitnetRequestBytecodes,
             bytecodes.bytecodeOf("0x0"),
             "UnknownRadonRequest"
           )
@@ -673,7 +673,7 @@ contract("WitnetBytecodes", (accounts) => {
       context("radon slas", async () => {
         it("reverts if trying to get bytecode from unknown radon sla", async () => {
           await expectRevertCustomError(
-            WitnetBytecodes,
+            WitnetRequestBytecodes,
             bytecodes.bytecodeOf(btcUsdPriceFeedHash, "0x0"),
             "UnknownRadonSLA"
           )
@@ -699,14 +699,14 @@ contract("WitnetBytecodes", (accounts) => {
     context("hashWeightRewardOf(..)", async () => {
       it("hashing unknown radon request reverts", async () => {
         await expectRevertCustomError(
-          WitnetBytecodes,
+          WitnetRequestBytecodes,
           bytecodes.hashWeightWitsOf("0x0", slaHash),
           "UnknownRadonRequest"
         )
       })
       it("hashing unknown radon sla reverts", async () => {
         await expectRevertCustomError(
-          WitnetBytecodes,
+          WitnetRequestBytecodes,
           bytecodes.hashWeightWitsOf(btcUsdPriceFeedHash, "0x0"),
           "UnknownRadonSLA"
         )

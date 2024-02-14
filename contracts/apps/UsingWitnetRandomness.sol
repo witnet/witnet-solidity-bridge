@@ -33,7 +33,7 @@ abstract contract UsingWitnetRandomness
         // On-chain building of the Witnet Randomness Request:
         {
             WitnetRequestFactory _factory = witnet().factory();
-            WitnetBytecodes _registry = witnet().registry();
+            WitnetRequestBytecodes _registry = witnet().registry();
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
             _retrievals[0] = _registry.verifyRadonRetrieval(

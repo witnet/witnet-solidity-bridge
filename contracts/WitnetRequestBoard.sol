@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./WitnetBytecodes.sol";
+import "./WitnetRequestBytecodes.sol";
 import "./WitnetRequestFactory.sol";
 import "./interfaces/V2/IWitnetRequestBoard.sol";
 import "./interfaces/V2/IWitnetRequestBoardEvents.sol";
@@ -19,6 +19,6 @@ abstract contract WitnetRequestBoard
     }
     function channel() virtual external view returns (bytes4);
     function factory() virtual external view returns (WitnetRequestFactory);
-    function registry() virtual external view returns (WitnetBytecodes);
+    function registry() virtual external view returns (WitnetRequestBytecodes);
     function specs() virtual external view returns (bytes4);
 }

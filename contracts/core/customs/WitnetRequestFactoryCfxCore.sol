@@ -8,7 +8,7 @@ import "../defaults/WitnetRequestFactoryDefault.sol";
 contract WitnetRequestFactoryCfxCore is WitnetRequestFactoryDefault {
     constructor(
             WitnetRequestBoard _witnet,
-            WitnetBytecodes _registry,
+            WitnetRequestBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag
         )
