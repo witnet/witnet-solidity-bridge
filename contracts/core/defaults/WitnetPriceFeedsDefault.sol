@@ -42,10 +42,6 @@ contract WitnetPriceFeedsDefault
         )
     {
         witnet = _wrb;
-        __settleDefaultRadonSLA(WitnetV2.RadonSLA({
-            witnessingCommitteeSize: 7,
-            witnessingWitTotalReward: (2 * (7 + 3)) * 10 ** 8 
-        }));
     }
 
     // solhint-disable-next-line payable-fallback
@@ -89,6 +85,12 @@ contract WitnetPriceFeedsDefault
             // set owner as specified by first argument in _initData
             _owner = abi.decode(_initData, (address));
             _transferOwnership(_owner);
+            // settle default Radon SLA upon first initialization
+            __settleDefaultRadonSLA(WitnetV2.RadonSLA({
+                witnessingCommitteeSize: 7,
+                witnessingWitTotalReward: (2 * (7 + 3)) * 10 ** 8 
+            }));
+        }));
         } else {
             // only the owner can initialize:
             require(
