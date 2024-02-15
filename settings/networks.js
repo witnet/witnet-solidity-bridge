@@ -3,26 +3,6 @@ module.exports = {
     host: "localhost",
     skipDryRun: true,
   },
-  "ethereum:goerli": {
-    network_id: 5,
-    port: 8545,
-    verify: {
-      apiUrl: "https://api-goerli.etherscan.io/",
-      browserURL: "https://goerli.etherscan.io/",
-    },
-  },
-  "ethereum:mainnet": {
-    network_id: 1,
-    port: 9545,
-  },
-  "ethereum:sepolia": {
-    network_id: 11155111,
-    port: 8506,
-    verify: {
-      apiUrl: "https://api-sepolia.etherscan.io/api",
-      browserURL: "https://sepolia.etherscan.io/",
-    },
-  },
   "arbitrum:goerli": {
     network_id: 421613,
     port: 8517,
@@ -135,6 +115,26 @@ module.exports = {
   "cube:testnet": {
     port: 8522,
     network_id: 1819,
+  },
+  "ethereum:goerli": {
+    network_id: 5,
+    port: 8545,
+    verify: {
+      apiUrl: "https://api-goerli.etherscan.io/",
+      browserURL: "https://goerli.etherscan.io/",
+    },
+  },
+  "ethereum:mainnet": {
+    network_id: 1,
+    port: 9545,
+  },
+  "ethereum:sepolia": {
+    network_id: 11155111,
+    port: 8506,
+    verify: {
+      apiUrl: "https://api-sepolia.etherscan.io/api",
+      browserURL: "https://sepolia.etherscan.io/",
+    },
   },
   "dogechain:testnet": {
     port: 8519,
@@ -365,7 +365,6 @@ module.exports = {
     port: 8504,
     network_id: 443,
     gas: 6000000,
-    gasPrice: 10,
   },
   "ultron:testnet": {
     port: 8516,

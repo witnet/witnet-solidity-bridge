@@ -5,13 +5,16 @@ const utils = require("./src/utils")
 const [, target] = utils.getRealmNetworkFromArgs()
 
 module.exports = {
+  paths: {
+    sources: "./contracts",
+  },
   networks: Object.fromEntries(
     Object.entries(settings.getNetworks())
       .map(([network, config]) => {
         return [network, {
           chainId: config.network_id,
-          gas: config?.gas || "auto",
-          gasPrice: config?.gasPrice || "auto",
+          gas: config?.gas,
+          gasPrice: config?.gasPrice,
           url: `http://${config?.host || "localhost"}:${config?.port || 8545}`,
         }]
       })
@@ -25,14 +28,17 @@ module.exports = {
   etherscan: {
     apiKey: Object.fromEntries(
       Object.entries(settings.getNetworks())
-        .filter(([, config]) => config?.verify)
+        .filter(([, config]) => config?.verify !== undefined)
         .map(([network, config]) => {
           const [ecosystem] = utils.getRealmNetworkFromString(network)
-          return [network, config?.verify?.apiKey ?? `ETHERSCAN_${ecosystem.toUpperCase()}_API_KEY`]
+          const envar = `ETHERSCAN_${ecosystem.toUpperCase()}_API_KEY`
+          return [network, 
+            config?.verify?.apiKey || process.env[envar] || process.env.ETHERSCAN_API_KEY || "MY_API_KEY"
+          ]
         }),
     ),
     customChains: Object.entries(settings.getNetworks())
-      .filter(([, config]) => config?.verify)
+      .filter(([, config]) => config?.verify !== undefined)
       .map(([network, config]) => {
         return {
           network,
