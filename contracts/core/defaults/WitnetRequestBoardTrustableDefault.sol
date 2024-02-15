@@ -16,6 +16,10 @@ contract WitnetRequestBoardTrustableDefault
     is 
         WitnetRequestBoardTrustableBase
 {
+    function class() virtual override external view returns (string memory) {
+        return type(WitnetRequestBoardTrustableDefault).name;
+    }
+
     uint256 internal immutable __reportResultGasBase;
     uint256 internal immutable __reportResultWithCallbackGasBase;
     uint256 internal immutable __reportResultWithCallbackRevertGasBase;

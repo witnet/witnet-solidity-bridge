@@ -17,6 +17,10 @@ contract WitnetRequestFactoryDefault
         WitnetRequestFactoryData,
         WitnetUpgradableBase        
 {
+    function class() virtual override external view returns (string memory) {
+        return type(WitnetRequestFactoryDefault).name;
+    }
+
     /// @notice Reference to Witnet Data Requests Bytecode Registry.
     WitnetRequestBytecodes immutable public override(WitnetRequestFactory, WitnetRequestTemplate) registry;
 

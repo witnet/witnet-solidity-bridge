@@ -15,8 +15,12 @@ import "../defaults/WitnetRequestBoardTrustableDefault.sol";
 /// @author The Witnet Foundation
 contract WitnetOracleTrustableReef
     is
-        WitnetRequestBoardTrustableDefault
-{           
+        WitnetRequestBoardTrustableDefault 
+{
+    function class() virtual override external view returns (string memory) {
+        return type(WitnetOracleTrustableReef).name;
+    }
+    
     constructor(
             WitnetRequestFactory _factory,
             WitnetRequestBytecodes _registry,

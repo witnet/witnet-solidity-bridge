@@ -5,7 +5,14 @@ pragma experimental ABIEncoderV2;
 
 import "../defaults/WitnetRequestFactoryDefault.sol";
 
-contract WitnetRequestFactoryCfxCore is WitnetRequestFactoryDefault {
+contract WitnetRequestFactoryCfxCore
+    is
+        WitnetRequestFactoryDefault
+{
+    function class() virtual override external view returns (string memory) {
+        return type(WitnetRequestFactoryCfxCore).name;
+    }
+
     constructor(
             WitnetOracle _witnet,
             WitnetRequestBytecodes _registry,

@@ -16,6 +16,10 @@ contract WitnetRequestBoardTrustableObscuro
     is 
         WitnetRequestBoardTrustableDefault
 {
+    function class() virtual override external view returns (string memory) {
+        return type(WitnetRequestBoardTrustableObscuro).name;
+    }
+
     constructor(
             WitnetRequestFactory _factory,
             WitnetRequestBytecodes _registry,
@@ -37,6 +41,7 @@ contract WitnetRequestBoardTrustableObscuro
             _sstoreFromZeroGas
         )
     {}
+
 
     // ================================================================================================================
     // --- Overrides implementation of 'IWitnetOracleView' ------------------------------------------------------

@@ -28,6 +28,10 @@ contract WitnetRequestBytecodesDefault
     using WitnetEncodingLib for Witnet.RadonSLA;
     using WitnetEncodingLib for Witnet.RadonDataTypes;
 
+    function class() virtual override external view returns (string memory) {
+        return type(WitnetRequestBytecodesDefault).name;
+    }
+
     bytes4 public immutable override specs = type(IWitnetRequestBytecodes).interfaceId;
     
     constructor(bool _upgradable, bytes32 _versionTag)

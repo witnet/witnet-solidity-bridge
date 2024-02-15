@@ -26,6 +26,10 @@ contract WitnetPriceFeedsDefault
     using WitnetV2 for WitnetV2.Response;
     using WitnetV2 for WitnetV2.RadonSLA;
 
+    function class() virtual override external view returns (string memory) {
+        return type(WitnetPriceFeedsDefault).name;
+    }
+
     bytes4 immutable public override specs = type(IWitnetPriceFeeds).interfaceId;
     WitnetOracle immutable public override witnet;
     

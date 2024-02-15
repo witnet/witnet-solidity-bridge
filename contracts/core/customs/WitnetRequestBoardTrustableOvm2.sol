@@ -23,6 +23,10 @@ contract WitnetRequestBoardTrustableOvm2
 {  
     OVM_GasPriceOracle immutable public gasPriceOracleL1;
 
+    function class() virtual override external view returns (string memory) {
+        return type(WitnetRequestBoardTrustableOvm2).name;
+    }
+
     constructor(
             WitnetRequestFactory _factory,
             WitnetRequestBytecodes _registry,
