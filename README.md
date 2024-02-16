@@ -23,7 +23,7 @@ Should any artifact require customized contract implementations:
 
 - Add a new network configuration to `settings/networks`. The network name should follow the pattern `<ecosystem>:<chain-name>`.
 
-- Make sure you run an ETH/RPC provider running at the specified `host` and `port`, capable of intercepting `eth_sendTransaction` calls (e.g. [web3-ethrpc-gateway](https://github.io/witnet/web3-jsonrpc-gateway)).
+- Make sure you run an ETH/RPC provider for the specified `host` and `port`, capable of intercepting `eth_sendTransaction` calls (e.g. [web3-ethrpc-gateway](https://github.io/witnet/web3-jsonrpc-gateway)).
 
 ### Run the script
 

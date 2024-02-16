@@ -10,6 +10,7 @@ const version = `${
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
+ 
   const specs = settings.getSpecs(network)
   const targets = settings.getArtifacts(network)
 
