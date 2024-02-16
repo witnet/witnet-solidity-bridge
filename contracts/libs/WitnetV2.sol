@@ -73,6 +73,8 @@ library WitnetV2 {
         return (
             sla.witnessingFee > 0 
                 && sla.committeeSize > 0 && sla.committeeSize <= 127
+                // v1.7.x requires witnessing collateral to be greater or equal to 20 WIT:
+                && sla.witnessingFee * 100 >= 20 * 10 ** 9 
         );
     }
 
