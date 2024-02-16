@@ -10,15 +10,13 @@ abstract contract UsingWitnetRequest
     WitnetRequest immutable public dataRequest;
     
     bytes32 immutable internal __witnetRequestRadHash;
-    uint16  immutable internal __witnetResultMaxSize;
+    uint16  immutable internal __witnetQueryResultMaxSize;
  
     /// @param _witnetRequest Address of the WitnetRequest contract containing the actual data request.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
-    /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.
     constructor (
             WitnetRequest _witnetRequest,
-            uint16 _baseFeeOverheadPercentage,
-            WitnetV2.RadonSLA memory _defaultSLA
+            uint16 _baseFeeOverheadPercentage
         )
         UsingWitnet(_witnetRequest.witnet())
     {
@@ -27,9 +25,8 @@ abstract contract UsingWitnetRequest
             "UsingWitnetRequest: uncompliant WitnetRequest"
         );
         dataRequest = _witnetRequest;
-        __witnetResultMaxSize = _witnetRequest.resultDataMaxSize();
+        __witnetQueryResultMaxSize = _witnetRequest.resultDataMaxSize();
         __witnetRequestRadHash = _witnetRequest.radHash();
-        __witnetSetDefaultSLA(_defaultSLA);
         __witnetSetBaseFeeOverheadPercentage(_baseFeeOverheadPercentage);
     }
 
@@ -37,13 +34,13 @@ abstract contract UsingWitnetRequest
         virtual internal view
         returns (uint256)
     {
-        return _witnetEstimateEvmReward(__witnetResultMaxSize);
+        return _witnetEstimateEvmReward(__witnetQueryResultMaxSize);
     }
 
     function __witnetRequestData(uint256 _witnetEvmReward)
         virtual internal returns (uint256)
     {
-        return __witnetRequestData(_witnetEvmReward, _witnetDefaultSLA());
+        return __witnetRequestData(_witnetEvmReward, __witnetDefaultSLA);
     }
 
     function __witnetRequestData(

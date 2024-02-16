@@ -44,7 +44,7 @@ contract WitnetRequestBytecodesDefault
     {}
 
     receive() external payable {
-        revert("WitnetRequestBytecodesDefault: no transfers");
+        revert("WitnetRequestBytecodes: no transfers");
     }
 
     
@@ -112,14 +112,14 @@ contract WitnetRequestBytecodesDefault
         } else {
             // only owner can initialize:
             if (msg.sender != _owner) {
-                revert("WitnetRequestBytecodesDefault: not the owner");
+                revert("WitnetRequestBytecodes: not the owner");
             }
         }
 
         if (__bytecodes().base != address(0)) {
             // current implementation cannot be initialized more than once:
             if(__bytecodes().base == base()) {
-                revert("WitnetRequestBytecodesDefault: already initialized");
+                revert("WitnetRequestBytecodes: already initialized");
             }
         }        
         __bytecodes().base = base();
@@ -418,12 +418,12 @@ contract WitnetRequestBytecodesDefault
         
             // Check that at least one source is provided;
             if (_retrievalsIds.length == 0) {
-                revert("WitnetRequestBytecodesDefault: no retrievals");
+                revert("WitnetRequestBytecodes: no retrievals");
             }
             
             // Check that number of args arrays matches the number of sources:
             if ( _retrievalsIds.length != _args.length) {
-                revert("WitnetRequestBytecodesDefault: args mismatch");
+                revert("WitnetRequestBytecodes: args mismatch");
             }
             
             // Check sources and tally reducers:
@@ -439,11 +439,11 @@ contract WitnetRequestBytecodesDefault
                 if (_ix == 0) {
                     _resultDataType = _retrievals[0].resultDataType;
                 } else if (_retrievals[_ix].resultDataType != _resultDataType) {
-                    revert("WitnetRequestBytecodesDefault: mismatching retrievals");
+                    revert("WitnetRequestBytecodes: mismatching retrievals");
                 }
                 // check enough args are provided for each source
                 if (_args[_ix].length < uint(_retrievals[_ix].argsCount)) {
-                    revert("WitnetRequestBytecodesDefault: missing args");
+                    revert("WitnetRequestBytecodes: missing args");
                 }
             }
 
@@ -458,7 +458,7 @@ contract WitnetRequestBytecodesDefault
                 _resultMaxSize
             );
             if (_bytecode.length > 65535) {
-                revert("WitnetRequestBytecodesDefault: too heavy request");
+                revert("WitnetRequestBytecodes: too heavy request");
             }
         
             // Calculate radhash and add request metadata and rad bytecode to storage:

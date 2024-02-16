@@ -9,7 +9,7 @@ interface IWitnetPriceSolver {
         uint value;
         uint timestamp;
         bytes32 tallyHash;
-        WitnetV2.ResultStatus status;
+        WitnetV2.ResponseStatus status;
     }
     function class() external pure returns (string memory);
     function delegator() external view returns (address);

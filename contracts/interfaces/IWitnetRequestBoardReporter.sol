@@ -19,12 +19,12 @@ interface IWitnetRequestBoardReporter {
     /// @dev - provided `_tallyHash` is zero;
     /// @dev - length of provided `_result` is zero.
     /// @param witnetQueryId The unique identifier of the data request.
-    /// @param witnetResultTallyHash The hash of the corresponding data request transaction in Witnet.
-    /// @param witnetResultCborBytes The result itself as bytes.
+    /// @param witnetQueryResultTallyHash The hash of the corresponding data request transaction in Witnet.
+    /// @param witnetQueryResultCborBytes The result itself as bytes.
     function reportResult(
             uint256 witnetQueryId,
-            bytes32 witnetResultTallyHash,
-            bytes calldata witnetResultCborBytes
+            bytes32 witnetQueryResultTallyHash,
+            bytes calldata witnetQueryResultCborBytes
         ) external returns (uint256);
 
     /// @notice Reports the Witnet-provided result to a previously posted request.
@@ -34,14 +34,14 @@ interface IWitnetRequestBoardReporter {
     /// @dev - provided `_tallyHash` is zero;
     /// @dev - length of provided `_result` is zero.
     /// @param witnetQueryId The unique query identifier
-    /// @param witnetResultTimestamp The timestamp of the solving tally transaction in Witnet.
-    /// @param witnetResultTallyHash The hash of the corresponding data request transaction in Witnet.
-    /// @param witnetResultCborBytes The result itself as bytes.
+    /// @param witnetQueryResultTimestamp The timestamp of the solving tally transaction in Witnet.
+    /// @param witnetQueryResultTallyHash The hash of the corresponding data request transaction in Witnet.
+    /// @param witnetQueryResultCborBytes The result itself as bytes.
     function reportResult(
             uint256 witnetQueryId,
-            uint64  witnetResultTimestamp,
-            bytes32 witnetResultTallyHash,
-            bytes calldata witnetResultCborBytes
+            uint32  witnetQueryResultTimestamp,
+            bytes32 witnetQueryResultTallyHash,
+            bytes calldata witnetQueryResultCborBytes
         ) external returns (uint256);
 
     /// @notice Reports Witnet-provided results to multiple requests within a single EVM tx.
@@ -56,9 +56,9 @@ interface IWitnetRequestBoardReporter {
         
         struct BatchResult {
             uint256 queryId;
-            uint64  timestamp;
-            bytes32 tallyHash;
-            bytes   cborBytes;
+            uint32  queryResultTimestamp;
+            bytes32 queryResultTallyHash;
+            bytes   queryResultCborBytes;
         }
 
         event BatchReportError(uint256 queryId, string reason);

@@ -15,14 +15,12 @@ abstract contract WitnetRequestConsumer
     /// @param _witnetRequest Address of the WitnetRequest contract containing the actual data request.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
     /// @param _callbackGasLimit Maximum gas to be spent by the IWitnetConsumer's callback methods.
-    /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.   
     constructor(
             WitnetRequest _witnetRequest, 
             uint16 _baseFeeOverheadPercentage,
-            uint96 _callbackGasLimit,
-            WitnetV2.RadonSLA memory _defaultSLA
+            uint24 _callbackGasLimit
         )
-        UsingWitnetRequest(_witnetRequest, _baseFeeOverheadPercentage, _defaultSLA)
+        UsingWitnetRequest(_witnetRequest, _baseFeeOverheadPercentage)
         WitnetConsumer(_callbackGasLimit)
     {}
 

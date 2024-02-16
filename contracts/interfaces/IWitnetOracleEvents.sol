@@ -6,7 +6,7 @@ import "../libs/WitnetV2.sol";
 interface IWitnetOracleEvents {
     
     /// Emitted every time a new query containing some verified data request is posted to the WRB.
-    event WitnetQuery(uint256 indexed id, uint64 witReward, uint256 evmReward);
+    event WitnetQuery(uint256 indexed id, uint256 evmReward, uint64 witTotalFee);
 
     /// Emitted when a query with no callback gets reported into the WRB.
     event WitnetQueryReported(uint256 indexed id, uint256 evmGasPrice);

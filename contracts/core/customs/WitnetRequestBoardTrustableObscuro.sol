@@ -69,16 +69,15 @@ contract WitnetRequestBoardTrustableObscuro
         return WitnetRequestBoardTrustableBase.getQueryResponse(_queryId);
     }
 
-    /// @notice Retrieves the Witnet-provable CBOR-bytes result of a previously posted request.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status, or if `msg.sender` is not the actual requester.
-    /// @param _queryId The unique query identifier
-    function getQueryResult(uint256 _queryId)
+    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
+    /// @param _queryId The unique query identifier.
+    function getQueryResultError(uint256 _queryId)
         public view
         virtual override
         onlyRequester(_queryId)
-        returns (Witnet.Result memory)
+        returns (Witnet.ResultError memory)
     {
-        return WitnetRequestBoardTrustableBase.getQueryResult(_queryId);
+        return WitnetRequestBoardTrustableBase.getQueryResultError(_queryId);
     }
     
 }

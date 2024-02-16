@@ -8,7 +8,6 @@ import "../../WitnetOracle.sol";
 import "../../WitnetRequestFactory.sol";
 
 import "../../data/WitnetRequestBoardDataACLs.sol";
-import "../../interfaces/IWitnetRequest.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
 import "../../interfaces/IWitnetRequestBoardReporter.sol";
 import "../../interfaces/IWitnetConsumer.sol";
@@ -41,24 +40,24 @@ abstract contract WitnetRequestBoardTrustableBase
     
     WitnetRequestFactory immutable private __factory;
 
-    modifier checkCallbackRecipient(address _addr, uint96 _callbackGasLimit) {
+    modifier checkCallbackRecipient(address _addr, uint24 _callbackGasLimit) {
         require(
             _addr.code.length > 0 && IWitnetConsumer(_addr).reportableFrom(address(this)) && _callbackGasLimit > 0,
-            "WitnetRequestBoardTrustableBase: invalid callback"
+            "WitnetOracle: invalid callback"
         ); _;
     }
 
     modifier checkReward(uint256 _baseFee) {
         require(
             _getMsgValue() >= _baseFee, 
-            "WitnetRequestBoardTrustableBase: insufficient reward"
+            "WitnetOracle: insufficient reward"
         ); _;
     }
 
     modifier checkSLA(WitnetV2.RadonSLA calldata sla) {
         require(
             WitnetV2.isValid(sla), 
-            "WitnetRequestBoardTrustableBase: invalid SLA"
+            "WitnetOracle: invalid SLA"
         ); _;
     }
     
@@ -82,7 +81,7 @@ abstract contract WitnetRequestBoardTrustableBase
     }
 
     receive() external payable { 
-        revert("WitnetRequestBoardTrustableBase: no transfers accepted");
+        revert("WitnetOracle: no transfers accepted");
     }
 
     /// @dev Provide backwards compatibility for dapps bound to versions <= 0.6.1
@@ -92,7 +91,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /* solhint-disable no-complex-fallback */
     fallback() override external { 
         revert(string(abi.encodePacked(
-            "WitnetRequestBoardTrustableBase: not implemented: 0x",
+            "WitnetOracle: not implemented: 0x",
             Witnet.toHexString(uint8(bytes1(msg.sig))),
             Witnet.toHexString(uint8(bytes1(msg.sig << 8))),
             Witnet.toHexString(uint8(bytes1(msg.sig << 16))),
@@ -121,7 +120,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
     /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint96 _callbackGasLimit) virtual public view returns (uint256);
+    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint24 _callbackGasLimit) virtual public view returns (uint256);
 
     
     // ================================================================================================================
@@ -146,7 +145,7 @@ abstract contract WitnetRequestBoardTrustableBase
             // only owner can initialize:
             require(
                 msg.sender == _owner,
-                "WitnetRequestBoardTrustableBase: not the owner"
+                "WitnetOracle: not the owner"
             );
             // get reporters from _initData
             _reporters = abi.decode(_initData, (address[]));
@@ -156,23 +155,23 @@ abstract contract WitnetRequestBoardTrustableBase
             // current implementation cannot be initialized more than once:
             require(
                 __storage().base != base(),
-                "WitnetRequestBoardTrustableBase: already upgraded"
+                "WitnetOracle: already upgraded"
             );
         }        
         __storage().base = base();
 
         require(
             address(__factory).code.length > 0,
-            "WitnetRequestBoardTrustableBase: inexistent factory"
+            "WitnetOracle: inexistent factory"
         );
         require(
             __factory.specs() == type(IWitnetRequestFactory).interfaceId, 
-            "WitnetRequestBoardTrustableBase: uncompliant factory"
+            "WitnetOracle: uncompliant factory"
         );
         require(
             address(__factory.witnet()) == address(this) 
                 && address(__factory.registry()) == address(registry),
-            "WitnetRequestBoardTrustableBase: discordant factory"
+            "WitnetOracle: discordant factory"
         );
 
         // Set reporters
@@ -238,39 +237,29 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         return __storage().queries[_witnetQueryId];
     }
-    
-    /// @notice Retrieves the serialized bytecode of a previously posted Witnet Data Request.
-    /// @dev Fails if the query does not exist.
-    /// @param _witnetQueryId The unique query identifier.
-    function getQueryBytecode(uint256 _witnetQueryId)
+
+    /// Retrieves the reward currently set for the given query.
+    /// @dev Fails if the `_witnetQueryId` is not valid or, if it has already been 
+    /// @dev reported, or deleted. 
+    /// @param _witnetQueryId The unique query identifier
+    function getQueryEvmReward(uint256 _witnetQueryId)
+        override
         external view
-        virtual override
-        returns (bytes memory)
+        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
+        returns (uint256)
     {
-        require(
-            _statusOf(_witnetQueryId) != WitnetV2.QueryStatus.Unknown,
-            "WitnetRequestBoardTrustableBase: unknown query"
-        );
-        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
-        if (__request.RAD != bytes32(0)) {
-            return registry.bytecodeOf(__request.RAD);
-        } else {
-            return __request.bytecode;
-        }
+        return __seekQueryRequest(_witnetQueryId).evmReward;
     }
 
+    
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     /// @param _witnetQueryId The unique query identifier.
     function getQueryRequest(uint256 _witnetQueryId)
         external view 
         override
-        returns (bytes32, Witnet.RadonSLA memory)
+        returns (WitnetV2.Request memory)
     {
-        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
-        return (
-            __request.RAD == bytes32(0) ? registry.hashOf(__request.bytecode) : __request.RAD,
-            WitnetV2.toRadonSLA(__request.SLA).toV1()
-        );
+        return __seekQueryRequest(_witnetQueryId);
     }
 
     /// Retrieves the Witnet-provable result, and metadata, to a previously posted request.    
@@ -284,48 +273,51 @@ abstract contract WitnetRequestBoardTrustableBase
         return __seekQueryResponse(_witnetQueryId);
     }
 
-    /// @notice Retrieves the Witnet-provable CBOR-bytes result of a previously posted request.
+    /// @notice Returns query's result current status from a requester's point of view:
+    /// @notice   - 0 => Void: the query is either non-existent or deleted;
+    /// @notice   - 1 => Awaiting: the query has not yet been reported;
+    /// @notice   - 2 => Ready: the query has been succesfully solved;
+    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
     /// @param _witnetQueryId The unique query identifier.
-    function getQueryResult(uint256 _witnetQueryId)
-        public view
-        virtual override
-        returns (Witnet.Result memory)
+    function getQueryResponseStatus(uint256 _witnetQueryId)
+        virtual public view
+        returns (WitnetV2.ResponseStatus)
     {
-        // todo: fail if not in finalized status ?
-        WitnetV2.Response storage _response = __seekQueryResponse(_witnetQueryId);
-        return _response.cborBytes.resultFromCborBytes();
-    }
-
-    /// @notice Returns reference to the commit/reveal act that took place on the Witnet blockchain.
-    /// @param _witnetQueryId The unique query identifier.
-    /// @return _witnetTimestamp Timestamp at which the query was solved by the Witnet blockchain.
-    /// @return _witnetTallyHash Hash of the commit/reveal act that solved the query on the Witnet blockchain.
-    /// @return _witnetEvmFinalityBlock EVM block at which the provided data can be considered to be final.
-    function getQueryResultAuditTrail(uint256 _witnetQueryId)
-        external view
-        override
-        returns (
-            uint256 _witnetTimestamp, 
-            bytes32 _witnetTallyHash,
-            uint256 _witnetEvmFinalityBlock
-        )
-    {
-        WitnetV2.Response storage __response = __seekQueryResponse(_witnetQueryId);
-        return (
-            __response.timestamp,
-            __response.tallyHash,
-            __response.unpackEvmFinalityBlock()
-        );
+        WitnetV2.QueryStatus _queryStatus = _statusOf(_witnetQueryId);
+        if (
+            _queryStatus == WitnetV2.QueryStatus.Finalized
+                || _queryStatus == WitnetV2.QueryStatus.Reported
+        ) {
+            bytes storage __cborValues = __seekQueryResponse(_witnetQueryId).resultCborBytes;
+            // determine whether reported result is an error by peeking the first byte
+            return (__cborValues[0] == bytes1(0xd8)
+                ? (_queryStatus == WitnetV2.QueryStatus.Finalized 
+                    ? WitnetV2.ResponseStatus.Error 
+                    : WitnetV2.ResponseStatus.AwaitingError
+                ) : (_queryStatus == WitnetV2.QueryStatus.Finalized
+                    ? WitnetV2.ResponseStatus.Ready
+                    : WitnetV2.ResponseStatus.AwaitingReady
+                )
+            );
+        } else if (
+            _queryStatus == WitnetV2.QueryStatus.Posted
+                || _queryStatus == WitnetV2.QueryStatus.Undeliverable
+        ) {
+            return WitnetV2.ResponseStatus.Awaiting;
+        } else {
+            return WitnetV2.ResponseStatus.Void;
+        }
     }
 
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
     /// @param _witnetQueryId The unique query identifier.
     function getQueryResultError(uint256 _witnetQueryId)
-        override external view
+        virtual override 
+        public view
         returns (Witnet.ResultError memory)
     {
-        WitnetV2.ResultStatus _status = getQueryResultStatus(_witnetQueryId);
-        try WitnetErrorsLib.asResultError(_status, __seekQueryResponse(_witnetQueryId).cborBytes)
+        WitnetV2.ResponseStatus _status = getQueryResponseStatus(_witnetQueryId);
+        try WitnetErrorsLib.asResultError(_status, __seekQueryResponse(_witnetQueryId).resultCborBytes)
             returns (Witnet.ResultError memory _resultError)
         {
             return _resultError;
@@ -344,55 +336,6 @@ abstract contract WitnetRequestBoardTrustableBase
         }
     }
 
-    /// @notice Returns query's result current status from a requester's point of view:
-    /// @notice   - 0 => Void: the query is either non-existent or deleted;
-    /// @notice   - 1 => Awaiting: the query has not yet been reported;
-    /// @notice   - 2 => Ready: the query has been succesfully solved;
-    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
-    /// @param _witnetQueryId The unique query identifier.
-    function getQueryResultStatus(uint256 _witnetQueryId)
-        virtual public view
-        returns (WitnetV2.ResultStatus)
-    {
-        WitnetV2.QueryStatus _queryStatus = _statusOf(_witnetQueryId);
-        if (
-            _queryStatus == WitnetV2.QueryStatus.Finalized
-                || _queryStatus == WitnetV2.QueryStatus.Reported
-        ) {
-            bytes storage __cborValues = __seekQueryResponse(_witnetQueryId).cborBytes;
-            // determine whether reported result is an error by peeking the first byte
-            return (__cborValues[0] == bytes1(0xd8)
-                ? (_queryStatus == WitnetV2.QueryStatus.Finalized 
-                    ? WitnetV2.ResultStatus.Error 
-                    : WitnetV2.ResultStatus.AwaitingError
-                ) : (_queryStatus == WitnetV2.QueryStatus.Finalized
-                    ? WitnetV2.ResultStatus.Ready
-                    : WitnetV2.ResultStatus.AwaitingReady
-                )
-            );
-        } else if (
-            _queryStatus == WitnetV2.QueryStatus.Posted
-                || _queryStatus == WitnetV2.QueryStatus.Undeliverable
-        ) {
-            return WitnetV2.ResultStatus.Awaiting;
-        } else {
-            return WitnetV2.ResultStatus.Void;
-        }
-    }
-
-    /// Retrieves the reward currently set for a previously posted request.
-    /// @dev Fails if the `_witnetQueryId` is not valid or, if it has already been 
-    /// @dev reported, or deleted. 
-    /// @param _witnetQueryId The unique query identifier
-    function getQueryReward(uint256 _witnetQueryId)
-        override
-        external view
-        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
-        returns (uint256)
-    {
-        return __seekQueryRequest(_witnetQueryId).evmReward;
-    }
-
     /// Gets current status of given query.
     function getQueryStatus(uint256 _witnetQueryId)
         external view
@@ -402,6 +345,27 @@ abstract contract WitnetRequestBoardTrustableBase
         return _statusOf(_witnetQueryId);
     }
 
+    /// @notice Retrieves the Witnet Data Request bytecode of a previously posted query.
+    /// @dev Fails if the query does not exist.
+    /// @param _witnetQueryId The unique query identifier.
+    function getQueryWitnetBytecode(uint256 _witnetQueryId)
+        external view
+        virtual override
+        returns (bytes memory)
+    {
+        require(
+            _statusOf(_witnetQueryId) != WitnetV2.QueryStatus.Unknown,
+            "WitnetOracle: unknown query"
+        );
+        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        if (__request.witnetRAD != bytes32(0)) {
+            return registry.bytecodeOf(__request.witnetRAD);
+        } else {
+            return __request.witnetBytecode;
+        }
+    }
+
+    /// @notice Returns next query id to be generated by the Witnet Request Board.
     function getNextQueryId()
         external view
         override
@@ -431,12 +395,12 @@ abstract contract WitnetRequestBoardTrustableBase
         checkSLA(_querySLA)
         returns (uint256 _witnetQueryId)
     {
-        _witnetQueryId = __postRequest(_queryRAD, _querySLA.toBytes32(), 0);
+        _witnetQueryId = __postRequest(_queryRAD, _querySLA, 0);
         // Let Web3 observers know that a new request has been posted
         emit WitnetQuery(
             _witnetQueryId, 
-            _querySLA.witnessingWitTotalReward, 
-            _getMsgValue()
+            _getMsgValue(),
+            _querySLA.witTotalFee()
         );
     }
    
@@ -458,7 +422,7 @@ abstract contract WitnetRequestBoardTrustableBase
     function postRequestWithCallback(
             bytes32 _queryRAD, 
             WitnetV2.RadonSLA calldata _querySLA,
-            uint96 _queryCallbackGasLimit
+            uint24 _queryCallbackGasLimit
         )
         virtual override
         external payable 
@@ -469,13 +433,13 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         _witnetQueryId = __postRequest(
             _queryRAD,
-            _querySLA.toBytes32(),
+            _querySLA,
             _queryCallbackGasLimit
         );
         emit WitnetQuery(
             _witnetQueryId, 
-            _querySLA.witnessingWitTotalReward,
-            _getMsgValue()
+            _getMsgValue(),
+            _querySLA.witTotalFee()
         );
     }
 
@@ -497,7 +461,7 @@ abstract contract WitnetRequestBoardTrustableBase
     function postRequestWithCallback(
             bytes calldata _queryUnverifiedBytecode,
             WitnetV2.RadonSLA calldata _querySLA, 
-            uint96 _queryCallbackGasLimit
+            uint24 _queryCallbackGasLimit
         )
         virtual override
         external payable 
@@ -508,27 +472,27 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         _witnetQueryId = __postRequest(
             bytes32(0),
-            _querySLA.toBytes32(),
+            _querySLA,
             _queryCallbackGasLimit
         );
-        __seekQueryRequest(_witnetQueryId).bytecode = _queryUnverifiedBytecode;
+        __seekQueryRequest(_witnetQueryId).witnetBytecode = _queryUnverifiedBytecode;
         emit WitnetQuery(
             _witnetQueryId,
-            _querySLA.witnessingWitTotalReward,
-            _getMsgValue()
+            _getMsgValue(),
+            _querySLA.witTotalFee()
         );
     }
   
     /// Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Fails if the `_witnetQueryId` is not in 'Posted' status.
     /// @param _witnetQueryId The unique query identifier.
-    function upgradeQueryReward(uint256 _witnetQueryId)
+    function upgradeQueryEvmReward(uint256 _witnetQueryId)
         external payable
         virtual override      
         inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
     {
         WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
-        __request.evmReward += _getMsgValue();
+        __request.evmReward += uint72(_getMsgValue());
         emit WitnetQueryRewardUpgraded(_witnetQueryId, __request.evmReward);
     }
 
@@ -550,7 +514,7 @@ abstract contract WitnetRequestBoardTrustableBase
             if (_statusOf(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
                 WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryIds[_ix]);
                 _revenues += __request.evmReward;
-                _expenses += _gasPrice * __request.unpackCallbackGasLimit();
+                _expenses += _gasPrice * __request.gasCallback;
             }
         }
         return int256(_revenues) - int256(_expenses);
@@ -560,15 +524,15 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
     /// @dev Fails if:
     /// @dev - the `_witnetQueryId` is not in 'Posted' status.
-    /// @dev - provided `_witnetResultTallyHash` is zero;
+    /// @dev - provided `_witnetQueryResultTallyHash` is zero;
     /// @dev - length of provided `_result` is zero.
     /// @param _witnetQueryId The unique identifier of the data request.
-    /// @param _witnetResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
-    /// @param _witnetResultCborBytes The result itself as bytes.
+    /// @param _witnetQueryResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param _witnetQueryResultCborBytes The result itself as bytes.
     function reportResult(
             uint256 _witnetQueryId,
-            bytes32 _witnetResultTallyHash,
-            bytes calldata _witnetResultCborBytes
+            bytes32 _witnetQueryResultTallyHash,
+            bytes calldata _witnetQueryResultCborBytes
         )
         external
         override
@@ -577,22 +541,22 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint256)
     {
         require(
-            _witnetResultTallyHash != 0, 
+            _witnetQueryResultTallyHash != 0, 
             "WitnetRequestBoardTrustableDefault: tally has cannot be zero"
         );
         // Ensures the result bytes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(
-            _witnetResultCborBytes.length != 0, 
+            _witnetQueryResultCborBytes.length != 0, 
             "WitnetRequestBoardTrustableDefault: result cannot be empty"
         );
         // Do actual report:
         // solhint-disable not-rely-on-time
         return __reportResultAndReward(
             _witnetQueryId,
-            uint64(block.timestamp),
-            _witnetResultTallyHash,
-            _witnetResultCborBytes
+            uint32(block.timestamp),
+            _witnetQueryResultTallyHash,
+            _witnetQueryResultCborBytes
         );
     }
 
@@ -600,17 +564,17 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev Fails if:
     /// @dev - called from unauthorized address;
     /// @dev - the `_witnetQueryId` is not in 'Posted' status.
-    /// @dev - provided `_witnetResultTallyHash` is zero;
-    /// @dev - length of provided `_witnetResultCborBytes` is zero.
+    /// @dev - provided `_witnetQueryResultTallyHash` is zero;
+    /// @dev - length of provided `_witnetQueryResultCborBytes` is zero.
     /// @param _witnetQueryId The unique query identifier
-    /// @param _witnetResultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
-    /// @param _witnetResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
-    /// @param _witnetResultCborBytes The result itself as bytes.
+    /// @param _witnetQueryResultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
+    /// @param _witnetQueryResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param _witnetQueryResultCborBytes The result itself as bytes.
     function reportResult(
             uint256 _witnetQueryId,
-            uint64  _witnetResultTimestamp,
-            bytes32 _witnetResultTallyHash,
-            bytes calldata _witnetResultCborBytes
+            uint32  _witnetQueryResultTimestamp,
+            bytes32 _witnetQueryResultTallyHash,
+            bytes calldata _witnetQueryResultCborBytes
         )
         external
         override
@@ -619,25 +583,25 @@ abstract contract WitnetRequestBoardTrustableBase
         returns (uint256)
     {
         require(
-            _witnetResultTimestamp <= block.timestamp, 
+            _witnetQueryResultTimestamp <= block.timestamp, 
             "WitnetRequestBoardTrustableDefault: bad timestamp"
         );
         require(
-            _witnetResultTallyHash != 0, 
+            _witnetQueryResultTallyHash != 0, 
             "WitnetRequestBoardTrustableDefault: Witnet tallyHash cannot be zero"
         );
         // Ensures the result bytes do not have zero length (this would not be a valid CBOR encoding 
         // and could trigger a reentrancy attack)
         require(
-            _witnetResultCborBytes.length != 0, 
+            _witnetQueryResultCborBytes.length != 0, 
             "WitnetRequestBoardTrustableDefault: result cannot be empty"
         );
         // Do actual report and return reward transfered to the reproter:
         return  __reportResultAndReward(
             _witnetQueryId,
-            _witnetResultTimestamp,
-            _witnetResultTallyHash,
-            _witnetResultCborBytes
+            _witnetQueryResultTimestamp,
+            _witnetQueryResultTallyHash,
+            _witnetQueryResultCborBytes
         );
     }
 
@@ -664,36 +628,42 @@ abstract contract WitnetRequestBoardTrustableBase
                 if (_verbose) {
                     emit BatchReportError(
                         _batchResults[_i].queryId,
-                        "WitnetRequestBoardTrustableBase: bad queryId"
+                        "WitnetOracle: bad queryId"
                     );
                 }
-            } else if (_batchResults[_i].tallyHash == 0) {
+            } else if (_batchResults[_i].queryResultTallyHash == 0) {
                 if (_verbose) {
                     emit BatchReportError(
                         _batchResults[_i].queryId,
-                        "WitnetRequestBoardTrustableBase: bad tallyHash"
+                        "WitnetOracle: bad tallyHash"
                     );
                 }
-            } else if (_batchResults[_i].cborBytes.length == 0) {
+            } else if (_batchResults[_i].queryResultCborBytes.length == 0) {
                 if (_verbose) {
                     emit BatchReportError(
                         _batchResults[_i].queryId, 
-                        "WitnetRequestBoardTrustableBase: bad cborBytes"
+                        "WitnetOracle: bad cborBytes"
                     );
                 }
-            } else if (_batchResults[_i].timestamp > 0 && _batchResults[_i].timestamp > block.timestamp) {
+            } else if (
+                _batchResults[_i].queryResultTimestamp > 0
+                    && uint256(_batchResults[_i].queryResultTimestamp) > block.timestamp
+            ) {
                 if (_verbose) {
                     emit BatchReportError(
                         _batchResults[_i].queryId,
-                        "WitnetRequestBoardTrustableBase: bad timestamp"
+                        "WitnetOracle: bad timestamp"
                     );
                 }
             } else {
                 _batchReward += __reportResult(
                     _batchResults[_i].queryId,
-                    _batchResults[_i].timestamp == 0 ? uint64(block.timestamp) : _batchResults[_i].timestamp,
-                    _batchResults[_i].tallyHash,
-                    _batchResults[_i].cborBytes
+                    _batchResults[_i].queryResultTimestamp == uint32(0)
+                        ? uint32(block.timestamp) 
+                        : _batchResults[_i].queryResultTimestamp
+                    ,
+                    _batchResults[_i].queryResultTallyHash,
+                    _batchResults[_i].queryResultCborBytes
                 );
             }
         }   
@@ -787,36 +757,33 @@ abstract contract WitnetRequestBoardTrustableBase
         )));
     }
 
-    function __postRequest(bytes32 _radHash, bytes32 _packedSLA, uint96 _callbackGasLimit)
+    function __postRequest(bytes32 _radHash, WitnetV2.RadonSLA calldata _sla, uint24 _callbackGasLimit)
         virtual internal
         returns (uint256 _witnetQueryId)
     {
         _witnetQueryId = ++ __storage().nonce; //__newQueryId(_radHash, _packedSLA);
         WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
-        require(
-            __request.fromCallbackGas == bytes32(0), 
-            "WitnetRequestBoardTrustableBase: already posted"
-        );
+        require(__request.requester != address(0), "WitnetOracle: already posted");
         {
-            __request.fromCallbackGas = WitnetV2.packRequesterCallbackGasLimit(msg.sender, _callbackGasLimit);
-            __request.RAD = _radHash;
-            __request.SLA = _packedSLA;
-            __request.evmReward = _getMsgValue();
+            __request.requester = msg.sender;
+            __request.gasCallback = _callbackGasLimit;
+            __request.evmReward = uint72(_getMsgValue());
+            __request.witnetRAD = _radHash;
+            __request.witnetSLA = _sla;
         }
     }
 
     function __reportResult(
             uint256 _witnetQueryId,
-            uint64  _witnetResultTimestamp,
-            bytes32 _witnetResultTallyHash,
-            bytes calldata _witnetResultCborBytes
+            uint32  _witnetQueryResultTimestamp,
+            bytes32 _witnetQueryResultTallyHash,
+            bytes calldata _witnetQueryResultCborBytes
         )
         virtual internal
         returns (uint256 _evmReward)
     {
         // read requester address and whether a callback was requested:
         WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
-        (address _evmRequester, uint96 _evmCallbackGasLimit) = __request.unpackRequesterAndCallbackGasLimit();
                 
         // read query EVM reward:
         _evmReward = __request.evmReward;
@@ -825,18 +792,18 @@ abstract contract WitnetRequestBoardTrustableBase
         __request.evmReward = 0; 
 
         // determine whether a callback is required
-        if (_evmCallbackGasLimit > 0) {
+        if (__request.gasCallback > 0) {
             (
                 uint256 _evmCallbackActualGas,
                 bool _evmCallbackSuccess,
                 string memory _evmCallbackRevertMessage
             ) = __reportResultCallback(
                 _witnetQueryId,
-                _witnetResultTimestamp,
-                _witnetResultTallyHash,
-                _witnetResultCborBytes,
-                _evmRequester,
-                _evmCallbackGasLimit
+                _witnetQueryResultTimestamp,
+                _witnetQueryResultTallyHash,
+                _witnetQueryResultCborBytes,
+                __request.requester,
+                __request.gasCallback
             );
             if (_evmCallbackSuccess) {
                 // => the callback run successfully
@@ -849,20 +816,20 @@ abstract contract WitnetRequestBoardTrustableBase
                 // as it was already passed over to the requester:
                 __writeQueryResponse(
                     _witnetQueryId, 
-                    _witnetResultTimestamp, 
-                    _witnetResultTallyHash, 
+                    _witnetQueryResultTimestamp, 
+                    _witnetQueryResultTallyHash, 
                     hex""
                 );
             } else {
                 // => the callback reverted
                 emit WitnetResponseDeliveryFailed(
                     _witnetQueryId,
-                    _witnetResultCborBytes,
+                    _witnetQueryResultCborBytes,
                     _getGasPrice(),
                     _evmCallbackActualGas,
                     bytes(_evmCallbackRevertMessage).length > 0 
                         ? _evmCallbackRevertMessage
-                        : "WitnetRequestBoardTrustableBase: callback exceeded gas limit"
+                        : "WitnetOracle: callback exceeded gas limit"
                 );
                 // upon failing delivery, only the witnet result tally hash is saved into storage,
                 // as to distinguish Reported vs Undelivered status. The query result is not saved 
@@ -870,7 +837,7 @@ abstract contract WitnetRequestBoardTrustableBase
                 __writeQueryResponse(
                     _witnetQueryId, 
                     0, 
-                    _witnetResultTallyHash, 
+                    _witnetQueryResultTallyHash, 
                     hex""
                 );
             }
@@ -883,27 +850,27 @@ abstract contract WitnetRequestBoardTrustableBase
             // write query result and audit trail data into storage 
             __writeQueryResponse(
                 _witnetQueryId,
-                _witnetResultTimestamp,
-                _witnetResultTallyHash,
-                _witnetResultCborBytes
+                _witnetQueryResultTimestamp,
+                _witnetQueryResultTallyHash,
+                _witnetQueryResultCborBytes
             );
         }
     }
 
     function __reportResultAndReward(
             uint256 _witnetQueryId,
-            uint64  _witnetResultTimestamp,
-            bytes32 _witnetResultTallyHash,
-            bytes calldata _witnetResultCborBytes
+            uint32  _witnetQueryResultTimestamp,
+            bytes32 _witnetQueryResultTallyHash,
+            bytes calldata _witnetQueryResultCborBytes
         )
         virtual internal
         returns (uint256 _evmReward)
     {
         _evmReward = __reportResult(
             _witnetQueryId, 
-            _witnetResultTimestamp, 
-            _witnetResultTallyHash, 
-            _witnetResultCborBytes
+            _witnetQueryResultTimestamp, 
+            _witnetQueryResultTallyHash, 
+            _witnetQueryResultCborBytes
         );
         // transfer reward to reporter
         __safeTransferTo(
@@ -914,9 +881,9 @@ abstract contract WitnetRequestBoardTrustableBase
 
     function __reportResultCallback(
             uint256 _witnetQueryId,
-            uint64  _witnetResultTimestamp,
-            bytes32 _witnetResultTallyHash,
-            bytes calldata _witnetResultCborBytes,
+            uint64  _witnetQueryResultTimestamp,
+            bytes32 _witnetQueryResultTallyHash,
+            bytes calldata _witnetQueryResultCborBytes,
             address _evmRequester,
             uint256 _evmCallbackGasLimit
         )
@@ -928,14 +895,14 @@ abstract contract WitnetRequestBoardTrustableBase
         )
     {
         _evmCallbackActualGas = gasleft();
-        if (_witnetResultCborBytes[0] == bytes1(0xd8)) {
-            WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(_witnetResultCborBytes).readArray();
+        if (_witnetQueryResultCborBytes[0] == bytes1(0xd8)) {
+            WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(_witnetQueryResultCborBytes).readArray();
             if (_errors.length < 2) {
                 // try to report result with unknown error:
                 try IWitnetConsumer(_evmRequester).reportWitnetQueryError{gas: _evmCallbackGasLimit}(
                     _witnetQueryId,
-                    _witnetResultTimestamp,
-                    _witnetResultTallyHash,
+                    _witnetQueryResultTimestamp,
+                    _witnetQueryResultTallyHash,
                     block.number,
                     Witnet.ResultErrorCodes.Unknown,
                     WitnetCBOR.CBOR({
@@ -955,8 +922,8 @@ abstract contract WitnetRequestBoardTrustableBase
                 // try to report result with parsable error:
                 try IWitnetConsumer(_evmRequester).reportWitnetQueryError{gas: _evmCallbackGasLimit}(
                     _witnetQueryId,
-                    _witnetResultTimestamp,
-                    _witnetResultTallyHash,
+                    _witnetQueryResultTimestamp,
+                    _witnetQueryResultTallyHash,
                     block.number,
                     Witnet.ResultErrorCodes(_errors[0].readUint()),
                     _errors[0]
@@ -970,10 +937,10 @@ abstract contract WitnetRequestBoardTrustableBase
             // try to report result result with no error :
             try IWitnetConsumer(_evmRequester).reportWitnetQueryResult{gas: _evmCallbackGasLimit}(
                 _witnetQueryId,
-                _witnetResultTimestamp,
-                _witnetResultTallyHash,
+                _witnetQueryResultTimestamp,
+                _witnetQueryResultTallyHash,
                 block.number,
-                WitnetCBOR.fromBytes(_witnetResultCborBytes)
+                WitnetCBOR.fromBytes(_witnetQueryResultCborBytes)
             ) {
                 _evmCallbackSuccess = true;
             } catch Error(string memory err) {
@@ -995,17 +962,18 @@ abstract contract WitnetRequestBoardTrustableBase
 
     function __writeQueryResponse(
             uint256 _witnetQueryId, 
-            uint64  _witnetResultTimestamp, 
-            bytes32 _witnetResultTallyHash, 
-            bytes memory _witnetResultCborBytes
+            uint32  _witnetQueryResultTimestamp, 
+            bytes32 _witnetQueryResultTallyHash, 
+            bytes memory _witnetQueryResultCborBytes
         )
         virtual internal
     {
         __seekQuery(_witnetQueryId).response = WitnetV2.Response({
-            fromFinality: WitnetV2.packReporterEvmFinalityBlock(msg.sender, block.number),
-            timestamp: _witnetResultTimestamp,
-            tallyHash: _witnetResultTallyHash,
-            cborBytes: _witnetResultCborBytes
+            reporter: msg.sender,
+            finality: uint64(block.number),
+            resultTimestamp: _witnetQueryResultTimestamp,
+            resultTallyHash: _witnetQueryResultTallyHash,
+            resultCborBytes: _witnetQueryResultCborBytes
         });
     }
 

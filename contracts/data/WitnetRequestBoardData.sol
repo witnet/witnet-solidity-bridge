@@ -36,7 +36,7 @@ abstract contract WitnetRequestBoardData {
     /// Asserts the caller actually posted the referred query.
     modifier onlyRequester(uint256 _queryId) {
         require(
-            msg.sender == __seekQueryRequest(_queryId).unpackRequester(), 
+            msg.sender == __seekQueryRequest(_queryId).requester, 
             "WitnetRequestBoardBase: not the requester"
         ); _;
     }
@@ -82,9 +82,9 @@ abstract contract WitnetRequestBoardData {
       returns (WitnetV2.QueryStatus)
     {
       WitnetV2.Query storage __query = __storage().queries[_queryId];
-      if (__query.response.tallyHash != bytes32(0)) {
-        if (__query.response.timestamp != 0) {  
-          if (block.number >= WitnetV2.unpackEvmFinalityBlock(__query.response.fromFinality)) {
+      if (__query.response.resultTallyHash != bytes32(0)) {
+        if (__query.response.resultTimestamp != 0) {  
+          if (block.number >= __query.response.finality) {
             return WitnetV2.QueryStatus.Finalized;
           } else {
             return WitnetV2.QueryStatus.Reported;
@@ -92,7 +92,7 @@ abstract contract WitnetRequestBoardData {
         } else {
           return WitnetV2.QueryStatus.Undeliverable;
         }
-      } else if (__query.request.fromCallbackGas != bytes32(0)) {
+      } else if (__query.request.requester != address(0)) {
         return WitnetV2.QueryStatus.Posted;
       } else {
         return WitnetV2.QueryStatus.Unknown;
@@ -104,13 +104,13 @@ abstract contract WitnetRequestBoardData {
       returns (string memory)
     {
       if (_status == WitnetV2.QueryStatus.Posted) {
-        return "WitnetOracle: not in Posted status";
+        return "WitnetOracle: query not in Posted status";
       } else if (_status == WitnetV2.QueryStatus.Reported) {
-        return "WitnetOracle: not in Reported status";
+        return "WitnetOracle: query not in Reported status";
       } else if (_status == WitnetV2.QueryStatus.Finalized) {
-        return "WitnetOracle: not in Finalized status";
+        return "WitnetOracle: query not in Finalized status";
       } else if (_status == WitnetV2.QueryStatus.Undeliverable) {
-        return "WitnetOracle: not in Undeliverable status";
+        return "WitnetOracle: query not in Undeliverable status";
       } else {
         return "WitnetOracle: bad mood";
       }

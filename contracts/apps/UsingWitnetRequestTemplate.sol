@@ -9,15 +9,13 @@ abstract contract UsingWitnetRequestTemplate
 {
     WitnetRequestTemplate immutable public dataRequestTemplate;
     
-    uint16 immutable internal __witnetResultMaxSize;
+    uint16 immutable internal __witnetQueryResultMaxSize;
  
     /// @param _witnetRequestTemplate Address of the WitnetRequestTemplate from which actual data requests will get built.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
-    /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.
     constructor (
             WitnetRequestTemplate _witnetRequestTemplate, 
-            uint16 _baseFeeOverheadPercentage,
-            WitnetV2.RadonSLA memory _defaultSLA
+            uint16 _baseFeeOverheadPercentage
         )
         UsingWitnet(_witnetRequestTemplate.witnet())
     {
@@ -26,8 +24,7 @@ abstract contract UsingWitnetRequestTemplate
             "UsingWitnetRequestTemplate: uncompliant WitnetRequestTemplate"
         );
         dataRequestTemplate = _witnetRequestTemplate;
-        __witnetResultMaxSize = _witnetRequestTemplate.resultDataMaxSize();
-        __witnetSetDefaultSLA(_defaultSLA);
+        __witnetQueryResultMaxSize = _witnetRequestTemplate.resultDataMaxSize();
         __witnetSetBaseFeeOverheadPercentage(_baseFeeOverheadPercentage);
     }
 
@@ -47,7 +44,7 @@ abstract contract UsingWitnetRequestTemplate
         virtual internal view
         returns (uint256)
     {
-        return _witnetEstimateEvmReward(__witnetResultMaxSize);
+        return _witnetEstimateEvmReward(__witnetQueryResultMaxSize);
     }
 
     function __witnetRequestData(
@@ -56,7 +53,7 @@ abstract contract UsingWitnetRequestTemplate
         )
         virtual internal returns (uint256)
     {
-        return __witnetRequestData(_witnetEvmReward, _witnetRequestArgs, _witnetDefaultSLA());
+        return __witnetRequestData(_witnetEvmReward, _witnetRequestArgs, __witnetDefaultSLA);
     }
 
     function __witnetRequestData(

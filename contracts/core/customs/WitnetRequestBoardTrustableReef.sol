@@ -59,7 +59,7 @@ contract WitnetOracleTrustableReef
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256, uint96 _callbackGasLimit)
+    function estimateBaseFeeWithCallback(uint256, uint24 _callbackGasLimit)
         public view
         virtual override
         returns (uint256)

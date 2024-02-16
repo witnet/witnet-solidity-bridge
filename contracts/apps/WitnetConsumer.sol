@@ -10,7 +10,7 @@ abstract contract WitnetConsumer
         UsingWitnet
 { 
     /// @dev Maximum gas to be spent by the IWitnetConsumer's callback methods.  
-    uint96 private immutable __witnetCallbackGasLimit;
+    uint24 private immutable __witnetCallbackGasLimit;
   
     modifier onlyFromWitnet {
         require(msg.sender == address(__witnet), "WitnetConsumer: unauthorized");
@@ -18,7 +18,7 @@ abstract contract WitnetConsumer
     }
 
     /// @param _callbackGasLimit Maximum gas to be spent by the IWitnetConsumer's callback methods.
-    constructor (uint96 _callbackGasLimit) {
+    constructor (uint24 _callbackGasLimit) {
         __witnetCallbackGasLimit = _callbackGasLimit;
     }
 
@@ -36,7 +36,7 @@ abstract contract WitnetConsumer
 
     function _witnetCallbackGasLimit()
         virtual internal view 
-        returns (uint96)
+        returns (uint24)
     {
         return __witnetCallbackGasLimit;
     }
@@ -62,7 +62,7 @@ abstract contract WitnetConsumer
     /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
     /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function _witnetEstimateEvmRewardWithCallback(uint96 _callbackGasLimit)
+    function _witnetEstimateEvmRewardWithCallback(uint24 _callbackGasLimit)
         virtual internal view
         returns (uint256)
     {

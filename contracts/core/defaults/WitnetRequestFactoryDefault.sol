@@ -26,7 +26,7 @@ contract WitnetRequestFactoryDefault
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
         require(
             address(this) != _BASE,
-            "WitnetRequestFactoryDefault: not a delegate call"
+            "WitnetRequestFactory: not a delegate call"
         );
         _;
     }
@@ -35,7 +35,7 @@ contract WitnetRequestFactoryDefault
         require(
             address(this) == __proxy()
                 || address(this) == base(),
-            "WitnetRequestFactoryDefault: not the factory"
+            "WitnetRequestFactory: not the factory"
         );
         _;
     }
@@ -43,7 +43,7 @@ contract WitnetRequestFactoryDefault
     modifier onlyOnTemplates {
         require(
             __witnetRequestTemplate().tally != bytes32(0),
-            "WitnetRequestFactoryDefault: not a WitnetRequestTemplate"
+            "WitnetRequestFactory: not a WitnetRequestTemplate"
         );
         _;
     }
@@ -290,7 +290,7 @@ contract WitnetRequestFactoryDefault
         } else {
             // only owner can initialize the proxy
             if (msg.sender != _owner) {
-                revert("WitnetRequestFactoryDefault: not the owner");
+                revert("WitnetRequestFactory: not the owner");
             }
         }
 
@@ -302,13 +302,13 @@ contract WitnetRequestFactoryDefault
         if (__proxiable().implementation != address(0)) {
             // same implementation cannot be initialized more than once:
             if(__proxiable().implementation == base()) {
-                revert("WitnetRequestFactoryDefault: already initialized");
+                revert("WitnetRequestFactory: already initialized");
             }
         }        
         __proxiable().implementation = base();
 
-        require(address(registry).code.length > 0, "WitnetRequestFactoryDefault: inexistent requests registry");
-        require(registry.specs() == type(IWitnetRequestBytecodes).interfaceId, "WitnetRequestFactoryDefault: uncompliant requests registry");
+        require(address(registry).code.length > 0, "WitnetRequestFactory: inexistent requests registry");
+        require(registry.specs() == type(IWitnetRequestBytecodes).interfaceId, "WitnetRequestFactory: uncompliant requests registry");
         
         emit Upgraded(msg.sender, base(), codehash(), version());
     }

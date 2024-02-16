@@ -20,7 +20,7 @@ abstract contract WitnetPriceFeedsData {
         string  caption;
         uint8   decimals;
         uint256 index;
-        uint256 latestValidQueryId;
+        uint256 lastValidQueryId;
         uint256 latestUpdateQueryId;
         bytes32 radHash;
         address solver;         // logic contract address for reducing values on routed feeds.

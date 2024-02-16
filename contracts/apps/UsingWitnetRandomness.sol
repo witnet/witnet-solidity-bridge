@@ -20,12 +20,10 @@ abstract contract UsingWitnetRandomness
     /// @param _wrb Address of the WitnetOracle contract.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
     /// @param _callbackGasLimit Maximum gas to be spent by the IWitnetConsumer's callback methods.
-    /// @param _defaultSLA Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain.
     constructor(
             WitnetOracle _wrb, 
             uint16 _baseFeeOverheadPercentage,
-            uint96 _callbackGasLimit,
-            WitnetV2.RadonSLA memory _defaultSLA
+            uint24 _callbackGasLimit
         )
         UsingWitnet(_wrb)
         WitnetConsumer(_callbackGasLimit)
@@ -62,8 +60,6 @@ abstract contract UsingWitnetRandomness
                 _template.buildRequest(new string[][](_retrievals.length))
             ).radHash();
         }
-        // Settle default randomize SLA:
-        __witnetSetDefaultSLA(_defaultSLA);
         __witnetSetBaseFeeOverheadPercentage(_baseFeeOverheadPercentage);
     }
 
@@ -85,7 +81,7 @@ abstract contract UsingWitnetRandomness
     }
 
     function __witnetRandomize(uint256 _witnetEvmReward) virtual internal returns (uint256) {
-        return __witnetRandomize(_witnetEvmReward, _witnetDefaultSLA());
+        return __witnetRandomize(_witnetEvmReward, __witnetDefaultSLA);
     }
 
     function __witnetRandomize(

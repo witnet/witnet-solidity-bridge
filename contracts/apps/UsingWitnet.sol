@@ -17,7 +17,7 @@ abstract contract UsingWitnet
     
     /// @dev Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain
     /// @dev when solving a data request.
-    bytes32 private __witnetDefaultPackedSLA;
+    WitnetV2.RadonSLA internal __witnetDefaultSLA;
 
     /// @dev Percentage over base fee to pay on every data request, 
     /// @dev as to deal with volatility of evmGasPrice and evmWitPrice during the live time of 
@@ -32,10 +32,12 @@ abstract contract UsingWitnet
             "UsingWitnet: uncompliant WitnetOracle"
         );
         __witnet = _wrb;
-        __witnetDefaultPackedSLA = WitnetV2.toBytes32(WitnetV2.RadonSLA({
-            witnessingCommitteeSize: 10, // up to 127
-            witnessingWitTotalReward: 10 ** 9 // 1.0 $WIT
-        }));
+        __witnetDefaultSLA = WitnetV2.RadonSLA({
+            // Number of nodes in the Witnet blockchain that will take part in solving the data request:
+            committeeSize: 7,
+            // Fee in $nanoWIT paid to every node in the Witnet blockchain involved in solving the data request:
+            witnessingFee: 10 ** 9  
+        });
         
         __witnetBaseFeeOverheadPercentage = 10; // defaults to 10%
     }
@@ -74,22 +76,11 @@ abstract contract UsingWitnet
         ) / 100;
     }
 
-    function _witnetCheckQueryResultAuditTrail(uint256 _witnetQueryId)
+    function _witnetCheckQueryResponseStatus(uint256 _witnetQueryId)
         internal view
-        returns (
-            uint256 _witnetResultTimestamp,
-            bytes32 _witnetResultTallyHash,
-            uint256 _witnetEvmFinalityBlock
-        )
+        returns (WitnetV2.ResponseStatus)
     {
-        return __witnet.getQueryResultAuditTrail(_witnetQueryId);
-    }
-
-    function _witnetCheckQueryResultStatus(uint256 _witnetQueryId)
-        internal view
-        returns (WitnetV2.ResultStatus)
-    {
-        return __witnet.getQueryResultStatus(_witnetQueryId);
+        return __witnet.getQueryResponseStatus(_witnetQueryId);
     }
 
     function _witnetCheckQueryResultError(uint256 _witnetQueryId)
@@ -99,16 +90,8 @@ abstract contract UsingWitnet
         return __witnet.getQueryResultError(_witnetQueryId);
     }
 
-    function _witnetDefaultSLA() virtual internal view returns (WitnetV2.RadonSLA memory) {
-        return WitnetV2.toRadonSLA(__witnetDefaultPackedSLA);
-    }
-
     function _witnetBaseFeeOverheadPercentage() virtual internal view returns (uint16) {
         return __witnetBaseFeeOverheadPercentage;
-    }
-
-    function __witnetSetDefaultSLA(WitnetV2.RadonSLA memory _defaultSLA) virtual internal {
-        __witnetDefaultPackedSLA = WitnetV2.toBytes32(_defaultSLA);
     }
 
     function __witnetSetBaseFeeOverheadPercentage(uint16 _baseFeeOverheadPercentage) virtual internal {
