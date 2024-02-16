@@ -17,6 +17,14 @@ module.exports = {
     solc: settings.getCompilers(network),
   },
   mocha: {
+    reporter: "eth-gas-reporter",
+    reporterOptions: {
+      coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+      currency: "USD",
+      gasPrice: 100,
+      excludeContracts: ["Migrations"],
+      src: "contracts",
+    },
     timeout: 300000,
     useColors: true,
   },

@@ -15,10 +15,6 @@ abstract contract WitnetPriceFeeds
         IWitnetPriceFeeds,
         IWitnetPriceSolverDeployer
 {
-    function class() override external pure returns (string memory) {
-        return type(WitnetPriceFeeds).name;
-    }
-
     constructor()
         WitnetFeeds(Witnet.RadonDataTypes.Integer, "Price-") 
     {}

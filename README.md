@@ -1,6 +1,6 @@
 # witnet-solidity-bridge
 
-Open repository containing the source code and artifacts of the smart contracts composing the **Witnet Solidity Bridge** framework, enabling smart contracts from a long selection of EVM-compatible chains to interact with the [Witnet Oracle Blockchain](https://witnet.io) for retrieving and aggregating offchain public data, and randomness.
+Open repository containing the smart contracts composing the **Witnet Solidity Bridge** framework. This framework enables Solidity developers and smart contracts operating in a long range of EVM-compatible chains to interact with the [Witnet Oracle Blockchain](https://witnet.io) for retrieving and aggregating offchain public data, and randomness.
 
 ## Install the package
 
@@ -43,3 +43,9 @@ Reasons for an upgrade to fail:
 - You have no credentials.
 - You're attempting to upgrade a contract with the same implementation logic as it currently has. 
 - The parameters passed to the upgrade call, as specified in `settings/specs` are not accepted for some reason (see actual revert message for further info).
+
+## Exported assets
+
+- [Deployed addresses.]("./migrations/addresses.json")
+- [Supported chains.]("./settings/networks/index.js")
+
