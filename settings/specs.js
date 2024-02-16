@@ -11,19 +11,19 @@ module.exports = {
         ],
       },
       libs: ["WitnetErrorsLib"],
-      vanity: 3648098779, // 0x00000eBcBDD5B6A1B4f102b165ED2C4d8B6B1000
+      vanity: 899032812, // 0x000071F0c823bD30D2Bf4CD1E829Eba5A6070000
     },
     WitnetPriceFeeds: {
       from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",
       libs: ["WitnetPriceFeedsLib"],
-      vanity: 6099024547, // 0x11111c2cC3f1af92bA0f1f554f2651cEfb858111
+      vanity: 1865150170, // 0x1111AbA2164AcdC6D291b08DfB374280035E1111
     },
     WitnetRequestBytecodes: {
       libs: ["WitnetEncodingLib"],
-      vanity: 2561527884, // 0x0000B677d4a6d20C3B087c52A36E4Bed558De000
+      vanity: 6765579443, // 0x000B61Fe075F545fd37767f40391658275900000
     },
     WitnetRequestFactory: {
-      vanity: 7945530998, // 0x0000f7Eb1d08E68C361b8A0c4a36f442c58f1000
+      vanity: 2294036679, // 0x000F4cCF726c5445626DBD6f2258482f61377000
     },
   },
   avalanche: {
