@@ -444,13 +444,13 @@ library Witnet {
     /// --- 'bytes' helper methods ------------------------------------------------------------------------------------
 
     /// @dev Transform given bytes into a Witnet.Result instance.
-    /// @param bytecode Raw bytes representing a CBOR-encoded value.
+    /// @param cborBytes Raw bytes representing a CBOR-encoded value.
     /// @return A `Witnet.Result` instance.
-    function resultFromCborBytes(bytes memory bytecode)
+    function toWitnetResult(bytes memory cborBytes)
         internal pure
         returns (Witnet.Result memory)
     {
-        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(bytecode);
+        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(cborBytes);
         return _resultFromCborValue(cborValue);
     }
 
@@ -795,7 +795,7 @@ library Witnet {
     //     });
     // }
 
-    // function witnessingWitTotalReward(Witnet.RadonSLA memory sla)
+    // function witnessingFee(Witnet.RadonSLA memory sla)
     //     internal pure returns (uint64)
     // {
     //     return sla.witnessReward * sla.numWitnesses;

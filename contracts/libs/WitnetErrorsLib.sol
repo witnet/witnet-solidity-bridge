@@ -9,6 +9,7 @@ import "./WitnetV2.sol";
 /// @author The Witnet Foundation.
 library WitnetErrorsLib {
 
+    using Witnet for bytes;
     using Witnet for uint8;
     using Witnet for uint256;
     using Witnet for Witnet.ResultErrorCodes;
@@ -30,24 +31,24 @@ library WitnetErrorsLib {
         );
     }
 
-    function asResultError(WitnetV2.ResultStatus _status, bytes memory _cborBytes)
+    function asResultError(WitnetV2.ResponseStatus _status, bytes memory _cborBytes)
         public pure
         returns (Witnet.ResultError memory)
     {
         if (
-            _status == WitnetV2.ResultStatus.Error
-                || _status == WitnetV2.ResultStatus.Ready
+            _status == WitnetV2.ResponseStatus.Error
+                || _status == WitnetV2.ResponseStatus.Ready
         ) {
             return resultErrorFromCborBytes(_cborBytes);
         } else if (
-            _status == WitnetV2.ResultStatus.AwaitingError 
-                || _status == WitnetV2.ResultStatus.AwaitingReady
+            _status == WitnetV2.ResponseStatus.AwaitingError 
+                || _status == WitnetV2.ResponseStatus.AwaitingReady
         ) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "WitnetErrorsLib: not yet finalized"
             });
-        } if (_status == WitnetV2.ResultStatus.Awaiting) {
+        } if (_status == WitnetV2.ResponseStatus.Awaiting) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "WitnetErrorsLib: not yet solved"
@@ -67,7 +68,7 @@ library WitnetErrorsLib {
             Witnet.ResultErrorCodes _subcode
         )
     {
-        WitnetCBOR.CBOR[] memory _errors = _errorsFromResult(Witnet.resultFromCborBytes(cborBytes));
+        WitnetCBOR.CBOR[] memory _errors = _errorsFromResult(cborBytes.toWitnetResult());
         if (_errors.length > 1) {
             _code = Witnet.ResultErrorCodes(_errors[0].readUint());
             if (_errors.length > 2) {
@@ -98,8 +99,7 @@ library WitnetErrorsLib {
         private pure
         returns(WitnetCBOR.CBOR[] memory)
     {
-        Witnet.Result memory result = Witnet.resultFromCborBytes(cborBytes);
-        return _errorsFromResult(result);
+        return _errorsFromResult(cborBytes.toWitnetResult());
     }
 
     /// @dev Extract error codes from a Witnet.Result value.
