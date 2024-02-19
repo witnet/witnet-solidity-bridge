@@ -7,14 +7,14 @@
         "WitnetRequestFactory": "0x000F4cCF726c5445626DBD6f2258482f61377000"
     },
     "ethereum:sepolia": {
+        "WitnetProxy": "0x21ac85A6c320E6fC89774A98732eAE733032651C",
         "WitnetErrorsLib": "0x77aac367a921DD2a92dfd0351456839663af248F",
         "WitnetEncodingLib": "0x967cfE0Edfc52e027849012E5dA706A9e5e62345",
         "WitnetPriceFeedsLib": "0x96013096b1305c4009bfa2C2D3e34fEcB3dD4927",
-        "WitnetRequestBoardTrustableDefault": "0x8C6F4a0DAa1e3Ea1fAcE58031e76187E61620845",
+        "WitnetRequestBoardTrustableDefault": "0x56d14506E2D86636c77Cb4Cfcd7fe32E613FD93D",
         "WitnetRequestBytecodesDefault": "0x8CE5EF0ab67cdC00D32e09f34f74daFb0d049314",
-        "WitnetRequestFactoryDefault": "0xdd118b23a2199Bf902e149dE407E205e67932bcb",
-        "WitnetPriceFeedsDefault": "0x9453CE5217a8688B2318455E82A9Fb4E89eD47b6",
-        "WitnetProxy": "0x21ac85A6c320E6fC89774A98732eAE733032651C"
+        "WitnetRequestFactoryDefault": "0xeb800BbCE619c0542Ae46DeA675D8a4495190A65",
+        "WitnetPriceFeedsDefault": "0xf5FC71e85f0eA7538E034A661c1D21C3500473FB"
     },
     "optimism:sepolia": {
         "WitnetProxy": "0xaC3E870BF8D13Dc39f76936b6AF8279eF5a9211F",
