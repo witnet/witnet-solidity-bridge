@@ -13,7 +13,6 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (_, network, [, from, reporter]) {
- 
   const targets = settings.getArtifacts(network)
   const specs = settings.getSpecs(network)
 
@@ -120,7 +119,7 @@ async function deploy (target) {
           const tx = await upgradeProxyTo(from, proxyAddr, newImpl.address, initdata)
           utils.traceTx(tx)
         } catch (ex) {
-          console.error("  ", "> Exception:\n",ex)
+          console.error("  ", "> Exception:\n", ex)
         }
       }
     } else {

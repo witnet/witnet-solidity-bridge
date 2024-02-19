@@ -10,7 +10,6 @@ const version = `${
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
- 
   const specs = settings.getSpecs(network)
   const targets = settings.getArtifacts(network)
 
@@ -134,7 +133,7 @@ async function deploy (specs) {
     // save addresses file if required
     if (!utils.isDryRun(network)) {
       await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-      const args = await utils.readJsonFromFile("./migrations/constructorArgs.json"); 
+      const args = await utils.readJsonFromFile("./migrations/constructorArgs.json")
       if (!args[network]) args[network] = {}
       args[network][key] = constructorArgs.slice(2)
       await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
@@ -148,7 +147,7 @@ async function deploy (specs) {
     const lib = artifacts.require(libname)
     contract.link(lib)
     console.info("  ", "> external library: ", `${libname}@${lib.address}`)
-  };  
+  };
   console.info("  ", "> contract address: ", contract.address)
   console.info("  ", "> contract codehash:", web3.utils.soliditySha3(await web3.eth.getCode(contract.address)))
   console.info()

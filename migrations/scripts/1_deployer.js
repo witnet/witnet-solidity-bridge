@@ -4,7 +4,6 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (deployer, network, [,,, master]) {
-
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {}
 

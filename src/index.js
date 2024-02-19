@@ -37,7 +37,7 @@ module.exports = {
     WitnetRequestBytecodes: require("../artifacts/contracts/WitnetRequestBytecodes.sol/WitnetRequestBytecodes.json"),
     WitnetRequestFactory: require("../artifacts/contracts/WitnetRequestFactory.sol/WitnetRequestFactory.json"),
     WitnetRequestTemplate: require("../artifacts/contracts/WitnetRequestTemplate.sol/WitnetRequestTemplate.json"),
-    WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json")
+    WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json"),
   },
   settings: require("../settings"),
   utils,

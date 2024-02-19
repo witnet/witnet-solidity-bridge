@@ -32,8 +32,8 @@ module.exports = {
         .map(([network, config]) => {
           const [ecosystem] = utils.getRealmNetworkFromString(network)
           const envar = `ETHERSCAN_${ecosystem.toUpperCase()}_API_KEY`
-          return [network, 
-            config?.verify?.apiKey || process.env[envar] || process.env.ETHERSCAN_API_KEY || "MY_API_KEY"
+          return [network,
+            config?.verify?.apiKey || process.env[envar] || process.env.ETHERSCAN_API_KEY || "MY_API_KEY",
           ]
         }),
     ),

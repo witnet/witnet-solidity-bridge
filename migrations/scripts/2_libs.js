@@ -4,7 +4,6 @@ const utils = require("../../src/utils")
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (_, network, [, from]) {
-
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {}
 

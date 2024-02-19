@@ -138,15 +138,21 @@ function traceTx (tx) {
   console.info("  ", "> transaction hash: ", tx.receipt.transactionHash)
   console.info("  ", "> gas used:         ", tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
   console.info("  ", "> gas price:        ", tx.receipt.effectiveGasPrice / 10 ** 9, "gwei")
-  console.info("  ", "> total cost:       ", parseFloat(BigInt(tx.receipt.gasUsed) * BigInt(tx.receipt.effectiveGasPrice) / BigInt(10 ** 18)).toString(), "ETH")
+  console.info("  ", "> total cost:       ", parseFloat(
+    BigInt(tx.receipt.gasUsed) *
+        BigInt(tx.receipt.effectiveGasPrice) /
+        BigInt(10 ** 18)
+  ).toString(),
+  "ETH"
+  )
 }
 
-function traceVerify(network, verifyArgs) {
+function traceVerify (network, verifyArgs) {
   console.log(
-      execSync(
-          `npx truffle run verify --network ${network} ${verifyArgs} ${process.argv.slice(3)}`, 
-          { stdout: 'inherit' }
-      ).toString().split("\n")
+    execSync(
+      `npx truffle run verify --network ${network} ${verifyArgs} ${process.argv.slice(3)}`,
+      { stdout: "inherit" }
+    ).toString().split("\n")
       .join("\n")
-  ); 
+  )
 }
