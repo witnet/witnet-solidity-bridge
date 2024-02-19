@@ -763,7 +763,7 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         _witnetQueryId = ++ __storage().nonce; //__newQueryId(_radHash, _packedSLA);
         WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
-        require(__request.requester != address(0), "WitnetOracle: already posted");
+        require(__request.requester == address(0), "WitnetOracle: already posted");
         {
             __request.requester = msg.sender;
             __request.gasCallback = _callbackGasLimit;
