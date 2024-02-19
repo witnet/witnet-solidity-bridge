@@ -16,7 +16,10 @@ jobs:
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
-      - run: yarn install
-      - run: yarn publish
+      - uses: pnpm/action-setup@v3
+          with:
+            version: 8
+      - run: pnpm install
+      - run: pnpm publish
         env:
           NODE_AUTH_TOKEN: ${{SECRETS.NPM_TOKEN}}

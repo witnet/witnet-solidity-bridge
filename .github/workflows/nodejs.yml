@@ -20,15 +20,18 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    - uses: pnpm/action-setup@v3
+          with:
+            version: 8
     - name: Install dependencies
       run: |
-        npm install
+        pnpm install
     - name: Check format
       run: |
-        npm run fmt
+        pnpm run fmt
     - name: Compile solidity contracts
       run: |
-        npm run compile
+        pnpm run compile
     - name: Run tests
       run: |
-        npm run test
+        pnpm run test
