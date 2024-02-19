@@ -23,7 +23,7 @@
         "WitnetPriceFeedsLib": "0x96013096b1305c4009bfa2C2D3e34fEcB3dD4927",
         "WitnetRequestBytecodesDefault": "0x02e4cC37B15C1bb2971F4E79ACcd3628918CAd32",
         "WitnetRequestFactoryDefault": "0x1A45041fC7D474C1746bDe0E7dAb4C40FdC6CB1e",
-        "WitnetRequestBoardTrustableOvm2": "0xBb2aA9F135682f9A2dE7bf99ba227b3Feec3dE17",
-        "WitnetPriceFeedsDefault": "0x4E071CBf1f629505BAd984f7361f43a5Ad07802a"
+        "WitnetRequestBoardTrustableOvm2": "0x2945425154b9EEfFdCa2b978f4ddA2B82C441Da2",
+        "WitnetPriceFeedsDefault": "0xf3718e0a04bfA2bB37cB78213c184eFEf088ad3A"
     }
 }
