@@ -1,6 +1,7 @@
 const utils = require("../../src/utils")
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
+const WitnetProxy = artifacts.require("WitnetProxy")
 
 module.exports = async function (deployer, network, [,,, master]) {
 
@@ -24,5 +25,13 @@ module.exports = async function (deployer, network, [,,, master]) {
     utils.traceHeader("Skipped 'WitnetDeployer'")
     console.info("   > Contract address:", factory.address)
     console.info()
+  }
+
+  if (utils.isNullAddress(addresses[network]?.WitnetProxy)) {
+    await deployer.deploy(WitnetProxy, { from: master })
+    addresses[network].WitnetProxy = WitnetProxy.address
+    if (!utils.isDryRun(network)) {
+      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+    }
   }
 }

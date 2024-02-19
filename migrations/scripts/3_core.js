@@ -143,6 +143,12 @@ async function deploy (specs) {
     utils.traceHeader(`Skipped '${key}'`)
   }
   contract.address = addresses[network][key]
+  for (const index in libs) {
+    const libname = libs[index]
+    const lib = artifacts.require(libname)
+    contract.link(lib)
+    console.info("  ", "> external library: ", `${libname}@${lib.address}`)
+  };  
   console.info("  ", "> contract address: ", contract.address)
   console.info("  ", "> contract codehash:", web3.utils.soliditySha3(await web3.eth.getCode(contract.address)))
   console.info()

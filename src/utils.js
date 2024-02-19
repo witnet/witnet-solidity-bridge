@@ -1,3 +1,4 @@
+const execSync = require("child_process").execSync
 const fs = require("fs")
 require("dotenv").config()
 const lockfile = require("proper-lockfile")
@@ -17,6 +18,7 @@ module.exports = {
   overwriteJsonFile,
   traceHeader,
   traceTx,
+  traceVerify,
 }
 
 function fromAscii (str) {
@@ -29,7 +31,7 @@ function fromAscii (str) {
 }
 
 function getRealmNetworkFromArgs () {
-  let networkString = process.argv.includes("test") ? "test" : "development"
+  let networkString = process.env.WSB_DEFAULT_CHAIN || process.argv.includes("test") ? "test" : "development"
   // If a `--network` argument is provided, use that instead
   const args = process.argv.join("=").split("=")
   const networkIndex = args.indexOf("--network")
@@ -136,9 +138,15 @@ function traceTx (tx) {
   console.info("  ", "> transaction hash: ", tx.receipt.transactionHash)
   console.info("  ", "> gas used:         ", tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","))
   console.info("  ", "> gas price:        ", tx.receipt.effectiveGasPrice / 10 ** 9, "gwei")
-  // console.info("  ", "> total cost:       ", web3.utils.fromWei(
-  //   BigInt(tx.receipt.gasUsed * tx.receipt.effectiveGasPrice).toString(),
-  //   "ether"
-  // ), "ETH"
-  // )
+  console.info("  ", "> total cost:       ", parseFloat(BigInt(tx.receipt.gasUsed) * BigInt(tx.receipt.effectiveGasPrice) / BigInt(10 ** 18)).toString(), "ETH")
+}
+
+function traceVerify(network, verifyArgs) {
+  console.log(
+      execSync(
+          `npx truffle run verify --network ${network} ${verifyArgs} ${process.argv.slice(3)}`, 
+          { stdout: 'inherit' }
+      ).toString().split("\n")
+      .join("\n")
+  ); 
 }
