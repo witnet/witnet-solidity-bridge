@@ -291,6 +291,15 @@ module.exports = {
       explorerUrl: "https://optimism-goerli.blockscout.com/",
     },
   },
+  "optimism:sepolia": {
+    port: 8503,
+    network_id: 11155420,
+    verify: {
+      apiKey: process.env.ETHERSCAN_API_KEY,
+      apiUrl: "https://optimism-sepolia.blockscout.com/api",
+      explorerUrl: "https://optimism-sepolia.blockscout.com/",
+    },
+  },
   "optimism:mainnet": {
     port: 9520,
     network_id: 10,

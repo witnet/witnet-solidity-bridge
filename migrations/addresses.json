@@ -15,5 +15,15 @@
         "WitnetRequestFactoryDefault": "0xdd118b23a2199Bf902e149dE407E205e67932bcb",
         "WitnetPriceFeedsDefault": "0x9453CE5217a8688B2318455E82A9Fb4E89eD47b6",
         "WitnetProxy": "0x21ac85A6c320E6fC89774A98732eAE733032651C"
+    },
+    "optimism:sepolia": {
+        "WitnetProxy": "0xaC3E870BF8D13Dc39f76936b6AF8279eF5a9211F",
+        "WitnetErrorsLib": "0x77aac367a921DD2a92dfd0351456839663af248F",
+        "WitnetEncodingLib": "0x967cfE0Edfc52e027849012E5dA706A9e5e62345",
+        "WitnetPriceFeedsLib": "0x96013096b1305c4009bfa2C2D3e34fEcB3dD4927",
+        "WitnetRequestBytecodesDefault": "0x02e4cC37B15C1bb2971F4E79ACcd3628918CAd32",
+        "WitnetRequestFactoryDefault": "0x1A45041fC7D474C1746bDe0E7dAb4C40FdC6CB1e",
+        "WitnetRequestBoardTrustableOvm2": "0xBb2aA9F135682f9A2dE7bf99ba227b3Feec3dE17",
+        "WitnetPriceFeedsDefault": "0x4E071CBf1f629505BAd984f7361f43a5Ad07802a"
     }
 }
