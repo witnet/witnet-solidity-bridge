@@ -295,31 +295,6 @@ contract WitnetRequestBytecodesDefault
         ];
     }
 
-    function lookupRadonRAD(bytes32 _radHash)
-        external view
-        override
-        returns (Witnet.RadonRAD memory rad)
-    {
-        DataRequest storage __request = __requests(_radHash);
-        rad.retrieve = new Witnet.RadonRetrieval[](__request.retrievals.length);
-        for (uint _ix = 0; _ix < rad.retrieve.length; _ix ++) {
-            rad.retrieve[_ix] = __database().retrievals[__request.retrievals[_ix]];
-        } 
-        rad.aggregate = __database().reducers[__request.aggregator];
-        rad.tally = __database().reducers[__request.tally];
-    }
-
-    // function lookupRadonSLA(bytes32 _slaHash)
-    //     external view
-    //     override
-    //     returns (Witnet.RadonSLA memory sla)
-    // {
-    //     sla = __database().slas[_slaHash];
-    //     if (sla.numWitnesses == 0) {
-    //         revert UnknownRadonSLA(_slaHash);
-    //     }
-    // }
-
     function verifyRadonRetrieval(
             Witnet.RadonDataRequestMethods _requestMethod,
             string calldata _requestURL,

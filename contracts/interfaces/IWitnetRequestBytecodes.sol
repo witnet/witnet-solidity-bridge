@@ -33,9 +33,7 @@ interface IWitnetRequestBytecodes {
     function lookupRadonRequestSources(bytes32 radHash) external view returns (bytes32[] memory);
     function lookupRadonRequestSourcesCount(bytes32 radHash) external view returns (uint);
     function lookupRadonRequestTally(bytes32 radHash) external view returns (Witnet.RadonReducer memory);
-    
-    function lookupRadonRAD(bytes32 radHash) external view returns (Witnet.RadonRAD memory);
-    
+        
     function verifyRadonRetrieval(
             Witnet.RadonDataRequestMethods requestMethod,
             string calldata requestURL,
@@ -56,10 +54,4 @@ interface IWitnetRequestBytecodes {
         ) external returns (bytes32 radHash);
 
     function totalDataProviders() external view returns (uint);
-
-    /// ===============================================================================================================
-    /// --- Deprecating methods ---------------------------------------------------------------------------------------
-
-    // function lookupRadonSLA(bytes32 slaHash) external view returns (Witnet.RadonSLA memory);
-   
 }

@@ -44,11 +44,8 @@ abstract contract WitnetRequestBytecodesData {
         
         mapping (bytes32 => Witnet.RadonReducer) reducers;
         mapping (bytes32 => Witnet.RadonRetrieval) retrievals;
-        mapping (bytes32 => Witnet.RadonSLA) _slas;
-        
         mapping (bytes32 => DataRequest) requests;
         mapping (bytes32 => bytes32) rads;
-
         mapping (bytes32 => bytes) radsBytecode;
         mapping (bytes32 => bytes) _slasBytecode;
     }
