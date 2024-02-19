@@ -7,7 +7,7 @@ const utils = require("../src/utils")
 
 module.exports = {
   getArtifacts: (network) => {
-    const [eco, net] = utils.getRealmNetworkFromArgs(network)
+    const [eco, net] = utils.getRealmNetworkFromString(network)
     return merge(
       artifacts.default,
       artifacts[eco],
@@ -15,7 +15,7 @@ module.exports = {
     )
   },
   getCompilers: (network) => {
-    const [eco, net] = utils.getRealmNetworkFromArgs(network)
+    const [eco, net] = utils.getRealmNetworkFromString(network)
     return merge(
       solidity.default,
       solidity[eco],
@@ -38,7 +38,7 @@ module.exports = {
     )
   },
   getSpecs: (network) => {
-    const [eco, net] = utils.getRealmNetworkFromArgs(network)
+    const [eco, net] = utils.getRealmNetworkFromString(network)
     return merge(
       specs.default,
       specs[eco],
