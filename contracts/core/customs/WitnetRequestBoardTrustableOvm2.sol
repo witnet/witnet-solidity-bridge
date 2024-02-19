@@ -65,7 +65,7 @@ contract WitnetRequestBoardTrustableOvm2
         returns (uint256)
     {
         return WitnetRequestBoardTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize) + (
-            _gasPrice * gasPriceOracleL1.getL1Fee(
+            gasPriceOracleL1.getL1Fee(
                 hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
             )
         );
