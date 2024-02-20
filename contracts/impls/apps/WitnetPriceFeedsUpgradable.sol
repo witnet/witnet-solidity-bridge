@@ -90,8 +90,8 @@ contract WitnetPriceFeedsUpgradable
         if (__storage().defaultSlaHash == 0) {
             settleDefaultRadonSLA(WitnetV2.RadonSLA({
                 numWitnesses: 5,
-                witnessCollateral: 15 * 10 ** 9,
-                witnessReward: 15 * 10 ** 7,
+                witnessCollateral: 20 * 10 ** 9,
+                witnessReward: 2 * 10 ** 8,
                 minerCommitRevealFee: 10 ** 7,
                 minConsensusPercentage: 51
             }));
