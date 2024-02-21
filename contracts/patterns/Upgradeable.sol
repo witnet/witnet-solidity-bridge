@@ -4,6 +4,8 @@
 
 pragma solidity >=0.6.0 <0.9.0;
 
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+
 import "./Initializable.sol";
 import "./Proxiable.sol";
 
