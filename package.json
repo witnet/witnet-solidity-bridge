@@ -29,7 +29,8 @@
   ],
   "scripts": {
     "addresses": "node ./scripts/addresses.js 2>&1",
-    "clean": "pnpm run clean:build && pnpm run clean:flattened",
+    "clean": "pnpm run clean:artifacts && pnpm run clean:build && pnpm run clean:flattened",
+    "clean:artifacts": "node ./scripts/clean.js artifacts",
     "clean:build": "node ./scripts/clean.js build",
     "clean:flattened": "node ./scripts/clean.js flattened",
     "compile": "npx truffle compile --all",
