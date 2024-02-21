@@ -1,6 +1,6 @@
 module.exports = {
   default: {
-    WitnetOracle: "WitnetRequestBoardTrustableDefault",
+    WitnetOracle: "WitnetOracleTrustableDefault",
     WitnetPriceFeeds: "WitnetPriceFeedsDefault",
     WitnetRequestBytecodes: "WitnetRequestBytecodesDefault",
     WitnetRequestFactory: "WitnetRequestFactoryDefault",
@@ -9,16 +9,16 @@ module.exports = {
     WitnetPriceFeedsLib: "WitnetPriceFeedsLib",
   },
   boba: {
-    WitnetOracle: "WitnetRequestBoardTrustableOvm2",
+    WitnetOracle: "WitnetOracleTrustableOvm2",
   },
   conflux: {
     WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
   },
   mantle: {
-    WitnetOracle: "WitnetRequestBoardTrustableOvm2",
+    WitnetOracle: "WitnetOracleTrustableOvm2",
   },
   optimism: {
-    WitnetOracle: "WitnetRequestBoardTrustableOvm2",
+    WitnetOracle: "WitnetOracleTrustableOvm2",
   },
   "polygon.zkevm.goerli": {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
@@ -33,9 +33,9 @@ module.exports = {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   "syscoin.rollux.testnet": {
-    WitnetOracle: "WitnetRequestBoardTrustableOvm2",
+    WitnetOracle: "WitnetOracleTrustableOvm2",
   },
   ten: {
-    WitnetOracle: "WitnetRequestBoardTrustableObscuro",
+    WitnetOracle: "WitnetOracleTrustableObscuro",
   },
 }

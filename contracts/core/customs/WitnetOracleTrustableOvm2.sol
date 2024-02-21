@@ -5,7 +5,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../defaults/WitnetRequestBoardTrustableDefault.sol";
+import "../defaults/WitnetOracleTrustableDefault.sol";
 
 // solhint-disable-next-line
 interface OVM_GasPriceOracle {
@@ -17,14 +17,14 @@ interface OVM_GasPriceOracle {
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetRequestBoardTrustableOvm2
+contract WitnetOracleTrustableOvm2
     is 
-        WitnetRequestBoardTrustableDefault
+        WitnetOracleTrustableDefault
 {  
     OVM_GasPriceOracle immutable public gasPriceOracleL1;
 
     function class() virtual override external view returns (string memory) {
-        return type(WitnetRequestBoardTrustableOvm2).name;
+        return type(WitnetOracleTrustableOvm2).name;
     }
 
     constructor(
@@ -37,7 +37,7 @@ contract WitnetRequestBoardTrustableOvm2
             uint256 _reportResultWithCallbackRevertGasBase,
             uint256 _sstoreFromZeroGas
         )
-        WitnetRequestBoardTrustableDefault(
+        WitnetOracleTrustableDefault(
             _factory,
             _registry,
             _upgradable,
@@ -64,7 +64,7 @@ contract WitnetRequestBoardTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return WitnetRequestBoardTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize) + (
+        return WitnetOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize) + (
             gasPriceOracleL1.getL1Fee(
                 hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
             )
@@ -79,7 +79,7 @@ contract WitnetRequestBoardTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return WitnetRequestBoardTrustableDefault.estimateBaseFeeWithCallback(
+        return WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(
             _gasPrice, 
             _callbackGasLimit
         ) + (

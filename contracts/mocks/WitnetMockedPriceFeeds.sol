@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetMockedRequestBoard.sol";
+import "./WitnetMockedOracle.sol";
 import "../core/defaults/WitnetPriceFeedsDefault.sol";
 
 /// @title Mocked implementation of `WitnetPriceFeeds`.
@@ -12,7 +12,7 @@ import "../core/defaults/WitnetPriceFeedsDefault.sol";
 /// @dev THE `WitnetPriceFeeds` CONTRACT ADDRESS PROVIDED 
 /// @dev BY THE WITNET FOUNDATION.
 contract WitnetMockedPriceFeeds is WitnetPriceFeedsDefault {
-    constructor(WitnetMockedRequestBoard _wrb)
+    constructor(WitnetMockedOracle _wrb)
         WitnetPriceFeedsDefault(
             _wrb,
             false,

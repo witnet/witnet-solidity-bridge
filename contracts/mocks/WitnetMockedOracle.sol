@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "./WitnetMockedRequestBytecodes.sol";
 import "./WitnetMockedRequestFactory.sol";
-import "../core/defaults/WitnetRequestBoardTrustableDefault.sol";
+import "../core/defaults/WitnetOracleTrustableDefault.sol";
 
 import "./WitnetMockedPriceFeeds.sol";
 
@@ -14,14 +14,14 @@ import "./WitnetMockedPriceFeeds.sol";
 /// @dev ON SUPPORTED TESTNETS AND MAINNETS, PLEASE USE 
 /// @dev THE `WitnetOracle` CONTRACT ADDRESS PROVIDED 
 /// @dev BY THE WITNET FOUNDATION.
-contract WitnetMockedRequestBoard
+contract WitnetMockedOracle
     is
-        WitnetRequestBoardTrustableDefault
+        WitnetOracleTrustableDefault
 {
     WitnetRequestFactory private __factory;
 
     constructor(WitnetMockedRequestBytecodes _registry) 
-        WitnetRequestBoardTrustableDefault(
+        WitnetOracleTrustableDefault(
             WitnetRequestFactory(address(0)), 
             WitnetRequestBytecodes(address(_registry)),
             false,

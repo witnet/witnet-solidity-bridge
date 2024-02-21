@@ -5,19 +5,19 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../defaults/WitnetRequestBoardTrustableDefault.sol";
+import "../defaults/WitnetOracleTrustableDefault.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetRequestBoardTrustableObscuro
+contract WitnetOracleTrustableObscuro
     is 
-        WitnetRequestBoardTrustableDefault
+        WitnetOracleTrustableDefault
 {
     function class() virtual override external view returns (string memory) {
-        return type(WitnetRequestBoardTrustableObscuro).name;
+        return type(WitnetOracleTrustableObscuro).name;
     }
 
     constructor(
@@ -30,7 +30,7 @@ contract WitnetRequestBoardTrustableObscuro
             uint256 _reportResultWithCallbackRevertGasBase,
             uint256 _sstoreFromZeroGas
         )
-        WitnetRequestBoardTrustableDefault(
+        WitnetOracleTrustableDefault(
             _factory, 
             _registry,
             _upgradable, 
@@ -54,7 +54,7 @@ contract WitnetRequestBoardTrustableObscuro
         onlyRequester(_queryId)
         returns (WitnetV2.Query memory)
     {
-        return WitnetRequestBoardTrustableBase.getQuery(_queryId);
+        return WitnetOracleTrustableBase.getQuery(_queryId);
     }
 
     /// @notice Retrieves the whole `Witnet.Response` record referred to a previously posted Witnet Data Request.
@@ -66,7 +66,7 @@ contract WitnetRequestBoardTrustableObscuro
         onlyRequester(_queryId)
         returns (WitnetV2.Response memory _response)
     {
-        return WitnetRequestBoardTrustableBase.getQueryResponse(_queryId);
+        return WitnetOracleTrustableBase.getQueryResponse(_queryId);
     }
 
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
@@ -77,7 +77,7 @@ contract WitnetRequestBoardTrustableObscuro
         onlyRequester(_queryId)
         returns (Witnet.ResultError memory)
     {
-        return WitnetRequestBoardTrustableBase.getQueryResultError(_queryId);
+        return WitnetOracleTrustableBase.getQueryResultError(_queryId);
     }
     
 }

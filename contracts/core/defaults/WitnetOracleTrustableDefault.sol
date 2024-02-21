@@ -5,19 +5,19 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetRequestBoardTrustableBase.sol";
+import "./WitnetOracleTrustableBase.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitnetRequestBoardTrustableDefault
+contract WitnetOracleTrustableDefault
     is 
-        WitnetRequestBoardTrustableBase
+        WitnetOracleTrustableBase
 {
     function class() virtual override external view returns (string memory) {
-        return type(WitnetRequestBoardTrustableDefault).name;
+        return type(WitnetOracleTrustableDefault).name;
     }
 
     uint256 internal immutable __reportResultGasBase;
@@ -35,7 +35,7 @@ contract WitnetRequestBoardTrustableDefault
             uint256 _reportResultWithCallbackRevertGasBase,
             uint256 _sstoreFromZeroGas
         )
-        WitnetRequestBoardTrustableBase(
+        WitnetOracleTrustableBase(
             _factory, 
             _registry,
             _upgradable, 

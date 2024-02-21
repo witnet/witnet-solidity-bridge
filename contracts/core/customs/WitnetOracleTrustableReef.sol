@@ -6,7 +6,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 // Inherits from:
-import "../defaults/WitnetRequestBoardTrustableDefault.sol";
+import "../defaults/WitnetOracleTrustableDefault.sol";
 
 /// @title Witnet Request Board OVM-compatible (Optimism) "trustable" implementation.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -15,7 +15,7 @@ import "../defaults/WitnetRequestBoardTrustableDefault.sol";
 /// @author The Witnet Foundation
 contract WitnetOracleTrustableReef
     is
-        WitnetRequestBoardTrustableDefault 
+        WitnetOracleTrustableDefault 
 {
     function class() virtual override external view returns (string memory) {
         return type(WitnetOracleTrustableReef).name;
@@ -31,7 +31,7 @@ contract WitnetOracleTrustableReef
             uint256 _reportResultWithCallbackRevertGasBase,
             uint256 _sstoreFromZeroGas
         )
-        WitnetRequestBoardTrustableDefault(
+        WitnetOracleTrustableDefault(
             _factory,
             _registry,
             _upgradable,
@@ -54,7 +54,7 @@ contract WitnetOracleTrustableReef
         virtual override
         returns (uint256)
     {
-        return WitnetRequestBoardTrustableDefault.estimateBaseFee(1, _resultMaxSize);
+        return WitnetOracleTrustableDefault.estimateBaseFee(1, _resultMaxSize);
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
@@ -64,7 +64,7 @@ contract WitnetOracleTrustableReef
         virtual override
         returns (uint256)
     {
-        return WitnetRequestBoardTrustableDefault.estimateBaseFeeWithCallback(1, _callbackGasLimit);
+        return WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(1, _callbackGasLimit);
     }
 
 

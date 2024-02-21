@@ -37,7 +37,7 @@ abstract contract WitnetRequestBoardData {
     modifier onlyRequester(uint256 _queryId) {
         require(
             msg.sender == __seekQueryRequest(_queryId).requester, 
-            "WitnetRequestBoardBase: not the requester"
+            "WitnetOracleBase: not the requester"
         ); _;
     }
 

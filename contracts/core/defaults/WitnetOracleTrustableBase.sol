@@ -9,7 +9,7 @@ import "../../WitnetRequestFactory.sol";
 
 import "../../data/WitnetRequestBoardDataACLs.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
-import "../../interfaces/IWitnetRequestBoardReporter.sol";
+import "../../interfaces/IWitnetOracleReporter.sol";
 import "../../interfaces/IWitnetConsumer.sol";
 import "../../libs/WitnetErrorsLib.sol";
 import "../../patterns/Payable.sol";
@@ -19,12 +19,12 @@ import "../../patterns/Payable.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-abstract contract WitnetRequestBoardTrustableBase
+abstract contract WitnetOracleTrustableBase
     is 
         WitnetUpgradableBase,
         WitnetOracle,
         WitnetRequestBoardDataACLs,
-        IWitnetRequestBoardReporter,
+        IWitnetOracleReporter,
         IWitnetRequestBoardAdminACLs,
         Payable 
 {
@@ -206,7 +206,7 @@ abstract contract WitnetRequestBoardTrustableBase
         uint16 _resultMaxSize = registry.lookupRadonRequestResultMaxSize(radHash);
         require(
             _resultMaxSize > 0, 
-            "WitnetRequestBoardTrustableDefault: invalid RAD"
+            "WitnetOracleTrustableDefault: invalid RAD"
         );
         return estimateBaseFee(
             gasPrice,
@@ -498,7 +498,7 @@ abstract contract WitnetRequestBoardTrustableBase
 
     
     // ================================================================================================================
-    // --- Full implementation of IWitnetRequestBoardReporter ---------------------------------------------------------
+    // --- Full implementation of IWitnetOracleReporter ---------------------------------------------------------
 
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
@@ -542,13 +542,13 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         require(
             _witnetQueryResultTallyHash != 0, 
-            "WitnetRequestBoardTrustableDefault: tally has cannot be zero"
+            "WitnetOracleTrustableDefault: tally has cannot be zero"
         );
         // Ensures the result bytes do not have zero length
         // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
         require(
             _witnetQueryResultCborBytes.length != 0, 
-            "WitnetRequestBoardTrustableDefault: result cannot be empty"
+            "WitnetOracleTrustableDefault: result cannot be empty"
         );
         // Do actual report:
         // solhint-disable not-rely-on-time
@@ -584,17 +584,17 @@ abstract contract WitnetRequestBoardTrustableBase
     {
         require(
             _witnetQueryResultTimestamp <= block.timestamp, 
-            "WitnetRequestBoardTrustableDefault: bad timestamp"
+            "WitnetOracleTrustableDefault: bad timestamp"
         );
         require(
             _witnetQueryResultTallyHash != 0, 
-            "WitnetRequestBoardTrustableDefault: Witnet tallyHash cannot be zero"
+            "WitnetOracleTrustableDefault: Witnet tallyHash cannot be zero"
         );
         // Ensures the result bytes do not have zero length (this would not be a valid CBOR encoding 
         // and could trigger a reentrancy attack)
         require(
             _witnetQueryResultCborBytes.length != 0, 
-            "WitnetRequestBoardTrustableDefault: result cannot be empty"
+            "WitnetOracleTrustableDefault: result cannot be empty"
         );
         // Do actual report and return reward transfered to the reproter:
         return  __reportResultAndReward(
@@ -615,7 +615,7 @@ abstract contract WitnetRequestBoardTrustableBase
     ///         - data request result in raw bytes.
     /// @param _verbose If true, emits a BatchReportError event for every failing report, if any. 
     function reportResultBatch(
-            IWitnetRequestBoardReporter.BatchResult[] calldata _batchResults,
+            IWitnetOracleReporter.BatchResult[] calldata _batchResults,
             bool _verbose
         )
         external

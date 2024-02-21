@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetMockedRequestBoard.sol";
+import "./WitnetMockedOracle.sol";
 import "../core/defaults/WitnetRequestFactoryDefault.sol";
 
 /// @title Mocked implementation of `WitnetRequestFactory`.
@@ -15,7 +15,7 @@ contract WitnetMockedRequestFactory
     is 
         WitnetRequestFactoryDefault
 {
-    constructor (WitnetMockedRequestBoard _wrb)
+    constructor (WitnetMockedOracle _wrb)
         WitnetRequestFactoryDefault(
             WitnetOracle(address(_wrb)),
             WitnetRequestBytecodes(_wrb.registry()),
