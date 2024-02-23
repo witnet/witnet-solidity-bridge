@@ -4,22 +4,33 @@
 name: Publish NPM package
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - '*'
 
 jobs:
-  publish-npm:
+  Publish:
+    environment: Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 8
-      - run: pnpm install
-      - run: pnpm publish
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+          with:
+            version: 8
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Publish
+        run: pnpm publish
         env:
-          NODE_AUTH_TOKEN: ${{SECRETS.NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
