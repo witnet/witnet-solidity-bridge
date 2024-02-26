@@ -341,18 +341,25 @@ abstract contract WitnetOracleTrustableBase
             _status[_ix] = _statusOf(_witnetQueryIds[_ix]);
         }
     }
+
+    /// @notice Retrieves the Witnet Data Request bytecode of previously posted queries.
+    /// @dev Returns empty buffer if the query does not exist.
+    /// @param _queryIds Query identifies.
+    function getQueryWitnetBytecodes(uint256[] calldata _queryIds)
+        external view 
         virtual override
-        returns (bytes memory)
+        returns (bytes[] memory _bytecodes)
     {
-        require(
-            _statusOf(_witnetQueryId) != WitnetV2.QueryStatus.Unknown,
-            "WitnetOracle: unknown query"
-        );
-        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
-        if (__request.witnetRAD != bytes32(0)) {
-            return registry.bytecodeOf(__request.witnetRAD);
-        } else {
-            return __request.witnetBytecode;
+        _bytecodes = new bytes[](_queryIds.length);
+        for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
+            if (_statusOf(_queryIds[_ix]) != WitnetV2.QueryStatus.Unknown) {
+                WitnetV2.Request storage __request = __seekQueryRequest(_queryIds[_ix]);
+                if (__request.witnetRAD != bytes32(0)) {
+                    _bytecodes[_ix] = registry.bytecodeOf(__request.witnetRAD);
+                } else {
+                    _bytecodes[_ix] = __request.witnetBytecode;
+                }
+            }
         }
     }
 
