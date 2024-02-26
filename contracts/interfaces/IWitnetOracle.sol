@@ -59,6 +59,7 @@ interface IWitnetOracle {
 
     /// @notice Gets current status of given query.
     function getQueryStatus(uint256 queryId) external view returns (WitnetV2.QueryStatus);
+    function getQueryStatus(uint256[] calldata queryIds) external view returns (WitnetV2.QueryStatus[] memory);
 
     /// @notice Retrieves the Witnet Data Request bytecode of a previously posted query.
     /// @dev Fails if the query does not exist.

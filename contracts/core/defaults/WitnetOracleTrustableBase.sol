@@ -345,11 +345,16 @@ abstract contract WitnetOracleTrustableBase
         return _statusOf(_witnetQueryId);
     }
 
-    /// @notice Retrieves the Witnet Data Request bytecode of a previously posted query.
-    /// @dev Fails if the query does not exist.
-    /// @param _witnetQueryId The unique query identifier.
-    function getQueryWitnetBytecode(uint256 _witnetQueryId)
+    function getQueryStatus(uint256[] calldata _witnetQueryIds)
         external view
+        override
+        returns (WitnetV2.QueryStatus[] memory _status)
+    {
+        _status = new WitnetV2.QueryStatus[](_witnetQueryIds.length);
+        for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
+            _status[_ix] = _statusOf(_witnetQueryIds[_ix]);
+        }
+    }
         virtual override
         returns (bytes memory)
     {
