@@ -21,7 +21,7 @@ contract WitnetOracleTrustableOvm2
     is 
         WitnetOracleTrustableDefault
 {  
-    OVM_GasPriceOracle immutable public gasPriceOracleL1;
+    OVM_GasPriceOracle immutable internal __gasPriceOracleL1;
 
     function class() virtual override external view returns (string memory) {
         return type(WitnetOracleTrustableOvm2).name;
@@ -48,9 +48,14 @@ contract WitnetOracleTrustableOvm2
             _sstoreFromZeroGas
         )
     {
-        gasPriceOracleL1 = OVM_GasPriceOracle(0x420000000000000000000000000000000000000F);
+        __gasPriceOracleL1 = OVM_GasPriceOracle(0x420000000000000000000000000000000000000F);
     }
 
+    function _getCurrentL1Fee() virtual internal view returns (uint256) {
+        return __gasPriceOracleL1.getL1Fee(
+            hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        );
+    }
 
     // ================================================================================================================
     // --- Overrides 'IWitnetOracle' ----------------------------------------------------------------------------
@@ -64,11 +69,7 @@ contract WitnetOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return WitnetOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize) + (
-            gasPriceOracleL1.getL1Fee(
-                hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-            )
-        );
+        return WitnetOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize) + _getCurrentL1Fee();
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
@@ -79,13 +80,6 @@ contract WitnetOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(
-            _gasPrice, 
-            _callbackGasLimit
-        ) + (
-            _gasPrice * gasPriceOracleL1.getL1Fee(
-                hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-            )
-        );
+        return WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit) + _getCurrentL1Fee();
     }
 }
