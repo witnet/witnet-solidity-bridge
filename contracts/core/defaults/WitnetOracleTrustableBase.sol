@@ -237,20 +237,6 @@ abstract contract WitnetOracleTrustableBase
     {
         return __storage().queries[_witnetQueryId];
     }
-
-    /// Retrieves the reward currently set for the given query.
-    /// @dev Fails if the `_witnetQueryId` is not valid or, if it has already been 
-    /// @dev reported, or deleted. 
-    /// @param _witnetQueryId The unique query identifier
-    function getQueryEvmReward(uint256 _witnetQueryId)
-        override
-        external view
-        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
-        returns (uint256)
-    {
-        return __seekQueryRequest(_witnetQueryId).evmReward;
-    }
-
     
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     /// @param _witnetQueryId The unique query identifier.

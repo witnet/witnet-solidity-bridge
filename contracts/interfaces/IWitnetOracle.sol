@@ -32,11 +32,6 @@ interface IWitnetOracle {
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
     function getQuery(uint256 queryId) external view returns (WitnetV2.Query memory);
 
-    /// @notice Retrieves the reward currently set for the given query.
-    /// @dev Fails if the `queryId` is not valid or, if it has already been reported, delivered, or deleted. 
-    /// @param queryId The unique query identifier.
-    function getQueryEvmReward(uint256 queryId) external view returns (uint256);
-
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     /// @param queryId The unique query identifier.
     function getQueryRequest(uint256 queryId) external view returns (WitnetV2.Request memory);

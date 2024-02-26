@@ -20,7 +20,6 @@ contract WitnetPriceFeedsDefault
         WitnetPriceFeeds,
         WitnetPriceFeedsData,
         WitnetUpgradableBase
-
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
@@ -672,7 +671,8 @@ contract WitnetPriceFeedsDefault
             if (_latestStatus == WitnetV2.ResponseStatus.Awaiting) {
                 // latest update is still pending, so just increase the reward
                 // accordingly to current tx gasprice:
-                int _deltaReward = int(witnet.getQueryEvmReward(_latestId)) - int(_usedFunds);
+                WitnetV2.Request memory _request = witnet.getQueryRequest(_latestId);
+                int _deltaReward = int(int72(_request.evmReward)) - int(_usedFunds);
                 if (_deltaReward > 0) {
                     _usedFunds = uint(_deltaReward);
                     witnet.upgradeQueryEvmReward{value: _usedFunds}(_latestId);
