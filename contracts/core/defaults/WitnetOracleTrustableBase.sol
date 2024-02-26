@@ -405,7 +405,7 @@ abstract contract WitnetOracleTrustableBase
         emit WitnetQuery(
             _witnetQueryId, 
             _getMsgValue(),
-            _querySLA.witTotalFee()
+            _querySLA
         );
     }
    
@@ -444,7 +444,7 @@ abstract contract WitnetOracleTrustableBase
         emit WitnetQuery(
             _witnetQueryId, 
             _getMsgValue(),
-            _querySLA.witTotalFee()
+            _querySLA
         );
     }
 
@@ -484,7 +484,7 @@ abstract contract WitnetOracleTrustableBase
         emit WitnetQuery(
             _witnetQueryId,
             _getMsgValue(),
-            _querySLA.witTotalFee()
+            _querySLA
         );
     }
   
