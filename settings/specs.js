@@ -10,7 +10,7 @@ module.exports = {
           /* _sstoreFromZeroGas */ 20000,
         ],
       },
-      libs: ["WitnetErrorsLib"],
+      libs: ["WitnetErrorsLib", "WitnetOracleDataLib"],
       vanity: 899032812, // 0x000071F0c823bD30D2Bf4CD1E829Eba5A6070000
     },
     WitnetPriceFeeds: {

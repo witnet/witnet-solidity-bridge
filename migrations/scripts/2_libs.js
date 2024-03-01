@@ -12,6 +12,7 @@ module.exports = async function (_, network, [, from]) {
     targets.WitnetErrorsLib,
     targets.WitnetEncodingLib,
     targets.WitnetPriceFeedsLib,
+    targets.WitnetOracleDataLib,
   ]
 
   const selection = utils.getWitnetArtifactsFromArgs()

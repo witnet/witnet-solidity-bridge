@@ -7,6 +7,7 @@ module.exports = {
     WitnetEncodingLib: "WitnetEncodingLib",
     WitnetErrorsLib: "WitnetErrorsLib",
     WitnetPriceFeedsLib: "WitnetPriceFeedsLib",
+    WitnetOracleDataLib: "WitnetDataOracleLib",
   },
   boba: {
     WitnetOracle: "WitnetOracleTrustableOvm2",
