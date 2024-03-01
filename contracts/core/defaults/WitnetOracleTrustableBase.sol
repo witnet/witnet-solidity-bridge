@@ -487,23 +487,17 @@ abstract contract WitnetOracleTrustableBase
             bytes32 _witnetQueryResultTallyHash,
             bytes calldata _witnetQueryResultCborBytes
         )
-        external
-        override
+        external override
         onlyReporters
         inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
         returns (uint256)
     {
-        require(
-            _witnetQueryResultTallyHash != 0, 
-            "WitnetOracleTrustableDefault: tally has cannot be zero"
-        );
-        // Ensures the result bytes do not have zero length
-        // This would not be a valid encoding with CBOR and could trigger a reentrancy attack
+        // results cannot be empty:
         require(
             _witnetQueryResultCborBytes.length != 0, 
             "WitnetOracleTrustableDefault: result cannot be empty"
         );
-        // Do actual report:
+        // do actual report and return reward transfered to the reproter:
         // solhint-disable not-rely-on-time
         return __reportResultAndReward(
             _witnetQueryId,
@@ -535,21 +529,18 @@ abstract contract WitnetOracleTrustableBase
         inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
         returns (uint256)
     {
+        // validate timestamp
         require(
-            _witnetQueryResultTimestamp <= block.timestamp, 
+            _witnetQueryResultTimestamp > 0 
+                && _witnetQueryResultTimestamp <= block.timestamp, 
             "WitnetOracleTrustableDefault: bad timestamp"
         );
-        require(
-            _witnetQueryResultTallyHash != 0, 
-            "WitnetOracleTrustableDefault: Witnet tallyHash cannot be zero"
-        );
-        // Ensures the result bytes do not have zero length (this would not be a valid CBOR encoding 
-        // and could trigger a reentrancy attack)
+        // results cannot be empty
         require(
             _witnetQueryResultCborBytes.length != 0, 
             "WitnetOracleTrustableDefault: result cannot be empty"
         );
-        // Do actual report and return reward transfered to the reproter:
+        // do actual report and return reward transfered to the reproter:
         return  __reportResultAndReward(
             _witnetQueryId,
             _witnetQueryResultTimestamp,
@@ -558,63 +549,41 @@ abstract contract WitnetOracleTrustableBase
         );
     }
 
-    /// Reports Witnet-provable results to multiple requests within a single EVM tx.
-    /// @dev Fails if called from unauthorized address.
-    /// @dev Emits a PostedResult event for every succesfully reported result, if any.
-    /// @param _batchResults Array of BatchedResult structs, every one containing:
+    /// @notice Reports Witnet-provided results to multiple requests within a single EVM tx.
+    /// @notice Emits either a WitnetQueryResponse* or a BatchReportError event per batched report.
+    /// @dev Fails only if called from unauthorized address.
+    /// @param _batchResults Array of BatchResult structs, every one containing:
     ///         - unique query identifier;
     ///         - timestamp of the solving tally txs in Witnet. If zero is provided, EVM-timestamp will be used instead;
     ///         - hash of the corresponding data request tx at the Witnet side-chain level;
     ///         - data request result in raw bytes.
-    /// @param _verbose If true, emits a BatchReportError event for every failing report, if any. 
-    function reportResultBatch(
-            IWitnetOracleReporter.BatchResult[] calldata _batchResults,
-            bool _verbose
-        )
-        external
-        override
+    function reportResultBatch(IWitnetOracleReporter.BatchResult[] calldata _batchResults)
+        external override
         onlyReporters
         returns (uint256 _batchReward)
     {
         for ( uint _i = 0; _i < _batchResults.length; _i ++) {
-            if (_statusOf(_batchResults[_i].queryId) != WitnetV2.QueryStatus.Posted) {
-                if (_verbose) {
-                    emit BatchReportError(
-                        _batchResults[_i].queryId,
-                        "WitnetOracle: bad queryId"
-                    );
-                }
-            } else if (_batchResults[_i].queryResultTallyHash == 0) {
-                if (_verbose) {
-                    emit BatchReportError(
-                        _batchResults[_i].queryId,
-                        "WitnetOracle: bad tallyHash"
-                    );
-                }
-            } else if (_batchResults[_i].queryResultCborBytes.length == 0) {
-                if (_verbose) {
-                    emit BatchReportError(
-                        _batchResults[_i].queryId, 
-                        "WitnetOracle: bad cborBytes"
-                    );
-                }
-            } else if (
-                _batchResults[_i].queryResultTimestamp > 0
-                    && uint256(_batchResults[_i].queryResultTimestamp) > block.timestamp
+            if (
+                WitnetOracleDataLib.statusOf(_batchResults[_i].queryId)
+                    != WitnetV2.QueryStatus.Posted
             ) {
-                if (_verbose) {
-                    emit BatchReportError(
-                        _batchResults[_i].queryId,
-                        "WitnetOracle: bad timestamp"
-                    );
-                }
+                emit BatchReportError(
+                    _batchResults[_i].queryId,
+                    WitnetOracleDataLib.notInStatusRevertMessage(WitnetV2.QueryStatus.Posted)
+                );
+            } else if (
+                uint256(_batchResults[_i].queryResultTimestamp) > block.timestamp
+                    || _batchResults[_i].queryResultTimestamp == 0
+                    || _batchResults[_i].queryResultCborBytes.length == 0
+            ) {
+                emit BatchReportError(
+                    _batchResults[_i].queryId, 
+                    "WitnetOracle: invalid report data"
+                );
             } else {
                 _batchReward += __reportResult(
                     _batchResults[_i].queryId,
-                    _batchResults[_i].queryResultTimestamp == uint32(0)
-                        ? uint32(block.timestamp) 
-                        : _batchResults[_i].queryResultTimestamp
-                    ,
+                    _batchResults[_i].queryResultTimestamp,
                     _batchResults[_i].queryResultTallyHash,
                     _batchResults[_i].queryResultCborBytes
                 );
@@ -776,16 +745,15 @@ abstract contract WitnetOracleTrustableBase
                         ? _evmCallbackRevertMessage
                         : "WitnetOracle: callback exceeded gas limit"
                 );
-                // upon failing delivery, only the witnet result tally hash is saved into storage,
-                // as to distinguish Reported vs Undelivered status. The query result is not saved 
-                // into storage as to avoid buffer-overflow attacks (on reporters):
-                __writeQueryResponse(
-                    _witnetQueryId, 
-                    0, 
-                    _witnetQueryResultTallyHash, 
-                    hex""
-                );
             }
+            // upon delivery, successfull or not, the audit trail is saved into storage, 
+            // but not the actual result which was intended to be passed over to the requester:
+            __writeQueryResponse(
+                _witnetQueryId, 
+                _witnetQueryResultTimestamp, 
+                _witnetQueryResultTallyHash, 
+                hex""
+            );
         } else {
             // => no callback is involved
             emit WitnetQueryResponse(
