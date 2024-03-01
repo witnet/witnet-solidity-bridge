@@ -11,7 +11,7 @@ module.exports = {
         ],
       },
       libs: ["WitnetErrorsLib", "WitnetOracleDataLib"],
-      vanity: 899032812, // 0x000071F0c823bD30D2Bf4CD1E829Eba5A6070000
+      vanity: 13710368043, // 0x77703aE126B971c9946d562F41Dd47071dA00777
     },
     WitnetPriceFeeds: {
       from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",

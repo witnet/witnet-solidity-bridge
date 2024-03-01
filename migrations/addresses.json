@@ -1,7 +1,7 @@
 {
     "default": {
         "WitnetDeployer": "0x03232aBE800D1638B30432FeEF300581De323a4E",
-        "WitnetOracle": "0x000071F0c823bD30D2Bf4CD1E829Eba5A6070000",
+        "WitnetOracle": "0x77703aE126B971c9946d562F41Dd47071dA00777",
         "WitnetPriceFeeds": "0x1111AbA2164AcdC6D291b08DfB374280035E1111",
         "WitnetRequestBytecodes": "0x000B61Fe075F545fd37767f40391658275900000",
         "WitnetRequestFactory": "0x000F4cCF726c5445626DBD6f2258482f61377000"
@@ -12,8 +12,8 @@
         "WitnetEncodingLib": "0x967cfE0Edfc52e027849012E5dA706A9e5e62345",
         "WitnetPriceFeedsLib": "0x96013096b1305c4009bfa2C2D3e34fEcB3dD4927",
         "WitnetOracleTrustableDefault": "",
-        "WitnetPriceFeedsDefault": "0xf5FC71e85f0eA7538E034A661c1D21C3500473FB",
-        "WitnetRequestBytecodesDefault": "0x8CE5EF0ab67cdC00D32e09f34f74daFb0d049314",
+        "WitnetPriceFeedsDefault": "",
+        "WitnetRequestBytecodesDefault": "",
         "WitnetRequestFactoryDefault": "0xeb800BbCE619c0542Ae46DeA675D8a4495190A65"
     },
     "optimism:sepolia": {
@@ -23,7 +23,7 @@
         "WitnetPriceFeedsLib": "0x96013096b1305c4009bfa2C2D3e34fEcB3dD4927",
         "WitnetOracleTrustableOvm2": "",
         "WitnetPriceFeedsDefault": "",
-        "WitnetRequestBytecodesDefault": "0x02e4cC37B15C1bb2971F4E79ACcd3628918CAd32",
+        "WitnetRequestBytecodesDefault": "",
         "WitnetRequestFactoryDefault": "0x1A45041fC7D474C1746bDe0E7dAb4C40FdC6CB1e"
         
     },
@@ -34,7 +34,7 @@
         "WitnetPriceFeedsLib": "0x96013096b1305c4009bfa2C2D3e34fEcB3dD4927",
         "WitnetOracleTrustableObscuro": "",
         "WitnetPriceFeedsDefault": "",
-        "WitnetRequestBytecodesDefault": "0xe021b7d15248222Db5d18355abA372916E9488f1",
+        "WitnetRequestBytecodesDefault": "",
         "WitnetRequestFactoryDefault": "0xaA472f280b93cdA40EDFB974b36BAC5Fc54DA4e3"
     }
 }
