@@ -29,7 +29,9 @@ contract WitnetMockedOracle
             60000, 65000, 70000, 20000
         )
     {
-        __acls().isReporter_[msg.sender] = true;
+        address[] memory _reporters = new address[](1);
+        _reporters[0] = msg.sender;
+        __setReporters(_reporters);
     }
 
     function factory() override public view returns (WitnetRequestFactory) {

@@ -6,10 +6,9 @@ pragma experimental ABIEncoderV2;
 import "../WitnetUpgradableBase.sol";
 import "../../WitnetOracle.sol";
 import "../../WitnetRequestFactory.sol";
-
-import "../../data/WitnetRequestBoardDataACLs.sol";
-import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
+import "../../data/WitnetOracleDataLib.sol";
 import "../../interfaces/IWitnetOracleReporter.sol";
+import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
 import "../../interfaces/IWitnetConsumer.sol";
 import "../../libs/WitnetErrorsLib.sol";
 import "../../patterns/Payable.sol";
@@ -23,7 +22,6 @@ abstract contract WitnetOracleTrustableBase
     is 
         WitnetUpgradableBase,
         WitnetOracle,
-        WitnetRequestBoardDataACLs,
         IWitnetOracleReporter,
         IWitnetRequestBoardAdminACLs,
         Payable 
@@ -60,6 +58,32 @@ abstract contract WitnetOracleTrustableBase
             "WitnetOracle: invalid SLA"
         ); _;
     }
+
+    /// Asserts the given query is currently in the given status.
+    modifier inStatus(uint256 _queryId, WitnetV2.QueryStatus _status) {
+      if (WitnetOracleDataLib.statusOf(_queryId) != _status) {
+        revert(WitnetOracleDataLib.notInStatusRevertMessage(_status));
+      } else {
+        _;
+      }
+    }
+
+    /// Asserts the caller actually posted the referred query.
+    modifier onlyRequester(uint256 _queryId) {
+        require(
+            msg.sender == WitnetOracleDataLib.seekQueryRequest(_queryId).requester, 
+            "WitnetOracle: not the requester"
+        ); _;
+    }
+
+    /// Asserts the caller is authorized as a reporter
+    modifier onlyReporters {
+        require(
+            __storage().reporters[msg.sender],
+            "WitnetOracle: unauthorized reporter"
+        );
+        _;
+    } 
     
     constructor(
             WitnetRequestFactory _factory,
@@ -132,15 +156,15 @@ abstract contract WitnetOracleTrustableBase
         public
         override
     {
-        address _owner = __storage().owner;
-        address[] memory _reporters;
+        address _owner = owner();
+        address[] memory _newReporters;
 
         if (_owner == address(0)) {
             // get owner (and reporters) from _initData
-            bytes memory _reportersRaw;
-            (_owner, _reportersRaw) = abi.decode(_initData, (address, bytes));
-            __storage().owner = _owner;
-            _reporters = abi.decode(_reportersRaw, (address[]));
+            bytes memory _newReportersRaw;
+            (_owner, _newReportersRaw) = abi.decode(_initData, (address, bytes));
+            _transferOwnership(_owner);
+            _newReporters = abi.decode(_newReportersRaw, (address[]));
         } else {
             // only owner can initialize:
             require(
@@ -148,17 +172,16 @@ abstract contract WitnetOracleTrustableBase
                 "WitnetOracle: not the owner"
             );
             // get reporters from _initData
-            _reporters = abi.decode(_initData, (address[]));
+            _newReporters = abi.decode(_initData, (address[]));
         }
 
-        if (__storage().base != address(0)) {
-            // current implementation cannot be initialized more than once:
-            require(
-                __storage().base != base(),
-                "WitnetOracle: already upgraded"
-            );
-        }        
-        __storage().base = base();
+        if (
+            __proxiable().codehash != bytes32(0)
+                && __proxiable().codehash == codehash()
+        ) {
+            revert("WitnetOracle: already upgraded");
+        }
+        __proxiable().codehash = codehash();
 
         require(
             address(__factory).code.length > 0,
@@ -174,19 +197,18 @@ abstract contract WitnetOracleTrustableBase
             "WitnetOracle: discordant factory"
         );
 
-        // Set reporters
-        __setReporters(_reporters);
+        // Set reporters, if any
+        __setReporters(_newReporters);
 
         emit Upgraded(_owner, base(), codehash(), version());
     }
 
     /// Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address _from) external view override returns (bool) {
-        address _owner = __storage().owner;
         return (
             // false if the WRB is intrinsically not upgradable, or `_from` is no owner
             isUpgradable()
-                && _owner == _from
+                && owner() == _from
         );
     }
 
@@ -225,7 +247,7 @@ abstract contract WitnetOracleTrustableBase
         onlyRequester(_witnetQueryId)
         returns (WitnetV2.Response memory _response)
     {
-        _response = __seekQuery(_witnetQueryId).response;
+        _response = WitnetOracleDataLib.seekQuery(_witnetQueryId).response;
         delete __storage().queries[_witnetQueryId];
     }
 
@@ -245,7 +267,7 @@ abstract contract WitnetOracleTrustableBase
         override
         returns (WitnetV2.Request memory)
     {
-        return __seekQueryRequest(_witnetQueryId);
+        return WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
     }
 
     /// Retrieves the Witnet-provable result, and metadata, to a previously posted request.    
@@ -256,7 +278,7 @@ abstract contract WitnetOracleTrustableBase
         virtual override
         returns (WitnetV2.Response memory _response)
     {
-        return __seekQueryResponse(_witnetQueryId);
+        return WitnetOracleDataLib.seekQueryResponse(_witnetQueryId);
     }
 
     /// @notice Returns query's result current status from a requester's point of view:
@@ -280,7 +302,7 @@ abstract contract WitnetOracleTrustableBase
         returns (Witnet.ResultError memory)
     {
         WitnetV2.ResponseStatus _status = getQueryResponseStatus(_witnetQueryId);
-        try WitnetErrorsLib.asResultError(_status, __seekQueryResponse(_witnetQueryId).resultCborBytes)
+        try WitnetErrorsLib.asResultError(_status, WitnetOracleDataLib.seekQueryResponse(_witnetQueryId).resultCborBytes)
             returns (Witnet.ResultError memory _resultError)
         {
             return _resultError;
@@ -428,7 +450,7 @@ abstract contract WitnetOracleTrustableBase
             _querySLA,
             _queryCallbackGasLimit
         );
-        __seekQueryRequest(_witnetQueryId).witnetBytecode = _queryUnverifiedBytecode;
+        WitnetOracleDataLib.seekQueryRequest(_witnetQueryId).witnetBytecode = _queryUnverifiedBytecode;
         emit WitnetQuery(
             _witnetQueryId,
             _getMsgValue(),
@@ -444,7 +466,7 @@ abstract contract WitnetOracleTrustableBase
         virtual override      
         inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
     {
-        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
         __request.evmReward += uint72(_getMsgValue());
         emit WitnetQueryRewardUpgraded(_witnetQueryId, __request.evmReward);
     }
@@ -467,10 +489,15 @@ abstract contract WitnetOracleTrustableBase
             if (_statusOf(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
                 WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryIds[_ix]);
                 _revenues += __request.evmReward;
-                _expenses += _gasPrice * __request.gasCallback;
-            }
-        }
-        return int256(_revenues) - int256(_expenses);
+    /// @notice Retrieves the Witnet Data Request bytecodes and SLAs of previously posted queries.
+    /// @dev Returns empty buffer if the query does not exist.
+    /// @param _queryIds Query identifies.
+    function extractWitnetDataRequests(uint256[] calldata _queryIds)
+        external view 
+        virtual override
+        returns (bytes[] memory _bytecodes)
+    {
+        return WitnetOracleDataLib.extractWitnetDataRequests(registry, _queryIds);
     }
 
     /// Reports the Witnet-provable result to a previously posted request. 
@@ -600,38 +627,12 @@ abstract contract WitnetOracleTrustableBase
 
 
     // ================================================================================================================
-    // --- Full implementation of 'IWitnetRequestBoardAdmin' ----------------------------------------------------------
-
-    /// Gets admin/owner address.
-    function owner()
-        public view
-        override
-        returns (address)
-    {
-        return __storage().owner;
-    }
-
-    /// Transfers ownership.
-    function transferOwnership(address _newOwner)
-        public
-        virtual override
-        onlyOwner
-    {
-        address _owner = __storage().owner;
-        if (_newOwner != _owner) {
-            __storage().owner = _newOwner;
-            emit OwnershipTransferred(_owner, _newOwner);
-        }
-    }
-
-
-    // ================================================================================================================
     // --- Full implementation of 'IWitnetRequestBoardAdminACLs' ------------------------------------------------------
 
     /// Tells whether given address is included in the active reporters control list.
     /// @param _reporter The address to be checked.
     function isReporter(address _reporter) public view override returns (bool) {
-        return __acls().isReporter_[_reporter];
+        return WitnetOracleDataLib.isReporter(_reporter);
     }
 
     /// Adds given addresses to the active reporters control list.
@@ -657,7 +658,7 @@ abstract contract WitnetOracleTrustableBase
     {
         for (uint ix = 0; ix < _exReporters.length; ix ++) {
             address _reporter = _exReporters[ix];
-            __acls().isReporter_[_reporter] = false;
+            __storage().reporters[_reporter] = false;
         }
         emit ReportersUnset(_exReporters);
     }
@@ -684,7 +685,7 @@ abstract contract WitnetOracleTrustableBase
         returns (uint256 _witnetQueryId)
     {
         _witnetQueryId = ++ __storage().nonce; //__newQueryId(_radHash, _packedSLA);
-        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
         require(__request.requester == address(0), "WitnetOracle: already posted");
         {
             __request.requester = msg.sender;
@@ -705,7 +706,7 @@ abstract contract WitnetOracleTrustableBase
         returns (uint256 _evmReward)
     {
         // read requester address and whether a callback was requested:
-        WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryId);
+        WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
                 
         // read query EVM reward:
         _evmReward = __request.evmReward;
@@ -868,9 +869,14 @@ abstract contract WitnetOracleTrustableBase
     {
         for (uint ix = 0; ix < _reporters.length; ix ++) {
             address _reporter = _reporters[ix];
-            __acls().isReporter_[_reporter] = true;
+            __storage().reporters[_reporter] = true;
         }
         emit ReportersSet(_reporters);
+    }
+
+    /// Returns storage pointer to contents of 'WitnetBoardState' struct.
+    function __storage() virtual internal pure returns (WitnetOracleDataLib.Storage storage _ptr) {
+      return WitnetOracleDataLib.data();
     }
 
     function __writeQueryResponse(
@@ -881,7 +887,7 @@ abstract contract WitnetOracleTrustableBase
         )
         virtual internal
     {
-        __seekQuery(_witnetQueryId).response = WitnetV2.Response({
+        WitnetOracleDataLib.seekQuery(_witnetQueryId).response = WitnetV2.Response({
             reporter: msg.sender,
             finality: uint64(block.number),
             resultTimestamp: _witnetQueryResultTimestamp,
