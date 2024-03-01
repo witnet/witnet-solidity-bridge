@@ -69,6 +69,7 @@
     "@openzeppelin/test-helpers": "~0.5.16",
     "ado-contracts": "1.0.0",
     "bn.js": "^4.11.0",
+    "chai": "^5.1.0",
     "custom-error-test-helper": "^1.0.6",
     "eslint": "^8.56.0",
     "eslint-config-standard": "^17.1.0",

@@ -1,4 +1,3 @@
-const { assert } = require("chai")
 const create3 = require("./eth-create3")
 const fs = require("fs")
 const utils = require("../src/utils")
@@ -7,7 +6,6 @@ const addresses = require("../migrations/addresses")
 
 module.exports = async function () {
   let count = 0
-  let ecosystem = "default"
   let from
   let hits = 10
   let offset = 0
@@ -19,21 +17,25 @@ module.exports = async function () {
       offset = parseInt(args[index + 1])
     } else if (argv === "--prefix") {
       prefix = args[index + 1].toLowerCase()
-      assert(web3.utils.isHexStrict(prefix), "--prefix: invalid hex string")
+      if (!web3.utils.isHexStrict(prefix)) {
+        throw Error("--prefix: invalid hex string")
+      }
     } else if (argv === "--suffix") {
       suffix = args[index + 1].toLowerCase()
-      assert(web3.utils.isHexStrict(suffix), "--suffix: invalid hex string")
+      if (!web3.utils.isHexStrict(suffix)) {
+        throw Error("--suffix: invalid hex string")
+      }
     } else if (argv === "--hits") {
       hits = parseInt(args[index + 1])
     } else if (argv === "--network") {
-      [ecosystem, network] = utils.getRealmNetworkFromString(args[index + 1].toLowerCase())
+      [, network] = utils.getRealmNetworkFromString(args[index + 1].toLowerCase())
     } else if (argv === "--from") {
       from = args[index + 1]
     }
     return argv
   })
   try {
-    from = from || addresses[ecosystem][network].WitnetDeployer
+    from = from || addresses[network]?.WitnetDeployer || addresses.default.WitnetDeployer
   } catch {
     console.error(`WitnetDeployer must have been previously deployed on network '${network}'.\n`)
     console.info("Usage:\n")
