@@ -20,6 +20,7 @@ const artifacts = settings.getArtifacts(network)
 const libs = [
   artifacts.WitnetEncodingLib,
   artifacts.WitnetErrorsLib,
+  artifacts.WitnetOracleDataLib,
   artifacts.WitnetPriceFeedsLib,
 ]
 for (const index in libs) {

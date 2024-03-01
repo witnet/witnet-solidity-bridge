@@ -14,18 +14,18 @@
         "WitnetOracleTrustableDefault": "",
         "WitnetPriceFeedsDefault": "",
         "WitnetRequestBytecodesDefault": "",
-        "WitnetRequestFactoryDefault": "0xeb800BbCE619c0542Ae46DeA675D8a4495190A65"
+        "WitnetRequestFactoryDefault": ""
     },
     "optimism:sepolia": {
-        "WitnetProxy": "0xaC3E870BF8D13Dc39f76936b6AF8279eF5a9211F",
+        "WitnetProxy": "0x9e262B69ef7cAb570F614538525c08998aA303af",
         "WitnetErrorsLib": "0x77aac367a921DD2a92dfd0351456839663af248F",
         "WitnetEncodingLib": "0x967cfE0Edfc52e027849012E5dA706A9e5e62345",
         "WitnetPriceFeedsLib": "0x96013096b1305c4009bfa2C2D3e34fEcB3dD4927",
-        "WitnetOracleTrustableOvm2": "",
-        "WitnetPriceFeedsDefault": "",
-        "WitnetRequestBytecodesDefault": "",
-        "WitnetRequestFactoryDefault": "0x1A45041fC7D474C1746bDe0E7dAb4C40FdC6CB1e"
-        
+        "WitnetOracleDataLib": "0xA76B841821b7b002f3180eA1B63272adC902F295",
+        "WitnetOracleTrustableOvm2": "0xBB074efe77fDb7CaaDbb9B5EcBB9864715747176",
+        "WitnetPriceFeedsDefault": "0xCCacf6ac740B51c56C5d204630B303d8e3fe083e",
+        "WitnetRequestBytecodesDefault": "0xe35E4973E4f6C7Ad693027aCa9c62EaBf0C1E79F",
+        "WitnetRequestFactoryDefault": "0xc61887700A5Ae2d1C5a5c4A83Ec7b03D92493710"
     },
     "ten:testnet": {
         "WitnetProxy": "0x46A54C4C9B36126D0E8f428BbC2ff9494Cd03947",
@@ -35,6 +35,6 @@
         "WitnetOracleTrustableObscuro": "",
         "WitnetPriceFeedsDefault": "",
         "WitnetRequestBytecodesDefault": "",
-        "WitnetRequestFactoryDefault": "0xaA472f280b93cdA40EDFB974b36BAC5Fc54DA4e3"
+        "WitnetRequestFactoryDefault": ""
     }
 }
