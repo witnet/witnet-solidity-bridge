@@ -478,17 +478,40 @@ abstract contract WitnetOracleTrustableBase
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
     /// @notice queries providing no actual earnings.
-    /// @dev Fails if the query does not exist, or if deleted.
-    function estimateQueryEarnings(uint256[] calldata _witnetQueryIds, uint256 _gasPrice)
-        virtual override
+    function estimateReportEarnings(
+            uint256[] calldata _witnetQueryIds, 
+            bytes calldata,
+            uint256 _txGasPrice,
+            uint256 _nanoWitPrice
+        )
         external view
-        returns (int256 _earnings)
+        virtual override
+        returns (uint256 _earnings)
     {
         uint256 _expenses; uint256 _revenues;
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            if (_statusOf(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
-                WitnetV2.Request storage __request = __seekQueryRequest(_witnetQueryIds[_ix]);
+            if (WitnetOracleDataLib.statusOf(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
+                WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
                 _revenues += __request.evmReward;
+                if (__request.gasCallback > 0) {
+                    _expenses += estimateBaseFeeWithCallback(_txGasPrice, __request.gasCallback);
+                } else {
+                    if (__request.witnetRAD != bytes32(0)) {
+                        _expenses += estimateBaseFee(_txGasPrice, __request.witnetRAD);
+                    } else {
+                        // todo: improve profit estimation accuracy if reporting on deleted query
+                        _expenses += estimateBaseFee(_txGasPrice, uint16(0)); 
+                    }
+                }
+                _expenses +=  __request.witnetSLA.nanoWitTotalFee() * _nanoWitPrice;
+            }
+        }
+        return (_revenues > _expenses
+            ? uint256(_revenues - _expenses)
+            : 0
+        );
+    }
+
     /// @notice Retrieves the Witnet Data Request bytecodes and SLAs of previously posted queries.
     /// @dev Returns empty buffer if the query does not exist.
     /// @param _queryIds Query identifies.

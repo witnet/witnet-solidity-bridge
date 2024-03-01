@@ -2,15 +2,27 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+import "../libs/WitnetV2.sol";
+
 /// @title The Witnet Request Board Reporter interface.
 /// @author The Witnet Foundation.
 interface IWitnetOracleReporter {
 
-    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
+    /// @notice Estimates the actual earnings in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
     /// @notice queries providing no actual earnings.
-    /// @dev Fails if the query does not exist, or if deleted.
-    function estimateQueryEarnings(uint256[] calldata queryIds, uint256 gasPrice) external view returns (int256);
+    function estimateReportEarnings(
+            uint256[] calldata witnetQueryIds, 
+            bytes calldata reportTxMsgData,
+            uint256 reportTxGasPrice,
+            uint256 nanoWitPrice
+        ) external view returns (uint256);
+
+    /// @notice Retrieves the Witnet Data Request bytecodes and SLAs of previously posted queries.
+    /// @dev Returns empty buffer if the query does not exist.
+    /// @param queryIds Query identifiers.
+    function extractWitnetDataRequests(uint256[] calldata queryIds) 
+        external view returns (bytes[] memory drBytecodes);
 
     /// @notice Reports the Witnet-provided result to a previously posted request. 
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
@@ -45,14 +57,14 @@ interface IWitnetOracleReporter {
         ) external returns (uint256);
 
     /// @notice Reports Witnet-provided results to multiple requests within a single EVM tx.
-    /// @dev Must emit a PostedResult event for every succesfully reported result.
+    /// @notice Emits either a WitnetQueryResponse* or a BatchReportError event per batched report.
+    /// @dev Fails only if called from unauthorized address.
     /// @param _batchResults Array of BatchResult structs, every one containing:
     ///         - unique query identifier;
     ///         - timestamp of the solving tally txs in Witnet. If zero is provided, EVM-timestamp will be used instead;
     ///         - hash of the corresponding data request tx at the Witnet side-chain level;
     ///         - data request result in raw bytes.
-    /// @param _verbose If true, must emit a BatchReportError event for every failing report, if any. 
-    function reportResultBatch(BatchResult[] calldata _batchResults, bool _verbose) external returns (uint256);
+    function reportResultBatch(BatchResult[] calldata _batchResults) external returns (uint256);
         
         struct BatchResult {
             uint256 queryId;

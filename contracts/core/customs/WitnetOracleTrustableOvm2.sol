@@ -20,8 +20,8 @@ interface OVM_GasPriceOracle {
 contract WitnetOracleTrustableOvm2
     is 
         WitnetOracleTrustableDefault
-{  
-    OVM_GasPriceOracle immutable internal __gasPriceOracleL1;
+{
+    using WitnetV2 for WitnetV2.RadonSLA;
 
     function class() virtual override external view returns (string memory) {
         return type(WitnetOracleTrustableOvm2).name;
@@ -50,6 +50,8 @@ contract WitnetOracleTrustableOvm2
     {
         __gasPriceOracleL1 = OVM_GasPriceOracle(0x420000000000000000000000000000000000000F);
     }
+
+    OVM_GasPriceOracle immutable internal __gasPriceOracleL1;
 
     function _getCurrentL1Fee() virtual internal view returns (uint256) {
         return __gasPriceOracleL1.getL1Fee(
@@ -81,5 +83,55 @@ contract WitnetOracleTrustableOvm2
         returns (uint256)
     {
         return WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit) + _getCurrentL1Fee();
+    }
+
+    // ================================================================================================================
+    // --- Overrides 'IWitnetOracleReporter' --------------------------------------------------------------------------
+
+    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
+    /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
+    /// @notice queries providing no actual earnings.
+    function estimateReportEarnings(
+            uint256[] calldata _witnetQueryIds, 
+            bytes calldata _reportTxMsgData,
+            uint256 _reportTxGasPrice, 
+            uint256 _nanoWitPrice
+        )
+        external view
+        virtual override
+        returns (uint256)
+    {
+        uint256 _expenses; uint256 _revenues;
+        for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
+            if (WitnetOracleDataLib.statusOf(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
+                WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
+                _revenues += __request.evmReward;
+                if (__request.gasCallback > 0) {
+                    _expenses += WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(
+                        _reportTxGasPrice, 
+                        __request.gasCallback
+                    );
+                } else {
+                    if (__request.witnetRAD != bytes32(0)) {
+                        _expenses += WitnetOracleTrustableBase.estimateBaseFee(
+                            _reportTxGasPrice, 
+                            __request.witnetRAD
+                        );
+                    } else {
+                        // todo: improve profit estimation accuracy if reporting on deleted query
+                        _expenses += WitnetOracleTrustableDefault.estimateBaseFee(
+                            _reportTxGasPrice, 
+                            uint16(0)
+                        ); 
+                    }
+                }
+                _expenses += __request.witnetSLA.nanoWitTotalFee() * _nanoWitPrice;
+            }
+        }
+        _expenses += __gasPriceOracleL1.getL1Fee(_reportTxMsgData);
+        return (_revenues > _expenses
+            ? uint256(_revenues - _expenses)
+            : 0
+        );
     }
 }
