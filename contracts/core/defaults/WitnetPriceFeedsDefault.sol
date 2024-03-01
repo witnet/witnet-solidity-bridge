@@ -94,7 +94,7 @@ contract WitnetPriceFeedsDefault
             // settle default Radon SLA upon first initialization
             __defaultRadonSLA = WitnetV2.RadonSLA({
                 committeeSize: 10,
-                witnessingFee: 2 * 10 ** 8   // 0.2 $WIT
+                witnessingFeeNanoWit: 2 * 10 ** 8   // 0.2 $WIT
             });
         } else {
             // only the owner can initialize:

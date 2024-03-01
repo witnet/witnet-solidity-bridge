@@ -17,7 +17,6 @@ library WitnetV2 {
         Unknown,
         Posted,
         Reported,
-        Undeliverable,
         Finalized
     }
 
@@ -56,7 +55,7 @@ library WitnetV2 {
         
         /// @notice Fee in $nanoWIT paid to every node in the Witnet blockchain involved in solving the data request.
         /// @dev Witnet nodes participating as witnesses will have to stake as collateral 100x this amount.
-        uint64  witnessingFee;
+        uint64  witnessingFeeNanoWit;
     }
 
     
@@ -71,10 +70,10 @@ library WitnetV2 {
      
     function isValid(RadonSLA calldata sla) internal pure returns (bool) {
         return (
-            sla.witnessingFee > 0 
+            sla.witnessingFeeNanoWit > 0 
                 && sla.committeeSize > 0 && sla.committeeSize <= 127
                 // v1.7.x requires witnessing collateral to be greater or equal to 20 WIT:
-                && sla.witnessingFee * 100 >= 20 * 10 ** 9 
+                && sla.witnessingFeeNanoWit * 100 >= 20 * 10 ** 9 
         );
     }
 
@@ -82,14 +81,14 @@ library WitnetV2 {
         return Witnet.RadonSLA({
             numWitnesses: self.committeeSize,
             minConsensusPercentage: 51,
-            witnessReward: self.witnessingFee,
-            witnessCollateral: self.witnessingFee * 100,
-            minerCommitRevealFee: self.witnessingFee
+            witnessReward: self.witnessingFeeNanoWit,
+            witnessCollateral: self.witnessingFeeNanoWit * 100,
+            minerCommitRevealFee: self.witnessingFeeNanoWit / self.committeeSize
         });
     }
 
-    function witTotalFee(RadonSLA calldata self) internal pure returns (uint64) {
-        return self.witnessingFee * (self.committeeSize + 3);
+    function nanoWitTotalFee(RadonSLA storage self) internal view returns (uint64) {
+        return self.witnessingFeeNanoWit * (self.committeeSize + 3);
     }
 
     uint256 internal constant _WITNET_GENESIS_TIMESTAMP = 1602666045;

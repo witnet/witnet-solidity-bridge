@@ -155,8 +155,8 @@ library WitnetErrorsLib {
         } else if (code == Witnet.ResultErrorCodes.InsufficientMajority) {
             return "insufficient majority.";
 
-        } else if (code == Witnet.ResultErrorCodes.InsufficientQuorum) {
-            return "insufficient quorum.";
+        } else if (code == Witnet.ResultErrorCodes.InsufficientReveals) {
+            return "insufficient reveals.";
 
         } else if (code == Witnet.ResultErrorCodes.BridgePoorIncentives) {
             return "as for the bridge.";

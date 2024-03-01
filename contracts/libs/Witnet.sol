@@ -163,8 +163,8 @@ library Witnet {
     
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Actual first-order result error codes =============================================================================
-        /// 0x50: Not enough reveal quorum was reached on tally stage:
-        InsufficientQuorum,
+        /// 0x50: Not enough reveals were received in due time:
+        InsufficientReveals,
         /// 0x51: No actual reveal majority was reached on tally stage:
         InsufficientMajority,
         /// 0x52: Not enough commits were received before tally stage:
@@ -254,7 +254,7 @@ library Witnet {
         return (
             self == ResultErrorCodes.InsufficientCommits
                 || self == ResultErrorCodes.InsufficientMajority
-                || self == ResultErrorCodes.InsufficientQuorum
+                || self == ResultErrorCodes.InsufficientReveals
         );
     }
 
@@ -744,62 +744,6 @@ library Witnet {
     {
         return result.value.readUintArray();
     }
-
-
-    // /// ===============================================================================================================
-    // /// --- 'Witnet.RadonSLA' helper methods --------------------------------------------------------------------------
-
-    // /// @notice Returns `true` if all witnessing parameters in `b` have same
-    // /// @notice value or greater than the ones in `a`.
-    // function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
-    //     internal pure returns (bool)
-    // {
-    //     return (
-    //         a.numWitnesses >= b.numWitnesses
-    //             && a.minConsensusPercentage >= b.minConsensusPercentage
-    //             && a.witnessReward >= b.witnessReward
-    //             && a.witnessCollateral >= b.witnessCollateral
-    //             && a.minerCommitRevealFee >= b.minerCommitRevealFee
-    //     );
-    // }
-
-    // function isValid(Witnet.RadonSLA memory sla)
-    //     internal pure returns (bool)
-    // {
-    //     return (
-    //         sla.witnessReward > 0
-    //             && sla.numWitnesses > 0 && sla.numWitnesses <= 127
-    //             && sla.minConsensusPercentage > 50 && sla.minConsensusPercentage < 100
-    //             && sla.witnessCollateral > 0
-    //             && sla.witnessCollateral / sla.witnessReward <= 127
-    //     );
-    // }
-
-    // function toBytes32(RadonSLA memory sla) internal pure returns (bytes32) {
-    //     return bytes32(
-    //         uint(sla.witnessReward)
-    //             | sla.witnessCollateral << 64
-    //             | sla.minerCommitRevealFee << 128
-    //             | sla.numWitnesses << 248
-    //             | sla.minConsensusPercentage << 232
-    //     );
-    // }
-
-    // function toRadonSLA(bytes32 _packed) internal pure returns (RadonSLA memory) {
-    //     return RadonSLA({
-    //         numWitnesses: uint8(uint(_packed >> 248)),
-    //         minConsensusPercentage: uint8(uint(_packed >> 232) & 0xff),
-    //         witnessReward: uint64(uint(_packed) & 0xffffffffffffffff),
-    //         witnessCollateral: uint64(uint(_packed >> 64) & 0xffffffffffffffff),
-    //         minerCommitRevealFee: uint64(uint(_packed >> 128) & 0xffffffffffffffff)
-    //     });
-    // }
-
-    // function witnessingFee(Witnet.RadonSLA memory sla)
-    //     internal pure returns (uint64)
-    // {
-    //     return sla.witnessReward * sla.numWitnesses;
-    // }
 
 
     /// ===============================================================================================================

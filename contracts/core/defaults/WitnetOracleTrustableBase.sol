@@ -266,33 +266,10 @@ abstract contract WitnetOracleTrustableBase
     /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
     /// @param _witnetQueryId The unique query identifier.
     function getQueryResponseStatus(uint256 _witnetQueryId)
-        virtual public view
+        virtual override public view
         returns (WitnetV2.ResponseStatus)
     {
-        WitnetV2.QueryStatus _queryStatus = _statusOf(_witnetQueryId);
-        if (
-            _queryStatus == WitnetV2.QueryStatus.Finalized
-                || _queryStatus == WitnetV2.QueryStatus.Reported
-        ) {
-            bytes storage __cborValues = __seekQueryResponse(_witnetQueryId).resultCborBytes;
-            // determine whether reported result is an error by peeking the first byte
-            return (__cborValues[0] == bytes1(0xd8)
-                ? (_queryStatus == WitnetV2.QueryStatus.Finalized 
-                    ? WitnetV2.ResponseStatus.Error 
-                    : WitnetV2.ResponseStatus.AwaitingError
-                ) : (_queryStatus == WitnetV2.QueryStatus.Finalized
-                    ? WitnetV2.ResponseStatus.Ready
-                    : WitnetV2.ResponseStatus.AwaitingReady
-                )
-            );
-        } else if (
-            _queryStatus == WitnetV2.QueryStatus.Posted
-                || _queryStatus == WitnetV2.QueryStatus.Undeliverable
-        ) {
-            return WitnetV2.ResponseStatus.Awaiting;
-        } else {
-            return WitnetV2.ResponseStatus.Void;
-        }
+        return WitnetOracleDataLib.getQueryResponseStatus(_witnetQueryId);
     }
 
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
@@ -328,38 +305,17 @@ abstract contract WitnetOracleTrustableBase
         override
         returns (WitnetV2.QueryStatus)
     {
-        return _statusOf(_witnetQueryId);
+        return WitnetOracleDataLib.statusOf(_witnetQueryId);
     }
 
-    function getQueryStatus(uint256[] calldata _witnetQueryIds)
+    function getQueryStatusBatch(uint256[] calldata _witnetQueryIds)
         external view
         override
         returns (WitnetV2.QueryStatus[] memory _status)
     {
         _status = new WitnetV2.QueryStatus[](_witnetQueryIds.length);
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            _status[_ix] = _statusOf(_witnetQueryIds[_ix]);
-        }
-    }
-
-    /// @notice Retrieves the Witnet Data Request bytecode of previously posted queries.
-    /// @dev Returns empty buffer if the query does not exist.
-    /// @param _queryIds Query identifies.
-    function getQueryWitnetBytecodes(uint256[] calldata _queryIds)
-        external view 
-        virtual override
-        returns (bytes[] memory _bytecodes)
-    {
-        _bytecodes = new bytes[](_queryIds.length);
-        for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
-            if (_statusOf(_queryIds[_ix]) != WitnetV2.QueryStatus.Unknown) {
-                WitnetV2.Request storage __request = __seekQueryRequest(_queryIds[_ix]);
-                if (__request.witnetRAD != bytes32(0)) {
-                    _bytecodes[_ix] = registry.bytecodeOf(__request.witnetRAD);
-                } else {
-                    _bytecodes[_ix] = __request.witnetBytecode;
-                }
-            }
+            _status[_ix] = WitnetOracleDataLib.statusOf(_witnetQueryIds[_ix]);
         }
     }
 
@@ -371,7 +327,6 @@ abstract contract WitnetOracleTrustableBase
     {
         return __storage().nonce;
     }
-
 
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and 
     /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
@@ -405,7 +360,7 @@ abstract contract WitnetOracleTrustableBase
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
     /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
     /// @notice reporter who relays back the Witnet-provable result to this request. The Witnet-provable result will be reported
-    /// @notice directly to the requesting contract. If the report callback fails for any reason, an `WitnetResponseDeliveryFailed`
+    /// @notice directly to the requesting contract. If the report callback fails for any reason, an `WitnetQueryResponseDeliveryFailed`
     /// @notice will be triggered, and the Witnet audit trail will be saved in storage, but not so the actual CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitnetConsumer interface;
@@ -444,7 +399,7 @@ abstract contract WitnetOracleTrustableBase
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
     /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
     /// @notice reporter who relays back the Witnet-provable result to this request. The Witnet-provable result will be reported
-    /// @notice directly to the requesting contract. If the report callback fails for any reason, a `WitnetResponseDeliveryFailed`
+    /// @notice directly to the requesting contract. If the report callback fails for any reason, a `WitnetQueryResponseDeliveryFailed`
     /// @notice event will be triggered, and the Witnet audit trail will be saved in storage, but not so the CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitnetConsumer interface;
@@ -805,22 +760,14 @@ abstract contract WitnetOracleTrustableBase
             );
             if (_evmCallbackSuccess) {
                 // => the callback run successfully
-                emit WitnetResponseDelivered(
+                emit WitnetQueryResponseDelivered(
                     _witnetQueryId,
                     _getGasPrice(),
                     _evmCallbackActualGas
                 );
-                // upon successfull delivery, the audit trail is saved into storage, but not the actual result
-                // as it was already passed over to the requester:
-                __writeQueryResponse(
-                    _witnetQueryId, 
-                    _witnetQueryResultTimestamp, 
-                    _witnetQueryResultTallyHash, 
-                    hex""
-                );
             } else {
                 // => the callback reverted
-                emit WitnetResponseDeliveryFailed(
+                emit WitnetQueryResponseDeliveryFailed(
                     _witnetQueryId,
                     _witnetQueryResultCborBytes,
                     _getGasPrice(),
@@ -841,7 +788,7 @@ abstract contract WitnetOracleTrustableBase
             }
         } else {
             // => no callback is involved
-            emit WitnetQueryReported(
+            emit WitnetQueryResponse(
                 _witnetQueryId, 
                 _getGasPrice()
             );
