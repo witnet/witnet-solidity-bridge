@@ -20,6 +20,7 @@ contract WitnetRequestBytecodesDefault
 {   
     using Witnet for bytes;
     using Witnet for string;
+    using WitnetV2 for WitnetV2.RadonSLA;
     
     using WitnetEncodingLib for Witnet.RadonDataRequestMethods;
     using WitnetEncodingLib for Witnet.RadonRetrieval;
@@ -152,6 +153,29 @@ contract WitnetRequestBytecodesDefault
         returns (bytes memory)
     {
         return __database().radsBytecode[_radHash];
+    }
+
+    function bytecodeOf(bytes32 _radHash, WitnetV2.RadonSLA calldata _sla)
+        override external view 
+        returns (bytes memory)
+    {
+        bytes memory _radBytecode = bytecodeOf(_radHash);
+        return abi.encodePacked(
+            WitnetEncodingLib.encode(uint64(_radBytecode.length), 0x0a),
+            _radBytecode,
+            _sla.toV1().encode()
+        );
+    }
+
+    function bytecodeOf(bytes calldata _radBytecode, WitnetV2.RadonSLA calldata _sla)
+        override external pure
+        returns (bytes memory)
+    {
+        return abi.encodePacked(
+            WitnetEncodingLib.encode(uint64(_radBytecode.length), 0x0a),
+            _radBytecode,
+            _sla.toV1().encode()
+        );
     }
 
     function hashOf(bytes calldata _radBytecode) external pure override returns (bytes32) {

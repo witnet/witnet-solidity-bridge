@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../libs/Witnet.sol";
+import "../libs/WitnetV2.sol";
 
 interface IWitnetRequestBytecodes {
 
@@ -15,6 +15,9 @@ interface IWitnetRequestBytecodes {
     event NewRadHash(bytes32 hash);
 
     function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
+    function bytecodeOf(bytes32 radHash, WitnetV2.RadonSLA calldata sla) external view returns (bytes memory);
+    function bytecodeOf(bytes calldata radBytecode, WitnetV2.RadonSLA calldata sla) external view returns (bytes memory);
+    
     function hashOf(bytes calldata) external view returns (bytes32);
 
     function lookupDataProvider(uint256 index) external view returns (string memory, uint);
