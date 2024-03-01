@@ -61,7 +61,7 @@ abstract contract WitnetOracleTrustableBase
 
     /// Asserts the given query is currently in the given status.
     modifier inStatus(uint256 _queryId, WitnetV2.QueryStatus _status) {
-      if (WitnetOracleDataLib.statusOf(_queryId) != _status) {
+      if (WitnetOracleDataLib.seekQueryStatus(_queryId) != _status) {
         revert(WitnetOracleDataLib.notInStatusRevertMessage(_status));
       } else {
         _;
@@ -291,7 +291,7 @@ abstract contract WitnetOracleTrustableBase
         virtual override public view
         returns (WitnetV2.ResponseStatus)
     {
-        return WitnetOracleDataLib.getQueryResponseStatus(_witnetQueryId);
+        return WitnetOracleDataLib.seekQueryResponseStatus(_witnetQueryId);
     }
 
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
@@ -301,7 +301,7 @@ abstract contract WitnetOracleTrustableBase
         public view
         returns (Witnet.ResultError memory)
     {
-        WitnetV2.ResponseStatus _status = getQueryResponseStatus(_witnetQueryId);
+        WitnetV2.ResponseStatus _status = WitnetOracleDataLib.seekQueryResponseStatus(_witnetQueryId);
         try WitnetErrorsLib.asResultError(_status, WitnetOracleDataLib.seekQueryResponse(_witnetQueryId).resultCborBytes)
             returns (Witnet.ResultError memory _resultError)
         {
@@ -327,7 +327,7 @@ abstract contract WitnetOracleTrustableBase
         override
         returns (WitnetV2.QueryStatus)
     {
-        return WitnetOracleDataLib.statusOf(_witnetQueryId);
+        return WitnetOracleDataLib.seekQueryStatus(_witnetQueryId);
     }
 
     function getQueryStatusBatch(uint256[] calldata _witnetQueryIds)
@@ -337,7 +337,7 @@ abstract contract WitnetOracleTrustableBase
     {
         _status = new WitnetV2.QueryStatus[](_witnetQueryIds.length);
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            _status[_ix] = WitnetOracleDataLib.statusOf(_witnetQueryIds[_ix]);
+            _status[_ix] = WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]);
         }
     }
 
@@ -490,7 +490,7 @@ abstract contract WitnetOracleTrustableBase
     {
         uint256 _expenses; uint256 _revenues;
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            if (WitnetOracleDataLib.statusOf(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
+            if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
                 WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
                 _revenues += __request.evmReward;
                 if (__request.gasCallback > 0) {
@@ -614,7 +614,7 @@ abstract contract WitnetOracleTrustableBase
     {
         for ( uint _i = 0; _i < _batchResults.length; _i ++) {
             if (
-                WitnetOracleDataLib.statusOf(_batchResults[_i].queryId)
+                WitnetOracleDataLib.seekQueryStatus(_batchResults[_i].queryId)
                     != WitnetV2.QueryStatus.Posted
             ) {
                 emit BatchReportError(

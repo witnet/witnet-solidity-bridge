@@ -30,7 +30,7 @@ contract TestWitnetV2 {
             witnetRAD: bytes32(0),
             witnetSLA: WitnetV2.RadonSLA({
                 committeeSize: 7,
-                witnessingFee: 10 ** 9
+                witnessingFeeNanoWit: 10 ** 9
             })
         });
     }
@@ -48,7 +48,7 @@ contract TestWitnetV2 {
             witnetRAD: bytes32(bytes2(0x1234)),
             witnetSLA: WitnetV2.RadonSLA({
                 committeeSize: 7,
-                witnessingFee: 10 ** 9
+                witnessingFeeNanoWit: 10 ** 9
             })
         });
     }

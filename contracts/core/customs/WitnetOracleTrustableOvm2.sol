@@ -103,7 +103,7 @@ contract WitnetOracleTrustableOvm2
     {
         uint256 _expenses; uint256 _revenues;
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            if (WitnetOracleDataLib.statusOf(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
+            if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
                 WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
                 _revenues += __request.evmReward;
                 if (__request.gasCallback > 0) {

@@ -51,7 +51,7 @@ library WitnetOracleDataLib {
         return data().queries[_queryId].response;
     }
 
-    function statusOf(uint256 queryId) internal view returns (WitnetV2.QueryStatus) {
+    function seekQueryStatus(uint256 queryId) internal view returns (WitnetV2.QueryStatus) {
         WitnetV2.Query storage __query = data().queries[queryId];
         if (__query.response.resultTimestamp != 0) {
             if (block.number >= __query.response.finality) {
@@ -66,34 +66,8 @@ library WitnetOracleDataLib {
         }
     }
 
-    // ================================================================================================================
-    // --- Public functions -------------------------------------------------------------------------------------------
-
-    function extractWitnetDataRequests(WitnetRequestBytecodes registry, uint256[] calldata queryIds)
-        public view
-        returns (bytes[] memory bytecodes)
-    {
-        bytecodes = new bytes[](queryIds.length);
-        for (uint _ix = 0; _ix < queryIds.length; _ix ++) {
-            if (statusOf(queryIds[_ix]) != WitnetV2.QueryStatus.Unknown) {
-                WitnetV2.Request storage __request = data().queries[queryIds[_ix]].request;
-                if (__request.witnetRAD != bytes32(0)) {
-                    bytecodes[_ix] = registry.bytecodeOf(
-                        __request.witnetRAD,
-                        __request.witnetSLA
-                    );
-                } else {
-                    bytecodes[_ix] = registry.bytecodeOf(
-                        __request.witnetBytecode,
-                        __request.witnetSLA 
-                    );
-                }
-            }
-        }
-    }
-
-    function getQueryResponseStatus(uint256 queryId) public view returns (WitnetV2.ResponseStatus) {
-        WitnetV2.QueryStatus _status = statusOf(queryId);
+    function seekQueryResponseStatus(uint256 queryId) internal view returns (WitnetV2.ResponseStatus) {
+        WitnetV2.QueryStatus _status = seekQueryStatus(queryId);
         if (
             _status == WitnetV2.QueryStatus.Finalized
                 || _status == WitnetV2.QueryStatus.Reported
@@ -115,6 +89,32 @@ library WitnetOracleDataLib {
             return WitnetV2.ResponseStatus.Awaiting;
         } else {
             return WitnetV2.ResponseStatus.Void;
+        }
+    }
+
+    // ================================================================================================================
+    // --- Public functions -------------------------------------------------------------------------------------------
+
+    function extractWitnetDataRequests(WitnetRequestBytecodes registry, uint256[] calldata queryIds)
+        public view
+        returns (bytes[] memory bytecodes)
+    {
+        bytecodes = new bytes[](queryIds.length);
+        for (uint _ix = 0; _ix < queryIds.length; _ix ++) {
+            if (seekQueryStatus(queryIds[_ix]) != WitnetV2.QueryStatus.Unknown) {
+                WitnetV2.Request storage __request = data().queries[queryIds[_ix]].request;
+                if (__request.witnetRAD != bytes32(0)) {
+                    bytecodes[_ix] = registry.bytecodeOf(
+                        __request.witnetRAD,
+                        __request.witnetSLA
+                    );
+                } else {
+                    bytecodes[_ix] = registry.bytecodeOf(
+                        __request.witnetBytecode,
+                        __request.witnetSLA 
+                    );
+                }
+            }
         }
     }
 
