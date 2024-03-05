@@ -205,7 +205,7 @@ library WitnetEncodingLib {
             string[][] memory args,
             bytes memory aggregatorInnerBytecode,
             bytes memory tallyInnerBytecode,
-            uint16 resultMaxSize
+            uint16
         )
         public pure
         returns (bytes memory)
@@ -216,10 +216,6 @@ library WitnetEncodingLib {
             encodedSources[ix] = encode(sources[ix]);
         }
         return abi.encodePacked(
-            (resultMaxSize > 0
-                ? encode(uint64(resultMaxSize), 0x08)
-                : bytes("")
-            ),
             WitnetBuffer.concat(encodedSources),
             encode(uint64(aggregatorInnerBytecode.length), bytes1(0x1a)),
             aggregatorInnerBytecode,

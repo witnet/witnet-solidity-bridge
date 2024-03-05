@@ -23,7 +23,7 @@ module.exports = {
       vanity: 6765579443, // 0x000B61Fe075F545fd37767f40391658275900000
     },
     WitnetRequestFactory: {
-      vanity: 2294036679, // 0x000F4cCF726c5445626DBD6f2258482f61377000
+      vanity: 1240014136, // 0x000DB36997AF1F02209A6F995883B9B699900000
     },
   },
   avalanche: {
