@@ -243,7 +243,7 @@ abstract contract WitnetOracleTrustableBase
     function fetchQueryResponse(uint256 _witnetQueryId)
         virtual override
         external
-        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Reported)
+        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Finalized)
         onlyRequester(_witnetQueryId)
         returns (WitnetV2.Response memory _response)
     {
