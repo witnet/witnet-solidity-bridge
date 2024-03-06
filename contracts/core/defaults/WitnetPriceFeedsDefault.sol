@@ -205,13 +205,19 @@ contract WitnetPriceFeedsDefault
         return witnet.estimateBaseFee(_evmGasPrice, 32);
     }
 
+    function lastValidQueryId(bytes4 feedId)
+        override public view
+        returns (uint256)
+    {
+        return _lastValidQueryId(feedId);
+    }
+
     function lastValidResponse(bytes4 feedId)
         override public view
         returns (WitnetV2.Response memory)
     {
         return witnet.getQueryResponse(_lastValidQueryId(feedId));
     }
-
 
     function latestUpdateQueryId(bytes4 feedId)
         override public view

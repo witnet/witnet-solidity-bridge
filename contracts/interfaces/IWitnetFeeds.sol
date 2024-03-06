@@ -35,6 +35,7 @@ interface IWitnetFeeds {
     function defaultRadonSLA() external view returns (Witnet.RadonSLA memory);
     function estimateUpdateBaseFee(uint256 evmGasPrice) external view returns (uint);
 
+    function lastValidQueryId(bytes4 feedId) external view returns (uint256);
     function lastValidResponse(bytes4 feedId) external view returns (WitnetV2.Response memory);
 
     function latestUpdateQueryId(bytes4 feedId) external view returns (uint256);
