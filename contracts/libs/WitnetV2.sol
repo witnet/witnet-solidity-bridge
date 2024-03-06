@@ -43,10 +43,9 @@ library WitnetV2 {
     enum ResponseStatus {
         Void,
         Awaiting,
+        Finalizing,
         Ready,
-        Error,
-        AwaitingReady,
-        AwaitingError
+        Error
     }
 
     struct RadonSLA {

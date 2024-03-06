@@ -615,8 +615,7 @@ contract WitnetPriceFeedsDefault
                 ? 200
                 : (
                     _latestPrice.status == WitnetV2.ResponseStatus.Awaiting 
-                        || _latestPrice.status == WitnetV2.ResponseStatus.AwaitingReady
-                        || _latestPrice.status == WitnetV2.ResponseStatus.AwaitingError
+                        || _latestPrice.status == WitnetV2.ResponseStatus.Finalizing
                 ) ? 404 : 400
         );
     }

@@ -67,26 +67,18 @@ library WitnetOracleDataLib {
     }
 
     function seekQueryResponseStatus(uint256 queryId) internal view returns (WitnetV2.ResponseStatus) {
-        WitnetV2.QueryStatus _status = seekQueryStatus(queryId);
-        if (
-            _status == WitnetV2.QueryStatus.Finalized
-                || _status == WitnetV2.QueryStatus.Reported
-        ) {
+        WitnetV2.QueryStatus _queryStatus = seekQueryStatus(queryId);
+        if (_queryStatus == WitnetV2.QueryStatus.Finalized) {
             bytes storage __cborValues = data().queries[queryId].response.resultCborBytes;
             // determine whether reported result is an error by peeking the first byte
             return (__cborValues[0] == bytes1(0xd8)
-                ? (_status == WitnetV2.QueryStatus.Finalized 
-                    ? WitnetV2.ResponseStatus.Error 
-                    : WitnetV2.ResponseStatus.AwaitingError
-                ) : (_status == WitnetV2.QueryStatus.Finalized
-                    ? WitnetV2.ResponseStatus.Ready
-                    : WitnetV2.ResponseStatus.AwaitingReady
-                )
+                ? WitnetV2.ResponseStatus.Error 
+                : WitnetV2.ResponseStatus.Ready
             );
-        } else if (
-            _status == WitnetV2.QueryStatus.Posted
-        ) {
+        } else if (_queryStatus == WitnetV2.QueryStatus.Posted) {
             return WitnetV2.ResponseStatus.Awaiting;
+        } else if (_queryStatus == WitnetV2.QueryStatus.Reported) {
+            return WitnetV2.ResponseStatus.Finalizing;
         } else {
             return WitnetV2.ResponseStatus.Void;
         }

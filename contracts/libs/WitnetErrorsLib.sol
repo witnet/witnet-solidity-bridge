@@ -40,10 +40,7 @@ library WitnetErrorsLib {
                 || _status == WitnetV2.ResponseStatus.Ready
         ) {
             return resultErrorFromCborBytes(_cborBytes);
-        } else if (
-            _status == WitnetV2.ResponseStatus.AwaitingError 
-                || _status == WitnetV2.ResponseStatus.AwaitingReady
-        ) {
+        } else if (_status == WitnetV2.ResponseStatus.Finalizing) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "WitnetErrorsLib: not yet finalized"
@@ -51,7 +48,7 @@ library WitnetErrorsLib {
         } if (_status == WitnetV2.ResponseStatus.Awaiting) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
-                reason: "WitnetErrorsLib: not yet solved"
+                reason: "WitnetErrorsLib: not yet reported"
             });
         } else {
             return Witnet.ResultError({
