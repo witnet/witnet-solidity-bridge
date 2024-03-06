@@ -7,10 +7,10 @@ import "../WitnetRequestBytecodes.sol";
 
 interface IWitnetFeeds {
 
-    event DeletedFeed       (address indexed from, bytes4 indexed feedId, string caption);
-    event SettledFeed       (address indexed from, bytes4 indexed feedId, string caption, bytes32 radHash);
-    event SettledFeedSolver (address indexed from, bytes4 indexed feedId, string caption, address solver);
-    event SettledRadonSLA   (address indexed from, WitnetV2.RadonSLA sla);
+    event WitnetFeedDeleted(bytes4 feedId);
+    event WitnetFeedSettled(bytes4 feedId, bytes32 radHash);
+    event WitnetFeedSolverSettled(bytes4 feedId, address solver);
+    event WitnetRadonSLA(WitnetV2.RadonSLA sla);
     
     event UpdateRequest(
             address indexed   origin, 

@@ -354,7 +354,7 @@ contract WitnetPriceFeedsDefault
             __records_(_lastFeedId).index = _index;
             delete __storage().records[feedId];
         }
-        emit DeletedFeed(msg.sender, feedId, caption);
+        emit WitnetFeedDeleted(feedId);
     }
 
     function settleDefaultRadonSLA(WitnetV2.RadonSLA calldata defaultSLA)
@@ -387,7 +387,7 @@ contract WitnetPriceFeedsDefault
             __record.radHash = radHash;
             __record.solver = address(0);
         }
-        emit SettledFeed(msg.sender, feedId, caption, radHash);
+        emit WitnetFeedSettled(feedId, radHash);
     }
 
     function settleFeedRequest(string calldata caption, WitnetRequest request)
@@ -469,7 +469,7 @@ contract WitnetPriceFeedsDefault
                 )));
             }
         }
-        emit SettledFeedSolver(msg.sender, feedId, caption, solver);
+        emit WitnetFeedSolverSettled(feedId, solver);
     }
 
 
@@ -565,7 +565,6 @@ contract WitnetPriceFeedsDefault
     {
         _solver = WitnetPriceFeedsLib.deployPriceSolver(initcode, constructorParams);
         emit WitnetPriceSolverDeployed(
-            msg.sender, 
             _solver, 
             _solver.codehash, 
             constructorParams
