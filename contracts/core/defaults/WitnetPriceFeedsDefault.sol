@@ -350,6 +350,7 @@ contract WitnetPriceFeedsDefault
         {
             bytes4 _lastFeedId = __ids[__ids.length - 1];
             __ids[_index - 1] = _lastFeedId;
+            __ids.pop();
             __records_(_lastFeedId).index = _index;
             delete __storage().records[feedId];
         }
