@@ -12,7 +12,7 @@ interface IWitnetFeeds {
     event WitnetFeedSolverSettled(bytes4 feedId, address solver);
     event WitnetRadonSLA(WitnetV2.RadonSLA sla);
     
-    event UpdateRequest(
+    event WitnetFeedUpdateRequested(
             address indexed   origin, 
             bytes4 indexed    feedId, 
             uint256           witnetQueryId, 
@@ -20,7 +20,7 @@ interface IWitnetFeeds {
             WitnetV2.RadonSLA witnetQuerySLA
         );
     
-    event UpdateRequestReward(
+    event WitnetFeedUpdateRequested(
             address indexed origin, 
             bytes4 indexed  feedId, 
             uint256         witnetQueryId, 

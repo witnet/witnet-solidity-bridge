@@ -696,7 +696,7 @@ contract WitnetPriceFeedsDefault
                     _usedFunds = uint(_deltaReward);
                     witnet.upgradeQueryEvmReward{value: _usedFunds}(_latestId);
                     // solhint-disable avoid-tx-origin
-                    emit UpdateRequestReward(
+                    emit WitnetFeedUpdateRequested(
                         tx.origin, 
                         feedId, 
                         _latestId,
@@ -726,7 +726,7 @@ contract WitnetPriceFeedsDefault
                 // Update latest query id:
                 __feed.latestUpdateQueryId = _latestId;
                 // solhint-disable avoid-tx-origin:
-                emit UpdateRequest(
+                emit WitnetFeedUpdateRequested(
                     tx.origin, 
                     feedId,
                     _latestId,
