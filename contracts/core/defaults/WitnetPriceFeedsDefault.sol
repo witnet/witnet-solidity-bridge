@@ -357,6 +357,19 @@ contract WitnetPriceFeedsDefault
         emit WitnetFeedDeleted(feedId);
     }
 
+    function deleteFeeds()
+        virtual override
+        external
+        onlyOwner
+    {
+        bytes4[] storage __ids = __storage().ids;
+        for (uint _ix = __ids.length; _ix > 0; _ix --) {
+            bytes4 _feedId = __ids[_ix - 1];
+            delete __storage().records[_feedId]; __ids.pop();
+            emit WitnetFeedDeleted(_feedId);
+        }
+    }
+
     function settleDefaultRadonSLA(WitnetV2.RadonSLA calldata defaultSLA)
         override public
         onlyOwner
