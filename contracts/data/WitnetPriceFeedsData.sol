@@ -11,7 +11,7 @@ abstract contract WitnetPriceFeedsData {
         0xe36ea87c48340f2c23c9e1c9f72f5c5165184e75683a4d2a19148e5964c1d1ff;
 
     struct Storage {
-        bytes32 packedDefaultSLA;
+        bytes32 reserved;
         bytes4[] ids;
         mapping (bytes4 => Record) records;
     }

@@ -11,6 +11,7 @@ interface IWitnetFeedsAdmin {
     function deleteFeeds() external;
     function owner() external view returns (address);
     function pendingOwner() external returns (address);
+    function settleBaseFeeOverheadPercentage(uint16) external;
     function settleDefaultRadonSLA(WitnetV2.RadonSLA calldata) external;
     function settleFeedRequest(string calldata caption, bytes32 radHash) external;
     function settleFeedRequest(string calldata caption, WitnetRequest request) external;

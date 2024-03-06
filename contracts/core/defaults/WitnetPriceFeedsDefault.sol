@@ -34,6 +34,7 @@ contract WitnetPriceFeedsDefault
     WitnetOracle immutable public override witnet;
 
     WitnetV2.RadonSLA private __defaultRadonSLA;
+    uint16 private __baseFeeOverheadPercentage;
     
     constructor(
             WitnetOracle _wrb,
@@ -96,6 +97,8 @@ contract WitnetPriceFeedsDefault
                 committeeSize: 10,
                 witnessingFeeNanoWit: 2 * 10 ** 8   // 0.2 $WIT
             });
+            // settle default base fee overhead percentage
+            __baseFeeOverheadPercentage = 10;
         } else {
             // only the owner can initialize:
             require(
@@ -202,7 +205,9 @@ contract WitnetPriceFeedsDefault
         public view
         returns (uint)
     {
-        return witnet.estimateBaseFee(_evmGasPrice, 32);
+        return (witnet.estimateBaseFee(_evmGasPrice, 32)
+            * (100 + __baseFeeOverheadPercentage)
+        ) / 100; 
     }
 
     function lastValidQueryId(bytes4 feedId)
@@ -376,12 +381,21 @@ contract WitnetPriceFeedsDefault
         }
     }
 
+    function settleBaseFeeOverheadPercentage(uint16 _baseFeeOverheadPercentage)
+        virtual override
+        external
+        onlyOwner 
+    {
+        __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
+    }
+
     function settleDefaultRadonSLA(WitnetV2.RadonSLA calldata defaultSLA)
         override public
         onlyOwner
     {
         require(defaultSLA.isValid(), "WitnetPriceFeeds: invalid SLA");
         __defaultRadonSLA = defaultSLA;
+        emit WitnetRadonSLA(defaultSLA);
     }
     
     function settleFeedRequest(string calldata caption, bytes32 radHash)
