@@ -221,8 +221,8 @@ abstract contract WitnetOracleTrustableBase
     /// @param gasPrice Expected gas price to pay upon posting the data request.
     /// @param radHash The hash of some Witnet Data Request previously posted in the WitnetRequestBytecodes registry.
     function estimateBaseFee(uint256 gasPrice, bytes32 radHash)
-        override
         public view
+        virtual override
         returns (uint256)
     {
         uint16 _resultMaxSize = registry.lookupRadonRequestResultMaxSize(radHash);

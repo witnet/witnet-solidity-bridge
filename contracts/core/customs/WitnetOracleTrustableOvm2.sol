@@ -71,7 +71,19 @@ contract WitnetOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return WitnetOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize) + _getCurrentL1Fee();
+        return _getCurrentL1Fee() + WitnetOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize);
+    }
+
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _radHash The hash of some Witnet Data Request previously posted in the WitnetRequestBytecodes registry.
+    function estimateBaseFee(uint256 _gasPrice, bytes32 _radHash)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return _getCurrentL1Fee() + WitnetOracleTrustableBase.estimateBaseFee(_gasPrice, _radHash);
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
@@ -82,7 +94,7 @@ contract WitnetOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit) + _getCurrentL1Fee();
+        return _getCurrentL1Fee() + WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit);
     }
 
     // ================================================================================================================
