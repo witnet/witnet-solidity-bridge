@@ -347,7 +347,7 @@ abstract contract WitnetOracleTrustableBase
         override
         returns (uint256)
     {
-        return __storage().nonce;
+        return __storage().nonce + 1;
     }
 
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and 
