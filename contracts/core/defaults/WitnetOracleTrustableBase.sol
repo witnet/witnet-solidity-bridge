@@ -486,9 +486,8 @@ abstract contract WitnetOracleTrustableBase
         )
         external view
         virtual override
-        returns (uint256 _earnings)
+        returns (uint256 _revenues, uint256 _expenses)
     {
-        uint256 _expenses; uint256 _revenues;
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
             if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
                 WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
@@ -506,10 +505,6 @@ abstract contract WitnetOracleTrustableBase
                 _expenses +=  __request.witnetSLA.nanoWitTotalFee() * _nanoWitPrice;
             }
         }
-        return (_revenues > _expenses
-            ? uint256(_revenues - _expenses)
-            : 0
-        );
     }
 
     /// @notice Retrieves the Witnet Data Request bytecodes and SLAs of previously posted queries.

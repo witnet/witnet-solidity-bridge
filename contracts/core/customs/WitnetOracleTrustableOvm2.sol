@@ -74,18 +74,6 @@ contract WitnetOracleTrustableOvm2
         return _getCurrentL1Fee() + WitnetOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize);
     }
 
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _radHash The hash of some Witnet Data Request previously posted in the WitnetRequestBytecodes registry.
-    function estimateBaseFee(uint256 _gasPrice, bytes32 _radHash)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return _getCurrentL1Fee() + WitnetOracleTrustableBase.estimateBaseFee(_gasPrice, _radHash);
-    }
-
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
     /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
@@ -111,13 +99,11 @@ contract WitnetOracleTrustableOvm2
         )
         external view
         virtual override
-        returns (uint256)
+        returns (uint256 _revenues, uint256 _expenses)
     {
-        uint256 _expenses; uint256 _revenues;
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
             if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
                 WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
-                _revenues += __request.evmReward;
                 if (__request.gasCallback > 0) {
                     _expenses += WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(
                         _reportTxGasPrice, 
@@ -125,9 +111,9 @@ contract WitnetOracleTrustableOvm2
                     );
                 } else {
                     if (__request.witnetRAD != bytes32(0)) {
-                        _expenses += WitnetOracleTrustableBase.estimateBaseFee(
+                        _expenses += WitnetOracleTrustableDefault.estimateBaseFee(
                             _reportTxGasPrice, 
-                            __request.witnetRAD
+                            registry.lookupRadonRequestResultMaxSize(__request.witnetRAD)
                         );
                     } else {
                         // todo: improve profit estimation accuracy if reporting on deleted query
@@ -138,12 +124,9 @@ contract WitnetOracleTrustableOvm2
                     }
                 }
                 _expenses += __request.witnetSLA.nanoWitTotalFee() * _nanoWitPrice;
+                _revenues += __request.evmReward;
             }
         }
         _expenses += __gasPriceOracleL1.getL1Fee(_reportTxMsgData);
-        return (_revenues > _expenses
-            ? uint256(_revenues - _expenses)
-            : 0
-        );
     }
 }

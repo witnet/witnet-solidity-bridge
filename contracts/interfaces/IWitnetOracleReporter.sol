@@ -16,7 +16,7 @@ interface IWitnetOracleReporter {
             bytes calldata reportTxMsgData,
             uint256 reportTxGasPrice,
             uint256 nanoWitPrice
-        ) external view returns (uint256);
+        ) external view returns (uint256, uint256);
 
     /// @notice Retrieves the Witnet Data Request bytecodes and SLAs of previously posted queries.
     /// @dev Returns empty buffer if the query does not exist.
