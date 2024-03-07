@@ -164,9 +164,9 @@ module.exports = {
   optimism: {
     WitnetOracle: {
       immutables: {
-        values: [
-          /* _reportResultGasBase */ 135000,
-        ],
+        // values: [
+        //   /* _reportResultGasBase */ 100000,
+        // ],
       },
     },
   },

@@ -132,6 +132,7 @@ async function deploy (target) {
   console.info("  ", "> proxy codehash:   ", web3.utils.soliditySha3(await web3.eth.getCode(impl.address)))
   console.info("  ", "> proxy operator:   ", await impl.owner.call({ from }))
   console.info("  ", "> impl. address:    ", await getProxyImplementation(from, proxy.address))
+  console.info("  ", "> impl. class:      ", await impl.class.call({ from }))
   console.info("  ", "> impl. version:    ", await impl.version.call({ from }))
   console.info()
   return proxy

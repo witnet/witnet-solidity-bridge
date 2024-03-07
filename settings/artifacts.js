@@ -21,10 +21,10 @@ module.exports = {
   optimism: {
     WitnetOracle: "WitnetOracleTrustableOvm2",
   },
-  "polygon.zkevm.goerli": {
+  "polygon:zkevm:goerli": {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
-  "polygon.zkevm.mainnet": {
+  "polygon:zkevm:mainnet": {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   reef: {
@@ -33,7 +33,7 @@ module.exports = {
   scroll: {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
-  "syscoin.rollux.testnet": {
+  "syscoin:rollux:testnet": {
     WitnetOracle: "WitnetOracleTrustableOvm2",
   },
   ten: {
