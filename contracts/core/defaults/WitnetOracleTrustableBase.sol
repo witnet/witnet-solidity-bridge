@@ -49,7 +49,12 @@ abstract contract WitnetOracleTrustableBase
         require(
             _getMsgValue() >= _baseFee, 
             "WitnetOracle: insufficient reward"
-        ); _;
+        ); 
+        require(
+            _getMsgValue() <= _baseFee * 10,
+            "WitnetOracle: too much reward"
+        );
+        _;
     }
 
     modifier checkSLA(WitnetV2.RadonSLA calldata sla) {
