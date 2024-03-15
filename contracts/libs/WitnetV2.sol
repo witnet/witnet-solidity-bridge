@@ -90,6 +90,28 @@ library WitnetV2 {
         return self.witnessingFeeNanoWit * (self.committeeSize + 3);
     }
 
+
+    /// ===============================================================================================================
+    /// --- P-RNG generators ------------------------------------------------------------------------------------------
+
+    /// Generates a pseudo-random uint32 number uniformly distributed within the range `[0 .. range)`, based on
+    /// the given `nonce` and `seed` values. 
+    function randomUint32(uint32 range, uint256 nonce, bytes32 seed)
+        internal pure 
+        returns (uint32) 
+    {
+        uint256 _number = uint256(
+            keccak256(
+                abi.encode(seed, nonce)
+            )
+        ) & uint256(2 ** 224 - 1);
+        return uint32((_number * range) >> 224);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- Witnet protocol v2.0 helper methods -----------------------------------------------------------------------  
+
     uint256 internal constant _WITNET_GENESIS_TIMESTAMP = 1602666045;
     uint256 internal constant _WITNET_GENESIS_EPOCH_SECONDS = 45;
 

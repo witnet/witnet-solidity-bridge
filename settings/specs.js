@@ -18,6 +18,9 @@ module.exports = {
       libs: ["WitnetPriceFeedsLib"],
       vanity: 1865150170, // 0x1111AbA2164AcdC6D291b08DfB374280035E1111
     },
+    WitnetRandomness: {
+      from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",
+    },
     WitnetRequestBytecodes: {
       libs: ["WitnetEncodingLib"],
       vanity: 6765579443, // 0x000B61Fe075F545fd37767f40391658275900000

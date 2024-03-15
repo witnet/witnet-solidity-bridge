@@ -1,11 +1,6 @@
 const ethUtils = require("ethereumjs-util")
 const settings = require("../../settings")
 const utils = require("../../src/utils")
-const version = `${
-  require("../../package").version
-}-${
-  require("child_process").execSync("git rev-parse HEAD").toString().trim().substring(0, 7)
-}`
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
@@ -13,83 +8,24 @@ module.exports = async function (_, network, [, from]) {
   const specs = settings.getSpecs(network)
   const targets = settings.getArtifacts(network)
 
+  // Community appliances built on top of the Witnet Oracle are meant to be immutable,
+  // and therefore not upgradable. Appliances can only be deployed
+  // once all core Witnet Oracle artifacts get deployed and initialized.
+
   // ==========================================================================
-  // --- WitnetRequestBytecodes core implementation ---------------------------
+  // --- WitnetRandomnessV20 --------------------------------------------------
 
   await deploy({
     network,
     targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetRequestBytecodes.from || from,
-    key: targets.WitnetRequestBytecodes,
-    libs: specs.WitnetRequestBytecodes.libs,
-    immutables: specs.WitnetRequestBytecodes.immutables,
+    from: utils.isDryRun(network) ? from : specs.WitnetRandomness.from || from,
+    key: targets.WitnetRandomness,
+    libs: specs.WitnetRandomness?.libs,
+    immutables: specs.WitnetRandomness?.immutables,
     intrinsics: {
-      types: ["bool", "bytes32"],
+      types: ["address"],
       values: [
-        /* _upgradable */ true,
-        /* _versionTag */ utils.fromAscii(version),
-      ],
-    },
-  })
-
-  // ==========================================================================
-  // --- WitnetRequestFactory core implementation -----------------------------
-
-  await deploy({
-    network,
-    targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetRequestFactory.from || from,
-    key: targets.WitnetRequestFactory,
-    libs: specs.WitnetRequestFactory.libs,
-    immutables: specs.WitnetRequestFactory.immutables,
-    intrinsics: {
-      types: ["address", "address", "bool", "bytes32"],
-      values: [
-        /* _witnet     */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
-        /* _registry   */ await determineProxyAddr(from, specs.WitnetRequestBytecodes?.vanity || 1),
-        /* _upgradable */ true,
-        /* _versionTag */ utils.fromAscii(version),
-      ],
-    },
-  })
-
-  // ==========================================================================
-  // --- WitnetOracle core implementation ---------------------------------
-
-  await deploy({
-    network,
-    targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetOracle.from || from,
-    key: targets.WitnetOracle,
-    libs: specs.WitnetOracle.libs,
-    immutables: specs.WitnetOracle.immutables,
-    intrinsics: {
-      types: ["address", "address", "bool", "bytes32"],
-      values: [
-        /* _factory    */ await determineProxyAddr(from, specs.WitnetRequestFactory?.vanity || 2),
-        /* _registry   */ await determineProxyAddr(from, specs.WitnetRequestBytecodes?.vanity || 1),
-        /* _upgradable */ true,
-        /* _versionTag */ utils.fromAscii(version),
-      ],
-    },
-  })
-
-  // ==========================================================================
-  // --- WitnetPriceFeeds core implementation ---------------------------------
-
-  await deploy({
-    network,
-    targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetPriceFeeds.from || from,
-    key: targets.WitnetPriceFeeds,
-    libs: specs.WitnetPriceFeeds.libs,
-    immutables: specs.WitnetPriceFeeds.immutables,
-    intrinsics: {
-      types: ["address", "bool", "bytes32"],
-      values: [
-        /* _witnet     */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
-        /* _upgradable */ true,
-        /* _versionTag */ utils.fromAscii(version),
+        /* _witnet */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
       ],
     },
   })

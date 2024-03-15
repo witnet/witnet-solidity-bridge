@@ -106,7 +106,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
     let btcUsdPriceFeedHash
 
     context("verifyRadonRetrieval(..)", async () => {
-      context("WitnetV2.RadonDataRequestMethods.Rng", async () => {
+      context("WitnetV2.RadonDataRequestMethods.RNG", async () => {
         it("emits appropiate single event when verifying randomness data source for the first time", async () => {
           const tx = await bytecodes.verifyRadonRetrieval(
             2, // requestMethod
