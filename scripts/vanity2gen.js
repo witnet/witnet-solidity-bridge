@@ -1,4 +1,3 @@
-const { assert } = require("chai")
 const create2 = require("./eth-create2")
 const fs = require("fs")
 const utils = require("../src/utils")
@@ -23,10 +22,14 @@ module.exports = async function () {
       artifact = artifacts.require(args[index + 1])
     } else if (argv === "--prefix") {
       prefix = args[index + 1].toLowerCase()
-      assert(web3.utils.isHexStrict(prefix), "--prefix: invalid hex string")
+      if (!web3.utils.isHexStrict(prefix)) {
+        throw new Error("--prefix: invalid hex string")
+      }
     } else if (argv === "--suffix") {
       suffix = args[index + 1].toLowerCase()
-      assert(web3.utils.isHexStrict(suffix), "--suffix: invalid hex string")
+      if (!web3.utils.isHexStrict(suffix)) {
+        throw new Error("--suffix: invalid hex string")
+      }
     } else if (argv === "--hits") {
       hits = parseInt(args[index + 1])
     } else if (argv === "--network") {
@@ -34,14 +37,16 @@ module.exports = async function () {
     } else if (argv === "--hexArgs") {
       hexArgs = args[index + 1].toLowerCase()
       if (hexArgs.startsWith("0x")) hexArgs = hexArgs.slice(2)
-      assert(web3.utils.isHexStrict("0x" + hexArgs), "--hexArgs: invalid hex string")
+      if (!web3.utils.isHexStrict("0x" + hexArgs)) {
+        throw new Error("--hexArgs: invalid hex string")
+      }
     } else if (argv === "--from") {
       from = args[index + 1]
     }
     return argv
   })
   try {
-    from = from || addresses[ecosystem][network].WitnetDeployer
+    from = from || addresses[network]?.WitnetDeployer || addresses.default.WitnetDeployer
   } catch {
     console.error(`WitnetDeployer must have been previously deployed on network '${network}'.\n`)
     console.info("Usage:\n")

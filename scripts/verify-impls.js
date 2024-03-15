@@ -4,7 +4,7 @@ const settings = require("../settings")
 const utils = require("../src/utils")
 
 if (process.argv.length < 3) {
-  console.error("\nUsage:\n\n$ node ./scripts/verify-proxies.js <ecosystem>:<network> ...OPTIONAL_ARGS\n")
+  console.error("\nUsage:\n\n$ node ./scripts/verify-impls.js <ecosystem>:<network> ...OPTIONAL_ARGS\n")
   process.exit(0)
 }
 

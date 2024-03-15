@@ -16,12 +16,10 @@ module.exports = async function (_, network, [, from]) {
   // --- WitnetRandomnessV20 --------------------------------------------------
 
   await deploy({
-    network,
-    targets,
+    network, targets,
     from: utils.isDryRun(network) ? from : specs.WitnetRandomness.from || from,
     key: targets.WitnetRandomness,
-    libs: specs.WitnetRandomness?.libs,
-    immutables: specs.WitnetRandomness?.immutables,
+    specs: specs.WitnetRandomness,
     intrinsics: {
       types: ["address"],
       values: [
@@ -31,8 +29,10 @@ module.exports = async function (_, network, [, from]) {
   })
 }
 
-async function deploy (specs) {
-  const { from, key, libs, intrinsics, immutables, network, targets } = specs
+async function deploy (target) {
+  const { from, key, intrinsics, network, specs, targets } = target
+  const { libs, immutables, vanity } = specs
+  const salt = vanity ? "0x" + utils.padLeft(vanity.toString(16), "0", 64) : "0x0"
 
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {}
@@ -58,20 +58,20 @@ async function deploy (specs) {
       console.info("  ", "> constructor types:", JSON.stringify(types))
       console.info("  ", "> constructor args: ", constructorArgs.slice(2))
     }
-    const coreBytecode = link(contract.toJSON().bytecode, libs, targets)
-    if (coreBytecode.indexOf("__") > -1) {
-      console.info(coreBytecode)
+    const bytecode = link(contract.toJSON().bytecode, libs, targets)
+    if (bytecode.indexOf("__") > -1) {
+      console.info(bytecode)
       console.info("Error: Cannot deploy due to some missing libs")
       process.exit(1)
     }
-    const coreInitCode = coreBytecode + constructorArgs.slice(2)
-    const coreAddr = await deployer.determineAddr.call(coreInitCode, "0x0", { from })
-    const tx = await deployer.deploy(coreInitCode, "0x0", { from })
+    const initCode = bytecode + constructorArgs.slice(2)
+    const addr = await deployer.determineAddr.call(initCode, salt, { from })
+    const tx = await deployer.deploy(initCode, salt || "0x0", { from })
     utils.traceTx(tx)
-    if ((await web3.eth.getCode(coreAddr)).length > 3) {
-      addresses[network][key] = coreAddr
+    if ((await web3.eth.getCode(addr)).length > 3) {
+      addresses[network][key] = addr
     } else {
-      console.info(`Error: Contract was not deployed on expected address: ${coreAddr}`)
+      console.info(`Error: Contract was not deployed on expected address: ${addr}`)
       process.exit(1)
     }
     // save addresses file if required
