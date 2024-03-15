@@ -1,12 +1,12 @@
 # witnet-solidity-bridge
 
-Open repository containing the smart contracts composing the **Witnet Solidity Bridge** framework. This framework enables Solidity developers and smart contracts operating in a long range of EVM-compatible chains to interact with the [Witnet Oracle Blockchain](https://witnet.io) for retrieving and aggregating offchain public data, and randomness.
+Solidity source code of the smart contracts composing the **Witnet EVM Bridge** framework. This framework enables smart contracts operating in a long range of EVM-compatible chains to interact with the [Witnet Oracle Blockchain](https://witnet.io) for retrieving and aggregating offchain public data, or as an entropy source for randomness generation.
 
 ## Install the package
 
 `$ pnpm install`
 
-## Deploy the whole WSB framework on a new chain
+## Deploying the Witnet EVM Bridge on a new chain
 
 ### Pre-assessment
 
@@ -29,7 +29,7 @@ Should any artifact require customized contract implementations:
 
 `$ pnpm run migrate <ecosytem>:<chain-name>`
 
-## Upgrade WSB components on an existing chain
+## Upgrding the Witnet EVM Bridge on an existing chain
 
 When modifying the existing source code, or the contents of `settings/artifacts` or `settings/specs`, you may need to upgrade some of the artifacts on certain networks. Just add the `--artifacts` parameter and a comma-separated list of the artifacts you need to upgrade. For instance:
 
@@ -44,8 +44,43 @@ Reasons for an upgrade to fail:
 - You're attempting to upgrade a contract with the same implementation logic as it currently has. 
 - The parameters passed to the upgrade call, as specified in `settings/specs` are not accepted for some reason (see actual revert message for further info).
 
-## Exported assets
+## Package exported modules
 
-- [Deployed addresses.]("./migrations/addresses.json")
-- [Supported chains.]("./settings/networks/index.js")
+### `require("witnet-solidity-bridge")`
+Javacript methods and resources:
+
+- List of supported EVM ecosystems:
+    - `supportedEcosystems()`
+- List of supported EVM chains:
+    - `supportedNetworks()`
+- WEB addresses at a given chain:
+    - `getAddresses(network)`
+- WEB artifacts:
+    - `assets.WitnetOracle`
+    - `assets.WitnetPriceFeeds`
+    - `assets.WitnetPriceRouteSolver`
+    - `assets.WitnetRequest`
+    - `assets.WitnetRequestBytecodes`
+    - `assets.WitnetRequestFactory`
+    - `assets.WitnetRequestTemplate`
+    - `assets.WitnetUpgrableBase`
+
+### `require("witnet-solidity-bridge/utils")`
+
+Javascript utils methods:
+
+- `fromAscii(str)`
+- `getRealmNetworkFromArgs()`
+- `getRealmNetworkFromString()`
+- `getWitnetArtifactsFromArgs()`
+- `getWitnetRequestMethodString(method)`
+- `isDryRun(network)`
+- `isNullAddress(addr)`
+- `padLeft(str, char, size)`
+- `prompt(text)`
+- `readJsonFromFile(filename)`
+- `overwriteJsonFile(filname, extra)`
+- `traceHeader(header)`
+- `traceTx(tx)`
+- `traceVerify(network, verifyArgs)`
 
