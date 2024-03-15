@@ -332,6 +332,14 @@ contract WitnetPriceFeedsDefault
         Ownable2Step.acceptOwnership();
     }
 
+    function baseFeeOverheadPercentage()
+        virtual override
+        external view
+        returns (uint16)
+    {
+        return __baseFeeOverheadPercentage;
+    }
+
     function pendingOwner() 
         virtual override (IWitnetFeedsAdmin, Ownable2Step)
         public view

@@ -7,6 +7,7 @@ import "../WitnetRequest.sol";
 
 interface IWitnetFeedsAdmin {
     function acceptOwnership() external;
+    function baseFeeOverheadPercentage() external view returns (uint16);
     function deleteFeed(string calldata caption) external;
     function deleteFeeds() external;
     function owner() external view returns (address);
