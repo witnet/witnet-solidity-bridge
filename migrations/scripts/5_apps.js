@@ -16,7 +16,8 @@ module.exports = async function (_, network, [, from]) {
   // --- WitnetRandomnessV20 --------------------------------------------------
 
   await deploy({
-    network, targets,
+    network,
+    targets,
     from: utils.isDryRun(network) ? from : specs.WitnetRandomness.from || from,
     key: targets.WitnetRandomness,
     specs: specs.WitnetRandomness,

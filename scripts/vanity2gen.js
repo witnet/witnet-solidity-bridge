@@ -7,7 +7,6 @@ const addresses = require("../migrations/addresses")
 module.exports = async function () {
   let artifact
   let count = 0
-  let ecosystem = "default"
   let from
   let hits = 10
   let offset = 0
