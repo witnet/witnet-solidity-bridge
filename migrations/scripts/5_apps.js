@@ -39,13 +39,12 @@ async function deploy (target) {
   if (!addresses[network]) addresses[network] = {}
 
   const selection = utils.getWitnetArtifactsFromArgs()
-
   const contract = artifacts.require(key)
   if (
-    utils.isNullAddress(addresses[network][key]) ||
-      (await web3.eth.getCode(addresses[network][key])).length < 3 ||
-      selection.includes(key) ||
-      (libs && selection.filter(item => libs.includes(item)).length > 0)
+    addresses[network][key] === "" ||
+      selection.includes(key) ||  
+      (libs && selection.filter(item => libs.includes(item)).length > 0) || 
+      (!utils.isNullAddress(addresses[network][key]) && (await web3.eth.getCode(addresses[network][key])).length < 3)      
   ) {
     utils.traceHeader(`Deploying '${key}'...`)
     console.info("  ", "> account:          ", from)
@@ -83,19 +82,21 @@ async function deploy (target) {
       args[network][key] = constructorArgs.slice(2)
       await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
     }
-  } else {
+  } else if (addresses[network][key]) {
     utils.traceHeader(`Skipped '${key}'`)
   }
-  contract.address = addresses[network][key]
-  for (const index in libs) {
-    const libname = libs[index]
-    const lib = artifacts.require(libname)
-    contract.link(lib)
-    console.info("  ", "> external library: ", `${libname}@${lib.address}`)
-  };
-  console.info("  ", "> contract address: ", contract.address)
-  console.info("  ", "> contract codehash:", web3.utils.soliditySha3(await web3.eth.getCode(contract.address)))
-  console.info()
+  if (!utils.isNullAddress(addresses[network][key])) {
+    contract.address = addresses[network][key]
+    for (const index in libs) {
+      const libname = libs[index]
+      const lib = artifacts.require(libname)
+      contract.link(lib)
+      console.info("  ", "> external library: ", `${libname}@${lib.address}`)
+    };
+    console.info("  ", "> contract address: ", contract.address)
+    console.info("  ", "> contract codehash:", web3.utils.soliditySha3(await web3.eth.getCode(contract.address)))
+    console.info()
+  }
   return contract
 }
 
