@@ -280,7 +280,7 @@ library Witnet {
     enum RadonDataRequestMethods {
         /* 0 */ Unknown,
         /* 1 */ HttpGet,
-        /* 2 */ Rng,
+        /* 2 */ RNG,
         /* 3 */ HttpPost,
         /* 4 */ HttpHead
     }
@@ -537,53 +537,7 @@ library Witnet {
             return (res, true);
         }
     }
-
     
-    // /// ===============================================================================================================
-    // /// --- 'Witnet.Request' helper methods ---------------------------------------------------------------------------
-
-    // function packRequesterCallbackGasLimit(address requester, uint96 callbackGasLimit) internal pure returns (bytes32) {
-    //     return bytes32(uint(bytes32(bytes20(requester))) | callbackGasLimit);
-    // }
-
-    // function unpackRequester(Request storage self) internal view returns (address) {
-    //     return address(bytes20(self.fromCallbackGas));
-    // }
-
-    // function unpackCallbackGasLimit(Request storage self) internal view returns (uint96) {
-    //     return uint96(uint(self.fromCallbackGas));
-    // }
-
-    // function unpackRequesterAndCallbackGasLimit(Request storage self) internal view returns (address, uint96) {
-    //     bytes32 _packed = self.fromCallbackGas;
-    //     return (address(bytes20(_packed)), uint96(uint(_packed)));
-    // }
-
-    
-    // /// ===============================================================================================================
-    // /// --- 'Witnet.Response' helper methods --------------------------------------------------------------------------
-
-    // function packReporterEvmFinalityBlock(address reporter, uint256 evmFinalityBlock) internal pure returns (bytes32) {
-    //     return bytes32(uint(bytes32(bytes20(reporter))) << 96 | uint96(evmFinalityBlock));
-    // }
-
-    // function unpackWitnetReporter(Response storage self) internal view returns (address) {
-    //     return address(bytes20(self.fromFinality));
-    // }
-
-    // function unpackEvmFinalityBlock(Response storage self) internal view returns (uint256) {
-    //     return uint(uint96(uint(self.fromFinality)));
-    // }
-
-    // function unpackEvmFinalityBlock(bytes32 fromFinality) internal pure returns (uint256) {
-    //     return uint(uint96(uint(fromFinality)));
-    // }
-
-    // function unpackWitnetReporterAndEvmFinalityBlock(Response storage self) internal view returns (address, uint256) {
-    //     bytes32 _packed = self.fromFinality;
-    //     return (address(bytes20(_packed)), uint(uint96(uint(_packed))));
-    // }
-
 
     /// ===============================================================================================================
     /// --- 'Witnet.Result' helper methods ----------------------------------------------------------------------------

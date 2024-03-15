@@ -23,7 +23,7 @@ abstract contract UsingWitnet
     /// @dev as to deal with volatility of evmGasPrice and evmWitPrice during the live time of 
     /// @dev a data request (since being posted until a result gets reported back), at both the EVM and 
     /// @dev the Witnet blockchain levels, respectivelly. 
-    uint16 private __witnetBaseFeeOverheadPercentage;
+    uint16 internal __witnetBaseFeeOverheadPercentage;
 
     /// @param _wrb Address of the WitnetOracle contract.
     constructor(WitnetOracle _wrb) {
@@ -71,7 +71,7 @@ abstract contract UsingWitnet
         returns (uint256)
     {
         return (
-            (100 + _witnetBaseFeeOverheadPercentage())
+            (100 + __witnetBaseFeeOverheadPercentage)
                 * __witnet.estimateBaseFee(tx.gasprice, _resultMaxSize) 
         ) / 100;
     }
@@ -88,13 +88,5 @@ abstract contract UsingWitnet
         returns (Witnet.ResultError memory)
     {
         return __witnet.getQueryResultError(_witnetQueryId);
-    }
-
-    function _witnetBaseFeeOverheadPercentage() virtual internal view returns (uint16) {
-        return __witnetBaseFeeOverheadPercentage;
-    }
-
-    function __witnetSetBaseFeeOverheadPercentage(uint16 _baseFeeOverheadPercentage) virtual internal {
-        __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 }

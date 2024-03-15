@@ -43,7 +43,7 @@ abstract contract WitnetConsumer
 
     function _witnetEstimateEvmReward() virtual internal view returns (uint256) {
         return (
-            (100 + _witnetBaseFeeOverheadPercentage())
+            (100 + __witnetBaseFeeOverheadPercentage)
                 * __witnet.estimateBaseFeeWithCallback(
                     tx.gasprice,
                     _witnetCallbackGasLimit()
@@ -67,7 +67,7 @@ abstract contract WitnetConsumer
         returns (uint256)
     {
         return (
-            (100 + _witnetBaseFeeOverheadPercentage())
+            (100 + __witnetBaseFeeOverheadPercentage)
                 * __witnet.estimateBaseFeeWithCallback(
                     tx.gasprice, 
                     _callbackGasLimit

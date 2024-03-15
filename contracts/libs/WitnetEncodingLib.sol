@@ -333,7 +333,7 @@ library WitnetEncodingLib {
                         || method == Witnet.RadonDataRequestMethods.HttpPost
                         || method == Witnet.RadonDataRequestMethods.HttpHead
                 )
-            || method == Witnet.RadonDataRequestMethods.Rng
+            || method == Witnet.RadonDataRequestMethods.RNG
                 && bytes(url).length == 0
                 && headers.length == 0
                 && script.length >= 1

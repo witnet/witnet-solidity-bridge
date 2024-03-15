@@ -25,7 +25,7 @@ abstract contract UsingWitnetRequestTemplate
         );
         dataRequestTemplate = _witnetRequestTemplate;
         __witnetQueryResultMaxSize = _witnetRequestTemplate.resultDataMaxSize();
-        __witnetSetBaseFeeOverheadPercentage(_baseFeeOverheadPercentage);
+        __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
     function _witnetBuildRadHash(string[][] memory _witnetRequestArgs)

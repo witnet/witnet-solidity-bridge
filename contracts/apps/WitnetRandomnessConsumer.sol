@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "./WitnetConsumer.sol";
 import "../WitnetRequest.sol";
 
-abstract contract UsingWitnetRandomness
+abstract contract WitnetRandomnessConsumer
     is
         WitnetConsumer
 {
@@ -30,12 +30,11 @@ abstract contract UsingWitnetRandomness
     {
         // On-chain building of the Witnet Randomness Request:
         {
-            WitnetRequestFactory _factory = witnet().factory();
             WitnetRequestBytecodes _registry = witnet().registry();
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
             _retrievals[0] = _registry.verifyRadonRetrieval(
-                Witnet.RadonDataRequestMethods.Rng,
+                Witnet.RadonDataRequestMethods.RNG,
                 "", // no url
                 "", // no body
                 new string[2][](0), // no headers
@@ -50,17 +49,15 @@ abstract contract UsingWitnetRandomness
                 opcode: Witnet.RadonReducerOpcodes.ConcatenateAndHash,
                 filters: _filters // no filters
             }));
-            WitnetRequestTemplate _template = WitnetRequestTemplate(_factory.buildRequestTemplate(
+            __witnetRandomnessRadHash = _registry.verifyRadonRequest(
                 _retrievals,
                 _aggregator,
                 _tally,
-                32 // 256 bits of pure entropy ;-)
-            ));
-            __witnetRandomnessRadHash = WitnetRequest(
-                _template.buildRequest(new string[][](_retrievals.length))
-            ).radHash();
+                32, // 256 bits of pure entropy ;-)
+                new string[][](_retrievals.length)
+            );
         }
-        __witnetSetBaseFeeOverheadPercentage(_baseFeeOverheadPercentage);
+        __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
     function _witnetEstimateEvmReward() virtual override internal view returns (uint256) {
