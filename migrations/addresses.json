@@ -25,7 +25,8 @@
         "WitnetOracleTrustableOvm2": "0xec03FD9B5F300BB931A76D1646ECb71Ff8b775cA",
         "WitnetPriceFeedsDefault": "0x73912b1E13C67485D6d38Ef4F2B750C67FD99DA9",
         "WitnetRequestBytecodesDefault": "0x65fB7A0C98719e967546317222dfF90A73C42296",
-        "WitnetRequestFactoryDefault": "0x23873d132e4Ebc34C19F405cf2bFe31dA21630c2"
+        "WitnetRequestFactoryDefault": "0x23873d132e4Ebc34C19F405cf2bFe31dA21630c2",
+        "WitnetRandomnessV20": "0x2C821B0Ed577a600B29CcD89d0037402Ba0B2Eea"
     },
     "ten:testnet": {
         "WitnetProxy": "0x4563C77E85c1374754ffec3e6220d13Ddc8620eF",
