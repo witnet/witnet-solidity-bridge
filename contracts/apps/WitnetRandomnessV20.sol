@@ -119,7 +119,10 @@ contract WitnetRandomnessV20
     {
         return (
             (100 + __witnetBaseFeeOverheadPercentage)
-                * __witnet.estimateBaseFee(_evmGasPrice, 32) 
+                * __witnet.estimateBaseFee(
+                    _evmGasPrice, 
+                    witnetRadHash
+                ) 
         ) / 100;
     }
 
@@ -353,8 +356,6 @@ contract WitnetRandomnessV20
 
     /// @notice Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
     /// @dev Only one randomness request per block will be actually posted to the Witnet Oracle. 
-    /// @dev Only consumes the exact randomize fare as required for the `tx.gasprice`. Remaining funds will 
-    /// @dev be transfered back to `msg.sender`. 
     /// @return _witnetEvmReward Funds actually paid as randomize fee.
     function randomize()
         external payable
@@ -362,11 +363,7 @@ contract WitnetRandomnessV20
         returns (uint256 _witnetEvmReward)
     {
         if (__storage().lastRandomizeBlock < block.number) {
-            _witnetEvmReward = estimateRandomizeFee(tx.gasprice);
-            require(
-                msg.value >= _witnetEvmReward, 
-                "WitnetRandomness: insufficient reward"
-            );
+            _witnetEvmReward = msg.value;
             // Post the Witnet Randomness request:
             uint _witnetQueryId = __witnet.postRequest{
                 value: _witnetEvmReward
@@ -385,6 +382,7 @@ contract WitnetRandomnessV20
             // Throw event:
             emit Randomizing(
                 block.number,
+                tx.gasprice,
                 _witnetQueryId,
                 _witnetEvmReward
             );
