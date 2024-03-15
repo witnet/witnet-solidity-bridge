@@ -295,9 +295,9 @@ module.exports = {
     port: 8503,
     network_id: 11155420,
     verify: {
-      apiKey: process.env.ETHERSCAN_API_KEY,
-      apiUrl: "https://optimism-sepolia.blockscout.com/api",
-      explorerUrl: "https://optimism-sepolia.blockscout.com/",
+      apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
+      apiUrl: "https://api-sepolia-optimistic.etherscan.io/api",
+      explorerUrl: "https://sepolia-optimism.etherscan.io/address",
     },
   },
   "optimism:mainnet": {

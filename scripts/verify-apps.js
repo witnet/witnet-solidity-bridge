@@ -24,5 +24,5 @@ const constructorArgs = require("../migrations/constructorArgs.json")
 for (const index in apps) {
   utils.traceVerify(network, `${apps[index]} --forceConstructorArgs string:${
     constructorArgs[network][apps[index]]
-  } --verifiers etherscan`)
+  }`)
 }
