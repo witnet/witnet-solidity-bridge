@@ -19,7 +19,7 @@ module.exports = async function (_, network, [, from]) {
     network,
     targets,
     from: utils.isDryRun(network) ? from : specs.WitnetRandomness.from || from,
-    key: targets.WitnetRandomness,
+    key: "WitnetRandomness",
     specs: specs.WitnetRandomness,
     intrinsics: {
       types: ["address"],
@@ -39,7 +39,8 @@ async function deploy (target) {
   if (!addresses[network]) addresses[network] = {}
 
   const selection = utils.getWitnetArtifactsFromArgs()
-  const contract = artifacts.require(key)
+  const artifact = artifacts.require(key)
+  const contract = artifacts.require(targets[key])
   if (
     addresses[network][key] === "" ||
       selection.includes(key) ||  
@@ -79,22 +80,26 @@ async function deploy (target) {
       await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
       const args = await utils.readJsonFromFile("./migrations/constructorArgs.json")
       if (!args[network]) args[network] = {}
-      args[network][key] = constructorArgs.slice(2)
+      args[network][targets[key]] = constructorArgs.slice(2)
       await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
     }
   } else if (addresses[network][key]) {
     utils.traceHeader(`Skipped '${key}'`)
   }
   if (!utils.isNullAddress(addresses[network][key])) {
+    artifact.address = addresses[network][key]
     contract.address = addresses[network][key]
     for (const index in libs) {
       const libname = libs[index]
       const lib = artifacts.require(libname)
       contract.link(lib)
-      console.info("  ", "> external library: ", `${libname}@${lib.address}`)
+      console.info("  ", "> external library:  ", `${libname}@${lib.address}`)
     };
-    console.info("  ", "> contract address: ", contract.address)
-    console.info("  ", "> contract codehash:", web3.utils.soliditySha3(await web3.eth.getCode(contract.address)))
+    const appliance = await artifact.deployed()
+    console.info("  ", "> appliance address: ", appliance.address)
+    console.info("  ", "> appliance class:   ", await appliance.class({ from }))
+    console.info("  ", "> appliance codehash:", web3.utils.soliditySha3(await web3.eth.getCode(appliance.address)))
+    console.info("  ", "> appliance specs:   ", await appliance.specs({ from }))
     console.info()
   }
   return contract
