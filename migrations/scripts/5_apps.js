@@ -42,10 +42,12 @@ async function deploy (target) {
   const artifact = artifacts.require(key)
   const contract = artifacts.require(targets[key])
   if (
-    addresses[network][key] === "" ||
+    addresses[network][targets[key]] === "" ||
       selection.includes(key) ||  
       (libs && selection.filter(item => libs.includes(item)).length > 0) || 
-      (!utils.isNullAddress(addresses[network][key]) && (await web3.eth.getCode(addresses[network][key])).length < 3)      
+      (!utils.isNullAddress(addresses[network][targets[key]]) && (
+        await web3.eth.getCode(addresses[network][targets[key]])).length < 3
+      )
   ) {
     utils.traceHeader(`Deploying '${key}'...`)
     console.info("  ", "> account:          ", from)
@@ -70,7 +72,7 @@ async function deploy (target) {
     const tx = await deployer.deploy(initCode, salt || "0x0", { from })
     utils.traceTx(tx)
     if ((await web3.eth.getCode(addr)).length > 3) {
-      addresses[network][key] = addr
+      addresses[network][targets[key]] = addr
     } else {
       console.info(`Error: Contract was not deployed on expected address: ${addr}`)
       process.exit(1)
@@ -86,9 +88,9 @@ async function deploy (target) {
   } else if (addresses[network][key]) {
     utils.traceHeader(`Skipped '${key}'`)
   }
-  if (!utils.isNullAddress(addresses[network][key])) {
-    artifact.address = addresses[network][key]
-    contract.address = addresses[network][key]
+  if (!utils.isNullAddress(addresses[network][targets[key]])) {
+    artifact.address = addresses[network][targets[key]]
+    contract.address = addresses[network][targets[key]]
     for (const index in libs) {
       const libname = libs[index]
       const lib = artifacts.require(libname)

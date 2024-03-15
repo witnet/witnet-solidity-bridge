@@ -3,7 +3,6 @@
         "WitnetDeployer": "0x03232aBE800D1638B30432FeEF300581De323a4E",
         "WitnetOracle": "0x77703aE126B971c9946d562F41Dd47071dA00777",
         "WitnetPriceFeeds": "0x1111AbA2164AcdC6D291b08DfB374280035E1111",
-        "WitnetRandomness": "0x2C821B0Ed577a600B29CcD89d0037402Ba0B2Eea",
         "WitnetRequestBytecodes": "0x000B61Fe075F545fd37767f40391658275900000",
         "WitnetRequestFactory": "0x000DB36997AF1F02209A6F995883B9B699900000"
     },
@@ -25,9 +24,9 @@
         "WitnetOracleDataLib": "0x72b43a4062c81918112646b32268f7A748F8Fe08",
         "WitnetOracleTrustableOvm2": "0x6a587296dEc2cAd88233bf6Bda862ED5396730b0",
         "WitnetPriceFeedsDefault": "0x73912b1E13C67485D6d38Ef4F2B750C67FD99DA9",
+        "WitnetRandomnessV20": "0x378C86Df3beed6808BFfbfCBF96B0e8abef5f70D",
         "WitnetRequestBytecodesDefault": "0x65fB7A0C98719e967546317222dfF90A73C42296",
-        "WitnetRequestFactoryDefault": "0x23873d132e4Ebc34C19F405cf2bFe31dA21630c2",
-        "WitnetRandomness": "0x2C821B0Ed577a600B29CcD89d0037402Ba0B2Eea"
+        "WitnetRequestFactoryDefault": "0x23873d132e4Ebc34C19F405cf2bFe31dA21630c2"
     },
     "ten:testnet": {
         "WitnetProxy": "0x4563C77E85c1374754ffec3e6220d13Ddc8620eF",

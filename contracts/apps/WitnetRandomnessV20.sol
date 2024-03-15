@@ -42,7 +42,10 @@ contract WitnetRandomnessV20
         require(
             address(_witnet) == address(0)
                 || _witnet.specs() == type(IWitnetOracle).interfaceId,
-            "WitnetRandomnessV2: uncompliant WitnetOracle"
+            string(abi.encodePacked(
+                class(),
+                ": uncompliant WitnetOracle"
+            ))
         );
         WitnetRequestBytecodes _registry = witnet().registry();
         {
@@ -138,12 +141,11 @@ contract WitnetRandomnessV20
         virtual override
         returns (bytes32)
     {
-        Randomize storage __randomize = __storage().randomize_[_blockNumber];
-
-        if (__randomize.witnetQueryId == 0) {
+        if (__storage().randomize_[_blockNumber].witnetQueryId == 0) {
             _blockNumber = getRandomizeNextBlock(_blockNumber);
         }
 
+        Randomize storage __randomize = __storage().randomize_[_blockNumber];
         uint256 _witnetQueryId = __randomize.witnetQueryId;
         require(
             _witnetQueryId != 0, 
@@ -190,12 +192,11 @@ contract WitnetRandomnessV20
             uint256 _witnetResultFinalityBlock
         )
     {
-        Randomize storage __randomize = __storage().randomize_[_blockNumber];
-
-        if (__randomize.witnetQueryId == 0) {
+        if (__storage().randomize_[_blockNumber].witnetQueryId == 0) {
             _blockNumber = getRandomizeNextBlock(_blockNumber);
         }
 
+        Randomize storage __randomize = __storage().randomize_[_blockNumber];
         uint256 _witnetQueryId = __randomize.witnetQueryId;
         require(
             _witnetQueryId != 0, 

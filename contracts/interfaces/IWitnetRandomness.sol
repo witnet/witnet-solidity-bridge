@@ -93,9 +93,8 @@ interface IWitnetRandomness {
 
     /// @notice Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
     /// @dev Only one randomness request per block will be actually posted to the Witnet Oracle. 
-    /// @dev Only consumes the exact randomize fare as expected for the `tx.gasprice`. Remaining funds will 
-    /// @dev be transfered back to `msg.sender`. 
-    /// @return Funds actually paid as randomize fee.
+    /// @dev Unused funds will be transfered back to the `msg.sender`. 
+    /// @return Funds actually paid as randomize fee. 
     function randomize() external payable returns (uint256);
 
     /// @notice Returns address of the Witnet Oracle bridging contract being used for solving randomness requests.
