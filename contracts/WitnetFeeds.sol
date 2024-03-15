@@ -2,9 +2,9 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../interfaces/IFeeds.sol";
-import "../interfaces/IWitnetFeeds.sol";
-import "../interfaces/IWitnetFeedsAdmin.sol";
+import "./interfaces/IFeeds.sol";
+import "./interfaces/IWitnetFeeds.sol";
+import "./interfaces/IWitnetFeedsAdmin.sol";
 
 import "ado-contracts/contracts/interfaces/IERC2362.sol";
 

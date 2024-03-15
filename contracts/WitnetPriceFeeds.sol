@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./apps/WitnetFeeds.sol";
+import "./WitnetFeeds.sol";
 
 import "./interfaces/IWitnetPriceFeeds.sol";
 import "./interfaces/IWitnetPriceSolverDeployer.sol";
