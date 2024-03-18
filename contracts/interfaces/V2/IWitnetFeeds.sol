@@ -5,12 +5,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../../WitnetRequestBoard.sol";
 
 interface IWitnetFeeds {
-    function dataType() external view returns (WitnetV2.RadonDataTypes);
+    function dataType() external view returns (Witnet.RadonDataTypes);
     function prefix() external view returns (string memory);
     function registry() external view returns (WitnetBytecodes);
     function witnet() external view returns (WitnetRequestBoard);
     
-    function defaultRadonSLA() external view returns (WitnetV2.RadonSLA memory);
+    function defaultRadonSLA() external view returns (Witnet.RadonSLA memory);
     
     function estimateUpdateBaseFee(bytes4 feedId, uint256 evmGasPrice, uint256 witEvmPrice) external view returns (uint);
     function estimateUpdateBaseFee(bytes4 feedId, uint256 evmGasPrice, uint256 witEvmPrice, bytes32 slaHash) external view returns (uint);
@@ -26,7 +26,7 @@ interface IWitnetFeeds {
 
     function lookupBytecode(bytes4 feedId) external view returns (bytes memory);
     function lookupRadHash(bytes4 feedId) external view returns (bytes32);
-    function lookupRetrievals(bytes4 feedId) external view returns (WitnetV2.RadonRetrieval[] memory);
+    function lookupRetrievals(bytes4 feedId) external view returns (Witnet.RadonRetrieval[] memory);
 
     function requestUpdate(bytes4 feedId) external payable returns (uint256 usedFunds);
     function requestUpdate(bytes4 feedId, bytes32 slaHash) external payable returns (uint256 usedFunds);

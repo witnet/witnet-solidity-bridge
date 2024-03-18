@@ -2,6 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+import "../interfaces/IWitnetRequest.sol";
 import "../libs/Witnet.sol";
 import "../patterns/Clonable.sol";
 import "../patterns/Ownable.sol";

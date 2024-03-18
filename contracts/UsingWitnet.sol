@@ -88,7 +88,7 @@ abstract contract UsingWitnet {
     /// @param _slaParams The SLA params upon which this data request will be solved by Witnet.
     /// @return _id The unique identifier of the just posted data request.
     /// @return _reward Current reward amount escrowed by the WRB until a result gets reported.
-    function _witnetPostRequest(bytes32 _radHash, WitnetV2.RadonSLA memory _slaParams)
+    function _witnetPostRequest(bytes32 _radHash, Witnet.RadonSLA memory _slaParams)
         virtual internal
         returns (uint256 _id, uint256 _reward)
     {

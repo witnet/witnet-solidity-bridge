@@ -127,7 +127,7 @@ library WitnetErrorsLib {
                 "'."
             ));
         } else if (
-            _error.code == Witnet.ResultErrorCodes.HTTP
+            _error.code == Witnet.ResultErrorCodes.HttpErrors
                 && errors.length > 2
         ) {
             _error.reason = string(abi.encodePacked(
@@ -136,35 +136,35 @@ library WitnetErrorsLib {
                 " error."
             ));
         } else if (
-            _error.code == Witnet.ResultErrorCodes.RetrievalTimeout
+            _error.code == Witnet.ResultErrorCodes.RetrievalsTimeout
                 && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
                 "Witnet: Retrieval: timeout."
             ));
         } else if (
-            _error.code == Witnet.ResultErrorCodes.Underflow
+            _error.code == Witnet.ResultErrorCodes.MathUnderflow
                 && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
                 "Witnet: Aggregation: math underflow."
             ));
         } else if (
-            _error.code == Witnet.ResultErrorCodes.Overflow
+            _error.code == Witnet.ResultErrorCodes.MathOverflow
                 && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
                 "Witnet: Aggregation: math overflow."
             ));
         } else if (
-            _error.code == Witnet.ResultErrorCodes.DivisionByZero
+            _error.code == Witnet.ResultErrorCodes.MathDivisionByZero
                 && errors.length > 1
         ) {
             _error.reason = string(abi.encodePacked(
                 "Witnet: Aggregation: division by zero."
             ));
         } else if (
-            _error.code == Witnet.ResultErrorCodes.BridgeMalformedRequest
+            _error.code == Witnet.ResultErrorCodes.BridgeMalformedDataRequest
         ) {
             _error.reason = "Witnet: Bridge: malformed data request cannot be processed.";
         } else if (
@@ -172,11 +172,11 @@ library WitnetErrorsLib {
         ) {
             _error.reason = "Witnet: Bridge: rejected due to poor witnessing incentives.";
         } else if (
-            _error.code == Witnet.ResultErrorCodes.BridgeOversizedResult
+            _error.code == Witnet.ResultErrorCodes.BridgeOversizedTallyResult
         ) {
             _error.reason = "Witnet: Bridge: rejected due to poor bridging incentives.";
         } else if (
-            _error.code == Witnet.ResultErrorCodes.InsufficientConsensus
+            _error.code == Witnet.ResultErrorCodes.InsufficientMajority
                 && errors.length > 3
         ) {
             uint reached = (errors[1].additionalInformation == 25
@@ -226,11 +226,11 @@ library WitnetErrorsLib {
                 "\") that was not found."
             ));
         } else if (
-            _error.code == Witnet.ResultErrorCodes.NoReveals
+            _error.code == Witnet.ResultErrorCodes.InsufficientReveals
         ) {
             _error.reason = "Witnet: Tally: no reveals.";
         } else if (
-            _error.code == Witnet.ResultErrorCodes.MalformedReveal
+            _error.code == Witnet.ResultErrorCodes.MalformedReveals
         ) {
             _error.reason = "Witnet: Tally: malformed reveal.";
         } else if (

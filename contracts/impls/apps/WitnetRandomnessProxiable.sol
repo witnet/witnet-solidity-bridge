@@ -74,7 +74,7 @@ contract WitnetRandomnessProxiable
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
             _retrievals[0] = _registry.verifyRadonRetrieval(
-                WitnetV2.DataRequestMethods.Rng,
+                Witnet.RadonDataRequestMethods.RNG,
                 "", // no schema
                 "", // no authority
                 "", // no path
@@ -83,14 +83,14 @@ contract WitnetRandomnessProxiable
                 new string[2][](0), // no headers
                 hex"80" // no retrieval script
             );
-            WitnetV2.RadonFilter[] memory _filters;
-            bytes32 _aggregator = _registry.verifyRadonReducer(WitnetV2.RadonReducer({
-                opcode: WitnetV2.RadonReducerOpcodes.Mode,
+            Witnet.RadonFilter[] memory _filters;
+            bytes32 _aggregator = _registry.verifyRadonReducer(Witnet.RadonReducer({
+                opcode: Witnet.RadonReducerOpcodes.Mode,
                 filters: _filters, // no filters
                 script: hex"" // no aggregation script
             }));
-            bytes32 _tally = _registry.verifyRadonReducer(WitnetV2.RadonReducer({
-                opcode: WitnetV2.RadonReducerOpcodes.ConcatenateAndHash,
+            bytes32 _tally = _registry.verifyRadonReducer(Witnet.RadonReducer({
+                opcode: Witnet.RadonReducerOpcodes.ConcatenateAndHash,
                 filters: _filters, // no filters
                 script: hex"" // no aggregation script
             }));
@@ -151,7 +151,7 @@ contract WitnetRandomnessProxiable
         Ownable.transferOwnership(_newOwner);
     }
 
-    function settleWitnetRandomnessSLA(WitnetV2.RadonSLA memory _radonSLA)
+    function settleWitnetRandomnessSLA(Witnet.RadonSLA memory _radonSLA)
         virtual override
         public
         onlyOwner
@@ -411,7 +411,7 @@ contract WitnetRandomnessProxiable
     function witnetRandomnessSLA()
         virtual override
         external view
-        returns (WitnetV2.RadonSLA memory)
+        returns (Witnet.RadonSLA memory)
     {
         return witnet().registry().lookupRadonSLA(__witnetRandomnessSlaHash);
     }
@@ -487,7 +487,7 @@ contract WitnetRandomnessProxiable
     }
 
     function __initializeWitnetRandomnessSlaHash() virtual internal {
-        settleWitnetRandomnessSLA(WitnetV2.RadonSLA({
+        settleWitnetRandomnessSLA(Witnet.RadonSLA({
             numWitnesses: 5,
             minConsensusPercentage: 51,
             witnessReward: 2 * 10 ** 8,

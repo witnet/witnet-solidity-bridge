@@ -104,7 +104,7 @@ contract("WitnetBytecodes", (accounts) => {
     let btcUsdPriceFeedHash
 
     context("verifyRadonRetrieval(..)", async () => {
-      context("WitnetV2.DataRequestMethods.Rng", async () => {
+      context("Witnet.RadonDataRequestMethods.RNG", async () => {
         it("emits appropiate single event when verifying randomness data source for the first time", async () => {
           const tx = await bytecodes.verifyRadonRetrieval(
             2, // requestMethod
@@ -150,7 +150,7 @@ contract("WitnetBytecodes", (accounts) => {
         })
         // ... reverts
       })
-      context("WitnetV2.DataRequestMethods.HttpGet", async () => {
+      context("Witnet.RadonDataRequestMethods.HttpGet", async () => {
         it(
           "emits new data provider and source events when verifying a new http-get source for the first time", async () => {
             const tx = await bytecodes.verifyRadonRetrieval(
@@ -201,7 +201,7 @@ contract("WitnetBytecodes", (accounts) => {
           )
         })
       })
-      context("WitnetV2.DataRequestMethods.HttpPost", async () => {
+      context("Witnet.RadonDataRequestMethods.HttpPost", async () => {
         it(
           "emits new data provider and source events when verifying a new http-post source for the first time", async () => {
             const tx = await bytecodes.verifyRadonRetrieval(

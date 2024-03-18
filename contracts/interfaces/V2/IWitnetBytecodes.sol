@@ -27,24 +27,24 @@ interface IWitnetBytecodes {
     function lookupDataProviderIndex(string calldata authority) external view returns (uint);
     function lookupDataProviderSources(uint256 index, uint256 offset, uint256 length) external view returns (bytes32[] memory);
 
-    function lookupRadonReducer(bytes32 hash) external view returns (WitnetV2.RadonReducer memory);
+    function lookupRadonReducer(bytes32 hash) external view returns (Witnet.RadonReducer memory);
     
-    function lookupRadonRetrieval(bytes32 hash) external view returns (WitnetV2.RadonRetrieval memory);
+    function lookupRadonRetrieval(bytes32 hash) external view returns (Witnet.RadonRetrieval memory);
     function lookupRadonRetrievalArgsCount(bytes32 hash) external view returns (uint8);
-    function lookupRadonRetrievalResultDataType(bytes32 hash) external view returns (WitnetV2.RadonDataTypes);
+    function lookupRadonRetrievalResultDataType(bytes32 hash) external view returns (Witnet.RadonDataTypes);
     
-    function lookupRadonRequestAggregator(bytes32 radHash) external view returns (WitnetV2.RadonReducer memory);
+    function lookupRadonRequestAggregator(bytes32 radHash) external view returns (Witnet.RadonReducer memory);
     function lookupRadonRequestResultMaxSize(bytes32 radHash) external view returns (uint256);
-    function lookupRadonRequestResultDataType(bytes32 radHash) external view returns (WitnetV2.RadonDataTypes);
+    function lookupRadonRequestResultDataType(bytes32 radHash) external view returns (Witnet.RadonDataTypes);
     function lookupRadonRequestSources(bytes32 radHash) external view returns (bytes32[] memory);
     function lookupRadonRequestSourcesCount(bytes32 radHash) external view returns (uint);
-    function lookupRadonRequestTally(bytes32 radHash) external view returns (WitnetV2.RadonReducer memory);
+    function lookupRadonRequestTally(bytes32 radHash) external view returns (Witnet.RadonReducer memory);
     
-    function lookupRadonSLA(bytes32 slaHash) external view returns (WitnetV2.RadonSLA memory);
+    function lookupRadonSLA(bytes32 slaHash) external view returns (Witnet.RadonSLA memory);
     function lookupRadonSLAReward(bytes32 slaHash) external view returns (uint);
     
     function verifyRadonRetrieval(
-            WitnetV2.DataRequestMethods requestMethod,
+            Witnet.RadonDataRequestMethods requestMethod,
             string calldata requestSchema,
             string calldata requestAuthority,
             string calldata requestPath,
@@ -55,14 +55,14 @@ interface IWitnetBytecodes {
         ) external returns (bytes32 hash);
     
     function verifyRadonRetrieval(
-            WitnetV2.DataRequestMethods requestMethod,
+            Witnet.RadonDataRequestMethods requestMethod,
             string calldata requestURL,
             string calldata requestBody,
             string[2][] calldata requestHeaders,
             bytes calldata requestRadonScript
         ) external returns (bytes32 hash);
     
-    function verifyRadonReducer(WitnetV2.RadonReducer calldata reducer)
+    function verifyRadonReducer(Witnet.RadonReducer calldata reducer)
         external returns (bytes32 hash);
     
     function verifyRadonRequest(
@@ -73,7 +73,7 @@ interface IWitnetBytecodes {
             string[][] calldata args
         ) external returns (bytes32 radHash);
     
-    function verifyRadonSLA(WitnetV2.RadonSLA calldata sla)
+    function verifyRadonSLA(Witnet.RadonSLA calldata sla)
         external returns (bytes32 slaHash);
 
     function totalDataProviders() external view returns (uint);

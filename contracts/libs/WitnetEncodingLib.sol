@@ -26,12 +26,12 @@ library WitnetEncodingLib {
     /// ===============================================================================================================
     /// --- WitnetLib internal methods --------------------------------------------------------------------------------
 
-    function size(WitnetV2.RadonDataTypes _type) internal pure returns (uint16) {
-        if (_type == WitnetV2.RadonDataTypes.Integer
-            || _type == WitnetV2.RadonDataTypes.Float
+    function size(Witnet.RadonDataTypes _type) internal pure returns (uint16) {
+        if (_type == Witnet.RadonDataTypes.Integer
+            || _type == Witnet.RadonDataTypes.Float
         ) {
             return 9;
-        } else if (_type == WitnetV2.RadonDataTypes.Bool) {
+        } else if (_type == Witnet.RadonDataTypes.Bool) {
             return 1;
         } else {
             // undetermined
@@ -46,11 +46,11 @@ library WitnetEncodingLib {
     /// @notice Encode bytes array into given major type (UTF-8 not yet supported)
     /// @param buf Bytes array
     /// @return Marshaled bytes
-    function encode(bytes memory buf, uint majorType)
+    function encode(bytes memory buf, uint256 majorType)
         public pure
         returns (bytes memory)
     {
-        uint len = buf.length;
+        uint256 len = buf.length;
         if (len < 23) {
             return abi.encodePacked(
                 uint8((majorType << 5) | uint8(len)),
@@ -131,7 +131,7 @@ library WitnetEncodingLib {
         }
     }   
 
-    function encode(WitnetV2.RadonRetrieval memory source)
+    function encode(Witnet.RadonRetrieval memory source)
         public pure
         returns (bytes memory)
     {
@@ -159,7 +159,7 @@ library WitnetEncodingLib {
         }
         bytes memory _encodedHeaders;
         if (source.headers.length > 0) {
-            for (uint _ix = 0; _ix < source.headers.length; _ix ++) {
+            for (uint256 _ix = 0; _ix < source.headers.length; _ix ++) {
                 bytes memory _headers = abi.encodePacked(
                     encode(uint64(bytes(source.headers[_ix][0]).length), bytes1(0x0a)),
                     bytes(source.headers[_ix][0]),
@@ -173,7 +173,7 @@ library WitnetEncodingLib {
                 );
             }
         }
-        uint _innerSize = (
+        uint256 _innerSize = (
             _encodedMethod.length
                 + _encodedUrl.length
                 + _encodedScript.length
@@ -191,7 +191,7 @@ library WitnetEncodingLib {
     }
 
     function encode(
-            WitnetV2.RadonRetrieval[] memory sources,
+            Witnet.RadonRetrieval[] memory sources,
             string[][] memory args,
             bytes memory aggregatorInnerBytecode,
             bytes memory tallyInnerBytecode,
@@ -201,7 +201,7 @@ library WitnetEncodingLib {
         returns (bytes memory)
     {
         bytes[] memory encodedSources = new bytes[](sources.length);
-        for (uint ix = 0; ix < sources.length; ix ++) {
+        for (uint256 ix = 0; ix < sources.length; ix ++) {
             replaceWildcards(sources[ix], args[ix]);
             encodedSources[ix] = encode(sources[ix]);
         }
@@ -218,12 +218,12 @@ library WitnetEncodingLib {
         );
     }
 
-    function encode(WitnetV2.RadonReducer memory reducer)
+    function encode(Witnet.RadonReducer memory reducer)
         public pure
         returns (bytes memory bytecode)
     {
         if (reducer.script.length == 0) {
-            for (uint ix = 0; ix < reducer.filters.length; ix ++) {
+            for (uint256 ix = 0; ix < reducer.filters.length; ix ++) {
                 bytecode = abi.encodePacked(
                     bytecode,
                     encode(reducer.filters[ix])
@@ -241,7 +241,7 @@ library WitnetEncodingLib {
         }
     }
 
-    function encode(WitnetV2.RadonFilter memory filter)
+    function encode(Witnet.RadonFilter memory filter)
         public pure
         returns (bytes memory bytecode)
     {        
@@ -259,7 +259,7 @@ library WitnetEncodingLib {
         );
     }
 
-    function encode(WitnetV2.RadonReducerOpcodes opcode)
+    function encode(Witnet.RadonReducerOpcodes opcode)
         public pure
         returns (bytes memory)
     {
@@ -267,7 +267,7 @@ library WitnetEncodingLib {
         return encode(uint64(opcode), bytes1(0x10));
     }
 
-    function encode(WitnetV2.RadonSLA memory sla)
+    function encode(Witnet.RadonSLA memory sla)
         public pure
         returns (bytes memory)
     {
@@ -299,19 +299,19 @@ library WitnetEncodingLib {
         return cbor.buffer.data;
     }
 
-    function replaceWildcards(WitnetV2.RadonRetrieval memory self, string[] memory args)
+    function replaceWildcards(Witnet.RadonRetrieval memory self, string[] memory args)
         public pure
     {
         self.url = WitnetBuffer.replace(self.url, args);
         self.body = WitnetBuffer.replace(self.body, args);
         self.script = replaceCborStringsFromBytes(self.script, args);
-        for (uint _ix = 0 ; _ix < self.headers.length; _ix ++) {
+        for (uint256 _ix = 0 ; _ix < self.headers.length; _ix ++) {
             self.headers[_ix][1] = WitnetBuffer.replace(self.headers[_ix][1], args);
         }
     }
 
     function validate(
-            WitnetV2.DataRequestMethods method,
+            Witnet.RadonDataRequestMethods method,
             string memory url,
             string memory body,
             string[2][] memory headers,
@@ -323,11 +323,11 @@ library WitnetEncodingLib {
         if (!(
             bytes(url).length > 0 
                 && (
-                    method == WitnetV2.DataRequestMethods.HttpGet 
-                        || method == WitnetV2.DataRequestMethods.HttpPost
-                        || method == WitnetV2.DataRequestMethods.HttpHead
+                    method == Witnet.RadonDataRequestMethods.HttpGet 
+                        || method == Witnet.RadonDataRequestMethods.HttpPost
+                        || method == Witnet.RadonDataRequestMethods.HttpHead
                 )
-            || method == WitnetV2.DataRequestMethods.Rng
+            || method == Witnet.RadonDataRequestMethods.RNG
                 && bytes(url).length == 0
                 && headers.length == 0
                 && script.length >= 1
@@ -343,7 +343,7 @@ library WitnetEncodingLib {
     }              
 
     function validate(
-            WitnetV2.DataRequestMethods method,
+            Witnet.RadonDataRequestMethods method,
             string memory schema,
             string memory authority,
             string memory path,
@@ -356,9 +356,9 @@ library WitnetEncodingLib {
         returns (bytes32)
     {
         if (!(
-            (method == WitnetV2.DataRequestMethods.HttpGet 
-                || method == WitnetV2.DataRequestMethods.HttpPost
-                || method == WitnetV2.DataRequestMethods.HttpHead
+            (method == Witnet.RadonDataRequestMethods.HttpGet 
+                || method == Witnet.RadonDataRequestMethods.HttpPost
+                || method == Witnet.RadonDataRequestMethods.HttpHead
             )
                 && bytes(authority).length > 0
                 && (
@@ -366,7 +366,7 @@ library WitnetEncodingLib {
                         || keccak256(bytes(schema)) == keccak256(bytes("https://")) 
                         || keccak256(bytes(schema)) == keccak256(bytes("http://"))
                 )
-            || method == WitnetV2.DataRequestMethods.Rng
+            || method == Witnet.RadonDataRequestMethods.RNG
                 && bytes(schema).length == 0
                 && bytes(authority).length == 0
                 && bytes(path).length == 0
@@ -395,18 +395,18 @@ library WitnetEncodingLib {
     }
     
     function validate(
-            WitnetV2.RadonDataTypes dataType,
+            Witnet.RadonDataTypes dataType,
             uint16 maxDataSize
         )
         public pure
         returns (uint16)
     {
         if (
-            dataType == WitnetV2.RadonDataTypes.Any
-                || dataType == WitnetV2.RadonDataTypes.String
-                || dataType == WitnetV2.RadonDataTypes.Bytes
-                || dataType == WitnetV2.RadonDataTypes.Array
-                || dataType == WitnetV2.RadonDataTypes.Map
+            dataType == Witnet.RadonDataTypes.Any
+                || dataType == Witnet.RadonDataTypes.String
+                || dataType == Witnet.RadonDataTypes.Bytes
+                || dataType == Witnet.RadonDataTypes.Array
+                || dataType == Witnet.RadonDataTypes.Map
         ) {
             if (/*maxDataSize == 0 ||*/maxDataSize > 2048) {
                 revert WitnetV2.UnsupportedRadonDataType(
@@ -416,9 +416,9 @@ library WitnetEncodingLib {
             }
             return maxDataSize;
         } else if (
-            dataType == WitnetV2.RadonDataTypes.Integer
-                || dataType == WitnetV2.RadonDataTypes.Float
-                || dataType == WitnetV2.RadonDataTypes.Bool
+            dataType == Witnet.RadonDataTypes.Integer
+                || dataType == Witnet.RadonDataTypes.Float
+                || dataType == Witnet.RadonDataTypes.Bool
         ) {
             return 0; // TBD: size(dataType);
         } else {
@@ -429,18 +429,18 @@ library WitnetEncodingLib {
         }
     }
 
-    function validate(WitnetV2.RadonFilter memory filter)
+    function validate(Witnet.RadonFilter memory filter)
         public pure
     {
         if (
-            filter.opcode == WitnetV2.RadonFilterOpcodes.StandardDeviation
+            filter.opcode == Witnet.RadonFilterOpcodes.StandardDeviation
         ) {
             // check filters that require arguments
             if (filter.args.length == 0) {
                 revert WitnetV2.RadonFilterMissingArgs(uint8(filter.opcode));
             }
         } else if (
-            filter.opcode == WitnetV2.RadonFilterOpcodes.Mode
+            filter.opcode == Witnet.RadonFilterOpcodes.Mode
         ) {
             // check filters that don't require any arguments
             if (filter.args.length > 0) {
@@ -452,20 +452,20 @@ library WitnetEncodingLib {
         }
     }
 
-    function validate(WitnetV2.RadonReducer memory reducer)
+    function validate(Witnet.RadonReducer memory reducer)
         public pure
     {
         if (reducer.script.length == 0) {
             if (!(
-                reducer.opcode == WitnetV2.RadonReducerOpcodes.AverageMean 
-                    || reducer.opcode == WitnetV2.RadonReducerOpcodes.StandardDeviation
-                    || reducer.opcode == WitnetV2.RadonReducerOpcodes.Mode
-                    || reducer.opcode == WitnetV2.RadonReducerOpcodes.ConcatenateAndHash
-                    || reducer.opcode == WitnetV2.RadonReducerOpcodes.AverageMedian
+                reducer.opcode == Witnet.RadonReducerOpcodes.AverageMean 
+                    || reducer.opcode == Witnet.RadonReducerOpcodes.StandardDeviation
+                    || reducer.opcode == Witnet.RadonReducerOpcodes.Mode
+                    || reducer.opcode == Witnet.RadonReducerOpcodes.ConcatenateAndHash
+                    || reducer.opcode == Witnet.RadonReducerOpcodes.AverageMedian
             )) {
                 revert WitnetV2.UnsupportedRadonReducerOpcode(uint8(reducer.opcode));
             }
-            for (uint ix = 0; ix < reducer.filters.length; ix ++) {
+            for (uint256 ix = 0; ix < reducer.filters.length; ix ++) {
                 validate(reducer.filters[ix]);
             }
         } else {
@@ -479,7 +479,7 @@ library WitnetEncodingLib {
         }
     }
 
-    function validate(WitnetV2.RadonSLA memory sla)
+    function validate(Witnet.RadonSLA memory sla)
         public pure
     {
         if (sla.witnessReward == 0) {
@@ -503,7 +503,7 @@ library WitnetEncodingLib {
 
     function verifyRadonScriptResultDataType(bytes memory script)
         public pure
-        returns (WitnetV2.RadonDataTypes)
+        returns (Witnet.RadonDataTypes)
     {
         return _verifyRadonScriptResultDataType(
             WitnetCBOR.fromBytes(script),
@@ -520,10 +520,10 @@ library WitnetEncodingLib {
             string[] memory args
         ) private pure
     {
-        uint _rewind = self.len;
-        uint _start = self.buffer.cursor;
+        uint256 _rewind = self.len;
+        uint256 _start = self.buffer.cursor;
         bytes memory _peeks = bytes(self.readString());
-        (bytes memory _pokes, uint _replacements) = WitnetBuffer.replace(_peeks, args);
+        (bytes memory _pokes, uint256 _replacements) = WitnetBuffer.replace(_peeks, args);
         if (_replacements > 0) {
             bytes memory _encodedPokes = encode(string(_pokes));
             self.buffer.cursor = _start - _rewind;
@@ -538,7 +538,7 @@ library WitnetEncodingLib {
     
     function _verifyRadonScriptResultDataType(WitnetCBOR.CBOR memory self, bool flip)
         private pure
-        returns (WitnetV2.RadonDataTypes)
+        returns (Witnet.RadonDataTypes)
     {
         if (self.majorType == WitnetCBOR.MAJOR_TYPE_ARRAY) {
             WitnetCBOR.CBOR[] memory items = self.readArray();
@@ -548,23 +548,23 @@ library WitnetEncodingLib {
                     : _verifyRadonScriptResultDataType(items[items.length - 2], true)
                 ;
             } else {
-                return WitnetV2.RadonDataTypes.Any;
+                return Witnet.RadonDataTypes.Any;
             }
         } else if (self.majorType == WitnetCBOR.MAJOR_TYPE_INT) {            
-            uint cursor = self.buffer.cursor;
-            uint opcode = self.readUint();
+            uint256 cursor = self.buffer.cursor;
+            uint256 opcode = self.readUint();
             uint8 dataType = (opcode > WITNET_RADON_OPCODES_RESULT_TYPES.length
                 ? 0xff
                 : uint8(WITNET_RADON_OPCODES_RESULT_TYPES[opcode])
             );
-            if (dataType > uint8(type(WitnetV2.RadonDataTypes).max)) {
+            if (dataType > uint8(type(Witnet.RadonDataTypes).max)) {
                 revert WitnetV2.UnsupportedRadonScriptOpcode(
                     self.buffer.data,
                     cursor,
                     uint8(opcode)
                 );
             }
-            return WitnetV2.RadonDataTypes(dataType);
+            return Witnet.RadonDataTypes(dataType);
         } else {
             revert WitnetCBOR.UnexpectedMajorType(
                 WitnetCBOR.MAJOR_TYPE_INT,

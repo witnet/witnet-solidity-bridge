@@ -18,8 +18,8 @@ contract WitnetPriceFeedsUpgradable
         WitnetPriceFeedsData,
         WitnetUpgradableBase
 {
+    using Witnet for Witnet.RadonSLA;
     using Witnet for Witnet.Result;
-    using WitnetV2 for WitnetV2.RadonSLA;
     
     constructor(
             WitnetRequestBoard _wrb,
@@ -32,7 +32,15 @@ contract WitnetPriceFeedsUpgradable
             _version,
             "io.witnet.proxiable.router"
         )
-    {}
+    {
+        settleDefaultRadonSLA(Witnet.RadonSLA({
+            numWitnesses: 5,
+            witnessCollateral: 20 * 10 ** 9,
+            witnessReward: 2 * 10 ** 8,
+            minerCommitRevealFee: 10 ** 7,
+            minConsensusPercentage: 51
+        }));
+    }
 
     // solhint-disable-next-line payable-fallback
     fallback() override external {
@@ -88,7 +96,7 @@ contract WitnetPriceFeedsUpgradable
             "WitnetPriceFeedsUpgradable: already initialized"
         );
         if (__storage().defaultSlaHash == 0) {
-            settleDefaultRadonSLA(WitnetV2.RadonSLA({
+            settleDefaultRadonSLA(Witnet.RadonSLA({
                 numWitnesses: 5,
                 witnessCollateral: 20 * 10 ** 9,
                 witnessReward: 2 * 10 ** 8,
@@ -172,7 +180,7 @@ contract WitnetPriceFeedsUpgradable
     function defaultRadonSLA()
         override
         public view
-        returns (WitnetV2.RadonSLA memory)
+        returns (Witnet.RadonSLA memory)
     {
         return registry.lookupRadonSLA(__storage().defaultSlaHash);
     }
@@ -268,10 +276,10 @@ contract WitnetPriceFeedsUpgradable
 
     function lookupRetrievals(bytes4 feedId)
         override external view
-        returns (WitnetV2.RadonRetrieval[] memory _retrievals)
+        returns (Witnet.RadonRetrieval[] memory _retrievals)
     {
         bytes32[] memory _hashes = registry.lookupRadonRequestSources(lookupRadHash(feedId));
-        _retrievals = new WitnetV2.RadonRetrieval[](_hashes.length);
+        _retrievals = new Witnet.RadonRetrieval[](_hashes.length);
         for (uint _ix = 0; _ix < _retrievals.length; _ix ++) {
             _retrievals[_ix] = registry.lookupRadonRetrieval(_hashes[_ix]);
         }
@@ -381,7 +389,7 @@ contract WitnetPriceFeedsUpgradable
         emit DeletedFeed(msg.sender, feedId, caption);
     }
 
-    function settleDefaultRadonSLA(WitnetV2.RadonSLA memory sla)
+    function settleDefaultRadonSLA(Witnet.RadonSLA memory sla)
         override public
         onlyOwner
     {

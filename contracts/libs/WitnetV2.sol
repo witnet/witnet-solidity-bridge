@@ -6,6 +6,112 @@ import "./Witnet.sol";
 
 library WitnetV2 {
 
+    /// Struct containing both request and response data related to every query posted to the Witnet Request Board
+    struct Query {
+        Request request;
+        Response response;
+    }
+
+    /// Possible status of a Witnet query.
+    enum QueryStatus {
+        Unknown,
+        Posted,
+        Reported,
+        Finalized
+    }
+
+    /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
+    struct Request {
+        address requester;              // EVM address from which the request was posted.
+        uint24  gasCallback;            // Max callback gas limit upon response, if a callback is required.
+        uint72  evmReward;              // EVM amount in wei eventually to be paid to the legit result reporter.
+        bytes   witnetBytecode;         // Optional: Witnet Data Request bytecode to be solved by the Witnet blockchain.
+        bytes32 witnetRAD;              // Optional: Previously verified hash of the Witnet Data Request to be solved.
+        Witnet.RadonSLA witnetSLA;    // Minimum Service-Level parameters to be committed by the Witnet blockchain. 
+    }
+
+    /// Response metadata and result as resolved by the Witnet blockchain.
+    struct Response {
+        address reporter;               // EVM address from which the Data Request result was reported.
+        uint64  finality;               // EVM block number at which the reported data will be considered to be finalized.
+        uint32  resultTimestamp;        // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
+        bytes32 resultTallyHash;        // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
+        bytes   resultCborBytes;        // CBOR-encode result to the request, as resolved in the Witnet blockchain.
+    }
+
+    /// Response status from a requester's point of view.
+    enum ResponseStatus {
+        Void,
+        Awaiting,
+        Ready,
+        Error,
+        Finalizing
+    }
+
+    struct RadonSLA {
+        /// @notice Number of nodes in the Witnet blockchain that will take part in solving the data request. 
+        uint8   committeeSize;
+        
+        /// @notice Fee in $nanoWIT paid to every node in the Witnet blockchain involved in solving the data request.
+        /// @dev Witnet nodes participating as witnesses will have to stake as collateral 100x this amount.
+        uint64  witnessingFeeNanoWit;
+    }
+
+    
+    /// ===============================================================================================================
+    /// --- 'WitnetV2.RadonSLA' helper methods ------------------------------------------------------------------------
+
+    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
+        internal pure returns (bool)
+    {
+        return (a.committeeSize >= b.committeeSize);
+    }
+     
+    function isValid(RadonSLA calldata sla) internal pure returns (bool) {
+        return (
+            sla.witnessingFeeNanoWit > 0 
+                && sla.committeeSize > 0 && sla.committeeSize <= 127
+                // v1.7.x requires witnessing collateral to be greater or equal to 20 WIT:
+                && sla.witnessingFeeNanoWit * 100 >= 20 * 10 ** 9 
+        );
+    }
+
+    function toV1(RadonSLA memory self) internal pure returns (Witnet.RadonSLA memory) {
+        return Witnet.RadonSLA({
+            numWitnesses: self.committeeSize,
+            minConsensusPercentage: 51,
+            witnessReward: self.witnessingFeeNanoWit,
+            witnessCollateral: self.witnessingFeeNanoWit * 100,
+            minerCommitRevealFee: self.witnessingFeeNanoWit / self.committeeSize
+        });
+    }
+
+    function nanoWitTotalFee(RadonSLA storage self) internal view returns (uint64) {
+        return self.witnessingFeeNanoWit * (self.committeeSize + 3);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- P-RNG generators ------------------------------------------------------------------------------------------
+
+    /// Generates a pseudo-random uint32 number uniformly distributed within the range `[0 .. range)`, based on
+    /// the given `nonce` and `seed` values. 
+    function randomUint32(uint32 range, uint256 nonce, bytes32 seed)
+        internal pure 
+        returns (uint32) 
+    {
+        uint256 _number = uint256(
+            keccak256(
+                abi.encode(seed, nonce)
+            )
+        ) & uint256(2 ** 224 - 1);
+        return uint32((_number * range) >> 224);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- Runtime Custom errors -------------------------------------------------------------------------------------
+
     error IndexOutOfBounds(uint256 index, uint256 range);
     error InsufficientBalance(uint256 weiBalance, uint256 weiExpected);
     error InsufficientFee(uint256 weiProvided, uint256 weiExpected);
@@ -14,10 +120,10 @@ library WitnetV2 {
     error RadonFilterMissingArgs(uint8 opcode);
 
     error RadonRequestNoSources();
-    error RadonRequestSourcesArgsMismatch(uint expected, uint actual);
-    error RadonRequestMissingArgs(uint index, uint expected, uint actual);
-    error RadonRequestResultsMismatch(uint index, uint8 read, uint8 expected);
-    error RadonRequestTooHeavy(bytes bytecode, uint weight);
+    error RadonRequestSourcesArgsMismatch(uint256 expected, uint256 actual);
+    error RadonRequestMissingArgs(uint256 index, uint256 expected, uint256 actual);
+    error RadonRequestResultsMismatch(uint256 index, uint8 read, uint8 expected);
+    error RadonRequestTooHeavy(bytes bytecode, uint256 weight);
 
     error RadonSlaNoReward();
     error RadonSlaNoWitnesses();
@@ -34,180 +140,4 @@ library WitnetV2 {
     error UnsupportedRadonScript(bytes script, uint256 offset);
     error UnsupportedRadonScriptOpcode(bytes script, uint256 cursor, uint8 opcode);
     error UnsupportedRadonTallyScript(bytes32 hash);
-
-    function toEpoch(uint _timestamp) internal pure returns (uint) {
-        return 1 + (_timestamp - 11111) / 15;
-    }
-
-    function toTimestamp(uint _epoch) internal pure returns (uint) {
-        return 111111+ _epoch * 15;
-    }
-
-    struct Beacon {
-        uint256 escrow;
-        uint256 evmBlock;
-        uint256 gasprice;
-        address relayer;
-        address slasher;
-        uint256 superblockIndex;
-        uint256 superblockRoot;        
-    }
-
-    enum BeaconStatus {
-        Idle
-    }
-
-    struct Block {
-        bytes32 blockHash;
-        bytes32 drTxsRoot;
-        bytes32 drTallyTxsRoot;
-    }
-    
-    enum BlockStatus {
-        Idle
-    }
-
-    struct DrPost {
-        uint256 block;
-        DrPostStatus status;
-        DrPostRequest request;
-        DrPostResponse response;
-    }
-    
-    /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
-    struct DrPostRequest {
-        uint256 epoch;
-        address requester;
-        address reporter;
-        bytes32 radHash;
-        bytes32 slaHash;
-        uint256 weiReward;
-    }
-
-    /// Data kept in EVM-storage containing Witnet-provided response metadata and result.
-    struct DrPostResponse {
-        address disputer;
-        address reporter;
-        uint256 escrowed;
-        uint256 drCommitTxEpoch;
-        uint256 drTallyTxEpoch;
-        bytes32 drTallyTxHash;
-        bytes   drTallyResultCborBytes;
-    }
-
-    enum DrPostStatus {
-        Void,
-        Deleted,
-        Expired,
-        Posted,
-        Disputed,
-        Reported,
-        Finalized,
-        Accepted,
-        Rejected
-    }
-
-    struct DataProvider {
-        string  authority;
-        uint256 totalEndpoints;
-        mapping (uint256 => bytes32) endpoints;
-    }
-
-    enum DataRequestMethods {
-        /* 0 */ Unknown,
-        /* 1 */ HttpGet,
-        /* 2 */ Rng,
-        /* 3 */ HttpPost,
-        /* 4 */ HttpHead
-    }
-
-    enum RadonDataTypes {
-        /* 0x00 */ Any, 
-        /* 0x01 */ Array,
-        /* 0x02 */ Bool,
-        /* 0x03 */ Bytes,
-        /* 0x04 */ Integer,
-        /* 0x05 */ Float,
-        /* 0x06 */ Map,
-        /* 0x07 */ String,
-        Unused0x08, Unused0x09, Unused0x0A, Unused0x0B,
-        Unused0x0C, Unused0x0D, Unused0x0E, Unused0x0F,
-        /* 0x10 */ Same,
-        /* 0x11 */ Inner,
-        /* 0x12 */ Match,
-        /* 0x13 */ Subscript
-    }
-
-    struct RadonFilter {
-        RadonFilterOpcodes opcode;
-        bytes args;
-    }
-
-    enum RadonFilterOpcodes {
-        /* 0x00 */ GreaterThan,
-        /* 0x01 */ LessThan,
-        /* 0x02 */ Equals,
-        /* 0x03 */ AbsoluteDeviation,
-        /* 0x04 */ RelativeDeviation,
-        /* 0x05 */ StandardDeviation,
-        /* 0x06 */ Top,
-        /* 0x07 */ Bottom,
-        /* 0x08 */ Mode,
-        /* 0x09 */ LessOrEqualThan
-    }
-
-    struct RadonReducer {
-        RadonReducerOpcodes opcode;
-        RadonFilter[] filters;
-        bytes script;
-    }
-
-    enum RadonReducerOpcodes {
-        /* 0x00 */ Minimum,
-        /* 0x01 */ Maximum,
-        /* 0x02 */ Mode,
-        /* 0x03 */ AverageMean,
-        /* 0x04 */ AverageMeanWeighted,
-        /* 0x05 */ AverageMedian,
-        /* 0x06 */ AverageMedianWeighted,
-        /* 0x07 */ StandardDeviation,
-        /* 0x08 */ AverageDeviation,
-        /* 0x09 */ MedianDeviation,
-        /* 0x0A */ MaximumDeviation,
-        /* 0x0B */ ConcatenateAndHash
-    }
-
-    struct RadonRetrieval {
-        uint8 argsCount;
-        DataRequestMethods method;
-        RadonDataTypes resultDataType;
-        string url;
-        string body;
-        string[2][] headers;
-        bytes script;
-    }
-
-    struct RadonSLA {
-        uint numWitnesses;
-        uint minConsensusPercentage;
-        uint witnessReward;
-        uint witnessCollateral;
-        uint minerCommitRevealFee;
-    }
-
-    /// @notice Returns `true` if all witnessing parameters in `b` have same
-    /// @notice value or greater than the ones in `a`.
-    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b)
-        internal pure
-        returns (bool)
-    {
-        return (
-            a.numWitnesses >= b.numWitnesses
-                && a.minConsensusPercentage >= b.minConsensusPercentage
-                && a.witnessReward >= b.witnessReward
-                && a.witnessCollateral >= b.witnessCollateral
-                && a.minerCommitRevealFee >= b.minerCommitRevealFee
-        );
-    }
-
 }

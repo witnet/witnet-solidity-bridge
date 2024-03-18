@@ -70,28 +70,28 @@ contract TestWitnetErrorsLib {
     );
     Assert.equal(
       uint(error0x30.code),
-      uint(Witnet.ResultErrorCodes.HTTP),
-      "error code `0x30` should be `Witnet.ResultErrorCodes.HTTP`"
+      uint(Witnet.ResultErrorCodes.HttpErrors),
+      "error code `0x30` should be `Witnet.ResultErrorCodes.HttpErrors`"
     );
     Assert.equal(
       uint(error0x31.code),
-      uint(Witnet.ResultErrorCodes.RetrievalTimeout),
-      "Error code 0x31 should be `Witnet.ResultErrorCodes.RetrievalTimeout`"
+      uint(Witnet.ResultErrorCodes.RetrievalsTimeout),
+      "Error code 0x31 should be `Witnet.ResultErrorCodes.RetrievalsTimeout`"
     );
     Assert.equal(
       uint(error0x40.code),
-      uint(Witnet.ResultErrorCodes.Underflow),
-      "error code `0x40` should be `Witnet.ResultErrorCodes.Underflow`"
+      uint(Witnet.ResultErrorCodes.MathUnderflow),
+      "error code `0x40` should be `Witnet.ResultErrorCodes.MathUnderflow`"
     );
     Assert.equal(
       uint(error0x41.code),
-      uint(Witnet.ResultErrorCodes.Overflow),
-      "error code `0x41` should be `Witnet.ResultErrorCodes.Overflow`"
+      uint(Witnet.ResultErrorCodes.MathOverflow),
+      "error code `0x41` should be `Witnet.ResultErrorCodes.MathOverflow`"
     );
     Assert.equal(
       uint(error0x42.code),
-      uint(Witnet.ResultErrorCodes.DivisionByZero),
-      "Error code #0x42 should be `Witnet.ResultErrorCodes.DivisionByZero`"
+      uint(Witnet.ResultErrorCodes.MathDivisionByZero),
+      "Error code #0x42 should be `Witnet.ResultErrorCodes.MathDivisionByZero`"
     );
   }
 
@@ -109,13 +109,13 @@ contract TestWitnetErrorsLib {
     Witnet.ResultError memory error0xff = WitnetErrorsLib.resultErrorFromCborBytes(hex"D8278118FF");
     Assert.equal(
       uint(error0x50.code),
-      uint(Witnet.ResultErrorCodes.NoReveals),
-      "Error code #0x50 should be `Witnet.ResultErrorCodes.NoReveals`"
+      uint(Witnet.ResultErrorCodes.InsufficientReveals),
+      "Error code #0x50 should be `Witnet.ResultErrorCodes.InsufficientReveals`"
     );
     Assert.equal(
       uint(error0x51.code),
-      uint(Witnet.ResultErrorCodes.InsufficientConsensus),
-      "Error code #0x51 should be `Witnet.ResultErrorCodes.InsufficientConsensus`"
+      uint(Witnet.ResultErrorCodes.InsufficientMajority),
+      "Error code #0x51 should be `Witnet.ResultErrorCodes.InsufficientMajority`"
     );
     Assert.equal(
       uint(error0x52.code),
@@ -129,8 +129,8 @@ contract TestWitnetErrorsLib {
     );
     Assert.equal(
       uint(error0x60.code),
-      uint(Witnet.ResultErrorCodes.MalformedReveal),
-      "Error code #0x60 should be `Witnet.ResultErrorCodes.MalformedReveal`"
+      uint(Witnet.ResultErrorCodes.MalformedReveals),
+      "Error code #0x60 should be `Witnet.ResultErrorCodes.MalformedReveals`"
     );
     Assert.equal(
       uint(error0x70.code),
@@ -144,8 +144,8 @@ contract TestWitnetErrorsLib {
     );
     Assert.equal(
       uint(error0xe0.code),
-      uint(Witnet.ResultErrorCodes.BridgeMalformedRequest),
-      "Error code #0xE0 should be `Witnet.ResultErrorCodes.BridgeMalformedRequest`"
+      uint(Witnet.ResultErrorCodes.BridgeMalformedDataRequest),
+      "Error code #0xE0 should be `Witnet.ResultErrorCodes.BridgeMalformedDataRequest`"
     );
     Assert.equal(
       uint(error0xe1.code),
@@ -154,8 +154,8 @@ contract TestWitnetErrorsLib {
     );
     Assert.equal(
       uint(error0xe2.code),
-      uint(Witnet.ResultErrorCodes.BridgeOversizedResult),
-      "Error code #0xE2 should be `Witnet.ResultErrorCodes.BridgeOversizedResult`"
+      uint(Witnet.ResultErrorCodes.BridgeOversizedTallyResult),
+      "Error code #0xE2 should be `Witnet.ResultErrorCodes.BridgeOversizedTallyResult`"
     );
     Assert.equal(
       uint(error0xff.code),
@@ -222,27 +222,27 @@ contract TestWitnetErrorsLib {
     Assert.equal(
       error0x30.reason,
       "Witnet: Retrieval: HTTP/404 error.",
-      "Error message for error code `0x30` (`Witnet.ResultErrorCodes.HTTP`) should be properly formatted"
+      "Error message for error code `0x30` (`Witnet.ResultErrorCodes.HttpErrors`) should be properly formatted"
     );
     Assert.equal(
       error0x31.reason,
       "Witnet: Retrieval: timeout.",
-      "Error message for error code `0x31` (`Witnet.ResultErrorCodes.RetrievalTimeout`) should be properly formatted"
+      "Error message for error code `0x31` (`Witnet.ResultErrorCodes.RetrievalsTimeout`) should be properly formatted"
     );
     Assert.equal(
       error0x40.reason,
       "Witnet: Aggregation: math underflow.",
-      "Error message for error code `0x40` (`Witnet.ResultErrorCodes.Underflow`) should be properly formatted"
+      "Error message for error code `0x40` (`Witnet.ResultErrorCodes.MathUnderflow`) should be properly formatted"
     );
     Assert.equal(
       error0x41.reason,
       "Witnet: Aggregation: math overflow.",
-      "Error message for error code `0x41` (`Witnet.ResultErrorCodes.Overflow`) should be properly formatted"
+      "Error message for error code `0x41` (`Witnet.ResultErrorCodes.MathOverflow`) should be properly formatted"
     );
     Assert.equal(
       error0x42.reason,
       "Witnet: Aggregation: division by zero.",
-      "Error message for e  rror code `0x42` (`Witnet.ResultErrorCodes.DivisionByZero`) should be properly formatted"
+      "Error message for e  rror code `0x42` (`Witnet.ResultErrorCodes.MathDivisionByZero`) should be properly formatted"
     );
   }
 
@@ -278,17 +278,17 @@ contract TestWitnetErrorsLib {
     Assert.equal(
       error0x50.reason,
       "Witnet: Tally: no reveals.",
-      "Error message for error code `0x50` (`Witnet.ResultErrorCodes.NoReveals`) should be properly formatted"
+      "Error message for error code `0x50` (`Witnet.ResultErrorCodes.InsufficientReveals`) should be properly formatted"
     );
     Assert.equal(
       error0x51.reason,
       "Witnet: Tally: insufficient consensus: 3% <= 51%.",
-      "Error message for error code `0x51` (`Witnet.ResultErrorCodes.InsufficientConsensus`) should be properly formatted"
+      "Error message for error code `0x51` (`Witnet.ResultErrorCodes.InsufficientMajority`) should be properly formatted"
     );
     Assert.equal(
       error0x51b.reason,
       "Witnet: Tally: insufficient consensus: 49% <= 51%.",
-      "Error message for error code `0x51` (`Witnet.ResultErrorCodes.InsufficientConsensus`) should be properly formatted"
+      "Error message for error code `0x51` (`Witnet.ResultErrorCodes.InsufficientMajority`) should be properly formatted"
     );
     Assert.equal(
       error0x52.reason,
@@ -298,7 +298,7 @@ contract TestWitnetErrorsLib {
     Assert.equal(
       error0x60.reason,
       "Witnet: Tally: malformed reveal.",
-      "Error message for error code `0x60` (`Witnet.ResultErrorCodes.MalformedReveal`) should be properly formatted"
+      "Error message for error code `0x60` (`Witnet.ResultErrorCodes.MalformedReveals`) should be properly formatted"
     );
     Assert.equal(
       error0xff.reason,
