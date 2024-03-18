@@ -20,7 +20,7 @@ module.exports = {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
     },
     optimism: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
     },
     "polygon.zkevm.goerli": {
       WitnetBytecodes: "WitnetBytecodesNoSha256",

@@ -27,7 +27,11 @@ module.exports = async function (deployer, network, [, from, reporter]) {
   if (!addresses[ecosystem][network]) addresses[ecosystem][network] = {}
 
   const artifactsName = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
-  const WitnetRequestBoardImplementation = artifacts.require(artifactsName.WitnetRequestBoard)
+  const artifactNames = artifactsName.WitnetRequestBoard.split(":")
+  const bypass = artifactNames.length > 1
+  const implName = artifactNames[0]
+  
+  const WitnetRequestBoardImplementation = artifacts.require(implName)
   const create2FactoryAddr = addresses[ecosystem][network]?.Create2Factory
 
   let proxy
@@ -80,21 +84,32 @@ module.exports = async function (deployer, network, [, from, reporter]) {
   let board
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoardImplementation)) {
     await deployer.link(WitnetErrorsLib, WitnetRequestBoardImplementation)
-    await deployer.deploy(
-      WitnetRequestBoardImplementation,
-      WitnetRequestFactory.address,
-      /* _isUpgradeable */ true,
-      /* _versionTag    */ utils.fromAscii(version),
-      ...(
-        // if defined, use network-specific constructor parameters:
-        settings.constructorParams[network]?.WitnetRequestBoard ||
-          // otherwise, use ecosystem-specific parameters, if any:
-          settings.constructorParams[ecosystem]?.WitnetRequestBoard ||
-          // or, default defined parameters for WRBs, if any:
-          settings.constructorParams?.default?.WitnetRequestBoard
-      ),
-      { from }
-    )
+    if (bypass) {
+      await deployer.deploy(
+        WitnetRequestBoardImplementation,
+        /* _legacy impl   */ addresses[ecosystem][network][artifactNames[1]],
+        /* _v20 address   */ addresses[ecosystem][network].WitnetOracle,
+        /* _isUpgradeable */ true,
+        /* _versionTag    */ utils.fromAscii(version),
+        { from }
+      )
+    } else {
+      await deployer.deploy(
+        WitnetRequestBoardImplementation,
+        WitnetRequestFactory.address,
+        /* _isUpgradeable */ true,
+        /* _versionTag    */ utils.fromAscii(version),
+        ...(
+          // if defined, use network-specific constructor parameters:
+          settings.constructorParams[network]?.WitnetRequestBoard ||
+            // otherwise, use ecosystem-specific parameters, if any:
+            settings.constructorParams[ecosystem]?.WitnetRequestBoard ||
+            // or, default defined parameters for WRBs, if any:
+            settings.constructorParams?.default?.WitnetRequestBoard
+        ),
+        { from }
+      )
+    }
     board = await WitnetRequestBoardImplementation.deployed()
     addresses[ecosystem][network].WitnetRequestBoardImplementation = board.address
     if (!isDryRun) {

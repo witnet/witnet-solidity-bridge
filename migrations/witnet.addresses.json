@@ -762,6 +762,10 @@
             "WitnetRequestBoardImplementation": "0xAa3BE012baab697c1AEAC34A96bb16aa381FA7F7",
             "WitnetRequestFactoryImplementation": "0x364E2b91a4C7563288C3ccF7256BA172935CC550"
         },
+        "optimism.sepolia": {
+            "WitnetRequestBoardTrustableOvm2": "",
+            "WitnetOracle": "0x77703aE126B971c9946d562F41Dd47071dA00777"
+        },
         "optimism.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
             "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
