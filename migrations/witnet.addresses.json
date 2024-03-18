@@ -540,14 +540,14 @@
             "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",
             "WitnetRandomness": "0xD111C0ef9A8FA71a66E37255d255abd8879D143C",
             "WitnetRequestBoard": "0xd653fbd7c736838289262F0F41A458f35393C88a",
-            "WitnetRandomnessImplementationV061": "0x1ebD93231a7fE551E1d6405404Df34909eff4c2C",
+            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
             "WitnetErrorsLib": "0x0e4F5763f417BB13AF759da4d36af50d13F02730",
             "WitnetEncodingLib": "0x217C32Cf5755aB281809f29F21c107cD0E4652B3",
+            "WitnetPriceFeedsLib": "0xe936a946FA591eCed937996Ef3df5c89d59f4dbb",
             "WitnetBytecodesImplementation": "0x92a68143Ee3C2527C2B07e4354efAF89fd75a359",
-            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
-            "WitnetRequestFactoryImplementation": "0xf56E739C436EA6e65A17DBfaC9D7E57062D19422",
+            "WitnetRandomnessImplementationV061": "0x1ebD93231a7fE551E1d6405404Df34909eff4c2C",
             "WitnetRequestBoardImplementation": "0x0Aa147F25CE8BfaA4E6B4B2CCa91f595bD732CD4",
-            "WitnetPriceFeedsLib": "0xe936a946FA591eCed937996Ef3df5c89d59f4dbb"
+            "WitnetRequestFactoryImplementation": "0xf56E739C436EA6e65A17DBfaC9D7E57062D19422"
         }
     },
     "mantle": {
