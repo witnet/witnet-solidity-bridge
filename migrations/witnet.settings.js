@@ -507,6 +507,11 @@ module.exports = {
         network_id: 321,
         gasPrice: 10 ** 10,
         skipDryRun: true,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://scan.kcc.io/api",
+          browserURL: "https://scan.kcc.io/",
+        },
       },
     },
     klaytn: {
