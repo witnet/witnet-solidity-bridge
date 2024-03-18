@@ -481,6 +481,11 @@ module.exports = {
         port: 9526,
         network_id: 2222,
         skipDryRun: true,
+        verify: {
+          apiKey: "MY_API_KEY",
+          apiUrl: "https://kavascan.com/api",
+          browserURL: "https://kavascan.com/",
+        }
       },
     },
     kcc: {
