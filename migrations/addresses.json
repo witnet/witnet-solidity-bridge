@@ -24,7 +24,7 @@
         "WitnetOracleDataLib": "0x72b43a4062c81918112646b32268f7A748F8Fe08",
         "WitnetOracleTrustableOvm2": "0xFa01Fb19696626dbBc53Cf2Ebd81356C55f32Fdf",
         "WitnetPriceFeedsDefault": "0x73912b1E13C67485D6d38Ef4F2B750C67FD99DA9",
-        "WitnetRandomnessV20": "0x378C86Df3beed6808BFfbfCBF96B0e8abef5f70D",
+        "WitnetRandomnessV2": "0xD527ac743576A6c9fe9AeDD6dd891a6A1D337eEc",
         "WitnetRequestBytecodesDefault": "0x65fB7A0C98719e967546317222dfF90A73C42296",
         "WitnetRequestFactoryDefault": "0x23873d132e4Ebc34C19F405cf2bFe31dA21630c2"
     },

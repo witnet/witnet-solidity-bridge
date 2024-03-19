@@ -2,7 +2,7 @@ module.exports = {
   default: {
     WitnetOracle: "WitnetOracleTrustableDefault",
     WitnetPriceFeeds: "WitnetPriceFeedsDefault",
-    WitnetRandomness: "WitnetRandomnessV20",
+    WitnetRandomness: "WitnetRandomnessV2",
     WitnetRequestBytecodes: "WitnetRequestBytecodesDefault",
     WitnetRequestFactory: "WitnetRequestFactoryDefault",
     WitnetEncodingLib: "WitnetEncodingLib",
