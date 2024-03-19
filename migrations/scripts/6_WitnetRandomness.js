@@ -31,12 +31,11 @@ module.exports = async function (deployer, network, [, from]) {
     return
   }
 
-  const create2Factory = await Create2Factory.deployed()
-
   const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
   const WitnetRandomnessImplementation = artifacts.require(artifactNames.WitnetRandomness)
 
   if (addresses[ecosystem][network].WitnetRandomnessImplementation !== undefined) {
+    const create2Factory = await Create2Factory.deployed()
     let proxy
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRandomness)) {
       if (

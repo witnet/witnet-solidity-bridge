@@ -640,6 +640,16 @@ module.exports = {
           explorerUrl: "https://optimism-goerli.blockscout.com/",
         },
       },
+      "optimism.sepolia": {
+        host: "localhost",
+        port: 8503,
+        network_id: 11155420,
+        verify: {
+          apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
+          apiUrl: "https://api-sepolia-optimistic.etherscan.io/api",
+          explorerUrl: "https://sepolia-optimism.etherscan.io/address",
+        },
+      },
       "optimism.mainnet": {
         host: "localhost",
         port: 9520,
