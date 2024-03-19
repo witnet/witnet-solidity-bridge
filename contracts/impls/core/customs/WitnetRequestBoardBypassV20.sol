@@ -6,11 +6,14 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 import "../../WitnetUpgradableBase.sol";
 import "../../../WitnetRequestBoard.sol";
+
 import "../../../data/WitnetBoardDataACLs.sol";
 
 import "../../../interfaces/V2/IWitnetConsumer.sol";
 import "../../../interfaces/V2/IWitnetOracle.sol";
 import "../../../interfaces/V2/IWitnetOracleEvents.sol";
+
+import "../../../libs/WitnetErrorsLib.sol";
 
 abstract contract WitnetOracleV07 {
     
@@ -84,9 +87,9 @@ contract WitnetRequestBoardBypassV20
     constructor(
             WitnetOracleV07 _legacy,
             WitnetOracleV20 _surrogate,
-            uint24 _legacyCallbackLimit,
             bool _upgradable,
-            bytes32 _versionTag
+            bytes32 _versionTag,
+            uint24 _legacyCallbackLimit
         )
         WitnetOracleV07(_legacy.factory())
         WitnetUpgradableBase(
@@ -117,6 +120,10 @@ contract WitnetRequestBoardBypassV20
     // solhint-disable-next-line payable-fallback
     fallback() virtual override external { /* solhint-disable no-complex-fallback */
         __legacyFallback();
+    }
+
+    function numLegacyQueries() external view returns (uint256) {
+        return __storage().numQueries;
     }
 
 
@@ -297,14 +304,22 @@ contract WitnetRequestBoardBypassV20
     /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
     /// @param _queryId The unique query identifier.
     function checkResultStatus(uint256 _queryId)
-        external
+        public
         legacyFallback(_queryId) 
         returns (Witnet.ResultStatus)
     {
-        WitnetV2.ResponseStatus _status = surrogate.getQueryResponseStatus(
-            _queryId - __storage().numQueries
-        );
-        return Witnet.ResultStatus(uint8(_status));
+        Witnet.QueryStatus _status = _statusOf(_queryId);
+        if (_status == Witnet.QueryStatus.Reported) {
+            if (__response(_queryId).cborBytes[0] == bytes1(0xd8)) {
+                return Witnet.ResultStatus.Error;
+            } else {
+                return Witnet.ResultStatus.Ready;
+            }
+        } else if (_status == Witnet.QueryStatus.Posted) {
+            return Witnet.ResultStatus.Awaiting;
+        } else {
+            return Witnet.ResultStatus.Void;
+        }
     }
 
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
@@ -314,9 +329,36 @@ contract WitnetRequestBoardBypassV20
         legacyFallback(_queryId) 
         returns (Witnet.ResultError memory)
     {
-        return surrogate.getQueryResultError(
-            _queryId - __storage().numQueries
-        );
+        Witnet.ResultStatus _status = checkResultStatus(_queryId);
+        if (_status == Witnet.ResultStatus.Awaiting) {
+            return Witnet.ResultError({
+                code: Witnet.ResultErrorCodes.Unknown,
+                reason: "WitnetRequestBoardBypassV20: not yet solved"
+            });
+        } else if (_status == Witnet.ResultStatus.Void) {
+            return Witnet.ResultError({
+                code: Witnet.ResultErrorCodes.Unknown,
+                reason: "WitnetRequestBoardBypassV20: unknown query"
+            });
+        } else {
+            try WitnetErrorsLib.resultErrorFromCborBytes(__response(_queryId).cborBytes)
+                returns (Witnet.ResultError memory _error)
+            {
+                return _error;
+            }
+            catch Error(string memory _reason) {
+                return Witnet.ResultError({
+                    code: Witnet.ResultErrorCodes.Unknown,
+                    reason: string(abi.encodePacked("WitnetErrorsLib: ", _reason))
+                });
+            }
+            catch (bytes memory) {
+                return Witnet.ResultError({
+                    code: Witnet.ResultErrorCodes.Unknown,
+                    reason: "WitnetErrorsLib: assertion failed"
+                });
+            }
+        }
     }
 
     /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.

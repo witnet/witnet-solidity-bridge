@@ -490,9 +490,9 @@ contract WitnetRandomnessProxiable
         settleWitnetRandomnessSLA(Witnet.RadonSLA({
             numWitnesses: 5,
             minConsensusPercentage: 51,
-            witnessReward: 2 * 10 ** 8,
-            witnessCollateral: 2 * 10 ** 9,
-            minerCommitRevealFee: 10 ** 7
+            witnessReward: 2 * 10 ** 8,      // 0.2 WIT
+            witnessCollateral: 2 * 10 ** 10, // 20 WIT
+            minerCommitRevealFee: 10 ** 7    // 0.01 WIT
         }));
     }
 

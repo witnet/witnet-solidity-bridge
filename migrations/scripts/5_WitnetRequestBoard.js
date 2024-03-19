@@ -91,6 +91,14 @@ module.exports = async function (deployer, network, [, from, reporter]) {
         /* _v20 address   */ addresses[ecosystem][network].WitnetOracleV20,
         /* _isUpgradeable */ true,
         /* _versionTag    */ utils.fromAscii(version),
+        ...(
+          // if defined, use network-specific constructor parameters:
+          settings.constructorParams[network]?.WitnetRequestBoard ||
+            // otherwise, use ecosystem-specific parameters, if any:
+            settings.constructorParams[ecosystem]?.WitnetRequestBoard ||
+            // or, default defined parameters for WRBs, if any:
+            settings.constructorParams?.default?.WitnetRequestBoard
+        ),
         { from }
       )
     } else {
