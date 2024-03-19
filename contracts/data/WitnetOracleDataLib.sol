@@ -70,11 +70,16 @@ library WitnetOracleDataLib {
         WitnetV2.QueryStatus _queryStatus = seekQueryStatus(queryId);
         if (_queryStatus == WitnetV2.QueryStatus.Finalized) {
             bytes storage __cborValues = data().queries[queryId].response.resultCborBytes;
-            // determine whether reported result is an error by peeking the first byte
-            return (__cborValues[0] == bytes1(0xd8)
-                ? WitnetV2.ResponseStatus.Error 
-                : WitnetV2.ResponseStatus.Ready
-            );
+            if (__cborValues.length > 0) {
+                // determine whether stored result is an error by peeking the first byte
+                return (__cborValues[0] == bytes1(0xd8)
+                    ? WitnetV2.ResponseStatus.Error 
+                    : WitnetV2.ResponseStatus.Ready
+                );
+            } else {
+                // the result is final but delivered to the requesting address
+                return WitnetV2.ResponseStatus.Delivered;
+            }
         } else if (_queryStatus == WitnetV2.QueryStatus.Posted) {
             return WitnetV2.ResponseStatus.Awaiting;
         } else if (_queryStatus == WitnetV2.QueryStatus.Reported) {

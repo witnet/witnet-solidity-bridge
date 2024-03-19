@@ -45,7 +45,8 @@ library WitnetV2 {
         Awaiting,
         Ready,
         Error,
-        Finalizing
+        Finalizing,
+        Delivered
     }
 
     struct RadonSLA {
