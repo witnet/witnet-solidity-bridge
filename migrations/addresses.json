@@ -22,7 +22,7 @@
         "WitnetEncodingLib": "0xf321bcD29CFc6134c9Bf42F759f428F3A6010919",
         "WitnetPriceFeedsLib": "0x85aa4A0fDa112c47d4216448EE4D49Afd072675e",
         "WitnetOracleDataLib": "0x72b43a4062c81918112646b32268f7A748F8Fe08",
-        "WitnetOracleTrustableOvm2": "0x6a587296dEc2cAd88233bf6Bda862ED5396730b0",
+        "WitnetOracleTrustableOvm2": "",
         "WitnetPriceFeedsDefault": "0x73912b1E13C67485D6d38Ef4F2B750C67FD99DA9",
         "WitnetRandomnessV20": "0x378C86Df3beed6808BFfbfCBF96B0e8abef5f70D",
         "WitnetRequestBytecodesDefault": "0x65fB7A0C98719e967546317222dfF90A73C42296",

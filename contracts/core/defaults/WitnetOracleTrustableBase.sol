@@ -264,6 +264,17 @@ abstract contract WitnetOracleTrustableBase
     {
         return __storage().queries[_witnetQueryId];
     }
+
+    /// @notice Gets current EVM reward the report can claim, if not done yet.
+    function getQueryEvmReward(uint256 _witnetQueryId) 
+        external view 
+        virtual override
+        returns (uint256)
+    {
+        return __storage().queries[_witnetQueryId].request.evmReward;
+    }
+
+
     
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     /// @param _witnetQueryId The unique query identifier.
