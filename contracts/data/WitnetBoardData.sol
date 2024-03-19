@@ -86,7 +86,7 @@ abstract contract WitnetBoardData {
 
     /// Gets current status of given query.
     function _statusOf(uint256 _queryId)
-      internal view
+      virtual internal view
       returns (Witnet.QueryStatus)
     {
       Witnet.Query storage _query = __storage().queries[_queryId];

@@ -764,7 +764,7 @@
         },
         "optimism.sepolia": {
             "WitnetRequestBoardTrustableOvm2": "",
-            "WitnetOracle": "0x77703aE126B971c9946d562F41Dd47071dA00777"
+            "WitnetOracleV20": "0x77703aE126B971c9946d562F41Dd47071dA00777"
         },
         "optimism.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
