@@ -146,8 +146,8 @@ module.exports = async function (deployer, network, [, from]) {
           ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
       ) {
         try {
-          const tx = await proxy.upgradeTo(router.address, "0x", { 
-            from: bypass ? '0xF121b71715E71DDeD592F1125a06D4ED06F0694D' : from 
+          const tx = await proxy.upgradeTo(router.address, "0x", {
+            from: bypass ? "0xF121b71715E71DDeD592F1125a06D4ED06F0694D" : from,
           })
           console.info("   => transaction hash :", tx.receipt.transactionHash)
           console.info("   => transaction gas  :", tx.receipt.gasUsed)

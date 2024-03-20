@@ -30,7 +30,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
   const artifactNames = artifactsName.WitnetRequestBoard.split(":")
   const bypass = artifactNames.length > 1
   const implName = artifactNames[0]
-  
+
   const WitnetRequestBoardImplementation = artifacts.require(implName)
   const create2FactoryAddr = addresses[ecosystem][network]?.Create2Factory
 
