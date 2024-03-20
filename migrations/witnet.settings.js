@@ -21,6 +21,7 @@ module.exports = {
     },
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
+      WitnetPriceFeeds: "WitnetPriceFeedsBypassV20:",
     },
     "polygon.zkevm.goerli": {
       WitnetBytecodes: "WitnetBytecodesNoSha256",

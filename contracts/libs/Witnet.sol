@@ -390,6 +390,17 @@ library Witnet {
                 && a.minerCommitRevealFee >= b.minerCommitRevealFee
         );
     }
+    
+    function isValid(RadonSLA calldata sla) internal pure returns (bool) {
+        return (
+            sla.numWitnesses > 0
+                && sla.numWitnesses <= 127
+                && sla.minConsensusPercentage >= 51
+                && sla.witnessReward > 0
+                && sla.witnessCollateral > 20 * 10 ** 9
+                && sla.witnessCollateral / sla.witnessReward <= 125
+        );
+    }
 
 
     /// ===============================================================================================================
@@ -498,6 +509,19 @@ library Witnet {
                 _bytes32 |= bytes32(_value[_i] & 0xff) >> (_i * 8);
             }
         }
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'bytes4' helper methods -----------------------------------------------------------------------------------
+
+    function toHexString(bytes4 word) internal pure returns (string memory) {
+        return string(abi.encodePacked(
+            toHexString(uint8(bytes1(word))),
+            toHexString(uint8(bytes1(word << 8))),
+            toHexString(uint8(bytes1(word << 16))),
+            toHexString(uint8(bytes1(word << 24)))
+        ));
     }
 
 

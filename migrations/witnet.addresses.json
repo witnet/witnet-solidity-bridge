@@ -780,7 +780,8 @@
             "WitnetRequestBoardImplementation": "0x307b1a85dC9BE441Cd7e4931266Dd6a24C4A98d2",
             "WitnetRequestBoardTrustableOvm2": "0xDb248F9D510aF57A6f7d009712e45f6cDDEA776d",
             "WitnetRequestFactoryImplementation": "0xc228d93908bd3E9E9015f83f125d1514803eDC06",
-            "WitnetOracleV20": "0x77703aE126B971c9946d562F41Dd47071dA00777"
+            "WitnetOracleV20": "0x77703aE126B971c9946d562F41Dd47071dA00777",
+            "WitnetPriceFeedsV20": "0x1111AbA2164AcdC6D291b08DfB374280035E1111"
         },
         "optimism.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
