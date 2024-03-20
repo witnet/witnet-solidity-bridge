@@ -33,8 +33,12 @@ module.exports = async function (deployer, network, [, from]) {
     return
   }
 
-  const artifactNames = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
-  const WitnetPriceFeedsImplementation = artifacts.require(artifactNames.WitnetPriceFeeds)
+  const artifactsName = merge(settings.artifacts.default, settings.artifacts[ecosystem], settings.artifacts[network])
+  const artifactNames = artifactsName.WitnetPriceFeeds?.split(":")
+  const bypass = artifactNames.length > 1
+  const implName = artifactNames[0]
+
+  const WitnetPriceFeedsImplementation = artifacts.require(implName)
 
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsLib)) {
     await deployer.deploy(WitnetPriceFeedsLib, { from })
@@ -99,13 +103,21 @@ module.exports = async function (deployer, network, [, from]) {
     }
     let router
     if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetPriceFeedsImplementation)) {
-      await deployer.deploy(
-        WitnetPriceFeedsImplementation,
-        WitnetRequestBoard.address,
-        true,
-        utils.fromAscii(version),
-        { from }
-      )
+      if (bypass) {
+        await deployer.deploy(
+          WitnetPriceFeedsImplementation,
+          /* _v20 address */ addresses[ecosystem][network].WitnetPriceFeedsV20,
+          /* _isUpgradeable */ true,
+          /* _versionTag    */ utils.fromAscii(version),
+          { from }
+        )
+      } else {
+        await deployer.deploy(
+          WitnetPriceFeedsImplementation,
+          WitnetRequestBoard.address, true, utils.fromAscii(version),
+          { from }
+        )
+      }
       router = await WitnetPriceFeedsImplementation.deployed()
       addresses[ecosystem][network].WitnetPriceFeedsImplementation = router.address
       if (!isDryRun) {
@@ -134,7 +146,9 @@ module.exports = async function (deployer, network, [, from]) {
           ["y", "yes"].includes((await utils.prompt("   > Upgrade the proxy ? [y/N] ")).toLowerCase().trim())
       ) {
         try {
-          const tx = await proxy.upgradeTo(router.address, "0x", { from })
+          const tx = await proxy.upgradeTo(router.address, "0x", { 
+            from: bypass ? '0xF121b71715E71DDeD592F1125a06D4ED06F0694D' : from 
+          })
           console.info("   => transaction hash :", tx.receipt.transactionHash)
           console.info("   => transaction gas  :", tx.receipt.gasUsed)
           console.info("   > Done.")
