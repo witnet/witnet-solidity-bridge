@@ -39,7 +39,7 @@ module.exports = {
     },
     ten: {
       WitnetRequestBoard: "WitnetRequestBoardTrustableObscuro",
-    }
+    },
   },
   compilers: {
     default: {
@@ -485,7 +485,7 @@ module.exports = {
           apiKey: "MY_API_KEY",
           apiUrl: "https://kavascan.com/api",
           browserURL: "https://kavascan.com/",
-        }
+        },
       },
     },
     kcc: {
@@ -764,7 +764,7 @@ module.exports = {
         skipDryRun: true,
         gas: 6000000,
         gasPrice: 10,
-      }
+      },
     },
     ultron: {
       "ultron.testnet": {

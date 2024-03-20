@@ -30,7 +30,6 @@ module.exports = async function (deployer, network, [, from, reporter]) {
   const WitnetRequestBoardImplementation = artifacts.require(artifactsName.WitnetRequestBoard)
   const create2FactoryAddr = addresses[ecosystem][network]?.Create2Factory
 
-
   let proxy
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestBoard)) {
     if (!utils.isNullAddress(create2FactoryAddr) && singletons?.WitnetPriceFeeds) {

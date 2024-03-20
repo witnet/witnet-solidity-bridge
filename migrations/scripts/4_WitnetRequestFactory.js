@@ -31,7 +31,6 @@ module.exports = async function (deployer, network, [, from]) {
 
   let proxy
   if (utils.isNullAddress(addresses[ecosystem][network]?.WitnetRequestFactory)) {
-
     if (!utils.isNullAddress(create2FactoryAddr) && singletons?.WitnetRequestFactory) {
       // Deploy the proxy via a singleton factory and a salt...
       const create2Factory = await Create2Factory.at(create2FactoryAddr)
