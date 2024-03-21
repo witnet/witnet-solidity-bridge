@@ -32,20 +32,19 @@ contract WitnetRandomnessV2
     }
 
     /// @notice Unique identifier of the RNG data request used on the Witnet Oracle blockchain for solving randomness.
-    /// @dev Can be used to track all randomness requests solved on the Witnet Oracle blockchain.
+    /// @dev Can be used to track all randomness requests solved so far on the Witnet Oracle blockchain.
     bytes32 immutable public override witnetRadHash;
 
-    constructor(WitnetOracle _witnet)
+    constructor(
+            WitnetOracle _witnet
+        )
         Ownable(address(msg.sender))
         UsingWitnet(_witnet)
     {
-        require(
+        _require(
             address(_witnet) == address(0)
                 || _witnet.specs() == type(IWitnetOracle).interfaceId,
-            string(abi.encodePacked(
-                class(),
-                ": uncompliant WitnetOracle"
-            ))
+            "uncompliant WitnetOracle"
         );
         WitnetRequestBytecodes _registry = witnet().registry();
         {
@@ -78,16 +77,12 @@ contract WitnetRandomnessV2
     }
 
     receive() virtual external payable {
-        revert(string(abi.encodePacked(
-            class(),
-            ": no transfers accepted"
-        )));
+        _revert("no transfers accepted");
     }
 
     fallback() virtual external payable { 
-        revert(string(abi.encodePacked(
-            class(),
-            ": not implemented: 0x",
+        _revert(string(abi.encodePacked(
+            "not implemented: 0x",
             Witnet.toHexString(uint8(bytes1(msg.sig))),
             Witnet.toHexString(uint8(bytes1(msg.sig << 8))),
             Witnet.toHexString(uint8(bytes1(msg.sig << 16))),
@@ -477,9 +472,9 @@ contract WitnetRandomnessV2
         external
         onlyOwner
     {
-        require(
+        _require(
             _witnetQuerySLA.isValid(),
-            "WitnetRandomness: invalid SLA"
+            "invalid SLA"
         );
         __witnetDefaultSLA = _witnetQuerySLA;
     }
@@ -487,6 +482,29 @@ contract WitnetRandomnessV2
 
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
+
+    function _require(
+            bool _condition, 
+            string memory _message
+        )
+        internal pure
+    {
+        if (!_condition) {
+            _revert(_message);
+        }
+    }
+
+    function _revert(string memory _message)
+        internal pure
+    {
+        revert(
+            string(abi.encodePacked(
+                class(),
+                ": ",
+                _message
+            ))
+        );
+    }
 
     /// @dev Recursively searches for the number of the first block after the given one in which a Witnet 
     /// @dev randomness request was posted. Returns 0 if none found.
