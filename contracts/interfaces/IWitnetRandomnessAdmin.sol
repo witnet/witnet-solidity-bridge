@@ -9,5 +9,5 @@ interface IWitnetRandomnessAdmin {
     function acceptOwnership() external;
     function pendingOwner() external returns (address);
     function transferOwnership(address) external;
-    function settleWitnetRandomnessSLA(WitnetV2.RadonSLA calldata) external returns (bytes32);
+    function settleWitnetRandomnessSLA(Witnet.RadonSLA calldata) external returns (bytes32);
 }

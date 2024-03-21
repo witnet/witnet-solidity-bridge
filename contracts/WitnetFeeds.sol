@@ -14,7 +14,7 @@ abstract contract WitnetFeeds
         IWitnetFeedsAdmin,
         IWitnetFeedsEvents
 {
-    WitnetV2.RadonDataTypes immutable public override dataType;
+    Witnet.RadonDataTypes immutable public override dataType;
     WitnetBytecodes immutable public override registry;
     WitnetRequestBoard immutable public override witnet;
 
@@ -22,7 +22,7 @@ abstract contract WitnetFeeds
 
     constructor(
             WitnetRequestBoard _wrb,
-            WitnetV2.RadonDataTypes _dataType,
+            Witnet.RadonDataTypes _dataType,
             string memory _prefix
         )
     {

@@ -533,7 +533,7 @@ abstract contract WitnetRequestBoardTrustableBase
     /// @dev - provided reward is too low.
     /// @param _radHash The RAD hash of the data tequest to be solved by Witnet.
     /// @param _slaParams The SLA param of the data request to be solved by Witnet.
-    function postRequest(bytes32 _radHash, WitnetV2.RadonSLA calldata _slaParams)
+    function postRequest(bytes32 _radHash, Witnet.RadonSLA calldata _slaParams)
         virtual override
         public payable
         returns (uint256 _queryId)

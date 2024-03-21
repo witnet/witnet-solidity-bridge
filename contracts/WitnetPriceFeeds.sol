@@ -17,7 +17,7 @@ abstract contract WitnetPriceFeeds
     constructor(WitnetRequestBoard _wrb)
         WitnetFeeds(
             _wrb,
-            WitnetV2.RadonDataTypes.Integer,
+            Witnet.RadonDataTypes.Integer,
             "Price-"
         )
     {}

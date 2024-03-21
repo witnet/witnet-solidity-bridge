@@ -762,6 +762,28 @@
             "WitnetRequestBoardImplementation": "0xAa3BE012baab697c1AEAC34A96bb16aa381FA7F7",
             "WitnetRequestFactoryImplementation": "0x364E2b91a4C7563288C3ccF7256BA172935CC550"
         },
+        "optimism.sepolia": {
+            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
+            "WitnetProxy": "0x08a6a53B8bCE95677fFA85813C32Bb8228cd114c",
+            "WitnetErrorsLib": "0x2Ce7843C1c2fce51DE54a06dB3516103fbde0F6D",
+            "WitnetEncodingLib": "0x03D884F4fF7f8f78310Df6879eF4031e1229bb07",
+            "WitnetPriceFeedsLib": "0x0F17043BB821F609670Dbcce36B6F19FD42829B2",
+            "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
+            "WitnetPriceFeeds": "0xf0f823034C1652d96aaFd0b255CCB4b05b8EE7B6",
+            "WitnetPriceRouter": "0x4326d5b067EC4Bb5c2F71909E278Def8e4906B19",
+            "WitnetRandomness": "0x0123456fbBC59E181D76B6Fe8771953d1953B51a",
+            "WitnetRequestBoard": "0x777777772C24e6CD34B464D1d71616C444254537",
+            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
+            "WitnetBytecodesImplementation": "0x578F143c36654DD361FdD51F6D2693b4621ac455",
+            "WitnetPriceFeedsImplementation": "0x2f8efDF55330248D072020e112aF622083360814",
+            "WitnetPriceFeedsUpgradable": "0xA7952bc98AB11b95aa51E52ae61d017D0F084eB8",
+            "WitnetRandomnessImplementation": "0x606E3E55827f82493D481d3dBC2727298e015879",
+            "WitnetRequestBoardImplementation": "0x123a7AcE0879C4645b19A69c2ba8B3E4d01fBfD6",
+            "WitnetRequestBoardTrustableOvm2": "0xDb248F9D510aF57A6f7d009712e45f6cDDEA776d",
+            "WitnetRequestFactoryImplementation": "0xc228d93908bd3E9E9015f83f125d1514803eDC06",
+            "WitnetOracleV20": "0x77703aE126B971c9946d562F41Dd47071dA00777",
+            "WitnetPriceFeedsV20": "0x1111AbA2164AcdC6D291b08DfB374280035E1111"
+        },
         "optimism.mainnet": {
             "WitnetLib": "0x1D9c4a8f8B7b5F9B8e2641D81927f8F8Cc7fF079",
             "WitnetPriceRouter": "0xD39D4d972C7E166856c4eb29E54D3548B4597F53",

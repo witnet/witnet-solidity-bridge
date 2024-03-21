@@ -26,12 +26,12 @@ contract WitnetBytecodesDefault
     using Witnet for bytes;
     using Witnet for string;
     
-    using WitnetEncodingLib for WitnetV2.DataRequestMethods;
-    using WitnetEncodingLib for WitnetV2.RadonRetrieval;
-    using WitnetEncodingLib for WitnetV2.RadonRetrieval[];
-    using WitnetEncodingLib for WitnetV2.RadonReducer;
-    using WitnetEncodingLib for WitnetV2.RadonSLA;
-    using WitnetEncodingLib for WitnetV2.RadonDataTypes;    
+    using WitnetEncodingLib for Witnet.RadonDataRequestMethods;
+    using WitnetEncodingLib for Witnet.RadonRetrieval;
+    using WitnetEncodingLib for Witnet.RadonRetrieval[];
+    using WitnetEncodingLib for Witnet.RadonReducer;
+    using WitnetEncodingLib for Witnet.RadonSLA;
+    using WitnetEncodingLib for Witnet.RadonDataTypes;    
     
     constructor(
             bool _upgradable,
@@ -173,7 +173,7 @@ contract WitnetBytecodesDefault
         external view
         returns (bytes memory)
     {
-        WitnetV2.RadonSLA storage __sla = __database().slas[_slaHash];
+        Witnet.RadonSLA storage __sla = __database().slas[_slaHash];
         if (__sla.numWitnesses == 0) {
             revert IWitnetBytecodesErrors.UnknownRadonSLA(_slaHash);
         }
@@ -224,7 +224,7 @@ contract WitnetBytecodesDefault
         virtual override
         returns (bytes32, uint32, uint256)
     {
-        WitnetV2.RadonSLA storage __sla = __database().slas[_slaHash];
+        Witnet.RadonSLA storage __sla = __database().slas[_slaHash];
         {
             uint _numWitnesses = __sla.numWitnesses;
             uint _weight = __database().radsBytecode[_radHash].length;
@@ -268,7 +268,7 @@ contract WitnetBytecodesDefault
         external view
         returns (bytes32[] memory _endpoints)
     {
-        WitnetV2.DataProvider storage __provider = __database().providers[_index];
+        DataProvider storage __provider = __database().providers[_index];
         uint _totalEndpoints = __provider.totalEndpoints;
         if (_offset < _totalEndpoints){
             if (_offset + _length > _totalEndpoints) {
@@ -284,10 +284,10 @@ contract WitnetBytecodesDefault
     function lookupRadonRetrieval(bytes32 _hash)
         external view
         override
-        returns (WitnetV2.RadonRetrieval memory _source)
+        returns (Witnet.RadonRetrieval memory _source)
     {
         _source = __database().retrievals[_hash];
-        if (_source.method == WitnetV2.DataRequestMethods.Unknown) {
+        if (_source.method == Witnet.RadonDataRequestMethods.Unknown) {
             revert IWitnetBytecodesErrors.UnknownRadonRetrieval(_hash);
         }
     }
@@ -297,7 +297,7 @@ contract WitnetBytecodesDefault
         override
         returns (uint8)
     {
-        if (__database().retrievals[_hash].method == WitnetV2.DataRequestMethods.Unknown) {
+        if (__database().retrievals[_hash].method == Witnet.RadonDataRequestMethods.Unknown) {
             revert IWitnetBytecodesErrors.UnknownRadonRetrieval(_hash);
         }
         return __database().retrievals[_hash].argsCount;
@@ -306,9 +306,9 @@ contract WitnetBytecodesDefault
     function lookupRadonRetrievalResultDataType(bytes32 _hash)
         external view
         override
-        returns (WitnetV2.RadonDataTypes)
+        returns (Witnet.RadonDataTypes)
     {
-        if (__database().retrievals[_hash].method == WitnetV2.DataRequestMethods.Unknown) {
+        if (__database().retrievals[_hash].method == Witnet.RadonDataRequestMethods.Unknown) {
             revert IWitnetBytecodesErrors.UnknownRadonRetrieval(_hash);
         }
         return __database().retrievals[_hash].resultDataType;
@@ -317,7 +317,7 @@ contract WitnetBytecodesDefault
     function lookupRadonReducer(bytes32 _hash)
         external view
         override
-        returns (WitnetV2.RadonReducer memory _reducer)
+        returns (Witnet.RadonReducer memory _reducer)
     {   
         _reducer = __database().reducers[_hash];
         if (uint8(_reducer.opcode) == 0) {
@@ -328,7 +328,7 @@ contract WitnetBytecodesDefault
     function lookupRadonRequestAggregator(bytes32 _radHash)
         external view
         override
-        returns (WitnetV2.RadonReducer memory)
+        returns (Witnet.RadonReducer memory)
     {
         return __database().reducers[
             __requests(_radHash).aggregator
@@ -338,7 +338,7 @@ contract WitnetBytecodesDefault
     function lookupRadonRequestResultDataType(bytes32 _radHash)
         external view
         override
-        returns (WitnetV2.RadonDataTypes)
+        returns (Witnet.RadonDataTypes)
     {
         return __requests(_radHash).resultDataType;
     }
@@ -370,7 +370,7 @@ contract WitnetBytecodesDefault
     function lookupRadonRequestTally(bytes32 _radHash)
         external view
         override
-        returns (WitnetV2.RadonReducer memory)
+        returns (Witnet.RadonReducer memory)
     {
         return __database().reducers[
             __requests(_radHash).tally
@@ -380,7 +380,7 @@ contract WitnetBytecodesDefault
     function lookupRadonSLA(bytes32 _slaHash)
         external view
         override
-        returns (WitnetV2.RadonSLA memory sla)
+        returns (Witnet.RadonSLA memory sla)
     {
         sla = __database().slas[_slaHash];
         if (sla.numWitnesses == 0) {
@@ -393,12 +393,12 @@ contract WitnetBytecodesDefault
         override
         returns (uint)
     {
-        WitnetV2.RadonSLA storage __sla = __database().slas[_slaHash];
+        Witnet.RadonSLA storage __sla = __database().slas[_slaHash];
         return __sla.numWitnesses * __sla.witnessReward;
     }
 
     function verifyRadonRetrieval(
-            WitnetV2.DataRequestMethods _requestMethod,
+            Witnet.RadonDataRequestMethods _requestMethod,
             string calldata _requestURL,
             string calldata _requestBody,
             string[2][] memory  _requestHeaders,
@@ -413,10 +413,10 @@ contract WitnetBytecodesDefault
 
         // should it be a new data source:
         if (
-            __database().retrievals[hash].method == WitnetV2.DataRequestMethods.Unknown
+            __database().retrievals[hash].method == Witnet.RadonDataRequestMethods.Unknown
         ) {
             // compose data source and save it in storage:
-            __database().retrievals[hash] = WitnetV2.RadonRetrieval({
+            __database().retrievals[hash] = Witnet.RadonRetrieval({
                 argsCount:
                     WitnetBuffer.argsCountOf(
                         abi.encode(
@@ -450,7 +450,7 @@ contract WitnetBytecodesDefault
     }
 
     function verifyRadonRetrieval(
-            WitnetV2.DataRequestMethods _requestMethod,
+            Witnet.RadonDataRequestMethods _requestMethod,
             string memory _requestSchema,
             string memory _requestAuthority,
             string memory _requestPath,
@@ -476,10 +476,10 @@ contract WitnetBytecodesDefault
 
         // should it be a new data source:
         if (
-            __database().retrievals[hash].method == WitnetV2.DataRequestMethods.Unknown
+            __database().retrievals[hash].method == Witnet.RadonDataRequestMethods.Unknown
         ) {
             // compose data source and save it in storage:
-            __database().retrievals[hash] = WitnetV2.RadonRetrieval({
+            __database().retrievals[hash] = Witnet.RadonRetrieval({
                 argsCount:
                     WitnetBuffer.argsCountOf(
                         abi.encode(
@@ -524,11 +524,11 @@ contract WitnetBytecodesDefault
         }
     }
 
-    function verifyRadonReducer(WitnetV2.RadonReducer memory _reducer)
+    function verifyRadonReducer(Witnet.RadonReducer memory _reducer)
         external returns (bytes32 hash)
     {
         hash = keccak256(abi.encode(_reducer));
-        WitnetV2.RadonReducer storage __reducer = __database().reducers[hash];
+        Witnet.RadonReducer storage __reducer = __database().reducers[hash];
         if (
             uint8(__reducer.opcode) == 0
                 && __reducer.filters.length == 0
@@ -577,15 +577,15 @@ contract WitnetBytecodesDefault
             }
             
             // Check sources and tally reducers:
-            WitnetV2.RadonReducer memory _aggregator = __database().reducers[_aggregatorId];
-            WitnetV2.RadonReducer memory _tally = __database().reducers[_tallyId];
+            Witnet.RadonReducer memory _aggregator = __database().reducers[_aggregatorId];
+            Witnet.RadonReducer memory _tally = __database().reducers[_tallyId];
             if (_tally.script.length > 0) {
                 revert WitnetV2.UnsupportedRadonTallyScript(_tallyId);
             }
             
             // Check result type consistency among all sources:
-            WitnetV2.RadonDataTypes _resultDataType;
-            WitnetV2.RadonRetrieval[] memory _retrievals = new WitnetV2.RadonRetrieval[](_retrievalsIds.length);
+            Witnet.RadonDataTypes _resultDataType;
+            Witnet.RadonRetrieval[] memory _retrievals = new Witnet.RadonRetrieval[](_retrievalsIds.length);
             for (uint _ix = 0; _ix < _retrievals.length; _ix ++) {
                 _retrievals[_ix] = __database().retrievals[_retrievalsIds[_ix]];
                 // Check all sources return same Radon data type:
@@ -639,7 +639,7 @@ contract WitnetBytecodesDefault
         }
     }
 
-    function verifyRadonSLA(WitnetV2.RadonSLA calldata _sla)
+    function verifyRadonSLA(Witnet.RadonSLA calldata _sla)
         external 
         virtual override
         returns (bytes32 _slaHash)
@@ -697,8 +697,8 @@ contract WitnetBytecodesDefault
     }
 
     function __pushRadonReducerFilters(
-            WitnetV2.RadonReducer storage __reducer,
-            WitnetV2.RadonFilter[] memory _filters
+            Witnet.RadonReducer storage __reducer,
+            Witnet.RadonFilter[] memory _filters
         )
         internal
         virtual

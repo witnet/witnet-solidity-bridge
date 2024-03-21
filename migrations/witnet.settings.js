@@ -20,7 +20,8 @@ module.exports = {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
     },
     optimism: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
+      WitnetPriceFeeds: "WitnetPriceFeedsBypassV20:",
     },
     "polygon.zkevm.goerli": {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
@@ -638,6 +639,16 @@ module.exports = {
           apiKey: "MY_API_KEY",
           apiUrl: "https://optimism-goerli.blockscout.com/api",
           explorerUrl: "https://optimism-goerli.blockscout.com/",
+        },
+      },
+      "optimism.sepolia": {
+        host: "localhost",
+        port: 8503,
+        network_id: 11155420,
+        verify: {
+          apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
+          apiUrl: "https://api-sepolia-optimistic.etherscan.io/api",
+          explorerUrl: "https://sepolia-optimism.etherscan.io/address",
         },
       },
       "optimism.mainnet": {

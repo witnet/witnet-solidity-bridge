@@ -3,6 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
+import "./IWitnetRequest.sol";
 import "../libs/WitnetV2.sol";
 
 /// @title Witnet Requestor Interface
@@ -59,7 +60,7 @@ interface IWitnetRequestBoardRequestor {
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     /// @param slaParams The SLA params of the data request to be solved by Witnet.
     /// @return _queryId Unique query identifier.
-    function postRequest(bytes32 radHash, WitnetV2.RadonSLA calldata slaParams) external payable returns (uint256 _queryId);
+    function postRequest(bytes32 radHash, Witnet.RadonSLA calldata slaParams) external payable returns (uint256 _queryId);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Updates request `gasPrice` in case this method is called with a higher 
