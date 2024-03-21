@@ -108,45 +108,4 @@ library WitnetV2 {
         ) & uint256(2 ** 224 - 1);
         return uint32((_number * range) >> 224);
     }
-
-
-    /// ===============================================================================================================
-    /// --- Witnet protocol v2.0 helper methods -----------------------------------------------------------------------  
-
-    uint256 internal constant _WITNET_GENESIS_TIMESTAMP = 1602666045;
-    uint256 internal constant _WITNET_GENESIS_EPOCH_SECONDS = 45;
-
-    uint256 internal constant _WITNET_2_0_EPOCH = 1234567;
-    uint256 internal constant _WITNET_2_0_EPOCH_SECONDS = 30;
-    uint256 internal constant _WITNET_2_0_TIMESTAMP = _WITNET_GENESIS_TIMESTAMP + _WITNET_2_0_EPOCH * _WITNET_GENESIS_EPOCH_SECONDS;
-
-    function timestampToWitnetEpoch(uint _timestamp) internal pure returns (uint) {
-        if (_timestamp > _WITNET_2_0_TIMESTAMP ) {
-            return (
-                _WITNET_2_0_EPOCH + (
-                    _timestamp - _WITNET_2_0_TIMESTAMP
-                ) / _WITNET_2_0_EPOCH_SECONDS
-            );
-        } else if (_timestamp > _WITNET_GENESIS_TIMESTAMP) {
-            return (
-                1 + (
-                    _timestamp - _WITNET_GENESIS_TIMESTAMP
-                ) / _WITNET_GENESIS_EPOCH_SECONDS
-            );
-        } else {
-            return 0;
-        }
-    }
-
-    function witnetEpochToTimestamp(uint _epoch) internal pure returns (uint) {
-        if (_epoch >= _WITNET_2_0_EPOCH) {
-            return (
-                _WITNET_2_0_TIMESTAMP + (
-                    _epoch - _WITNET_2_0_EPOCH
-                ) * _WITNET_2_0_EPOCH_SECONDS
-            );
-        } else {
-            return (_WITNET_GENESIS_TIMESTAMP + _epoch * _WITNET_GENESIS_EPOCH_SECONDS);
-        }
-    }
 }
