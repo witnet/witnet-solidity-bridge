@@ -294,6 +294,7 @@ module.exports = {
   "optimism:sepolia": {
     port: 8503,
     network_id: 11155420,
+    confirmations: 2,
     verify: {
       apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
       apiUrl: "https://api-sepolia-optimistic.etherscan.io/api",
