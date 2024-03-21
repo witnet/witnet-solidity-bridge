@@ -51,6 +51,10 @@ interface IWitnetOracle {
     /// @param queryId The unique query identifier.
     function getQueryResponseStatus(uint256 queryId) external view returns (WitnetV2.ResponseStatus);
 
+    /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
+    /// @param queryId The unique query identifier.
+    function getQueryResultCborBytes(uint256 queryId) external view returns (bytes memory);
+
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
     /// @param queryId The unique query identifier.
     function getQueryResultError(uint256 queryId) external view returns (Witnet.ResultError memory);

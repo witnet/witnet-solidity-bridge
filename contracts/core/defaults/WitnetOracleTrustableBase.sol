@@ -308,6 +308,16 @@ abstract contract WitnetOracleTrustableBase
         return WitnetOracleDataLib.seekQueryResponseStatus(_witnetQueryId);
     }
 
+    /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
+    /// @param _witnetQueryId The unique query identifier.
+    function getQueryResultCborBytes(uint256 _witnetQueryId) 
+        external view 
+        virtual override
+        returns (bytes memory)
+    {
+        return WitnetOracleDataLib.seekQueryResponse(_witnetQueryId).resultCborBytes;
+    }
+
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
     /// @param _witnetQueryId The unique query identifier.
     function getQueryResultError(uint256 _witnetQueryId)
