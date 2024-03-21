@@ -117,13 +117,13 @@ library WitnetOracleDataLib {
 
     function notInStatusRevertMessage(WitnetV2.QueryStatus self) public pure returns (string memory) {
         if (self == WitnetV2.QueryStatus.Posted) {
-            return "WitnetOracle: query not in Posted status";
+            return "query not in Posted status";
         } else if (self == WitnetV2.QueryStatus.Reported) {
-            return "WitnetOracle: query not in Reported status";
+            return "query not in Reported status";
         } else if (self == WitnetV2.QueryStatus.Finalized) {
-            return "WitnetOracle: query not in Finalized status";
+            return "query not in Finalized status";
         } else {
-            return "WitnetOracle: bad mood";
+            return "bad mood";
         }
     }
 }

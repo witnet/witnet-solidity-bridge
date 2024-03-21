@@ -23,7 +23,7 @@ contract WitnetOracleTrustableOvm2
 {
     using WitnetV2 for WitnetV2.RadonSLA;
 
-    function class() virtual override external view returns (string memory) {
+    function class() virtual override public view returns (string memory) {
         return type(WitnetOracleTrustableOvm2).name;
     }
 

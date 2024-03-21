@@ -35,9 +35,13 @@ abstract contract WitnetUpgradableBase
     
     /// @dev Reverts if proxy delegatecalls to unexistent method.
     fallback() virtual external {
-        revert("WitnetUpgradableBase: not implemented");
+        _revert("not implemented");
     }
 
+
+    function class() virtual public view returns (string memory) {
+        return type(WitnetUpgradableBase).name;
+    }
    
     // ================================================================================================================
     // --- Overrides 'Proxiable' --------------------------------------------------------------------------------------
@@ -59,6 +63,29 @@ abstract contract WitnetUpgradableBase
 
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
+
+    function _require(
+            bool _condition, 
+            string memory _message
+        )
+        internal view
+    {
+        if (!_condition) {
+            _revert(_message);
+        }
+    }
+
+    function _revert(string memory _message)
+        internal view
+    {
+        revert(
+            string(abi.encodePacked(
+                class(),
+                ": ",
+                _message
+            ))
+        );
+    }
 
     /// Converts bytes32 into string.
     function _toString(bytes32 _bytes32)

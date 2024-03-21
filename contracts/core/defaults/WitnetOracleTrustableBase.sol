@@ -39,35 +39,35 @@ abstract contract WitnetOracleTrustableBase
     WitnetRequestFactory immutable private __factory;
 
     modifier checkCallbackRecipient(address _addr, uint24 _callbackGasLimit) {
-        require(
+        _require(
             _addr.code.length > 0 && IWitnetConsumer(_addr).reportableFrom(address(this)) && _callbackGasLimit > 0,
-            "WitnetOracle: invalid callback"
+            "invalid callback"
         ); _;
     }
 
     modifier checkReward(uint256 _baseFee) {
-        require(
+        _require(
             _getMsgValue() >= _baseFee, 
-            "WitnetOracle: insufficient reward"
+            "insufficient reward"
         ); 
-        require(
+        _require(
             _getMsgValue() <= _baseFee * 10,
-            "WitnetOracle: too much reward"
+            "too much reward"
         );
         _;
     }
 
     modifier checkSLA(WitnetV2.RadonSLA calldata sla) {
-        require(
+        _require(
             WitnetV2.isValid(sla), 
-            "WitnetOracle: invalid SLA"
+            "invalid SLA"
         ); _;
     }
 
     /// Asserts the given query is currently in the given status.
     modifier inStatus(uint256 _queryId, WitnetV2.QueryStatus _status) {
       if (WitnetOracleDataLib.seekQueryStatus(_queryId) != _status) {
-        revert(WitnetOracleDataLib.notInStatusRevertMessage(_status));
+        _revert(WitnetOracleDataLib.notInStatusRevertMessage(_status));
       } else {
         _;
       }
@@ -75,17 +75,17 @@ abstract contract WitnetOracleTrustableBase
 
     /// Asserts the caller actually posted the referred query.
     modifier onlyRequester(uint256 _queryId) {
-        require(
+        _require(
             msg.sender == WitnetOracleDataLib.seekQueryRequest(_queryId).requester, 
-            "WitnetOracle: not the requester"
+            "not the requester"
         ); _;
     }
 
     /// Asserts the caller is authorized as a reporter
     modifier onlyReporters {
-        require(
+        _require(
             __storage().reporters[msg.sender],
-            "WitnetOracle: unauthorized reporter"
+            "unauthorized reporter"
         );
         _;
     } 
@@ -110,7 +110,7 @@ abstract contract WitnetOracleTrustableBase
     }
 
     receive() external payable { 
-        revert("WitnetOracle: no transfers accepted");
+        _revert("no transfers accepted");
     }
 
     /// @dev Provide backwards compatibility for dapps bound to versions <= 0.6.1
@@ -119,8 +119,8 @@ abstract contract WitnetOracleTrustableBase
     /* solhint-disable payable-fallback */
     /* solhint-disable no-complex-fallback */
     fallback() override external { 
-        revert(string(abi.encodePacked(
-            "WitnetOracle: not implemented: 0x",
+        _revert(string(abi.encodePacked(
+            "not implemented: 0x",
             Witnet.toHexString(uint8(bytes1(msg.sig))),
             Witnet.toHexString(uint8(bytes1(msg.sig << 8))),
             Witnet.toHexString(uint8(bytes1(msg.sig << 16))),
@@ -130,6 +130,14 @@ abstract contract WitnetOracleTrustableBase
 
     function channel() virtual override public view returns (bytes4) {
         return bytes4(keccak256(abi.encode(address(this), block.chainid)));
+    }
+
+    function class()
+        public view
+        virtual override(WitnetOracle, WitnetUpgradableBase) 
+        returns (string memory)
+    {
+        return type(WitnetOracleTrustableBase).name;
     }
 
     function factory() virtual override public view returns (WitnetRequestFactory) {
@@ -172,9 +180,9 @@ abstract contract WitnetOracleTrustableBase
             _newReporters = abi.decode(_newReportersRaw, (address[]));
         } else {
             // only owner can initialize:
-            require(
+            _require(
                 msg.sender == _owner,
-                "WitnetOracle: not the owner"
+                "not the owner"
             );
             // get reporters from _initData
             _newReporters = abi.decode(_initData, (address[]));
@@ -184,22 +192,22 @@ abstract contract WitnetOracleTrustableBase
             __proxiable().codehash != bytes32(0)
                 && __proxiable().codehash == codehash()
         ) {
-            revert("WitnetOracle: already upgraded");
+            _revert("already upgraded");
         }
         __proxiable().codehash = codehash();
 
-        require(
+        _require(
             address(__factory).code.length > 0,
-            "WitnetOracle: inexistent factory"
+            "inexistent factory"
         );
-        require(
+        _require(
             __factory.specs() == type(IWitnetRequestFactory).interfaceId, 
-            "WitnetOracle: uncompliant factory"
+            "uncompliant factory"
         );
-        require(
+        _require(
             address(__factory.witnet()) == address(this) 
                 && address(__factory.registry()) == address(registry),
-            "WitnetOracle: discordant factory"
+            "discordant factory"
         );
 
         // Set reporters, if any
@@ -231,9 +239,9 @@ abstract contract WitnetOracleTrustableBase
         returns (uint256)
     {
         uint16 _resultMaxSize = registry.lookupRadonRequestResultMaxSize(radHash);
-        require(
+        _require(
             _resultMaxSize > 0, 
-            "WitnetOracleTrustableDefault: invalid RAD"
+            "invalid RAD"
         );
         return estimateBaseFee(
             gasPrice,
@@ -290,7 +298,7 @@ abstract contract WitnetOracleTrustableBase
     function getQueryResponse(uint256 _witnetQueryId)
         public view
         virtual override
-        returns (WitnetV2.Response memory _response)
+        returns (WitnetV2.Response memory)
     {
         return WitnetOracleDataLib.seekQueryResponse(_witnetQueryId);
     }
@@ -562,9 +570,9 @@ abstract contract WitnetOracleTrustableBase
         returns (uint256)
     {
         // results cannot be empty:
-        require(
+        _require(
             _witnetQueryResultCborBytes.length != 0, 
-            "WitnetOracleTrustableDefault: result cannot be empty"
+            "result cannot be empty"
         );
         // do actual report and return reward transfered to the reproter:
         // solhint-disable not-rely-on-time
@@ -599,15 +607,15 @@ abstract contract WitnetOracleTrustableBase
         returns (uint256)
     {
         // validate timestamp
-        require(
+        _require(
             _witnetQueryResultTimestamp > 0 
                 && _witnetQueryResultTimestamp <= block.timestamp, 
-            "WitnetOracleTrustableDefault: bad timestamp"
+            "bad timestamp"
         );
         // results cannot be empty
-        require(
+        _require(
             _witnetQueryResultCborBytes.length != 0, 
-            "WitnetOracleTrustableDefault: result cannot be empty"
+            "result cannot be empty"
         );
         // do actual report and return reward transfered to the reproter:
         return  __reportResultAndReward(
@@ -647,7 +655,10 @@ abstract contract WitnetOracleTrustableBase
             ) {
                 emit BatchReportError(
                     _batchResults[_i].queryId, 
-                    "WitnetOracle: invalid report data"
+                    string(abi.encodePacked(
+                        class(),
+                        "invalid report data"
+                    ))
                 );
             } else {
                 _batchReward += __reportResult(
@@ -728,7 +739,7 @@ abstract contract WitnetOracleTrustableBase
     {
         _witnetQueryId = ++ __storage().nonce; //__newQueryId(_radHash, _packedSLA);
         WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
-        require(__request.requester == address(0), "WitnetOracle: already posted");
+        _require(__request.requester == address(0), "already posted");
         {
             __request.requester = msg.sender;
             __request.gasCallback = _callbackGasLimit;

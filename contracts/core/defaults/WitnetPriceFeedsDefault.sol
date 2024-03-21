@@ -26,7 +26,7 @@ contract WitnetPriceFeedsDefault
     using WitnetV2 for WitnetV2.Response;
     using WitnetV2 for WitnetV2.RadonSLA;
 
-    function class() virtual override external view returns (string memory) {
+    function class() virtual override(WitnetFeeds, WitnetUpgradableBase) public view returns (string memory) {
         return type(WitnetPriceFeedsDefault).name;
     }
 

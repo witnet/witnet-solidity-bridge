@@ -188,8 +188,8 @@ contract WitnetRequestFactoryDefault
     }
 
     function class()
-        virtual override(WitnetRequestFactory, WitnetRequestTemplate)
-        external view
+        virtual override(WitnetRequestFactory, WitnetRequestTemplate, WitnetUpgradableBase)
+        public view
         returns (string memory)
     {
         if (

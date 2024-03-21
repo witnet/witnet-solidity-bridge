@@ -16,7 +16,7 @@ contract WitnetOracleTrustableDefault
     is 
         WitnetOracleTrustableBase
 {
-    function class() virtual override external view returns (string memory) {
+    function class() virtual override public view returns (string memory) {
         return type(WitnetOracleTrustableDefault).name;
     }
 
