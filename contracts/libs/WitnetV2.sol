@@ -97,7 +97,7 @@ library WitnetV2 {
 
     /// Generates a pseudo-random uint32 number uniformly distributed within the range `[0 .. range)`, based on
     /// the given `nonce` and `seed` values. 
-    function randomUint32(uint32 range, uint256 nonce, bytes32 seed)
+    function randomUniformUint32(uint32 range, uint256 nonce, bytes32 seed)
         internal pure 
         returns (uint32) 
     {

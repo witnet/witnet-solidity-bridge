@@ -353,7 +353,7 @@ contract WitnetRandomnessV2
         virtual override
         returns (uint32)
     {
-        return WitnetV2.randomUint32(
+        return WitnetV2.randomUniformUint32(
             _range,
             _nonce,
             keccak256(
