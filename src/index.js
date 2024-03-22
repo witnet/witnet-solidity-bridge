@@ -11,8 +11,9 @@ module.exports = {
         addresses[net],
       )
       return {
-        WitnetPriceFeeds: merged?.WitnetPriceFeeds,
         WitnetOracle: merged?.WitnetOracle,
+        WitnetPriceFeeds: merged?.WitnetPriceFeeds,
+        WitnetRandomnessV2: merged?.WitnetRandomnessV2,
       }
     } else {
       return {}
