@@ -20,6 +20,7 @@ module.exports = {
     },
     WitnetRandomness: {
       from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",
+      vanity: 154280299, // 0xc0fFee99E1E2bA8C92E714eCCD886AF005AFB06B
     },
     WitnetRequestBytecodes: {
       libs: ["WitnetEncodingLib"],
