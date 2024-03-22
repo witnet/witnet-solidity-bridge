@@ -10,7 +10,7 @@ abstract contract WitnetConsumer
         UsingWitnet
 { 
     /// @dev Maximum gas to be spent by the IWitnetConsumer's callback methods.  
-    uint24 private immutable __witnetCallbackGasLimit;
+    uint24 internal immutable __witnetCallbackGasLimit;
   
     modifier onlyFromWitnet {
         require(msg.sender == address(__witnet), "WitnetConsumer: unauthorized");
@@ -34,19 +34,12 @@ abstract contract WitnetConsumer
     /// ===============================================================================================================
     /// --- WitnetConsumer virtual methods ----------------------------------------------------------------------------
 
-    function _witnetCallbackGasLimit()
-        virtual internal view 
-        returns (uint24)
-    {
-        return __witnetCallbackGasLimit;
-    }
-
     function _witnetEstimateEvmReward() virtual internal view returns (uint256) {
         return (
             (100 + __witnetBaseFeeOverheadPercentage)
                 * __witnet.estimateBaseFeeWithCallback(
                     tx.gasprice,
-                    _witnetCallbackGasLimit()
+                    __witnetCallbackGasLimit
                 )
         ) / 100;
     }
