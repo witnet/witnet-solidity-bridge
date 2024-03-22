@@ -367,17 +367,17 @@ contract WitnetRandomnessV2
 
     /// @notice Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
     /// @dev Only one randomness request per block will be actually posted to the Witnet Oracle. 
-    /// @return _witnetEvmReward Funds actually paid as randomize fee.
+    /// @return _evmRandomizeFee Funds actually paid as randomize fee.
     function randomize()
         external payable
         virtual override
-        returns (uint256 _witnetEvmReward)
+        returns (uint256 _evmRandomizeFee)
     {
         if (__storage().lastRandomizeBlock < block.number) {
-            _witnetEvmReward = msg.value;
+            _evmRandomizeFee = msg.value;
             // Post the Witnet Randomness request:
             uint _witnetQueryId = __witnet.postRequest{
-                value: _witnetEvmReward
+                value: _evmRandomizeFee
             }(
                 witnetRadHash,
                 __witnetDefaultSLA  
@@ -394,13 +394,14 @@ contract WitnetRandomnessV2
             emit Randomizing(
                 block.number,
                 tx.gasprice,
+                _evmRandomizeFee,
                 _witnetQueryId,
-                _witnetEvmReward
+                __witnetDefaultSLA
             );
         }
         // Transfer back unused funds:
-        if (_witnetEvmReward < msg.value) {
-            payable(msg.sender).transfer(msg.value - _witnetEvmReward);
+        if (_evmRandomizeFee < msg.value) {
+            payable(msg.sender).transfer(msg.value - _evmRandomizeFee);
         }
     }
 

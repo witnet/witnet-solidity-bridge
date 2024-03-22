@@ -1,19 +1,13 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.7.0 <0.9.0;
+pragma experimental ABIEncoderV2;
 
 import "../WitnetOracle.sol";
 
 /// @title The Witnet Randomness generator interface.
 /// @author Witnet Foundation.
 interface IWitnetRandomness {
-
-    event Randomizing(
-            uint256 blockNumber, 
-            uint256 evmTxGasPrice,
-            uint256 witnetQueryId, 
-            uint256 witnetEvmReward
-        );
     
     /// @notice Returns amount of wei required to be paid as a fee when requesting randomization with a 
     /// transaction gas price as the one given.
