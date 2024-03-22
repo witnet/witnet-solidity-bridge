@@ -36,9 +36,10 @@ contract WitnetRandomnessV2
     bytes32 immutable public override witnetRadHash;
 
     constructor(
-            WitnetOracle _witnet
+            WitnetOracle _witnet,
+            address _operator
         )
-        Ownable(address(msg.sender))
+        Ownable(_operator)
         UsingWitnet(_witnet)
     {
         _require(

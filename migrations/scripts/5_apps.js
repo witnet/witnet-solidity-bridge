@@ -22,9 +22,10 @@ module.exports = async function (_, network, [, from]) {
     key: "WitnetRandomness",
     specs: specs.WitnetRandomness,
     intrinsics: {
-      types: ["address"],
+      types: ["address", "address"],
       values: [
-        /* _witnet */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
+        /* _witnetOracle */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
+        /* _witnetOperator */ utils.isDryRun(network) ? from : specs?.WitnetRandomness?.from || from,
       ],
     },
   })
