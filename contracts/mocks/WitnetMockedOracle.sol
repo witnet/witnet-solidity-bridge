@@ -8,6 +8,7 @@ import "./WitnetMockedRequestFactory.sol";
 import "../core/defaults/WitnetOracleTrustableDefault.sol";
 
 import "./WitnetMockedPriceFeeds.sol";
+import "./WitnetMockedRandomness.sol";
 
 /// @title Mocked implementation of `WitnetOracle`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
