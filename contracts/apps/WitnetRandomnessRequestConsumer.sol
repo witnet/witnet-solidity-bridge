@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "./WitnetConsumer.sol";
 import "../WitnetRequest.sol";
 
-abstract contract WitnetRandomnessConsumer
+abstract contract WitnetRandomnessRequestConsumer
     is
         WitnetConsumer
 {
