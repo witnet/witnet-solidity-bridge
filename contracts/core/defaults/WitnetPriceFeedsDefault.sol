@@ -140,6 +140,23 @@ contract WitnetPriceFeedsDefault
     // ================================================================================================================
     // --- Implements 'IFeeds' ----------------------------------------------------------------------------------------
 
+    /// @notice Returns unique hash determined by the combination of data sources being used
+    /// @notice on non-routed price feeds, and dependencies of routed price feeds.
+    /// @dev Ergo, `footprint()` changes if any data source is modified, or the dependecy tree
+    /// @dev on any routed price feed is altered.
+    function footprint() 
+        virtual override
+        public view
+        returns (bytes4 _footprint)
+    {
+        if (__storage().ids.length > 0) {
+            _footprint = _footprintOf(__storage().ids[0]);
+            for (uint _ix = 1; _ix < __storage().ids.length; _ix ++) {
+                _footprint ^= _footprintOf(__storage().ids[_ix]);
+            }
+        }
+    }
+
     function hash(string memory caption)
         virtual override
         public pure
@@ -654,6 +671,14 @@ contract WitnetPriceFeedsDefault
             return witnet.getQueryResponseStatus(_queryId);
         } else {
             return WitnetV2.ResponseStatus.Ready;
+        }
+    }
+
+    function _footprintOf(bytes4 _id4) virtual internal view returns (bytes4) {
+        if (__records_(_id4).radHash != bytes32(0)) {
+            return bytes4(keccak256(abi.encode(_id4, __records_(_id4).radHash)));
+        } else {
+            return bytes4(keccak256(abi.encode(_id4, __records_(_id4).solverDepsFlag)));
         }
     }
 
