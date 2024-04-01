@@ -39,7 +39,7 @@ abstract contract UsingWitnet
             witnessingFeeNanoWit: 20 * 10 ** 8  // defaults to 0.2 $WIT
         });
         
-        __witnetBaseFeeOverheadPercentage = 10; // defaults to 10%
+        __witnetBaseFeeOverheadPercentage = 33; // defaults to 33%
     }
 
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
