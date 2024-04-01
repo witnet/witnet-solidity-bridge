@@ -18,12 +18,15 @@ console.info()
 utils.traceVerify(network, "WitnetDeployer")
 utils.traceVerify(network, "WitnetProxy")
 
+const addresses = require("../migrations/addresses.json")
 const singletons = [
   "WitnetOracle",
   "WitnetPriceFeeds",
   "WitnetRequestBytecodes",
-  "witnetRequestFactory",
+  "WitnetRequestFactory",
 ]
 for (const index in singletons) {
-  utils.traceVerify(network, `${singletons[index]} --custom-proxy WitnetProxy`)
+  utils.traceVerify(network, `WitnetProxy@${
+    addresses[network][singletons[index]] || addresses.default[singletons[index]]
+  } --custom-proxy WitnetProxy`)
 }
