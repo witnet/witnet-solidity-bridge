@@ -120,7 +120,7 @@ contract WitnetRandomnessV2
             (100 + __witnetBaseFeeOverheadPercentage)
                 * __witnet.estimateBaseFee(
                     _evmGasPrice, 
-                    witnetRadHash
+                    uint16(34)
                 ) 
         ) / 100;
     }
@@ -526,10 +526,13 @@ contract WitnetRandomnessV2
         );
     }
 
+    bytes32 private constant _STORAGE_SLOT = 
+        // keccak256("io.witnet.apps.randomness.v20")
+        0x643778935c57df947f6944f6a5242a3e91445f6337f4b2ec670c8642153b614f;
+
     function __storage() internal pure returns (Storage storage _ptr) {
-        bytes32 _slothash = keccak256(bytes("io.witnet.apps.randomness.v20"));
         assembly {
-            _ptr.slot := _slothash
+            _ptr.slot := _STORAGE_SLOT
         }
     }
 }
