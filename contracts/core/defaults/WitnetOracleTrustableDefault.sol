@@ -65,7 +65,7 @@ contract WitnetOracleTrustableDefault
         return _gasPrice * (
             __reportResultGasBase
                 + __sstoreFromZeroGas * (
-                    5 + (_resultMaxSize == 0 ? 0 : _resultMaxSize - 1) / 32
+                    4 + (_resultMaxSize == 0 ? 0 : _resultMaxSize - 1) / 32
                 )
         );
     }
