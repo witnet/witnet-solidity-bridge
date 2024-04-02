@@ -53,10 +53,26 @@ contract WitnetOracleTrustableOvm2
 
     OVM_GasPriceOracle immutable internal __gasPriceOracleL1;
 
-    function _getCurrentL1Fee() virtual internal view returns (uint256) {
+    function _getCurrentL1Fee(uint16 _resultMaxSize) virtual internal view returns (uint256) {
         return __gasPriceOracleL1.getL1Fee(
-            hex"c8f5cdd500000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000225820ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            abi.encodePacked(
+                hex"06eb2c42000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000ffffffffff00000000000000000000000000000000000000000000000000000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000ff",
+                _resultMaxBuffer(_resultMaxSize)
+            )
         );
+    }
+
+    function _resultMaxBuffer(uint16 _resultMaxSize) private pure returns (bytes memory) {
+        unchecked {
+            uint256[] memory _buffer = new uint256[](_resultMaxSize / 32);
+            for (uint _ix = 0; _ix < _buffer.length; _ix ++) {
+                _buffer[_ix] = type(uint256).max;
+            }
+            return abi.encodePacked(
+                _buffer,
+                uint256((1 << (_resultMaxSize % 32)) - 1)
+            );
+        }
     }
 
     // ================================================================================================================
@@ -71,7 +87,7 @@ contract WitnetOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return _getCurrentL1Fee() + WitnetOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize);
+        return _getCurrentL1Fee(_resultMaxSize) + WitnetOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize);
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
@@ -82,7 +98,7 @@ contract WitnetOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return _getCurrentL1Fee() + WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit);
+        return _getCurrentL1Fee(32) + WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit);
     }
 
     // ================================================================================================================
