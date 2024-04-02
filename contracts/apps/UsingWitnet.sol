@@ -36,7 +36,7 @@ abstract contract UsingWitnet
             // Number of nodes in the Witnet blockchain that will take part in solving the data request:
             committeeSize: 10,
             // Fee in $nanoWIT paid to every node in the Witnet blockchain involved in solving the data request:
-            witnessingFeeNanoWit: 20 * 10 ** 8  // defaults to 0.2 $WIT
+            witnessingFeeNanoWit: 2 * 10 ** 8  // defaults to 0.2 $WIT
         });
         
         __witnetBaseFeeOverheadPercentage = 33; // defaults to 33%
