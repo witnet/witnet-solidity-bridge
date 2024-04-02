@@ -10,6 +10,9 @@ module.exports = {
     WitnetPriceFeedsLib: "WitnetPriceFeedsLib",
     WitnetOracleDataLib: "WitnetOracleDataLib",
   },
+  base: {
+    WitnetOracle: "WitnetOracleTrustableOvm2",
+  },
   boba: {
     WitnetOracle: "WitnetOracleTrustableOvm2",
   },

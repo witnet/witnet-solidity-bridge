@@ -27,6 +27,15 @@ module.exports = {
       browserURL: "https://arbiscan.io/",
     },
   },
+  "base:sepolia": {
+    network_id: 84532,
+    port: 8502,
+    verify: {
+      apiKey: "MY_API_KEY",
+      apiUrl: "https://base-sepolia.blockscout.com/api",
+      browserURL: "https://base-sepolia.blockscout.com/",
+    },
+  },
   "boba:bnb:testnet": {
     network_id: 9728,
     port: 8510,
