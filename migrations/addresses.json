@@ -36,9 +36,9 @@
         "WitnetEncodingLib": "0xf321bcD29CFc6134c9Bf42F759f428F3A6010919",
         "WitnetPriceFeedsLib": "0x85aa4A0fDa112c47d4216448EE4D49Afd072675e",
         "WitnetOracleDataLib": "0x25d57Cf8a047B14172Ba2a929C1441E1A77c3f9D",
-        "WitnetOracleTrustableOvm2": "0xeE04B260D4aBE8ABb2BB174D33b2C8731d518DdE",
-        "WitnetPriceFeedsDefault": "",
-        "WitnetRandomnessV2": "0xc0ffee84FD3B533C3fA408c993F59828395319A1",
+        "WitnetOracleTrustableOvm2": "0xc1C158e77A91da158a1A2D0c2A154c68a8C7c0d2",
+        "WitnetPriceFeedsDefault": "0xA936f7F4909494Ea1F7D898C2759b2324912153d",
+        "WitnetRandomnessV2": "0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB",
         "WitnetRequestBytecodesDefault": "0x2D8BCBC4F8c97CC227e770d95d19914324baBF2A",
         "WitnetRequestFactoryDefault": "0x3D551165020a4014A8d5b9E4b73D2b3Dbe401546"
     },
