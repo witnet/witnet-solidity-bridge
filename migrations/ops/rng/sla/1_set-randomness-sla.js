@@ -14,7 +14,7 @@ module.exports = async function (_deployer, network) {
 
   console.log("> WitnetRandomness address:", randomizer.address)
   console.log("> WitnetRequestRandomness address:", request.address)
-  console.log("> WitnetRequestRadnomness owner:", owner)
+  console.log("> WitnetRequestRandomness owner:", owner)
   console.log("> Current commit/reval fee:", radonSLA.witnessingUnitaryFee)
   console.log("> Current number of witnesses:", radonSLA.numWitnesses)
   console.log("> Current witnessing reward:", radonSLA.witnessingReward)

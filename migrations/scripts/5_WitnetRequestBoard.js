@@ -88,7 +88,7 @@ module.exports = async function (deployer, network, [, from, reporter]) {
       await deployer.deploy(
         WitnetRequestBoardImplementation,
         /* _legacy impl   */ addresses[ecosystem][network][artifactNames[1]],
-        /* _v20 address   */ addresses[ecosystem][network].WitnetOracleV20,
+        /* _v20 address   */ addresses[ecosystem][network]?.WitnetOracleV20 || addresses.commons.WitnetOracleV20,
         /* _isUpgradeable */ true,
         /* _versionTag    */ utils.fromAscii(version),
         ...(

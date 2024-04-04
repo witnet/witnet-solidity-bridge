@@ -32,7 +32,7 @@ interface IWitnetOracle {
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
     function getQuery(uint256 queryId) external view returns (WitnetV2.Query memory);
 
-    /// @notice Gets current EVM reward the report can claim, if not done yet.
+    /// @notice Gets the current EVM reward the report can claim, if not done yet.
     function getQueryEvmReward(uint256 queryId) external view returns (uint256);
 
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
@@ -50,6 +50,10 @@ interface IWitnetOracle {
     /// @notice   - 3 => Error: the query response was finalized, and contains a result with errors.
     /// @param queryId The unique query identifier.
     function getQueryResponseStatus(uint256 queryId) external view returns (WitnetV2.ResponseStatus);
+
+    /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
+    /// @param queryId The unique query identifier.
+    function getQueryResultCborBytes(uint256 queryId) external view returns (bytes memory);
 
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
     /// @param queryId The unique query identifier.

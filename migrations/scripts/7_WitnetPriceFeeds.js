@@ -106,7 +106,7 @@ module.exports = async function (deployer, network, [, from]) {
       if (bypass) {
         await deployer.deploy(
           WitnetPriceFeedsImplementation,
-          /* _v20 address */ addresses[ecosystem][network].WitnetPriceFeedsV20,
+          /* _v20 address */ addresses[ecosystem][network]?.WitnetPriceFeedsV20 || addresses.commons.WitnetPriceFeedsV20,
           /* _isUpgradeable */ true,
           /* _versionTag    */ utils.fromAscii(version),
           { from }

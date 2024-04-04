@@ -2,13 +2,13 @@ module.exports = {
   artifacts: {
     default: {
       WitnetBytecodes: "WitnetBytecodesDefault",
-      WitnetPriceFeeds: "WitnetPriceFeedsUpgradable",
+      WitnetPriceFeeds: "WitnetPriceFeedsBypassV20:",
       WitnetRandomness: "WitnetRandomnessProxiable",
-      WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
+      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableDefault",
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
     },
     boba: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
     },
     conflux: {
       WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
@@ -21,7 +21,6 @@ module.exports = {
     },
     optimism: {
       WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
-      WitnetPriceFeeds: "WitnetPriceFeedsBypassV20:",
     },
     "polygon.zkevm.goerli": {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
@@ -30,17 +29,14 @@ module.exports = {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
     },
     reef: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableReef",
+      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableReef",
     },
     scroll: {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
     },
     "syscoin.rollux.testnet": {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
-    },
-    ten: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableObscuro",
-    },
+      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
+    }
   },
   compilers: {
     default: {
@@ -313,7 +309,7 @@ module.exports = {
         host: "localhost",
         port: 8540,
         network_id: 1,
-        gasPrice: 10,
+        gasPrice: 10 ** 9,
         skipDryRun: true,
       },
       "conflux.core.mainnet": {
