@@ -17,8 +17,8 @@
             "WitnetEncodingLib": "0xc71A87657b13A370594967A04b4301a3AcEAF007",
             "WitnetPriceFeedsLib": "0xBfFA2ec6225390C517A1bEB83b27a171C6734294",
             "WitnetBytecodesImplementation": "0xa45206cC3Ae76630Cc4D47A730590Ff9B6d8Ee54",
-            "WitnetPriceFeedsImplementation": "",
-            "WitnetRequestBoardImplementation": "",
+            "WitnetPriceFeedsImplementation": "0xDe2464F0ac0EA829BE25AA0c36056EB64bCbe2C9",
+            "WitnetRequestBoardImplementation": "0x14417b205ef242a364Dc68540Eb42F974b1Ea909",
             "WitnetRequestBoardTrustableDefault": "0xd8875D7D3087DEec0103d47d4cE0C4a5414874E1",
             "WitnetRequestFactoryImplementation": "0x6F68A4d58cEd8e094b42511350527Ed628ACB970"
         },
