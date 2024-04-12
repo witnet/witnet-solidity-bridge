@@ -232,13 +232,12 @@ module.exports = {
     port: 9527,
     network_id: 8217,
   },
-  "mantle:testnet": {
+  "mantle:sepolia": {
     port: 8508,
-    network_id: 5001,
+    network_id: 5003,
     verify: {
-      apiKey: "MY_API_KEY",
-      apiUrl: "https://explorer.testnet.mantle.xyz/api",
-      explorerUrl: "https://explorer.testnet.mantle.xyz/address",
+      apiUrl: "https://explorer.sepolia.mantle.xyz/api",
+      explorerUrl: "https://explorer.sepolia.mantle.xyz/",
     },
   },
   "mantle:mainnet": {
