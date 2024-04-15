@@ -312,7 +312,14 @@ module.exports = {
   "optimism:mainnet": {
     port: 9520,
     network_id: 10,
-
+    verify: {
+      apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
+      apiKey: "MY_API_KEY",
+      // apiUrl: "https://api-optimistic.etherscan.io/api",
+      apiUrl: "https://optimism.blockscout.com/api",
+      // explorerUrl: "https://optimistic.etherscan.io/",
+      explorerUrl: "https://optimism.blockscout.com/",
+    },
   },
   "polygon:goerli": {
     port: 8535,

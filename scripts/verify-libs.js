@@ -16,6 +16,7 @@ console.info(header)
 console.info("=".repeat(header.length))
 console.info()
 
+const addresses = require("../migrations/addresses.json")
 const artifacts = settings.getArtifacts(network)
 const libs = [
   artifacts.WitnetEncodingLib,
@@ -24,5 +25,5 @@ const libs = [
   artifacts.WitnetPriceFeedsLib,
 ]
 for (const index in libs) {
-  utils.traceVerify(network, `${libs[index]}`)
+  utils.traceVerify(network, `${libs[index]}@${addresses[network][libs[index]]}`)
 }
