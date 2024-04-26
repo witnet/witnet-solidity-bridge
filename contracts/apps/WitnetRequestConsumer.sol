@@ -40,4 +40,19 @@ abstract contract WitnetRequestConsumer
         return WitnetConsumer._witnetEstimateEvmReward();
     }
 
+    function __witnetRequestData(
+            uint256 _witnetEvmReward, 
+            WitnetV2.RadonSLA memory _witnetQuerySLA
+        )
+        virtual override
+        internal returns (uint256)
+    {
+        return __witnet.postRequestWithCallback{
+            value: _witnetEvmReward
+        }(
+            __witnetRequestRadHash,
+            _witnetQuerySLA,
+            __witnetCallbackGasLimit
+        );
+    }
 }

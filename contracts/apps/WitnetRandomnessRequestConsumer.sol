@@ -88,9 +88,12 @@ abstract contract WitnetRandomnessRequestConsumer
         virtual internal 
         returns (uint256 _randomizeId)
     {
-        return __witnet.postRequest{value: _witnetEvmReward}(
+        return __witnet.postRequestWithCallback{
+            value: _witnetEvmReward
+        }(
             __witnetRandomnessRadHash,
-            _witnetQuerySLA
+            _witnetQuerySLA,
+            __witnetCallbackGasLimit
         );
     }
 }
