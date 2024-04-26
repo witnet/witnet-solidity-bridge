@@ -652,6 +652,11 @@ module.exports = {
         port: 9520,
         network_id: 10,
         skipDryRun: true,
+        verify: {
+          apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
+          apiUrl: "https://api-optimistic.etherscan.io/api",
+          explorerUrl: "https://optimistic.etherscan.io",
+        },
       },
     },
     polygon: {
