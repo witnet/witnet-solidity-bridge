@@ -35,26 +35,6 @@
         }
     },
     "arbitrum": {
-        "arbitrum.goerli": {
-            "WitnetProxy": "0x1b91eAB33362f10A5F803Fe3f0d181F42caFaac3",
-            "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
-            "WitnetBytecodes": "0x0000000e3a3d22d7510B36BdC88994dab11eadc8",
-            "WitnetPriceFeeds": "0x9999999d139bdBFbF25923ba39F63bBFc7593400",
-            "WitnetPriceRouter": "0xAafb2D27E2E0f83dcE501a2879aaD710ec377403",
-            "WitnetRandomness": "0x0123456fbBC59E181D76B6Fe8771953d1953B51a",
-            "WitnetRequestBoard": "0xa6a6b2cBE9Ce5B8fF94729F1eC402efc5042AbBF",
-            "WitnetRequestFactory": "0x1111111FDE7dC956E3d7922Bc779D9E2349Afb63",
-            "WitnetErrorsLib": "0xf6d52770453166de85B6B6260Cf22196bC460E88",
-            "WitnetEncodingLib": "0x69891cE36F6dFbef4A7BdD0E95A15CBA916f206b",
-            "WitnetBytecodesImplementation": "0xd8875D7D3087DEec0103d47d4cE0C4a5414874E1",
-            "WitnetPriceFeedsImplementation": "",
-            "WitnetRandomnessImplementation": "0x078EE90E16e2e5332EDaA87da19d2743cD8C64DD",
-            "WitnetRandomnessImplementationV061": "0xB0C5d40A7658b2ab28360aFa6eB5bAeb2fFe86c3",
-            "WitnetRequestBoardImplementation": "",
-            "WitnetRequestBoardTrustableDefault": "0x7ab66AB288A143D4e07Aff9b729165bFb71DB73a",
-            "WitnetRequestFactoryImplementation": "0xb5F3c9Dc6Ca7C1078cE5c51c1cE030D6BEEd57E2",
-            "WitnetPriceFeedsLib": "0x4874cb1732eE1167A006E0Ab047D940ACF04D771"
-        },
         "arbitrum.one": {
             "WitnetProxy": "0x0Dd81412825b9C3960195ab47F14dFa9Fd70e36e",
             "Create2Factory": "0xDe312a6f7fA35320E8DD109c8ea42e82806DC45b",
