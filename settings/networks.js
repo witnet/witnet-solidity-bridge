@@ -3,12 +3,12 @@ module.exports = {
     host: "localhost",
     skipDryRun: true,
   },
-  "arbitrum:goerli": {
-    network_id: 421613,
+  "arbitrum:sepolia": {
+    network_id: 421614,
     port: 8517,
     verify: {
-      apiUrl: "https://api-goerli.arbiscan.io/",
-      browserURL: "https://goerli.arbiscan.io/",
+      apiUrl: "https://api-sepolia.arbiscan.io/api",
+      browserURL: "https://sepolia.arbiscan.io/",
     },
   },
   "arbitrum:one": {
@@ -236,8 +236,8 @@ module.exports = {
     port: 8508,
     network_id: 5003,
     verify: {
-      apiUrl: "https://explorer.sepolia.mantle.xyz/api",
-      explorerUrl: "https://explorer.sepolia.mantle.xyz/",
+      apiUrl: "https://api-sepolia.mantlescan.xyz/api",
+      explorerUrl: "https://sepolia.mantlescan.xyz/",
     },
   },
   "mantle:mainnet": {
@@ -314,11 +314,11 @@ module.exports = {
     network_id: 10,
     verify: {
       apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
-      apiKey: "MY_API_KEY",
-      // apiUrl: "https://api-optimistic.etherscan.io/api",
-      apiUrl: "https://optimism.blockscout.com/api",
-      // explorerUrl: "https://optimistic.etherscan.io/",
-      explorerUrl: "https://optimism.blockscout.com/",
+      // apiKey: "MY_API_KEY",
+      apiUrl: "https://api-optimistic.etherscan.io/api",
+      // apiUrl: "https://optimism.blockscout.com/api",
+      explorerUrl: "https://optimistic.etherscan.io/",
+      // explorerUrl: "https://optimism.blockscout.com/",
     },
   },
   "polygon:goerli": {
