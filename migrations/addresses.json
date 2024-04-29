@@ -8,12 +8,16 @@
         "WitnetRequestBytecodes": "0x000B61Fe075F545fd37767f40391658275900000",
         "WitnetRequestFactory": "0x000DB36997AF1F02209A6F995883B9B699900000"
     },
-    "base:sepolia": {
-        "WitnetProxy": "0xaC3E870BF8D13Dc39f76936b6AF8279eF5a9211F",
+    "arbitrum:sepolia": {
         "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
         "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
+        "WitnetOracleTrustableDefault": "0x85cd7aaF5248fC0568B003EF24FB2a5329C95c28",
         "WitnetPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837",
+        "WitnetPriceFeedsDefault": "0x682A7dF2852F3Df2d3B4b84803da69A38ba33180",
+        "WitnetRequestBytecodesDefault": "0x03604d41a0289cb9325814A6aCA8BaBEf7492B44",
+        "WitnetRequestFactoryDefault": "0x90a7Fc875dac0D453b43BF9E5AeE7dC68091CC24"       
+    },
     "base:sepolia": {
         "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
         "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
