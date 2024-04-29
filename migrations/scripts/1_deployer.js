@@ -14,9 +14,11 @@ module.exports = async function (deployer, network, [,,, master]) {
   ) {
     await deployer.deploy(WitnetDeployer, { from: master })
     const factory = await WitnetDeployer.deployed()
-    addresses[network].WitnetDeployer = factory.address
-    if (!utils.isDryRun(network)) {
-      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+    if (factory.address !== addresses?.default?.WitnetDeployer) {
+      addresses[network].WitnetDeployer = factory.address
+      if (!utils.isDryRun(network)) {
+        await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+      }
     }
   } else {
     const factory = await WitnetDeployer.at(factoryAddr)
@@ -26,11 +28,17 @@ module.exports = async function (deployer, network, [,,, master]) {
     console.info()
   }
 
-  if (utils.isNullAddress(addresses[network]?.WitnetProxy)) {
+  const proxyAddr = addresses[network]?.WitnetProxy || addresses?.default?.WitnetProxy || ""
+  if (
+    utils.isNullAddress(proxyAddr) ||
+      (await web3.eth.getCode(proxyAddr)).length < 3
+  ) {
     await deployer.deploy(WitnetProxy, { from: master })
-    addresses[network].WitnetProxy = WitnetProxy.address
-    if (!utils.isDryRun(network)) {
-      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+    if (WitnetProxy.address !== addresses?.default?.WitnetProxy) {
+      addresses[network].WitnetProxy = WitnetProxy.address
+      if (!utils.isDryRun(network)) {
+        await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+      }
     }
   }
 }

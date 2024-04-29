@@ -15,20 +15,22 @@ module.exports = async function (_, network, [, from]) {
   // ==========================================================================
   // --- WitnetRandomnessV2 --------------------------------------------------
 
-  await deploy({
-    network,
-    targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetRandomness.from || from,
-    key: "WitnetRandomness",
-    specs: specs.WitnetRandomness,
-    intrinsics: {
-      types: ["address", "address"],
-      values: [
-        /* _witnetOracle */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
-        /* _witnetOperator */ utils.isDryRun(network) ? from : specs?.WitnetRandomness?.from || from,
-      ],
-    },
-  })
+  if (!process.argv.includes("--no-randomness")) {
+    await deploy({
+      network,
+      targets,
+      from: utils.isDryRun(network) ? from : specs.WitnetRandomness.from || from,
+      key: "WitnetRandomness",
+      specs: specs.WitnetRandomness,
+      intrinsics: {
+        types: ["address", "address"],
+        values: [
+          /* _witnetOracle */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
+          /* _witnetOperator */ utils.isDryRun(network) ? from : specs?.WitnetRandomness?.from || from,
+        ],
+      },
+    })
+  }
 }
 
 async function deploy (target) {
@@ -43,12 +45,10 @@ async function deploy (target) {
   const artifact = artifacts.require(key)
   const contract = artifacts.require(targets[key])
   if (
-    addresses[network][targets[key]] === "" ||
-      selection.includes(key) ||  
-      (libs && selection.filter(item => libs.includes(item)).length > 0) || 
-      (!utils.isNullAddress(addresses[network][targets[key]]) && (
-        await web3.eth.getCode(addresses[network][targets[key]])).length < 3
-      )
+    (!utils.isNullAddress(addresses[network][targets[key]] || addresses?.default[targets[key]]) 
+      && (await web3.eth.getCode(addresses[network][targets[key]] || addresses?.default[targets[key]])).length < 3)
+    || addresses[network][targets[key]] === ""
+    || selection.includes(targets[key])
   ) {
     utils.traceHeader(`Deploying '${key}'...`)
     console.info("  ", "> account:          ", from)
@@ -73,25 +73,29 @@ async function deploy (target) {
     const tx = await deployer.deploy(initCode, salt || "0x0", { from })
     utils.traceTx(tx)
     if ((await web3.eth.getCode(addr)).length > 3) {
-      addresses[network][targets[key]] = addr
+      if (addr !== addresses?.default[targets[key]]) {
+        addresses[network][targets[key]] = addr
+        // save addresses file if required
+        if (!utils.isDryRun(network)) {
+          await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+          const args = await utils.readJsonFromFile("./migrations/constructorArgs.json")
+          if (!args?.default[targets[key]] || constructorArgs.slice(2) !== args.default[targets[key]]) {
+            if (!args[network]) args[network] = {}
+            args[network][targets[key]] = constructorArgs.slice(2)
+            await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
+          }
+        }
+      }
     } else {
       console.info(`Error: Contract was not deployed on expected address: ${addr}`)
       process.exit(1)
     }
-    // save addresses file if required
-    if (!utils.isDryRun(network)) {
-      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-      const args = await utils.readJsonFromFile("./migrations/constructorArgs.json")
-      if (!args[network]) args[network] = {}
-      args[network][targets[key]] = constructorArgs.slice(2)
-      await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
-    }
-  } else if (addresses[network][key]) {
+  } else {
     utils.traceHeader(`Skipped '${key}'`)
   }
-  if (!utils.isNullAddress(addresses[network][targets[key]])) {
-    artifact.address = addresses[network][targets[key]]
-    contract.address = addresses[network][targets[key]]
+  if (!utils.isNullAddress(addresses[network][targets[key]]) || addresses?.default[targets[key]]) {
+    artifact.address = addresses[network][targets[key]] || addresses?.default[targets[key]]
+    contract.address = addresses[network][targets[key]] || addresses?.default[targets[key]]
     for (const index in libs) {
       const libname = libs[index]
       const lib = artifacts.require(libname)

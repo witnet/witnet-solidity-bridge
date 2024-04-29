@@ -142,9 +142,11 @@ async function deploy (specs) {
     if (!utils.isDryRun(network)) {
       await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
       const args = await utils.readJsonFromFile("./migrations/constructorArgs.json")
-      if (!args[network]) args[network] = {}
-      args[network][key] = constructorArgs.slice(2)
-      await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
+      if (!args?.default[key] || constructorArgs.slice(2) !== args.default[key]) {
+        if (!args[network]) args[network] = {}
+        args[network][key] = constructorArgs.slice(2)
+        await utils.overwriteJsonFile("./migrations/constructorArgs.json", args)
+      }
     }
   } else {
     utils.traceHeader(`Skipped '${key}'`)

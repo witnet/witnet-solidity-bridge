@@ -24,8 +24,9 @@ const impls = [
   artifacts.WitnetRequestFactory,
 ]
 const constructorArgs = require("../migrations/constructorArgs.json")
+if (!constructorArgs[network]) constructorArgs[network] = {}
 for (const index in impls) {
   utils.traceVerify(network, `${impls[index]} --forceConstructorArgs string:${
-    constructorArgs[network][impls[index]]
+    constructorArgs[network][impls[index]] || constructorArgs?.default[impls[index]]
   } --verifiers etherscan`)
 }

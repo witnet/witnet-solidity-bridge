@@ -88,13 +88,15 @@ async function deploy (target) {
       }
     }
     if ((await web3.eth.getCode(proxyAddr)).length > 3) {
-      addresses[network][key] = proxyAddr
+      if (proxyAddr !== addresses?.default[key]) {
+        addresses[network][key] = proxyAddr
+        if (!utils.isDryRun(network)) {
+          await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+        }
+      }
     } else {
       console.info(`Error: Contract was not deployed on expected address: ${proxyAddr}`)
       process.exit(1)
-    }
-    if (!utils.isDryRun(network)) {
-      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
     }
   } else {
     const oldAddr = await getProxyImplementation(from, proxyAddr)

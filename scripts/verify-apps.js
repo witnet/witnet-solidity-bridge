@@ -21,8 +21,9 @@ const apps = [
   artifacts.WitnetRandomness,
 ]
 const constructorArgs = require("../migrations/constructorArgs.json")
+if (!constructorArgs[network]) constructorArgs[network] = {}
 for (const index in apps) {
   utils.traceVerify(network, `${apps[index]} --forceConstructorArgs string:${
-    constructorArgs[network][apps[index]]
+    constructorArgs[network][apps[index]] || constructorArgs?.default[apps[index]]
   }`)
 }
