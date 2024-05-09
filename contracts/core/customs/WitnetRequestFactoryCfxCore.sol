@@ -9,10 +9,6 @@ contract WitnetRequestFactoryCfxCore
     is
         WitnetRequestFactoryDefault
 {
-    function class() virtual override public view returns (string memory) {
-        return type(WitnetRequestFactoryCfxCore).name;
-    }
-
     constructor(
             WitnetOracle _witnet,
             WitnetRequestBytecodes _registry,

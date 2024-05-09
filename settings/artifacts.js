@@ -17,14 +17,29 @@ module.exports = {
   boba: {
     WitnetOracle: "WitnetOracleTrustableOvm2",
   },
-  conflux: {
+  "conflux:core:testnet": {
+    WitnetDeployer: "WitnetDeployerCfxCore",
+    WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
+  },
+  "conflux:core:mainnet": {
+    WitnetDeployer: "WitnetDeployerCfxCore",
     WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
   },
   mantle: {
     WitnetOracle: "WitnetOracleTrustableOvm2",
   },
+  meter: {
+    WitnetDeployer: "WitnetDeployerMeter",
+    WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
+  },
   optimism: {
     WitnetOracle: "WitnetOracleTrustableOvm2",
+  },
+  "okx:x1:mainnet": {
+    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
+  },
+  "okx:x1:sepolia": {
+    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   "polygon:zkevm:goerli": {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
@@ -39,6 +54,9 @@ module.exports = {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   "syscoin:rollux:testnet": {
+    WitnetOracle: "WitnetOracleTrustableOvm2",
+  },
+  "syscoin:rollux:mainnet": {
     WitnetOracle: "WitnetOracleTrustableOvm2",
   },
   ten: {

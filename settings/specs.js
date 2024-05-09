@@ -30,148 +30,37 @@ module.exports = {
       vanity: 1240014136, // 0x000DB36997AF1F02209A6F995883B9B699900000
     },
   },
-  avalanche: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 155000,
-        ],
-      },
+  "conflux:core:testnet": {
+    WitnetDeployer: {
+      from: "0x1169Bf81ecf738d02fd8d3824dfe02153B334eF7",
     },
-  },
-  celo: {
     WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 114000,
-        ],
-      },
+      vanity: 3,
     },
-  },
-  conflux: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 78500,
-        ],
-      },
+    WitnetPriceFeeds: {
+      from: "0x1169Bf81ecf738d02fd8d3824dfe02153B334eF7",
+      vanity: 4,
     },
-  },
-  "conflux.espace.testnet": {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 225000,
-        ],
-      },
+    WitnetRandomness: {
+      from: "0x1169Bf81ecf738d02fd8d3824dfe02153B334eF7",
+      vanity: 5,
     },
-  },
-  "conflux.espace.mainnet": {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 225000,
-        ],
-      },
+    WitnetRequestBytecodes: {
+      vanity: 1,
     },
-  },
-  cronos: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 137500,
-        ],
-      },
-    },
-  },
-  dogechain: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 85000,
-        ],
-      },
-    },
-  },
-  harmony: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 530000,
-        ],
-      },
-    },
-  },
-  hsc: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 85000,
-        ],
-      },
-    },
-  },
-  kcc: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 92500,
-        ],
-      },
-    },
-  },
-  klaytn: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 105000,
-        ],
-      },
+    WitnetRequestFactory: {
+      vanity: 2,
     },
   },
   meter: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 85000,
-        ],
-      },
+    WitnetDeployer: {
+      from: "0xE169Bf81Ecf738d02fD8d3824DFe02153b334eF7",
     },
-  },
-  metis: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 134800,
-        ],
-      },
+    WitnetPriceFeeds: {
+      from: "0xE169Bf81Ecf738d02fD8d3824DFe02153b334eF7",
     },
-  },
-  moonbeam: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 115000,
-        ],
-      },
-    },
-  },
-  okxchain: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 145000,
-        ],
-      },
-    },
-  },
-  optimism: {
-    WitnetOracle: {
-      immutables: {
-        // values: [
-        //   /* _reportResultGasBase */ 100000,
-        // ],
-      },
+    WitnetRandomness: {
+      from: "0xE169Bf81Ecf738d02fD8d3824DFe02153b334eF7",
     },
   },
   reef: {
@@ -179,15 +68,6 @@ module.exports = {
       immutables: {
         values: [
           /* _reportResultGasBase */ "0x3100A1CAC7EF19DC",
-        ],
-      },
-    },
-  },
-  ultron: {
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ 83949,
         ],
       },
     },
