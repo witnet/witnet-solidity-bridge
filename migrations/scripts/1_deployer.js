@@ -1,3 +1,4 @@
+const settings = require("../../settings")
 const utils = require("../../src/utils")
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
@@ -12,14 +13,18 @@ module.exports = async function (deployer, network, [,,, master]) {
     utils.isNullAddress(factoryAddr) ||
       (await web3.eth.getCode(factoryAddr)).length < 3
   ) {
-    await deployer.deploy(WitnetDeployer, { from: master })
-    const factory = await WitnetDeployer.deployed()
+    const WitnetDeployerImpl = artifacts.require(settings.getArtifacts(network).WitnetDeployer)
+    await deployer.deploy(WitnetDeployerImpl, { 
+      from: settings.getSpecs(network)?.WitnetDeployer?.from || master 
+    })
+    const factory = await WitnetDeployerImpl.deployed()
     if (factory.address !== addresses?.default?.WitnetDeployer) {
       addresses[network].WitnetDeployer = factory.address
       if (!utils.isDryRun(network)) {
         await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
       }
     }
+    WitnetDeployer.address = factory.address
   } else {
     const factory = await WitnetDeployer.at(factoryAddr)
     WitnetDeployer.address = factory.address
@@ -33,7 +38,9 @@ module.exports = async function (deployer, network, [,,, master]) {
     utils.isNullAddress(proxyAddr) ||
       (await web3.eth.getCode(proxyAddr)).length < 3
   ) {
-    await deployer.deploy(WitnetProxy, { from: master })
+    await deployer.deploy(WitnetProxy, { 
+      from: settings.getSpecs(network)?.WitnetDeployer?.from || master 
+    })
     if (WitnetProxy.address !== addresses?.default?.WitnetProxy) {
       addresses[network].WitnetProxy = WitnetProxy.address
       if (!utils.isDryRun(network)) {

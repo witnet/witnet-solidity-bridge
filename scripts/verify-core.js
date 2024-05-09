@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const settings = require("../settings")
 const utils = require("../src/utils")
 
 if (process.argv.length < 3) {
@@ -15,7 +16,7 @@ console.info(header)
 console.info("=".repeat(header.length))
 console.info()
 
-utils.traceVerify(network, "WitnetDeployer")
+utils.traceVerify(network, settings.getArtifacts(network).WitnetDeployer)
 utils.traceVerify(network, "WitnetProxy")
 
 const addresses = require("../migrations/addresses.json")
