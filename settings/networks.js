@@ -8,7 +8,7 @@ module.exports = {
     port: 8517,
     verify: {
       apiUrl: "https://api-sepolia.arbiscan.io/api",
-      browserURL: "https://sepolia.arbiscan.io/",
+      explorerUrl: "https://sepolia.arbiscan.io/",
     },
   },
   "arbitrum:one": {
@@ -23,8 +23,10 @@ module.exports = {
     network_id: 43113,
     port: 8533,
     verify: {
-      apiUrl: "https://api.arbiscan.io/api",
-      browserURL: "https://arbiscan.io/",
+      // apiUrl: "https://api.arbiscan.io/api",
+      apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
+      apiUrl: "https://api.routescan.io/v2/network/testnet/evm/43113/etherscan/api",
+      explorerUrl: "https://testnet.snowtrace.io/",
     },
   },
   "base:sepolia": {
@@ -33,7 +35,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://base-sepolia.blockscout.com/api",
-      browserURL: "https://base-sepolia.blockscout.com/",
+      explorerUrl: "https://base-sepolia.blockscout.com/",
     },
   },
   "boba:bnb:testnet": {
@@ -41,7 +43,7 @@ module.exports = {
     port: 8510,
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/testnet/evm/2888/etherscan",
-      browserURL: "https://boba.testnet.routescan.io/",
+      explorerUrl: "https://boba.testnet.routescan.io/",
     },
   },
   "boba:bnb:mainnet": {
@@ -49,7 +51,7 @@ module.exports = {
     port: 9510,
     verify: {
       apiUrl: "https://blockexplorer.bnb.boba.network/api",
-      browserURL: "https://blockexplorer.bnb.boba.network/",
+      explorerUrl: "https://blockexplorer.bnb.boba.network/",
       apiKey: "MY_API_KEY",
     },
   },
@@ -58,7 +60,7 @@ module.exports = {
     port: 9539,
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/all/etherscan",
-      browserURL: "https://bobascan.com/address/",
+      explorerUrl: "https://bobascan.com/address/",
       apiKey: "MY_API_KEY",
     },
   },
@@ -67,26 +69,34 @@ module.exports = {
     port: 8515,
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/testnet/evm/2888/etherscan",
-      browserURL: "https://boba.testnet.routescan.io/",
+      explorerUrl: "https://boba.testnet.routescan.io/",
     },
   },
   "celo:alfajores": {
     network_id: 44787,
     port: 8538,
+    verify: {
+      apiKey: process.env.ETHERSCAN_CELO_API_KEY,
+      apiUrl: "https://api-alfajores.celoscan.io/api",
+      explorerUrl: "https://alfjores.celoscan.io/",
+    },
   },
   "celo:mainnet": {
     network_id: 42220,
     port: 9538,
     verify: {
       apiKey: "MY_API_KEY",
-      apiUrl: "https://explorer.celo.org/alfajores/api",
-      browserURL: "https://explorer.celo.org/alfajores/",
+      apiUrl: "",
+      explorerUrl: "",
     },
   },
   "conflux:core:testnet": {
     port: 8540,
-    network_id: 1,
-    gasPrice: 10,
+    // network_id: 1,
+    verify: {
+      apiUrl: "https://api-testnet.confluxscan.io",
+      explorerUrl: "https://testnet.confluxscan.io/",
+    },
   },
   "conflux:core:mainnet": {
     port: 9540,
@@ -94,14 +104,19 @@ module.exports = {
     gasPrice: 10,
     verify: {
       apiUrl: "https://explorer.celo.org/mainnet/api",
-      browserURL: "https://explorer.celo.org/mainnet/",
+      explorerUrl: "https://explorer.celo.org/mainnet/",
     },
   },
   "conflux:espace:testnet": {
     port: 8529,
     network_id: 71,
-    networkCheckTimeout: 999999,
+    // networkCheckTimeout: 999999,
     gas: 15000000,
+    verify: {
+      apiKey: "espace",
+      apiUrl: "https://evmapi-testnet.confluxscan.io/api/",
+      explorerUrl: "https://evmtestnet.confluxscan.io/",
+    }
   },
   "conflux:espace:mainnet": {
     port: 9529,
@@ -113,8 +128,9 @@ module.exports = {
     port: 8530,
     network_id: 338,
     verify: {
-      apiUrl: "https://cronos.org/explorer/testnet3/api",
-      browserURL: "https://cronos.org/explorer/testnet3",
+      apiKey: process.env.ETHERSCAN_CRONOS_API_KEY,
+      apiUrl: "https://explorer-api.cronos.org/testnet/api/v1/hardhat/contract?apikey=",
+      explorerUrl: "https://explorer.cronos.org/testnet",
     },
   },
   "cronos:mainnet": {
@@ -125,12 +141,34 @@ module.exports = {
     port: 8522,
     network_id: 1819,
   },
-  "ethereum:goerli": {
-    network_id: 5,
-    port: 8545,
+  "dogechain:testnet": {
+    port: 8519,
+    network_id: 568,
+    gas: 6000000,
     verify: {
-      apiUrl: "https://api-goerli.etherscan.io/",
-      browserURL: "https://goerli.etherscan.io/",
+      apiKey: "MY_API_KEY",
+      apiUrl: "http://explorer-testnet.dogechain.dog/api",
+      explorerUrl: "https://explorer-testnet.dogechain.dog/",
+    },
+  },
+  "dogechain:mainnet": {
+    port: 9519,
+    network_id: 2000,
+  },
+  "elastos:testnet": {
+    port: 8513,
+    network_id: 21,
+    verify: {
+      apiUrl: "https://esc-testnet.elastos.io/api",
+      explorerUrl: "https://esc-testnet.elastos.io/address",
+    },
+  },
+  "elastos:mainnet": {
+    port: 9513,
+    network_id: 20,
+    verify: {
+      apiUrl: "https://esc.elastos.io/api",
+      explorerUrl: "https://esc.elastos.io/address",
     },
   },
   "ethereum:mainnet": {
@@ -142,69 +180,34 @@ module.exports = {
     port: 8506,
     verify: {
       apiUrl: "https://api-sepolia.etherscan.io/api",
-      browserURL: "https://sepolia.etherscan.io/",
-    },
-  },
-  "dogechain:testnet": {
-    port: 8519,
-    network_id: 568,
-    gas: 6000000,
-    verify: {
-      apiKey: "MY_API_KEY",
-      apiUrl: "http://explorer-testnet.dogechain.dog/api",
-      browserURL: "https://explorer-testnet.dogechain.dog/",
-    },
-  },
-  "dogechain:mainnet": {
-    port: 9519,
-    network_id: 2000,
-  },
-  "elastos:testnet": {
-    port: 8513,
-    network_id: 21,
-    verify: {
-      apiKey: "MY_API_KEY",
-      apiUrl: "https://esc-testnet.elastos.io/api",
-      browserURL: "https://esc-testnet.elastos.io/address",
-    },
-  },
-  "elastos:mainnet": {
-    port: 9513,
-    network_id: 20,
-    verify: {
-      apiUrl: "https://esc.elastos.io/api",
-      browserURL: "https://esc.elastos.io/address",
+      explorerUrl: "https://sepolia.etherscan.io/",
     },
   },
   "fuse:testnet": {
     port: 8511,
     network_id: 123,
     verify: {
-      apiUrl: "https://explorer.fusespark.io/api",
-      browserURL: "https://explorer.fusespark.io/address",
       apiKey: "MY_API_KEY",
+      apiUrl: "https://explorer.fusespark.io/api",
+      explorerUrl: "https://explorer.fusespark.io/address",
     },
   },
   "gnosis:testnet": {
     port: 8509,
     network_id: 10200,
     verify: {
-      apiUrl: "https://gnosis-chiado.blockscout.com/api",
-      browserURL: "https://gnosis-chiado.blockscout.com/address",
       apiKey: "MY_API_KEY",
+      apiUrl: "https://gnosis-chiado.blockscout.com/api",
+      explorerUrl: "https://gnosis-chiado.blockscout.com/address",
     },
-  },
-  "harmony:testnet#0": {
-    port: 8534,
-    network_id: 1666700000,
   },
   "kava:testnet": {
     port: 8526,
     network_id: 2221,
     verify: {
       apiKey: "MY_API_KEY",
-      apiUrl: "https://explorer.testnet.kava.io/api",
-      browserURL: "https://explorer.testnet.kava.io/",
+      apiUrl: "https://testnet.explorer.kavalabs.io/api",
+      explorerUrl: "https://testnet.explorer.kavalabs.io/",
     },
   },
   "kava:mainnet": {
@@ -215,9 +218,8 @@ module.exports = {
     port: 8537,
     network_id: 322,
     verify: {
-      apiKey: "MY_API_KEY",
       apiUrl: "https://scan-testnet.kcc.network/api",
-      browserURL: "https://scan-testnet.kcc.network/",
+      explorerUrl: "https://scan-testnet.kcc.network/",
     },
   },
   "kcc:mainnet": {
@@ -253,14 +255,15 @@ module.exports = {
     port: 9536,
     network_id: 1088,
   },
-  "metis:goerli": {
+  "metis:sepolia": {
     port: 8536,
-    network_id: 599,
+    network_id: 59902,
     verify: {
       apiKey: "MY_API_KEY",
-      apiUrl: "https://goerli.explorer.metisdevops.link/api",
-      explorerUrl: "https://goerli.explorer.metisdevops.link/address",
-    },
+      apiUrl: "https://sepolia-explorer.metisdevops.link/api",
+      // apiUrl: "https://api.routescan.io/v2/network/sepolia/evm/59902/etherscan",
+      explorerUrl: "https://sepolia-explorer.metisdevops.link",
+    }
   },
   "meter:testnet": {
     port: 8523,
@@ -281,23 +284,35 @@ module.exports = {
   "moonbeam:moonbase": {
     port: 8531,
     network_id: 1287,
+    gas: 15000000,
+    verify: {
+      apiUrl: "https://api-moonbase.moonscan.io/api",
+      explorerUrl: "https://moonbase.moonscan.io/"
+    }
   },
-  "okxchain:testnet": {
+  "okx:oktchain:testnet": {
     port: 8528,
     network_id: 65,
+    verify: {
+      apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api",
+      explorerUrl: "https://www.okx.com/explorer/oktc/",
+    }
   },
-  "okxchain:mainnet": {
+  "okx:oktchain:mainnet": {
     port: 9528,
     network_id: 66,
-  },
-  "optimism:goerli": {
-    port: 8520,
-    network_id: 420,
     verify: {
-      apiKey: "MY_API_KEY",
-      apiUrl: "https://optimism-goerli.blockscout.com/api",
-      explorerUrl: "https://optimism-goerli.blockscout.com/",
-    },
+      apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api/okctest",
+      explorerUrl: "https://www.okx.com/explorer/oktc-test/",
+    }
+  },
+  "okx:x1:sepolia": {
+    port: 8505,
+    network_id: 195,
+    verify: {
+      apiUrl: "https://www.okx.com/explorer/xlayer-test/api",
+      explorerUrl: "https://www.okx.com/explorer/xlayer-test"
+    }
   },
   "optimism:sepolia": {
     port: 8503,
@@ -314,16 +329,18 @@ module.exports = {
     network_id: 10,
     verify: {
       apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
-      // apiKey: "MY_API_KEY",
       apiUrl: "https://api-optimistic.etherscan.io/api",
-      // apiUrl: "https://optimism.blockscout.com/api",
       explorerUrl: "https://optimistic.etherscan.io/",
-      // explorerUrl: "https://optimism.blockscout.com/",
     },
   },
-  "polygon:goerli": {
+  "polygon:amoy": {
     port: 8535,
-    network_id: 80001,
+    network_id: 80002,
+    verify: {
+      apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
+      apiUrl: "https://api-amoy.polygonscan.com/api",
+      explorerUrl: "https://amoy.polygonscan.com/",
+    }
   },
   "polygon:mainnet": {
     port: 9535,
@@ -357,8 +374,8 @@ module.exports = {
     port: 8514,
     network_id: 534351,
     verify: {
-      apiUrl: "http://api-sepolia.scrollscan.io/api",
-      explorerUrl: "https://sepolia.scrollscan.io/",
+      apiUrl: "https://api-sepolia.scrollscan.com/api",
+      explorerUrl: "https://sepolia.scrollscan.com/",
     },
   },
   "scroll:mainnet": {
@@ -383,13 +400,13 @@ module.exports = {
     verify: {
       apiKey: "abc",
       apiUrl: "https://rollux.tanenbaum.io/api",
-      explorerUrl: "https://rollux.tanenbaum.io/address/",
+      explorerUrl: "https://rollux.tanenbaum.io",
     },
   },
   "ten:testnet": {
     port: 8504,
     network_id: 443,
-    gas: 6000000,
+    gas: 15000000,
   },
   "ultron:testnet": {
     port: 8516,
