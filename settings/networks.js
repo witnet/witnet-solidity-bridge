@@ -29,6 +29,14 @@ module.exports = {
       explorerUrl: "https://testnet.snowtrace.io/",
     },
   },
+  "base:mainnet": {
+    network_id: 8453,
+    port: 9502,
+    verify: {
+      apiUrl: "https://api.basescan.org/api",
+      explorerUrl: "https://basescan.com/",
+    },
+  },
   "base:sepolia": {
     network_id: 84532,
     port: 8502,
@@ -129,7 +137,7 @@ module.exports = {
     network_id: 338,
     verify: {
       apiKey: process.env.ETHERSCAN_CRONOS_API_KEY,
-      apiUrl: "https://explorer-api.cronos.org/testnet/api/v1/hardhat/contract?apikey=",
+      apiUrl: "https://explorer-api.cronos.org/testnet/api/v1/hardhat/contract?apikey=G99km4eqHKfvEgpk6Lscsg3Y15QVLQLK",
       explorerUrl: "https://explorer.cronos.org/testnet",
     },
   },

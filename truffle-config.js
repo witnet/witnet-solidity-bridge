@@ -33,6 +33,7 @@ module.exports = {
   ],
   api_keys: {
     arbiscan: process.env.ETHERSCAN_ARBISCAN_API_KEY,
+    basescan: process.env.ETHERSCAN_BASESCAN_API_KEY,
     bobascan: process.env.BOBASCAN_API_KEY,
     celo: process.env.CELOSCAN_API_KEY,
     cronos: process.env.ETHERSCAN_CRONOS_API_KEY,
