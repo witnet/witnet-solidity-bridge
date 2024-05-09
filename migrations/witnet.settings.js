@@ -288,9 +288,9 @@ module.exports = {
         port: 8538,
         skipDryRun: true,
         verify: {
-          apiKey: "MY_API_KEY",
-          apiUrl: "https://explorer.celo.org/alfajores/api",
-          browserURL: "https://explorer.celo.org/alfajores/",
+          apiKey: process.env.CELOSCAN_API_KEY,
+          apiUrl: "https://api-alfajores.celoscan.io/api",
+          browserURL: "https://alfjores.celoscan.io/",
         },
       },
       "celo.mainnet": {
@@ -324,8 +324,13 @@ module.exports = {
         port: 8529,
         network_id: 71,
         skipDryRun: true,
-        networkCheckTimeout: 999999,
+        // networkCheckTimeout: 999999,
         gas: 15000000,
+        verify: {
+          apiKey: "espace",
+          apiUrl: "https://evmapi-testnet.confluxscan.io/api/",
+          browserURL: "https://evmtestnet.confluxscan.io/",
+        }
       },
       "conflux.espace.mainnet": {
         host: "localhost",
@@ -714,8 +719,8 @@ module.exports = {
         network_id: 534351,
         skipDryRun: true,
         verify: {
-          apiUrl: "http://api-sepolia.scrollscan.io/api",
-          explorerUrl: "https://sepolia.scrollscan.io/",
+          apiUrl: "https://api-sepolia.scrollscan.com/api",
+          explorerUrl: "https://sepolia.scrollscan.com/",
         },
       },
       "scroll.mainnet": {
