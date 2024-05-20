@@ -541,11 +541,14 @@ contract WitnetRequestBoardBypassV20
         legacyFallback(_queryId) 
         returns (Witnet.QueryStatus)
     {
-        return Witnet.QueryStatus(uint8(
-            surrogate.getQueryStatus(
-                _queryId - __storage().numQueries
-            )
-        ));
+        WitnetV2.QueryStatus _queryStatusV2 = surrogate.getQueryStatus(
+            _queryId - __storage().numQueries
+        );
+        if (_queryStatusV2 == WitnetV2.QueryStatus.Finalized) {
+            return Witnet.QueryStatus.Reported;
+        } else {
+            return Witnet.QueryStatus(uint8(_queryStatusV2));
+        }
     }
 
     /// Retrieves the whole Request record posted to the Witnet Request Board.
