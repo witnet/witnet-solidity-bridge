@@ -53,6 +53,7 @@ contract WitnetRequestBoardBypassV20
 
     using Witnet for bytes;
     using Witnet for Witnet.Result;
+    using WitnetCBOR for WitnetCBOR.CBOR;
 
     WitnetOracleV07 immutable public legacy;
     WitnetOracleV20 immutable public surrogate;
@@ -404,7 +405,7 @@ contract WitnetRequestBoardBypassV20
                 surrogate.postRequestWithCallback{
                     value: msg.value
                 }(
-                    _witnetRequest.bytecode(),
+                    _extractRAD(_witnetRequest.bytecode()),
                     defaultRadonSLA(),
                     legacyCallbackLimit
                 )
@@ -679,6 +680,35 @@ contract WitnetRequestBoardBypassV20
 
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
+
+    function _reverseSeek(bytes memory _buffer, bytes1 _char, uint256 _offset) internal pure returns (uint256 _index) {
+        unchecked {
+            _index = _offset;
+            while (_index > 0 && _buffer[-- _index] != _char) {}            
+        }
+    }
+
+    function _extractRAD(bytes memory _witnetBytecode) internal pure returns (bytes memory _output) {
+        uint256 _length = _reverseSeek(_witnetBytecode, 0x30, _witnetBytecode.length);
+        _length = _reverseSeek(_witnetBytecode, 0x28, _length);
+        _length = _reverseSeek(_witnetBytecode, 0x20, _length);
+        _length = _reverseSeek(_witnetBytecode, 0x18, _length);
+        _length = _reverseSeek(_witnetBytecode, 0x10, _length);
+        uint256 _offset = _skipCborStructLength(_witnetBytecode);
+        unchecked {
+            _output = new bytes(_length - _offset);
+            for (uint256 _ix = 0; _ix < _length - _offset; _ix ++) {
+                _output[_ix] = _witnetBytecode[_ix + _offset];
+            }
+        }
+    }
+
+    function _skipCborStructLength(bytes memory _buffer) internal pure returns (uint256 _index) {
+        unchecked {
+            _index = 1;
+            while (_index < _buffer.length && _buffer[_index ++] & 0x80 != bytes1(0)) {}
+        }
+    }
 
     function _statusOf(uint256 _queryId)
       override internal view
