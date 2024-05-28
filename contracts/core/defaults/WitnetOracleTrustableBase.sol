@@ -657,7 +657,7 @@ abstract contract WitnetOracleTrustableBase
                     _batchResults[_i].queryId, 
                     string(abi.encodePacked(
                         class(),
-                        "invalid report data"
+                        ": invalid report data"
                     ))
                 );
             } else {
