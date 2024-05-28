@@ -14,16 +14,24 @@ module.exports = {
   "arbitrum:one": {
     network_id: 42161,
     port: 9517,
+    verify: {
+      apiUrl: "https://api.arbiscan.io/api",
+      explorerUrl: "https://arbiscan.io/",
+    },
   },
   "avalanche:mainnet": {
     network_id: 43114,
     port: 9533,
+    verify: {
+      apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
+      apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan/api",
+      explorerUrl: "https://snowtrace.io/",
+    },
   },
   "avalanche:testnet": {
     network_id: 43113,
     port: 8533,
     verify: {
-      // apiUrl: "https://api.arbiscan.io/api",
       apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
       apiUrl: "https://api.routescan.io/v2/network/testnet/evm/43113/etherscan/api",
       explorerUrl: "https://testnet.snowtrace.io/",
@@ -58,21 +66,21 @@ module.exports = {
     network_id: 56288,
     port: 9510,
     verify: {
-      apiUrl: "https://blockexplorer.bnb.boba.network/api",
-      explorerUrl: "https://blockexplorer.bnb.boba.network/",
+      apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/56288/etherscan",
+      explorerUrl: "https://bobascan.com/",
       apiKey: "MY_API_KEY",
     },
   },
-  "boba:ethereum:mainnet": {
+  "boba:eth:mainnet": {
     network_id: 288,
     port: 9539,
     verify: {
-      apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/all/etherscan",
+      apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/288/etherscan",
       explorerUrl: "https://bobascan.com/address/",
       apiKey: "MY_API_KEY",
     },
   },
-  "boba:ethereum:goerli": {
+  "boba:eth:goerli": {
     network_id: 2888,
     port: 8515,
     verify: {
@@ -84,7 +92,6 @@ module.exports = {
     network_id: 44787,
     port: 8538,
     verify: {
-      apiKey: process.env.ETHERSCAN_CELO_API_KEY,
       apiUrl: "https://api-alfajores.celoscan.io/api",
       explorerUrl: "https://alfjores.celoscan.io/",
     },
@@ -93,14 +100,13 @@ module.exports = {
     network_id: 42220,
     port: 9538,
     verify: {
-      apiKey: "MY_API_KEY",
-      apiUrl: "",
-      explorerUrl: "",
+      apiUrl: "https://api.celoscan.io/api",
+      explorerUrl: "https://celoscan.io/",
     },
   },
   "conflux:core:testnet": {
     port: 8540,
-    // network_id: 1,
+    network_id: 1,
     verify: {
       apiUrl: "https://api-testnet.confluxscan.io",
       explorerUrl: "https://testnet.confluxscan.io/",
@@ -111,8 +117,9 @@ module.exports = {
     network_id: 1029,
     gasPrice: 10,
     verify: {
-      apiUrl: "https://explorer.celo.org/mainnet/api",
-      explorerUrl: "https://explorer.celo.org/mainnet/",
+      apiKey: "MY_API_KEY",
+      apiUrl: "https://api.confluxscan.io/",
+      explorerUrl: "https://confluxscan.io/",
     },
   },
   "conflux:espace:testnet": {
@@ -131,6 +138,11 @@ module.exports = {
     network_id: 1030,
     networkCheckTimeout: 999999,
     gas: 15000000,
+    verify: {
+      apiKey: "espace",
+      apiUrl: "https://evmapi.confluxscan.io/api",
+      explorerUrl: "https://evm.confluxscan.io/address",
+    }
   },
   "cronos:testnet": {
     port: 8530,
@@ -144,6 +156,11 @@ module.exports = {
   "cronos:mainnet": {
     port: 9530,
     network_id: 25,
+    confirmations: 2,
+    verify: {
+      apiUrl: "https://api.cronoscan.com/api",
+      explorerUrl: "https://cronoscan.com",
+    },
   },
   "cube:testnet": {
     port: 8522,
@@ -162,6 +179,11 @@ module.exports = {
   "dogechain:mainnet": {
     port: 9519,
     network_id: 2000,
+    verify: {
+      apiKey: "MY_API_KEY",
+      apiUrl: "http://explorer.dogechain.dog/api",
+      explorerUrl: "https://explorer.dogechain.dog/",
+    },
   },
   "elastos:testnet": {
     port: 8513,
@@ -221,6 +243,11 @@ module.exports = {
   "kava:mainnet": {
     port: 9526,
     network_id: 2222,
+    verify: {
+      apiKey: "MY_API_KEY",
+      apiUrl: "https://explorer.kavalabs.io/api",
+      explorerUrl: "https://explorer.kavalabs.io/",
+    },
   },
   "kcc:testnet": {
     port: 8537,
@@ -233,6 +260,10 @@ module.exports = {
   "kcc:mainnet": {
     port: 9537,
     network_id: 321,
+    // verify: {
+    //   apiUrl: "https://scan.kcc.io/api",
+    //   explorerUrl: "https://scan.kcc.io/",
+    // },
   },
   "klaytn:testnet": {
     port: 8527,
@@ -254,9 +285,8 @@ module.exports = {
     port: 9508,
     network_id: 5000,
     verify: {
-      apiKey: "MY_API_KEY",
       apiUrl: "https://explorer.mantle.xyz/api",
-      explorerUrl: "https://explorer.mantle.xyz/address",
+      explorerUrl: "https://explorer.mantle.xyz/",
     },
   },
   "metis:mainnet": {
@@ -284,10 +314,18 @@ module.exports = {
   "moonbeam:mainnet": {
     port: 9531,
     network_id: 1284,
+    verify: {
+      apiUrl: "https://api-moonbeam.moonscan.io/api",
+      explorerUrl: "https://moonscan.io/"
+    }
   },
   "moonbeam:moonriver": {
     port: 7531,
     network_id: 1285,
+    verify: {
+      apiUrl: "https://api-moonriver.moonscan.io/api",
+      explorerUrl: "https://moonriver.moonscan.io/"
+    }
   },
   "moonbeam:moonbase": {
     port: 8531,
@@ -335,6 +373,7 @@ module.exports = {
   "optimism:mainnet": {
     port: 9520,
     network_id: 10,
+    confirmations: 3,
     verify: {
       apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
       apiUrl: "https://api-optimistic.etherscan.io/api",
@@ -353,13 +392,18 @@ module.exports = {
   "polygon:mainnet": {
     port: 9535,
     network_id: 137,
+    verify: {
+      apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
+      apiUrl: "https://api.polygonscan.com/api",
+      explorerUrl: "https://polygonscan.com/",
+    }
   },
   "polygon:zkevm:goerli": {
     port: 8512,
     network_id: 1442,
     verify: {
       apiUrl: "https://api-testnet-zkevm.polygonscan.com/api",
-      explorerUrl: "https://testnet-zkevm.polygonscan.com/address",
+      explorerUrl: "https://testnet-zkevm.polygonscan.com/",
     },
   },
   "polygon:zkevm:mainnet": {
@@ -367,7 +411,7 @@ module.exports = {
     network_id: 1101,
     verify: {
       apiUrl: "https://api-zkevm.polygonscan.com/api",
-      explorerUrl: "https://zkevm.polygonscan.com/address/",
+      explorerUrl: "https://zkevm.polygonscan.com/",
     },
   },
   "reef:testnet": {
