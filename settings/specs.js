@@ -30,6 +30,28 @@ module.exports = {
       vanity: 1240014136, // 0x000DB36997AF1F02209A6F995883B9B699900000
     },
   },
+  "conflux:core:mainnet": {
+    WitnetDeployer: {
+      from: "0x1169bf81ecf738d02fd8d3824dfe02153b334ef7",
+    },
+    WitnetOracle: {
+      vanity: 3,
+    },
+    WitnetPriceFeeds: {
+      from: "0x1169bf81ecf738d02fd8d3824dfe02153b334ef7",
+      vanity: 4,
+    },
+    WitnetRandomness: {
+      from: "0x1169bf81ecf738d02fd8d3824dfe02153b334ef7",
+      vanity: 5,
+    },
+    WitnetRequestBytecodes: {
+      vanity: 1,
+    },
+    WitnetRequestFactory: {
+      vanity: 2,
+    },
+  },
   "conflux:core:testnet": {
     WitnetDeployer: {
       from: "0x1169Bf81ecf738d02fd8d3824dfe02153B334eF7",
