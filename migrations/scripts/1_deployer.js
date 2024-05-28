@@ -15,7 +15,7 @@ module.exports = async function (deployer, network, [,,, master]) {
   ) {
     const WitnetDeployerImpl = artifacts.require(settings.getArtifacts(network).WitnetDeployer)
     await deployer.deploy(WitnetDeployerImpl, { 
-      from: settings.getSpecs(network)?.WitnetDeployer?.from || master 
+      from: settings.getSpecs(network)?.WitnetDeployer?.from || web3.utils.toChecksumAddress(master)
     })
     const factory = await WitnetDeployerImpl.deployed()
     if (factory.address !== addresses?.default?.WitnetDeployer) {
