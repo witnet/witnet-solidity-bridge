@@ -14,8 +14,8 @@ module.exports = async function (deployer, network, [,,, master]) {
       (await web3.eth.getCode(factoryAddr)).length < 3
   ) {
     const WitnetDeployerImpl = artifacts.require(settings.getArtifacts(network).WitnetDeployer)
-    await deployer.deploy(WitnetDeployerImpl, { 
-      from: settings.getSpecs(network)?.WitnetDeployer?.from || web3.utils.toChecksumAddress(master)
+    await deployer.deploy(WitnetDeployerImpl, {
+      from: settings.getSpecs(network)?.WitnetDeployer?.from || web3.utils.toChecksumAddress(master),
     })
     const factory = await WitnetDeployerImpl.deployed()
     if (factory.address !== addresses?.default?.WitnetDeployer) {
@@ -38,8 +38,8 @@ module.exports = async function (deployer, network, [,,, master]) {
     utils.isNullAddress(proxyAddr) ||
       (await web3.eth.getCode(proxyAddr)).length < 3
   ) {
-    await deployer.deploy(WitnetProxy, { 
-      from: settings.getSpecs(network)?.WitnetDeployer?.from || master 
+    await deployer.deploy(WitnetProxy, {
+      from: settings.getSpecs(network)?.WitnetDeployer?.from || master,
     })
     if (WitnetProxy.address !== addresses?.default?.WitnetProxy) {
       addresses[network].WitnetProxy = WitnetProxy.address

@@ -45,10 +45,10 @@ async function deploy (target) {
   const artifact = artifacts.require(key)
   const contract = artifacts.require(targets[key])
   if (
-    (!utils.isNullAddress(addresses[network][targets[key]] || addresses?.default[targets[key]]) 
-      && (await web3.eth.getCode(addresses[network][targets[key]] || addresses?.default[targets[key]])).length < 3)
-    || addresses[network][targets[key]] === ""
-    || selection.includes(targets[key])
+    (!utils.isNullAddress(addresses[network][targets[key]] || addresses?.default[targets[key]]) &&
+      (await web3.eth.getCode(addresses[network][targets[key]] || addresses?.default[targets[key]])).length < 3) ||
+    addresses[network][targets[key]] === "" ||
+    selection.includes(targets[key])
   ) {
     utils.traceHeader(`Deploying '${key}'...`)
     console.info("  ", "> account:          ", from)

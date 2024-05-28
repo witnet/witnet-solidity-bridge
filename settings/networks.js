@@ -131,7 +131,7 @@ module.exports = {
       apiKey: "espace",
       apiUrl: "https://evmapi-testnet.confluxscan.io/api/",
       explorerUrl: "https://evmtestnet.confluxscan.io/",
-    }
+    },
   },
   "conflux:espace:mainnet": {
     port: 9529,
@@ -142,7 +142,7 @@ module.exports = {
       apiKey: "espace",
       apiUrl: "https://evmapi.confluxscan.io/api",
       explorerUrl: "https://evm.confluxscan.io/address",
-    }
+    },
   },
   "cronos:testnet": {
     port: 8530,
@@ -301,7 +301,7 @@ module.exports = {
       apiUrl: "https://sepolia-explorer.metisdevops.link/api",
       // apiUrl: "https://api.routescan.io/v2/network/sepolia/evm/59902/etherscan",
       explorerUrl: "https://sepolia-explorer.metisdevops.link",
-    }
+    },
   },
   "meter:testnet": {
     port: 8523,
@@ -316,16 +316,16 @@ module.exports = {
     network_id: 1284,
     verify: {
       apiUrl: "https://api-moonbeam.moonscan.io/api",
-      explorerUrl: "https://moonscan.io/"
-    }
+      explorerUrl: "https://moonscan.io/",
+    },
   },
   "moonbeam:moonriver": {
     port: 7531,
     network_id: 1285,
     verify: {
       apiUrl: "https://api-moonriver.moonscan.io/api",
-      explorerUrl: "https://moonriver.moonscan.io/"
-    }
+      explorerUrl: "https://moonriver.moonscan.io/",
+    },
   },
   "moonbeam:moonbase": {
     port: 8531,
@@ -333,8 +333,8 @@ module.exports = {
     gas: 15000000,
     verify: {
       apiUrl: "https://api-moonbase.moonscan.io/api",
-      explorerUrl: "https://moonbase.moonscan.io/"
-    }
+      explorerUrl: "https://moonbase.moonscan.io/",
+    },
   },
   "okx:oktchain:testnet": {
     port: 8528,
@@ -342,7 +342,7 @@ module.exports = {
     verify: {
       apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api",
       explorerUrl: "https://www.okx.com/explorer/oktc/",
-    }
+    },
   },
   "okx:oktchain:mainnet": {
     port: 9528,
@@ -350,15 +350,15 @@ module.exports = {
     verify: {
       apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api/okctest",
       explorerUrl: "https://www.okx.com/explorer/oktc-test/",
-    }
+    },
   },
   "okx:x1:sepolia": {
     port: 8505,
     network_id: 195,
     verify: {
       apiUrl: "https://www.okx.com/explorer/xlayer-test/api",
-      explorerUrl: "https://www.okx.com/explorer/xlayer-test"
-    }
+      explorerUrl: "https://www.okx.com/explorer/xlayer-test",
+    },
   },
   "optimism:sepolia": {
     port: 8503,
@@ -387,7 +387,7 @@ module.exports = {
       apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
       apiUrl: "https://api-amoy.polygonscan.com/api",
       explorerUrl: "https://amoy.polygonscan.com/",
-    }
+    },
   },
   "polygon:mainnet": {
     port: 9535,
@@ -396,7 +396,7 @@ module.exports = {
       apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
       apiUrl: "https://api.polygonscan.com/api",
       explorerUrl: "https://polygonscan.com/",
-    }
+    },
   },
   "polygon:zkevm:goerli": {
     port: 8512,
