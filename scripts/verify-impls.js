@@ -28,5 +28,5 @@ if (!constructorArgs[network]) constructorArgs[network] = {}
 for (const index in impls) {
   utils.traceVerify(network, `${impls[index]} --forceConstructorArgs string:${
     constructorArgs[network][impls[index]] || constructorArgs?.default[impls[index]]
-  } --verifiers etherscan`)
+  } --verifiers etherscan,sourcify`)
 }
