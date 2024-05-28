@@ -8,13 +8,16 @@ module.exports = {
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
     },
     boba: {
-      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
+      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
     },
-    conflux: {
+    "conflux.core.testnet": {
+      WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
+    },
+    "conflux.core.mainnet": {
       WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
     },
     mantle: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
     },
     "okx.x1.sepolia": {
       WitnetBytecodes: "WitnetBytecodesNoSha256",
@@ -222,7 +225,12 @@ module.exports = {
         host: "localhost",
         port: 9533,
         skipDryRun: true,
-        gasPrice: 75 * 10 ** 9,
+        // gasPrice: 75 * 10 ** 9,
+        verify: {
+          apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
+          apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan/api",
+          explorerUrl: "https://snowtrace.io/",
+        },
       },
       "avalanche.testnet": {
         network_id: 43113,
@@ -254,8 +262,8 @@ module.exports = {
         port: 9510,
         skipDryRun: true,
         verify: {
-          apiUrl: "https://blockexplorer.bnb.boba.network/api",
-          browserURL: "https://blockexplorer.bnb.boba.network/",
+          apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/56288/etherscan",
+          explorerUrl: "https://bobascan.com/",
           apiKey: "MY_API_KEY",
         },
       },
@@ -299,8 +307,8 @@ module.exports = {
         port: 9538,
         skipDryRun: true,
         verify: {
-          apiUrl: "https://explorer.celo.org/mainnet/api",
-          browserURL: "https://explorer.celo.org/mainnet/",
+          apiUrl: "https://api.celoscan.io/api",
+          explorerUrl: "https://celoscan.io/",
         },
       },
     },
@@ -337,8 +345,12 @@ module.exports = {
         port: 9529,
         network_id: 1030,
         skipDryRun: true,
-        networkCheckTimeout: 999999,
         gas: 15000000,
+        verify: {
+          apiKey: "espace",
+          apiUrl: "https://evmapi.confluxscan.io/api",
+          explorerUrl: "https://evm.confluxscan.io/address",
+        }
       },
     },
     cronos: {
@@ -357,6 +369,10 @@ module.exports = {
         port: 9530,
         network_id: 25,
         skipDryRun: true,
+        verify: {
+          apiUrl: "https://api.cronoscan.com/api",
+          explorerUrl: "https://cronoscan.com",
+        },
       },
     },
     cube: {
@@ -414,7 +430,7 @@ module.exports = {
         skipDryRun: true,
         verify: {
           apiUrl: "https://esc.elastos.io/api",
-          browserURL: "https://esc.elastos.io/address",
+          explorerUrl: "https://esc.elastos.io/",
         },
       },
     },
@@ -485,8 +501,8 @@ module.exports = {
         skipDryRun: true,
         verify: {
           apiKey: "MY_API_KEY",
-          apiUrl: "https://kavascan.com/api",
-          browserURL: "https://kavascan.com/",
+          apiUrl: "https://explorer.kavalabs.io/api",
+          explorerUrl: "https://explorer.kavalabs.io/",
         },
       },
     },
@@ -595,12 +611,20 @@ module.exports = {
         port: 9531,
         network_id: 1284,
         skipDryRun: true,
+        verify: {
+          apiUrl: "https://api-moonbeam.moonscan.io/api",
+          explorerUrl: "https://moonscan.io/"
+        }
       },
       "moonbeam.moonriver": {
         host: "localhost",
         port: 7531,
         network_id: 1285,
         skipDrynRun: true,
+        verify: {
+          apiUrl: "https://api-moonriver.moonscan.io/api",
+          explorerUrl: "https://moonriver.moonscan.io/"
+        }
       },
       "moonbeam.moonbase": {
         host: "localhost",
@@ -676,6 +700,11 @@ module.exports = {
         port: 9535,
         network_id: 137,
         skipDryRun: true,
+        verify: {
+          apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
+          apiUrl: "https://api.polygonscan.com/api",
+          explorerUrl: "https://polygonscan.com/",
+        }
       },
       "polygon.zkevm.goerli": {
         host: "localhost",
@@ -692,6 +721,7 @@ module.exports = {
         port: 9512,
         network_id: 1101,
         skipDryRun: true,
+        // gasPrice: 50 * 10 ** 9,
         verify: {
           apiUrl: "https://api-zkevm.polygonscan.com/api",
           explorerUrl: "https://zkevm.polygonscan.com/address/",
