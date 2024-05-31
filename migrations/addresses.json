@@ -103,7 +103,7 @@
         "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
         "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
-        "WitnetOracleTrustableDefault": "0x73280fa1238DAE165b9c37B7E877668C31b239f6",
+        "WitnetOracleTrustableDefault": "",
         "WitnetPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837",
         "WitnetPriceFeedsDefault": "0x8280929b7F6adcE1CfA15b63cbEC1A7FD8cAEf11",
         "WitnetRequestBytecodesDefault": "0x51376b77d9944bb9c5685b9d9289dd08D399B5e1",
@@ -112,12 +112,12 @@
     "celo:mainnet": {
         "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
         "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
-        "WitnetPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837",
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
+        "WitnetOracleTrustableDefault": "",
+        "WitnetPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837",
+        "WitnetPriceFeedsDefault": "0xd26f5c402D274C1b7c443E2215221D70C0b8DeB0",
         "WitnetRequestBytecodesDefault": "0x967C4A627e68770db28803d033eEBCeE615C37EB",
-        "WitnetRequestFactoryDefault": "0xE2CA421F5c28a04eb0B22f12512627acA9cF9E04",
-        "WitnetOracleTrustableDefault": "0x105EeFc7ad7A057C3BF2D516a0bFbB84E80d66eF",
-        "WitnetPriceFeedsDefault": "0xd26f5c402D274C1b7c443E2215221D70C0b8DeB0"
+        "WitnetRequestFactoryDefault": "0xE2CA421F5c28a04eb0B22f12512627acA9cF9E04"
     },
     "conflux:core:mainnet": {
         "WitnetDeployer": "0x8785dBa05D3B90c55c009D0C47f12A2d976C5e47",
