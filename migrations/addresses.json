@@ -78,6 +78,17 @@
         "WitnetOracleTrustableOvm2": "0x0D929cFfa089cA99a644E10A7c7fe1C8C62F657f",
         "WitnetPriceFeedsDefault": "0xd26f5c402D274C1b7c443E2215221D70C0b8DeB0"
     },
+    "boba:bnb:testnet": {
+        "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
+        "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
+        "WitnetPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837",
+        "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
+        "WitnetRequestBytecodesDefault": "0x4e6159Aa6c94584Af01Ccc828200c79D350D07E9",
+        "WitnetRequestFactoryDefault": "0xFbb35731Fd5c35a84176aBccD214538843eAf5db",
+        "WitnetRequestBoardTrustableOvm": "0xA126d29b0803CD0536c5487C831Daf9cB634318D",
+        "WitnetOracleTrustableOvm2": "0xA126d29b0803CD0536c5487C831Daf9cB634318D",
+        "WitnetPriceFeedsDefault": "0x9E23a4CD5f903b4D0ED1358413250a1e2c459F63"
+    },
     "boba:eth:mainnet": {
         "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
         "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",

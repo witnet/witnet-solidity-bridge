@@ -57,8 +57,9 @@ module.exports = {
   "boba:bnb:testnet": {
     network_id: 9728,
     port: 8510,
+    confirmations: 4,
     verify: {
-      apiUrl: "https://api.routescan.io/v2/network/testnet/evm/2888/etherscan",
+      apiUrl: "https://api.routescan.io/v2/network/testnet/evm/9728/etherscan",
       explorerUrl: "https://boba.testnet.routescan.io/",
     },
   },
