@@ -8,7 +8,7 @@ module.exports = {
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
     },
     boba: {
-      WitnetRequestBoard: "WitnetRequestBoardTrustableOvm2",
+      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
     },
     "conflux.core.testnet": {
       WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
@@ -39,7 +39,7 @@ module.exports = {
     },
     "syscoin.rollux.testnet": {
       WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableOvm2",
-    }
+    },
   },
   compilers: {
     default: {

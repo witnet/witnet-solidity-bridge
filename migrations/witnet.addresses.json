@@ -106,10 +106,10 @@
             "WitnetEncodingLib": "0xA14a1fD9b1C6023f87f3A7E97DbdFdf1a9413D0A",
             "WitnetPriceFeedsLib": "0x5c1dD29563203883A5D5C3136783D3119B2C4e57",
             "WitnetBytecodesImplementation": "0xcf9F6DD90221d5A23a6c4E2252bF690acdf6eedC",
-            "WitnetPriceFeedsImplementation": "",
+            "WitnetPriceFeedsImplementation": "0x307b1a85dC9BE441Cd7e4931266Dd6a24C4A98d2",
             "WitnetRandomnessImplementation": "0x08a6a53B8bCE95677fFA85813C32Bb8228cd114c",
-            "WitnetRequestBoardImplementation": "",
-            "WitnetRequestBoardTrustableOvm2": "0x276Da4D5720EFaD1fBE417d27BD838707e61ba8C",
+            "WitnetRequestBoardImplementation": "0x95CCa33d8eF01410b4395AF23B1334EeA129B44A",
+            "WitnetRequestBoardTrustableOvm2": "0x7BD9B620ae5989E6e6b15E31c6a49CC739587F86",
             "WitnetRequestFactoryImplementation": "0xce66333c9D7BE37D61d3c5b57D6D41ff082Ca92f"
         },
         "boba.bnb.mainnet": {
