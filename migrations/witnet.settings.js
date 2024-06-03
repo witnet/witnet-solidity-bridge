@@ -252,7 +252,7 @@ module.exports = {
         port: 8510,
         skipDryRun: true,
         verify: {
-          apiUrl: "https://api.routescan.io/v2/network/testnet/evm/2888/etherscan",
+          apiUrl: "https://api.routescan.io/v2/network/testnet/evm/9728/etherscan",
           browserURL: "https://boba.testnet.routescan.io/",
         },
       },
@@ -338,7 +338,7 @@ module.exports = {
           apiKey: "espace",
           apiUrl: "https://evmapi-testnet.confluxscan.io/api/",
           browserURL: "https://evmtestnet.confluxscan.io/",
-        }
+        },
       },
       "conflux.espace.mainnet": {
         host: "localhost",
@@ -350,7 +350,7 @@ module.exports = {
           apiKey: "espace",
           apiUrl: "https://evmapi.confluxscan.io/api",
           explorerUrl: "https://evm.confluxscan.io/address",
-        }
+        },
       },
     },
     cronos: {
@@ -613,8 +613,8 @@ module.exports = {
         skipDryRun: true,
         verify: {
           apiUrl: "https://api-moonbeam.moonscan.io/api",
-          explorerUrl: "https://moonscan.io/"
-        }
+          explorerUrl: "https://moonscan.io/",
+        },
       },
       "moonbeam.moonriver": {
         host: "localhost",
@@ -623,8 +623,8 @@ module.exports = {
         skipDrynRun: true,
         verify: {
           apiUrl: "https://api-moonriver.moonscan.io/api",
-          explorerUrl: "https://moonriver.moonscan.io/"
-        }
+          explorerUrl: "https://moonriver.moonscan.io/",
+        },
       },
       "moonbeam.moonbase": {
         host: "localhost",
@@ -704,7 +704,7 @@ module.exports = {
           apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
           apiUrl: "https://api.polygonscan.com/api",
           explorerUrl: "https://polygonscan.com/",
-        }
+        },
       },
       "polygon.zkevm.goerli": {
         host: "localhost",
