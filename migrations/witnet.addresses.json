@@ -164,7 +164,7 @@
             "WitnetPriceFeedsImplementation": "0x606E3E55827f82493D481d3dBC2727298e015879",
             "WitnetRandomnessImplementation": "0xFB36b14df6D319A5A7F418C80b0700664A4f9e6a",
             "WitnetRandomnessImplementationV061": "0xbD804467270bCD832b4948242453CA66972860F5",
-            "WitnetRequestBoardImplementation": "0xA81c6737399313F9bD93ACDCC226F42E362dAAAA",
+            "WitnetRequestBoardImplementation": "0x07024BBdFbE0b7560A0f5B49745A372e15954d08",
             "WitnetRequestBoardTrustableDefault": "0xe381f706f2932049A844791f41b2863884c4e6CA",
             "WitnetRequestFactoryImplementation": "0x4874cb1732eE1167A006E0Ab047D940ACF04D771"
         },
@@ -417,7 +417,7 @@
             "WitnetPriceFeedsImplementation": "0x078790f8A1c6e49A192c6259D040EC3B36D9EB0E",
             "WitnetRandomnessImplementation": "0xA9cC3101735b248964e90fA8506219A9CF0b1091",
             "WitnetRandomnessImplementationV061": "0xeD074DA2A76FD2Ca90C1508930b4FB4420e413B0",
-            "WitnetRequestBoardImplementation": "0x03D884F4fF7f8f78310Df6879eF4031e1229bb07",
+            "WitnetRequestBoardImplementation": "0x578F143c36654DD361FdD51F6D2693b4621ac455",
             "WitnetRequestBoardTrustableDefault": "0x8684d396366C21AA01B120F69df2070f840aC134",
             "WitnetRequestFactoryImplementation": "0x60768ce66aF2f3957e7280c6CfC4ab9c575a7FCF"
         },
@@ -458,7 +458,7 @@
             "WitnetPriceFeedsImplementation": "0xAb19Da1bD91E29813942d10459e29B93365a34E8",
             "WitnetRandomnessImplementation": "0x98DbB216138aA6a0b3ff2ae9bBdeC254398E5B2E",
             "WitnetRandomnessImplementationV061": "0x76c72518060952FAec3f90666F047e39E3333f7E",
-            "WitnetRequestBoardImplementation": "0x0F17043BB821F609670Dbcce36B6F19FD42829B2",
+            "WitnetRequestBoardImplementation": "0x8c3e3079e71680B0d678B7380756EDD073B65A34",
             "WitnetRequestBoardTrustableDefault": "0xeF262eCBF9c61A0e71688D90d8fe75B0C3a48901",
             "WitnetRequestFactoryImplementation": "0x4374a050f808d1FF18bCcf73270daE3EdF8D0865"
         },
@@ -499,7 +499,7 @@
             "WitnetPriceFeedsImplementation": "0x03D884F4fF7f8f78310Df6879eF4031e1229bb07",
             "WitnetRandomnessImplementation": "0xd6d4B24219751A7725ce972E68B1067Ee57CC85a",
             "WitnetRandomnessImplementationV061": "0xB4B2E2e00e9d6E5490d55623E4F403EC84c6D33f",
-            "WitnetRequestBoardImplementation": "0x71D5D7F2ed2436062946727DB84E44588F765D02",
+            "WitnetRequestBoardImplementation": "0x08a6a53B8bCE95677fFA85813C32Bb8228cd114c",
             "WitnetRequestBoardTrustableDefault": "0x1f35F6d6BE5Bd574b2B00Ac2Dc0BeCAfcc04Ed51",
             "WitnetRequestFactoryImplementation": "0xeDA4f244FEe1D6a3EA0fB2c0Fc6b7D1c49fEF01D"
         },
@@ -628,7 +628,7 @@
             "WitnetPriceFeedsImplementation": "0x8FA6eF092C678D4A5679c913180fE1cC29a63719",
             "WitnetRandomnessImplementation": "0xcf9F6DD90221d5A23a6c4E2252bF690acdf6eedC",
             "WitnetRandomnessImplementationv079": "0x65772461641A4A6E8B10c81bae1a132E04e77262",
-            "WitnetRequestBoardImplementation": "0x89A0EF4eDEEfA128931b353bdf494Bad97a3D448",
+            "WitnetRequestBoardImplementation": "0x49030E216d49Fbf443CBe3692De5A6B97AEcFFCA",
             "WitnetRequestBoardTrustableDefault": "0xCA9e7861643febcEa7C657eA8F012645D6acceC4",
             "WitnetRequestFactoryImplementation": "0x6395d83C9Aa803498980A5ab78217785d4db7bE7"
         },
