@@ -251,7 +251,7 @@
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
         "WitnetRequestBytecodesDefault": "0x967C4A627e68770db28803d033eEBCeE615C37EB",
         "WitnetRequestFactoryDefault": "0xE2CA421F5c28a04eb0B22f12512627acA9cF9E04",
-        "WitnetOracleTrustableDefault": "0x105EeFc7ad7A057C3BF2D516a0bFbB84E80d66eF",
+        "WitnetOracleTrustableDefault": "",
         "WitnetPriceFeedsDefault": "0xd26f5c402D274C1b7c443E2215221D70C0b8DeB0"
     },
     "kava:testnet": {
@@ -271,7 +271,7 @@
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
         "WitnetRequestBytecodesDefault": "0x967C4A627e68770db28803d033eEBCeE615C37EB",
         "WitnetRequestFactoryDefault": "0xE2CA421F5c28a04eb0B22f12512627acA9cF9E04",
-        "WitnetOracleTrustableDefault": "0x105EeFc7ad7A057C3BF2D516a0bFbB84E80d66eF",
+        "WitnetOracleTrustableDefault": "",
         "WitnetPriceFeedsDefault": "0xd26f5c402D274C1b7c443E2215221D70C0b8DeB0"
     },
     "kcc:testnet": {
@@ -291,7 +291,7 @@
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
         "WitnetRequestBytecodesDefault": "0x967C4A627e68770db28803d033eEBCeE615C37EB",
         "WitnetRequestFactoryDefault": "0xE2CA421F5c28a04eb0B22f12512627acA9cF9E04",
-        "WitnetOracleTrustableDefault": "0x105EeFc7ad7A057C3BF2D516a0bFbB84E80d66eF",
+        "WitnetOracleTrustableDefault": "",
         "WitnetPriceFeedsDefault": "0xd26f5c402D274C1b7c443E2215221D70C0b8DeB0"
     },
     "klaytn:testnet": {
@@ -376,7 +376,7 @@
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
         "WitnetRequestBytecodesDefault": "0x967C4A627e68770db28803d033eEBCeE615C37EB",
         "WitnetRequestFactoryDefault": "0xE2CA421F5c28a04eb0B22f12512627acA9cF9E04",
-        "WitnetOracleTrustableDefault": "0x412647Ff1519706C01706c5816E5cC355dd0A06D",
+        "WitnetOracleTrustableDefault": "",
         "WitnetPriceFeedsDefault": "0xd26f5c402D274C1b7c443E2215221D70C0b8DeB0"
     },
     "moonbeam:moonbase": {
@@ -468,7 +468,7 @@
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
         "WitnetRequestBytecodesNoSha256": "0x0C39d07778Fc2FF94efe889b107Deaa074041719",
         "WitnetRequestFactoryDefault": "0xE2CA421F5c28a04eb0B22f12512627acA9cF9E04",
-        "WitnetOracleTrustableDefault": "0x412647Ff1519706C01706c5816E5cC355dd0A06D",
+        "WitnetOracleTrustableDefault": "",
         "WitnetPriceFeedsDefault": "0xd26f5c402D274C1b7c443E2215221D70C0b8DeB0"
     },
     "reef:mainnet": {
