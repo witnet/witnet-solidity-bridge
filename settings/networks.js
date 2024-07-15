@@ -205,6 +205,10 @@ module.exports = {
   "ethereum:mainnet": {
     network_id: 1,
     port: 9545,
+    verify: {
+      apiUrl: "https://api.etherscan.io/api",
+      explorerUrl: "https://etherscan.io/",
+    },
   },
   "ethereum:sepolia": {
     network_id: 11155111,
