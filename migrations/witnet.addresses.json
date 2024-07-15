@@ -31,7 +31,8 @@
             "WitnetBytecodes": "0xB8CdB2577dA632a77D6b90526aB53Eb5694Ed2D1",
             "WitnetBytecodesImplementation": "0xf56E739C436EA6e65A17DBfaC9D7E57062D19422",
             "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA",
-            "WitnetRequestBoardImplementation": "0xA99B485363DBAe90D17B10F988C4e1Ae895048e0",
+            "WitnetRequestBoardImplementation": "0xC467B6E0F700D3E044C9F20BB76957eEC0B33c8C",
+            "WitnetRequestBoardTrustableDefault": "0xA99B485363DBAe90D17B10F988C4e1Ae895048e0",
             "WitnetRequestFactory": "0xdABE9E1B328d5Dd6b96271e5562ee3f7D8D035c4",
             "WitnetRequestFactoryImplementation": "0x0d13c6058DDE86da77565ED6038C065Af71e9208"
         }
