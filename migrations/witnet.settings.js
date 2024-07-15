@@ -4,7 +4,7 @@ module.exports = {
       WitnetBytecodes: "WitnetBytecodesDefault",
       WitnetPriceFeeds: "WitnetPriceFeedsBypassV20:",
       WitnetRandomness: "WitnetRandomnessProxiable",
-      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableDefault",
+      WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
     },
     boba: {
@@ -174,6 +174,10 @@ module.exports = {
         host: "localhost",
         port: 9545,
         skipDryRun: true,
+        verify: {
+          apiUrl: "https://api.etherscan.io/api",
+          explorerUrl: "https://etherscan.io/",
+        },
       },
       "ethereum.rinkeby": {
         network_id: 4,

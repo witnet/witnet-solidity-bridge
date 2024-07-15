@@ -23,15 +23,17 @@
             "WitnetRequestFactoryImplementation": "0x6F68A4d58cEd8e094b42511350527Ed628ACB970"
         },
         "ethereum.mainnet": {
-            "WitnetBytecodes": "0xB8CdB2577dA632a77D6b90526aB53Eb5694Ed2D1",
-            "WitnetBytecodesImplementation": "",
-            "WitnetEncodingLib": "",
             "WitnetLib": "0xaD18Fd3CC724A11c2B0D8cc7f1B108d8A3388416",
             "WitnetPriceRouter": "0x83A757eAe821Ad7B520D9A74952337138A80b2AF",
             "WitnetRandomness": "0x894907c7Ab64C1092620B5c8Ba039BB6E611eba8",
+            "WitnetEncodingLib": "0xe33bD10fb2f1C5F4c6eF4259aAd4cE8A5868c222",
+            "WitnetErrorsLib": "0xa239729c399c9eBae7fdc188A1Dbb2c4a06Cd4Bb",
+            "WitnetBytecodes": "0xB8CdB2577dA632a77D6b90526aB53Eb5694Ed2D1",
+            "WitnetBytecodesImplementation": "0xf56E739C436EA6e65A17DBfaC9D7E57062D19422",
             "WitnetRequestBoard": "0x9E4fae1c7ac543a81E4E2a5486a0dDaad8194bdA",
+            "WitnetRequestBoardImplementation": "0xA99B485363DBAe90D17B10F988C4e1Ae895048e0",
             "WitnetRequestFactory": "0xdABE9E1B328d5Dd6b96271e5562ee3f7D8D035c4",
-            "WitnetRequestFactoryImplementation": "0xBfe9473720CC8DCa9615b8B6CFE228C7e1089396"
+            "WitnetRequestFactoryImplementation": "0x0d13c6058DDE86da77565ED6038C065Af71e9208"
         }
     },
     "arbitrum": {
