@@ -273,7 +273,7 @@ library WitnetEncodingLib {
         return encode(uint64(opcode), bytes1(0x10));
     }
 
-    function encode(Witnet.RadonSLA memory sla)
+    function encode(Witnet.RadonSLAv1 memory sla)
         public pure
         returns (bytes memory)
     {
@@ -433,7 +433,7 @@ library WitnetEncodingLib {
         // }
     }
 
-    function validate(Witnet.RadonSLA memory sla)
+    function validate(Witnet.RadonSLAv1 memory sla)
         public pure
     {
         if (sla.witnessReward == 0) {

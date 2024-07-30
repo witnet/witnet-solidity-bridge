@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetV2.sol";
+import "./Witnet.sol";
 
 /// @title A library for interpreting Witnet resolution errors
 /// @author The Witnet Foundation.
@@ -31,21 +31,21 @@ library WitnetErrorsLib {
         );
     }
 
-    function asResultError(WitnetV2.ResponseStatus _status, bytes memory _cborBytes)
+    function asResultError(Witnet.ResponseStatus _status, bytes memory _cborBytes)
         public pure
         returns (Witnet.ResultError memory)
     {
         if (
-            _status == WitnetV2.ResponseStatus.Error
-                || _status == WitnetV2.ResponseStatus.Ready
+            _status == Witnet.ResponseStatus.Error
+                || _status == Witnet.ResponseStatus.Ready
         ) {
             return resultErrorFromCborBytes(_cborBytes);
-        } else if (_status == WitnetV2.ResponseStatus.Finalizing) {
+        } else if (_status == Witnet.ResponseStatus.Finalizing) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "WitnetErrorsLib: not yet finalized"
             });
-        } if (_status == WitnetV2.ResponseStatus.Awaiting) {
+        } if (_status == Witnet.ResponseStatus.Awaiting) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "WitnetErrorsLib: not yet reported"

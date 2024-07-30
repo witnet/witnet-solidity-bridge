@@ -42,7 +42,7 @@ abstract contract WitnetRequestConsumer
 
     function __witnetRequestData(
             uint256 _witnetEvmReward, 
-            WitnetV2.RadonSLA memory _witnetQuerySLA
+            Witnet.RadonSLA memory _witnetQuerySLA
         )
         virtual override
         internal returns (uint256)

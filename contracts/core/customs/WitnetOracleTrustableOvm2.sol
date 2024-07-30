@@ -21,7 +21,7 @@ contract WitnetOracleTrustableOvm2
     is 
         WitnetOracleTrustableDefault
 {
-    using WitnetV2 for WitnetV2.RadonSLA;
+    using Witnet for Witnet.RadonSLA;
 
     function class() virtual override public view returns (string memory) {
         return type(WitnetOracleTrustableOvm2).name;
@@ -118,8 +118,8 @@ contract WitnetOracleTrustableOvm2
         returns (uint256 _revenues, uint256 _expenses)
     {
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
-                WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
+            if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == Witnet.QueryStatus.Posted) {
+                Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
                 if (__request.gasCallback > 0) {
                     _expenses += WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(
                         _reportTxGasPrice, 
@@ -129,7 +129,7 @@ contract WitnetOracleTrustableOvm2
                     if (__request.witnetRAD != bytes32(0)) {
                         _expenses += WitnetOracleTrustableDefault.estimateBaseFee(
                             _reportTxGasPrice, 
-                            registry.lookupRadonRequestResultMaxSize(__request.witnetRAD)
+                            __registry.lookupRadonRequestResultMaxSize(__request.witnetRAD)
                         );
                     } else {
                         // todo: improve profit estimation accuracy if reporting on deleted query

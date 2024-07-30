@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../libs/WitnetV2.sol";
+import "../libs/Witnet.sol";
 
 /// @title The Witnet Request Board Reporter interface.
 /// @author The Witnet Foundation.

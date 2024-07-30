@@ -5,7 +5,7 @@ const { expectRevertCustomError } = require("custom-error-test-helper")
 
 const WitnetRequestBytecodes = artifacts.require("WitnetRequestBytecodesDefault")
 const WitnetEncodingLib = artifacts.require("WitnetEncodingLib")
-const WitnetV2 = artifacts.require("WitnetV2")
+const Witnet = artifacts.require("Witnet")
 
 contract("WitnetRequestBytecodes", (accounts) => {
   const creatorAddress = accounts[0]
@@ -106,7 +106,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
     let btcUsdPriceFeedHash
 
     context("verifyRadonRetrieval(..)", async () => {
-      context("WitnetV2.RadonDataRequestMethods.RNG", async () => {
+      context("Witnet.RadonRetrievalMethods.RNG", async () => {
         it("emits appropiate single event when verifying randomness data source for the first time", async () => {
           const tx = await bytecodes.verifyRadonRetrieval(
             2, // requestMethod
@@ -152,7 +152,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
         })
         // ... reverts
       })
-      context("WitnetV2.RadonDataRequestMethods.HttpGet", async () => {
+      context("Witnet.RadonRetrievalMethods.HttpGet", async () => {
         it(
           "emits new data provider and source events when verifying a new http-get source for the first time", async () => {
             const tx = await bytecodes.verifyRadonRetrieval(
@@ -203,7 +203,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
           )
         })
       })
-      context("WitnetV2.RadonDataRequestMethods.HttpPost", async () => {
+      context("Witnet.RadonRetrievalMethods.HttpPost", async () => {
         it(
           "emits new data provider and source events when verifying a new http-post source for the first time", async () => {
             const tx = await bytecodes.verifyRadonRetrieval(
@@ -282,7 +282,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
       })
       it("reverts custom error if verifying radon reducer with unsupported opcode", async () => {
         await expectRevertCustomError(
-          WitnetV2,
+          Witnet,
           bytecodes.verifyRadonReducer([
             0, // Minimum
             [], // filters
@@ -293,7 +293,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
       })
       it("reverts custom error if verifying radon reducer with at least one unsupported filter", async () => {
         await expectRevertCustomError(
-          WitnetV2,
+          Witnet,
           bytecodes.verifyRadonReducer([
             5, // AverageMedian
             [
@@ -307,7 +307,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
       })
       it("reverts custom error if verifying radon reducer with stdev filter but no args", async () => {
         await expectRevertCustomError(
-          WitnetV2,
+          Witnet,
           bytecodes.verifyRadonReducer([
             2, // Mode
             [
@@ -466,7 +466,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
         })
         it("reverts if trying to verify radon request w/ incompatible sources", async () => {
           await expectRevertCustomError(
-            WitnetV2,
+            Witnet,
             bytecodes.verifyRadonRequest(
               [ // sources
                 binanceTickerHash,
@@ -578,7 +578,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
       })
       it("reverts custom error if verifying radon sla with no reward", async () => {
         await expectRevertCustomError(
-          WitnetV2,
+          Witnet,
           bytecodes.verifyRadonSLA([
             10,
             51,
@@ -591,7 +591,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
       })
       it("reverts custom error if verifying radon sla with no witnesses", async () => {
         await expectRevertCustomError(
-          WitnetV2,
+          Witnet,
           bytecodes.verifyRadonSLA([
             0,
             51,
@@ -604,7 +604,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
       })
       it("reverts custom error if verifying radon sla with too many witnesses", async () => {
         await expectRevertCustomError(
-          WitnetV2,
+          Witnet,
           bytecodes.verifyRadonSLA([
             500,
             51,
@@ -617,7 +617,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
       })
       it("reverts custom error if verifying radon sla with quorum out of range", async () => {
         await expectRevertCustomError(
-          WitnetV2,
+          Witnet,
           bytecodes.verifyRadonSLA([
             10,
             50,
@@ -628,7 +628,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
           "RadonSlaConsensusOutOfRange"
         )
         await expectRevertCustomError(
-          WitnetV2,
+          Witnet,
           bytecodes.verifyRadonSLA([
             10,
             100,
@@ -641,7 +641,7 @@ contract("WitnetRequestBytecodes", (accounts) => {
       })
       it("reverts custom error if verifying radon sla with too low collateral", async () => {
         await expectRevertCustomError(
-          WitnetV2,
+          Witnet,
           bytecodes.verifyRadonSLA([
             10,
             51,

@@ -20,13 +20,13 @@ contract WitnetRequestBytecodesDefault
 {   
     using Witnet for bytes;
     using Witnet for string;
-    using WitnetV2 for WitnetV2.RadonSLA;
+    using Witnet for Witnet.RadonSLA;
     
     using WitnetEncodingLib for Witnet.RadonRetrievalMethods;
     using WitnetEncodingLib for Witnet.RadonRetrieval;
     using WitnetEncodingLib for Witnet.RadonRetrieval[];
     using WitnetEncodingLib for Witnet.RadonReducer;
-    using WitnetEncodingLib for Witnet.RadonSLA;
+    using WitnetEncodingLib for Witnet.RadonSLAv1;
     using WitnetEncodingLib for Witnet.RadonDataTypes;
 
     function class()
@@ -159,7 +159,7 @@ contract WitnetRequestBytecodesDefault
         return __database().radsBytecode[_radHash];
     }
 
-    function bytecodeOf(bytes32 _radHash, WitnetV2.RadonSLA calldata _sla)
+    function bytecodeOf(bytes32 _radHash, Witnet.RadonSLA calldata _sla)
         override external view 
         returns (bytes memory)
     {
@@ -171,7 +171,7 @@ contract WitnetRequestBytecodesDefault
         );
     }
 
-    function bytecodeOf(bytes calldata _radBytecode, WitnetV2.RadonSLA calldata _sla)
+    function bytecodeOf(bytes calldata _radBytecode, Witnet.RadonSLA calldata _sla)
         override external pure
         returns (bytes memory)
     {

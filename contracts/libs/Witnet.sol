@@ -15,7 +15,6 @@ library Witnet {
     struct Query {
         Request request;
         Response response;
-        address from;      // Address from which the request was posted.
     }
 
     /// Possible status of a Witnet query.
@@ -23,24 +22,36 @@ library Witnet {
         Unknown,
         Posted,
         Reported,
-        Deleted
+        Finalized
     }
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct Request {
-        address addr;       // Address of the (deprecated) IWitnetRequest contract containing Witnet data request raw bytecode.
-        bytes32 slaHash;    // Radon SLA hash of the Witnet data request.
-        bytes32 radHash;    // Radon radHash of the Witnet data request.
-        uint256 gasprice;   // Minimum gas price the DR resolver should pay on the solving tx.
-        uint256 reward;     // Escrowed reward to be paid to the DR resolver.
+        address  requester;              // EVM address from which the request was posted.
+        uint24   gasCallback;            // Max callback gas limit upon response, if a callback is required.
+        uint72   evmReward;              // EVM amount in wei eventually to be paid to the legit result reporter.
+        bytes    witnetBytecode;         // Optional: Witnet Data Request bytecode to be solved by the Witnet blockchain.
+        bytes32  witnetRAD;              // Optional: Previously verified hash of the Witnet Data Request to be solved.
+        RadonSLA witnetSLA;    // Minimum Service-Level parameters to be committed by the Witnet blockchain. 
     }
 
-    /// Data kept in EVM-storage containing the Witnet-provided response metadata and CBOR-encoded result.
+    /// Response metadata and result as resolved by the Witnet blockchain.
     struct Response {
-        address reporter;       // Address from which the result was reported.
-        uint256 timestamp;      // Timestamp of the Witnet-provided result.
-        bytes32 drTxHash;       // Hash of the Witnet transaction that solved the queried Data Request.
-        bytes   cborBytes;      // Witnet-provided result CBOR-bytes to the queried Data Request.
+        address reporter;               // EVM address from which the Data Request result was reported.
+        uint64  finality;               // EVM block number at which the reported data will be considered to be finalized.
+        uint32  resultTimestamp;        // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
+        bytes32 resultTallyHash;        // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
+        bytes   resultCborBytes;        // CBOR-encode result to the request, as resolved in the Witnet blockchain.
+    }
+
+    /// Response status from a requester's point of view.
+    enum ResponseStatus {
+        Void,
+        Awaiting,
+        Ready,
+        Error,
+        Finalizing,
+        Delivered
     }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
@@ -365,8 +376,20 @@ library Witnet {
         /* 4 */ HttpHead
     }
 
-    /// Structure containing the SLA security parameters of a Witnet-compliant Data Request.
     struct RadonSLA {
+        /// @notice Number of nodes in the Witnet blockchain that will take part in solving the data request. 
+        uint8   committeeSize;
+        
+        /// @notice Fee in $nanoWIT paid to every node in the Witnet blockchain involved in solving the data request.
+        /// @dev Witnet nodes participating as witnesses will have to stake as collateral 100x this amount.
+        uint64  witnessingFeeNanoWit;
+
+        /// @notice Maximum size accepted for the CBOR-encoded buffer containing successfull Tally Result values.
+        //uint16  maxTallyResultSize;
+    }
+
+    /// Structure containing the SLA security parameters of a Witnet-compliant Data Request.
+    struct RadonSLAv1 {
         uint8 numWitnesses;
         uint8 minConsensusPercentage;
         uint64 witnessReward;
@@ -697,6 +720,55 @@ library Witnet {
         returns (uint[] memory)
     {
         return result.value.readUintArray();
+    }
+
+        
+    /// ===============================================================================================================
+    /// --- 'Witnet.RadonSLA' helper methods ------------------------------------------------------------------------
+
+    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
+        internal pure returns (bool)
+    {
+        return (a.committeeSize >= b.committeeSize);
+    }
+     
+    function isValid(RadonSLA calldata sla) internal pure returns (bool) {
+        return (
+            sla.witnessingFeeNanoWit > 0 
+                && sla.committeeSize > 0 && sla.committeeSize <= 127
+        );
+    }
+
+    function toV1(RadonSLA memory self) internal pure returns (Witnet.RadonSLAv1 memory) {
+        return Witnet.RadonSLAv1({
+            numWitnesses: self.committeeSize,
+            minConsensusPercentage: 51,
+            witnessReward: self.witnessingFeeNanoWit,
+            witnessCollateral: self.witnessingFeeNanoWit * 100,
+            minerCommitRevealFee: self.witnessingFeeNanoWit / self.committeeSize
+        });
+    }
+
+    function nanoWitTotalFee(RadonSLA storage self) internal view returns (uint64) {
+        return self.witnessingFeeNanoWit * (self.committeeSize + 3);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- P-RNG generators ------------------------------------------------------------------------------------------
+
+    /// Generates a pseudo-random uint32 number uniformly distributed within the range `[0 .. range)`, based on
+    /// the given `nonce` and `seed` values. 
+    function randomUniformUint32(uint32 range, uint256 nonce, bytes32 seed)
+        internal pure 
+        returns (uint32) 
+    {
+        uint256 _number = uint256(
+            keccak256(
+                abi.encode(seed, nonce)
+            )
+        ) & uint256(2 ** 224 - 1);
+        return uint32((_number * range) >> 224);
     }
 
 

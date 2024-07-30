@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../libs/WitnetV2.sol";
+import "../libs/Witnet.sol";
 
 /// @title Witnet Request Board base data model. 
 /// @author The Witnet Foundation.

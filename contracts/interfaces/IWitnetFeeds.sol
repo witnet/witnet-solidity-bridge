@@ -36,12 +36,12 @@ interface IWitnetFeeds {
     function estimateUpdateBaseFee(uint256 evmGasPrice) external view returns (uint);
 
     function lastValidQueryId(bytes4 feedId) external view returns (uint256);
-    function lastValidResponse(bytes4 feedId) external view returns (WitnetV2.Response memory);
+    function lastValidResponse(bytes4 feedId) external view returns (Witnet.Response memory);
 
     function latestUpdateQueryId(bytes4 feedId) external view returns (uint256);
-    function latestUpdateRequest(bytes4 feedId) external view returns (WitnetV2.Request memory);
-    function latestUpdateResponse(bytes4 feedId) external view returns (WitnetV2.Response memory);
-    function latestUpdateResponseStatus(bytes4 feedId) external view returns (WitnetV2.ResponseStatus);
+    function latestUpdateRequest(bytes4 feedId) external view returns (Witnet.Request memory);
+    function latestUpdateResponse(bytes4 feedId) external view returns (Witnet.Response memory);
+    function latestUpdateResponseStatus(bytes4 feedId) external view returns (Witnet.ResponseStatus);
     function latestUpdateResultError(bytes4 feedId) external view returns (Witnet.ResultError memory);
     
     function lookupWitnetBytecode(bytes4 feedId) external view returns (bytes memory);
@@ -49,5 +49,5 @@ interface IWitnetFeeds {
     function lookupWitnetRetrievals(bytes4 feedId) external view returns (Witnet.RadonRetrieval[] memory);
 
     function requestUpdate(bytes4 feedId) external payable returns (uint256 usedFunds);
-    function requestUpdate(bytes4 feedId, WitnetV2.RadonSLA calldata updateSLA) external payable returns (uint256 usedFunds);
+    function requestUpdate(bytes4 feedId, Witnet.RadonSLA calldata updateSLA) external payable returns (uint256 usedFunds);
 }

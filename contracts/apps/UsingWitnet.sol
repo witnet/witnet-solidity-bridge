@@ -17,7 +17,7 @@ abstract contract UsingWitnet
     
     /// @dev Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain
     /// @dev when solving a data request.
-    WitnetV2.RadonSLA internal __witnetDefaultSLA;
+    Witnet.RadonSLA internal __witnetDefaultSLA;
 
     /// @dev Percentage over base fee to pay on every data request, 
     /// @dev as to deal with volatility of evmGasPrice and evmWitPrice during the live time of 
@@ -32,7 +32,7 @@ abstract contract UsingWitnet
             "UsingWitnet: uncompliant WitnetOracle"
         );
         __witnet = _wrb;
-        __witnetDefaultSLA = WitnetV2.RadonSLA({
+        __witnetDefaultSLA = Witnet.RadonSLA({
             // Number of nodes in the Witnet blockchain that will take part in solving the data request:
             committeeSize: 10,
             // Fee in $nanoWIT paid to every node in the Witnet blockchain involved in solving the data request:
@@ -60,7 +60,7 @@ abstract contract UsingWitnet
         internal view
         returns (bool)
     {
-        return __witnet.getQueryStatus(_id) == WitnetV2.QueryStatus.Reported;
+        return __witnet.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
     }
 
     /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
@@ -78,7 +78,7 @@ abstract contract UsingWitnet
 
     function _witnetCheckQueryResponseStatus(uint256 _witnetQueryId)
         internal view
-        returns (WitnetV2.ResponseStatus)
+        returns (Witnet.ResponseStatus)
     {
         return __witnet.getQueryResponseStatus(_witnetQueryId);
     }

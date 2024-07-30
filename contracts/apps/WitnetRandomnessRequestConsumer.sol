@@ -11,9 +11,9 @@ abstract contract WitnetRandomnessRequestConsumer
         WitnetConsumer
 {
     using Witnet for bytes;
+    using Witnet for bytes32;
+    using Witnet for Witnet.RadonSLA;
     using WitnetCBOR for WitnetCBOR.CBOR;
-    using WitnetV2 for bytes32;
-    using WitnetV2 for WitnetV2.RadonSLA;
 
     bytes32 internal immutable __witnetRandomnessRadHash;
 
@@ -83,7 +83,7 @@ abstract contract WitnetRandomnessRequestConsumer
 
     function __witnetRandomize(
             uint256 _witnetEvmReward,
-            WitnetV2.RadonSLA memory _witnetQuerySLA
+            Witnet.RadonSLA memory _witnetQuerySLA
         )
         virtual internal 
         returns (uint256 _randomizeId)

@@ -2,14 +2,14 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../libs/WitnetV2.sol";
+import "../libs/Witnet.sol";
 
 interface IWitnetPriceSolver {
     struct Price {
         uint value;
         uint timestamp;
         bytes32 tallyHash;
-        WitnetV2.ResponseStatus status;
+        Witnet.ResponseStatus status;
     }
     function class() external pure returns (string memory);
     function delegator() external view returns (address);

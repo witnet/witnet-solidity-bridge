@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../libs/WitnetV2.sol";
+import "../libs/Witnet.sol";
 
 /// @title The Witnet Randomness generator interface.
 /// @author Witnet Foundation.

@@ -23,8 +23,8 @@ contract WitnetPriceFeedsDefault
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
-    using WitnetV2 for WitnetV2.Response;
-    using WitnetV2 for WitnetV2.RadonSLA;
+    using Witnet for Witnet.Response;
+    using Witnet for Witnet.RadonSLA;
 
     function class() virtual override(WitnetFeeds, WitnetUpgradableBase) public view returns (string memory) {
         return type(WitnetPriceFeedsDefault).name;
@@ -93,7 +93,7 @@ contract WitnetPriceFeedsDefault
             _owner = abi.decode(_initData, (address));
             _transferOwnership(_owner);
             // settle default Radon SLA upon first initialization
-            __defaultRadonSLA = WitnetV2.RadonSLA({
+            __defaultRadonSLA = Witnet.RadonSLA({
                 committeeSize: 10,
                 witnessingFeeNanoWit: 2 * 10 ** 8   // 0.2 $WIT
             });
@@ -214,7 +214,7 @@ contract WitnetPriceFeedsDefault
         public view
         returns (Witnet.RadonSLA memory)
     {
-        return __defaultRadonSLA.toV1();
+        return __defaultRadonSLA;
     }
     
     function estimateUpdateBaseFee(uint256 _evmGasPrice)
@@ -250,14 +250,14 @@ contract WitnetPriceFeedsDefault
 
     function latestUpdateRequest(bytes4 feedId)
         override external view 
-        returns (WitnetV2.Request memory)
+        returns (Witnet.Request memory)
     {
         return witnet.getQueryRequest(latestUpdateQueryId(feedId));
     }
 
     function latestUpdateResponse(bytes4 feedId)
         override external view
-        returns (WitnetV2.Response memory)
+        returns (Witnet.Response memory)
     {
         return witnet.getQueryResponse(latestUpdateQueryId(feedId));
     }
@@ -271,7 +271,7 @@ contract WitnetPriceFeedsDefault
     
     function latestUpdateResponseStatus(bytes4 feedId)
         override public view
-        returns (WitnetV2.ResponseStatus)
+        returns (Witnet.ResponseStatus)
     {
         return _checkQueryResponseStatus(latestUpdateQueryId(feedId));
     }
@@ -285,7 +285,7 @@ contract WitnetPriceFeedsDefault
             __record.radHash != 0,
             "WitnetPriceFeeds: no RAD hash"
         );
-        return registry().bytecodeOf(__record.radHash);
+        return _registry().bytecodeOf(__record.radHash);
     }
     
     function lookupWitnetRadHash(bytes4 feedId)
@@ -318,7 +318,7 @@ contract WitnetPriceFeedsDefault
         return __requestUpdate(feedId, __defaultRadonSLA);
     }
     
-    function requestUpdate(bytes4 feedId, WitnetV2.RadonSLA calldata updateSLA)
+    function requestUpdate(bytes4 feedId, Witnet.RadonSLA calldata updateSLA)
         public payable
         virtual override
         returns (uint256 _usedFunds)
@@ -414,7 +414,7 @@ contract WitnetPriceFeedsDefault
         __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function settleDefaultRadonSLA(WitnetV2.RadonSLA calldata defaultSLA)
+    function settleDefaultRadonSLA(Witnet.RadonSLA calldata defaultSLA)
         override public
         onlyOwner
     {
@@ -562,7 +562,7 @@ contract WitnetPriceFeedsDefault
     {
         uint _queryId = _lastValidQueryId(feedId);
         if (_queryId > 0) {
-            WitnetV2.Response memory _lastValidResponse = lastValidResponse(feedId);
+            Witnet.Response memory _lastValidResponse = lastValidResponse(feedId);
             Witnet.Result memory _latestResult = _lastValidResponse.resultCborBytes.toWitnetResult();
             return IWitnetPriceSolver.Price({
                 value: _latestResult.asUint(),
@@ -650,11 +650,11 @@ contract WitnetPriceFeedsDefault
         return (
             int(_latestPrice.value),
             _latestPrice.timestamp,
-            _latestPrice.status == WitnetV2.ResponseStatus.Ready 
+            _latestPrice.status == Witnet.ResponseStatus.Ready 
                 ? 200
                 : (
-                    _latestPrice.status == WitnetV2.ResponseStatus.Awaiting 
-                        || _latestPrice.status == WitnetV2.ResponseStatus.Finalizing
+                    _latestPrice.status == Witnet.ResponseStatus.Awaiting 
+                        || _latestPrice.status == Witnet.ResponseStatus.Finalizing
                 ) ? 404 : 400
         );
     }
@@ -665,12 +665,12 @@ contract WitnetPriceFeedsDefault
 
     function _checkQueryResponseStatus(uint _queryId)
         internal view
-        returns (WitnetV2.ResponseStatus)
+        returns (Witnet.ResponseStatus)
     {
         if (_queryId > 0) {
             return witnet.getQueryResponseStatus(_queryId);
         } else {
-            return WitnetV2.ResponseStatus.Ready;
+            return Witnet.ResponseStatus.Ready;
         }
     }
 
@@ -689,7 +689,7 @@ contract WitnetPriceFeedsDefault
         uint _latestUpdateQueryId = latestUpdateQueryId(feedId);
         if (
             _latestUpdateQueryId > 0
-                && witnet.getQueryResponseStatus(_latestUpdateQueryId) == WitnetV2.ResponseStatus.Ready
+                && witnet.getQueryResponseStatus(_latestUpdateQueryId) == Witnet.ResponseStatus.Ready
         ) {
             return _latestUpdateQueryId;
         } else {
@@ -710,7 +710,7 @@ contract WitnetPriceFeedsDefault
         }
     }
 
-    function __requestUpdate(bytes4[] memory _deps, WitnetV2.RadonSLA memory sla)
+    function __requestUpdate(bytes4[] memory _deps, Witnet.RadonSLA memory sla)
         virtual internal
         returns (uint256 _usedFunds)
     {
@@ -720,7 +720,7 @@ contract WitnetPriceFeedsDefault
         }
     }
 
-    function __requestUpdate(bytes4 feedId, WitnetV2.RadonSLA memory querySLA)
+    function __requestUpdate(bytes4 feedId, Witnet.RadonSLA memory querySLA)
         virtual internal
         returns (uint256 _usedFunds)
     {
@@ -732,11 +732,11 @@ contract WitnetPriceFeedsDefault
                 "WitnetPriceFeeds: insufficient reward"
             );
             uint _latestId = __feed.latestUpdateQueryId;
-            WitnetV2.ResponseStatus _latestStatus = _checkQueryResponseStatus(_latestId);
-            if (_latestStatus == WitnetV2.ResponseStatus.Awaiting) {
+            Witnet.ResponseStatus _latestStatus = _checkQueryResponseStatus(_latestId);
+            if (_latestStatus == Witnet.ResponseStatus.Awaiting) {
                 // latest update is still pending, so just increase the reward
                 // accordingly to current tx gasprice:
-                WitnetV2.Request memory _request = witnet.getQueryRequest(_latestId);
+                Witnet.Request memory _request = witnet.getQueryRequest(_latestId);
                 int _deltaReward = int(int72(_request.evmReward)) - int(_usedFunds);
                 if (_deltaReward > 0) {
                     _usedFunds = uint(_deltaReward);
@@ -753,7 +753,7 @@ contract WitnetPriceFeedsDefault
                 }
             } else {
                 // Check if latest update ended successfully:
-                if (_latestStatus == WitnetV2.ResponseStatus.Ready) {
+                if (_latestStatus == Witnet.ResponseStatus.Ready) {
                     // If so, remove previous last valid query from the WRB:
                     if (__feed.lastValidQueryId > 0) {
                         witnet.fetchQueryResponse(__feed.lastValidQueryId);

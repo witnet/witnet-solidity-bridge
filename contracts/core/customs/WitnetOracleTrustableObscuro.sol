@@ -64,7 +64,7 @@ contract WitnetOracleTrustableObscuro
         public view
         virtual override
         onlyRequester(_queryId)
-        returns (WitnetV2.Response memory _response)
+        returns (Witnet.Response memory _response)
     {
         return WitnetOracleTrustableBase.getQueryResponse(_queryId);
     }

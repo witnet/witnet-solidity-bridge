@@ -29,9 +29,9 @@ abstract contract WitnetOracleTrustableBase
     using Witnet for bytes;
     using Witnet for Witnet.Result;
     using WitnetCBOR for WitnetCBOR.CBOR;
-    using WitnetV2 for WitnetV2.RadonSLA;
-    using WitnetV2 for WitnetV2.Request;
-    using WitnetV2 for WitnetV2.Response;
+    using Witnet for Witnet.RadonSLA;
+    using Witnet for Witnet.Request;
+    using Witnet for Witnet.Response;
 
     bytes4 public immutable override specs = type(IWitnetOracle).interfaceId;
     WitnetRequestBytecodes immutable public override registry;
@@ -57,15 +57,15 @@ abstract contract WitnetOracleTrustableBase
         _;
     }
 
-    modifier checkSLA(WitnetV2.RadonSLA calldata sla) {
+    modifier checkSLA(Witnet.RadonSLA calldata sla) {
         _require(
-            WitnetV2.isValid(sla), 
+            Witnet.isValid(sla), 
             "invalid SLA"
         ); _;
     }
 
     /// Asserts the given query is currently in the given status.
-    modifier inStatus(uint256 _queryId, WitnetV2.QueryStatus _status) {
+    modifier inStatus(uint256 _queryId, Witnet.QueryStatus _status) {
       if (WitnetOracleDataLib.seekQueryStatus(_queryId) != _status) {
         _revert(WitnetOracleDataLib.notInStatusRevertMessage(_status));
       } else {
@@ -256,9 +256,9 @@ abstract contract WitnetOracleTrustableBase
     function fetchQueryResponse(uint256 _witnetQueryId)
         virtual override
         external
-        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Finalized)
+        inStatus(_witnetQueryId, Witnet.QueryStatus.Finalized)
         onlyRequester(_witnetQueryId)
-        returns (WitnetV2.Response memory _response)
+        returns (Witnet.Response memory _response)
     {
         _response = WitnetOracleDataLib.seekQuery(_witnetQueryId).response;
         delete __storage().queries[_witnetQueryId];
@@ -268,7 +268,7 @@ abstract contract WitnetOracleTrustableBase
     function getQuery(uint256 _witnetQueryId)
       public view
       virtual override
-      returns (WitnetV2.Query memory)
+      returns (Witnet.Query memory)
     {
         return __storage().queries[_witnetQueryId];
     }
@@ -287,7 +287,7 @@ abstract contract WitnetOracleTrustableBase
     function getQueryRequest(uint256 _witnetQueryId)
         external view 
         override
-        returns (WitnetV2.Request memory)
+        returns (Witnet.Request memory)
     {
         return WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
     }
@@ -298,7 +298,7 @@ abstract contract WitnetOracleTrustableBase
     function getQueryResponse(uint256 _witnetQueryId)
         public view
         virtual override
-        returns (WitnetV2.Response memory)
+        returns (Witnet.Response memory)
     {
         return WitnetOracleDataLib.seekQueryResponse(_witnetQueryId);
     }
@@ -311,7 +311,7 @@ abstract contract WitnetOracleTrustableBase
     /// @param _witnetQueryId The unique query identifier.
     function getQueryResponseStatus(uint256 _witnetQueryId)
         virtual override public view
-        returns (WitnetV2.ResponseStatus)
+        returns (Witnet.ResponseStatus)
     {
         return WitnetOracleDataLib.seekQueryResponseStatus(_witnetQueryId);
     }
@@ -333,7 +333,7 @@ abstract contract WitnetOracleTrustableBase
         public view
         returns (Witnet.ResultError memory)
     {
-        WitnetV2.ResponseStatus _status = WitnetOracleDataLib.seekQueryResponseStatus(_witnetQueryId);
+        Witnet.ResponseStatus _status = WitnetOracleDataLib.seekQueryResponseStatus(_witnetQueryId);
         try WitnetErrorsLib.asResultError(_status, WitnetOracleDataLib.seekQueryResponse(_witnetQueryId).resultCborBytes)
             returns (Witnet.ResultError memory _resultError)
         {
@@ -357,7 +357,7 @@ abstract contract WitnetOracleTrustableBase
     function getQueryStatus(uint256 _witnetQueryId)
         external view
         override
-        returns (WitnetV2.QueryStatus)
+        returns (Witnet.QueryStatus)
     {
         return WitnetOracleDataLib.seekQueryStatus(_witnetQueryId);
     }
@@ -365,9 +365,9 @@ abstract contract WitnetOracleTrustableBase
     function getQueryStatusBatch(uint256[] calldata _witnetQueryIds)
         external view
         override
-        returns (WitnetV2.QueryStatus[] memory _status)
+        returns (Witnet.QueryStatus[] memory _status)
     {
-        _status = new WitnetV2.QueryStatus[](_witnetQueryIds.length);
+        _status = new Witnet.QueryStatus[](_witnetQueryIds.length);
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
             _status[_ix] = WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]);
         }
@@ -394,7 +394,7 @@ abstract contract WitnetOracleTrustableBase
     /// @return _witnetQueryId Unique query identifier.
     function postRequest(
             bytes32 _queryRAD, 
-            WitnetV2.RadonSLA calldata _querySLA
+            Witnet.RadonSLA calldata _querySLA
         )
         virtual override
         external payable
@@ -428,7 +428,7 @@ abstract contract WitnetOracleTrustableBase
     /// @return _witnetQueryId Unique query identifier.
     function postRequestWithCallback(
             bytes32 _queryRAD, 
-            WitnetV2.RadonSLA calldata _querySLA,
+            Witnet.RadonSLA calldata _querySLA,
             uint24 _queryCallbackGasLimit
         )
         virtual override
@@ -467,7 +467,7 @@ abstract contract WitnetOracleTrustableBase
     /// @return _witnetQueryId Unique query identifier.
     function postRequestWithCallback(
             bytes calldata _queryUnverifiedBytecode,
-            WitnetV2.RadonSLA calldata _querySLA, 
+            Witnet.RadonSLA calldata _querySLA, 
             uint24 _queryCallbackGasLimit
         )
         virtual override
@@ -496,9 +496,9 @@ abstract contract WitnetOracleTrustableBase
     function upgradeQueryEvmReward(uint256 _witnetQueryId)
         external payable
         virtual override      
-        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
+        inStatus(_witnetQueryId, Witnet.QueryStatus.Posted)
     {
-        WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
+        Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
         __request.evmReward += uint72(_getMsgValue());
         emit WitnetQueryRewardUpgraded(_witnetQueryId, __request.evmReward);
     }
@@ -521,8 +521,8 @@ abstract contract WitnetOracleTrustableBase
         returns (uint256 _revenues, uint256 _expenses)
     {
         for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == WitnetV2.QueryStatus.Posted) {
-                WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
+            if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == Witnet.QueryStatus.Posted) {
+                Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
                 _revenues += __request.evmReward;
                 if (__request.gasCallback > 0) {
                     _expenses += estimateBaseFeeWithCallback(_txGasPrice, __request.gasCallback);
@@ -566,7 +566,7 @@ abstract contract WitnetOracleTrustableBase
         )
         external override
         onlyReporters
-        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
+        inStatus(_witnetQueryId, Witnet.QueryStatus.Posted)
         returns (uint256)
     {
         // results cannot be empty:
@@ -603,7 +603,7 @@ abstract contract WitnetOracleTrustableBase
         external
         override
         onlyReporters
-        inStatus(_witnetQueryId, WitnetV2.QueryStatus.Posted)
+        inStatus(_witnetQueryId, Witnet.QueryStatus.Posted)
         returns (uint256)
     {
         // validate timestamp
@@ -642,11 +642,11 @@ abstract contract WitnetOracleTrustableBase
         for ( uint _i = 0; _i < _batchResults.length; _i ++) {
             if (
                 WitnetOracleDataLib.seekQueryStatus(_batchResults[_i].queryId)
-                    != WitnetV2.QueryStatus.Posted
+                    != Witnet.QueryStatus.Posted
             ) {
                 emit BatchReportError(
                     _batchResults[_i].queryId,
-                    WitnetOracleDataLib.notInStatusRevertMessage(WitnetV2.QueryStatus.Posted)
+                    WitnetOracleDataLib.notInStatusRevertMessage(Witnet.QueryStatus.Posted)
                 );
             } else if (
                 uint256(_batchResults[_i].queryResultTimestamp) > block.timestamp
@@ -738,7 +738,7 @@ abstract contract WitnetOracleTrustableBase
         returns (uint256 _witnetQueryId)
     {
         _witnetQueryId = ++ __storage().nonce; //__newQueryId(_radHash, _packedSLA);
-        WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
+        Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
         _require(__request.requester == address(0), "already posted");
         {
             __request.requester = msg.sender;
@@ -759,7 +759,7 @@ abstract contract WitnetOracleTrustableBase
         returns (uint256 _evmReward)
     {
         // read requester address and whether a callback was requested:
-        WitnetV2.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
+        Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
                 
         // read query EVM reward:
         _evmReward = __request.evmReward;
@@ -940,7 +940,7 @@ abstract contract WitnetOracleTrustableBase
         )
         virtual internal
     {
-        WitnetOracleDataLib.seekQuery(_witnetQueryId).response = WitnetV2.Response({
+        WitnetOracleDataLib.seekQuery(_witnetQueryId).response = Witnet.Response({
             reporter: msg.sender,
             finality: uint64(block.number),
             resultTimestamp: _witnetQueryResultTimestamp,

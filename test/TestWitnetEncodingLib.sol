@@ -53,7 +53,7 @@ contract TestWitnetEncodingLib {
 
   function testEncodeRadonSLA() external {
     bytes memory bytecode = WitnetEncodingLib.encode(
-      Witnet.RadonSLA({
+      Witnet.RadonSLAv1({
         numWitnesses: 10,
         minConsensusPercentage: 51,
         minerCommitRevealFee: 1000000,
@@ -65,7 +65,7 @@ contract TestWitnetEncodingLib {
     Assert.equal(
       keccak256(bytecode),
       keccak256(hex"10c0843d180a20c0843d283330c096b102"),
-      "bad encode(Witnet.RadonSLA)"
+      "bad encode(Witnet.RadonSLAv1)"
     );
   }
 
