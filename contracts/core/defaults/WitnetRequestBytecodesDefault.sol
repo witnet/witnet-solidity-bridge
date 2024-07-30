@@ -22,7 +22,7 @@ contract WitnetRequestBytecodesDefault
     using Witnet for string;
     using WitnetV2 for WitnetV2.RadonSLA;
     
-    using WitnetEncodingLib for Witnet.RadonDataRequestMethods;
+    using WitnetEncodingLib for Witnet.RadonRetrievalMethods;
     using WitnetEncodingLib for Witnet.RadonRetrieval;
     using WitnetEncodingLib for Witnet.RadonRetrieval[];
     using WitnetEncodingLib for Witnet.RadonReducer;
@@ -233,7 +233,7 @@ contract WitnetRequestBytecodesDefault
         returns (Witnet.RadonRetrieval memory _source)
     {
         _source = __database().retrievals[_hash];
-        if (_source.method == Witnet.RadonDataRequestMethods.Unknown) {
+        if (_source.method == Witnet.RadonRetrievalMethods.Unknown) {
             revert UnknownRadonRetrieval(_hash);
         }
     }
@@ -243,7 +243,7 @@ contract WitnetRequestBytecodesDefault
         override
         returns (uint8)
     {
-        if (__database().retrievals[_hash].method == Witnet.RadonDataRequestMethods.Unknown) {
+        if (__database().retrievals[_hash].method == Witnet.RadonRetrievalMethods.Unknown) {
             revert UnknownRadonRetrieval(_hash);
         }
         return __database().retrievals[_hash].argsCount;
@@ -254,7 +254,7 @@ contract WitnetRequestBytecodesDefault
         override
         returns (Witnet.RadonDataTypes)
     {
-        if (__database().retrievals[_hash].method == Witnet.RadonDataRequestMethods.Unknown) {
+        if (__database().retrievals[_hash].method == Witnet.RadonRetrievalMethods.Unknown) {
             revert UnknownRadonRetrieval(_hash);
         }
         return __database().retrievals[_hash].resultDataType;
@@ -324,7 +324,7 @@ contract WitnetRequestBytecodesDefault
     }
 
     function verifyRadonRetrieval(
-            Witnet.RadonDataRequestMethods _requestMethod,
+            Witnet.RadonRetrievalMethods _requestMethod,
             string calldata _requestURL,
             string calldata _requestBody,
             string[2][] memory  _requestHeaders,
@@ -344,7 +344,7 @@ contract WitnetRequestBytecodesDefault
 
         // should it be a new data source:
         if (
-            __database().retrievals[hash].method == Witnet.RadonDataRequestMethods.Unknown
+            __database().retrievals[hash].method == Witnet.RadonRetrievalMethods.Unknown
         ) {
             // compose data source and save it in storage:
             __database().retrievals[hash] = Witnet.RadonRetrieval({

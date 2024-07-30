@@ -317,7 +317,7 @@ library WitnetEncodingLib {
     }
 
     function validate(
-            Witnet.RadonDataRequestMethods method,
+            Witnet.RadonRetrievalMethods method,
             string memory url,
             string memory body,
             string[2][] memory headers,
@@ -329,11 +329,11 @@ library WitnetEncodingLib {
         if (!(
             bytes(url).length > 0 
                 && (
-                    method == Witnet.RadonDataRequestMethods.HttpGet 
-                        || method == Witnet.RadonDataRequestMethods.HttpPost
-                        || method == Witnet.RadonDataRequestMethods.HttpHead
+                    method == Witnet.RadonRetrievalMethods.HttpGet 
+                        || method == Witnet.RadonRetrievalMethods.HttpPost
+                        || method == Witnet.RadonRetrievalMethods.HttpHead
                 )
-            || method == Witnet.RadonDataRequestMethods.RNG
+            || method == Witnet.RadonRetrievalMethods.RNG
                 && bytes(url).length == 0
                 && headers.length == 0
                 && script.length >= 1

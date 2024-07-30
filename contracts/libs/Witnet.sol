@@ -274,16 +274,6 @@ library Witnet {
                 || self == ResultErrorCodes.BridgeOversizedTallyResult
         );
     }
-    
-
-    /// Possible Radon data request methods that can be used within a Radon Retrieval. 
-    enum RadonDataRequestMethods {
-        /* 0 */ Unknown,
-        /* 1 */ HttpGet,
-        /* 2 */ RNG,
-        /* 3 */ HttpPost,
-        /* 4 */ HttpHead
-    }
 
     /// Possible types either processed by Witnet Radon Scripts or included within results to Witnet Data Requests.
     enum RadonDataTypes {
@@ -350,19 +340,21 @@ library Witnet {
     /// Structure containing all the parameters that fully describe a Witnet Radon Retrieval within a Witnet Data Request.
     struct RadonRetrieval {
         uint8 argsCount;
-        RadonDataRequestMethods method;
-        RadonDataTypes resultDataType;
+        RadonRetrievalMethods method;
+        RadonDataTypes dataType;
         string url;
         string body;
         string[2][] headers;
-        bytes script;
+        bytes radonScript;
     }
 
-    /// Structure containing the Retrieve-Attestation-Delivery parts of a Witnet Data Request.
-    struct RadonRAD {
-        RadonRetrieval[] retrieve;
-        RadonReducer aggregate;
-        RadonReducer tally;
+    /// Possible Radon retrieval methods that can be used within a Radon Retrieval. 
+    enum RadonRetrievalMethods {
+        /* 0 */ Unknown,
+        /* 1 */ HttpGet,
+        /* 2 */ RNG,
+        /* 3 */ HttpPost,
+        /* 4 */ HttpHead
     }
 
     /// Structure containing the Service Level Aggreement parameters of a Witnet Data Request.

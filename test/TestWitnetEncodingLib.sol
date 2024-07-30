@@ -86,7 +86,7 @@ contract TestWitnetEncodingLib {
 
   function testEncodeRadonRetrievalUrlOnly() external {
     Witnet.RadonRetrieval memory source;
-    source.method = Witnet.RadonDataRequestMethods.HttpGet;
+    source.method = Witnet.RadonRetrievalMethods.HttpGet;
     source.url = "https://data.messar.io/api/v1/assets/\\0\\/metrics/market-data?fields=market_data/price_\\1\\";
     source.script = hex"861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b";
     bytes memory bytecode = WitnetEncodingLib.encode(source);
@@ -100,7 +100,7 @@ contract TestWitnetEncodingLib {
 
   function testEncodeRadonRetrievalUrlBodyHeaders() external {
     Witnet.RadonRetrieval memory source;
-    source.method = Witnet.RadonDataRequestMethods.HttpPost;
+    source.method = Witnet.RadonRetrievalMethods.HttpPost;
     source.url = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3";
     source.body = "{\"query\":\"{pool(id:\\\"0xc2a856c3aff2110c1171b8f942256d40e980c726\\\"){token1Price}}\"}";
     source.headers = new string[2][](2);

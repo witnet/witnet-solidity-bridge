@@ -34,7 +34,7 @@ abstract contract WitnetRandomnessRequestConsumer
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
             _retrievals[0] = _registry.verifyRadonRetrieval(
-                Witnet.RadonDataRequestMethods.RNG,
+                Witnet.RadonRetrievalMethods.RNG,
                 "", // no url
                 "", // no body
                 new string[2][](0), // no headers
