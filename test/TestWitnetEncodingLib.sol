@@ -74,7 +74,7 @@ contract TestWitnetEncodingLib {
     reducer.opcode = Witnet.RadonReducerOpcodes.Mode;
     reducer.filters = new Witnet.RadonFilter[](1);
     reducer.filters[0].opcode = Witnet.RadonFilterOpcodes.StandardDeviation;
-    reducer.filters[0].args = hex"fa40200000";
+    reducer.filters[0].cborArgs = hex"fa40200000";
     bytes memory bytecode = WitnetEncodingLib.encode(reducer);
     // emit Log(bytecode);
     Assert.equal(

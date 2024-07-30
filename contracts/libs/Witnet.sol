@@ -297,7 +297,7 @@ library Witnet {
     /// within a Witnet Data Request resolution workflow.
     struct RadonFilter {
         RadonFilterOpcodes opcode;
-        bytes args;
+        bytes cborArgs;
     }
 
     /// Filtering methods currently supported on the Witnet blockchain. 
@@ -337,6 +337,14 @@ library Witnet {
         /* 0x0B */ ConcatenateAndHash
     }
 
+    
+    /// Structure containing the Retrieve-Attestation-Delivery parts of a Witnet-compliant Data Request.
+    struct RadonRequest {
+        RadonRetrieval[] retrieve;
+        RadonReducer aggregate;
+        RadonReducer tally;
+    }
+
     /// Structure containing all the parameters that fully describe a Witnet Radon Retrieval within a Witnet Data Request.
     struct RadonRetrieval {
         uint8 argsCount;
@@ -357,7 +365,7 @@ library Witnet {
         /* 4 */ HttpHead
     }
 
-    /// Structure containing the Service Level Aggreement parameters of a Witnet Data Request.
+    /// Structure containing the SLA security parameters of a Witnet-compliant Data Request.
     struct RadonSLA {
         uint8 numWitnesses;
         uint8 minConsensusPercentage;

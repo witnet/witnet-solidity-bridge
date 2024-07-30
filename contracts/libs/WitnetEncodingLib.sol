@@ -154,10 +154,10 @@ library WitnetEncodingLib {
             );
         }
         bytes memory _encodedScript;
-        if (source.script.length > 0) {
+        if (source.radonScript.length > 0) {
             _encodedScript = abi.encodePacked(
-                encode(uint64(source.script.length), bytes1(0x1a)),
-                source.script
+                encode(uint64(source.radonScript.length), bytes1(0x1a)),
+                source.radonScript
             );
         }
         bytes memory _encodedBody;
@@ -253,10 +253,10 @@ library WitnetEncodingLib {
     {        
         bytecode = abi.encodePacked(
             encode(uint64(filter.opcode), bytes1(0x08)),
-            filter.args.length > 0
+            filter.cborArgs.length > 0
                 ? abi.encodePacked(
-                    encode(uint64(filter.args.length), bytes1(0x12)),
-                    filter.args
+                    encode(uint64(filter.cborArgs.length), bytes1(0x12)),
+                    filter.cborArgs
                 ) : bytes("")
         );
         return abi.encodePacked(
@@ -310,7 +310,7 @@ library WitnetEncodingLib {
     {
         self.url = WitnetBuffer.replace(self.url, args);
         self.body = WitnetBuffer.replace(self.body, args);
-        self.script = replaceCborStringsFromBytes(self.script, args);
+        self.radonScript = replaceCborStringsFromBytes(self.radonScript, args);
         for (uint _ix = 0 ; _ix < self.headers.length; _ix ++) {
             self.headers[_ix][1] = WitnetBuffer.replace(self.headers[_ix][1], args);
         }
@@ -390,15 +390,15 @@ library WitnetEncodingLib {
             filter.opcode == Witnet.RadonFilterOpcodes.StandardDeviation
         ) {
             // check filters that require arguments
-            if (filter.args.length == 0) {
-                revert UnsupportedRadonFilterArgs(uint8(filter.opcode), filter.args);
+            if (filter.cborArgs.length == 0) {
+                revert UnsupportedRadonFilterArgs(uint8(filter.opcode), filter.cborArgs);
             }
         } else if (
             filter.opcode == Witnet.RadonFilterOpcodes.Mode
         ) {
             // check filters that don't require any arguments
-            if (filter.args.length > 0) {
-                revert UnsupportedRadonFilterArgs(uint8(filter.opcode), filter.args);
+            if (filter.cborArgs.length > 0) {
+                revert UnsupportedRadonFilterArgs(uint8(filter.opcode), filter.cborArgs);
             }
         } else {
             // reject unsupported opcodes
