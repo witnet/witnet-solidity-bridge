@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./WitnetRequestBytecodes.sol";
+import "./WitnetRadonRegistry.sol";
 import "./WitnetRequestFactory.sol";
 
 import "./interfaces/IWitnetAppliance.sol";

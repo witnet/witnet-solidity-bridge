@@ -6,9 +6,7 @@ import "../WitnetRequestFactory.sol";
 
 abstract contract IWitnetRequestFactoryAppliance
     is
-        IWitnetOracleAppliance,
-        IWitnetRequestFactoryEvents,
-        IWitnetRequestRegistryEvents
+        IWitnetOracleAppliance
 {
     function factory() virtual external view returns (WitnetRequestFactory);
 }

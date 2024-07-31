@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../WitnetRequestBytecodes.sol";
+import "../WitnetRadonRegistry.sol";
 import "../libs/Witnet.sol";
 
 /// @title Witnet Request Board base data model library
@@ -92,7 +92,7 @@ library WitnetOracleDataLib {
     // ================================================================================================================
     // --- Public functions -------------------------------------------------------------------------------------------
 
-    function extractWitnetDataRequests(WitnetRequestBytecodes registry, uint256[] calldata queryIds)
+    function extractWitnetDataRequests(WitnetRadonRegistry registry, uint256[] calldata queryIds)
         public view
         returns (bytes[] memory bytecodes)
     {

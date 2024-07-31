@@ -1,24 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../libs/WitnetV2.sol";
+import "../libs/Witnet.sol";
 
-interface IWitnetRequestBytecodes {
+interface IWitnetRadonRegistryLegacy {
 
     error UnknownRadonRetrieval(bytes32 hash);
     error UnknownRadonReducer(bytes32 hash);
     error UnknownRadonRequest(bytes32 hash);
-
-    event NewDataProvider(uint256 index);
-    event NewRadonRetrievalHash(bytes32 hash);
-    event NewRadonReducerHash(bytes32 hash);
-    event NewRadHash(bytes32 hash);
-
-    function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
-    function bytecodeOf(bytes32 radHash, WitnetV2.RadonSLA calldata sla) external view returns (bytes memory);
-    function bytecodeOf(bytes calldata radBytecode, WitnetV2.RadonSLA calldata sla) external view returns (bytes memory);
-    
-    function hashOf(bytes calldata) external view returns (bytes32);
 
     function lookupDataProvider(uint256 index) external view returns (string memory, uint);
     function lookupDataProviderIndex(string calldata authority) external view returns (uint);
@@ -36,14 +25,6 @@ interface IWitnetRequestBytecodes {
     function lookupRadonRequestSources(bytes32 radHash) external view returns (bytes32[] memory);
     function lookupRadonRequestSourcesCount(bytes32 radHash) external view returns (uint);
     function lookupRadonRequestTally(bytes32 radHash) external view returns (Witnet.RadonReducer memory);
-        
-    function verifyRadonRetrieval(
-            Witnet.RadonDataRequestMethods requestMethod,
-            string calldata requestURL,
-            string calldata requestBody,
-            string[2][] calldata requestHeaders,
-            bytes calldata requestRadonScript
-        ) external returns (bytes32 hash);
     
     function verifyRadonReducer(Witnet.RadonReducer calldata reducer)
         external returns (bytes32 hash);

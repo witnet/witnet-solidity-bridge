@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../libs/Witnet.sol";
 
-import "../WitnetRequestBytecodes.sol";
+import "../WitnetRadonRegistry.sol";
 import "../WitnetRequestFactory.sol";
 
 interface IWitnetOracle {
@@ -18,7 +18,7 @@ interface IWitnetOracle {
     function estimateBaseFee(uint256 gasPrice, uint16 resultMaxSize) external view returns (uint256);
 
     /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Fails if the RAD hash was not previously verified on the WitnetRequestBytecodes registry.
+    /// @dev Fails if the RAD hash was not previously verified on the WitnetRadonRegistry registry.
     /// @param gasPrice Expected gas price to pay upon posting the data request.
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     function estimateBaseFee(uint256 gasPrice, bytes32 radHash) external view returns (uint256);
@@ -29,7 +29,7 @@ interface IWitnetOracle {
     function estimateBaseFeeWithCallback(uint256 gasPrice, uint24 callbackGasLimit) external view returns (uint256);
 
     /// @notice Returns the address of the WitnetRequestFactory appliance capable of building compliant data request
-    /// @notice  templates verified into the same WitnetRequestBytecodes instance returned by registry().
+    /// @notice templates verified into the same WitnetRadonRegistry instance returned by registry().
     function factory() external view returns (WitnetRequestFactory);
        
     /// @notice Retrieves a copy of all Witnet-provable data related to a previously posted request, 
@@ -84,7 +84,7 @@ interface IWitnetOracle {
     /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
     /// @notice transferred to the reporter who relays back the Witnet-provable result to this request.
     /// @dev Reasons to fail:
-    /// @dev - the RAD hash was not previously verified by the WitnetRequestBytecodes registry;
+    /// @dev - the RAD hash was not previously verified by the WitnetRadonRegistry registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
     /// @param queryRAD The RAD hash of the data request to be solved by Witnet.
@@ -102,7 +102,7 @@ interface IWitnetOracle {
     /// @notice will be triggered, and the Witnet audit trail will be saved in storage, but not so the actual CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitnetConsumer interface;
-    /// @dev - the RAD hash was not previously verified by the WitnetRequestBytecodes registry;
+    /// @dev - the RAD hash was not previously verified by the WitnetRadonRegistry registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
     /// @param queryRAD The RAD hash of the data request to be solved by Witnet.
@@ -114,6 +114,13 @@ interface IWitnetOracle {
             Witnet.RadonSLA calldata querySLA, 
             uint24 queryCallbackGasLimit
         ) external payable returns (uint256 queryId);
+
+            function postRequestWithCallbackFrom(
+                address consumer,
+                bytes32 queryRAD, 
+                Witnet.RadonSLA calldata querySLA, 
+                uint24 queryCallbackGasLimit
+            ) external payable returns (uint256 queryId);
 
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
     /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
@@ -135,10 +142,18 @@ interface IWitnetOracle {
             uint24 queryCallbackGasLimit
         ) external payable returns (uint256 queryId);    
 
-    /// @notice Returns the singleton WitnetRequestBytecodes in which all Witnet-compliant data requests 
+
+        function postRequestWithCallback(
+                address consumer,
+                bytes calldata queryUnverifiedBytecode,
+                Witnet.RadonSLA calldata querySLA, 
+                uint24 queryCallbackGasLimit
+            ) external payable returns (uint256 queryId);    
+
+    /// @notice Returns the singleton WitnetRadonRegistry in which all Witnet-compliant data requests 
     /// @notice and templates must be previously verified so they can be passed as reference when 
     /// @notice calling postRequest(bytes32,..) methods.
-    function registry() external view returns (WitnetRequestBytecodes);
+    function registry() external view returns (WitnetRadonRegistry);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     /// @param queryId The unique query identifier.

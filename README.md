@@ -60,7 +60,7 @@ Javacript methods and resources:
     - `assets.WitnetPriceFeeds`
     - `assets.WitnetPriceRouteSolver`
     - `assets.WitnetRequest`
-    - `assets.WitnetRequestBytecodes`
+    - `assets.WitnetRadonRegistry`
     - `assets.WitnetRequestFactory`
     - `assets.WitnetRequestTemplate`
     - `assets.WitnetUpgrableBase`

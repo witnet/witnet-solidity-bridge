@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../WitnetUpgradableBase.sol";
-import "../../WitnetRequestBytecodes.sol";
+import "../../WitnetRadonRegistry.sol";
 import "../../WitnetRequestFactory.sol";
 import "../../data/WitnetRequestFactoryData.sol";
 import "../../patterns/Clonable.sol";

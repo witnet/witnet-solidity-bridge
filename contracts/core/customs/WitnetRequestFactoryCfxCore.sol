@@ -11,7 +11,7 @@ contract WitnetRequestFactoryCfxCore
 {
     constructor(
             WitnetOracle _witnet,
-            WitnetRequestBytecodes _registry,
+            WitnetRadonRegistry _registry,
             bool _upgradable,
             bytes32 _versionTag
         )
