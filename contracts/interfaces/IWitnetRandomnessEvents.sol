@@ -8,11 +8,11 @@ import "../libs/Witnet.sol";
 /// @title The Witnet Randomness generator interface.
 /// @author Witnet Foundation.
 interface IWitnetRandomnessEvents {
+
+    /// Emitted every time a new randomize is requested.
     event Randomizing(
-            uint256 blockNumber, 
-            uint256 evmTxGasPrice,
-            uint256 evmRandomizeFee,
-            uint256 witnetQueryId, 
-            WitnetV2.RadonSLA witnetQuerySLA
-        );
+            address evmOrigin,
+            address evmSender,
+            uint256 witOracleQueryId
+    );
 }

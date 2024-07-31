@@ -391,7 +391,7 @@ abstract contract WitnetOracleTrustableBase
     /// @dev - insufficient value is paid as reward.
     /// @param _queryRAD The RAD hash of the data request to be solved by Witnet.
     /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
-    /// @return _witnetQueryId Unique query identifier.
+    /// @return _queryId Unique query identifier.
     function postRequest(
             bytes32 _queryRAD, 
             Witnet.RadonSLA calldata _querySLA
@@ -400,13 +400,16 @@ abstract contract WitnetOracleTrustableBase
         external payable
         checkReward(estimateBaseFee(_getGasPrice(), _queryRAD))
         checkSLA(_querySLA)
-        returns (uint256 _witnetQueryId)
+        returns (uint256 _queryId)
     {
-        _witnetQueryId = __postRequest(_queryRAD, _querySLA, 0);
+        _queryId = __postRequest(_queryRAD, _querySLA, 0);
         // Let Web3 observers know that a new request has been posted
         emit WitnetQuery(
-            _witnetQueryId, 
+            _msgSender(),
+            _getGasPrice(),
             _getMsgValue(),
+            _queryId, 
+            _queryRAD,
             _querySLA
         );
     }
@@ -425,7 +428,7 @@ abstract contract WitnetOracleTrustableBase
     /// @param _queryRAD The RAD hash of the data request to be solved by Witnet.
     /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @param _queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
-    /// @return _witnetQueryId Unique query identifier.
+    /// @return _queryId Unique query identifier.
     function postRequestWithCallback(
             bytes32 _queryRAD, 
             Witnet.RadonSLA calldata _querySLA,
@@ -436,16 +439,19 @@ abstract contract WitnetOracleTrustableBase
         checkCallbackRecipient(msg.sender, _queryCallbackGasLimit)
         checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  _queryCallbackGasLimit))
         checkSLA(_querySLA)
-        returns (uint256 _witnetQueryId)
+        returns (uint256 _queryId)
     {
-        _witnetQueryId = __postRequest(
+        _queryId = __postRequest(
             _queryRAD,
             _querySLA,
             _queryCallbackGasLimit
         );
         emit WitnetQuery(
-            _witnetQueryId, 
+            _msgSender(),
+            _getGasPrice(),
             _getMsgValue(),
+            _queryId,
+            _queryRAD,
             _querySLA
         );
     }
@@ -475,17 +481,20 @@ abstract contract WitnetOracleTrustableBase
         checkCallbackRecipient(msg.sender, _queryCallbackGasLimit)
         checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  _queryCallbackGasLimit))
         checkSLA(_querySLA)
-        returns (uint256 _witnetQueryId)
+        returns (uint256 _queryId)
     {
-        _witnetQueryId = __postRequest(
+        _queryId = __postRequest(
             bytes32(0),
             _querySLA,
             _queryCallbackGasLimit
         );
         WitnetOracleDataLib.seekQueryRequest(_witnetQueryId).witnetBytecode = _queryUnverifiedBytecode;
         emit WitnetQuery(
-            _witnetQueryId,
+            _msgSender(),
+            _getGasPrice(),
             _getMsgValue(),
+            _queryId,
+            _queryUnverifiedBytecode,
             _querySLA
         );
     }
@@ -500,7 +509,12 @@ abstract contract WitnetOracleTrustableBase
     {
         Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryId);
         __request.evmReward += uint72(_getMsgValue());
-        emit WitnetQueryRewardUpgraded(_witnetQueryId, __request.evmReward);
+        emit WitnetQueryUpgrade(
+            _witnetQueryId,
+            _msgSender(),
+            _getGasPrice(),
+            __request.evmReward
+        );
     }
 
     
@@ -792,12 +806,12 @@ abstract contract WitnetOracleTrustableBase
                 // => the callback reverted
                 emit WitnetQueryResponseDeliveryFailed(
                     _witnetQueryId,
-                    _witnetQueryResultCborBytes,
                     _getGasPrice(),
                     _evmCallbackActualGas,
                     bytes(_evmCallbackRevertMessage).length > 0 
                         ? _evmCallbackRevertMessage
-                        : "WitnetOracle: callback exceeded gas limit"
+                        : "WitnetOracle: callback exceeded gas limit",
+                    _witnetQueryResultCborBytes
                 );
             }
             // upon delivery, successfull or not, the audit trail is saved into storage, 

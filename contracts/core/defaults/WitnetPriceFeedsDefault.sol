@@ -742,11 +742,11 @@ contract WitnetPriceFeedsDefault
                     _usedFunds = uint(_deltaReward);
                     witnet.upgradeQueryEvmReward{value: _usedFunds}(_latestId);
                     // solhint-disable avoid-tx-origin
-                    emit WitnetFeedUpdateRequested(
-                        tx.origin, 
+                    emit PullingUpdate(
+                        tx.origin,
+                        _msgSender(),
                         feedId, 
-                        _latestId,
-                        _usedFunds
+                        _latestId
                     );
                 } else {
                     _usedFunds = 0;
@@ -772,12 +772,11 @@ contract WitnetPriceFeedsDefault
                 // Update latest query id:
                 __feed.latestUpdateQueryId = _latestId;
                 // solhint-disable avoid-tx-origin:
-                emit WitnetFeedUpdateRequested(
+                emit PullingUpdate(
                     tx.origin, 
+                    _msgSender(),
                     feedId,
-                    _latestId,
-                    _usedFunds,
-                    querySLA
+                    _latestId
                 );
             }            
         } else if (__feed.solver != address(0)) {
