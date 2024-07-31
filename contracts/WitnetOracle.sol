@@ -4,6 +4,8 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "./WitnetRequestBytecodes.sol";
 import "./WitnetRequestFactory.sol";
+
+import "./interfaces/IWitnetAppliance.sol";
 import "./interfaces/IWitnetOracle.sol";
 import "./interfaces/IWitnetOracleEvents.sol";
 
@@ -11,14 +13,7 @@ import "./interfaces/IWitnetOracleEvents.sol";
 /// @author The Witnet Foundation.
 abstract contract WitnetOracle
     is
+        IWitnetAppliance,
         IWitnetOracle,
         IWitnetOracleEvents
-{
-    function class() virtual external view returns (string memory) {
-        return type(WitnetOracle).name;
-    }
-    function channel() virtual external view returns (bytes4);
-    function factory() virtual external view returns (WitnetRequestFactory);
-    function registry() virtual external view returns (WitnetRequestBytecodes);
-    function specs() virtual external view returns (bytes4);
-}
+{}

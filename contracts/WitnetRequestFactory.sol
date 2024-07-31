@@ -3,16 +3,15 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetRequestBytecodes.sol";
-import "./WitnetOracle.sol";
+import "./interfaces/IWitnetOracleAppliance.sol";
 import "./interfaces/IWitnetRequestFactory.sol";
+import "./interfaces/IWitnetRequestFactoryEvents.sol";
+import "./interfaces/IWitnetRequestRegistryEvents.sol";
 
 abstract contract WitnetRequestFactory
     is
-        IWitnetRequestFactory
-{
-    function class() virtual external view returns (string memory);
-    function registry() virtual external view returns (WitnetRequestBytecodes);
-    function specs() virtual external view returns (bytes4);
-    function witnet() virtual external view returns (WitnetOracle);
-}
+        IWitnetOracleAppliance, 
+        IWitnetRequestFactory,
+        IWitnetRequestFactoryEvents,
+        IWitnetRequestRegistryEvents
+{}

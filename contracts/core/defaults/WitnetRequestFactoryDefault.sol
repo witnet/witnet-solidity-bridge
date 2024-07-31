@@ -21,7 +21,7 @@ contract WitnetRequestFactoryDefault
     WitnetRequestBytecodes immutable public override(WitnetRequestFactory, WitnetRequestTemplate) registry;
 
      /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
-    WitnetOracle immutable public override(WitnetRequestFactory, WitnetRequestTemplate) witnet;
+    WitnetOracle immutable public override witnet;
 
     modifier onlyDelegateCalls override(Clonable, Upgradeable) {
         require(
@@ -188,7 +188,7 @@ contract WitnetRequestFactoryDefault
     }
 
     function class()
-        virtual override(WitnetRequestFactory, WitnetRequestTemplate, WitnetUpgradableBase)
+        virtual override(IWitnetAppliance, WitnetUpgradableBase)
         public view
         returns (string memory)
     {
@@ -205,7 +205,7 @@ contract WitnetRequestFactoryDefault
     }
 
     function specs() 
-        virtual override(WitnetRequestFactory, WitnetRequestTemplate)
+        virtual override
         external view
         returns (bytes4)
     {
@@ -485,7 +485,6 @@ contract WitnetRequestFactoryDefault
         } else {
             return __witnetRequestTemplate().retrievals;
         }
-
     }
 
     function tally()

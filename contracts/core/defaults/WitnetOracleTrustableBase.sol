@@ -33,10 +33,17 @@ abstract contract WitnetOracleTrustableBase
     using Witnet for Witnet.Request;
     using Witnet for Witnet.Response;
 
-    bytes4 public immutable override specs = type(IWitnetOracle).interfaceId;
-    WitnetRequestBytecodes immutable public override registry;
-    
-    WitnetRequestFactory immutable private __factory;
+    function channel() virtual override public view returns (bytes4) {
+        return bytes4(keccak256(abi.encode(address(this), block.chainid)));
+    }
+
+    function class()
+        public view
+        virtual override(IWitnetAppliance, WitnetUpgradableBase) 
+        returns (string memory)
+    {
+        return type(WitnetOracleTrustableBase).name;
+    }
 
     modifier checkCallbackRecipient(address _addr, uint24 _callbackGasLimit) {
         _require(
@@ -126,22 +133,6 @@ abstract contract WitnetOracleTrustableBase
             Witnet.toHexString(uint8(bytes1(msg.sig << 16))),
             Witnet.toHexString(uint8(bytes1(msg.sig << 24)))
         )));
-    }
-
-    function channel() virtual override public view returns (bytes4) {
-        return bytes4(keccak256(abi.encode(address(this), block.chainid)));
-    }
-
-    function class()
-        public view
-        virtual override(WitnetOracle, WitnetUpgradableBase) 
-        returns (string memory)
-    {
-        return type(WitnetOracleTrustableBase).name;
-    }
-
-    function factory() virtual override public view returns (WitnetRequestFactory) {
-        return __factory;
     }
 
     
@@ -747,7 +738,11 @@ abstract contract WitnetOracleTrustableBase
         )));
     }
 
-    function __postRequest(bytes32 _radHash, WitnetV2.RadonSLA calldata _sla, uint24 _callbackGasLimit)
+    function __postRequest(
+            bytes32 _radHash, 
+            Witnet.RadonSLA calldata _sla, 
+            uint24 _callbackGasLimit
+        )
         virtual internal
         returns (uint256 _witnetQueryId)
     {

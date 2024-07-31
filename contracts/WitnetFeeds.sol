@@ -4,7 +4,8 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "./interfaces/IFeeds.sol";
 import "./interfaces/IWitnetFeeds.sol";
-import "./interfaces/IWitnetFeedsAdmin.sol";
+import "./interfaces/IWitnetFeedsEvents.sol";
+import "./interfaces/IWitnetOracleAppliance.sol";
 
 import "ado-contracts/contracts/interfaces/IERC2362.sol";
 
@@ -13,14 +14,12 @@ abstract contract WitnetFeeds
         IERC2362,
         IFeeds,
         IWitnetFeeds,
-        IWitnetFeedsAdmin,
+        IWitnetFeedsEvents,
+        IWitnetOracleAppliance,
         IWitnetOracleEvents
 {
     Witnet.RadonDataTypes immutable public override dataType;
-
-    function class() virtual external view returns (string memory);
-    function specs() virtual external view returns (bytes4);
-    function witnet() virtual external view returns (WitnetOracle);
+    bytes32 immutable internal __prefix;
 
     constructor(
             Witnet.RadonDataTypes _dataType,
@@ -30,8 +29,6 @@ abstract contract WitnetFeeds
         dataType = _dataType;
         __prefix = Witnet.toBytes32(bytes(_prefix));
     }
-
-    bytes32 immutable internal __prefix;
 
     function prefix() override public view returns (string memory) {
         return Witnet.toString(__prefix);

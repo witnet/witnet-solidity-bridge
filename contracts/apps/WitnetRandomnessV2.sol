@@ -18,7 +18,7 @@ contract WitnetRandomnessV2
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
-    using WitnetV2 for WitnetV2.RadonSLA;
+    using Witnet for Witnet.RadonSLA;
 
     struct Randomize {
         uint256 witnetQueryId;
@@ -52,7 +52,7 @@ contract WitnetRandomnessV2
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
             _retrievals[0] = _registry.verifyRadonRetrieval(
-                Witnet.RadonDataRequestMethods.RNG,
+                Witnet.RadonRetrievalMethods.RNG,
                 "", // no request url
                 "", // no request body
                 new string[2][](0), // no request headers
@@ -99,7 +99,7 @@ contract WitnetRandomnessV2
         return type(WitnetRandomness).interfaceId;
     }
 
-    function witnet() override (IWitnetRandomness, UsingWitnet)
+    function witnet() override (IWitnetOracleAppliance, UsingWitnet)
         public view returns (WitnetOracle)
     {
         return UsingWitnet.witnet();
@@ -161,14 +161,14 @@ contract WitnetRandomnessV2
             "not randomized"
         );
         
-        WitnetV2.ResponseStatus _status = __witnet.getQueryResponseStatus(_witnetQueryId);
-        if (_status == WitnetV2.ResponseStatus.Ready) {
+        Witnet.ResponseStatus _status = __witnet.getQueryResponseStatus(_witnetQueryId);
+        if (_status == Witnet.ResponseStatus.Ready) {
             return (
                 __witnet.getQueryResultCborBytes(_witnetQueryId)
                     .toWitnetResult()
                     .asBytes32()
             );
-        } else if (_status == WitnetV2.ResponseStatus.Error) {
+        } else if (_status == Witnet.ResponseStatus.Error) {
             uint256 _nextRandomizeBlock = __randomize.nextBlock;
             _require(
                 _nextRandomizeBlock != 0, 
@@ -214,15 +214,15 @@ contract WitnetRandomnessV2
             "not randomized"
         );
         
-        WitnetV2.ResponseStatus _status = __witnet.getQueryResponseStatus(_witnetQueryId);
-        if (_status == WitnetV2.ResponseStatus.Ready) {
-            WitnetV2.Response memory _witnetQueryResponse = __witnet.getQueryResponse(_witnetQueryId);
+        Witnet.ResponseStatus _status = __witnet.getQueryResponseStatus(_witnetQueryId);
+        if (_status == Witnet.ResponseStatus.Ready) {
+            Witnet.Response memory _witnetQueryResponse = __witnet.getQueryResponse(_witnetQueryId);
             _witnetResultTimestamp = _witnetQueryResponse.resultTimestamp;
             _witnetResultTallyHash = _witnetQueryResponse.resultTallyHash;
             _witnetResultFinalityBlock = _witnetQueryResponse.finality;
             _witnetResultRandomness = _witnetQueryResponse.resultCborBytes.toWitnetResult().asBytes32();
 
-        } else if (_status == WitnetV2.ResponseStatus.Error) {
+        } else if (_status == Witnet.ResponseStatus.Error) {
             uint256 _nextRandomizeBlock = __randomize.nextBlock;
             _require(
                 _nextRandomizeBlock != 0, 
@@ -307,23 +307,23 @@ contract WitnetRandomnessV2
     function getRandomizeStatus(uint256 _blockNumber)
         virtual override
         public view 
-        returns (WitnetV2.ResponseStatus)
+        returns (Witnet.ResponseStatus)
     {
         if (__storage().randomize_[_blockNumber].witnetQueryId == 0) {
             _blockNumber = getRandomizeNextBlock(_blockNumber);
         }
         uint256 _witnetQueryId = __storage().randomize_[_blockNumber].witnetQueryId;
         if (_witnetQueryId == 0) {
-            return WitnetV2.ResponseStatus.Void;
+            return Witnet.ResponseStatus.Void;
         
         } else {
-            WitnetV2.ResponseStatus _status = __witnet.getQueryResponseStatus(_witnetQueryId);
-            if (_status == WitnetV2.ResponseStatus.Error) {
+            Witnet.ResponseStatus _status = __witnet.getQueryResponseStatus(_witnetQueryId);
+            if (_status == Witnet.ResponseStatus.Error) {
                 uint256 _nextRandomizeBlock = __storage().randomize_[_blockNumber].nextBlock;
                 if (_nextRandomizeBlock != 0) {
                     return getRandomizeStatus(_nextRandomizeBlock);
                 } else {
-                    return WitnetV2.ResponseStatus.Error;
+                    return Witnet.ResponseStatus.Error;
                 }
             } else {
                 return _status;
@@ -339,7 +339,7 @@ contract WitnetRandomnessV2
         returns (bool)
     {
         return (
-            getRandomizeStatus(_blockNumber) == WitnetV2.ResponseStatus.Ready
+            getRandomizeStatus(_blockNumber) == Witnet.ResponseStatus.Ready
         );
     }
 
@@ -354,7 +354,7 @@ contract WitnetRandomnessV2
         virtual override
         returns (uint32)
     {
-        return WitnetV2.randomUniformUint32(
+        return Witnet.randomUniformUint32(
             _range,
             _nonce,
             keccak256(
@@ -413,7 +413,7 @@ contract WitnetRandomnessV2
     function witnetQuerySLA() 
         virtual override
         external view
-        returns (WitnetV2.RadonSLA memory)
+        returns (Witnet.RadonSLA memory)
     {
         return __witnetDefaultSLA;
     }
@@ -469,7 +469,7 @@ contract WitnetRandomnessV2
         __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function settleWitnetQuerySLA(WitnetV2.RadonSLA calldata _witnetQuerySLA)
+    function settleWitnetQuerySLA(Witnet.RadonSLA calldata _witnetQuerySLA)
         virtual override
         external
         onlyOwner

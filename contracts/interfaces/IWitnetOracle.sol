@@ -3,7 +3,13 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "../libs/Witnet.sol";
 
+import "../WitnetRequestBytecodes.sol";
+import "../WitnetRequestFactory.sol";
+
 interface IWitnetOracle {
+
+    /// @notice Uniquely identifies the WitnetOracle addrees and the chain on which it's deployed.
+    function channel() external view returns (bytes4);
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
@@ -21,6 +27,10 @@ interface IWitnetOracle {
     /// @param gasPrice Expected gas price to pay upon posting the data request.
     /// @param callbackGasLimit Maximum gas to be spent when reporting the data request result.
     function estimateBaseFeeWithCallback(uint256 gasPrice, uint24 callbackGasLimit) external view returns (uint256);
+
+    /// @notice Returns the address of the WitnetRequestFactory appliance capable of building compliant data request
+    /// @notice  templates verified into the same WitnetRequestBytecodes instance returned by registry().
+    function factory() external view returns (WitnetRequestFactory);
        
     /// @notice Retrieves a copy of all Witnet-provable data related to a previously posted request, 
     /// removing the whole query from the WRB storage.
@@ -124,6 +134,11 @@ interface IWitnetOracle {
             Witnet.RadonSLA calldata querySLA, 
             uint24 queryCallbackGasLimit
         ) external payable returns (uint256 queryId);    
+
+    /// @notice Returns the singleton WitnetRequestBytecodes in which all Witnet-compliant data requests 
+    /// @notice and templates must be previously verified so they can be passed as reference when 
+    /// @notice calling postRequest(bytes32,..) methods.
+    function registry() external view returns (WitnetRequestBytecodes);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     /// @param queryId The unique query identifier.

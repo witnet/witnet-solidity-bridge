@@ -11,5 +11,5 @@ interface IWitnetRandomnessAdmin {
     function pendingOwner() external returns (address);
     function transferOwnership(address) external;
     function settleBaseFeeOverheadPercentage(uint16) external;
-    function settleWitnetQuerySLA(WitnetV2.RadonSLA calldata) external;
+    function settleWitnetQuerySLA(Witnet.RadonSLA calldata) external;
 }

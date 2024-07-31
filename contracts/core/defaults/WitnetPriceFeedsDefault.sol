@@ -8,6 +8,9 @@ import "../WitnetUpgradableBase.sol";
 import "../../WitnetPriceFeeds.sol";
 
 import "../../data/WitnetPriceFeedsData.sol";
+import "../../interfaces/IWitnetFeedsAdmin.sol";
+import "../../interfaces/IWitnetPriceSolverDeployer.sol";
+
 import "../../libs/WitnetPriceFeedsLib.sol";
 import "../../patterns/Ownable2Step.sol";
 
@@ -19,21 +22,23 @@ contract WitnetPriceFeedsDefault
         Ownable2Step,
         WitnetPriceFeeds,
         WitnetPriceFeedsData,
-        WitnetUpgradableBase
+        WitnetUpgradableBase,
+        IWitnetFeedsAdmin,
+        IWitnetPriceSolverDeployer
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
     using Witnet for Witnet.Response;
     using Witnet for Witnet.RadonSLA;
 
-    function class() virtual override(WitnetFeeds, WitnetUpgradableBase) public view returns (string memory) {
+    function class() virtual override(IWitnetAppliance, WitnetUpgradableBase) public view returns (string memory) {
         return type(WitnetPriceFeedsDefault).name;
     }
 
     bytes4 immutable public override specs = type(IWitnetPriceFeeds).interfaceId;
     WitnetOracle immutable public override witnet;
 
-    WitnetV2.RadonSLA private __defaultRadonSLA;
+    Witnet.RadonSLA private __defaultRadonSLA;
     uint16 private __baseFeeOverheadPercentage;
     
     constructor(

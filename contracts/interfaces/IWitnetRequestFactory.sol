@@ -3,8 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 interface IWitnetRequestFactory {
-    
-    event WitnetRequestTemplateBuilt(address template, bool parameterized);
+
     
     function buildRequestTemplate(
             bytes32[] memory sourcesIds,

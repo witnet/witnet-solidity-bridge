@@ -31,7 +31,7 @@ contract WitnetRequestBytecodesDefault
 
     function class()
         public view
-        virtual override(WitnetRequestBytecodes, WitnetUpgradableBase) 
+        virtual override(IWitnetAppliance, WitnetUpgradableBase) 
         returns (string memory)
     {
         return type(WitnetRequestBytecodesDefault).name;

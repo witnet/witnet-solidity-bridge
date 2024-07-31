@@ -94,14 +94,11 @@ interface IWitnetRandomness {
     /// @return Funds actually paid as randomize fee. 
     function randomize() external payable returns (uint256);
 
-    /// @notice Returns address of the Witnet Oracle bridging contract being used for solving randomness requests.
-    function witnet() external view returns (WitnetOracle);
-
     /// @notice Returns the SLA parameters required for the Witnet Oracle blockchain to fulfill 
     /// @notice when solving randomness requests:
     /// @notice - number of witnessing nodes contributing to randomness generation
     /// @notice - reward in $nanoWIT received per witnessing node in the Witnet blockchain
-    function witnetQuerySLA() external view returns (WitnetV2.RadonSLA memory);
+    function witnetQuerySLA() external view returns (Witnet.RadonSLA memory);
 
     /// @notice Returns the unique identifier of the Witnet-compliant data request being used for solving randomness.
     function witnetRadHash() external view returns (bytes32);
