@@ -125,7 +125,7 @@ contract WitnetPriceFeedsDefault
             "WitnetPriceFeeds: inexistent oracle"
         );
         require(
-            witnet.specs() == type(IWitnetOracle).interfaceId, 
+            witnet.specs() == type(WitnetOracle).interfaceId, 
             "WitnetPriceFeeds: uncompliant oracle"
         );
         emit Upgraded(_owner, base(), codehash(), version());
@@ -222,7 +222,7 @@ contract WitnetPriceFeedsDefault
         return __defaultRadonSLA;
     }
     
-    function estimateUpdateBaseFee(uint256 _evmGasPrice)
+    function estimateUpdateRequestFee(uint256 _evmGasPrice)
         virtual override
         public view
         returns (uint)
@@ -241,7 +241,7 @@ contract WitnetPriceFeedsDefault
 
     function lastValidResponse(bytes4 feedId)
         override public view
-        returns (WitnetV2.Response memory)
+        returns (Witnet.Response memory)
     {
         return witnet.getQueryResponse(_lastValidQueryId(feedId));
     }
@@ -731,7 +731,7 @@ contract WitnetPriceFeedsDefault
     {
         Record storage __feed = __records_(feedId);
         if (__feed.radHash != 0) {
-            _usedFunds = estimateUpdateBaseFee(tx.gasprice);
+            _usedFunds = estimateUpdateRequestFee(_getGasPrice());
             require(
                 msg.value >= _usedFunds, 
                 "WitnetPriceFeeds: insufficient reward"

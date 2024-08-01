@@ -6,6 +6,12 @@ import "../libs/Witnet.sol";
 import "../WitnetRequest.sol";
 
 interface IWitnetFeedsAdmin {
+
+    event WitnetFeedDeleted(bytes4 feedId);
+    event WitnetFeedSettled(bytes4 feedId, bytes32 radHash);
+    event WitnetFeedSolverSettled(bytes4 feedId, address solver);
+    event WitnetRadonSLA(Witnet.RadonSLA sla);
+
     function acceptOwnership() external;
     function baseFeeOverheadPercentage() external view returns (uint16);
     function deleteFeed(string calldata caption) external;
