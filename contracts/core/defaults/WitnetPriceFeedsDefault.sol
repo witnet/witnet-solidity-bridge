@@ -35,7 +35,7 @@ contract WitnetPriceFeedsDefault
         return type(WitnetPriceFeedsDefault).name;
     }
 
-    bytes4 immutable public override specs = type(IWitnetPriceFeeds).interfaceId;
+    bytes4 immutable public override specs = type(WitnetPriceFeeds).interfaceId;
     WitnetOracle immutable public override witnet;
 
     Witnet.RadonSLA private __defaultRadonSLA;

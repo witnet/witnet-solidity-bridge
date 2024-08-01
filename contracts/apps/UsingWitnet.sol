@@ -28,7 +28,7 @@ abstract contract UsingWitnet
     /// @param _wrb Address of the WitnetOracle contract.
     constructor(WitnetOracle _wrb) {
         require(
-            _wrb.specs() == type(IWitnetOracle).interfaceId,
+            _wrb.specs() == type(WitnetOracle).interfaceId,
             "UsingWitnet: uncompliant WitnetOracle"
         );
         __witnet = _wrb;

@@ -44,7 +44,7 @@ contract WitnetRandomnessV2
     {
         _require(
             address(_witnet) == address(0)
-                || _witnet.specs() == type(IWitnetOracle).interfaceId,
+                || _witnet.specs() == type(WitnetOracle).interfaceId,
             "uncompliant WitnetOracle"
         );
         WitnetRequestBytecodes _registry = witnet().registry();

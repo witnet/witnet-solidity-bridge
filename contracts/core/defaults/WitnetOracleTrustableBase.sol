@@ -32,6 +32,7 @@ abstract contract WitnetOracleTrustableBase
     using Witnet for Witnet.RadonSLA;
     using Witnet for Witnet.Request;
     using Witnet for Witnet.Response;
+    bytes4 public immutable override specs = type(WitnetOracle).interfaceId;
 
     function channel() virtual override public view returns (bytes4) {
         return bytes4(keccak256(abi.encode(address(this), block.chainid)));

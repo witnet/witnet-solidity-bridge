@@ -308,7 +308,7 @@ contract WitnetRequestFactoryDefault
         __proxiable().implementation = base();
 
         require(address(registry).code.length > 0, "WitnetRequestFactory: inexistent requests registry");
-        require(registry.specs() == type(IWitnetRequestBytecodes).interfaceId, "WitnetRequestFactory: uncompliant requests registry");
+        require(registry.specs() == type(WitnetRadonRegistry).interfaceId, "WitnetRequestFactory: uncompliant requests registry");
         
         emit Upgraded(msg.sender, base(), codehash(), version());
     }
