@@ -20,7 +20,7 @@ const artifacts = settings.getArtifacts(network)
 const impls = [
   artifacts.WitnetOracle,
   artifacts.WitnetPriceFeeds,
-  artifacts.WitnetRequestBytecodes,
+  artifacts.WitnetRadonRegistry,
   artifacts.WitnetRequestFactory,
 ]
 const constructorArgs = require("../migrations/constructorArgs.json")

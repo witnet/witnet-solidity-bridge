@@ -4,7 +4,7 @@ module.exports = {
     WitnetOracle: "WitnetOracleTrustableDefault",
     WitnetPriceFeeds: "WitnetPriceFeedsDefault",
     WitnetRandomness: "WitnetRandomnessV2",
-    WitnetRequestBytecodes: "WitnetRequestBytecodesDefault",
+    WitnetRadonRegistry: "WitnetRadonRegistryDefault",
     WitnetRequestFactory: "WitnetRequestFactoryDefault",
     WitnetEncodingLib: "WitnetEncodingLib",
     WitnetErrorsLib: "WitnetErrorsLib",
@@ -36,22 +36,22 @@ module.exports = {
     WitnetOracle: "WitnetOracleTrustableOvm2",
   },
   "okx:x1:mainnet": {
-    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
+    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
   },
   "okx:x1:sepolia": {
-    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
+    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
   },
   "polygon:zkevm:goerli": {
-    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
+    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
   },
   "polygon:zkevm:mainnet": {
-    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
+    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
   },
   reef: {
     WitnetOracle: "WitnetOracleTrustableReef",
   },
   scroll: {
-    WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
+    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
   },
   "syscoin:rollux:testnet": {
     WitnetOracle: "WitnetOracleTrustableOvm2",

@@ -22,7 +22,7 @@ module.exports = {
       from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",
       vanity: 1060132513, // 0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB
     },
-    WitnetRequestBytecodes: {
+    WitnetRadonRegistry: {
       libs: ["WitnetEncodingLib"],
       vanity: 6765579443, // 0x000B61Fe075F545fd37767f40391658275900000
     },
@@ -45,7 +45,7 @@ module.exports = {
       from: "0x1169bf81ecf738d02fd8d3824dfe02153b334ef7",
       vanity: 5,
     },
-    WitnetRequestBytecodes: {
+    WitnetRadonRegistry: {
       vanity: 1,
     },
     WitnetRequestFactory: {
@@ -67,7 +67,7 @@ module.exports = {
       from: "0x1169Bf81ecf738d02fd8d3824dfe02153B334eF7",
       vanity: 5,
     },
-    WitnetRequestBytecodes: {
+    WitnetRadonRegistry: {
       vanity: 1,
     },
     WitnetRequestFactory: {

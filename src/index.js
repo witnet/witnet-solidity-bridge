@@ -36,7 +36,7 @@ module.exports = {
     WitnetPriceRouteSolver: require("../artifacts/contracts/interfaces/IWitnetPriceSolver.sol/IWitnetPriceSolver.json"),
     WitnetRandomness: require("../artifacts/contracts/WitnetRandomness.sol/WitnetRandomness.json"),
     WitnetRequest: require("../artifacts/contracts/WitnetRequest.sol/WitnetRequest.json"),
-    WitnetRequestBytecodes: require("../artifacts/contracts/WitnetRequestBytecodes.sol/WitnetRequestBytecodes.json"),
+    WitnetRadonRegistry: require("../artifacts/contracts/WitnetRadonRegistry.sol/WitnetRadonRegistry.json"),
     WitnetRequestFactory: require("../artifacts/contracts/WitnetRequestFactory.sol/WitnetRequestFactory.json"),
     WitnetRequestTemplate: require("../artifacts/contracts/WitnetRequestTemplate.sol/WitnetRequestTemplate.json"),
     WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json"),

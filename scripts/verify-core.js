@@ -23,7 +23,7 @@ const addresses = require("../migrations/addresses.json")
 const singletons = [
   "WitnetOracle",
   "WitnetPriceFeeds",
-  "WitnetRequestBytecodes",
+  "WitnetRadonRegistry",
   "WitnetRequestFactory",
 ]
 for (const index in singletons) {

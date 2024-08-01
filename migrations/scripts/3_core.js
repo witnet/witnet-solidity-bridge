@@ -14,15 +14,15 @@ module.exports = async function (_, network, [, from]) {
   const targets = settings.getArtifacts(network)
 
   // ==========================================================================
-  // --- WitnetRequestBytecodes core implementation ---------------------------
+  // --- WitnetRadonRegistry core implementation ---------------------------
 
   await deploy({
     network,
     targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetRequestBytecodes.from || from,
-    key: targets.WitnetRequestBytecodes,
-    libs: specs.WitnetRequestBytecodes.libs,
-    immutables: specs.WitnetRequestBytecodes.immutables,
+    from: utils.isDryRun(network) ? from : specs.WitnetRadonRegistry.from || from,
+    key: targets.WitnetRadonRegistry,
+    libs: specs.WitnetRadonRegistry.libs,
+    immutables: specs.WitnetRadonRegistry.immutables,
     intrinsics: {
       types: ["bool", "bytes32"],
       values: [
@@ -46,7 +46,7 @@ module.exports = async function (_, network, [, from]) {
       types: ["address", "address", "bool", "bytes32"],
       values: [
         /* _witnet     */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
-        /* _registry   */ await determineProxyAddr(from, specs.WitnetRequestBytecodes?.vanity || 1),
+        /* _registry   */ await determineProxyAddr(from, specs.WitnetRadonRegistry?.vanity || 1),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],
@@ -67,7 +67,7 @@ module.exports = async function (_, network, [, from]) {
       types: ["address", "address", "bool", "bytes32"],
       values: [
         /* _factory    */ await determineProxyAddr(from, specs.WitnetRequestFactory?.vanity || 2),
-        /* _registry   */ await determineProxyAddr(from, specs.WitnetRequestBytecodes?.vanity || 1),
+        /* _registry   */ await determineProxyAddr(from, specs.WitnetRadonRegistry?.vanity || 1),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],
