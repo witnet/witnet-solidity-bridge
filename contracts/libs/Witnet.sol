@@ -377,15 +377,14 @@ library Witnet {
     }
 
     struct RadonSLA {
-        /// @notice Number of nodes in the Witnet blockchain that will take part in solving the data request. 
-        uint8   committeeSize;
+        /// Number of witnessing nodes in the Witnet blockchain that contribute to solve some data query.
+        uint8  witNumWitnesses;
         
-        /// @notice Fee in $nanoWIT paid to every node in the Witnet blockchain involved in solving the data request.
-        /// @dev Witnet nodes participating as witnesses will have to stake as collateral 100x this amount.
-        uint64  witnessingFeeNanoWit;
+        /// Reward in $nanoWit ultimately paid to every earnest node in the Wit/oracle blockchain contributing to solve some data query.        
+        uint64 witUnitaryReward; 
 
-        /// @notice Maximum size accepted for the CBOR-encoded buffer containing successfull Tally Result values.
-        //uint16  maxTallyResultSize;
+        /// Maximum size accepted for the CBOR-encoded buffer containing successfull result values.
+        uint16 maxTallyResultSize; 
     }
 
     /// Structure containing the SLA security parameters of a Witnet-compliant Data Request.
@@ -395,6 +394,43 @@ library Witnet {
         uint64 witnessReward;
         uint64 witnessCollateral;
         uint64 minerCommitRevealFee;
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'Witnet.RadonSLA' helper methods ------------------------------------------------------------------------
+
+    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
+        internal pure returns (bool)
+    {
+        return (
+            a.witNumWitnesses >= b.witNumWitnesses
+                && a.witUnitaryReward >= b.witUnitaryReward
+                && a.maxTallyResultSize >= b.maxTallyResultSize
+        );
+    }
+     
+    function isValid(RadonSLA memory sla) internal pure returns (bool) {
+        return (
+            sla.witUnitaryReward > 0 
+                && sla.witNumWitnesses > 0 && sla.witNumWitnesses <= 127
+                && sla.maxTallyResultSize > 0
+        );
+    }
+
+    function toV1(RadonSLA memory self) internal pure returns (Witnet.RadonSLAv1 memory) {
+        return Witnet.RadonSLAv1({
+            numWitnesses: self.witNumWitnesses,
+            minConsensusPercentage: 51,
+            witnessReward: self.witUnitaryReward,
+            witnessCollateral: self.witUnitaryReward * 100,
+            minerCommitRevealFee: self.witUnitaryReward / self.witNumWitnesses
+        });
+    }
+
+    /// Sum of all rewards in $nanoWit to be paid to nodes in the Wit/oracle blockchain that contribute to solve some data query.
+    function witTotalReward(RadonSLA storage self) internal view returns (uint64) {
+        return self.witUnitaryReward / (self.witNumWitnesses + 3);
     }
 
 
@@ -720,37 +756,6 @@ library Witnet {
         returns (uint[] memory)
     {
         return result.value.readUintArray();
-    }
-
-        
-    /// ===============================================================================================================
-    /// --- 'Witnet.RadonSLA' helper methods ------------------------------------------------------------------------
-
-    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
-        internal pure returns (bool)
-    {
-        return (a.committeeSize >= b.committeeSize);
-    }
-     
-    function isValid(RadonSLA calldata sla) internal pure returns (bool) {
-        return (
-            sla.witnessingFeeNanoWit > 0 
-                && sla.committeeSize > 0 && sla.committeeSize <= 127
-        );
-    }
-
-    function toV1(RadonSLA memory self) internal pure returns (Witnet.RadonSLAv1 memory) {
-        return Witnet.RadonSLAv1({
-            numWitnesses: self.committeeSize,
-            minConsensusPercentage: 51,
-            witnessReward: self.witnessingFeeNanoWit,
-            witnessCollateral: self.witnessingFeeNanoWit * 100,
-            minerCommitRevealFee: self.witnessingFeeNanoWit / self.committeeSize
-        });
-    }
-
-    function nanoWitTotalFee(RadonSLA storage self) internal view returns (uint64) {
-        return self.witnessingFeeNanoWit * (self.committeeSize + 3);
     }
 
 

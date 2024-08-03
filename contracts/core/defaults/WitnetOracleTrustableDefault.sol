@@ -68,23 +68,6 @@ contract WitnetOracleTrustableDefault
         );
     }
 
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256 _gasPrice, uint16 _resultMaxSize)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return _gasPrice * (
-            __reportResultGasBase
-                + __sstoreFromZeroGas * (
-                    4 + (_resultMaxSize == 0 ? 0 : _resultMaxSize - 1) / 32
-                )
-        );
-    }
-
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
     /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
@@ -133,10 +116,31 @@ contract WitnetOracleTrustableDefault
         returns (uint256)
     {
         return (
-            _evmWitPrice * ((3 + _querySLA.witnessingCommitteeSize) * _querySLA.witnessingReward)
+            _evmWitPrice * ((3 + _querySLA.witNumWitnesses) * _querySLA.witUnitaryReward)
                 + (_querySLA.maxTallyResultSize > 32
                     ? _evmGasPrice * __sstoreFromZeroGas * ((_querySLA.maxTallyResultSize - 32) / 32)
                     : 0
+                )
+        );
+    }
+
+
+    /// ===============================================================================================================
+    /// --- IWitnetOracleLegacy ---------------------------------------------------------------------------------------
+
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
+    function estimateBaseFee(uint256 _gasPrice, uint16 _resultMaxSize)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return _gasPrice * (
+            __reportResultGasBase
+                + __sstoreFromZeroGas * (
+                    4 + (_resultMaxSize == 0 ? 0 : _resultMaxSize - 1) / 32
                 )
         );
     }

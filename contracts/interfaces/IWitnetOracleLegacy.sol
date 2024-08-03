@@ -14,4 +14,12 @@ interface IWitnetOracleLegacy {
     /// @param gasPrice Expected gas price to pay upon posting the data request.
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     function estimateBaseFee(uint256 gasPrice, bytes32 radHash) external view returns (uint256);
+
+    struct RadonSLA {
+        uint8 witNumWitnesses;
+        uint64 witUnitaryReward;
+    }
+    function postRequest(bytes32, RadonSLA calldata) external payable returns (uint256);
+    function postRequestWithCallback(bytes32, RadonSLA calldata, uint24) external payable returns (uint256);
+    function postRequestWithCallback(bytes calldata, RadonSLA calldata, uint24) external payable returns (uint256);
 }

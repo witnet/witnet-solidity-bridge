@@ -70,9 +70,9 @@ abstract contract WitnetOracleTrustableBase
         _;
     }
 
-    modifier checkSLA(Witnet.RadonSLA calldata sla) {
+    modifier checkSLA(Witnet.RadonSLA memory sla) {
         _require(
-            Witnet.isValid(sla), 
+            sla.isValid(), 
             "invalid SLA"
         ); _;
     }
@@ -145,18 +145,9 @@ abstract contract WitnetOracleTrustableBase
     // ================================================================================================================
     // --- Yet to be implemented virtual methods ----------------------------------------------------------------------
 
-
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @param evmGasPrice Expected gas price to pay upon posting the data request.
-    function estimateBaseFee(uint256 evmGasPrice)
-        virtual public view returns (uint256);
-
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param evmGasPrice Expected gas price to pay upon posting the data request.
-    /// @param maxResultSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256 evmGasPrice, uint16 maxResultSize)
-        virtual public view returns (uint256); 
+    function estimateBaseFee(uint256 evmGasPrice) virtual public view returns (uint256);
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param evmGasPrice Expected gas price to pay upon posting the data request.
@@ -234,22 +225,6 @@ abstract contract WitnetOracleTrustableBase
 
     // ================================================================================================================
     // --- Partial implementation of IWitnetOracle --------------------------------------------------------------
-
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
-    /// @param gasPrice Expected gas price to pay upon posting the data request.
-    /// @param radHash The hash of some Witnet Data Request previously posted in the WitnetRadonRegistry registry.
-    function estimateBaseFee(uint256 gasPrice, bytes32 radHash)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        // Check this rad hash is actually verified:
-        registry.lookupRadonRequestResultDataType(radHash);
-
-        // Base fee is actually invariant to max result size:
-        return estimateBaseFee(gasPrice);
-    }
 
     /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
     /// @dev Fails if the `_witnetQueryId` is not in 'Reported' status, or called from an address different to
@@ -396,10 +371,10 @@ abstract contract WitnetOracleTrustableBase
     /// @return _queryId Unique query identifier.
     function postRequest(
             bytes32 _queryRAD, 
-            Witnet.RadonSLA calldata _querySLA
+            Witnet.RadonSLA memory _querySLA
         )
         virtual override
-        external payable
+        public payable
         checkReward(estimateBaseFee(_getGasPrice(), _queryRAD))
         checkSLA(_querySLA)
         returns (uint256 _queryId)
@@ -433,11 +408,11 @@ abstract contract WitnetOracleTrustableBase
     /// @return _queryId Unique query identifier.
     function postRequestWithCallback(
             bytes32 _queryRAD, 
-            Witnet.RadonSLA calldata _querySLA,
+            Witnet.RadonSLA memory _querySLA,
             uint24 _queryCallbackGasLimit
         )
         virtual override
-        external payable 
+        public payable 
         checkCallbackRecipient(msg.sender, _queryCallbackGasLimit)
         checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  _queryCallbackGasLimit))
         checkSLA(_querySLA)
@@ -475,11 +450,11 @@ abstract contract WitnetOracleTrustableBase
     /// @return _queryId Unique query identifier.
     function postRequestWithCallback(
             bytes calldata _queryUnverifiedBytecode,
-            Witnet.RadonSLA calldata _querySLA, 
+            Witnet.RadonSLA memory _querySLA, 
             uint24 _queryCallbackGasLimit
         )
         virtual override
-        external payable 
+        public payable 
         checkCallbackRecipient(msg.sender, _queryCallbackGasLimit)
         checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  _queryCallbackGasLimit))
         checkSLA(_querySLA)
@@ -519,6 +494,91 @@ abstract contract WitnetOracleTrustableBase
         );
     }
 
+
+    /// ===============================================================================================================
+    /// --- IWitnetOracleLegacy ---------------------------------------------------------------------------------------
+
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
+    /// @param evmGasPrice Expected gas price to pay upon posting the data request.
+    /// @param maxResultSize Maximum expected size of returned data (in bytes).
+    function estimateBaseFee(uint256 evmGasPrice, uint16 maxResultSize)
+        virtual public view returns (uint256); 
+
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
+    /// @param gasPrice Expected gas price to pay upon posting the data request.
+    /// @param radHash The hash of some Witnet Data Request previously posted in the WitnetRadonRegistry registry.
+    function estimateBaseFee(uint256 gasPrice, bytes32 radHash)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        // Check this rad hash is actually verified:
+        registry.lookupRadonRequestResultDataType(radHash);
+
+        // Base fee is actually invariant to max result size:
+        return estimateBaseFee(gasPrice);
+    }
+
+    function postRequest(
+            bytes32 _queryRadHash, 
+            IWitnetOracleLegacy.RadonSLA calldata _querySLA
+        )
+        virtual override
+        external payable
+        returns (uint256)
+    {
+        return postRequest(
+            _queryRadHash,
+            Witnet.RadonSLA({
+                witNumWitnesses: _querySLA.witNumWitnesses,
+                witUnitaryReward: _querySLA.witUnitaryReward,
+                maxTallyResultSize: 32
+            })
+        );
+    }
+
+    function postRequestWithCallback(
+            bytes32 _queryRadHash,
+            IWitnetOracleLegacy.RadonSLA calldata _querySLA,
+            uint24 _queryCallbackGas
+        )
+        virtual override
+        external payable
+        returns (uint256)
+    {
+        return postRequestWithCallback(
+            _queryRadHash,
+            Witnet.RadonSLA({
+                witNumWitnesses: _querySLA.witNumWitnesses,
+                witUnitaryReward: _querySLA.witUnitaryReward,
+                maxTallyResultSize: 32
+            }),
+            _queryCallbackGas
+        );
+    }
+
+    function postRequestWithCallback(
+            bytes calldata _queryRadBytecode,
+            IWitnetOracleLegacy.RadonSLA calldata _querySLA,
+            uint24 _queryCallbackGas
+        )
+        virtual override
+        external payable
+        returns (uint256)
+    {
+        return postRequestWithCallback(
+            _queryRadBytecode,
+            Witnet.RadonSLA({
+                witNumWitnesses: _querySLA.witNumWitnesses,
+                witUnitaryReward: _querySLA.witUnitaryReward,
+                maxTallyResultSize: 32
+            }),
+            _queryCallbackGas
+        );
+    }
+
     
     // ================================================================================================================
     // --- Full implementation of IWitnetOracleReporter ---------------------------------------------------------
@@ -548,8 +608,8 @@ abstract contract WitnetOracleTrustableBase
                                 _evmGasPrice,
                                 _evmWitPrice,
                                 Witnet.RadonSLA({
-                                    witnessingCommitteeSize: __request.witnetSLA.witnessingCommitteeSize,
-                                    witnessingReward: __request.witnetSLA.witnessingReward,
+                                    witNumWitnesses: __request.witnetSLA.witNumWitnesses,
+                                    witUnitaryReward: __request.witnetSLA.witUnitaryReward,
                                     maxTallyResultSize: uint16(0)
                                 })
                             )
@@ -564,7 +624,7 @@ abstract contract WitnetOracleTrustableBase
                             )
                     );
                 }
-                _expenses +=  _evmWitPrice * __request.witnetSLA.witnessingTotalReward();
+                _expenses +=  _evmWitPrice * __request.witnetSLA.witUnitaryReward;
                 _revenues += __request.evmReward;
             }
         }
@@ -766,7 +826,7 @@ abstract contract WitnetOracleTrustableBase
 
     function __postRequest(
             bytes32 _radHash, 
-            Witnet.RadonSLA calldata _sla, 
+            Witnet.RadonSLA memory _sla, 
             uint24 _callbackGasLimit
         )
         virtual internal

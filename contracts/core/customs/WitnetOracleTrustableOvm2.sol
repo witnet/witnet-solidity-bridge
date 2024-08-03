@@ -155,8 +155,8 @@ contract WitnetOracleTrustableOvm2
                                 _evmGasPrice,
                                 _evmWitPrice,
                                 Witnet.RadonSLA({
-                                    witnessingCommitteeSize: __request.witnetSLA.witnessingCommitteeSize,
-                                    witnessingReward: __request.witnetSLA.witnessingReward,
+                                    witNumWitnesses: __request.witnetSLA.witNumWitnesses,
+                                    witUnitaryReward: __request.witnetSLA.witUnitaryReward,
                                     maxTallyResultSize: uint16(0)
                                 })
                             )
@@ -171,7 +171,7 @@ contract WitnetOracleTrustableOvm2
                             )
                     );
                 }
-                _expenses += __request.witnetSLA.witnessingTotalReward() * _evmWitPrice;
+                _expenses += __request.witnetSLA.witUnitaryReward * _evmWitPrice;
                 _revenues += __request.evmReward;
             }
         }

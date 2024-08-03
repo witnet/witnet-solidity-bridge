@@ -8,6 +8,7 @@ import "../WitnetUpgradableBase.sol";
 import "../../WitnetPriceFeeds.sol";
 import "../../data/WitnetPriceFeedsData.sol";
 import "../../interfaces/IWitnetFeedsAdmin.sol";
+import "../../interfaces/IWitnetFeedsLegacy.sol";
 import "../../interfaces/IWitnetPriceSolverDeployer.sol";
 import "../../interfaces/IWitnetOracleLegacy.sol";
 import "../../libs/WitnetPriceFeedsLib.sol";
@@ -23,6 +24,7 @@ contract WitnetPriceFeedsDefault
         WitnetPriceFeedsData,
         WitnetUpgradableBase,
         IWitnetFeedsAdmin,
+        IWitnetFeedsLegacy,
         IWitnetPriceSolverDeployer
 {
     using Witnet for bytes;
@@ -103,8 +105,9 @@ contract WitnetPriceFeedsDefault
             _transferOwnership(_owner);
             // settle default Radon SLA upon first initialization
             __defaultRadonSLA = Witnet.RadonSLA({
-                committeeSize: 10,
-                witnessingFeeNanoWit: 2 * 10 ** 8   // 0.2 $WIT
+                witNumWitnesses: 10,
+                witUnitaryReward: 2 * 10 ** 8,   // 0.2 $WIT
+                maxTallyResultSize: 16
             });
             // settle default base fee overhead percentage
             __baseFeeOverheadPercentage = 10;
@@ -321,7 +324,7 @@ contract WitnetPriceFeedsDefault
         return __requestUpdate(feedId, __defaultRadonSLA);
     }
     
-    function requestUpdate(bytes4 feedId, Witnet.RadonSLA calldata updateSLA)
+    function requestUpdate(bytes4 feedId, Witnet.RadonSLA memory updateSLA)
         public payable
         virtual override
         returns (uint256 _usedFunds)
@@ -331,6 +334,21 @@ contract WitnetPriceFeedsDefault
             "unsecure update"
         );
         return __requestUpdate(feedId, updateSLA);
+    }
+
+    function requestUpdate(bytes4 feedId, IWitnetFeedsLegacy.RadonSLA memory updateSLA)
+        external payable
+        virtual override
+        returns (uint256)
+    {
+        return requestUpdate(
+            feedId,
+            Witnet.RadonSLA({
+                witNumWitnesses: updateSLA.witNumWitnesses,
+                witUnitaryReward: updateSLA.witUnitaryReward,
+                maxTallyResultSize: __defaultRadonSLA.maxTallyResultSize
+            })
+        );
     }
 
 
@@ -724,6 +742,7 @@ contract WitnetPriceFeedsDefault
         virtual internal
         returns (uint256 _usedFunds)
     {
+        // TODO: let requester settle the reward (see WRV2.randomize(..))
         Record storage __feed = __records_(feedId);
         if (__feed.radHash != 0) {
             _usedFunds = estimateUpdateRequestFee(tx.gasprice);
