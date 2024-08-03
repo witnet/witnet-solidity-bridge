@@ -361,42 +361,29 @@ contract WitnetRandomnessV2
 
     /// @notice Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
     /// @dev Only one randomness request per block will be actually posted to the Witnet Oracle. 
-    /// @return _evmRandomizeFee Funds actually paid as randomize fee.
+    /// @return Funds actually paid as randomize fee.
     function randomize()
         external payable
         virtual override
-        returns (uint256 _evmRandomizeFee)
+        returns (uint256)
     {
-        if (__storage().lastRandomizeBlock < block.number) {
-            _evmRandomizeFee = msg.value;
-            // Post the Witnet Randomness request:
-            uint _witnetQueryId = __witnet.postRequest{
-                value: _evmRandomizeFee
-            }(
-                witnetRadHash,
-                __witnetDefaultSLA  
-            );
-            // Keep Randomize data in storage:
-            Randomize storage __randomize = __storage().randomize_[block.number];
-            __randomize.witnetQueryId = _witnetQueryId;
-            // Update block links:
-            uint256 _prevBlock = __storage().lastRandomizeBlock;
-            __randomize.prevBlock = _prevBlock;
-            __storage().randomize_[_prevBlock].nextBlock = block.number;
-            __storage().lastRandomizeBlock = block.number;
-            // Throw event:
-            emit Randomizing(
-                block.number,
-                tx.gasprice,
-                _evmRandomizeFee,
-                _witnetQueryId,
-                __witnetDefaultSLA
-            );
-        }
-        // Transfer back unused funds:
-        if (_evmRandomizeFee < msg.value) {
-            payable(msg.sender).transfer(msg.value - _evmRandomizeFee);
-        }
+        return __postRandomizeQuery(__witnetDefaultSLA);
+    }
+
+    /// @notice Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
+    /// @dev Only one randomness request per block will be actually posted to the Witnet Oracle. 
+    /// @dev Reverts if given SLA security parameters are below witnetQuerySLA().
+    /// @return Funds actually paid as randomize fee.
+    function randomize(Witnet.RadonSLA calldata _querySLA)
+        external payable
+        virtual override
+        returns (uint256)
+    {
+        _require(
+            _querySLA.equalOrGreaterThan(__witnetDefaultSLA),
+            "unsecure randomize"
+        );
+        return __postRandomizeQuery(_querySLA);
     }
 
     /// @notice Returns the SLA parameters required for the Witnet Oracle blockchain to fulfill 
@@ -477,6 +464,43 @@ contract WitnetRandomnessV2
 
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
+
+    function __postRandomizeQuery(Witnet.RadonSLA memory _querySLA)
+        internal
+        returns (uint256 _evmUsedFunds)
+    {
+        uint256 _queryId;
+        Randomize storage __randomize = __storage().randomize_[block.number];
+        if (__storage().lastRandomizeBlock < block.number) {
+            _evmUsedFunds = msg.value;
+            
+            // Post the Witnet Randomness request:
+            _queryId = __witnet.postRequest{
+                value: msg.value
+            }(
+                witnetRadHash,
+                _querySLA
+            );
+
+            // Save Randomize metadata in storage:
+            __randomize.queryId = _queryId;
+            uint256 _prevBlock = __storage().lastRandomizeBlock;
+            __randomize.prevBlock = _prevBlock;
+            __storage().randomize_[_prevBlock].nextBlock = block.number;
+            __storage().lastRandomizeBlock = block.number;
+        } else {
+            _queryId = __storage().randomize_[block.number].queryId;
+        }
+
+        // Transfer back unused funds:
+        if (_evmUsedFunds < msg.value) {
+            payable(msg.sender).transfer(msg.value - _evmUsedFunds);
+        }
+
+        // Emit event upon every randomize call, even if multiple within same block:
+        // solhint-disable-next-line avoid-tx-origin
+        emit Randomizing(tx.origin, _msgSender(), _queryId);
+    }
 
     function _require(
             bool _condition, 
