@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../apps/WitnetRandomnessRequestConsumer.sol";
+import "../../contracts/apps/WitnetRandomnessRequestConsumer.sol";
 
 contract MyDapp
     is

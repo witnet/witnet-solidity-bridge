@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "./WitnetMockedOracle.sol";
-import "../core/defaults/WitnetPriceFeedsDefault.sol";
+import "../../contracts/core/defaults/WitnetPriceFeedsDefault.sol";
 
 /// @title Mocked implementation of `WitnetPriceFeeds`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 

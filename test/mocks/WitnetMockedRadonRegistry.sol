@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../core/defaults/WitnetRadonRegistryDefault.sol";
+import "../../contracts/core/defaults/WitnetRadonRegistryDefault.sol";
 
 /// @title Mocked implementation of `WitnetRadonRegistry`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 

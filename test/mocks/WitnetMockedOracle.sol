@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "./WitnetMockedRadonRegistry.sol";
 import "./WitnetMockedRequestFactory.sol";
-import "../core/defaults/WitnetOracleTrustableDefault.sol";
+import "../../contracts/core/defaults/WitnetOracleTrustableDefault.sol";
 
 import "./WitnetMockedPriceFeeds.sol";
 import "./WitnetMockedRandomness.sol";
