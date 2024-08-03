@@ -2,10 +2,9 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./mocks/UsingWitnet.sol";
-
 import "../WitnetRandomness.sol";
 import "../interfaces/IWitnetRandomnessAdmin.sol";
+import "../mocks/UsingWitnet.sol";
 import "../patterns/Ownable2Step.sol";
 
 /// @title WitnetRandomnessV21: Unmalleable and provably-fair randomness generation based on the Witnet Oracle v2.*.

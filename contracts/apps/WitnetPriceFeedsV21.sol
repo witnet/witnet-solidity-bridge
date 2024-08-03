@@ -3,21 +3,20 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../WitnetUpgradableBase.sol";
-
-import "../../WitnetPriceFeeds.sol";
-import "../../data/WitnetPriceFeedsData.sol";
-import "../../interfaces/IWitnetFeedsAdmin.sol";
-import "../../interfaces/IWitnetFeedsLegacy.sol";
-import "../../interfaces/IWitnetPriceSolverDeployer.sol";
-import "../../interfaces/IWitnetOracleLegacy.sol";
-import "../../libs/WitnetPriceFeedsLib.sol";
-import "../../patterns/Ownable2Step.sol";
+import "../WitnetPriceFeeds.sol";
+import "../core/WitnetUpgradableBase.sol";
+import "../data/WitnetPriceFeedsData.sol";
+import "../interfaces/IWitnetFeedsAdmin.sol";
+import "../interfaces/IWitnetFeedsLegacy.sol";
+import "../interfaces/IWitnetPriceSolverDeployer.sol";
+import "../interfaces/IWitnetOracleLegacy.sol";
+import "../libs/WitnetPriceFeedsLib.sol";
+import "../patterns/Ownable2Step.sol";
 
 /// @title WitnetPriceFeeds: Price Feeds live repository reliant on the Witnet Oracle blockchain.
 /// @author Guillermo Díaz <guillermo@otherplane.com>
 
-contract WitnetPriceFeedsDefault
+contract WitnetPriceFeedsV21
     is
         Ownable2Step,
         WitnetPriceFeeds,
@@ -33,7 +32,7 @@ contract WitnetPriceFeedsDefault
     using Witnet for Witnet.RadonSLA;
 
     function class() virtual override(IWitnetAppliance, WitnetUpgradableBase) public view returns (string memory) {
-        return type(WitnetPriceFeedsDefault).name;
+        return type(WitnetPriceFeedsV21).name;
     }
 
     bytes4 immutable public override specs = type(WitnetPriceFeeds).interfaceId;
