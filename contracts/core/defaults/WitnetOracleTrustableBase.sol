@@ -6,6 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../WitnetUpgradableBase.sol";
 import "../../WitnetOracle.sol";
 import "../../data/WitnetOracleDataLib.sol";
+import "../..//interfaces/IWitnetOracleLegacy.sol";
 import "../../interfaces/IWitnetOracleReporter.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
 import "../../interfaces/IWitnetConsumer.sol";
@@ -22,6 +23,7 @@ abstract contract WitnetOracleTrustableBase
         Payable,
         WitnetOracle,
         WitnetUpgradableBase,
+        IWitnetOracleLegacy,
         IWitnetOracleReporter,
         IWitnetRequestBoardAdminACLs
 {
@@ -143,16 +145,34 @@ abstract contract WitnetOracleTrustableBase
     // ================================================================================================================
     // --- Yet to be implemented virtual methods ----------------------------------------------------------------------
 
+
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @param evmGasPrice Expected gas price to pay upon posting the data request.
+    function estimateBaseFee(uint256 evmGasPrice)
+        virtual public view returns (uint256);
+
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256 _gasPrice, uint16 _resultMaxSize) virtual public view returns (uint256); 
+    /// @param evmGasPrice Expected gas price to pay upon posting the data request.
+    /// @param maxResultSize Maximum expected size of returned data (in bytes).
+    function estimateBaseFee(uint256 evmGasPrice, uint16 maxResultSize)
+        virtual public view returns (uint256); 
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint24 _callbackGasLimit) virtual public view returns (uint256);
+    /// @param evmGasPrice Expected gas price to pay upon posting the data request.
+    /// @param evmCallbackGas Maximum gas to be spent when reporting the data request result.
+    function estimateBaseFeeWithCallback(uint256 evmGasPrice, uint24 evmCallbackGas)
+        virtual public view returns (uint256);
+
+    /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
+    /// @notice data query in order to avoid getting provable "too low incentives" results from
+    /// @notice the Wit/oracle blockchain. 
+    /// @dev The extra fee gets calculated in proportion to:
+    /// @param evmGasPrice Tentative EVM gas price at the moment the query result is ready.
+    /// @param evmWitPrice Tentative nanoWit price in Wei at the moment the query is solved on the Wit/oracle blockchain.
+    /// @param querySLA The query SLA data security parameters as required for the Wit/oracle blockchain. 
+    function estimateExtraFee(uint256 evmGasPrice, uint256 evmWitPrice, Witnet.RadonSLA memory querySLA)
+        virtual public view returns (uint256);
 
     
     // ================================================================================================================
@@ -224,15 +244,11 @@ abstract contract WitnetOracleTrustableBase
         virtual override
         returns (uint256)
     {
-        uint16 _resultMaxSize = registry.lookupRadonRequestResultMaxSize(radHash);
-        _require(
-            _resultMaxSize > 0, 
-            "invalid RAD"
-        );
-        return estimateBaseFee(
-            gasPrice,
-            _resultMaxSize
-        );
+        // Check this rad hash is actually verified:
+        registry.lookupRadonRequestResultDataType(radHash);
+
+        // Base fee is actually invariant to max result size:
+        return estimateBaseFee(gasPrice);
     }
 
     /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
@@ -456,7 +472,7 @@ abstract contract WitnetOracleTrustableBase
     /// @param _queryUnverifiedBytecode The (unverified) bytecode containing the actual data request to be solved by the Witnet blockchain.
     /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @param _queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
-    /// @return _witnetQueryId Unique query identifier.
+    /// @return _queryId Unique query identifier.
     function postRequestWithCallback(
             bytes calldata _queryUnverifiedBytecode,
             Witnet.RadonSLA calldata _querySLA, 
@@ -474,7 +490,7 @@ abstract contract WitnetOracleTrustableBase
             _querySLA,
             _queryCallbackGasLimit
         );
-        WitnetOracleDataLib.seekQueryRequest(_witnetQueryId).witnetBytecode = _queryUnverifiedBytecode;
+        WitnetOracleDataLib.seekQueryRequest(_queryId).witnetBytecode = _queryUnverifiedBytecode;
         emit WitnetQuery(
             _msgSender(),
             _getGasPrice(),
@@ -511,30 +527,45 @@ abstract contract WitnetOracleTrustableBase
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
     /// @notice queries providing no actual earnings.
     function estimateReportEarnings(
-            uint256[] calldata _witnetQueryIds, 
+            uint256[] calldata _queryIds, 
             bytes calldata,
-            uint256 _txGasPrice,
-            uint256 _nanoWitPrice
+            uint256 _evmGasPrice,
+            uint256 _evmWitPrice
         )
         external view
         virtual override
         returns (uint256 _revenues, uint256 _expenses)
     {
-        for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == Witnet.QueryStatus.Posted) {
-                Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
-                _revenues += __request.evmReward;
+        for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
+            if (
+                WitnetOracleDataLib.seekQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
+            ) {
+                Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_queryIds[_ix]);
                 if (__request.gasCallback > 0) {
-                    _expenses += estimateBaseFeeWithCallback(_txGasPrice, __request.gasCallback);
+                    _expenses += (
+                        estimateBaseFeeWithCallback(_evmGasPrice, __request.gasCallback)
+                            + estimateExtraFee(
+                                _evmGasPrice,
+                                _evmWitPrice,
+                                Witnet.RadonSLA({
+                                    witnessingCommitteeSize: __request.witnetSLA.witnessingCommitteeSize,
+                                    witnessingReward: __request.witnetSLA.witnessingReward,
+                                    maxTallyResultSize: uint16(0)
+                                })
+                            )
+                    );      
                 } else {
-                    if (__request.witnetRAD != bytes32(0)) {
-                        _expenses += estimateBaseFee(_txGasPrice, __request.witnetRAD);
-                    } else {
-                        // todo: improve profit estimation accuracy if reporting on deleted query
-                        _expenses += estimateBaseFee(_txGasPrice, uint16(0)); 
-                    }
+                    _expenses += (
+                        estimateBaseFee(_evmGasPrice)
+                            + estimateExtraFee(
+                                _evmGasPrice, 
+                                _evmWitPrice, 
+                                __request.witnetSLA
+                            )
+                    );
                 }
-                _expenses +=  __request.witnetSLA.nanoWitTotalFee() * _nanoWitPrice;
+                _expenses +=  _evmWitPrice * __request.witnetSLA.witnessingTotalReward();
+                _revenues += __request.evmReward;
             }
         }
     }

@@ -12,22 +12,23 @@ interface IWitnetOracle {
     function channel() external view returns (bytes4);
 
     /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
-    /// @param gasPrice Expected gas price to pay upon posting the data request.
-    /// @param resultMaxSize Maximum expected size of returned data (in bytes).  
-    function estimateBaseFee(uint256 gasPrice, uint16 resultMaxSize) external view returns (uint256);
-
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Fails if the RAD hash was not previously verified on the WitnetRadonRegistry registry.
-    /// @param gasPrice Expected gas price to pay upon posting the data request.
-    /// @param radHash The RAD hash of the data request to be solved by Witnet.
-    function estimateBaseFee(uint256 gasPrice, bytes32 radHash) external view returns (uint256);
+    /// @param evmGasPrice Expected gas price to pay upon posting the data request.
+    function estimateBaseFee(uint256 evmGasPrice) external view returns (uint256);
     
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
-    /// @param gasPrice Expected gas price to pay upon posting the data request.
+    /// @param evmGasPrice Expected gas price to pay upon posting the data request.
     /// @param callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 gasPrice, uint24 callbackGasLimit) external view returns (uint256);
+    function estimateBaseFeeWithCallback(uint256 evmGasPrice, uint24 callbackGasLimit) external view returns (uint256);
 
+    /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
+    /// @notice data query in order to avoid getting provable "too low incentives" results from
+    /// @notice the Wit/oracle blockchain. 
+    /// @dev The extra fee gets calculated in proportion to:
+    /// @param evmGasPrice Tentative EVM gas price at the moment the query result is ready.
+    /// @param evmWitPrice  Tentative nanoWit price in Wei at the moment the query is solved on the Wit/oracle blockchain.
+    /// @param querySLA The query SLA data security parameters as required for the Wit/oracle blockchain. 
+    function estimateExtraFee(uint256 evmGasPrice, uint256 evmWitPrice, Witnet.RadonSLA calldata querySLA) external view returns (uint256);
+    
     /// @notice Returns the address of the WitnetRequestFactory appliance capable of building compliant data request
     /// @notice templates verified into the same WitnetRadonRegistry instance returned by registry().
     function factory() external view returns (WitnetRequestFactory);

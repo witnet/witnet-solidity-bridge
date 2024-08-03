@@ -6,11 +6,10 @@ pragma experimental ABIEncoderV2;
 import "../WitnetUpgradableBase.sol";
 
 import "../../WitnetPriceFeeds.sol";
-
 import "../../data/WitnetPriceFeedsData.sol";
 import "../../interfaces/IWitnetFeedsAdmin.sol";
 import "../../interfaces/IWitnetPriceSolverDeployer.sol";
-
+import "../../interfaces/IWitnetOracleLegacy.sol";
 import "../../libs/WitnetPriceFeedsLib.sol";
 import "../../patterns/Ownable2Step.sol";
 
@@ -232,7 +231,7 @@ contract WitnetPriceFeedsDefault
         public view
         returns (uint)
     {
-        return (witnet.estimateBaseFee(_evmGasPrice, 32)
+        return (IWitnetOracleLegacy(address(witnet)).estimateBaseFee(_evmGasPrice, 32)
             * (100 + __baseFeeOverheadPercentage)
         ) / 100; 
     }

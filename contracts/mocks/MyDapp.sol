@@ -3,11 +3,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../apps/UsingWitnetRandomness.sol";
+import "../apps/WitnetRandomnessRequestConsumer.sol";
 
 contract MyDapp
     is
-        UsingWitnetRandomness
+        WitnetRandomnessRequestConsumer
 {
     using WitnetCBOR for WitnetCBOR.CBOR;
 
@@ -29,7 +29,7 @@ contract MyDapp
     uint256 private immutable __randomizeValue;
 
     constructor(WitnetOracle _wrb, uint16 _baseFeeOverheadPercentage, uint24 _callbackGasLimit)
-        UsingWitnetRandomness(
+        WitnetRandomnessRequestConsumer(
             _wrb, 
             _baseFeeOverheadPercentage,
             _callbackGasLimit
@@ -41,7 +41,7 @@ contract MyDapp
         rubbish.slot3 = blockhash(block.number - 3);
         witnetRandomnessRadHash = __witnetRandomnessRadHash;
         witnetRandomnessBytecode = witnet().registry().bytecodeOf(__witnetRandomnessRadHash);
-        __randomizeValue = _witnetEstimateEvmReward();
+        __randomizeValue = _witnetEstimateBaseFee();
     }
 
     function getRandomizeValue() external view returns (uint256) {

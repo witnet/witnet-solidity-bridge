@@ -101,6 +101,32 @@ contract WitnetOracleTrustableOvm2
         return _getCurrentL1Fee(32) + WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit);
     }
 
+    /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
+    /// @notice data query in order to avoid getting provable "too low incentives" results from
+    /// @notice the Wit/oracle blockchain. 
+    /// @dev The extra fee gets calculated in proportion to:
+    /// @param _evmGasPrice Tentative EVM gas price at the moment the query result is ready.
+    /// @param _evmWitPrice Tentative nanoWit price in Wei at the moment the query is solved on the Wit/oracle blockchain.
+    /// @param _querySLA The query SLA data security parameters as required for the Wit/oracle blockchain. 
+    function estimateExtraFee(
+            uint256 _evmGasPrice, 
+            uint256 _evmWitPrice, 
+            Witnet.RadonSLA memory _querySLA
+        )
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return (
+            _getCurrentL1Fee(_querySLA.maxTallyResultSize)
+                + WitnetOracleTrustableDefault.estimateExtraFee(
+                    _evmGasPrice,
+                    _evmWitPrice,
+                    _querySLA
+                )
+        );
+    }
+
     // ================================================================================================================
     // --- Overrides 'IWitnetOracleReporter' --------------------------------------------------------------------------
 
@@ -108,41 +134,47 @@ contract WitnetOracleTrustableOvm2
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
     /// @notice queries providing no actual earnings.
     function estimateReportEarnings(
-            uint256[] calldata _witnetQueryIds, 
-            bytes calldata _reportTxMsgData,
-            uint256 _reportTxGasPrice, 
-            uint256 _nanoWitPrice
+            uint256[] calldata _queryIds, 
+            bytes calldata _evmMsgData,
+            uint256 _evmGasPrice, 
+            uint256 _evmWitPrice
         )
         external view
         virtual override
         returns (uint256 _revenues, uint256 _expenses)
     {
-        for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            if (WitnetOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]) == Witnet.QueryStatus.Posted) {
-                Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_witnetQueryIds[_ix]);
+        for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
+            if (
+                WitnetOracleDataLib.seekQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
+            ) {
+                Witnet.Request storage __request = WitnetOracleDataLib.seekQueryRequest(_queryIds[_ix]);
                 if (__request.gasCallback > 0) {
-                    _expenses += WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(
-                        _reportTxGasPrice, 
-                        __request.gasCallback
+                    _expenses += (
+                        WitnetOracleTrustableDefault.estimateBaseFeeWithCallback(_evmGasPrice, __request.gasCallback)
+                            + WitnetOracleTrustableDefault.estimateExtraFee(
+                                _evmGasPrice,
+                                _evmWitPrice,
+                                Witnet.RadonSLA({
+                                    witnessingCommitteeSize: __request.witnetSLA.witnessingCommitteeSize,
+                                    witnessingReward: __request.witnetSLA.witnessingReward,
+                                    maxTallyResultSize: uint16(0)
+                                })
+                            )
                     );
                 } else {
-                    if (__request.witnetRAD != bytes32(0)) {
-                        _expenses += WitnetOracleTrustableDefault.estimateBaseFee(
-                            _reportTxGasPrice, 
-                            __registry.lookupRadonRequestResultMaxSize(__request.witnetRAD)
-                        );
-                    } else {
-                        // todo: improve profit estimation accuracy if reporting on deleted query
-                        _expenses += WitnetOracleTrustableDefault.estimateBaseFee(
-                            _reportTxGasPrice, 
-                            uint16(0)
-                        ); 
-                    }
+                    _expenses += (
+                        WitnetOracleTrustableDefault.estimateBaseFee(_evmGasPrice)
+                            + WitnetOracleTrustableDefault.estimateExtraFee(
+                                _evmGasPrice,
+                                _evmWitPrice,
+                                __request.witnetSLA
+                            )
+                    );
                 }
-                _expenses += __request.witnetSLA.nanoWitTotalFee() * _nanoWitPrice;
+                _expenses += __request.witnetSLA.witnessingTotalReward() * _evmWitPrice;
                 _revenues += __request.evmReward;
             }
         }
-        _expenses += __gasPriceOracleL1.getL1Fee(_reportTxMsgData);
+        _expenses += __gasPriceOracleL1.getL1Fee(_evmMsgData);
     }
 }

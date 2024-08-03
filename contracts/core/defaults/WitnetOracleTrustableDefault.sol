@@ -56,6 +56,19 @@ contract WitnetOracleTrustableDefault
     // --- Overrides 'IWitnetOracle' ----------------------------------------------------------------------------
 
     /// @notice Estimate the minimum reward required for posting a data request.
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    function estimateBaseFee(uint256 _gasPrice)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return _gasPrice * (
+            __reportResultGasBase 
+                + 4 * __sstoreFromZeroGas
+        );
+    }
+
+    /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
     /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
@@ -101,6 +114,31 @@ contract WitnetOracleTrustableDefault
                     )
             );
         }
+    }
+
+    /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
+    /// @notice data query in order to avoid getting provable "too low incentives" results from
+    /// @notice the Wit/oracle blockchain. 
+    /// @dev The extra fee gets calculated in proportion to:
+    /// @param _evmGasPrice Tentative EVM gas price at the moment the query result is ready.
+    /// @param _evmWitPrice Tentative nanoWit price in Wei at the moment the query is solved on the Wit/oracle blockchain.
+    /// @param _querySLA The query SLA data security parameters as required for the Wit/oracle blockchain. 
+    function estimateExtraFee(
+            uint256 _evmGasPrice, 
+            uint256 _evmWitPrice, 
+            Witnet.RadonSLA memory _querySLA
+        )
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return (
+            _evmWitPrice * ((3 + _querySLA.witnessingCommitteeSize) * _querySLA.witnessingReward)
+                + (_querySLA.maxTallyResultSize > 32
+                    ? _evmGasPrice * __sstoreFromZeroGas * ((_querySLA.maxTallyResultSize - 32) / 32)
+                    : 0
+                )
+        );
     }
 
 
