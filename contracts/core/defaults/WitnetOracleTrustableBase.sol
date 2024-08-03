@@ -5,7 +5,6 @@ pragma experimental ABIEncoderV2;
 
 import "../WitnetUpgradableBase.sol";
 import "../../WitnetOracle.sol";
-import "../../WitnetRequestFactory.sol";
 import "../../data/WitnetOracleDataLib.sol";
 import "../../interfaces/IWitnetOracleReporter.sol";
 import "../../interfaces/IWitnetRequestBoardAdminACLs.sol";
@@ -20,18 +19,22 @@ import "../../patterns/Payable.sol";
 /// @author The Witnet Foundation
 abstract contract WitnetOracleTrustableBase
     is 
-        WitnetUpgradableBase,
+        Payable,
         WitnetOracle,
+        WitnetUpgradableBase,
         IWitnetOracleReporter,
-        IWitnetRequestBoardAdminACLs,
-        Payable 
+        IWitnetRequestBoardAdminACLs
 {
     using Witnet for bytes;
-    using Witnet for Witnet.Result;
-    using WitnetCBOR for WitnetCBOR.CBOR;
     using Witnet for Witnet.RadonSLA;
     using Witnet for Witnet.Request;
     using Witnet for Witnet.Response;
+    using Witnet for Witnet.Result;
+    using WitnetCBOR for WitnetCBOR.CBOR;
+
+    WitnetRequestFactory public immutable override factory;
+    WitnetRadonRegistry public immutable override registry;
+    
     bytes4 public immutable override specs = type(WitnetOracle).interfaceId;
 
     function channel() virtual override public view returns (bytes4) {
@@ -99,8 +102,8 @@ abstract contract WitnetOracleTrustableBase
     } 
     
     constructor(
+            WitnetRadonRegistry _registry,
             WitnetRequestFactory _factory,
-            WitnetRequestBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag,
             address _currency
@@ -113,8 +116,8 @@ abstract contract WitnetOracleTrustableBase
             "io.witnet.proxiable.board"
         )
     {
-        __factory = _factory;
         registry = _registry;
+        factory = _factory;
     }
 
     receive() external payable { 
@@ -188,20 +191,11 @@ abstract contract WitnetOracleTrustableBase
         }
         __proxiable().codehash = codehash();
 
-        _require(
-            address(__factory).code.length > 0,
-            "inexistent factory"
-        );
-        _require(
-            __factory.specs() == type(IWitnetRequestFactory).interfaceId, 
-            "uncompliant factory"
-        );
-        _require(
-            address(__factory.witnet()) == address(this) 
-                && address(__factory.registry()) == address(registry),
-            "discordant factory"
-        );
-
+        _require(address(registry).code.length > 0, "inexistent registry");
+        _require(registry.specs() == type(WitnetRadonRegistry).interfaceId, "uncompliant registry");
+        _require(address(factory).code.length > 0, "inexistent factory");
+        _require(address(factory.witnet()) == address(this), "discordant factory");
+        
         // Set reporters, if any
         __setReporters(_newReporters);
 
@@ -224,7 +218,7 @@ abstract contract WitnetOracleTrustableBase
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
     /// @param gasPrice Expected gas price to pay upon posting the data request.
-    /// @param radHash The hash of some Witnet Data Request previously posted in the WitnetRequestBytecodes registry.
+    /// @param radHash The hash of some Witnet Data Request previously posted in the WitnetRadonRegistry registry.
     function estimateBaseFee(uint256 gasPrice, bytes32 radHash)
         public view
         virtual override
@@ -378,7 +372,7 @@ abstract contract WitnetOracleTrustableBase
     /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
     /// @notice transferred to the reporter who relays back the Witnet-provable result to this request.
     /// @dev Reasons to fail:
-    /// @dev - the RAD hash was not previously verified by the WitnetRequestBytecodes registry;
+    /// @dev - the RAD hash was not previously verified by the WitnetRadonRegistry registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
     /// @param _queryRAD The RAD hash of the data request to be solved by Witnet.
@@ -413,7 +407,7 @@ abstract contract WitnetOracleTrustableBase
     /// @notice will be triggered, and the Witnet audit trail will be saved in storage, but not so the actual CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitnetConsumer interface;
-    /// @dev - the RAD hash was not previously verified by the WitnetRequestBytecodes registry;
+    /// @dev - the RAD hash was not previously verified by the WitnetRadonRegistry registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - zero callback gas limit is provided;
     /// @dev - insufficient value is paid as reward.

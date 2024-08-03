@@ -42,12 +42,12 @@ contract TestWitnetEncodingLib {
 
   function testEncodeRadonReducerOpcodes() external {
     bytes memory bytecode = WitnetEncodingLib.encode(
-      Witnet.RadonReducerOpcodes.StandardDeviation
+      Witnet.RadonReduceOpcodes.StandardDeviation
     );
     Assert.equal(
       keccak256(bytecode),
       keccak256(hex"1007"),
-      "bad encode(Witnet.RadonReducerOpcodes)"
+      "bad encode(Witnet.RadonReduceOpcodes)"
     );
   }
 
@@ -71,7 +71,7 @@ contract TestWitnetEncodingLib {
 
   function testEncodeRadonReducer1Filter() external {
     Witnet.RadonReducer memory reducer;
-    reducer.opcode = Witnet.RadonReducerOpcodes.Mode;
+    reducer.opcode = Witnet.RadonReduceOpcodes.Mode;
     reducer.filters = new Witnet.RadonFilter[](1);
     reducer.filters[0].opcode = Witnet.RadonFilterOpcodes.StandardDeviation;
     reducer.filters[0].cborArgs = hex"fa40200000";

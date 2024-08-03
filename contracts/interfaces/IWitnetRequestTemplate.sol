@@ -5,6 +5,7 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../libs/Witnet.sol";
 
 interface IWitnetRequestTemplate {
+
     /// Build a WitnetRequest instance that will provide the bytecode and RAD 
     /// hash of some Witnet-compliant Radon Request, provably made out of the 
     /// data sources, aggregate and tally Radon Reducers that compose this WitnetRequestTemplate.
@@ -20,27 +21,30 @@ interface IWitnetRequestTemplate {
     /// of data sources that compose this instance.
     function getArgsCount() external view returns (uint256[] memory);
 
+    /// Returns the filters and reducing functions to be applied by witnessing nodes 
+    /// on the Witnet blockchain both at the:
+    /// - Aggregate stage: when aggregating data extracted from the public 
+    ///                    data sources (i.e. Radon Retrievals).
+    /// - Tally stage: when aggregating values revealed by witnesses.
+    function getRadonReducers() external view returns (
+            Witnet.RadonReducer memory aggregateStage,
+            Witnet.RadonReducer memory tallyStage
+        );
+
+    /// Returns metadata concerning the data source specified by the given index. 
+    function getRadonRetrievalByIndex(uint256) external view returns (Witnet.RadonRetrieval memory);
+
+    /// Returns the array of one or more parameterized data sources that compose 
+    /// this WitnetRequestTemplate.
+    function getRadonRetrievals() external view returns (Witnet.RadonRetrieval[] memory);
+
     /// Returns the expected data type produced by successful resolutions of 
     /// any WitnetRequest that gets built out of this WitnetRequestTemplate.
     function getResultDataType() external view returns (Witnet.RadonDataTypes); 
 
-    /// Returns the filters and reducing function to be applied by witnessing 
-    /// nodes on the Witnet blockchain when aggregating data extracted from 
-    /// the public data sources (i.e. Radon Retrievals) of the data requests 
-    /// that get eventually built out of this WitnetRequestTemplate.
-    function getAggregateReducer() external view returns (Witnet.RadonReducer memory);
-
-    /// Returns metadata concerning the data source specified by the given index. 
-    function getRetrievalByIndex(uint256) external view returns (Witnet.RadonRetrieval memory);
-
-    /// Returns the array of one or more parameterized data sources that compose 
-    /// this WitnetRequestTemplate.
-    function getRetrievals() external view returns (Witnet.RadonRetrieval[] memory);
-
-    /// Returns the slashing filters and reducing function to be applied to the 
-    /// values revealed by the witnessing nodes on the Witnet blockchain that 
-    /// contribute to solve data requests built out of this WitnetRequestTemplate.
-    function getTallyReducer() external view returns (Witnet.RadonReducer memory);
+    /// If built out of an upgradable factory, returns the SemVer tag of the 
+    /// factory implementation at the time when this WitnetRequestTemplate got built.
+    function version() external view returns (string memory);
 
     /// Verifies into the bounded WitnetOracle's registry the actual bytecode 
     /// and RAD hash of the Witnet-compliant Radon Request that gets provably 
@@ -55,9 +59,5 @@ interface IWitnetRequestTemplate {
     /// @dev This method requires less gas than buildWitnetRequest(string[][]), and 
     /// it's usually preferred when parameterized data requests made out of this 
     /// template are intended to be used just once in lifetime.    
-    function verifyWitnetRequest(string[][] calldata args) external returns (bytes32);
-
-    /// If built out of an upgradable factory, returns the SemVer tag of the 
-    /// factory implementation at the time when this WitnetRequestTemplate got built.
-    function version() external view returns (string memory);
+    function verifyRadonRequest(string[][] calldata args) external returns (bytes32);
 }

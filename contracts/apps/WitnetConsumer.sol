@@ -34,7 +34,7 @@ abstract contract WitnetConsumer
     /// ===============================================================================================================
     /// --- WitnetConsumer virtual methods ----------------------------------------------------------------------------
 
-    function _witnetEstimateEvmReward() virtual internal view returns (uint256) {
+    function _witnetEstimateBaseFee() virtual override internal view returns (uint256) {
         return (
             (100 + __witnetBaseFeeOverheadPercentage)
                 * __witnet.estimateBaseFeeWithCallback(
@@ -43,19 +43,12 @@ abstract contract WitnetConsumer
                 )
         ) / 100;
     }
-    
-    function _witnetEstimateEvmReward(uint16)
-        virtual override internal view
-        returns (uint256)
-    {
-        return _witnetEstimateEvmReward();
-    }
 
 
     /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
     /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function _witnetEstimateEvmRewardWithCallback(uint24 _callbackGasLimit)
+    function _witnetEstimateBaseFeeWithCallback(uint24 _callbackGasLimit)
         virtual internal view
         returns (uint256)
     {

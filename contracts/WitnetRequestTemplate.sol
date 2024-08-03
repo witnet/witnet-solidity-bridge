@@ -3,13 +3,15 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./interfaces/IWitnetRequestFactoryAppliance.sol";
+import "./interfaces/IWitnetOracleAppliance.sol";
+import "./interfaces/IWitnetRadonRegistryEvents.sol";
+import "./interfaces/IWitnetRequestFactoryEvents.sol";
 import "./interfaces/IWitnetRequestTemplate.sol";
 
 abstract contract WitnetRequestTemplate
     is
+        IWitnetOracleAppliance,
         IWitnetRadonRegistryEvents,
-        IWitnetRequestFactoryAppliance,
         IWitnetRequestFactoryEvents,
         IWitnetRequestTemplate
 {}

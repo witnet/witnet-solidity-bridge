@@ -29,7 +29,7 @@ interface IWitnetOracleEvents {
     event WitnetQueryUpgrade(
         uint256 queryId,
         address evmSender,
-        address evmGasPrice,
+        uint256 evmGasPrice,
         uint256 evmReward
     );
 

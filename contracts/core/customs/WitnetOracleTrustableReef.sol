@@ -22,8 +22,8 @@ contract WitnetOracleTrustableReef
     }
     
     constructor(
+            WitnetRadonRegistry _registry,
             WitnetRequestFactory _factory,
-            WitnetRequestBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasBase,
@@ -32,8 +32,8 @@ contract WitnetOracleTrustableReef
             uint256 _sstoreFromZeroGas
         )
         WitnetOracleTrustableDefault(
-            _factory,
             _registry,
+            _factory,
             _upgradable,
             _versionTag,
             _reportResultGasBase,

@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetMockedRequestBytecodes.sol";
+import "./WitnetMockedRadonRegistry.sol";
 import "./WitnetMockedRequestFactory.sol";
 import "../core/defaults/WitnetOracleTrustableDefault.sol";
 
@@ -19,12 +19,10 @@ contract WitnetMockedOracle
     is
         WitnetOracleTrustableDefault
 {
-    WitnetRequestFactory private __factory;
-
-    constructor(WitnetMockedRequestBytecodes _registry) 
+    constructor(WitnetMockedRadonRegistry _registry) 
         WitnetOracleTrustableDefault(
+            WitnetRadonRegistry(_registry),
             WitnetRequestFactory(address(0)), 
-            WitnetRequestBytecodes(address(_registry)),
             false,
             bytes32("mocked"),
             60000, 65000, 70000, 20000
@@ -33,13 +31,5 @@ contract WitnetMockedOracle
         address[] memory _reporters = new address[](1);
         _reporters[0] = msg.sender;
         __setReporters(_reporters);
-    }
-
-    function factory() override public view returns (WitnetRequestFactory) {
-        return __factory;
-    }
-
-    function setFactory(WitnetMockedRequestFactory _factory) external onlyOwner {
-        __factory = WitnetRequestFactory(address(_factory)); 
     }
 } 

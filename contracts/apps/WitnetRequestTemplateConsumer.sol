@@ -24,21 +24,13 @@ abstract contract WitnetRequestTemplateConsumer
         WitnetConsumer(_callbackGasLimit)
     {}
 
-    function _witnetEstimateEvmReward()
-        virtual override(UsingWitnetRequestTemplate, WitnetConsumer)
+    function _witnetEstimateBaseFee()
+        virtual override(UsingWitnet, WitnetConsumer)
         internal view
         returns (uint256)
     {
-        return WitnetConsumer._witnetEstimateEvmReward(__witnetQueryResultMaxSize);
+        return WitnetConsumer._witnetEstimateBaseFee();
     }
-
-    function _witnetEstimateEvmReward(uint16) 
-        virtual override(UsingWitnet, WitnetConsumer) 
-        internal view
-        returns (uint256)
-    {
-        return WitnetConsumer._witnetEstimateEvmReward();
-    } 
 
     function __witnetRequestData(
             uint256 _witnetEvmReward,

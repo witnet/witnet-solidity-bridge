@@ -328,12 +328,12 @@ library Witnet {
     /// Structure defining the array of filters and reducting function to be applied at either the Aggregation
     /// or the Tally stages within a Witnet Data Request resolution workflow.
     struct RadonReducer {
-        RadonReducerOpcodes opcode;
+        RadonReduceOpcodes opcode;
         RadonFilter[] filters;
     }
 
     /// Reducting functions currently supported on the Witnet blockchain.
-    enum RadonReducerOpcodes {
+    enum RadonReduceOpcodes {
         /* 0x00 */ Reserved0x00, //Minimum,
         /* 0x01 */ Reserved0x01, //Maximum,
         /* 0x02 */ Mode,

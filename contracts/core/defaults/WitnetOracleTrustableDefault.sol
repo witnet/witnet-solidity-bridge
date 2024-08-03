@@ -16,6 +16,8 @@ contract WitnetOracleTrustableDefault
     is 
         WitnetOracleTrustableBase
 {
+    using Witnet for Witnet.RadonSLA;
+
     function class() virtual override public view returns (string memory) {
         return type(WitnetOracleTrustableDefault).name;
     }
@@ -26,8 +28,8 @@ contract WitnetOracleTrustableDefault
     uint256 internal immutable __sstoreFromZeroGas;
 
     constructor(
+            WitnetRadonRegistry _registry,
             WitnetRequestFactory _factory,
-            WitnetRequestBytecodes _registry,
             bool _upgradable,
             bytes32 _versionTag,
             uint256 _reportResultGasBase,
@@ -36,13 +38,13 @@ contract WitnetOracleTrustableDefault
             uint256 _sstoreFromZeroGas
         )
         WitnetOracleTrustableBase(
-            _factory, 
             _registry,
+            _factory,
             _upgradable, 
             _versionTag, 
             address(0)
         )
-    {   
+    {
         __reportResultGasBase = _reportResultGasBase;
         __reportResultWithCallbackGasBase = _reportResultWithCallbackGasBase;
         __reportResultWithCallbackRevertGasBase = _reportResultWithCallbackRevertGasBase;

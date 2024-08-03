@@ -37,6 +37,7 @@ contract WitnetPriceFeedsDefault
 
     bytes4 immutable public override specs = type(WitnetPriceFeeds).interfaceId;
     WitnetOracle immutable public override witnet;
+    WitnetRadonRegistry immutable internal __registry;
 
     Witnet.RadonSLA private __defaultRadonSLA;
     uint16 private __baseFeeOverheadPercentage;
@@ -56,6 +57,10 @@ contract WitnetPriceFeedsDefault
         witnet = _wrb;
     }
 
+    function _registry() virtual internal view returns (WitnetRadonRegistry) {
+        return witnet.registry();
+    }
+
     // solhint-disable-next-line payable-fallback
     fallback() override external {
         if (
@@ -63,9 +68,9 @@ contract WitnetPriceFeedsDefault
                 && msg.sender == address(this)
         ) {
             address _solver = __records_(bytes4(bytes8(msg.data) << 32)).solver;
-            require(
+            _require(
                 _solver != address(0),
-                "WitnetPriceFeeds: unsettled solver"
+                "unsettled solver"
             );
             assembly {
                 let ptr := mload(0x40)
@@ -78,7 +83,7 @@ contract WitnetPriceFeedsDefault
                     default { return(ptr, size) }
             }
         } else {
-            revert("WitnetPriceFeeds: not implemented");
+            _revert("not implemented");
         }
     }
 
@@ -106,9 +111,9 @@ contract WitnetPriceFeedsDefault
             __baseFeeOverheadPercentage = 10;
         } else {
             // only the owner can initialize:
-            require(
+            _require(
                 msg.sender == _owner,
-                "WitnetPriceFeeds: not the owner"
+                "not the owner"
             );
         }
 
@@ -116,17 +121,17 @@ contract WitnetPriceFeedsDefault
             __proxiable().codehash != bytes32(0)
                 && __proxiable().codehash == codehash()
         ) {
-            revert("WitnetPriceFeeds: already upgraded");
+            _revert("already upgraded");
         }        
         __proxiable().codehash = codehash();
 
-        require(
+        _require(
             address(witnet).code.length > 0,
-            "WitnetPriceFeeds: inexistent oracle"
+            "inexistent oracle"
         );
-        require(
+        _require(
             witnet.specs() == type(WitnetOracle).interfaceId, 
-            "WitnetPriceFeeds: uncompliant oracle"
+            "uncompliant oracle"
         );
         emit Upgraded(_owner, base(), codehash(), version());
     }
@@ -286,9 +291,9 @@ contract WitnetPriceFeedsDefault
         returns (bytes memory)
     {
         Record storage __record = __records_(feedId);
-        require(
+        _require(
             __record.radHash != 0,
-            "WitnetPriceFeeds: no RAD hash"
+            "no RAD hash"
         );
         return _registry().bytecodeOf(__record.radHash);
     }
@@ -304,15 +309,9 @@ contract WitnetPriceFeedsDefault
         override external view
         returns (Witnet.RadonRetrieval[] memory _retrievals)
     {
-        bytes32[] memory _hashes = registry().lookupRadonRequestSources(lookupWitnetRadHash(feedId));
-        _retrievals = new Witnet.RadonRetrieval[](_hashes.length);
-        for (uint _ix = 0; _ix < _retrievals.length; _ix ++) {
-            _retrievals[_ix] = registry().lookupRadonRetrieval(_hashes[_ix]);
-        }
-    }
-
-    function registry() public view virtual override returns (WitnetRequestBytecodes) {
-        return WitnetOracle(address(witnet)).registry();
+        return _registry().lookupRadonRequestRetrievals(
+            lookupWitnetRadHash(feedId)
+        );
     }
 
     function requestUpdate(bytes4 feedId)
@@ -328,9 +327,9 @@ contract WitnetPriceFeedsDefault
         virtual override
         returns (uint256 _usedFunds)
     {
-        require(
+        _require(
             updateSLA.equalOrGreaterThan(__defaultRadonSLA),
-            "WitnetPriceFeeds: unsecure update"
+            "unsecure update"
         );
         return __requestUpdate(feedId, updateSLA);
     }
@@ -387,7 +386,7 @@ contract WitnetPriceFeedsDefault
         bytes4[] storage __ids = __storage().ids;
         Record storage __record = __records_(feedId);
         uint _index = __record.index;
-        require(_index != 0, "WitnetPriceFeeds: unknown feed");
+        _require(_index != 0, "unknown feed");
         {
             bytes4 _lastFeedId = __ids[__ids.length - 1];
             __ids[_index - 1] = _lastFeedId;
@@ -423,7 +422,7 @@ contract WitnetPriceFeedsDefault
         override public
         onlyOwner
     {
-        require(defaultSLA.isValid(), "WitnetPriceFeeds: invalid SLA");
+        _require(defaultSLA.isValid(), "invalid SLA");
         __defaultRadonSLA = defaultSLA;
         emit WitnetRadonSLA(defaultSLA);
     }
@@ -432,9 +431,9 @@ contract WitnetPriceFeedsDefault
         override public
         onlyOwner
     {
-        require(
-            registry().lookupRadonRequestResultDataType(radHash) == dataType,
-            "WitnetPriceFeeds: bad result data type"
+        _require(
+            _registry().lookupRadonRequestResultDataType(radHash) == dataType,
+            "bad result data type"
         );
         bytes4 feedId = hash(caption);
         Record storage __record = __records_(feedId);
@@ -479,9 +478,9 @@ contract WitnetPriceFeedsDefault
         override external
         onlyOwner
     {
-        require(
+        _require(
             solver != address(0),
-            "WitnetPriceFeeds: no solver address"
+            "no solver address"
         );
         bytes4 feedId = hash(caption);        
         Record storage __record = __records_(feedId);
@@ -509,8 +508,8 @@ contract WitnetPriceFeedsDefault
                 assembly {
                     _reason := add(_reason, 4)
                 }
-                revert(string(abi.encodePacked(
-                    "WitnetPriceFeedUpgradable: solver validation failed: ",
+                _revert(string(abi.encodePacked(
+                    "solver validation failed: ",
                     string(abi.decode(_reason,(string)))
                 )));
             }
@@ -526,8 +525,8 @@ contract WitnetPriceFeedsDefault
                 assembly {
                     _reason := add(_reason, 4)
                 }
-                revert(string(abi.encodePacked(
-                    "WitnetPriceFeeds: smoke-test failed: ",
+                _revert(string(abi.encodePacked(
+                    "smoke-test failed: ",
                     string(abi.decode(_reason,(string)))
                 )));
             }
@@ -708,10 +707,7 @@ contract WitnetPriceFeedsDefault
         try WitnetPriceFeedsLib.validateCaption(__prefix, caption) returns (uint8 _decimals) {
             return _decimals;
         } catch Error(string memory reason) {
-            revert(string(abi.encodePacked(
-                "WitnetPriceFeeds: ", 
-                reason
-            )));
+            _revert(reason);
         }
     }
 
@@ -731,11 +727,8 @@ contract WitnetPriceFeedsDefault
     {
         Record storage __feed = __records_(feedId);
         if (__feed.radHash != 0) {
-            _usedFunds = estimateUpdateRequestFee(_getGasPrice());
-            require(
-                msg.value >= _usedFunds, 
-                "WitnetPriceFeeds: insufficient reward"
-            );
+            _usedFunds = estimateUpdateRequestFee(tx.gasprice);
+            _require(msg.value >= _usedFunds, "insufficient reward");
             uint _latestId = __feed.latestUpdateQueryId;
             Witnet.ResponseStatus _latestStatus = _checkQueryResponseStatus(_latestId);
             if (_latestStatus == Witnet.ResponseStatus.Awaiting) {
@@ -746,13 +739,6 @@ contract WitnetPriceFeedsDefault
                 if (_deltaReward > 0) {
                     _usedFunds = uint(_deltaReward);
                     witnet.upgradeQueryEvmReward{value: _usedFunds}(_latestId);
-                    // solhint-disable avoid-tx-origin
-                    emit PullingUpdate(
-                        tx.origin,
-                        _msgSender(),
-                        feedId, 
-                        _latestId
-                    );
                 } else {
                     _usedFunds = 0;
                 }
@@ -790,7 +776,7 @@ contract WitnetPriceFeedsDefault
                 querySLA
             );
         } else {
-            revert("WitnetPriceFeeds: unknown feed");
+            _revert("unknown feed");
         }
         if (_usedFunds < msg.value) {
             // transfer back unused funds:

@@ -6,11 +6,15 @@ import "../libs/Witnet.sol";
 
 interface IWitnetRadonRegistryEvents {
 
+    /// Emitted every time a new Radon Reducer gets successfully verified and
+    /// stored into the WitnetRadonRegistry.
+    event NewRadonReducer(bytes16 hash);
+
     /// Emitted every time a new Radon Retrieval gets successfully verified and
-    /// stored in the registry.
-    event NewRadonRetrieval(bytes32 hash, Witnet.RadonRetrieval retrieval);
+    /// stored into the WitnetRadonRegistry.
+    event NewRadonRetrieval(bytes32 hash);
 
     /// Emitted every time a new Radon Request gets successfully verified and
-    /// stored in the registry.
-    event NewRadonRequest(bytes32 radHash, Witnet.RadonRequest rad);
+    /// stored into the WitnetRadonRegistry.
+    event NewRadonRequest(bytes32 radHash);
 }

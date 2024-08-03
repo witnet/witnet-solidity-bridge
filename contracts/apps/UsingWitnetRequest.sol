@@ -10,7 +10,6 @@ abstract contract UsingWitnetRequest
     WitnetRequest immutable public dataRequest;
     
     bytes32 immutable internal __witnetRequestRadHash;
-    uint16  immutable internal __witnetQueryResultMaxSize;
  
     /// @param _witnetRequest Address of the WitnetRequest contract containing the actual data request.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
@@ -25,16 +24,8 @@ abstract contract UsingWitnetRequest
             "UsingWitnetRequest: uncompliant WitnetRequest"
         );
         dataRequest = _witnetRequest;
-        __witnetQueryResultMaxSize = _witnetRequest.resultDataMaxSize();
         __witnetRequestRadHash = _witnetRequest.radHash();
         __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
-    }
-
-    function _witnetEstimateEvmReward()
-        virtual internal view
-        returns (uint256)
-    {
-        return _witnetEstimateEvmReward(__witnetQueryResultMaxSize);
     }
 
     function __witnetRequestData(uint256 _witnetEvmReward)

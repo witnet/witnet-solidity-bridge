@@ -21,7 +21,7 @@ contract WitnetRandomnessV2
     using Witnet for Witnet.RadonSLA;
 
     struct Randomize {
-        uint256 witnetQueryId;
+        uint256 queryId;
         uint256 prevBlock;
         uint256 nextBlock;
     }
@@ -45,36 +45,32 @@ contract WitnetRandomnessV2
         _require(
             address(_witnet) == address(0)
                 || _witnet.specs() == type(WitnetOracle).interfaceId,
-            "uncompliant WitnetOracle"
+            "uncompliant oracle"
         );
-        WitnetRequestBytecodes _registry = witnet().registry();
-        {
-            // Build own Witnet Randomness Request:
-            bytes32[] memory _retrievals = new bytes32[](1);
-            _retrievals[0] = _registry.verifyRadonRetrieval(
-                Witnet.RadonRetrievalMethods.RNG,
-                "", // no request url
-                "", // no request body
-                new string[2][](0), // no request headers
-                hex"80" // no request Radon script
-            );
-            Witnet.RadonFilter[] memory _filters;
-            bytes32 _aggregator = _registry.verifyRadonReducer(Witnet.RadonReducer({
-                opcode: Witnet.RadonReducerOpcodes.Mode,
-                filters: _filters // no filters
-            }));
-            bytes32 _tally = _registry.verifyRadonReducer(Witnet.RadonReducer({
-                opcode: Witnet.RadonReducerOpcodes.ConcatenateAndHash,
-                filters: _filters // no filters
-            }));
-            witnetRadHash = _registry.verifyRadonRequest(
-                _retrievals,
-                _aggregator,
-                _tally,
-                32, // 256 bits of pure entropy ;-)
-                new string[][](_retrievals.length)
-            );
-        }
+        // Build Witnet-compliant randomness request:
+        WitnetRadonRegistry _registry = witnet().registry();
+        witnetRadHash = _registry.verifyRadonRequest(
+            abi.decode(
+                abi.encode([
+                    _registry.verifyRadonRetrieval(
+                        Witnet.RadonRetrievalMethods.RNG,
+                        "", // no request url
+                        "", // no request body
+                        new string[2][](0), // no request headers
+                        hex"80" // no request Radon script
+                    )
+                ]), (bytes32[])
+            ),
+            Witnet.RadonReducer({
+                opcode: Witnet.RadonReduceOpcodes.Mode,
+                filters: new Witnet.RadonFilter[](0)
+            }),
+            Witnet.RadonReducer({
+                opcode: Witnet.RadonReduceOpcodes.ConcatenateAndHash,
+                filters: new Witnet.RadonFilter[](0)
+            })
+        );
+        __witnetDefaultSLA.maxTallyResultSize = 34;
     }
 
     receive() virtual external payable {
@@ -117,11 +113,8 @@ contract WitnetRandomnessV2
         returns (uint256)
     {
         return (
-            (100 + __witnetBaseFeeOverheadPercentage)
-                * __witnet.estimateBaseFee(
-                    _evmGasPrice, 
-                    uint16(34)
-                ) 
+            __witnet.estimateBaseFee(_evmGasPrice) 
+                * (100 + __witnetBaseFeeOverheadPercentage)
         ) / 100;
     }
 
@@ -150,21 +143,21 @@ contract WitnetRandomnessV2
         virtual internal view 
         returns (bytes32)
     {
-        if (__storage().randomize_[_blockNumber].witnetQueryId == 0) {
+        if (__storage().randomize_[_blockNumber].queryId == 0) {
             _blockNumber = getRandomizeNextBlock(_blockNumber);
         }
 
         Randomize storage __randomize = __storage().randomize_[_blockNumber];
-        uint256 _witnetQueryId = __randomize.witnetQueryId;
+        uint256 _queryId = __randomize.queryId;
         _require(
-            _witnetQueryId != 0, 
+            _queryId != 0, 
             "not randomized"
         );
         
-        Witnet.ResponseStatus _status = __witnet.getQueryResponseStatus(_witnetQueryId);
+        Witnet.ResponseStatus _status = __witnet.getQueryResponseStatus(_queryId);
         if (_status == Witnet.ResponseStatus.Ready) {
             return (
-                __witnet.getQueryResultCborBytes(_witnetQueryId)
+                __witnet.getQueryResultCborBytes(_queryId)
                     .toWitnetResult()
                     .asBytes32()
             );
@@ -203,20 +196,20 @@ contract WitnetRandomnessV2
             uint256 _witnetResultFinalityBlock
         )
     {
-        if (__storage().randomize_[_blockNumber].witnetQueryId == 0) {
+        if (__storage().randomize_[_blockNumber].queryId == 0) {
             _blockNumber = getRandomizeNextBlock(_blockNumber);
         }
 
         Randomize storage __randomize = __storage().randomize_[_blockNumber];
-        uint256 _witnetQueryId = __randomize.witnetQueryId;
+        uint256 _queryId = __randomize.queryId;
         _require(
-            _witnetQueryId != 0, 
+            _queryId != 0, 
             "not randomized"
         );
         
-        Witnet.ResponseStatus _status = __witnet.getQueryResponseStatus(_witnetQueryId);
+        Witnet.ResponseStatus _status = __witnet.getQueryResponseStatus(_queryId);
         if (_status == Witnet.ResponseStatus.Ready) {
-            Witnet.Response memory _witnetQueryResponse = __witnet.getQueryResponse(_witnetQueryId);
+            Witnet.Response memory _witnetQueryResponse = __witnet.getQueryResponse(_queryId);
             _witnetResultTimestamp = _witnetQueryResponse.resultTimestamp;
             _witnetResultTallyHash = _witnetQueryResponse.resultTallyHash;
             _witnetResultFinalityBlock = _witnetQueryResponse.finality;
@@ -247,20 +240,20 @@ contract WitnetRandomnessV2
     /// @notice Retrieves metadata related to the randomize request that got posted to the 
     /// @notice Witnet Oracle contract on the given block number.
     /// @dev Returns zero values if no randomize request was actually posted on the given block.
-    /// @return _witnetQueryId Identifier of the underlying Witnet query created on the given block number. 
+    /// @return _queryId Identifier of the underlying Witnet query created on the given block number. 
     /// @return _prevRandomizeBlock Block number in which a randomize request got posted just before this one. 0 if none.
     /// @return _nextRandomizeBlock Block number in which a randomize request got posted just after this one, 0 if none.
     function getRandomizeData(uint256 _blockNumber)
         external view
         virtual override
         returns (
-            uint256 _witnetQueryId,
+            uint256 _queryId,
             uint256 _prevRandomizeBlock,
             uint256 _nextRandomizeBlock
         )
     {
         Randomize storage __randomize = __storage().randomize_[_blockNumber];
-        _witnetQueryId = __randomize.witnetQueryId;
+        _queryId = __randomize.queryId;
         _prevRandomizeBlock = __randomize.prevBlock;
         _nextRandomizeBlock = __randomize.nextBlock;
     }
@@ -273,7 +266,7 @@ contract WitnetRandomnessV2
         virtual override
         returns (uint256)
     {
-        return ((__storage().randomize_[_blockNumber].witnetQueryId != 0)
+        return ((__storage().randomize_[_blockNumber].queryId != 0)
             ? __storage().randomize_[_blockNumber].nextBlock
             // start search from the latest block
             : _searchNextBlock(_blockNumber, __storage().lastRandomizeBlock)
@@ -309,15 +302,15 @@ contract WitnetRandomnessV2
         public view 
         returns (Witnet.ResponseStatus)
     {
-        if (__storage().randomize_[_blockNumber].witnetQueryId == 0) {
+        if (__storage().randomize_[_blockNumber].queryId == 0) {
             _blockNumber = getRandomizeNextBlock(_blockNumber);
         }
-        uint256 _witnetQueryId = __storage().randomize_[_blockNumber].witnetQueryId;
-        if (_witnetQueryId == 0) {
+        uint256 _queryId = __storage().randomize_[_blockNumber].queryId;
+        if (_queryId == 0) {
             return Witnet.ResponseStatus.Void;
         
         } else {
-            Witnet.ResponseStatus _status = __witnet.getQueryResponseStatus(_witnetQueryId);
+            Witnet.ResponseStatus _status = __witnet.getQueryResponseStatus(_queryId);
             if (_status == Witnet.ResponseStatus.Error) {
                 uint256 _nextRandomizeBlock = __storage().randomize_[_blockNumber].nextBlock;
                 if (_nextRandomizeBlock != 0) {

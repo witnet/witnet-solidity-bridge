@@ -64,15 +64,13 @@ abstract contract UsingWitnet
     }
 
     /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function _witnetEstimateEvmReward(uint16 _resultMaxSize)
+    function _witnetEstimateBaseFee()
         virtual internal view
         returns (uint256)
     {
         return (
             (100 + __witnetBaseFeeOverheadPercentage)
-                * __witnet.estimateBaseFee(tx.gasprice, _resultMaxSize) 
+                * __witnet.estimateBaseFee(tx.gasprice) 
         ) / 100;
     }
 

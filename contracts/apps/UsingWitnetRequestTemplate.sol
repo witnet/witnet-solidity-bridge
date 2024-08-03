@@ -2,19 +2,19 @@
 pragma solidity ^0.8.0;
 
 import "./UsingWitnet.sol";
+
 import "../WitnetRequest.sol";
+import "../WitnetRequestTemplate.sol";
 
 abstract contract UsingWitnetRequestTemplate
     is UsingWitnet
 {
     WitnetRequestTemplate immutable public dataRequestTemplate;
-    
-    uint16 immutable internal __witnetQueryResultMaxSize;
  
     /// @param _witnetRequestTemplate Address of the WitnetRequestTemplate from which actual data requests will get built.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
     constructor (
-            WitnetRequestTemplate _witnetRequestTemplate, 
+            WitnetRequestTemplate _witnetRequestTemplate,
             uint16 _baseFeeOverheadPercentage
         )
         UsingWitnet(_witnetRequestTemplate.witnet())
@@ -24,7 +24,6 @@ abstract contract UsingWitnetRequestTemplate
             "UsingWitnetRequestTemplate: uncompliant WitnetRequestTemplate"
         );
         dataRequestTemplate = _witnetRequestTemplate;
-        __witnetQueryResultMaxSize = _witnetRequestTemplate.resultDataMaxSize();
         __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
@@ -37,14 +36,7 @@ abstract contract UsingWitnetRequestTemplate
     function _witnetBuildRequest(string[][] memory _witnetRequestArgs)
         internal returns (WitnetRequest)
     {
-        return WitnetRequest(dataRequestTemplate.buildRequest(_witnetRequestArgs));
-    }
-
-    function _witnetEstimateEvmReward()
-        virtual internal view
-        returns (uint256)
-    {
-        return _witnetEstimateEvmReward(__witnetQueryResultMaxSize);
+        return WitnetRequest(dataRequestTemplate.buildWitnetRequest(_witnetRequestArgs));
     }
 
     function __witnetRequestData(

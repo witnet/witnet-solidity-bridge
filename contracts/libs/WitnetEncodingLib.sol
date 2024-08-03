@@ -265,7 +265,7 @@ library WitnetEncodingLib {
         );
     }
 
-    function encode(Witnet.RadonReducerOpcodes opcode)
+    function encode(Witnet.RadonReduceOpcodes opcode)
         public pure
         returns (bytes memory)
     {
@@ -411,11 +411,11 @@ library WitnetEncodingLib {
     {
         // if (reducer.script.length == 0) {
             if (!(
-                reducer.opcode == Witnet.RadonReducerOpcodes.AverageMean 
-                    || reducer.opcode == Witnet.RadonReducerOpcodes.StandardDeviation
-                    || reducer.opcode == Witnet.RadonReducerOpcodes.Mode
-                    || reducer.opcode == Witnet.RadonReducerOpcodes.ConcatenateAndHash
-                    || reducer.opcode == Witnet.RadonReducerOpcodes.AverageMedian
+                reducer.opcode == Witnet.RadonReduceOpcodes.AverageMean 
+                    || reducer.opcode == Witnet.RadonReduceOpcodes.StandardDeviation
+                    || reducer.opcode == Witnet.RadonReduceOpcodes.Mode
+                    || reducer.opcode == Witnet.RadonReduceOpcodes.ConcatenateAndHash
+                    || reducer.opcode == Witnet.RadonReduceOpcodes.AverageMedian
             )) {
                 revert UnsupportedRadonReducerOpcode(uint8(reducer.opcode));
             }

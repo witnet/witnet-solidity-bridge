@@ -8,5 +8,5 @@ interface IWitnetRequestFactoryEvents {
     event WitnetRequestBuilt(address request);
 
     /// Emitted every time a new counter-factual WitnetRequestTemplate gets verified and built. 
-    event WitnetRequestTemplateBuilt(address template, uint256[] argsCount);
+    event WitnetRequestTemplateBuilt(address template);
 }

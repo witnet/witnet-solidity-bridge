@@ -36,8 +36,7 @@ interface IWitnetRequestFactory {
     /// @param aggregate The Radon Reducer to apply on values returned from data sources.
     /// @param tally The Radon Reducer to apply on values revealed by witnessing nodes.
     function buildWitnetRequestTemplate(
-            bytes32[] calldata retrieveHashes,
-            string[][] calldata args,
+            bytes32[]  calldata retrieveHashes,
             Witnet.RadonReducer calldata aggregate,
             Witnet.RadonReducer calldata tally
         ) external returns (address template);
@@ -52,7 +51,7 @@ interface IWitnetRequestFactory {
     /// @dev   - unsupported data request method is given;
     /// @dev   - no URL is provided on Http/* data requests;
     /// @dev   - non-empty strings given on RNG data requests..
-    function verifyWitnetRetrieval(
+    function verifyRadonRetrieval(
             Witnet.RadonRetrievalMethods requestMethod,
             string calldata requestURL,
             string calldata requestBody,

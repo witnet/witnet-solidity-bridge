@@ -18,7 +18,6 @@ contract WitnetMockedRequestFactory
     constructor (WitnetMockedOracle _wrb)
         WitnetRequestFactoryDefault(
             WitnetOracle(address(_wrb)),
-            WitnetRequestBytecodes(_wrb.registry()),
             false,
             bytes32("mocked")
         ) 

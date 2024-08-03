@@ -11,11 +11,10 @@ contract WitnetRequestFactoryCfxCore
 {
     constructor(
             WitnetOracle _witnet,
-            WitnetRadonRegistry _registry,
             bool _upgradable,
             bytes32 _versionTag
         )
-        WitnetRequestFactoryDefault(_witnet, _registry, _upgradable, _versionTag)
+        WitnetRequestFactoryDefault(_witnet, _upgradable, _versionTag)
     {}
 
     function _cloneDeterministic(bytes32 _salt)

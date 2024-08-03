@@ -4,6 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "../WitnetRequest.sol";
+import "../WitnetRequestTemplate.sol";
 
 contract WitnetRequestFactoryData {
 
@@ -19,40 +20,30 @@ contract WitnetRequestFactoryData {
         /* keccak256("io.witnet.data.request.template") */
         0x50402db987be01ecf619cd3fb022cf52f861d188e7b779dd032a62d082276afb;
 
-    struct Slot {
+    struct WitnetRequestFactoryStorage {
         address owner;
         address pendingOwner;
     }
 
-    struct WitnetRequestSlot {
-        /// Array of string arguments passed upon initialization.
-        string[][] args;
+    struct WitnetRequestStorage {
         /// Radon RAD hash.
         bytes32 radHash;
-        /// Parent WitnetRequestTemplate contract.
-        WitnetRequestTemplate template;
+        // /// Array of string arguments passed upon initialization.
+        // string[][] args;
     }
 
-    struct WitnetRequestTemplateSlot {
-        /// @notice Aggregator reducer hash.
-        bytes32 aggregator;
-        /// @notice Parent IWitnetRequestFactory from which this template was built.
-        WitnetRequestFactory factory;
-        /// Whether any of the sources is parameterized.
-        bool parameterized;
-        /// @notice Tally reducer hash.
-        bytes32 tally;
+    struct WitnetRequestTemplateStorage {
         /// @notice Array of retrievals hashes passed upon construction.
-        bytes32[] retrievals;
-        /// @notice Result data type.
-        Witnet.RadonDataTypes resultDataType;
-        /// @notice Result max size or rank (if variable type).
-        uint16 resultDataMaxSize; 
+        bytes32[] retrieveHashes;
+        /// @notice Aggregator reduce hash.
+        bytes16 aggregateReduceHash;
+        /// @notice Tally reduce hash.
+        bytes16 tallyReduceHash;
     }
 
     function __witnetRequestFactory()
         internal pure
-        returns (Slot storage ptr)
+        returns (WitnetRequestFactoryStorage storage ptr)
     {
         assembly {
             ptr.slot := _WITNET_REQUEST_FACTORY_SLOTHASH
@@ -61,7 +52,7 @@ contract WitnetRequestFactoryData {
 
     function __witnetRequest()
         internal pure
-        returns (WitnetRequestSlot storage ptr)
+        returns (WitnetRequestStorage storage ptr)
     {
         assembly {
             ptr.slot := _WITNET_REQUEST_SLOTHASH
@@ -70,7 +61,7 @@ contract WitnetRequestFactoryData {
 
     function __witnetRequestTemplate()
         internal pure
-        returns (WitnetRequestTemplateSlot storage ptr)
+        returns (WitnetRequestTemplateStorage storage ptr)
     {
         assembly {
             ptr.slot := _WITNET_REQUEST_TEMPLATE_SLOTHASH

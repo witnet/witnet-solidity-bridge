@@ -6,7 +6,7 @@ import "../libs/Witnet.sol";
 
 /// @title Witnet Request Board base data model. 
 /// @author The Witnet Foundation.
-abstract contract WitnetRequestBytecodesData {
+abstract contract WitnetRadonRegistryData {
     
     bytes32 private constant _WITNET_BYTECODES_DATA_SLOTHASH =
         /* keccak256("io.witnet.bytecodes.data") */
@@ -18,8 +18,6 @@ abstract contract WitnetRequestBytecodesData {
         address pendingOwner;
         
         Database db;
-        uint256 totalDataProviders;
-        // ...
     }
 
     struct DataProvider {
@@ -28,26 +26,25 @@ abstract contract WitnetRequestBytecodesData {
         mapping (uint256 => bytes32) endpoints;
     }
 
-    struct DataRequest {
-        string[][] args;
-        bytes32 aggregator;
-        bytes32 radHash;
-        Witnet.RadonDataTypes resultDataType;
-        uint16 resultMaxSize;
+    struct RadonRequestPacked {
+        string[][] _args;
+        bytes32 aggregateTallyHashes;
+        bytes32 _radHash;
+        Witnet.RadonDataTypes _resultDataType;
+        uint16 _resultMaxSize;
         bytes32[] retrievals;
-        bytes32 tally;
+        bytes32 legacyTallyHash;
     }
 
     struct Database {
-        mapping (uint256 => DataProvider) providers;
-        mapping (bytes32 => uint256) providersIndex;
+        bytes32 _reservedSlot0;
+        bytes32 _reservedSlot1;
         
         mapping (bytes32 => Witnet.RadonReducer) reducers;
         mapping (bytes32 => Witnet.RadonRetrieval) retrievals;
-        mapping (bytes32 => DataRequest) requests;
+        mapping (bytes32 => RadonRequestPacked) requests;
         mapping (bytes32 => bytes32) rads;
         mapping (bytes32 => bytes) radsBytecode;
-        mapping (bytes32 => bytes) _slasBytecode;
     }
 
     constructor() {
@@ -79,7 +76,7 @@ abstract contract WitnetRequestBytecodesData {
 
     function __requests(bytes32 _radHash)
         internal view
-        returns (DataRequest storage _ptr)
+        returns (RadonRequestPacked storage _ptr)
     {
         return __database().requests[_radHash];
     }

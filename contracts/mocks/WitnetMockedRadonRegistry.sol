@@ -3,16 +3,16 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../core/defaults/WitnetRequestBytecodesDefault.sol";
+import "../core/defaults/WitnetRadonRegistryDefault.sol";
 
-/// @title Mocked implementation of `WitnetRequestBytecodes`.
+/// @title Mocked implementation of `WitnetRadonRegistry`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
 /// @dev ON SUPPORTED TESTNETS AND MAINNETS, PLEASE USE 
-/// @dev THE `WitnetRequestBytecodes` CONTRACT ADDRESS PROVIDED 
+/// @dev THE `WitnetRadonRegistry` CONTRACT ADDRESS PROVIDED 
 /// @dev BY THE WITNET FOUNDATION.
-contract WitnetMockedRequestBytecodes is WitnetRequestBytecodesDefault {
+contract WitnetMockedRadonRegistry is WitnetRadonRegistryDefault {
     constructor()
-        WitnetRequestBytecodesDefault(
+        WitnetRadonRegistryDefault(
             false,
             bytes32("mocked")
         )

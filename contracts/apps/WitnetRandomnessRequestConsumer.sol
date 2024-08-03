@@ -30,7 +30,7 @@ abstract contract WitnetRandomnessRequestConsumer
     {
         // On-chain building of the Witnet Randomness Request:
         {
-            WitnetRequestBytecodes _registry = witnet().registry();
+            WitnetRadonRegistry _registry = witnet().registry();
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
             _retrievals[0] = _registry.verifyRadonRetrieval(
@@ -40,28 +40,19 @@ abstract contract WitnetRandomnessRequestConsumer
                 new string[2][](0), // no headers
                 hex"80" // no retrieval script
             );
-            Witnet.RadonFilter[] memory _filters;
-            bytes32 _aggregator = _registry.verifyRadonReducer(Witnet.RadonReducer({
-                opcode: Witnet.RadonReducerOpcodes.Mode,
-                filters: _filters // no filters
-            }));
-            bytes32 _tally = _registry.verifyRadonReducer(Witnet.RadonReducer({
-                opcode: Witnet.RadonReducerOpcodes.ConcatenateAndHash,
-                filters: _filters // no filters
-            }));
             __witnetRandomnessRadHash = _registry.verifyRadonRequest(
                 _retrievals,
-                _aggregator,
-                _tally,
-                32, // 256 bits of pure entropy ;-)
-                new string[][](_retrievals.length)
+                Witnet.RadonReducer({
+                    opcode: Witnet.RadonReduceOpcodes.Mode,
+                    filters: new Witnet.RadonFilter[](0)
+                }),
+                Witnet.RadonReducer({
+                    opcode: Witnet.RadonReduceOpcodes.ConcatenateAndHash,
+                    filters: new Witnet.RadonFilter[](0)
+                })
             );
         }
         __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
-    }
-
-    function _witnetEstimateEvmReward() virtual override internal view returns (uint256) {
-        return _witnetEstimateEvmReward(32);
     }
 
     function _witnetRandomUniformUint32(uint32 _range, uint256 _nonce, bytes32 _seed) internal pure returns (uint32) {
