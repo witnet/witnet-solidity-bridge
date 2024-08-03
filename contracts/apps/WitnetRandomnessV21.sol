@@ -2,14 +2,15 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+import "./mocks/UsingWitnet.sol";
+
 import "../WitnetRandomness.sol";
-import "../apps/UsingWitnet.sol";
 import "../interfaces/IWitnetRandomnessAdmin.sol";
 import "../patterns/Ownable2Step.sol";
 
-/// @title WitnetRandomnessV2: Unmalleable and provably-fair randomness generation based on the Witnet Oracle v2.*.
+/// @title WitnetRandomnessV21: Unmalleable and provably-fair randomness generation based on the Witnet Oracle v2.*.
 /// @author The Witnet Foundation.
-contract WitnetRandomnessV2
+contract WitnetRandomnessV21
     is
         Ownable2Step,
         UsingWitnet,
@@ -88,7 +89,7 @@ contract WitnetRandomnessV2
     }
 
     function class() virtual override public pure returns (string memory) {
-        return type(WitnetRandomnessV2).name;
+        return type(WitnetRandomnessV21).name;
     }
 
     function specs() virtual override external pure returns (bytes4) {

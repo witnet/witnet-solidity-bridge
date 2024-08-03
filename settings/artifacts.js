@@ -3,7 +3,7 @@ module.exports = {
     WitnetDeployer: "WitnetDeployer",
     WitnetOracle: "WitnetOracleTrustableDefault",
     WitnetPriceFeeds: "WitnetPriceFeedsDefault",
-    WitnetRandomness: "WitnetRandomnessV2",
+    WitnetRandomness: "WitnetRandomnessV21",
     WitnetRadonRegistry: "WitnetRadonRegistryDefault",
     WitnetRequestFactory: "WitnetRequestFactoryDefault",
     WitnetEncodingLib: "WitnetEncodingLib",

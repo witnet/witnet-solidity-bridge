@@ -13,7 +13,7 @@ module.exports = {
       return {
         WitnetOracle: merged?.WitnetOracle,
         WitnetPriceFeeds: merged?.WitnetPriceFeeds,
-        WitnetRandomnessV2: merged?.WitnetRandomnessV2,
+        WitnetRandomnessV21: merged?.WitnetRandomnessV21,
       }
     } else {
       return {}
