@@ -13,7 +13,7 @@ module.exports = async function (_, network, [, from]) {
   // once all core Witnet Oracle artifacts get deployed and initialized.
 
   // ==========================================================================
-  // --- WitnetRandomnessV21 --------------------------------------------------
+  // --- WitRandomnessV21 --------------------------------------------------
 
   if (!process.argv.includes("--no-randomness")) {
     await deploy({

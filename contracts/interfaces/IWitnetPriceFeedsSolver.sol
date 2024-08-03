@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../libs/Witnet.sol";
 
-interface IWitnetPriceSolver {
+interface IWitnetPriceFeedsSolver {
     struct Price {
         uint value;
         uint timestamp;

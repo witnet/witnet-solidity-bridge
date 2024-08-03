@@ -7,9 +7,9 @@ import "../interfaces/IWitnetRandomnessAdmin.sol";
 import "../mocks/UsingWitnet.sol";
 import "../patterns/Ownable2Step.sol";
 
-/// @title WitnetRandomnessV21: Unmalleable and provably-fair randomness generation based on the Witnet Oracle v2.*.
+/// @title WitRandomnessV21: Unmalleable and provably-fair randomness generation based on the Witnet Oracle v2.*.
 /// @author The Witnet Foundation.
-contract WitnetRandomnessV21
+contract WitRandomnessV21
     is
         Ownable2Step,
         UsingWitnet,
@@ -88,7 +88,7 @@ contract WitnetRandomnessV21
     }
 
     function class() virtual override public pure returns (string memory) {
-        return type(WitnetRandomnessV21).name;
+        return type(WitRandomnessV21).name;
     }
 
     function specs() virtual override external pure returns (bytes4) {

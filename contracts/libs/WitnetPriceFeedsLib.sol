@@ -3,14 +3,14 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/IWitnetPriceSolver.sol";
-import "../interfaces/IWitnetPriceSolverDeployer.sol";
+import "../interfaces/IWitnetPriceFeedsSolver.sol";
+import "../interfaces/IWitnetPriceFeedsSolverDeployer.sol";
 
 import "../libs/Slices.sol";
 
 /// @title Ancillary deployable library for WitnetPriceFeeds.
 /// @dev Features:
-/// @dev - deployment of counter-factual IWitnetPriceSolver instances.
+/// @dev - deployment of counter-factual IWitnetPriceFeedsSolver instances.
 /// @dev - validation of feed caption strings.
 /// @author The Witnet Foundation.
 library WitnetPriceFeedsLib {
@@ -40,7 +40,7 @@ library WitnetPriceFeedsLib {
             // assert(_solver == _createdContract); // fails on TEN chains
             _solver = _createdContract;
             require(
-                IWitnetPriceSolver(_solver).specs() == type(IWitnetPriceSolver).interfaceId,
+                IWitnetPriceFeedsSolver(_solver).specs() == type(IWitnetPriceFeedsSolver).interfaceId,
                 "WitnetPriceFeedsLib: uncompliant solver implementation"
             );
         }

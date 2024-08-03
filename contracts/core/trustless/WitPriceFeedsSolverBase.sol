@@ -2,12 +2,12 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../data/WitnetPriceFeedsData.sol";
-import "../interfaces/IWitnetPriceFeeds.sol";
+import "../../data/WitnetPriceFeedsData.sol";
+import "../../interfaces/IWitnetPriceFeeds.sol";
 
-abstract contract WitnetPriceSolverBase
+abstract contract WitPriceFeedsSolverBase
     is
-        IWitnetPriceSolver,
+        IWitnetPriceFeedsSolver,
         WitnetPriceFeedsData
 {
     address public immutable override delegator;
@@ -15,7 +15,7 @@ abstract contract WitnetPriceSolverBase
     modifier onlyDelegator {
         require(
             address(this) == delegator,
-            "WitnetPriceSolverBase: not the delegator"
+            "WitPriceFeedsSolverBase: not the delegator"
         );
         _;
     }
@@ -25,7 +25,7 @@ abstract contract WitnetPriceSolverBase
     }
 
     function specs() external pure returns (bytes4) {
-        return type(IWitnetPriceSolver).interfaceId;
+        return type(IWitnetPriceFeedsSolver).interfaceId;
     }
 
     function validate(bytes4 feedId, string[] calldata deps) virtual override external {
@@ -33,7 +33,7 @@ abstract contract WitnetPriceSolverBase
         uint256 _innerDecimals;
         require(
             deps.length <= 8,
-            "WitnetPriceSolverBase: too many dependencies"
+            "WitPriceFeedsSolverBase: too many dependencies"
         );
         for (uint _ix = 0; _ix < deps.length; _ix ++) {
             bytes4 _depsId4 = bytes4(keccak256(bytes(deps[_ix])));
@@ -41,14 +41,14 @@ abstract contract WitnetPriceSolverBase
             require(
                 __depsFeed.index > 0, 
                 string(abi.encodePacked(
-                    "WitnetPriceSolverBase: unsupported ",
+                    "WitPriceFeedsSolverBase: unsupported ",
                     deps[_ix]
                 ))
             );
             require(
                 _depsId4 != feedId, 
                 string(abi.encodePacked(
-                    "WitnetPriceSolverBase: loop on ",
+                    "WitPriceFeedsSolverBase: loop on ",
                     deps[_ix]
                 ))
             );

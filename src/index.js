@@ -13,7 +13,7 @@ module.exports = {
       return {
         WitnetOracle: merged?.WitnetOracle,
         WitnetPriceFeeds: merged?.WitnetPriceFeeds,
-        WitnetRandomnessV21: merged?.WitnetRandomnessV21,
+        WitRandomnessV21: merged?.WitRandomnessV21,
       }
     } else {
       return {}
@@ -33,7 +33,7 @@ module.exports = {
   artifacts: {
     WitnetOracle: require("../artifacts/contracts/WitnetOracle.sol/WitnetOracle.json"),
     WitnetPriceFeeds: require("../artifacts/contracts/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
-    WitnetPriceRouteSolver: require("../artifacts/contracts/interfaces/IWitnetPriceSolver.sol/IWitnetPriceSolver.json"),
+    WitnetPriceRouteSolver: require("../artifacts/contracts/interfaces/IWitnetPriceFeedsSolver.sol/IWitnetPriceFeedsSolver.json"),
     WitnetRandomness: require("../artifacts/contracts/WitnetRandomness.sol/WitnetRandomness.json"),
     WitnetRequest: require("../artifacts/contracts/WitnetRequest.sol/WitnetRequest.json"),
     WitnetRadonRegistry: require("../artifacts/contracts/WitnetRadonRegistry.sol/WitnetRadonRegistry.json"),

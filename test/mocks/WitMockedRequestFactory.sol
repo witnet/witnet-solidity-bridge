@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitnetMockedOracle.sol";
+import "./WitMockedOracle.sol";
 import "../../contracts/core/trustless/WitnetRequestFactoryDefault.sol";
 
 /// @title Mocked implementation of `WitnetRequestFactory`.
@@ -11,11 +11,11 @@ import "../../contracts/core/trustless/WitnetRequestFactoryDefault.sol";
 /// @dev ON SUPPORTED TESTNETS AND MAINNETS, PLEASE USE 
 /// @dev THE `WitnetRequestFactory` CONTRACT ADDRESS PROVIDED 
 /// @dev BY THE WITNET FOUNDATION.
-contract WitnetMockedRequestFactory
+contract WitMockedRequestFactory
     is 
         WitnetRequestFactoryDefault
 {
-    constructor (WitnetMockedOracle _wrb)
+    constructor (WitMockedOracle _wrb)
         WitnetRequestFactoryDefault(
             WitnetOracle(address(_wrb)),
             false,

@@ -8,7 +8,7 @@ import "../core/WitnetUpgradableBase.sol";
 import "../data/WitnetPriceFeedsData.sol";
 import "../interfaces/IWitnetFeedsAdmin.sol";
 import "../interfaces/IWitnetFeedsLegacy.sol";
-import "../interfaces/IWitnetPriceSolverDeployer.sol";
+import "../interfaces/IWitnetPriceFeedsSolverDeployer.sol";
 import "../interfaces/IWitnetOracleLegacy.sol";
 import "../libs/WitnetPriceFeedsLib.sol";
 import "../patterns/Ownable2Step.sol";
@@ -16,7 +16,7 @@ import "../patterns/Ownable2Step.sol";
 /// @title WitnetPriceFeeds: Price Feeds live repository reliant on the Witnet Oracle blockchain.
 /// @author Guillermo Díaz <guillermo@otherplane.com>
 
-contract WitnetPriceFeedsV21
+contract WitPriceFeedsV21
     is
         Ownable2Step,
         WitnetPriceFeeds,
@@ -24,7 +24,7 @@ contract WitnetPriceFeedsV21
         WitnetUpgradableBase,
         IWitnetFeedsAdmin,
         IWitnetFeedsLegacy,
-        IWitnetPriceSolverDeployer
+        IWitnetPriceFeedsSolverDeployer
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
@@ -32,7 +32,7 @@ contract WitnetPriceFeedsV21
     using Witnet for Witnet.RadonSLA;
 
     function class() virtual override(IWitnetAppliance, WitnetUpgradableBase) public view returns (string memory) {
-        return type(WitnetPriceFeedsV21).name;
+        return type(WitPriceFeedsV21).name;
     }
 
     bytes4 immutable public override specs = type(WitnetPriceFeeds).interfaceId;
@@ -64,7 +64,7 @@ contract WitnetPriceFeedsV21
     // solhint-disable-next-line payable-fallback
     fallback() override external {
         if (
-            msg.sig == IWitnetPriceSolver.solve.selector
+            msg.sig == IWitnetPriceFeedsSolver.solve.selector
                 && msg.sender == address(this)
         ) {
             address _solver = __records_(bytes4(bytes8(msg.data) << 32)).solver;
@@ -516,7 +516,7 @@ contract WitnetPriceFeedsV21
         {
             // solhint-disable-next-line avoid-low-level-calls
             (bool _success, bytes memory _reason) = solver.delegatecall(abi.encodeWithSelector(
-                IWitnetPriceSolver.validate.selector,
+                IWitnetPriceFeedsSolver.validate.selector,
                 feedId,
                 deps
             ));
@@ -534,7 +534,7 @@ contract WitnetPriceFeedsV21
         {   
             // solhint-disable-next-line avoid-low-level-calls
             (bool _success, bytes memory _reason) = address(this).staticcall(abi.encodeWithSelector(
-                IWitnetPriceSolver.solve.selector,
+                IWitnetPriceFeedsSolver.solve.selector,
                 feedId
             ));
             if (!_success) {
@@ -565,9 +565,9 @@ contract WitnetPriceFeedsV21
     function lookupPriceSolver(bytes4 feedId)
         override
         external view
-        returns (IWitnetPriceSolver _solverAddress, string[] memory _solverDeps)
+        returns (IWitnetPriceFeedsSolver _solverAddress, string[] memory _solverDeps)
     {
-        _solverAddress = IWitnetPriceSolver(__records_(feedId).solver);
+        _solverAddress = IWitnetPriceFeedsSolver(__records_(feedId).solver);
         bytes4[] memory _deps = _depsOf(feedId);
         _solverDeps = new string[](_deps.length);
         for (uint _ix = 0; _ix < _deps.length; _ix ++) {
@@ -578,13 +578,13 @@ contract WitnetPriceFeedsV21
     function latestPrice(bytes4 feedId)
         virtual override
         public view
-        returns (IWitnetPriceSolver.Price memory)
+        returns (IWitnetPriceFeedsSolver.Price memory)
     {
         uint _queryId = _lastValidQueryId(feedId);
         if (_queryId > 0) {
             Witnet.Response memory _lastValidResponse = lastValidResponse(feedId);
             Witnet.Result memory _latestResult = _lastValidResponse.resultCborBytes.toWitnetResult();
-            return IWitnetPriceSolver.Price({
+            return IWitnetPriceFeedsSolver.Price({
                 value: _latestResult.asUint(),
                 timestamp: _lastValidResponse.resultTimestamp,
                 tallyHash: _lastValidResponse.resultTallyHash,
@@ -595,7 +595,7 @@ contract WitnetPriceFeedsV21
             if (_solver != address(0)) {
                 // solhint-disable-next-line avoid-low-level-calls
                 (bool _success, bytes memory _result) = address(this).staticcall(abi.encodeWithSelector(
-                    IWitnetPriceSolver.solve.selector,
+                    IWitnetPriceFeedsSolver.solve.selector,
                     feedId
                 ));
                 if (!_success) {
@@ -607,10 +607,10 @@ contract WitnetPriceFeedsV21
                         string(abi.decode(_result, (string)))
                     )));
                 } else {
-                    return abi.decode(_result, (IWitnetPriceSolver.Price));
+                    return abi.decode(_result, (IWitnetPriceFeedsSolver.Price));
                 }
             } else {
-                return IWitnetPriceSolver.Price({
+                return IWitnetPriceFeedsSolver.Price({
                     value: 0,
                     timestamp: 0,
                     tallyHash: 0,
@@ -623,9 +623,9 @@ contract WitnetPriceFeedsV21
     function latestPrices(bytes4[] calldata feedIds)
         virtual override
         external view
-        returns (IWitnetPriceSolver.Price[] memory _prices)
+        returns (IWitnetPriceFeedsSolver.Price[] memory _prices)
     {
-        _prices = new IWitnetPriceSolver.Price[](feedIds.length);
+        _prices = new IWitnetPriceFeedsSolver.Price[](feedIds.length);
         for (uint _ix = 0; _ix < feedIds.length; _ix ++) {
             _prices[_ix] = latestPrice(feedIds[_ix]);
         }
@@ -633,7 +633,7 @@ contract WitnetPriceFeedsV21
 
 
     // ================================================================================================================
-    // --- Implements 'IWitnetPriceSolverDeployer' ---------------------------------------------------------------------
+    // --- Implements 'IWitnetPriceFeedsSolverDeployer' ---------------------------------------------------------------------
 
     function deployPriceSolver(bytes calldata initcode, bytes calldata constructorParams)
         virtual override
@@ -642,7 +642,7 @@ contract WitnetPriceFeedsV21
         returns (address _solver)
     {
         _solver = WitnetPriceFeedsLib.deployPriceSolver(initcode, constructorParams);
-        emit WitnetPriceSolverDeployed(
+        emit NewPriceFeedsSolver(
             _solver, 
             _solver.codehash, 
             constructorParams
@@ -666,7 +666,7 @@ contract WitnetPriceFeedsV21
         external view
         returns (int256 _value, uint256 _timestamp, uint256 _status)
     {
-        IWitnetPriceSolver.Price memory _latestPrice = latestPrice(bytes4(feedId));
+        IWitnetPriceFeedsSolver.Price memory _latestPrice = latestPrice(bytes4(feedId));
         return (
             int(_latestPrice.value),
             _latestPrice.timestamp,

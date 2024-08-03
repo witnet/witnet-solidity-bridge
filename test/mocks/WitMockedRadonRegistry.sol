@@ -10,7 +10,7 @@ import "../../contracts/core/trustless/WitnetRadonRegistryDefault.sol";
 /// @dev ON SUPPORTED TESTNETS AND MAINNETS, PLEASE USE 
 /// @dev THE `WitnetRadonRegistry` CONTRACT ADDRESS PROVIDED 
 /// @dev BY THE WITNET FOUNDATION.
-contract WitnetMockedRadonRegistry is WitnetRadonRegistryDefault {
+contract WitMockedRadonRegistry is WitnetRadonRegistryDefault {
     constructor()
         WitnetRadonRegistryDefault(
             false,

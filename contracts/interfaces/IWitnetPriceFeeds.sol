@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./IWitnetPriceSolver.sol";
+import "./IWitnetPriceFeedsSolver.sol";
 
 interface IWitnetPriceFeeds {   
     /// ======================================================================================================
@@ -10,13 +10,13 @@ interface IWitnetPriceFeeds {
     
     function lookupDecimals(bytes4 feedId) external view returns (uint8);    
     function lookupPriceSolver(bytes4 feedId) external view returns (
-            IWitnetPriceSolver solverAddress, 
+            IWitnetPriceFeedsSolver solverAddress, 
             string[] memory solverDeps
         );
 
     /// ======================================================================================================
     /// --- IWitnetFeeds extension ---------------------------------------------------------------------------
 
-    function latestPrice(bytes4 feedId) external view returns (IWitnetPriceSolver.Price memory);
-    function latestPrices(bytes4[] calldata feedIds)  external view returns (IWitnetPriceSolver.Price[] memory);
+    function latestPrice(bytes4 feedId) external view returns (IWitnetPriceFeedsSolver.Price memory);
+    function latestPrices(bytes4[] calldata feedIds)  external view returns (IWitnetPriceFeedsSolver.Price[] memory);
 }
