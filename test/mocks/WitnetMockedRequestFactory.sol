@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "./WitnetMockedOracle.sol";
-import "../../contracts/core/defaults/WitnetRequestFactoryDefault.sol";
+import "../../contracts/core/trustless/WitnetRequestFactoryDefault.sol";
 
 /// @title Mocked implementation of `WitnetRequestFactory`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 

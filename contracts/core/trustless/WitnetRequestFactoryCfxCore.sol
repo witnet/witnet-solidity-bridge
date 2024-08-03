@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../defaults/WitnetRequestFactoryDefault.sol";
+import "./WitnetRequestFactoryDefault.sol";
 
 contract WitnetRequestFactoryCfxCore
     is
