@@ -21,7 +21,7 @@ contract TestWitnetV2 {
         __finalityBlock = block.number;
     }
 
-    function testWitnetRequestPackingWithBytecode() external {
+    function testWitOracleRequestPackingWithBytecode() external {
         __request = Witnet.Request({
             requester: msg.sender,
             gasCallback: 500000,
@@ -36,11 +36,11 @@ contract TestWitnetV2 {
         });
     }
 
-    function testWitnetRequestUnpackingWithBytecode() external returns (Witnet.Request memory) {
+    function testWitOracleRequestUnpackingWithBytecode() external returns (Witnet.Request memory) {
         return __request;
     }
 
-    function testWitnetRequestPackingWithRadHash() external {
+    function testWitOracleRequestPackingWithRadHash() external {
         __request = Witnet.Request({
             requester: msg.sender,
             gasCallback: 500000,
@@ -55,7 +55,7 @@ contract TestWitnetV2 {
         });
     }
 
-    function testWitnetRequestUnpackingWithRadHash() external returns (Witnet.Request memory) {
+    function testWitOracleRequestUnpackingWithRadHash() external returns (Witnet.Request memory) {
         return __request;
     }
 

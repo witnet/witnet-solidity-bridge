@@ -19,14 +19,14 @@ module.exports = async function (_, network, [, from]) {
     await deploy({
       network,
       targets,
-      from: utils.isDryRun(network) ? from : specs.WitnetRandomness.from || from,
-      key: "WitnetRandomness",
-      specs: specs.WitnetRandomness,
+      from: utils.isDryRun(network) ? from : specs.WitRandomness.from || from,
+      key: "WitRandomness",
+      specs: specs.WitRandomness,
       intrinsics: {
         types: ["address", "address"],
         values: [
-          /* _witnetOracle */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
-          /* _witnetOperator */ utils.isDryRun(network) ? from : specs?.WitnetRandomness?.from || from,
+          /* _witOracle */ await determineProxyAddr(from, specs.WitOracle?.vanity || 3),
+          /* _witnetOperator */ utils.isDryRun(network) ? from : specs?.WitRandomness?.from || from,
         ],
       },
     })

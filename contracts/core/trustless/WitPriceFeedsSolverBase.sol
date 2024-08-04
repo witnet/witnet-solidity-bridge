@@ -2,13 +2,13 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../data/WitnetPriceFeedsData.sol";
-import "../../interfaces/IWitnetPriceFeeds.sol";
+import "../../data/WitPriceFeedsData.sol";
+import "../../interfaces/IWitPriceFeeds.sol";
 
 abstract contract WitPriceFeedsSolverBase
     is
-        IWitnetPriceFeedsSolver,
-        WitnetPriceFeedsData
+        IWitPriceFeedsSolver,
+        WitPriceFeedsData
 {
     address public immutable override delegator;
 
@@ -25,7 +25,7 @@ abstract contract WitPriceFeedsSolverBase
     }
 
     function specs() external pure returns (bytes4) {
-        return type(IWitnetPriceFeedsSolver).interfaceId;
+        return type(IWitPriceFeedsSolver).interfaceId;
     }
 
     function validate(bytes4 feedId, string[] calldata deps) virtual override external {

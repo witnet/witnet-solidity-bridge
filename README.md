@@ -33,7 +33,7 @@ Should any artifact require customized contract implementations:
 
 When modifying the existing source code, or the contents of `settings/artifacts` or `settings/specs`, you may need to upgrade some of the artifacts on certain networks. Just add the `--artifacts` parameter and a comma-separated list of the artifacts you need to upgrade. For instance:
 
-`$ pnpm run migrate <ecosystem>:<chain-name> WitnetErrorsLib,WitnetPriceFeeds`
+`$ pnpm run migrate <ecosystem>:<chain-name> WitOracleResultErrorsLib,WitPriceFeeds`
 
 When specifying deployable library artifacts, the depending contracts will be attempted to be upgraded as well.
 
@@ -56,13 +56,13 @@ Javacript methods and resources:
 - WEB addresses at a given chain:
     - `getAddresses(network)`
 - WEB artifacts:
-    - `assets.WitnetOracle`
-    - `assets.WitnetPriceFeeds`
+    - `assets.WitOracle`
+    - `assets.WitPriceFeeds`
     - `assets.WitnetPriceRouteSolver`
-    - `assets.WitnetRequest`
-    - `assets.WitnetRadonRegistry`
-    - `assets.WitnetRequestFactory`
-    - `assets.WitnetRequestTemplate`
+    - `assets.WitOracleRequest`
+    - `assets.WitOracleRadonRegistry`
+    - `assets.WitOracleRequestFactory`
+    - `assets.WitOracleRequestTemplate`
     - `assets.WitnetUpgrableBase`
 
 ### `require("witnet-solidity-bridge/utils")`

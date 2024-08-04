@@ -1,65 +1,65 @@
 module.exports = {
   default: {
     WitnetDeployer: "WitnetDeployer",
-    WitnetOracle: "WitnetOracleTrustableDefault",
-    WitnetPriceFeeds: "WitPriceFeedsV21",
-    WitnetRandomness: "WitRandomnessV21",
-    WitnetRadonRegistry: "WitnetRadonRegistryDefault",
-    WitnetRequestFactory: "WitnetRequestFactoryDefault",
-    WitnetEncodingLib: "WitnetEncodingLib",
-    WitnetErrorsLib: "WitnetErrorsLib",
-    WitnetPriceFeedsLib: "WitnetPriceFeedsLib",
-    WitnetOracleDataLib: "WitnetOracleDataLib",
+    WitOracle: "WitOracleTrustableDefault",
+    WitPriceFeeds: "WitPriceFeedsV21",
+    WitRandomness: "WitRandomnessV21",
+    WitOracleRadonRegistry: "WitOracleRadonRegistryDefault",
+    WitOracleRequestFactory: "WitOracleRequestFactoryDefault",
+    WitOracleRadonEncodingLib: "WitOracleRadonEncodingLib",
+    WitOracleResultErrorsLib: "WitOracleResultErrorsLib",
+    WitPriceFeedsLib: "WitPriceFeedsLib",
+    WitOracleDataLib: "WitOracleDataLib",
   },
   base: {
-    WitnetOracle: "WitnetOracleTrustableOvm2",
+    WitOracle: "WitOracleTrustableOvm2",
   },
   boba: {
-    WitnetOracle: "WitnetOracleTrustableOvm2",
+    WitOracle: "WitOracleTrustableOvm2",
   },
   "conflux:core:testnet": {
     WitnetDeployer: "WitnetDeployerCfxCore",
-    WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
+    WitOracleRequestFactory: "WitOracleRequestFactoryCfxCore",
   },
   "conflux:core:mainnet": {
     WitnetDeployer: "WitnetDeployerCfxCore",
-    WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
+    WitOracleRequestFactory: "WitOracleRequestFactoryCfxCore",
   },
   mantle: {
-    WitnetOracle: "WitnetOracleTrustableOvm2",
+    WitOracle: "WitOracleTrustableOvm2",
   },
   meter: {
     WitnetDeployer: "WitnetDeployerMeter",
-    WitnetRequestFactory: "WitnetRequestFactoryCfxCore",
+    WitOracleRequestFactory: "WitOracleRequestFactoryCfxCore",
   },
   optimism: {
-    WitnetOracle: "WitnetOracleTrustableOvm2",
+    WitOracle: "WitOracleTrustableOvm2",
   },
   "okx:x1:mainnet": {
-    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
+    WitOracleRadonRegistry: "WitOracleRadonRegistryNoSha256",
   },
   "okx:x1:sepolia": {
-    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
+    WitOracleRadonRegistry: "WitOracleRadonRegistryNoSha256",
   },
   "polygon:zkevm:goerli": {
-    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
+    WitOracleRadonRegistry: "WitOracleRadonRegistryNoSha256",
   },
   "polygon:zkevm:mainnet": {
-    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
+    WitOracleRadonRegistry: "WitOracleRadonRegistryNoSha256",
   },
   reef: {
-    WitnetOracle: "WitnetOracleTrustableReef",
+    WitOracle: "WitOracleTrustableReef",
   },
   scroll: {
-    WitnetRadonRegistry: "WitnetRadonRegistryNoSha256",
+    WitOracleRadonRegistry: "WitOracleRadonRegistryNoSha256",
   },
   "syscoin:rollux:testnet": {
-    WitnetOracle: "WitnetOracleTrustableOvm2",
+    WitOracle: "WitOracleTrustableOvm2",
   },
   "syscoin:rollux:mainnet": {
-    WitnetOracle: "WitnetOracleTrustableOvm2",
+    WitOracle: "WitOracleTrustableOvm2",
   },
   ten: {
-    WitnetOracle: "WitnetOracleTrustableObscuro",
+    WitOracle: "WitOracleTrustableObscuro",
   },
 }

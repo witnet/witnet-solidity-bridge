@@ -40,7 +40,7 @@
     "flatten:all": "pnpm run clean && pnpm run flatten:core && pnpm run flatten:apps && pnpm run flatten:libs && pnpm run flatten:proxy",
     "flatten:apps": "pnpm run flatten contracts/apps/",
     "flatten:core": "pnpm run flatten contracts/core/",
-    "flatten:libs": "pnpm run flatten contracts/libs/WitnetErrorsLib.sol && pnpm run flatten contracts/libs/WitnetEncodingLib.sol && pnpm run flatten contracts/libs/WitnetPriceFeedsLib.sol",
+    "flatten:libs": "pnpm run flatten contracts/libs/WitOracleResultErrorsLib.sol && pnpm run flatten contracts/libs/WitOracleRadonEncodingLib.sol && pnpm run flatten contracts/libs/WitPriceFeedsLib.sol",
     "flatten:proxy": "pnpm run flatten contracts/core/WitnetProxy.sol",
     "fmt:js": "eslint \"**/*.js\"",
     "fmt:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" && solhint \"test/**/*.sol\" && solhint \"flattened/**/*.sol\"",

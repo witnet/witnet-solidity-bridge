@@ -3,11 +3,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../contracts/apps/WitnetRandomnessRequestConsumer.sol";
+import "../../contracts/mocks/WitRandomnessRequestConsumer.sol";
 
 contract MyDapp
     is
-        WitnetRandomnessRequestConsumer
+        WitRandomnessRequestConsumer
 {
     using WitnetCBOR for WitnetCBOR.CBOR;
 
@@ -28,8 +28,8 @@ contract MyDapp
 
     uint256 private immutable __randomizeValue;
 
-    constructor(WitnetOracle _wrb, uint16 _baseFeeOverheadPercentage, uint24 _callbackGasLimit)
-        WitnetRandomnessRequestConsumer(
+    constructor(WitOracle _wrb, uint16 _baseFeeOverheadPercentage, uint24 _callbackGasLimit)
+        WitRandomnessRequestConsumer(
             _wrb, 
             _baseFeeOverheadPercentage,
             _callbackGasLimit
@@ -55,10 +55,10 @@ contract MyDapp
         }
     }
 
-    /// @notice Method to be called from the WitnetOracle contract as soon as the given Witnet `queryId`
+    /// @notice Method to be called from the WitOracle contract as soon as the given Witnet `queryId`
     /// @notice gets reported, if reported with no errors.
-    /// @dev It should revert if called from any other address different to the WitnetOracle being used
-    /// @dev by the WitnetConsumer contract. Within the implementation of this method, the WitnetConsumer
+    /// @dev It should revert if called from any other address different to the WitOracle being used
+    /// @dev by the WitConsumer contract. Within the implementation of this method, the WitConsumer
     /// @dev can call to the WRB as to retrieve the Witnet tracking information (i.e. the `witnetDrTxHash` 
     /// @dev and `witnetDrCommitTxTimestamp`), or the finality status, of the result being reported.
     function reportWitnetQueryResult(

@@ -3,47 +3,47 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../WitnetPriceFeeds.sol";
+import "../WitPriceFeeds.sol";
 import "../core/WitnetUpgradableBase.sol";
-import "../data/WitnetPriceFeedsData.sol";
-import "../interfaces/IWitnetFeedsAdmin.sol";
-import "../interfaces/IWitnetFeedsLegacy.sol";
-import "../interfaces/IWitnetPriceFeedsSolverDeployer.sol";
-import "../interfaces/IWitnetOracleLegacy.sol";
-import "../libs/WitnetPriceFeedsLib.sol";
+import "../data/WitPriceFeedsData.sol";
+import "../interfaces/IWitFeedsAdmin.sol";
+import "../interfaces/IWitFeedsLegacy.sol";
+import "../interfaces/IWitPriceFeedsSolverFactory.sol";
+import "../interfaces/IWitOracleLegacy.sol";
+import "../libs/WitPriceFeedsLib.sol";
 import "../patterns/Ownable2Step.sol";
 
-/// @title WitnetPriceFeeds: Price Feeds live repository reliant on the Witnet Oracle blockchain.
+/// @title WitPriceFeeds: Price Feeds live repository reliant on the Witnet Oracle blockchain.
 /// @author Guillermo Díaz <guillermo@otherplane.com>
 
 contract WitPriceFeedsV21
     is
         Ownable2Step,
-        WitnetPriceFeeds,
-        WitnetPriceFeedsData,
+        WitPriceFeeds,
+        WitPriceFeedsData,
         WitnetUpgradableBase,
-        IWitnetFeedsAdmin,
-        IWitnetFeedsLegacy,
-        IWitnetPriceFeedsSolverDeployer
+        IWitFeedsAdmin,
+        IWitFeedsLegacy,
+        IWitPriceFeedsSolverFactory
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
     using Witnet for Witnet.Response;
     using Witnet for Witnet.RadonSLA;
 
-    function class() virtual override(IWitnetAppliance, WitnetUpgradableBase) public view returns (string memory) {
+    function class() virtual override(IWitAppliance, WitnetUpgradableBase) public view returns (string memory) {
         return type(WitPriceFeedsV21).name;
     }
 
-    bytes4 immutable public override specs = type(WitnetPriceFeeds).interfaceId;
-    WitnetOracle immutable public override witnet;
-    WitnetRadonRegistry immutable internal __registry;
+    bytes4 immutable public override specs = type(WitPriceFeeds).interfaceId;
+    WitOracle immutable public override witnet;
+    WitOracleRadonRegistry immutable internal __registry;
 
     Witnet.RadonSLA private __defaultRadonSLA;
     uint16 private __baseFeeOverheadPercentage;
     
     constructor(
-            WitnetOracle _wrb,
+            WitOracle _wrb,
             bool _upgradable,
             bytes32 _versionTag
         )
@@ -57,14 +57,14 @@ contract WitPriceFeedsV21
         witnet = _wrb;
     }
 
-    function _registry() virtual internal view returns (WitnetRadonRegistry) {
+    function _registry() virtual internal view returns (WitOracleRadonRegistry) {
         return witnet.registry();
     }
 
     // solhint-disable-next-line payable-fallback
     fallback() override external {
         if (
-            msg.sig == IWitnetPriceFeedsSolver.solve.selector
+            msg.sig == IWitPriceFeedsSolver.solve.selector
                 && msg.sender == address(this)
         ) {
             address _solver = __records_(bytes4(bytes8(msg.data) << 32)).solver;
@@ -131,7 +131,7 @@ contract WitPriceFeedsV21
             "inexistent oracle"
         );
         _require(
-            witnet.specs() == type(WitnetOracle).interfaceId, 
+            witnet.specs() == type(WitOracle).interfaceId, 
             "uncompliant oracle"
         );
         emit Upgraded(_owner, base(), codehash(), version());
@@ -218,7 +218,7 @@ contract WitPriceFeedsV21
 
 
     // ================================================================================================================
-    // --- Implements 'IWitnetFeeds' ----------------------------------------------------------------------------------
+    // --- Implements 'IWitFeeds' ----------------------------------------------------------------------------------
 
     function defaultRadonSLA()
         override
@@ -233,7 +233,7 @@ contract WitPriceFeedsV21
         public view
         returns (uint)
     {
-        return (IWitnetOracleLegacy(address(witnet)).estimateBaseFee(_evmGasPrice, 32)
+        return (IWitOracleLegacy(address(witnet)).estimateBaseFee(_evmGasPrice, 32)
             * (100 + __baseFeeOverheadPercentage)
         ) / 100; 
     }
@@ -335,7 +335,7 @@ contract WitPriceFeedsV21
         return __requestUpdate(feedId, updateSLA);
     }
 
-    function requestUpdate(bytes4 feedId, IWitnetFeedsLegacy.RadonSLA memory updateSLA)
+    function requestUpdate(bytes4 feedId, IWitFeedsLegacy.RadonSLA memory updateSLA)
         external payable
         virtual override
         returns (uint256)
@@ -352,10 +352,10 @@ contract WitPriceFeedsV21
 
 
     // ================================================================================================================
-    // --- Implements 'IWitnetFeedsAdmin' -----------------------------------------------------------------------------
+    // --- Implements 'IWitFeedsAdmin' -----------------------------------------------------------------------------
 
     function owner()
-        virtual override (IWitnetFeedsAdmin, Ownable)
+        virtual override (IWitFeedsAdmin, Ownable)
         public view 
         returns (address)
     {
@@ -363,7 +363,7 @@ contract WitPriceFeedsV21
     }
     
     function acceptOwnership()
-        virtual override (IWitnetFeedsAdmin, Ownable2Step)
+        virtual override (IWitFeedsAdmin, Ownable2Step)
         public
     {
         Ownable2Step.acceptOwnership();
@@ -378,7 +378,7 @@ contract WitPriceFeedsV21
     }
 
     function pendingOwner() 
-        virtual override (IWitnetFeedsAdmin, Ownable2Step)
+        virtual override (IWitFeedsAdmin, Ownable2Step)
         public view
         returns (address)
     {
@@ -386,7 +386,7 @@ contract WitPriceFeedsV21
     }
     
     function transferOwnership(address _newOwner)
-        virtual override (IWitnetFeedsAdmin, Ownable2Step)
+        virtual override (IWitFeedsAdmin, Ownable2Step)
         public 
         onlyOwner
     {
@@ -468,7 +468,7 @@ contract WitPriceFeedsV21
         emit WitnetFeedSettled(feedId, radHash);
     }
 
-    function settleFeedRequest(string calldata caption, WitnetRequest request)
+    function settleFeedRequest(string calldata caption, WitOracleRequest request)
         override external
         onlyOwner
     {
@@ -477,7 +477,7 @@ contract WitPriceFeedsV21
 
     function settleFeedRequest(
             string calldata caption,
-            WitnetRequestTemplate template,
+            WitOracleRequestTemplate template,
             string[][] calldata args
         )
         override external
@@ -516,7 +516,7 @@ contract WitPriceFeedsV21
         {
             // solhint-disable-next-line avoid-low-level-calls
             (bool _success, bytes memory _reason) = solver.delegatecall(abi.encodeWithSelector(
-                IWitnetPriceFeedsSolver.validate.selector,
+                IWitPriceFeedsSolver.validate.selector,
                 feedId,
                 deps
             ));
@@ -534,7 +534,7 @@ contract WitPriceFeedsV21
         {   
             // solhint-disable-next-line avoid-low-level-calls
             (bool _success, bytes memory _reason) = address(this).staticcall(abi.encodeWithSelector(
-                IWitnetPriceFeedsSolver.solve.selector,
+                IWitPriceFeedsSolver.solve.selector,
                 feedId
             ));
             if (!_success) {
@@ -552,7 +552,7 @@ contract WitPriceFeedsV21
 
 
     // ================================================================================================================
-    // --- Implements 'IWitnetPriceFeeds' -----------------------------------------------------------------------------
+    // --- Implements 'IWitPriceFeeds' -----------------------------------------------------------------------------
 
     function lookupDecimals(bytes4 feedId) 
         override 
@@ -565,9 +565,9 @@ contract WitPriceFeedsV21
     function lookupPriceSolver(bytes4 feedId)
         override
         external view
-        returns (IWitnetPriceFeedsSolver _solverAddress, string[] memory _solverDeps)
+        returns (IWitPriceFeedsSolver _solverAddress, string[] memory _solverDeps)
     {
-        _solverAddress = IWitnetPriceFeedsSolver(__records_(feedId).solver);
+        _solverAddress = IWitPriceFeedsSolver(__records_(feedId).solver);
         bytes4[] memory _deps = _depsOf(feedId);
         _solverDeps = new string[](_deps.length);
         for (uint _ix = 0; _ix < _deps.length; _ix ++) {
@@ -578,13 +578,13 @@ contract WitPriceFeedsV21
     function latestPrice(bytes4 feedId)
         virtual override
         public view
-        returns (IWitnetPriceFeedsSolver.Price memory)
+        returns (IWitPriceFeedsSolver.Price memory)
     {
         uint _queryId = _lastValidQueryId(feedId);
         if (_queryId > 0) {
             Witnet.Response memory _lastValidResponse = lastValidResponse(feedId);
             Witnet.Result memory _latestResult = _lastValidResponse.resultCborBytes.toWitnetResult();
-            return IWitnetPriceFeedsSolver.Price({
+            return IWitPriceFeedsSolver.Price({
                 value: _latestResult.asUint(),
                 timestamp: _lastValidResponse.resultTimestamp,
                 tallyHash: _lastValidResponse.resultTallyHash,
@@ -595,7 +595,7 @@ contract WitPriceFeedsV21
             if (_solver != address(0)) {
                 // solhint-disable-next-line avoid-low-level-calls
                 (bool _success, bytes memory _result) = address(this).staticcall(abi.encodeWithSelector(
-                    IWitnetPriceFeedsSolver.solve.selector,
+                    IWitPriceFeedsSolver.solve.selector,
                     feedId
                 ));
                 if (!_success) {
@@ -603,14 +603,14 @@ contract WitPriceFeedsV21
                         _result := add(_result, 4)
                     }
                     revert(string(abi.encodePacked(
-                        "WitnetPriceFeeds: ",
+                        "WitPriceFeeds: ",
                         string(abi.decode(_result, (string)))
                     )));
                 } else {
-                    return abi.decode(_result, (IWitnetPriceFeedsSolver.Price));
+                    return abi.decode(_result, (IWitPriceFeedsSolver.Price));
                 }
             } else {
-                return IWitnetPriceFeedsSolver.Price({
+                return IWitPriceFeedsSolver.Price({
                     value: 0,
                     timestamp: 0,
                     tallyHash: 0,
@@ -623,9 +623,9 @@ contract WitPriceFeedsV21
     function latestPrices(bytes4[] calldata feedIds)
         virtual override
         external view
-        returns (IWitnetPriceFeedsSolver.Price[] memory _prices)
+        returns (IWitPriceFeedsSolver.Price[] memory _prices)
     {
-        _prices = new IWitnetPriceFeedsSolver.Price[](feedIds.length);
+        _prices = new IWitPriceFeedsSolver.Price[](feedIds.length);
         for (uint _ix = 0; _ix < feedIds.length; _ix ++) {
             _prices[_ix] = latestPrice(feedIds[_ix]);
         }
@@ -633,7 +633,7 @@ contract WitPriceFeedsV21
 
 
     // ================================================================================================================
-    // --- Implements 'IWitnetPriceFeedsSolverDeployer' ---------------------------------------------------------------------
+    // --- Implements 'IWitPriceFeedsSolverFactory' ---------------------------------------------------------------------
 
     function deployPriceSolver(bytes calldata initcode, bytes calldata constructorParams)
         virtual override
@@ -641,7 +641,7 @@ contract WitPriceFeedsV21
         onlyOwner
         returns (address _solver)
     {
-        _solver = WitnetPriceFeedsLib.deployPriceSolver(initcode, constructorParams);
+        _solver = WitPriceFeedsLib.deployPriceSolver(initcode, constructorParams);
         emit NewPriceFeedsSolver(
             _solver, 
             _solver.codehash, 
@@ -654,7 +654,7 @@ contract WitPriceFeedsV21
         public view
         returns (address _address)
     {
-        return WitnetPriceFeedsLib.determinePriceSolverAddress(initcode, constructorParams);
+        return WitPriceFeedsLib.determinePriceSolverAddress(initcode, constructorParams);
     }
 
 
@@ -666,7 +666,7 @@ contract WitPriceFeedsV21
         external view
         returns (int256 _value, uint256 _timestamp, uint256 _status)
     {
-        IWitnetPriceFeedsSolver.Price memory _latestPrice = latestPrice(bytes4(feedId));
+        IWitPriceFeedsSolver.Price memory _latestPrice = latestPrice(bytes4(feedId));
         return (
             int(_latestPrice.value),
             _latestPrice.timestamp,
@@ -720,7 +720,7 @@ contract WitPriceFeedsV21
     function _validateCaption(string calldata caption)
         internal view returns (uint8)
     {
-        try WitnetPriceFeedsLib.validateCaption(__prefix, caption) returns (uint8 _decimals) {
+        try WitPriceFeedsLib.validateCaption(__prefix, caption) returns (uint8 _decimals) {
             return _decimals;
         } catch Error(string memory reason) {
             _revert(reason);

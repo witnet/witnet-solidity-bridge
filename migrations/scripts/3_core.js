@@ -14,15 +14,15 @@ module.exports = async function (_, network, [, from]) {
   const targets = settings.getArtifacts(network)
 
   // ==========================================================================
-  // --- WitnetRadonRegistry core implementation ---------------------------
+  // --- WitOracleRadonRegistry core implementation ---------------------------
 
   await deploy({
     network,
     targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetRadonRegistry.from || from,
-    key: targets.WitnetRadonRegistry,
-    libs: specs.WitnetRadonRegistry.libs,
-    immutables: specs.WitnetRadonRegistry.immutables,
+    from: utils.isDryRun(network) ? from : specs.WitOracleRadonRegistry.from || from,
+    key: targets.WitOracleRadonRegistry,
+    libs: specs.WitOracleRadonRegistry.libs,
+    immutables: specs.WitOracleRadonRegistry.immutables,
     intrinsics: {
       types: ["bool", "bytes32"],
       values: [
@@ -33,19 +33,19 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // ==========================================================================
-  // --- WitnetRequestFactory core implementation -----------------------------
+  // --- WitOracleRequestFactory core implementation -----------------------------
 
   await deploy({
     network,
     targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetRequestFactory.from || from,
-    key: targets.WitnetRequestFactory,
-    libs: specs.WitnetRequestFactory.libs,
-    immutables: specs.WitnetRequestFactory.immutables,
+    from: utils.isDryRun(network) ? from : specs.WitOracleRequestFactory.from || from,
+    key: targets.WitOracleRequestFactory,
+    libs: specs.WitOracleRequestFactory.libs,
+    immutables: specs.WitOracleRequestFactory.immutables,
     intrinsics: {
       types: ["address", "address", "bool", "bytes32"],
       values: [
-        /* _witnet     */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
+        /* _witnet     */ await determineProxyAddr(from, specs.WitOracle?.vanity || 3),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],
@@ -53,20 +53,20 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // ==========================================================================
-  // --- WitnetOracle core implementation ---------------------------------
+  // --- WitOracle core implementation ---------------------------------
 
   await deploy({
     network,
     targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetOracle.from || from,
-    key: targets.WitnetOracle,
-    libs: specs.WitnetOracle.libs,
-    immutables: specs.WitnetOracle.immutables,
+    from: utils.isDryRun(network) ? from : specs.WitOracle.from || from,
+    key: targets.WitOracle,
+    libs: specs.WitOracle.libs,
+    immutables: specs.WitOracle.immutables,
     intrinsics: {
       types: ["address", "address", "bool", "bytes32"],
       values: [
-        /* _registry   */ await determineProxyAddr(from, specs.WitnetRadonRegistry?.vanity || 1),
-        /* _factory    */ await determineProxyAddr(from, specs.WitnetRequestFactory?.vanity || 2),
+        /* _registry   */ await determineProxyAddr(from, specs.WitOracleRadonRegistry?.vanity || 1),
+        /* _factory    */ await determineProxyAddr(from, specs.WitOracleRequestFactory?.vanity || 2),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],
@@ -74,19 +74,19 @@ module.exports = async function (_, network, [, from]) {
   })
 
   // ==========================================================================
-  // --- WitnetPriceFeeds core implementation ---------------------------------
+  // --- WitPriceFeeds core implementation ---------------------------------
 
   await deploy({
     network,
     targets,
-    from: utils.isDryRun(network) ? from : specs.WitnetPriceFeeds.from || from,
-    key: targets.WitnetPriceFeeds,
-    libs: specs.WitnetPriceFeeds.libs,
-    immutables: specs.WitnetPriceFeeds.immutables,
+    from: utils.isDryRun(network) ? from : specs.WitPriceFeeds.from || from,
+    key: targets.WitPriceFeeds,
+    libs: specs.WitPriceFeeds.libs,
+    immutables: specs.WitPriceFeeds.immutables,
     intrinsics: {
       types: ["address", "bool", "bytes32"],
       values: [
-        /* _witnet     */ await determineProxyAddr(from, specs.WitnetOracle?.vanity || 3),
+        /* _witnet     */ await determineProxyAddr(from, specs.WitOracle?.vanity || 3),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],

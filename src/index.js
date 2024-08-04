@@ -11,8 +11,8 @@ module.exports = {
         addresses[net],
       )
       return {
-        WitnetOracle: merged?.WitnetOracle,
-        WitnetPriceFeeds: merged?.WitnetPriceFeeds,
+        WitOracle: merged?.WitOracle,
+        WitPriceFeeds: merged?.WitPriceFeeds,
         WitRandomnessV21: merged?.WitRandomnessV21,
       }
     } else {
@@ -31,14 +31,14 @@ module.exports = {
   },
   supportedNetworks,
   artifacts: {
-    WitnetOracle: require("../artifacts/contracts/WitnetOracle.sol/WitnetOracle.json"),
-    WitnetPriceFeeds: require("../artifacts/contracts/WitnetPriceFeeds.sol/WitnetPriceFeeds.json"),
-    WitnetPriceRouteSolver: require("../artifacts/contracts/interfaces/IWitnetPriceFeedsSolver.sol/IWitnetPriceFeedsSolver.json"),
-    WitnetRandomness: require("../artifacts/contracts/WitnetRandomness.sol/WitnetRandomness.json"),
-    WitnetRequest: require("../artifacts/contracts/WitnetRequest.sol/WitnetRequest.json"),
-    WitnetRadonRegistry: require("../artifacts/contracts/WitnetRadonRegistry.sol/WitnetRadonRegistry.json"),
-    WitnetRequestFactory: require("../artifacts/contracts/WitnetRequestFactory.sol/WitnetRequestFactory.json"),
-    WitnetRequestTemplate: require("../artifacts/contracts/WitnetRequestTemplate.sol/WitnetRequestTemplate.json"),
+    WitOracle: require("../artifacts/contracts/WitOracle.sol/WitOracle.json"),
+    WitPriceFeeds: require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json"),
+    WitnetPriceRouteSolver: require("../artifacts/contracts/interfaces/IWitPriceFeedsSolver.sol/IWitPriceFeedsSolver.json"),
+    WitRandomness: require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json"),
+    WitOracleRequest: require("../artifacts/contracts/WitOracleRequest.sol/WitOracleRequest.json"),
+    WitOracleRadonRegistry: require("../artifacts/contracts/WitOracleRadonRegistry.sol/WitOracleRadonRegistry.json"),
+    WitOracleRequestFactory: require("../artifacts/contracts/WitOracleRequestFactory.sol/WitOracleRequestFactory.json"),
+    WitOracleRequestTemplate: require("../artifacts/contracts/WitOracleRequestTemplate.sol/WitOracleRequestTemplate.json"),
     WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json"),
   },
   settings: require("../settings"),

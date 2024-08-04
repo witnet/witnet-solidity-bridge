@@ -9,10 +9,10 @@ module.exports = async function (_, network, [, from]) {
 
   const targets = settings.getArtifacts(network)
   const libs = [
-    targets.WitnetErrorsLib,
-    targets.WitnetEncodingLib,
-    targets.WitnetPriceFeedsLib,
-    targets.WitnetOracleDataLib,
+    targets.WitPriceFeedsLib,
+    targets.WitOracleDataLib,
+    targets.WitOracleRadonEncodingLib,
+    targets.WitOracleResultErrorsLib,
   ]
 
   const selection = utils.getWitnetArtifactsFromArgs()

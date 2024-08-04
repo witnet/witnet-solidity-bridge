@@ -18,7 +18,7 @@ console.info()
 
 const artifacts = settings.getArtifacts(network)
 const apps = [
-  artifacts.WitnetRandomness,
+  artifacts.WitRandomness,
 ]
 const constructorArgs = require("../migrations/constructorArgs.json")
 if (!constructorArgs[network]) constructorArgs[network] = {}

@@ -17,17 +17,17 @@ module.exports = async function (_, network, [, from, reporter]) {
   const specs = settings.getSpecs(network)
 
   const singletons = [
-    "WitnetRadonRegistry",
-    "WitnetRequestFactory",
-    "WitnetOracle",
-    "WitnetPriceFeeds",
+    "WitOracleRadonRegistry",
+    "WitOracleRequestFactory",
+    "WitOracle",
+    "WitPriceFeeds",
   ]
 
   // inject `reporter` within array of addresses as first initialization args
-  specs.WitnetOracle.mutables = merge({
+  specs.WitOracle.mutables = merge({
     types: ["address[]"],
     values: [[reporter]],
-  }, specs.WitnetOracle.mutables
+  }, specs.WitOracle.mutables
   )
 
   // Deploy/upgrade singleton proxies, if required

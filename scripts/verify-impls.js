@@ -18,10 +18,10 @@ console.info()
 
 const artifacts = settings.getArtifacts(network)
 const impls = [
-  artifacts.WitnetOracle,
-  artifacts.WitnetPriceFeeds,
-  artifacts.WitnetRadonRegistry,
-  artifacts.WitnetRequestFactory,
+  artifacts.WitOracle,
+  artifacts.WitPriceFeeds,
+  artifacts.WitOracleRadonRegistry,
+  artifacts.WitOracleRequestFactory,
 ]
 const constructorArgs = require("../migrations/constructorArgs.json")
 if (!constructorArgs[network]) constructorArgs[network] = {}

@@ -21,10 +21,10 @@ utils.traceVerify(network, "WitnetProxy")
 
 const addresses = require("../migrations/addresses.json")
 const singletons = [
-  "WitnetOracle",
-  "WitnetPriceFeeds",
-  "WitnetRadonRegistry",
-  "WitnetRequestFactory",
+  "WitOracle",
+  "WitPriceFeeds",
+  "WitOracleRadonRegistry",
+  "WitOracleRequestFactory",
 ]
 for (const index in singletons) {
   utils.traceVerify(network, `WitnetProxy@${

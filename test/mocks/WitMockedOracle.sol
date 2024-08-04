@@ -5,24 +5,24 @@ pragma experimental ABIEncoderV2;
 
 import "./WitMockedRadonRegistry.sol";
 import "./WitMockedRequestFactory.sol";
-import "../../contracts/core/trustable/WitnetOracleTrustableDefault.sol";
+import "../../contracts/core/trustable/WitOracleTrustableDefault.sol";
 
 import "./WitMockedPriceFeeds.sol";
 import "./WitMockedRandomness.sol";
 
-/// @title Mocked implementation of `WitnetOracle`.
+/// @title Mocked implementation of `WitOracle`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
 /// @dev ON SUPPORTED TESTNETS AND MAINNETS, PLEASE USE 
-/// @dev THE `WitnetOracle` CONTRACT ADDRESS PROVIDED 
+/// @dev THE `WitOracle` CONTRACT ADDRESS PROVIDED 
 /// @dev BY THE WITNET FOUNDATION.
 contract WitMockedOracle
     is
-        WitnetOracleTrustableDefault
+        WitOracleTrustableDefault
 {
     constructor(WitMockedRadonRegistry _registry) 
-        WitnetOracleTrustableDefault(
-            WitnetRadonRegistry(_registry),
-            WitnetRequestFactory(address(0)), 
+        WitOracleTrustableDefault(
+            WitOracleRadonRegistry(_registry),
+            WitOracleRequestFactory(address(0)), 
             false,
             bytes32("mocked"),
             60000, 65000, 70000, 20000

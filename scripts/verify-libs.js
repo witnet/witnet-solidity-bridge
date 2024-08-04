@@ -19,10 +19,10 @@ console.info()
 const addresses = require("../migrations/addresses.json")
 const artifacts = settings.getArtifacts(network)
 const libs = [
-  artifacts.WitnetEncodingLib,
-  artifacts.WitnetErrorsLib,
-  artifacts.WitnetOracleDataLib,
-  artifacts.WitnetPriceFeedsLib,
+  artifacts.WitOracleRadonEncodingLib,
+  artifacts.WitOracleResultErrorsLib,
+  artifacts.WitOracleDataLib,
+  artifacts.WitPriceFeedsLib,
 ]
 for (const index in libs) {
   utils.traceVerify(network, `${libs[index]}@${addresses[network][libs[index]]}`)

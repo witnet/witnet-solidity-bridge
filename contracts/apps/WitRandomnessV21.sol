@@ -2,9 +2,9 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitnetRandomness.sol";
-import "../interfaces/IWitnetRandomnessAdmin.sol";
-import "../mocks/UsingWitnet.sol";
+import "../WitRandomness.sol";
+import "../interfaces/IWitRandomnessAdmin.sol";
+import "../mocks/UsingWitOracle.sol";
 import "../patterns/Ownable2Step.sol";
 
 /// @title WitRandomnessV21: Unmalleable and provably-fair randomness generation based on the Witnet Oracle v2.*.
@@ -12,9 +12,9 @@ import "../patterns/Ownable2Step.sol";
 contract WitRandomnessV21
     is
         Ownable2Step,
-        UsingWitnet,
-        WitnetRandomness,
-        IWitnetRandomnessAdmin
+        UsingWitOracle,
+        WitRandomness,
+        IWitRandomnessAdmin
 {
     using Witnet for bytes;
     using Witnet for Witnet.Result;
@@ -36,19 +36,19 @@ contract WitRandomnessV21
     bytes32 immutable public override witnetRadHash;
 
     constructor(
-            WitnetOracle _witnet,
+            WitOracle _witnet,
             address _operator
         )
         Ownable(_operator)
-        UsingWitnet(_witnet)
+        UsingWitOracle(_witnet)
     {
         _require(
             address(_witnet) == address(0)
-                || _witnet.specs() == type(WitnetOracle).interfaceId,
+                || _witnet.specs() == type(WitOracle).interfaceId,
             "uncompliant oracle"
         );
         // Build Witnet-compliant randomness request:
-        WitnetRadonRegistry _registry = witnet().registry();
+        WitOracleRadonRegistry _registry = witnet().registry();
         witnetRadHash = _registry.verifyRadonRequest(
             abi.decode(
                 abi.encode([
@@ -92,18 +92,18 @@ contract WitRandomnessV21
     }
 
     function specs() virtual override external pure returns (bytes4) {
-        return type(WitnetRandomness).interfaceId;
+        return type(WitRandomness).interfaceId;
     }
 
-    function witnet() override (IWitnetOracleAppliance, UsingWitnet)
-        public view returns (WitnetOracle)
+    function witnet() override (IWitOracleAppliance, UsingWitOracle)
+        public view returns (WitOracle)
     {
-        return UsingWitnet.witnet();
+        return UsingWitOracle.witnet();
     }
 
     
     /// ===============================================================================================================
-    /// --- 'IWitnetRandomness' implementation ------------------------------------------------------------------------
+    /// --- 'IWitRandomness' implementation ------------------------------------------------------------------------
 
     /// Returns amount of wei required to be paid as a fee when requesting randomization with a 
     /// transaction gas price as the one given.
@@ -400,10 +400,10 @@ contract WitRandomnessV21
 
 
     /// ===============================================================================================================
-    /// --- 'IWitnetRandomnessAdmin' implementation -------------------------------------------------------------------
+    /// --- 'IWitRandomnessAdmin' implementation -------------------------------------------------------------------
 
     function acceptOwnership()
-        virtual override (IWitnetRandomnessAdmin, Ownable2Step)
+        virtual override (IWitRandomnessAdmin, Ownable2Step)
         public
     {
         Ownable2Step.acceptOwnership();
@@ -418,7 +418,7 @@ contract WitRandomnessV21
     }
 
     function owner()
-        virtual override (IWitnetRandomnessAdmin, Ownable)
+        virtual override (IWitRandomnessAdmin, Ownable)
         public view 
         returns (address)
     {
@@ -426,7 +426,7 @@ contract WitRandomnessV21
     }
 
     function pendingOwner() 
-        virtual override (IWitnetRandomnessAdmin, Ownable2Step)
+        virtual override (IWitRandomnessAdmin, Ownable2Step)
         public view
         returns (address)
     {
@@ -434,7 +434,7 @@ contract WitRandomnessV21
     }
     
     function transferOwnership(address _newOwner)
-        virtual override (IWitnetRandomnessAdmin, Ownable2Step)
+        virtual override (IWitRandomnessAdmin, Ownable2Step)
         public 
         onlyOwner
     {
