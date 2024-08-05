@@ -40,7 +40,7 @@ interface IWitOracleEvents {
     );
 
     /// Emitted when a query with a callback gets successfully reported into the WRB.
-    event WitnetQueryResponseDelivered(
+    event WitnetQueryReponseDelivered(
         uint256 queryId, 
         uint256 evmGasPrice, 
         uint256 evmCallbackGas

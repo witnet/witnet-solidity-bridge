@@ -74,7 +74,7 @@ interface IWitRandomness {
     /// @dev - 2 -> Ready: a successfull randomize value was reported and ready to be read.
     /// @dev - 3 -> Error: all randomize resolutions after the given block were solved with errors.
     /// @dev - 4 -> Finalizing: a randomize resolution has been reported from the Witnet blockchain, but it's not yet final.  
-    function getRandomizeStatus(uint256 blockNumber) external view returns (Witnet.ResponseStatus);
+    function getRandomizeStatus(uint256 blockNumber) external view returns (Witnet.QueryResponseStatus);
 
     /// @notice Returns `true` only if a successfull resolution from the Witnet blockchain is found for the first 
     /// @notice non-failing randomize request posted on or after the given block number.

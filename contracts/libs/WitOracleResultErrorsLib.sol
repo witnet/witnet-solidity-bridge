@@ -31,21 +31,21 @@ library WitOracleResultErrorsLib {
         );
     }
 
-    function asResultError(Witnet.ResponseStatus _status, bytes memory _cborBytes)
+    function asResultError(Witnet.QueryResponseStatus _status, bytes memory _cborBytes)
         public pure
         returns (Witnet.ResultError memory)
     {
         if (
-            _status == Witnet.ResponseStatus.Error
-                || _status == Witnet.ResponseStatus.Ready
+            _status == Witnet.QueryResponseStatus.Error
+                || _status == Witnet.QueryResponseStatus.Ready
         ) {
             return resultErrorFromCborBytes(_cborBytes);
-        } else if (_status == Witnet.ResponseStatus.Finalizing) {
+        } else if (_status == Witnet.QueryResponseStatus.Finalizing) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "WitOracleResultErrorsLib: not yet finalized"
             });
-        } if (_status == Witnet.ResponseStatus.Awaiting) {
+        } if (_status == Witnet.QueryResponseStatus.Awaiting) {
             return Witnet.ResultError({
                 code: Witnet.ResultErrorCodes.Unknown,
                 reason: "WitOracleResultErrorsLib: not yet reported"
@@ -168,7 +168,7 @@ library WitOracleResultErrorsLib {
             return "inconsistent sources.";
 
         } else if (
-            code == Witnet.ResultErrorCodes.MalformedResponses
+            code == Witnet.ResultErrorCodes.MalformedQueryResponses
                 && args.length > 2
         ) {
             return string(abi.encodePacked(

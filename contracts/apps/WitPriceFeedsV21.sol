@@ -27,9 +27,9 @@ contract WitPriceFeedsV21
         IWitPriceFeedsSolverFactory
 {
     using Witnet for bytes;
-    using Witnet for Witnet.Result;
-    using Witnet for Witnet.Response;
+    using Witnet for Witnet.QueryResponse;
     using Witnet for Witnet.RadonSLA;
+    using Witnet for Witnet.Result;
 
     function class() virtual override(IWitAppliance, WitnetUpgradableBase) public view returns (string memory) {
         return type(WitPriceFeedsV21).name;
@@ -245,9 +245,9 @@ contract WitPriceFeedsV21
         return _lastValidQueryId(feedId);
     }
 
-    function lastValidResponse(bytes4 feedId)
+    function lastValidQueryResponse(bytes4 feedId)
         override public view
-        returns (Witnet.Response memory)
+        returns (Witnet.QueryResponse memory)
     {
         return witnet.getQueryResponse(_lastValidQueryId(feedId));
     }
@@ -259,16 +259,16 @@ contract WitPriceFeedsV21
         return __records_(feedId).latestUpdateQueryId;
     }
 
-    function latestUpdateRequest(bytes4 feedId)
+    function latestUpdateQueryRequest(bytes4 feedId)
         override external view 
-        returns (Witnet.Request memory)
+        returns (Witnet.QueryRequest memory)
     {
         return witnet.getQueryRequest(latestUpdateQueryId(feedId));
     }
 
-    function latestUpdateResponse(bytes4 feedId)
+    function latestUpdateQueryResponse(bytes4 feedId)
         override external view
-        returns (Witnet.Response memory)
+        returns (Witnet.QueryResponse memory)
     {
         return witnet.getQueryResponse(latestUpdateQueryId(feedId));
     }
@@ -280,9 +280,9 @@ contract WitPriceFeedsV21
         return witnet.getQueryResultError(latestUpdateQueryId(feedId));
     }
     
-    function latestUpdateResponseStatus(bytes4 feedId)
+    function latestUpdateQueryResponseStatus(bytes4 feedId)
         override public view
-        returns (Witnet.ResponseStatus)
+        returns (Witnet.QueryResponseStatus)
     {
         return _checkQueryResponseStatus(latestUpdateQueryId(feedId));
     }
@@ -582,13 +582,13 @@ contract WitPriceFeedsV21
     {
         uint _queryId = _lastValidQueryId(feedId);
         if (_queryId > 0) {
-            Witnet.Response memory _lastValidResponse = lastValidResponse(feedId);
-            Witnet.Result memory _latestResult = _lastValidResponse.resultCborBytes.toWitnetResult();
+            Witnet.QueryResponse memory _lastValidQueryResponse = lastValidQueryResponse(feedId);
+            Witnet.Result memory _latestResult = _lastValidQueryResponse.resultCborBytes.toWitnetResult();
             return IWitPriceFeedsSolver.Price({
                 value: _latestResult.asUint(),
-                timestamp: _lastValidResponse.resultTimestamp,
-                tallyHash: _lastValidResponse.resultTallyHash,
-                status: latestUpdateResponseStatus(feedId)
+                timestamp: _lastValidQueryResponse.resultTimestamp,
+                tallyHash: _lastValidQueryResponse.resultTallyHash,
+                status: latestUpdateQueryResponseStatus(feedId)
             });
         } else {
             address _solver = __records_(feedId).solver;
@@ -614,7 +614,7 @@ contract WitPriceFeedsV21
                     value: 0,
                     timestamp: 0,
                     tallyHash: 0,
-                    status: latestUpdateResponseStatus(feedId)
+                    status: latestUpdateQueryResponseStatus(feedId)
                 });
             }
         }
@@ -670,11 +670,11 @@ contract WitPriceFeedsV21
         return (
             int(_latestPrice.value),
             _latestPrice.timestamp,
-            _latestPrice.status == Witnet.ResponseStatus.Ready 
+            _latestPrice.status == Witnet.QueryResponseStatus.Ready 
                 ? 200
                 : (
-                    _latestPrice.status == Witnet.ResponseStatus.Awaiting 
-                        || _latestPrice.status == Witnet.ResponseStatus.Finalizing
+                    _latestPrice.status == Witnet.QueryResponseStatus.Awaiting 
+                        || _latestPrice.status == Witnet.QueryResponseStatus.Finalizing
                 ) ? 404 : 400
         );
     }
@@ -685,12 +685,12 @@ contract WitPriceFeedsV21
 
     function _checkQueryResponseStatus(uint _queryId)
         internal view
-        returns (Witnet.ResponseStatus)
+        returns (Witnet.QueryResponseStatus)
     {
         if (_queryId > 0) {
             return witnet.getQueryResponseStatus(_queryId);
         } else {
-            return Witnet.ResponseStatus.Ready;
+            return Witnet.QueryResponseStatus.Ready;
         }
     }
 
@@ -709,7 +709,7 @@ contract WitPriceFeedsV21
         uint _latestUpdateQueryId = latestUpdateQueryId(feedId);
         if (
             _latestUpdateQueryId > 0
-                && witnet.getQueryResponseStatus(_latestUpdateQueryId) == Witnet.ResponseStatus.Ready
+                && witnet.getQueryResponseStatus(_latestUpdateQueryId) == Witnet.QueryResponseStatus.Ready
         ) {
             return _latestUpdateQueryId;
         } else {
@@ -747,11 +747,11 @@ contract WitPriceFeedsV21
             _usedFunds = estimateUpdateRequestFee(tx.gasprice);
             _require(msg.value >= _usedFunds, "insufficient reward");
             uint _latestId = __feed.latestUpdateQueryId;
-            Witnet.ResponseStatus _latestStatus = _checkQueryResponseStatus(_latestId);
-            if (_latestStatus == Witnet.ResponseStatus.Awaiting) {
+            Witnet.QueryResponseStatus _latestStatus = _checkQueryResponseStatus(_latestId);
+            if (_latestStatus == Witnet.QueryResponseStatus.Awaiting) {
                 // latest update is still pending, so just increase the reward
                 // accordingly to current tx gasprice:
-                Witnet.Request memory _request = witnet.getQueryRequest(_latestId);
+                Witnet.QueryRequest memory _request = witnet.getQueryRequest(_latestId);
                 int _deltaReward = int(int72(_request.evmReward)) - int(_usedFunds);
                 if (_deltaReward > 0) {
                     _usedFunds = uint(_deltaReward);
@@ -761,7 +761,7 @@ contract WitPriceFeedsV21
                 }
             } else {
                 // Check if latest update ended successfully:
-                if (_latestStatus == Witnet.ResponseStatus.Ready) {
+                if (_latestStatus == Witnet.QueryResponseStatus.Ready) {
                     // If so, remove previous last valid query from the WRB:
                     if (__feed.lastValidQueryId > 0) {
                         witnet.fetchQueryResponse(__feed.lastValidQueryId);

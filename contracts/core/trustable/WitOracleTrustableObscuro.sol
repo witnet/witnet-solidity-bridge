@@ -57,14 +57,14 @@ contract WitOracleTrustableObscuro
         return WitOracleTrustableBase.getQuery(_queryId);
     }
 
-    /// @notice Retrieves the whole `Witnet.Response` record referred to a previously posted Witnet Data Request.
+    /// @notice Retrieves the whole `Witnet.QueryResponse` record referred to a previously posted Witnet Data Request.
     /// @dev Fails if the `_queryId` is not in 'Reported' status, or if `msg.sender` is not the actual requester.
     /// @param _queryId The unique query identifier
     function getQueryResponse(uint256 _queryId)
         public view
         virtual override
         onlyRequester(_queryId)
-        returns (Witnet.Response memory _response)
+        returns (Witnet.QueryResponse memory _response)
     {
         return WitOracleTrustableBase.getQueryResponse(_queryId);
     }

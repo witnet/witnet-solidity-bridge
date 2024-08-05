@@ -76,9 +76,9 @@ abstract contract UsingWitOracle
         ) / 100;
     }
 
-    function _witnetCheckQueryResponseStatus(uint256 _witnetQueryId)
+    function _witnetCheckQueryQueryResponseStatus(uint256 _witnetQueryId)
         internal view
-        returns (Witnet.ResponseStatus)
+        returns (Witnet.QueryResponseStatus)
     {
         return __witnet.getQueryResponseStatus(_witnetQueryId);
     }

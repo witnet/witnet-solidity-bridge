@@ -58,11 +58,11 @@ contract MyDapp
     /// @notice Method to be called from the WitOracle contract as soon as the given Witnet `queryId`
     /// @notice gets reported, if reported with no errors.
     /// @dev It should revert if called from any other address different to the WitOracle being used
-    /// @dev by the WitConsumer contract. Within the implementation of this method, the WitConsumer
+    /// @dev by the WitOracleConsumer contract. Within the implementation of this method, the WitOracleConsumer
     /// @dev can call to the WRB as to retrieve the Witnet tracking information (i.e. the `witnetDrTxHash` 
     /// @dev and `witnetDrCommitTxTimestamp`), or the finality status, of the result being reported.
     function reportWitnetQueryResult(
-            uint256 _witnetQueryId, uint64, bytes32, uint256,
+            uint256 _queryId, uint64, bytes32, uint256,
             WitnetCBOR.CBOR calldata witnetResultCborValue
         )
         override external
@@ -70,7 +70,7 @@ contract MyDapp
     {
         // randomness = _witnetReadRandomizeFromResultValue(witnetResultCborValue);
         // delete rubbish;
-        // witnet.burnQuery(_witnetQueryId);
+        // witnet.burnQuery(_queryId);
         // emit Result(queryId, _witnetReadRandomizeFromResultValue(cborValue));
     }
 

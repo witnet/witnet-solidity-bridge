@@ -13,20 +13,12 @@ library Witnet {
 
     /// Struct containing both request and response data related to every query posted to the Witnet Request Board
     struct Query {
-        Request request;
-        Response response;
-    }
-
-    /// Possible status of a Witnet query.
-    enum QueryStatus {
-        Unknown,
-        Posted,
-        Reported,
-        Finalized
+        QueryRequest request;
+        QueryResponse response;
     }
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
-    struct Request {
+    struct QueryRequest {
         address  requester;              // EVM address from which the request was posted.
         uint24   gasCallback;            // Max callback gas limit upon response, if a callback is required.
         uint72   evmReward;              // EVM amount in wei eventually to be paid to the legit result reporter.
@@ -35,8 +27,8 @@ library Witnet {
         RadonSLA witnetSLA;    // Minimum Service-Level parameters to be committed by the Witnet blockchain. 
     }
 
-    /// Response metadata and result as resolved by the Witnet blockchain.
-    struct Response {
+    /// QueryResponse metadata and result as resolved by the Witnet blockchain.
+    struct QueryResponse {
         address reporter;               // EVM address from which the Data Request result was reported.
         uint64  finality;               // EVM block number at which the reported data will be considered to be finalized.
         uint32  resultTimestamp;        // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
@@ -44,14 +36,22 @@ library Witnet {
         bytes   resultCborBytes;        // CBOR-encode result to the request, as resolved in the Witnet blockchain.
     }
 
-    /// Response status from a requester's point of view.
-    enum ResponseStatus {
+    /// QueryResponse status from a requester's point of view.
+    enum QueryResponseStatus {
         Void,
         Awaiting,
         Ready,
         Error,
         Finalizing,
         Delivered
+    }
+
+    /// Possible status of a Witnet query.
+    enum QueryStatus {
+        Unknown,
+        Posted,
+        Reported,
+        Finalized
     }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
@@ -189,7 +189,7 @@ library Witnet {
         /// 0x56: Any one of the (multiple) Retrieve, Aggregate or Tally scripts were badly formated:
         MalformedDataRequest,
         /// 0x57: Values returned from a majority of data sources don't match the expected schema:
-        MalformedResponses,
+        MalformedQueryResponses,
         /// Unallocated:    
         OtherError0x58, OtherError0x59, OtherError0x5A, OtherError0x5B, OtherError0x5C, OtherError0x5D, OtherError0x5E, 
         /// 0x5F: Size of serialized tally result exceeds allowance:

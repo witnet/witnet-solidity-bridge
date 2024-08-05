@@ -38,7 +38,7 @@ interface IWitOracle {
     /// @dev Fails if the query was not in 'Reported' status, or called from an address different to
     /// @dev the one that actually posted the given request.
     /// @param queryId The unique query identifier.
-    function fetchQueryResponse(uint256 queryId) external returns (Witnet.Response memory);
+    function fetchQueryResponse(uint256 queryId) external returns (Witnet.QueryResponse memory);
    
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
     function getQuery(uint256 queryId) external view returns (Witnet.Query memory);
@@ -48,11 +48,11 @@ interface IWitOracle {
 
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     /// @param queryId The unique query identifier.
-    function getQueryRequest(uint256 queryId) external view returns (Witnet.Request memory);
+    function getQueryRequest(uint256 queryId) external view returns (Witnet.QueryRequest memory);
 
-    /// @notice Retrieves the whole `Witnet.Response` record referred to a previously posted Witnet Data Request.
+    /// @notice Retrieves the whole `Witnet.QueryResponse` record referred to a previously posted Witnet Data Request.
     /// @param queryId The unique query identifier.
-    function getQueryResponse(uint256 queryId) external view returns (Witnet.Response memory);
+    function getQueryResponse(uint256 queryId) external view returns (Witnet.QueryResponse memory);
 
     /// @notice Returns query's result current status from a requester's point of view:
     /// @notice   - 0 => Void: the query is either non-existent or deleted;
@@ -62,7 +62,7 @@ interface IWitOracle {
     /// @notice   - 4 => Finalizing: some result to the query has been reported, but cannot yet be considered finalized.
     /// @notice   - 5 => Delivered: at least one response, either successful or with errors, was delivered to the requesting contract.
     /// @param queryId The unique query identifier.
-    function getQueryResponseStatus(uint256 queryId) external view returns (Witnet.ResponseStatus);
+    function getQueryResponseStatus(uint256 queryId) external view returns (Witnet.QueryResponseStatus);
 
     /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
     /// @param queryId The unique query identifier.

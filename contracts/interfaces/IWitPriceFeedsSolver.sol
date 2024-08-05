@@ -9,7 +9,7 @@ interface IWitPriceFeedsSolver {
         uint value;
         uint timestamp;
         bytes32 tallyHash;
-        Witnet.ResponseStatus status;
+        Witnet.QueryResponseStatus status;
     }
     function class() external pure returns (string memory);
     function delegator() external view returns (address);

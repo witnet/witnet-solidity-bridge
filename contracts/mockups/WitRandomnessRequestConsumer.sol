@@ -3,12 +3,12 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitConsumer.sol";
+import "./WitOracleConsumer.sol";
 import "../WitOracleRequest.sol";
 
 abstract contract WitRandomnessRequestConsumer
     is
-        WitConsumer
+        WitOracleConsumer
 {
     using Witnet for bytes;
     using Witnet for bytes32;
@@ -26,7 +26,7 @@ abstract contract WitRandomnessRequestConsumer
             uint24 _callbackGasLimit
         )
         UsingWitOracle(_wrb)
-        WitConsumer(_callbackGasLimit)
+        WitOracleConsumer(_callbackGasLimit)
     {
         // On-chain building of the Witnet Randomness Request:
         {

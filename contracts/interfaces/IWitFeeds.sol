@@ -28,21 +28,21 @@ interface IWitFeeds {
 
     /// Returns the actual response from the Witnet oracle blockchain to the last 
     /// successful update for the given data feed.
-    function lastValidResponse(bytes4 feedId) external view returns (Witnet.Response memory);
+    function lastValidQueryResponse(bytes4 feedId) external view returns (Witnet.QueryResponse memory);
 
     /// Returns the Witnet query id of the latest update attempt for the given data feed.
     function latestUpdateQueryId(bytes4 feedId) external view returns (uint256);
 
     /// Returns the actual request queried to the the Witnet oracle blockchain on the latest 
     /// update attempt for the given data feed.
-    function latestUpdateRequest(bytes4 feedId) external view returns (Witnet.Request memory);
+    function latestUpdateQueryRequest(bytes4 feedId) external view returns (Witnet.QueryRequest memory);
 
     /// Returns the response from the Witnet oracle blockchain to the latest update attempt 
     /// for the given data feed.
-    function latestUpdateResponse(bytes4 feedId) external view returns (Witnet.Response memory);
+    function latestUpdateQueryResponse(bytes4 feedId) external view returns (Witnet.QueryResponse memory);
 
     /// Tells the current response status of the latest update attempt for the given data feed.
-    function latestUpdateResponseStatus(bytes4 feedId) external view returns (Witnet.ResponseStatus);
+    function latestUpdateQueryResponseStatus(bytes4 feedId) external view returns (Witnet.QueryResponseStatus);
 
     /// Describes the error returned from the Witnet oracle blockchain in response to the latest 
     /// update attempt for the given data feed, if any.

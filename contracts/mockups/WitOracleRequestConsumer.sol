@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "./UsingWitOracleRequest.sol";
-import "./WitConsumer.sol";
+import "./WitOracleConsumer.sol";
 
 abstract contract WitOracleRequestConsumer
     is
         UsingWitOracleRequest,
-        WitConsumer
+        WitOracleConsumer
 {
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
@@ -21,15 +21,15 @@ abstract contract WitOracleRequestConsumer
             uint24 _callbackGasLimit
         )
         UsingWitOracleRequest(_witnetRequest, _baseFeeOverheadPercentage)
-        WitConsumer(_callbackGasLimit)
+        WitOracleConsumer(_callbackGasLimit)
     {}
 
     function _witnetEstimateBaseFee() 
-        virtual override(UsingWitOracle, WitConsumer)
+        virtual override(UsingWitOracle, WitOracleConsumer)
         internal view
         returns (uint256)
     {
-        return WitConsumer._witnetEstimateBaseFee();
+        return WitOracleConsumer._witnetEstimateBaseFee();
     } 
 
     function __witnetRequestData(

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./UsingWitOracle.sol";
 import "../interfaces/IWitOracleConsumer.sol";
 
-abstract contract WitConsumer
+abstract contract WitOracleConsumer
     is
         IWitOracleConsumer,
         UsingWitOracle
@@ -13,7 +13,7 @@ abstract contract WitConsumer
     uint24 internal immutable __witnetCallbackGasLimit;
   
     modifier onlyFromWitnet {
-        require(msg.sender == address(__witnet), "WitConsumer: unauthorized");
+        require(msg.sender == address(__witnet), "WitOracleConsumer: unauthorized");
         _;
     }
 
@@ -32,7 +32,7 @@ abstract contract WitConsumer
 
 
     /// ===============================================================================================================
-    /// --- WitConsumer virtual methods ----------------------------------------------------------------------------
+    /// --- WitOracleConsumer virtual methods ----------------------------------------------------------------------------
 
     function _witnetEstimateBaseFee() virtual override internal view returns (uint256) {
         return (

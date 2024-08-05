@@ -10,8 +10,8 @@ contract TestWitnetV2 {
     using Witnet for *;
 
 
-    Witnet.Request internal __request;
-    Witnet.Response internal __response;
+    Witnet.QueryRequest internal __request;
+    Witnet.QueryResponse internal __response;
 
     uint256 internal __finalityBlock;
 
@@ -22,7 +22,7 @@ contract TestWitnetV2 {
     }
 
     function testWitOracleRequestPackingWithBytecode() external {
-        __request = Witnet.Request({
+        __request = Witnet.QueryRequest({
             requester: msg.sender,
             gasCallback: 500000,
             evmReward: 10 ** 18,
@@ -36,12 +36,12 @@ contract TestWitnetV2 {
         });
     }
 
-    function testWitOracleRequestUnpackingWithBytecode() external returns (Witnet.Request memory) {
+    function testWitOracleRequestUnpackingWithBytecode() external returns (Witnet.QueryRequest memory) {
         return __request;
     }
 
     function testWitOracleRequestPackingWithRadHash() external {
-        __request = Witnet.Request({
+        __request = Witnet.QueryRequest({
             requester: msg.sender,
             gasCallback: 500000,
             evmReward: 10 ** 18,
@@ -55,12 +55,12 @@ contract TestWitnetV2 {
         });
     }
 
-    function testWitOracleRequestUnpackingWithRadHash() external returns (Witnet.Request memory) {
+    function testWitOracleRequestUnpackingWithRadHash() external returns (Witnet.QueryRequest memory) {
         return __request;
     }
 
-    function testWitnetResponsePacking() external {
-        __response = Witnet.Response({
+    function testWitnetQueryResponsePacking() external {
+        __response = Witnet.QueryResponse({
             reporter: msg.sender,
             finality: uint64(block.number),
             resultTimestamp: uint32(block.timestamp),
@@ -69,7 +69,7 @@ contract TestWitnetV2 {
         });
     }
 
-    function testWitnetResponseUnpacking() external returns (Witnet.Response memory) {
+    function testWitnetQueryResponseUnpacking() external returns (Witnet.QueryResponse memory) {
         return __response;
     }
 

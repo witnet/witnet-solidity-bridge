@@ -9,7 +9,7 @@ import "../libs/Witnet.sol";
 /// @author The Witnet Foundation.
 library WitOracleDataLib {  
 
-    using Witnet for Witnet.Request;
+    using Witnet for Witnet.QueryRequest;
 
     bytes32 internal constant _WIT_ORACLE_DATA_SLOTHASH =
         /* keccak256("io.witnet.boards.data") */
@@ -41,13 +41,13 @@ library WitOracleDataLib {
       return data().queries[_queryId];
     }
 
-    /// Gets the Witnet.Request part of a given query.
-    function seekQueryRequest(uint256 _queryId) internal view returns (Witnet.Request storage) {
+    /// Gets the Witnet.QueryRequest part of a given query.
+    function seekQueryRequest(uint256 _queryId) internal view returns (Witnet.QueryRequest storage) {
         return data().queries[_queryId].request;
     }   
 
     /// Gets the Witnet.Result part of a given query.
-    function seekQueryResponse(uint256 _queryId) internal view returns (Witnet.Response storage) {
+    function seekQueryResponse(uint256 _queryId) internal view returns (Witnet.QueryResponse storage) {
         return data().queries[_queryId].response;
     }
 
@@ -66,26 +66,26 @@ library WitOracleDataLib {
         }
     }
 
-    function seekQueryResponseStatus(uint256 queryId) internal view returns (Witnet.ResponseStatus) {
+    function seekQueryResponseStatus(uint256 queryId) internal view returns (Witnet.QueryResponseStatus) {
         Witnet.QueryStatus _queryStatus = seekQueryStatus(queryId);
         if (_queryStatus == Witnet.QueryStatus.Finalized) {
             bytes storage __cborValues = data().queries[queryId].response.resultCborBytes;
             if (__cborValues.length > 0) {
                 // determine whether stored result is an error by peeking the first byte
                 return (__cborValues[0] == bytes1(0xd8)
-                    ? Witnet.ResponseStatus.Error 
-                    : Witnet.ResponseStatus.Ready
+                    ? Witnet.QueryResponseStatus.Error 
+                    : Witnet.QueryResponseStatus.Ready
                 );
             } else {
                 // the result is final but delivered to the requesting address
-                return Witnet.ResponseStatus.Delivered;
+                return Witnet.QueryResponseStatus.Delivered;
             }
         } else if (_queryStatus == Witnet.QueryStatus.Posted) {
-            return Witnet.ResponseStatus.Awaiting;
+            return Witnet.QueryResponseStatus.Awaiting;
         } else if (_queryStatus == Witnet.QueryStatus.Reported) {
-            return Witnet.ResponseStatus.Finalizing;
+            return Witnet.QueryResponseStatus.Finalizing;
         } else {
-            return Witnet.ResponseStatus.Void;
+            return Witnet.QueryResponseStatus.Void;
         }
     }
 
@@ -99,7 +99,7 @@ library WitOracleDataLib {
         bytecodes = new bytes[](queryIds.length);
         for (uint _ix = 0; _ix < queryIds.length; _ix ++) {
             if (seekQueryStatus(queryIds[_ix]) != Witnet.QueryStatus.Unknown) {
-                Witnet.Request storage __request = data().queries[queryIds[_ix]].request;
+                Witnet.QueryRequest storage __request = data().queries[queryIds[_ix]].request;
                 if (__request.witnetRAD != bytes32(0)) {
                     bytecodes[_ix] = registry.bytecodeOf(
                         __request.witnetRAD,
