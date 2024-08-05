@@ -465,7 +465,7 @@ abstract contract WitOracleTrustableBase
             _querySLA,
             _queryCallbackGasLimit
         );
-        WitOracleDataLib.seekQueryRequest(_queryId).witnetBytecode = _queryUnverifiedBytecode;
+        WitOracleDataLib.seekQueryRequest(_queryId).radonBytecode = _queryUnverifiedBytecode;
         emit WitOracleQuery(
             _msgSender(),
             _getGasPrice(),
@@ -608,8 +608,8 @@ abstract contract WitOracleTrustableBase
                                 _evmGasPrice,
                                 _evmWitPrice,
                                 Witnet.RadonSLA({
-                                    witNumWitnesses: __request.witnetSLA.witNumWitnesses,
-                                    witUnitaryReward: __request.witnetSLA.witUnitaryReward,
+                                    witNumWitnesses: __request.radonSLA.witNumWitnesses,
+                                    witUnitaryReward: __request.radonSLA.witUnitaryReward,
                                     maxTallyResultSize: uint16(0)
                                 })
                             )
@@ -620,11 +620,11 @@ abstract contract WitOracleTrustableBase
                             + estimateExtraFee(
                                 _evmGasPrice, 
                                 _evmWitPrice, 
-                                __request.witnetSLA
+                                __request.radonSLA
                             )
                     );
                 }
-                _expenses +=  _evmWitPrice * __request.witnetSLA.witUnitaryReward;
+                _expenses +=  _evmWitPrice * __request.radonSLA.witUnitaryReward;
                 _revenues += __request.evmReward;
             }
         }
@@ -839,8 +839,8 @@ abstract contract WitOracleTrustableBase
             __request.requester = msg.sender;
             __request.gasCallback = _callbackGasLimit;
             __request.evmReward = uint72(_getMsgValue());
-            __request.witnetRAD = _radHash;
-            __request.witnetSLA = _sla;
+            __request.radonRadHash = _radHash;
+            __request.radonSLA = _sla;
         }
     }
 

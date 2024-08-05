@@ -100,15 +100,15 @@ library WitOracleDataLib {
         for (uint _ix = 0; _ix < queryIds.length; _ix ++) {
             if (seekQueryStatus(queryIds[_ix]) != Witnet.QueryStatus.Unknown) {
                 Witnet.QueryRequest storage __request = data().queries[queryIds[_ix]].request;
-                if (__request.witnetRAD != bytes32(0)) {
+                if (__request.radonRadHash != bytes32(0)) {
                     bytecodes[_ix] = registry.bytecodeOf(
-                        __request.witnetRAD,
-                        __request.witnetSLA
+                        __request.radonRadHash,
+                        __request.radonSLA
                     );
                 } else {
                     bytecodes[_ix] = registry.bytecodeOf(
-                        __request.witnetBytecode,
-                        __request.witnetSLA 
+                        __request.radonBytecode,
+                        __request.radonSLA 
                     );
                 }
             }

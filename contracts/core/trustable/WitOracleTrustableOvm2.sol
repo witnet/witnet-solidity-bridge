@@ -155,8 +155,8 @@ contract WitOracleTrustableOvm2
                                 _evmGasPrice,
                                 _evmWitPrice,
                                 Witnet.RadonSLA({
-                                    witNumWitnesses: __request.witnetSLA.witNumWitnesses,
-                                    witUnitaryReward: __request.witnetSLA.witUnitaryReward,
+                                    witNumWitnesses: __request.radonSLA.witNumWitnesses,
+                                    witUnitaryReward: __request.radonSLA.witUnitaryReward,
                                     maxTallyResultSize: uint16(0)
                                 })
                             )
@@ -167,11 +167,11 @@ contract WitOracleTrustableOvm2
                             + WitOracleTrustableDefault.estimateExtraFee(
                                 _evmGasPrice,
                                 _evmWitPrice,
-                                __request.witnetSLA
+                                __request.radonSLA
                             )
                     );
                 }
-                _expenses += __request.witnetSLA.witUnitaryReward * _evmWitPrice;
+                _expenses += __request.radonSLA.witUnitaryReward * _evmWitPrice;
                 _revenues += __request.evmReward;
             }
         }
