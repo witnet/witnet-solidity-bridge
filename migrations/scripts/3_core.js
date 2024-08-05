@@ -43,7 +43,7 @@ module.exports = async function (_, network, [, from]) {
     libs: specs.WitOracleRequestFactory.libs,
     immutables: specs.WitOracleRequestFactory.immutables,
     intrinsics: {
-      types: ["address", "address", "bool", "bytes32"],
+      types: ["address", "bool", "bytes32"],
       values: [
         /* _witOracle  */ await determineProxyAddr(from, specs.WitOracle?.vanity || 3),
         /* _upgradable */ true,

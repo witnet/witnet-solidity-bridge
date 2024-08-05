@@ -164,8 +164,8 @@ contract WitOracleRadonRegistryDefault
     // --- Implementation of 'IWitOracleRadonRegistry' -----------------------------------------------------------------------
 
     function bytecodeOf(bytes32 _radHash)
-        public view
-        override
+        public view override
+        radonRequestExists(_radHash)
         returns (bytes memory)
     {
         return __database().radsBytecode[_radHash];

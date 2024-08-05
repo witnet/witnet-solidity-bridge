@@ -88,7 +88,7 @@ contract TestWitOracleRadonEncodingLib {
     Witnet.RadonRetrieval memory source;
     source.method = Witnet.RadonRetrievalMethods.HttpGet;
     source.url = "https://data.messar.io/api/v1/assets/\\0\\/metrics/market-data?fields=market_data/price_\\1\\";
-    source.script = hex"861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b";
+    source.radonScript = hex"861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b";
     bytes memory bytecode = WitOracleRadonEncodingLib.encode(source);
     // emit Log(bytecode);
     Assert.equal(
@@ -106,7 +106,7 @@ contract TestWitOracleRadonEncodingLib {
     source.headers = new string[2][](2);
     source.headers[0] = [ "user-agent", "witnet-rust" ];
     source.headers[1] = [ "content-type", "text/html; charset=utf-8" ];
-    source.script = hex"861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b";
+    source.radonScript = hex"861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b";
     bytes memory bytecode = WitOracleRadonEncodingLib.encode(source);
     // emit Log(bytecode);
     Assert.equal(

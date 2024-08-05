@@ -18,8 +18,8 @@ module.exports = async function (_, network, [, from, reporter]) {
 
   const singletons = [
     "WitOracleRadonRegistry",
-    "WitOracleRequestFactory",
     "WitOracle",
+    "WitOracleRequestFactory",
     "WitPriceFeeds",
   ]
 
