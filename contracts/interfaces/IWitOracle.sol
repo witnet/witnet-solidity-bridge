@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../libs/Witnet.sol";
+import "./IWitOracleConsumer.sol";
 
 import "../WitOracleRadonRegistry.sol";
 import "../WitOracleRequestFactory.sol";
@@ -111,17 +111,17 @@ interface IWitOracle {
     /// @param queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
     /// @return queryId Unique query identifier.
     function postRequestWithCallback(
-            bytes32 queryRAD, 
-            Witnet.RadonSLA calldata querySLA, 
+            bytes32 queryRAD,
+            Witnet.RadonSLA calldata querySLA,
             uint24 queryCallbackGasLimit
         ) external payable returns (uint256 queryId);
 
-            // function postRequestWithCallbackFrom(
-            //     address consumer,
-            //     bytes32 queryRAD, 
-            //     Witnet.RadonSLA calldata querySLA, 
-            //     uint24 queryCallbackGasLimit
-            // ) external payable returns (uint256 queryId);
+    function postRequestWithCallback(
+            IWitOracleConsumer consumer,
+            bytes32 queryRAD,
+            Witnet.RadonSLA calldata querySLA,
+            uint24 queryCallbackGasLimit
+        ) external payable returns (uint256 queryId);
 
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
     /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
@@ -139,17 +139,16 @@ interface IWitOracle {
     /// @return queryId Unique query identifier.
     function postRequestWithCallback(
             bytes calldata queryUnverifiedBytecode,
-            Witnet.RadonSLA calldata querySLA, 
+            Witnet.RadonSLA calldata querySLA,
             uint24 queryCallbackGasLimit
-        ) external payable returns (uint256 queryId);    
+        ) external payable returns (uint256 queryId);
 
-
-        // function postRequestWithCallbackFrom(
-        //         address consumer,
-        //         bytes calldata queryUnverifiedBytecode,
-        //         Witnet.RadonSLA calldata querySLA, 
-        //         uint24 queryCallbackGasLimit
-        //     ) external payable returns (uint256 queryId);    
+    function postRequestWithCallback(
+            IWitOracleConsumer consumer,
+            bytes calldata queryUnverifiedBytecode,
+            Witnet.RadonSLA calldata querySLA,
+            uint24 queryCallbackGasLimit
+        ) external payable returns (uint256 queryId); 
 
     /// @notice Returns the singleton WitOracleRadonRegistry in which all Witnet-compliant data requests 
     /// @notice and templates must be previously verified so they can be passed as reference when 

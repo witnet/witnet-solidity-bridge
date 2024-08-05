@@ -51,9 +51,11 @@ abstract contract WitOracleTrustableBase
         return type(WitOracleTrustableBase).name;
     }
 
-    modifier checkCallbackRecipient(address _addr, uint24 _callbackGasLimit) {
+    modifier checkCallbackRecipient(IWitOracleConsumer _consumer, uint24 _callbackGasLimit) {
         _require(
-            _addr.code.length > 0 && IWitOracleConsumer(_addr).reportableFrom(address(this)) && _callbackGasLimit > 0,
+            address(_consumer).code.length > 0
+                && _consumer.reportableFrom(address(this))
+                && _callbackGasLimit > 0,
             "invalid callback"
         ); _;
     }
@@ -379,7 +381,12 @@ abstract contract WitOracleTrustableBase
         checkSLA(_querySLA)
         returns (uint256 _queryId)
     {
-        _queryId = __postRequest(_queryRAD, _querySLA, 0);
+        _queryId = __postRequest(
+            _msgSender(), 
+            _queryRAD, 
+            _querySLA, 
+            0
+        );
         // Let Web3 observers know that a new request has been posted
         emit WitOracleQuery(
             _msgSender(),
@@ -405,20 +412,36 @@ abstract contract WitOracleTrustableBase
     /// @param _queryRAD The RAD hash of the data request to be solved by Witnet.
     /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @param _queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
-    /// @return _queryId Unique query identifier.
     function postRequestWithCallback(
             bytes32 _queryRAD, 
             Witnet.RadonSLA memory _querySLA,
             uint24 _queryCallbackGasLimit
         )
-        virtual override
-        public payable 
-        checkCallbackRecipient(msg.sender, _queryCallbackGasLimit)
+        virtual override public payable 
+        returns (uint256)
+    {
+        return postRequestWithCallback(
+            IWitOracleConsumer(_msgSender()),
+            _queryRAD,
+            _querySLA,
+            _queryCallbackGasLimit
+        );
+    }
+
+    function postRequestWithCallback(
+            IWitOracleConsumer _consumer,
+            bytes32 _queryRAD,
+            Witnet.RadonSLA memory _querySLA,
+            uint24 _queryCallbackGasLimit
+        )
+        virtual override public payable
+        checkCallbackRecipient(_consumer, _queryCallbackGasLimit)
         checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  _queryCallbackGasLimit))
         checkSLA(_querySLA)
         returns (uint256 _queryId)
     {
         _queryId = __postRequest(
+            address(_consumer),
             _queryRAD,
             _querySLA,
             _queryCallbackGasLimit
@@ -447,20 +470,36 @@ abstract contract WitOracleTrustableBase
     /// @param _queryUnverifiedBytecode The (unverified) bytecode containing the actual data request to be solved by the Witnet blockchain.
     /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @param _queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
-    /// @return _queryId Unique query identifier.
     function postRequestWithCallback(
+            bytes calldata _queryUnverifiedBytecode,
+            Witnet.RadonSLA memory _querySLA,
+            uint24 _queryCallbackGasLimit
+        )
+        virtual override public payable
+        returns (uint256)
+    {
+        return postRequestWithCallback(
+            IWitOracleConsumer(_msgSender()),
+            _queryUnverifiedBytecode,
+            _querySLA,
+            _queryCallbackGasLimit
+        );
+    }
+
+    function postRequestWithCallback(
+            IWitOracleConsumer _consumer,
             bytes calldata _queryUnverifiedBytecode,
             Witnet.RadonSLA memory _querySLA, 
             uint24 _queryCallbackGasLimit
         )
-        virtual override
-        public payable 
-        checkCallbackRecipient(msg.sender, _queryCallbackGasLimit)
+        virtual override public payable 
+        checkCallbackRecipient(_consumer, _queryCallbackGasLimit)
         checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  _queryCallbackGasLimit))
         checkSLA(_querySLA)
         returns (uint256 _queryId)
     {
         _queryId = __postRequest(
+            address(_consumer),
             bytes32(0),
             _querySLA,
             _queryCallbackGasLimit
@@ -825,6 +864,7 @@ abstract contract WitOracleTrustableBase
     }
 
     function __postRequest(
+            address _requester,
             bytes32 _radHash, 
             Witnet.RadonSLA memory _sla, 
             uint24 _callbackGasLimit
@@ -836,7 +876,7 @@ abstract contract WitOracleTrustableBase
         Witnet.QueryRequest storage __request = WitOracleDataLib.seekQueryRequest(_queryId);
         _require(__request.requester == address(0), "already posted");
         {
-            __request.requester = msg.sender;
+            __request.requester = _requester;
             __request.gasCallback = _callbackGasLimit;
             __request.evmReward = uint72(_getMsgValue());
             __request.radonRadHash = _radHash;
