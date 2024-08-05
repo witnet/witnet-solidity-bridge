@@ -10,11 +10,11 @@ contract WitOracleRequestFactoryCfxCore
         WitOracleRequestFactoryDefault
 {
     constructor(
-            WitOracle _witnet,
+            WitOracle _witOracle,
             bool _upgradable,
             bytes32 _versionTag
         )
-        WitOracleRequestFactoryDefault(_witnet, _upgradable, _versionTag)
+        WitOracleRequestFactoryDefault(_witOracle, _upgradable, _versionTag)
     {}
 
     function _cloneDeterministic(bytes32 _salt)

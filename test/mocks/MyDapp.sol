@@ -39,9 +39,9 @@ contract MyDapp
         rubbish.slot1 = blockhash(block.number - 1);
         rubbish.slot2 = blockhash(block.number - 2);
         rubbish.slot3 = blockhash(block.number - 3);
-        witnetRandomnessRadHash = __witnetRandomnessRadHash;
-        witnetRandomnessBytecode = witnet().registry().bytecodeOf(__witnetRandomnessRadHash);
-        __randomizeValue = _witnetEstimateBaseFee();
+        witnetRandomnessRadHash = __witOracleRandomnessRadHash;
+        witnetRandomnessBytecode = witOracle().registry().bytecodeOf(__witOracleRandomnessRadHash);
+        __randomizeValue = _witOracleEstimateBaseFee();
     }
 
     function getRandomizeValue() external view returns (uint256) {
@@ -49,7 +49,7 @@ contract MyDapp
     }
 
     function randomize() external payable returns (uint256 _randomizeId) {
-        _randomizeId = __witnetRandomize(__randomizeValue);
+        _randomizeId = __witOracleRandomize(__randomizeValue);
         if (__randomizeValue < msg.value) {
             payable(msg.sender).transfer(msg.value - __randomizeValue);
         }
@@ -68,10 +68,10 @@ contract MyDapp
         override external
         onlyFromWitnet
     {
-        // randomness = _witnetReadRandomizeFromResultValue(witnetResultCborValue);
+        // randomness = _witOracleReadRandomizeFromResultValue(witnetResultCborValue);
         // delete rubbish;
-        // witnet.burnQuery(_queryId);
-        // emit Result(queryId, _witnetReadRandomizeFromResultValue(cborValue));
+        // witOracle.burnQuery(_queryId);
+        // emit Result(queryId, _witOracleReadRandomizeFromResultValue(cborValue));
     }
 
     function reportWitOracleResultError(

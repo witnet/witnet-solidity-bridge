@@ -9,5 +9,5 @@ abstract contract IWitOracleAppliance
         IWitAppliance
 {
     /// @notice Returns the WitOracle address that this appliance is bound to.
-    function witnet() virtual external view returns (WitOracle);
+    function witOracle() virtual external view returns (WitOracle);
 }

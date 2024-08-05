@@ -32,7 +32,7 @@ interface IWitFeeds {
     /// caption string, truncated to bytes4.
     function hash(string calldata caption) external pure returns (bytes4);
 
-    /// Returns the query id (in the context of the WitOracle addressed by witnet()) 
+    /// Returns the query id (in the context of the WitOracle addressed by witOracle()) 
     /// that solved the most recently updated value for the given feed.
     function lastValidQueryId(bytes4 feedId) external view returns (uint256);
 

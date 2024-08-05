@@ -11,52 +11,52 @@ abstract contract UsingWitOracleRequestTemplate
 {
     WitOracleRequestTemplate immutable public dataRequestTemplate;
  
-    /// @param _witnetRequestTemplate Address of the WitOracleRequestTemplate from which actual data requests will get built.
+    /// @param _witOracleRequestTemplate Address of the WitOracleRequestTemplate from which actual data requests will get built.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
     constructor (
-            WitOracleRequestTemplate _witnetRequestTemplate,
+            WitOracleRequestTemplate _witOracleRequestTemplate,
             uint16 _baseFeeOverheadPercentage
         )
-        UsingWitOracle(_witnetRequestTemplate.witnet())
+        UsingWitOracle(_witOracleRequestTemplate.witOracle())
     {
         require(
-            _witnetRequestTemplate.specs() == type(WitOracleRequestTemplate).interfaceId,
+            _witOracleRequestTemplate.specs() == type(WitOracleRequestTemplate).interfaceId,
             "UsingWitOracleRequestTemplate: uncompliant WitOracleRequestTemplate"
         );
-        dataRequestTemplate = _witnetRequestTemplate;
-        __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
+        dataRequestTemplate = _witOracleRequestTemplate;
+        __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function _witnetBuildRadHash(string[][] memory _witnetRequestArgs)
+    function _witOracleBuildRadHash(string[][] memory _witOracleRequestArgs)
         internal returns (bytes32)
     {
-        return dataRequestTemplate.verifyRadonRequest(_witnetRequestArgs);
+        return dataRequestTemplate.verifyRadonRequest(_witOracleRequestArgs);
     }
     
-    function _witnetBuildRequest(string[][] memory _witnetRequestArgs)
+    function _witOracleBuildRequest(string[][] memory _witOracleRequestArgs)
         internal returns (WitOracleRequest)
     {
-        return WitOracleRequest(dataRequestTemplate.buildWitOracleRequest(_witnetRequestArgs));
+        return WitOracleRequest(dataRequestTemplate.buildWitOracleRequest(_witOracleRequestArgs));
     }
 
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
-            string[][] memory _witnetRequestArgs
+    function __witOracleRequestData(
+            uint256 _witOracleEvmReward,
+            string[][] memory _witOracleRequestArgs
         )
         virtual internal returns (uint256)
     {
-        return __witnetRequestData(_witnetEvmReward, _witnetRequestArgs, __witnetDefaultSLA);
+        return __witOracleRequestData(_witOracleEvmReward, _witOracleRequestArgs, __witOracleDefaultSLA);
     }
 
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
-            string[][] memory _witnetRequestArgs,
+    function __witOracleRequestData(
+            uint256 _witOracleEvmReward,
+            string[][] memory _witOracleRequestArgs,
             Witnet.RadonSLA memory _witOracleQuerySLA
         )
         virtual internal returns (uint256)
     {
-        return __witnet.postRequest{value: _witnetEvmReward}(
-            _witnetBuildRadHash(_witnetRequestArgs),
+        return __witOracle.postRequest{value: _witOracleEvmReward}(
+            _witOracleBuildRadHash(_witOracleRequestArgs),
             _witOracleQuerySLA
         );
     }

@@ -36,14 +36,14 @@ contract WitPriceFeedsV21
     }
 
     bytes4 immutable public override specs = type(WitPriceFeeds).interfaceId;
-    WitOracle immutable public override witnet;
+    WitOracle immutable public override witOracle;
     WitOracleRadonRegistry immutable internal __registry;
 
     Witnet.RadonSLA private __defaultRadonSLA;
     uint16 private __baseFeeOverheadPercentage;
     
     constructor(
-            WitOracle _wrb,
+            WitOracle _witOracle,
             bool _upgradable,
             bytes32 _versionTag
         )
@@ -54,11 +54,11 @@ contract WitPriceFeedsV21
             "io.witnet.proxiable.feeds.price"
         )
     {
-        witnet = _wrb;
+        witOracle = _witOracle;
     }
 
     function _registry() virtual internal view returns (WitOracleRadonRegistry) {
-        return witnet.registry();
+        return witOracle.registry();
     }
 
     // solhint-disable-next-line payable-fallback
@@ -127,11 +127,11 @@ contract WitPriceFeedsV21
         __proxiable().codehash = codehash();
 
         _require(
-            address(witnet).code.length > 0,
+            address(witOracle).code.length > 0,
             "inexistent oracle"
         );
         _require(
-            witnet.specs() == type(WitOracle).interfaceId, 
+            witOracle.specs() == type(WitOracle).interfaceId, 
             "uncompliant oracle"
         );
         emit Upgraded(_owner, base(), codehash(), version());
@@ -233,7 +233,7 @@ contract WitPriceFeedsV21
         public view
         returns (uint)
     {
-        return (IWitOracleLegacy(address(witnet)).estimateBaseFee(_evmGasPrice, 32)
+        return (IWitOracleLegacy(address(witOracle)).estimateBaseFee(_evmGasPrice, 32)
             * (100 + __baseFeeOverheadPercentage)
         ) / 100; 
     }
@@ -249,7 +249,7 @@ contract WitPriceFeedsV21
         override public view
         returns (Witnet.QueryResponse memory)
     {
-        return witnet.getQueryResponse(_lastValidQueryId(feedId));
+        return witOracle.getQueryResponse(_lastValidQueryId(feedId));
     }
 
     function latestUpdateQueryId(bytes4 feedId)
@@ -263,21 +263,21 @@ contract WitPriceFeedsV21
         override external view 
         returns (Witnet.QueryRequest memory)
     {
-        return witnet.getQueryRequest(latestUpdateQueryId(feedId));
+        return witOracle.getQueryRequest(latestUpdateQueryId(feedId));
     }
 
     function latestUpdateQueryResponse(bytes4 feedId)
         override external view
         returns (Witnet.QueryResponse memory)
     {
-        return witnet.getQueryResponse(latestUpdateQueryId(feedId));
+        return witOracle.getQueryResponse(latestUpdateQueryId(feedId));
     }
 
     function latestUpdateResultError(bytes4 feedId)
         override external view 
         returns (Witnet.ResultError memory)
     {
-        return witnet.getQueryResultError(latestUpdateQueryId(feedId));
+        return witOracle.getQueryResultError(latestUpdateQueryId(feedId));
     }
     
     function latestUpdateQueryResponseStatus(bytes4 feedId)
@@ -688,7 +688,7 @@ contract WitPriceFeedsV21
         returns (Witnet.QueryResponseStatus)
     {
         if (_queryId > 0) {
-            return witnet.getQueryResponseStatus(_queryId);
+            return witOracle.getQueryResponseStatus(_queryId);
         } else {
             return Witnet.QueryResponseStatus.Ready;
         }
@@ -709,7 +709,7 @@ contract WitPriceFeedsV21
         uint _latestUpdateQueryId = latestUpdateQueryId(feedId);
         if (
             _latestUpdateQueryId > 0
-                && witnet.getQueryResponseStatus(_latestUpdateQueryId) == Witnet.QueryResponseStatus.Ready
+                && witOracle.getQueryResponseStatus(_latestUpdateQueryId) == Witnet.QueryResponseStatus.Ready
         ) {
             return _latestUpdateQueryId;
         } else {
@@ -751,11 +751,11 @@ contract WitPriceFeedsV21
             if (_latestStatus == Witnet.QueryResponseStatus.Awaiting) {
                 // latest update is still pending, so just increase the reward
                 // accordingly to current tx gasprice:
-                Witnet.QueryRequest memory _request = witnet.getQueryRequest(_latestId);
+                Witnet.QueryRequest memory _request = witOracle.getQueryRequest(_latestId);
                 int _deltaReward = int(int72(_request.evmReward)) - int(_usedFunds);
                 if (_deltaReward > 0) {
                     _usedFunds = uint(_deltaReward);
-                    witnet.upgradeQueryEvmReward{value: _usedFunds}(_latestId);
+                    witOracle.upgradeQueryEvmReward{value: _usedFunds}(_latestId);
                 } else {
                     _usedFunds = 0;
                 }
@@ -764,16 +764,16 @@ contract WitPriceFeedsV21
                 if (_latestStatus == Witnet.QueryResponseStatus.Ready) {
                     // If so, remove previous last valid query from the WRB:
                     if (__feed.lastValidQueryId > 0) {
-                        witnet.fetchQueryResponse(__feed.lastValidQueryId);
+                        witOracle.fetchQueryResponse(__feed.lastValidQueryId);
                     }
                     __feed.lastValidQueryId = _latestId;
                 } else {
                     // Otherwise, try to delete latest query, as it was faulty
                     // and we are about to post a new update request:
-                    try witnet.fetchQueryResponse(_latestId) {} catch {}
+                    try witOracle.fetchQueryResponse(_latestId) {} catch {}
                 }
                 // Post update request to the WRB:
-                _latestId = witnet.postRequest{value: _usedFunds}(
+                _latestId = witOracle.postRequest{value: _usedFunds}(
                     __feed.radHash,
                     querySLA
                 );

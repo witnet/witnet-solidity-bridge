@@ -9,39 +9,39 @@ abstract contract UsingWitOracleRequest
 {
     WitOracleRequest immutable public dataRequest;
     
-    bytes32 immutable internal __witnetRequestRadHash;
+    bytes32 immutable internal __witOracleRequestRadHash;
  
-    /// @param _witnetRequest Address of the WitOracleRequest contract containing the actual data request.
+    /// @param _witOracleRequest Address of the WitOracleRequest contract containing the actual data request.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
     constructor (
-            WitOracleRequest _witnetRequest,
+            WitOracleRequest _witOracleRequest,
             uint16 _baseFeeOverheadPercentage
         )
-        UsingWitOracle(_witnetRequest.witnet())
+        UsingWitOracle(_witOracleRequest.witOracle())
     {
         require(
-            _witnetRequest.specs() == type(WitOracleRequest).interfaceId,
+            _witOracleRequest.specs() == type(WitOracleRequest).interfaceId,
             "UsingWitOracleRequest: uncompliant WitOracleRequest"
         );
-        dataRequest = _witnetRequest;
-        __witnetRequestRadHash = _witnetRequest.radHash();
-        __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
+        dataRequest = _witOracleRequest;
+        __witOracleRequestRadHash = _witOracleRequest.radHash();
+        __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function __witnetRequestData(uint256 _witnetEvmReward)
+    function __witOracleRequestData(uint256 _witOracleEvmReward)
         virtual internal returns (uint256)
     {
-        return __witnetRequestData(_witnetEvmReward, __witnetDefaultSLA);
+        return __witOracleRequestData(_witOracleEvmReward, __witOracleDefaultSLA);
     }
 
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
+    function __witOracleRequestData(
+            uint256 _witOracleEvmReward,
             Witnet.RadonSLA memory _witOracleQuerySLA
         )
         virtual internal returns (uint256)
     {
-        return __witnet.postRequest{value: _witnetEvmReward}(
-            __witnetRequestRadHash,
+        return __witOracle.postRequest{value: _witOracleEvmReward}(
+            __witOracleRequestRadHash,
             _witOracleQuerySLA
         );
     }

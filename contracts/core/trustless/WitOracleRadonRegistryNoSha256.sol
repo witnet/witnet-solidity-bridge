@@ -17,7 +17,7 @@ contract WitOracleRadonRegistryNoSha256
         WitOracleRadonRegistryDefault(_upgradable, _versionTag)
     {}
     
-    function _witnetHash(bytes memory chunk) virtual override internal pure returns (bytes32) {
+    function _witOracleHash(bytes memory chunk) virtual override internal pure returns (bytes32) {
         return keccak256(chunk);
     }
 }

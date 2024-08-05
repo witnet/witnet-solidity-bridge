@@ -12,39 +12,39 @@ abstract contract WitOracleRequestConsumer
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
 
-    /// @param _witnetRequest Address of the WitOracleRequest contract containing the actual data request.
+    /// @param _witOracleRequest Address of the WitOracleRequest contract containing the actual data request.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
     /// @param _callbackGasLimit Maximum gas to be spent by the IWitOracleConsumer's callback methods.
     constructor(
-            WitOracleRequest _witnetRequest, 
+            WitOracleRequest _witOracleRequest, 
             uint16 _baseFeeOverheadPercentage,
             uint24 _callbackGasLimit
         )
-        UsingWitOracleRequest(_witnetRequest, _baseFeeOverheadPercentage)
+        UsingWitOracleRequest(_witOracleRequest, _baseFeeOverheadPercentage)
         WitOracleConsumer(_callbackGasLimit)
     {}
 
-    function _witnetEstimateBaseFee() 
+    function _witOracleEstimateBaseFee() 
         virtual override(UsingWitOracle, WitOracleConsumer)
         internal view
         returns (uint256)
     {
-        return WitOracleConsumer._witnetEstimateBaseFee();
+        return WitOracleConsumer._witOracleEstimateBaseFee();
     } 
 
-    function __witnetRequestData(
-            uint256 _witnetEvmReward, 
+    function __witOracleRequestData(
+            uint256 _witOracleEvmReward, 
             Witnet.RadonSLA memory _witOracleQuerySLA
         )
         virtual override
         internal returns (uint256)
     {
-        return __witnet.postRequestWithCallback{
-            value: _witnetEvmReward
+        return __witOracle.postRequestWithCallback{
+            value: _witOracleEvmReward
         }(
-            __witnetRequestRadHash,
+            __witOracleRequestRadHash,
             _witOracleQuerySLA,
-            __witnetCallbackGasLimit
+            __witOracleCallbackGasLimit
         );
     }
 }

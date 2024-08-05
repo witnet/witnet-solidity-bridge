@@ -205,7 +205,7 @@ abstract contract WitOracleTrustableBase
         _require(address(registry).code.length > 0, "inexistent registry");
         _require(registry.specs() == type(WitOracleRadonRegistry).interfaceId, "uncompliant registry");
         _require(address(factory).code.length > 0, "inexistent factory");
-        _require(address(factory.witnet()) == address(this), "discordant factory");
+        _require(address(factory.witOracle()) == address(this), "discordant factory");
         
         // Set reporters, if any
         __setReporters(_newReporters);

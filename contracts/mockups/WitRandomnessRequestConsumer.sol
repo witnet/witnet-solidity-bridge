@@ -15,7 +15,7 @@ abstract contract WitRandomnessRequestConsumer
     using Witnet for Witnet.RadonSLA;
     using WitnetCBOR for WitnetCBOR.CBOR;
 
-    bytes32 internal immutable __witnetRandomnessRadHash;
+    bytes32 internal immutable __witOracleRandomnessRadHash;
 
     /// @param _wrb Address of the WitOracle contract.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
@@ -30,7 +30,7 @@ abstract contract WitRandomnessRequestConsumer
     {
         // On-chain building of the Witnet Randomness Request:
         {
-            WitOracleRadonRegistry _registry = witnet().registry();
+            WitOracleRadonRegistry _registry = witOracle().registry();
             // Build own Witnet Randomness Request:
             bytes32[] memory _retrievals = new bytes32[](1);
             _retrievals[0] = _registry.verifyRadonRetrieval(
@@ -40,7 +40,7 @@ abstract contract WitRandomnessRequestConsumer
                 new string[2][](0), // no headers
                 hex"80" // no retrieval script
             );
-            __witnetRandomnessRadHash = _registry.verifyRadonRequest(
+            __witOracleRandomnessRadHash = _registry.verifyRadonRequest(
                 _retrievals,
                 Witnet.RadonReducer({
                     opcode: Witnet.RadonReduceOpcodes.Mode,
@@ -52,10 +52,10 @@ abstract contract WitRandomnessRequestConsumer
                 })
             );
         }
-        __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
+        __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function _witnetRandomUniformUint32(uint32 _range, uint256 _nonce, bytes32 _seed) internal pure returns (uint32) {
+    function _witOracleRandomUniformUint32(uint32 _range, uint256 _nonce, bytes32 _seed) internal pure returns (uint32) {
         uint256 _number = uint256(
             keccak256(
                 abi.encode(_seed, _nonce)
@@ -64,27 +64,27 @@ abstract contract WitRandomnessRequestConsumer
         return uint32((_number * _range) >> 224);
     }
 
-    function _witnetReadRandomizeFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
+    function _witOracleReadRandomizeFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
         return cborValue.readBytes().toBytes32();
     }
 
-    function __witnetRandomize(uint256 _witnetEvmReward) virtual internal returns (uint256) {
-        return __witnetRandomize(_witnetEvmReward, __witnetDefaultSLA);
+    function __witOracleRandomize(uint256 _witOracleEvmReward) virtual internal returns (uint256) {
+        return __witOracleRandomize(_witOracleEvmReward, __witOracleDefaultSLA);
     }
 
-    function __witnetRandomize(
-            uint256 _witnetEvmReward,
+    function __witOracleRandomize(
+            uint256 _witOracleEvmReward,
             Witnet.RadonSLA memory _witOracleQuerySLA
         )
         virtual internal 
         returns (uint256 _randomizeId)
     {
-        return __witnet.postRequestWithCallback{
-            value: _witnetEvmReward
+        return __witOracle.postRequestWithCallback{
+            value: _witOracleEvmReward
         }(
-            __witnetRandomnessRadHash,
+            __witOracleRandomnessRadHash,
             _witOracleQuerySLA,
-            __witnetCallbackGasLimit
+            __witOracleCallbackGasLimit
         );
     }
 }

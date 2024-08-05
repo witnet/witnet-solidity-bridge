@@ -13,6 +13,9 @@ abstract contract WitPriceFeeds
         IWitPriceFeeds
 {
     constructor()
-        WitFeeds(Witnet.RadonDataTypes.Integer, "Price-") 
+        WitFeeds(
+            Witnet.RadonDataTypes.Integer,
+            "Price-"
+        ) 
     {}
 }

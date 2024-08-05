@@ -45,7 +45,7 @@ module.exports = async function (_, network, [, from]) {
     intrinsics: {
       types: ["address", "address", "bool", "bytes32"],
       values: [
-        /* _witnet     */ await determineProxyAddr(from, specs.WitOracle?.vanity || 3),
+        /* _witOracle  */ await determineProxyAddr(from, specs.WitOracle?.vanity || 3),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],
@@ -86,7 +86,7 @@ module.exports = async function (_, network, [, from]) {
     intrinsics: {
       types: ["address", "bool", "bytes32"],
       values: [
-        /* _witnet     */ await determineProxyAddr(from, specs.WitOracle?.vanity || 3),
+        /* _witOracle  */ await determineProxyAddr(from, specs.WitOracle?.vanity || 3),
         /* _upgradable */ true,
         /* _versionTag */ utils.fromAscii(version),
       ],

@@ -16,14 +16,14 @@ abstract contract UsingWitOracleRandomness
     WitOracle immutable public witnet;
     WitRandomness immutable public __RNG;
 
-    constructor(WitRandomness _witnetRandomness) {
+    constructor(WitRandomness _witOracleRandomness) {
         require(
-            address(_witnetRandomness).code.length > 0
-                && _witnetRandomness.specs() == type(WitRandomness).interfaceId,
+            address(_witOracleRandomness).code.length > 0
+                && _witOracleRandomness.specs() == type(WitRandomness).interfaceId,
             "UsingWitOracleRandomness: uncompliant WitRandomness appliance"
         );
-        __RNG = _witnetRandomness;
-        witnet = __RNG.witnet();
+        __RNG = _witOracleRandomness;
+        witnet = __RNG.witOracle();
     }
 
 }

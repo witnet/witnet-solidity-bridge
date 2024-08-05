@@ -26,7 +26,7 @@ module.exports = async function (_, network, [, from]) {
         types: ["address", "address"],
         values: [
           /* _witOracle */ await determineProxyAddr(from, specs.WitOracle?.vanity || 3),
-          /* _witnetOperator */ utils.isDryRun(network) ? from : specs?.WitRandomness?.from || from,
+          /* _witOracleOperator */ utils.isDryRun(network) ? from : specs?.WitRandomness?.from || from,
         ],
       },
     })

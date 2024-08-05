@@ -20,7 +20,7 @@ contract WitOracleRequestFactoryDefault
         WitnetUpgradableBase        
 {
      /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
-    WitOracle immutable public override witnet;
+    WitOracle immutable public override witOracle;
 
     modifier notOnFactory {
         _require(
@@ -47,20 +47,20 @@ contract WitOracleRequestFactoryDefault
 
     modifier onlyOnRequests {
         _require(
-            __witnetRequest().radHash != bytes32(0),
+            __witOracleRequest().radHash != bytes32(0),
             "not a request"
         ); _;
     }
 
     modifier onlyOnTemplates {
         _require(
-            __witnetRequestTemplate().tallyReduceHash != bytes32(0),
+            __witOracleRequestTemplate().tallyReduceHash != bytes32(0),
             "not a template"
         ); _;
     }
 
     constructor(
-            WitOracle _witnet,
+            WitOracle _witOracle,
             bool _upgradable,
             bytes32 _versionTag
         )
@@ -71,15 +71,15 @@ contract WitOracleRequestFactoryDefault
             "io.witnet.requests.factory"
         )
     {
-        witnet = _witnet;
+        witOracle = _witOracle;
         // let logic contract be used as a factory, while avoiding further initializations:
         __proxiable().proxy = address(this);
         __proxiable().implementation = address(this);
-        __witnetRequestFactory().owner = address(0);
+        __witOracleRequestFactory().owner = address(0);
     }
 
     function _getWitOracleRadonRegistry() virtual internal view returns (WitOracleRadonRegistry) {
-        return witnet.registry();
+        return witOracle.registry();
     }
 
     function initializeWitOracleRequest(bytes32 _radHash)
@@ -87,7 +87,7 @@ contract WitOracleRequestFactoryDefault
         returns (address)
     {
         _require(_radHash != bytes32(0), "no rad hash?");
-        __witnetRequest().radHash = _radHash;   
+        __witOracleRequest().radHash = _radHash;   
         return address(this);
     }
 
@@ -103,7 +103,7 @@ contract WitOracleRequestFactoryDefault
         _require(_aggregateReduceHash != bytes16(0), "no aggregate reducer?");
         _require(_tallyReduceHash != bytes16(0), "no tally reducer?");
 
-        WitOracleRequestTemplateStorage storage __data = __witnetRequestTemplate();
+        WitOracleRequestTemplateStorage storage __data = __witOracleRequestTemplate();
         __data.retrieveHashes = _retrieveHashes;
         __data.aggregateReduceHash = _aggregateReduceHash;
         __data.tallyReduceHash = _tallyReduceHash;
@@ -120,7 +120,7 @@ contract WitOracleRequestFactoryDefault
         virtual override
         returns (address)
     {
-        return __witnetRequestFactory().pendingOwner;
+        return __witOracleRequestFactory().pendingOwner;
     }
 
     /// @notice Returns the address of the current owner.
@@ -129,7 +129,7 @@ contract WitOracleRequestFactoryDefault
         public view
         returns (address)
     {
-        return __witnetRequestFactory().owner;
+        return __witOracleRequestFactory().owner;
     }
 
     /// @notice Starts the ownership transfer of the contract to a new account. Replaces the pending transfer if there is one.
@@ -138,7 +138,7 @@ contract WitOracleRequestFactoryDefault
         virtual override public
         onlyOwner
     {
-        __witnetRequestFactory().pendingOwner = _newOwner;
+        __witOracleRequestFactory().pendingOwner = _newOwner;
         emit OwnershipTransferStarted(owner(), _newOwner);
     }
 
@@ -148,10 +148,10 @@ contract WitOracleRequestFactoryDefault
         internal
         virtual override
     {
-        delete __witnetRequestFactory().pendingOwner;
+        delete __witOracleRequestFactory().pendingOwner;
         address _oldOwner = owner();
         if (_newOwner != _oldOwner) {
-            __witnetRequestFactory().owner = _newOwner;
+            __witOracleRequestFactory().owner = _newOwner;
             emit OwnershipTransferred(_oldOwner, _newOwner);
         }
     }
@@ -170,12 +170,12 @@ contract WitOracleRequestFactoryDefault
         
         // Trying to intialize an upgradable factory instance...
         {
-            address _owner = __witnetRequestFactory().owner;
+            address _owner = __witOracleRequestFactory().owner;
             if (_owner == address(0)) {
                 // Upon first initialization of an upgradable factory,
                 // set owner from the one specified in _initData
                 _owner = abi.decode(_initData, (address));
-                __witnetRequestFactory().owner = _owner;
+                __witOracleRequestFactory().owner = _owner;
             } else {
                 // only the owner can upgrade an upgradable factory
                 _require(
@@ -190,8 +190,8 @@ contract WitOracleRequestFactoryDefault
             }
             __proxiable().implementation = base();
 
-            _require(address(witnet).code.length > 0, "inexistent request board");
-            _require(witnet.specs() == type(WitOracle).interfaceId, "uncompliant request board");
+            _require(address(witOracle).code.length > 0, "inexistent request board");
+            _require(witOracle.specs() == type(WitOracle).interfaceId, "uncompliant request board");
             
             emit Upgraded(msg.sender, base(), codehash(), version());
         }
@@ -199,7 +199,7 @@ contract WitOracleRequestFactoryDefault
 
     /// Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address _from) external view override returns (bool) {
-        address _owner = __witnetRequestFactory().owner;
+        address _owner = __witOracleRequestFactory().owner;
         return (
             // false if the logic contract is intrinsically not upgradable, or `_from` is no owner
             isUpgradable()
@@ -219,8 +219,8 @@ contract WitOracleRequestFactoryDefault
         returns (bool)
     {
         return (
-            __witnetRequestTemplate().tallyReduceHash != bytes16(0)
-                || __witnetRequest().radHash != bytes32(0)
+            __witOracleRequestTemplate().tallyReduceHash != bytes16(0)
+                || __witOracleRequest().radHash != bytes32(0)
                 || __implementation() == base()
         );
     }
@@ -246,9 +246,9 @@ contract WitOracleRequestFactoryDefault
         public view
         returns (string memory)
     {
-        if (__witnetRequest().radHash != bytes32(0)) {
+        if (__witOracleRequest().radHash != bytes32(0)) {
             return type(WitOracleRequest).name;
-        } else if (__witnetRequestTemplate().tallyReduceHash != bytes16(0)) {
+        } else if (__witOracleRequestTemplate().tallyReduceHash != bytes16(0)) {
             return type(WitOracleRequestTemplate).name;
         } else {
             return type(WitOracleRequestFactory).name;
@@ -260,9 +260,9 @@ contract WitOracleRequestFactoryDefault
         external view
         returns (bytes4)
     {
-        if (__witnetRequest().radHash != bytes32(0)) {
+        if (__witOracleRequest().radHash != bytes32(0)) {
             return type(WitOracleRequest).interfaceId;
-        } else if (__witnetRequestTemplate().tallyReduceHash != bytes16(0)) {
+        } else if (__witOracleRequestTemplate().tallyReduceHash != bytes16(0)) {
             return type(WitOracleRequestTemplate).interfaceId;
         } else {
             return type(WitOracleRequestFactory).interfaceId;
@@ -280,15 +280,15 @@ contract WitOracleRequestFactoryDefault
         returns (Witnet.RadonReducer memory, Witnet.RadonReducer memory)
     {
         WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
-        if (__witnetRequest().radHash != bytes32(0)) {
+        if (__witOracleRequest().radHash != bytes32(0)) {
             return (
-                _registry.lookupRadonRequestAggregator(__witnetRequest().radHash),
-                _registry.lookupRadonRequestTally(__witnetRequest().radHash)
+                _registry.lookupRadonRequestAggregator(__witOracleRequest().radHash),
+                _registry.lookupRadonRequestTally(__witOracleRequest().radHash)
             );
         } else {
             return (
-                _registry.lookupRadonReducer(__witnetRequestTemplate().aggregateReduceHash),
-                _registry.lookupRadonReducer(__witnetRequestTemplate().tallyReduceHash)
+                _registry.lookupRadonReducer(__witOracleRequestTemplate().aggregateReduceHash),
+                _registry.lookupRadonReducer(__witOracleRequestTemplate().tallyReduceHash)
             );
         }
     }
@@ -299,18 +299,18 @@ contract WitOracleRequestFactoryDefault
         notOnFactory
         returns (Witnet.RadonRetrieval memory)
     {
-        if (__witnetRequest().radHash != bytes32(0)) {
+        if (__witOracleRequest().radHash != bytes32(0)) {
             return _getWitOracleRadonRegistry().lookupRadonRequestRetrievalByIndex(
-                __witnetRequest().radHash,
+                __witOracleRequest().radHash,
                 _index
             );
         } else {
             _require(
-                _index < __witnetRequestTemplate().retrieveHashes.length, 
+                _index < __witOracleRequestTemplate().retrieveHashes.length, 
                 "index out of range"
             );
             return _getWitOracleRadonRegistry().lookupRadonRetrieval(
-                __witnetRequestTemplate().retrieveHashes[_index]
+                __witOracleRequestTemplate().retrieveHashes[_index]
             );
         }
     }
@@ -322,15 +322,15 @@ contract WitOracleRequestFactoryDefault
         returns (Witnet.RadonRetrieval[] memory _retrievals)
     {
         WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
-        if (__witnetRequest().radHash != bytes32(0)) {
+        if (__witOracleRequest().radHash != bytes32(0)) {
             return _registry.lookupRadonRequestRetrievals(
-                __witnetRequest().radHash
+                __witOracleRequest().radHash
             );
         } else {
-            _retrievals = new Witnet.RadonRetrieval[](__witnetRequestTemplate().retrieveHashes.length);
+            _retrievals = new Witnet.RadonRetrieval[](__witOracleRequestTemplate().retrieveHashes.length);
             for (uint _ix = 0; _ix < _retrievals.length; _ix ++) {
                 _retrievals[_ix] = _registry.lookupRadonRetrieval(
-                    __witnetRequestTemplate().retrieveHashes[_ix]
+                    __witOracleRequestTemplate().retrieveHashes[_ix]
                 );
             }
         }
@@ -342,13 +342,13 @@ contract WitOracleRequestFactoryDefault
         notOnFactory
         returns (Witnet.RadonDataTypes)
     {
-        if (__witnetRequest().radHash != bytes32(0)) {
+        if (__witOracleRequest().radHash != bytes32(0)) {
             return _getWitOracleRadonRegistry().lookupRadonRequestResultDataType(
-                __witnetRequest().radHash
+                __witOracleRequest().radHash
             );
         } else {
             return _getWitOracleRadonRegistry().lookupRadonRetrievalResultDataType(
-                __witnetRequestTemplate().retrieveHashes[0]
+                __witOracleRequestTemplate().retrieveHashes[0]
             );
         }
     }
@@ -488,7 +488,7 @@ contract WitOracleRequestFactoryDefault
         returns (address _request)
     {
         WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
-        WitOracleRequestTemplateStorage storage __template = __witnetRequestTemplate();
+        WitOracleRequestTemplateStorage storage __template = __witOracleRequestTemplate();
 
         // Verify Radon Request using template's retrieve hashes, aggregate and tally reducers, 
         // and given args:
@@ -523,10 +523,10 @@ contract WitOracleRequestFactoryDefault
     {
         
         WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
-        _argsCount = new uint256[](__witnetRequestTemplate().retrieveHashes.length);
+        _argsCount = new uint256[](__witOracleRequestTemplate().retrieveHashes.length);
         for (uint _ix = 0; _ix < _argsCount.length; _ix ++) {
             _argsCount[_ix] = _registry.lookupRadonRetrievalArgsCount(
-                __witnetRequestTemplate().retrieveHashes[_ix]
+                __witOracleRequestTemplate().retrieveHashes[_ix]
             );
         }
     }
@@ -537,9 +537,9 @@ contract WitOracleRequestFactoryDefault
         returns (bytes32)
     {
         return IWitOracleRadonRegistryLegacy(address(_getWitOracleRadonRegistry())).verifyRadonRequest(
-            __witnetRequestTemplate().retrieveHashes,
-            bytes32(__witnetRequestTemplate().aggregateReduceHash),
-            bytes32(__witnetRequestTemplate().tallyReduceHash),
+            __witOracleRequestTemplate().retrieveHashes,
+            bytes32(__witOracleRequestTemplate().aggregateReduceHash),
+            bytes32(__witOracleRequestTemplate().tallyReduceHash),
             0,
             _args
         );
@@ -554,7 +554,7 @@ contract WitOracleRequestFactoryDefault
         returns (bytes memory)
     {
         return _getWitOracleRadonRegistry().bytecodeOf(
-            __witnetRequest().radHash
+            __witOracleRequest().radHash
         );
     }
 
@@ -563,7 +563,7 @@ contract WitOracleRequestFactoryDefault
         onlyOnRequests
         returns (bytes32)
     {
-        return __witnetRequest().radHash;
+        return __witOracleRequest().radHash;
     }
 
 

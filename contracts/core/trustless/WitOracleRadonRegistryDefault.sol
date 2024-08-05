@@ -196,7 +196,7 @@ contract WitOracleRadonRegistryDefault
 
     function hashOf(bytes calldata _radBytecode) external pure override returns (bytes32) {
         // todo: validate correctness of _radBytecode
-        return _witnetHash(_radBytecode);
+        return _witOracleHash(_radBytecode);
     }
 
     function lookupRadonReducer(bytes32 _hash)
@@ -504,7 +504,7 @@ contract WitOracleRadonRegistryDefault
             );
         
             // Calculate radhash and add request metadata and rad bytecode to storage:
-            _radHash = _witnetHash(_bytecode);
+            _radHash = _witOracleHash(_bytecode);
             __database().rads[hash] = _radHash;
             __database().radsBytecode[_radHash] = _bytecode;
             __database().requests[_radHash] = RadonRequestPacked({
@@ -538,7 +538,7 @@ contract WitOracleRadonRegistryDefault
         }
     }
 
-    function _witnetHash(bytes memory chunk) virtual internal pure returns (bytes32) {
+    function _witOracleHash(bytes memory chunk) virtual internal pure returns (bytes32) {
         return sha256(chunk);
     }
 

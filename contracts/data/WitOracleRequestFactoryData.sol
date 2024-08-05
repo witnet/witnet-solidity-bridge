@@ -41,7 +41,7 @@ contract WitOracleRequestFactoryData {
         bytes16 tallyReduceHash;
     }
 
-    function __witnetRequestFactory()
+    function __witOracleRequestFactory()
         internal pure
         returns (WitOracleRequestFactoryStorage storage ptr)
     {
@@ -50,7 +50,7 @@ contract WitOracleRequestFactoryData {
         }
     }
 
-    function __witnetRequest()
+    function __witOracleRequest()
         internal pure
         returns (WitOracleRequestStorage storage ptr)
     {
@@ -59,7 +59,7 @@ contract WitOracleRequestFactoryData {
         }
     }
 
-    function __witnetRequestTemplate()
+    function __witOracleRequestTemplate()
         internal pure
         returns (WitOracleRequestTemplateStorage storage ptr)
     {

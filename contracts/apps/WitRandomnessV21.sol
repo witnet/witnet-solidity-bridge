@@ -36,19 +36,19 @@ contract WitRandomnessV21
     bytes32 immutable public override witOracleQueryRadHash;
 
     constructor(
-            WitOracle _witnet,
+            WitOracle _witOracle,
             address _operator
         )
         Ownable(_operator)
-        UsingWitOracle(_witnet)
+        UsingWitOracle(_witOracle)
     {
         _require(
-            address(_witnet) == address(0)
-                || _witnet.specs() == type(WitOracle).interfaceId,
+            address(_witOracle) == address(0)
+                || _witOracle.specs() == type(WitOracle).interfaceId,
             "uncompliant oracle"
         );
         // Build Witnet-compliant randomness request:
-        WitOracleRadonRegistry _registry = witnet().registry();
+        WitOracleRadonRegistry _registry = witOracle().registry();
         witOracleQueryRadHash = _registry.verifyRadonRequest(
             abi.decode(
                 abi.encode([
@@ -70,7 +70,7 @@ contract WitRandomnessV21
                 filters: new Witnet.RadonFilter[](0)
             })
         );
-        __witnetDefaultSLA.maxTallyResultSize = 34;
+        __witOracleDefaultSLA.maxTallyResultSize = 34;
     }
 
     receive() virtual external payable {
@@ -95,10 +95,10 @@ contract WitRandomnessV21
         return type(WitRandomness).interfaceId;
     }
 
-    function witnet() override (IWitOracleAppliance, UsingWitOracle)
+    function witOracle() override (IWitOracleAppliance, UsingWitOracle)
         public view returns (WitOracle)
     {
-        return UsingWitOracle.witnet();
+        return UsingWitOracle.witOracle();
     }
 
     
@@ -113,8 +113,8 @@ contract WitRandomnessV21
         returns (uint256)
     {
         return (
-            __witnet.estimateBaseFee(_evmGasPrice) 
-                * (100 + __witnetBaseFeeOverheadPercentage)
+            __witOracle.estimateBaseFee(_evmGasPrice) 
+                * (100 + __witOracleBaseFeeOverheadPercentage)
         ) / 100;
     }
 
@@ -154,10 +154,10 @@ contract WitRandomnessV21
             "not randomized"
         );
         
-        Witnet.QueryResponseStatus _status = __witnet.getQueryResponseStatus(_queryId);
+        Witnet.QueryResponseStatus _status = __witOracle.getQueryResponseStatus(_queryId);
         if (_status == Witnet.QueryResponseStatus.Ready) {
             return (
-                __witnet.getQueryResultCborBytes(_queryId)
+                __witOracle.getQueryResultCborBytes(_queryId)
                     .toWitnetResult()
                     .asBytes32()
             );
@@ -207,9 +207,9 @@ contract WitRandomnessV21
             "not randomized"
         );
         
-        Witnet.QueryResponseStatus _status = __witnet.getQueryResponseStatus(_queryId);
+        Witnet.QueryResponseStatus _status = __witOracle.getQueryResponseStatus(_queryId);
         if (_status == Witnet.QueryResponseStatus.Ready) {
-            Witnet.QueryResponse memory _queryResponse = __witnet.getQueryResponse(_queryId);
+            Witnet.QueryResponse memory _queryResponse = __witOracle.getQueryResponse(_queryId);
             _resultTimestamp = _queryResponse.resultTimestamp;
             _resultTallyHash = _queryResponse.resultTallyHash;
             _resultFinalityBlock = _queryResponse.finality;
@@ -310,7 +310,7 @@ contract WitRandomnessV21
             return Witnet.QueryResponseStatus.Void;
         
         } else {
-            Witnet.QueryResponseStatus _status = __witnet.getQueryResponseStatus(_queryId);
+            Witnet.QueryResponseStatus _status = __witOracle.getQueryResponseStatus(_queryId);
             if (_status == Witnet.QueryResponseStatus.Error) {
                 uint256 _nextRandomizeBlock = __storage().randomize_[_blockNumber].nextBlock;
                 if (_nextRandomizeBlock != 0) {
@@ -367,7 +367,7 @@ contract WitRandomnessV21
         virtual override
         returns (uint256)
     {
-        return __postRandomizeQuery(__witnetDefaultSLA);
+        return __postRandomizeQuery(__witOracleDefaultSLA);
     }
 
     /// @notice Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
@@ -380,7 +380,7 @@ contract WitRandomnessV21
         returns (uint256)
     {
         _require(
-            _querySLA.equalOrGreaterThan(__witnetDefaultSLA),
+            _querySLA.equalOrGreaterThan(__witOracleDefaultSLA),
             "unsecure randomize"
         );
         return __postRandomizeQuery(_querySLA);
@@ -395,7 +395,7 @@ contract WitRandomnessV21
         external view
         returns (Witnet.RadonSLA memory)
     {
-        return __witnetDefaultSLA;
+        return __witOracleDefaultSLA;
     }
 
 
@@ -414,7 +414,7 @@ contract WitRandomnessV21
         external view 
         returns (uint16)
     {
-        return __witnetBaseFeeOverheadPercentage;
+        return __witOracleBaseFeeOverheadPercentage;
     }
 
     function owner()
@@ -446,7 +446,7 @@ contract WitRandomnessV21
         external
         onlyOwner
     {
-        __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
+        __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
     function settleDefaultQuerySLA(Witnet.RadonSLA calldata _witOracleQuerySLA)
@@ -458,7 +458,7 @@ contract WitRandomnessV21
             _witOracleQuerySLA.isValid(),
             "invalid SLA"
         );
-        __witnetDefaultSLA = _witOracleQuerySLA;
+        __witOracleDefaultSLA = _witOracleQuerySLA;
     }
 
 
@@ -475,7 +475,7 @@ contract WitRandomnessV21
             _evmUsedFunds = msg.value;
             
             // Post the Witnet Randomness request:
-            _queryId = __witnet.postRequest{
+            _queryId = __witOracle.postRequest{
                 value: msg.value
             }(
                 witOracleQueryRadHash,

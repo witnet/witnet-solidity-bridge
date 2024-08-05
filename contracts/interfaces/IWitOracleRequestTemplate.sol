@@ -51,7 +51,7 @@ interface IWitOracleRequestTemplate {
     /// made out of the data sources, aggregate and tally Radon Reducers that 
     /// compose this WitOracleRequestTemplate. While no WitOracleRequest instance is 
     /// actually constructed, the returned value will be accepted as a valid
-    /// RAD hash on the witnet() contract from now on. 
+    /// RAD hash on the witOracle() contract from now on. 
     /// Reverts if:
     /// - the ranks of passed array don't match either the number of this 
     ///   template's data sources, or the number of required parameters by 

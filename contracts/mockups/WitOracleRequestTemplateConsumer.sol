@@ -12,40 +12,40 @@ abstract contract WitOracleRequestTemplateConsumer
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
     
-    /// @param _witnetRequestTemplate Address of the WitOracleRequestTemplate from which actual data requests will get built.
+    /// @param _witOracleRequestTemplate Address of the WitOracleRequestTemplate from which actual data requests will get built.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
     /// @param _callbackGasLimit Maximum gas to be spent by the IWitOracleConsumer's callback methods.
     constructor(
-            WitOracleRequestTemplate _witnetRequestTemplate, 
+            WitOracleRequestTemplate _witOracleRequestTemplate, 
             uint16 _baseFeeOverheadPercentage,
             uint24 _callbackGasLimit
         )
-        UsingWitOracleRequestTemplate(_witnetRequestTemplate, _baseFeeOverheadPercentage)
+        UsingWitOracleRequestTemplate(_witOracleRequestTemplate, _baseFeeOverheadPercentage)
         WitOracleConsumer(_callbackGasLimit)
     {}
 
-    function _witnetEstimateBaseFee()
+    function _witOracleEstimateBaseFee()
         virtual override(UsingWitOracle, WitOracleConsumer)
         internal view
         returns (uint256)
     {
-        return WitOracleConsumer._witnetEstimateBaseFee();
+        return WitOracleConsumer._witOracleEstimateBaseFee();
     }
 
-    function __witnetRequestData(
-            uint256 _witnetEvmReward,
-            string[][] memory _witnetRequestArgs,
+    function __witOracleRequestData(
+            uint256 _witOracleEvmReward,
+            string[][] memory _witOracleRequestArgs,
             Witnet.RadonSLA memory _witOracleQuerySLA
         )
         virtual override
         internal returns (uint256)
     {
-        return __witnet.postRequestWithCallback{
-            value: _witnetEvmReward
+        return __witOracle.postRequestWithCallback{
+            value: _witOracleEvmReward
         }(
-            _witnetBuildRadHash(_witnetRequestArgs),
+            _witOracleBuildRadHash(_witOracleRequestArgs),
             _witOracleQuerySLA,
-            __witnetCallbackGasLimit
+            __witOracleCallbackGasLimit
         );
     }
 
