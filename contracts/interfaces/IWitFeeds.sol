@@ -22,6 +22,16 @@ interface IWitFeeds {
     /// update with the given the _evmGasPrice value.
     function estimateUpdateRequestFee(uint256 evmGasPrice) external view returns (uint);
 
+    /// Returns a unique hash determined by the combination of data sources being used by 
+    /// supported non-routed price feeds, and dependencies of all supported routed 
+    /// price feeds. The footprint changes if any price feed is modified, added, removed 
+    /// or if the dependency tree of any routed price feed is altered.
+    function footprint() external view returns (bytes4);
+
+    /// This pure function determines the ERC-2362 identifier of the given data feed 
+    /// caption string, truncated to bytes4.
+    function hash(string calldata caption) external pure returns (bytes4);
+
     /// Returns the query id (in the context of the WitOracle addressed by witnet()) 
     /// that solved the most recently updated value for the given feed.
     function lastValidQueryId(bytes4 feedId) external view returns (uint256);
@@ -48,6 +58,9 @@ interface IWitFeeds {
     /// update attempt for the given data feed, if any.
     function latestUpdateResultError(bytes4 feedId) external view returns (Witnet.ResultError memory);
     
+    /// Returns the ERC-2362 caption of the given feed identifier, if known. 
+    function lookupCaption(bytes4) external view returns (string memory);
+
     /// Returns the Witnet-compliant bytecode of the data retrieving script to be solved by 
     /// the Witnet oracle blockchain upon every update of the given data feed.
     function lookupWitOracleRequestBytecode(bytes4 feedId) external view returns (bytes memory);
@@ -66,4 +79,17 @@ interface IWitFeeds {
     /// Triggers a fresh update for the given data feed, requiring also the SLA data security parameters
     /// that will have to be fulfilled on Witnet. 
     function requestUpdate(bytes4 feedId, Witnet.RadonSLA calldata updateSLA) external payable returns (uint256 usedFunds);
+
+    /// Returns the list of feed ERC-2362 ids, captions and RAD hashes of all currently supported 
+    /// data feeds. The RAD hash of a data feed determines in a verifiable way the actual data sources 
+    /// and off-chain computations solved by the Witnet oracle blockchain upon every data update. 
+    /// The RAD hash value for a routed feed actually contains the address of the IWitnetPriceSolver 
+    /// logic contract that solves it.
+    function supportedFeeds() external view returns (bytes4[] memory, string[] memory, bytes32[] memory);
+
+    /// Tells whether the given ERC-2362 feed caption is currently supported.
+    function supportsCaption(string calldata) external view returns (bool);
+
+    /// Total number of data feeds, routed or not, that are currently supported.
+    function totalFeeds() external view returns (uint256);
 }
