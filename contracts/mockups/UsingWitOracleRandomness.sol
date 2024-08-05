@@ -13,8 +13,7 @@ abstract contract UsingWitOracleRandomness
         IWitOracleEvents,
         IWitRandomnessEvents
 {
-    WitOracle immutable public witnet;
-    WitRandomness immutable public __RNG;
+    WitRandomness immutable public witOracleRandomness;
 
     constructor(WitRandomness _witOracleRandomness) {
         require(
@@ -22,8 +21,7 @@ abstract contract UsingWitOracleRandomness
                 && _witOracleRandomness.specs() == type(WitRandomness).interfaceId,
             "UsingWitOracleRandomness: uncompliant WitRandomness appliance"
         );
-        __RNG = _witOracleRandomness;
-        witnet = __RNG.witOracle();
+        witOracleRandomness = _witOracleRandomness;
     }
 
 }

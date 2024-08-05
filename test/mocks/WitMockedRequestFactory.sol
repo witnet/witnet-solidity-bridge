@@ -15,9 +15,9 @@ contract WitMockedRequestFactory
     is 
         WitOracleRequestFactoryDefault
 {
-    constructor (WitMockedOracle _wrb)
+    constructor (WitMockedOracle _witOracle)
         WitOracleRequestFactoryDefault(
-            WitOracle(address(_wrb)),
+            WitOracle(address(_witOracle)),
             false,
             bytes32("mocked")
         ) 

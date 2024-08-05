@@ -24,6 +24,8 @@ abstract contract WitOracleRequestConsumer
         WitOracleConsumer(_callbackGasLimit)
     {}
 
+    /// @dev Estimate the minimum reward required for posting a data request (based on `tx.gasprice` and 
+    /// @dev `__witOracleCallbackGasLimit`).
     function _witOracleEstimateBaseFee() 
         virtual override(UsingWitOracle, WitOracleConsumer)
         internal view
@@ -32,18 +34,36 @@ abstract contract WitOracleRequestConsumer
         return WitOracleConsumer._witOracleEstimateBaseFee();
     } 
 
-    function __witOracleRequestData(
-            uint256 _witOracleEvmReward, 
-            Witnet.RadonSLA memory _witOracleQuerySLA
+    /// @dev Pulls a data update from the Wit/oracle blockchain based on the underlying `witOracleRequest`,
+    /// @dev the default `__witOracleDefaultQuerySLA` data security parameters and the immutable value of
+    /// @dev `__witOracleCalbackGasLimit`.
+    /// @param _queryEvmReward The exact EVM reward passed to the WitOracle when pulling the data update.
+    function __witOraclePostQuery(
+            uint256 _queryEvmReward
         )
-        virtual override
-        internal returns (uint256)
+        virtual override internal returns (uint256)
+    {
+        return __witOraclePostQuery(
+            _queryEvmReward,
+            __witOracleDefaultQuerySLA
+        );
+    }
+
+    /// @dev Pulls a data update from the Wit/oracle blockchain based on the underlying `witOracleRequest`,
+    /// @dev the given `_querySLA` data security parameters and the immutable value of  `__witOracleCallbackGasLimit`. 
+    /// @param _queryEvmReward The exact EVM reward passed to the WitOracle when pulling the data update.
+    /// @param _querySLA The required SLA data security params for the Wit/oracle blockchain to accomplish.
+    function __witOraclePostQuery(
+            uint256 _queryEvmReward, 
+            Witnet.RadonSLA memory _querySLA
+        )
+        virtual override internal returns (uint256)
     {
         return __witOracle.postRequestWithCallback{
-            value: _witOracleEvmReward
+            value: _queryEvmReward
         }(
             __witOracleRequestRadHash,
-            _witOracleQuerySLA,
+            _querySLA,
             __witOracleCallbackGasLimit
         );
     }

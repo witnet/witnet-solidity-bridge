@@ -70,7 +70,7 @@ contract WitRandomnessV21
                 filters: new Witnet.RadonFilter[](0)
             })
         );
-        __witOracleDefaultSLA.maxTallyResultSize = 34;
+        __witOracleDefaultQuerySLA.maxTallyResultSize = 34;
     }
 
     receive() virtual external payable {
@@ -367,12 +367,12 @@ contract WitRandomnessV21
         virtual override
         returns (uint256)
     {
-        return __postRandomizeQuery(__witOracleDefaultSLA);
+        return __postRandomizeQuery(__witOracleDefaultQuerySLA);
     }
 
     /// @notice Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
     /// @dev Only one randomness request per block will be actually posted to the Witnet Oracle. 
-    /// @dev Reverts if given SLA security parameters are below witOracleQuerySLA().
+    /// @dev Reverts if given SLA security parameters are below witOracleDefaultQuerySLA().
     /// @return Funds actually paid as randomize fee.
     function randomize(Witnet.RadonSLA calldata _querySLA)
         external payable
@@ -380,7 +380,7 @@ contract WitRandomnessV21
         returns (uint256)
     {
         _require(
-            _querySLA.equalOrGreaterThan(__witOracleDefaultSLA),
+            _querySLA.equalOrGreaterThan(__witOracleDefaultQuerySLA),
             "unsecure randomize"
         );
         return __postRandomizeQuery(_querySLA);
@@ -390,12 +390,12 @@ contract WitRandomnessV21
     /// @notice when solving randomness requests:
     /// @notice - number of witnessing nodes contributing to randomness generation
     /// @notice - reward in $nanoWIT received by every contributing node in the Witnet blockchain
-    function witOracleQuerySLA() 
-        virtual override
-        external view
+    function witOracleDefaultQuerySLA() 
+        virtual override (UsingWitOracle, IWitRandomness)
+        public view
         returns (Witnet.RadonSLA memory)
     {
-        return __witOracleDefaultSLA;
+        return __witOracleDefaultQuerySLA;
     }
 
 
@@ -449,16 +449,16 @@ contract WitRandomnessV21
         __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function settleDefaultQuerySLA(Witnet.RadonSLA calldata _witOracleQuerySLA)
+    function settleDefaultQuerySLA(Witnet.RadonSLA calldata _querySLA)
         virtual override
         external
         onlyOwner
     {
         _require(
-            _witOracleQuerySLA.isValid(),
+            _querySLA.isValid(),
             "invalid SLA"
         );
-        __witOracleDefaultSLA = _witOracleQuerySLA;
+        __witOracleDefaultQuerySLA = _querySLA;
     }
 
 

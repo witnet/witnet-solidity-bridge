@@ -12,7 +12,7 @@ import "../../contracts/apps/WitRandomnessV21.sol";
 /// @dev THE `WitRandomness` CONTRACT ADDRESS PROVIDED 
 /// @dev BY THE WITNET FOUNDATION.
 contract WitMockedRandomness is WitRandomnessV21 {
-    constructor(WitMockedOracle _wrb)
-        WitRandomnessV21(_wrb, msg.sender)
+    constructor(WitMockedOracle _witOracle)
+        WitRandomnessV21(_witOracle, msg.sender)
     {}
 }

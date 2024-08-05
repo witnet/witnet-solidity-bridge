@@ -7,8 +7,12 @@ import "../WitOracleRequest.sol";
 abstract contract UsingWitOracleRequest
     is UsingWitOracle
 {
-    WitOracleRequest immutable public dataRequest;
+    /// @notice Immutable address of the underlying WitOracleRequest used for every fresh data
+    /// @notice update pulled from this contract.
+    WitOracleRequest immutable public witOracleRequest;
     
+    /// @dev Immutable RAD hash of the underlying data request being solved on the Wit/oracle blockchain
+    /// @dev upon every fresh data update pulled from this contract.
     bytes32 immutable internal __witOracleRequestRadHash;
  
     /// @param _witOracleRequest Address of the WitOracleRequest contract containing the actual data request.
@@ -23,26 +27,40 @@ abstract contract UsingWitOracleRequest
             _witOracleRequest.specs() == type(WitOracleRequest).interfaceId,
             "UsingWitOracleRequest: uncompliant WitOracleRequest"
         );
-        dataRequest = _witOracleRequest;
+        witOracleRequest = _witOracleRequest;
         __witOracleRequestRadHash = _witOracleRequest.radHash();
         __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function __witOracleRequestData(uint256 _witOracleEvmReward)
-        virtual internal returns (uint256)
-    {
-        return __witOracleRequestData(_witOracleEvmReward, __witOracleDefaultSLA);
-    }
-
-    function __witOracleRequestData(
-            uint256 _witOracleEvmReward,
-            Witnet.RadonSLA memory _witOracleQuerySLA
+    /// @dev Pulls a data update from the Wit/oracle blockchain based on the underlying `witOracleRequest`,
+    /// @dev and the default `__witOracleDefaultQuerySLA` data security parameters. 
+    /// @param _queryEvmReward The exact EVM reward passed to the WitOracle when pulling the data update.
+    function __witOraclePostQuery(
+            uint256 _queryEvmReward
         )
         virtual internal returns (uint256)
     {
-        return __witOracle.postRequest{value: _witOracleEvmReward}(
+        return __witOraclePostQuery(
+            _queryEvmReward, 
+            __witOracleDefaultQuerySLA
+        );
+    }
+
+    /// @dev Pulls a data update from the Wit/oracle blockchain based on the underlying `witOracleRequest`,
+    /// @dev and the given `_querySLA` data security parameters. 
+    /// @param _queryEvmReward The exact EVM reward passed to the WitOracle when pulling the data update.
+    /// @param _querySLA The required SLA data security params for the Wit/oracle blockchain to accomplish.
+    function __witOraclePostQuery(
+            uint256 _queryEvmReward,
+            Witnet.RadonSLA memory _querySLA
+        )
+        virtual internal returns (uint256)
+    {
+        return __witOracle.postRequest{
+            value: _queryEvmReward
+        }(
             __witOracleRequestRadHash,
-            _witOracleQuerySLA
+            _querySLA
         );
     }
 }

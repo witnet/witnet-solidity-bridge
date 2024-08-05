@@ -12,9 +12,9 @@ import "../../contracts/apps/WitPriceFeedsV21.sol";
 /// @dev THE `WitPriceFeeds` CONTRACT ADDRESS PROVIDED 
 /// @dev BY THE WITNET FOUNDATION.
 contract WitMockedPriceFeeds is WitPriceFeedsV21 {
-    constructor(WitMockedOracle _wrb)
+    constructor(WitMockedOracle _witOracle)
         WitPriceFeedsV21(
-            _wrb,
+            _witOracle,
             false,
             bytes32("mocked")
         )

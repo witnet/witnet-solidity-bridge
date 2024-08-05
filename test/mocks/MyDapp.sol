@@ -28,9 +28,9 @@ contract MyDapp
 
     uint256 private immutable __randomizeValue;
 
-    constructor(WitOracle _wrb, uint16 _baseFeeOverheadPercentage, uint24 _callbackGasLimit)
+    constructor(WitOracle _witOracle, uint16 _baseFeeOverheadPercentage, uint24 _callbackGasLimit)
         WitRandomnessRequestConsumer(
-            _wrb, 
+            _witOracle, 
             _baseFeeOverheadPercentage,
             _callbackGasLimit
         )
@@ -68,10 +68,10 @@ contract MyDapp
         override external
         onlyFromWitnet
     {
-        // randomness = _witOracleReadRandomizeFromResultValue(witnetResultCborValue);
+        // randomness = _witOracleRandomizeSeedFromResultValue(witnetResultCborValue);
         // delete rubbish;
         // witOracle.burnQuery(_queryId);
-        // emit Result(queryId, _witOracleReadRandomizeFromResultValue(cborValue));
+        // emit Result(queryId, _witOracleRandomizeSeedFromResultValue(cborValue));
     }
 
     function reportWitOracleResultError(

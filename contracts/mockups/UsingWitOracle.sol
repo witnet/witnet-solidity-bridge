@@ -11,52 +11,51 @@ import "../WitOracle.sol";
 abstract contract UsingWitOracle
     is
         IWitOracleEvents
-{
-    /// @dev Immutable reference to the Witnet Request Board contract.
+{   
+    /// @notice Immutable reference to the WitOracle contract.
+    function witOracle() virtual public view returns (WitOracle) {
+        return __witOracle;
+    }
     WitOracle internal immutable __witOracle;
     
-    /// @dev Default Security-Level Agreement parameters to be fulfilled by the Witnet blockchain
-    /// @dev when solving a data request.
-    Witnet.RadonSLA internal __witOracleDefaultSLA;
-
     /// @dev Percentage over base fee to pay on every data request, 
     /// @dev as to deal with volatility of evmGasPrice and evmWitPrice during the live time of 
     /// @dev a data request (since being posted until a result gets reported back), at both the EVM and 
     /// @dev the Witnet blockchain levels, respectivelly. 
     uint16 internal __witOracleBaseFeeOverheadPercentage;
 
-    /// @param _wrb Address of the WitOracle contract.
-    constructor(WitOracle _wrb) {
+    /// @notice Default SLA data security parameters to be fulfilled by the Wit/oracle blockchain
+    /// @notice when solving a data request.
+    function witOracleDefaultQuerySLA() virtual public view returns (Witnet.RadonSLA memory) {
+        return __witOracleDefaultQuerySLA;
+    }
+    Witnet.RadonSLA internal __witOracleDefaultQuerySLA;
+
+    /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
+    /// @dev contract until a particular request has been successfully solved and reported from the Wit/oracle blockchain,
+    /// @dev either with an error or successfully.
+    modifier witOracleQuerySolved(uint256 _queryId) {
+        require(_witOracleCheckQueryResultAvailability(_queryId), "UsingWitOracle: unsolved query");
+        _;
+    }
+
+    /// @param _witOracle Address of the WitOracle bridging contract.
+    constructor(WitOracle _witOracle) {
         require(
-            _wrb.specs() == type(WitOracle).interfaceId,
+            _witOracle.specs() == type(WitOracle).interfaceId,
             "UsingWitOracle: uncompliant WitOracle"
         );
-        __witOracle = _wrb;
-        __witOracleDefaultSLA = Witnet.RadonSLA({
-            // Number of nodes in the Witnet blockchain that will take part in solving the data request:
+        __witOracle = _witOracle;
+        __witOracleDefaultQuerySLA = Witnet.RadonSLA({
             witNumWitnesses: 10,
-            // Reward in $nanoWIT to be paid to every node in the Witnet blockchain involved in solving some data query.
             witUnitaryReward: 2 * 10 ** 8,  // defaults to 0.2 $WIT
-            // Maximum size accepted for the CBOR-encoded buffer containing successfull result values.
             maxTallyResultSize: 32
         });
         
         __witOracleBaseFeeOverheadPercentage = 33; // defaults to 33%
     }
 
-    /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
-    /// @dev contract until a particular request has been successfully solved and reported by Witnet,
-    /// @dev either with an error or successfully.
-    modifier witnetQuerySolved(uint256 _queryId) {
-        require(_witOracleCheckQueryResultAvailability(_queryId), "UsingWitOracle: unsolved query");
-        _;
-    }
-
-    function witOracle() virtual public view returns (WitOracle) {
-        return __witOracle;
-    }
-
-    /// @notice Check if given query was already reported back from the Witnet oracle.
+    /// @dev Check if given query was already reported back from the Wit/oracle blockchain.
     /// @param _id The unique identifier of a previously posted data request.
     function _witOracleCheckQueryResultAvailability(uint256 _id)
         internal view
@@ -65,7 +64,23 @@ abstract contract UsingWitOracle
         return __witOracle.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
     }
 
-    /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
+    /// @dev Returns a struct describing the resulting error from some given query id.
+    function _witOracleCheckQueryResultError(uint256 _queryId)
+        internal view
+        returns (Witnet.ResultError memory)
+    {
+        return __witOracle.getQueryResultError(_queryId);
+    }
+
+    /// @dev Return current response status to some given gquery id.
+    function _witOracleCheckQueryResponseStatus(uint256 _queryId)
+        internal view
+        returns (Witnet.QueryResponseStatus)
+    {
+        return __witOracle.getQueryResponseStatus(_queryId);
+    }
+
+    /// @dev Estimate the minimum reward required for posting a data request (based on `tx.gasprice`).
     function _witOracleEstimateBaseFee()
         virtual internal view
         returns (uint256)
@@ -74,19 +89,5 @@ abstract contract UsingWitOracle
             (100 + __witOracleBaseFeeOverheadPercentage)
                 * __witOracle.estimateBaseFee(tx.gasprice) 
         ) / 100;
-    }
-
-    function _witOracleCheckQueryQueryResponseStatus(uint256 _queryId)
-        internal view
-        returns (Witnet.QueryResponseStatus)
-    {
-        return __witOracle.getQueryResponseStatus(_queryId);
-    }
-
-    function _witOracleCheckQueryResultError(uint256 _queryId)
-        internal view
-        returns (Witnet.ResultError memory)
-    {
-        return __witOracle.getQueryResultError(_queryId);
     }
 }

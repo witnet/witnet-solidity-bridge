@@ -24,6 +24,8 @@ abstract contract WitOracleRequestTemplateConsumer
         WitOracleConsumer(_callbackGasLimit)
     {}
 
+    /// @dev Estimate the minimum reward required for posting a data request (based on `tx.gasprice` and 
+    /// @dev `__witOracleCallbackGasLimit`).
     function _witOracleEstimateBaseFee()
         virtual override(UsingWitOracle, WitOracleConsumer)
         internal view
@@ -32,21 +34,54 @@ abstract contract WitOracleRequestTemplateConsumer
         return WitOracleConsumer._witOracleEstimateBaseFee();
     }
 
-    function __witOracleRequestData(
-            uint256 _witOracleEvmReward,
-            string[][] memory _witOracleRequestArgs,
-            Witnet.RadonSLA memory _witOracleQuerySLA
+    /// @dev Pulls a fresh update from the Wit/oracle blockchain based on some data request built out
+    /// @dev of the underlying `witOracleRequestTemplate`, the default `__witOracleDefaultQuerySLA` data
+    /// @dev security parameters and the immutable value of `__witOracleCallbackGasLimit`.
+    /// @dev Returns the unique RAD hash of the just-built data request, and some unique query id. 
+    /// @dev Reverts if the number of given parameters don't match as required by the underlying template's 
+    /// @dev parameterized data sources (i.e. Radon Retrievals). 
+    /// @param _queryEvmReward The exact EVM reward passed to the WitOracle bridge when pulling the data update.
+    /// @param _witOracleRequestArgs Parameters passed to the `witOracleRequestTemplate` for building a new data request.
+    function __witOraclePostQuery(
+            uint256 _queryEvmReward,
+            string[][] memory _witOracleRequestArgs
         )
-        virtual override
-        internal returns (uint256)
+        virtual override internal returns (bytes32, uint256)
     {
-        return __witOracle.postRequestWithCallback{
-            value: _witOracleEvmReward
-        }(
-            _witOracleBuildRadHash(_witOracleRequestArgs),
-            _witOracleQuerySLA,
-            __witOracleCallbackGasLimit
+        return __witOraclePostQuery(
+            _queryEvmReward, 
+            __witOracleDefaultQuerySLA,
+            _witOracleRequestArgs
         );
     }
 
+    /// @dev Pulls a fresh update from the Wit/oracle blockchain based on some data request built out
+    /// @dev of the underlying `witOracleRequestTemplate`, and the given `_querSLA` data security parameters,
+    /// @dev and the immutable value of `__witOracleCallbackGasLimit`. 
+    /// @dev Returns the unique RAD hash of the just-built data request, and some unique query id. 
+    /// @dev Reverts if the number of given parameters don't match as required by the underlying template's 
+    /// @dev parameterized data sources (i.e. Radon Retrievals). 
+    /// @param _queryEvmReward The exact EVM reward passed to the WitOracle bridge when pulling the data update.
+    /// @param _querySLA The required SLA data security params for the Wit/oracle blockchain to accomplish.
+    /// @param _witOracleRequestArgs Parameters passed to the `witOracleRequestTemplate` for building a new data request.
+    function __witOraclePostQuery(
+            uint256 _queryEvmReward,
+            Witnet.RadonSLA memory _querySLA,
+            string[][] memory _witOracleRequestArgs
+        )
+        virtual override internal
+        returns (
+            bytes32 _queryRadHash, 
+            uint256 _queryId
+        )
+    {
+        _queryRadHash = __witOracleVerifyRadHash(_witOracleRequestArgs);
+        _queryId = __witOracle.postRequestWithCallback{
+            value: _queryEvmReward
+        }(
+            _queryRadHash,
+            _querySLA,
+            __witOracleCallbackGasLimit
+        );
+    }
 }

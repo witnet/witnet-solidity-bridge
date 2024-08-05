@@ -98,7 +98,7 @@ interface IWitRandomness {
     /// @notice while fulfilling the given SLA data security parameters.
     /// @dev Only one randomness request per block will be actually posted to the Witnet Oracle. 
     /// @dev Unused funds will be transferred back to the `msg.sender`. 
-    /// @dev Passed SLA security parameters must be equal or greater than `witOracleQuerySLA()`.
+    /// @dev Passed SLA security parameters must be equal or greater than `witOracleDefaultQuerySLA()`.
     /// @return Funds actually paid as randomize fee. 
     function randomize(Witnet.RadonSLA calldata) external payable returns (uint256);
 
@@ -106,7 +106,7 @@ interface IWitRandomness {
     /// @notice when solving randomness requests:
     /// @notice - number of witnessing nodes contributing to randomness generation
     /// @notice - reward in $nanoWIT received per witnessing node in the Witnet blockchain
-    function witOracleQuerySLA() external view returns (Witnet.RadonSLA memory);
+    function witOracleDefaultQuerySLA() external view returns (Witnet.RadonSLA memory);
 
     /// @notice Returns the unique identifier of the Witnet-compliant data request being used for solving randomness.
     function witOracleQueryRadHash() external view returns (bytes32);

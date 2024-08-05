@@ -34,29 +34,26 @@ abstract contract WitOracleConsumer
     /// ===============================================================================================================
     /// --- WitOracleConsumer virtual methods ----------------------------------------------------------------------------
 
+    /// @dev Estimate the minimum reward required for posting a data request (based on `tx.gasprice` and 
+    /// @dev `__witOracleCallbackGasLimit`).
     function _witOracleEstimateBaseFee() virtual override internal view returns (uint256) {
-        return (
-            (100 + __witOracleBaseFeeOverheadPercentage)
-                * __witOracle.estimateBaseFeeWithCallback(
-                    tx.gasprice,
-                    __witOracleCallbackGasLimit
-                )
-        ) / 100;
+        return _witOracleEstimateBaseFeeWithCallback(__witOracleCallbackGasLimit);
     }
 
 
-    /// @notice Estimate the minimum reward required for posting a data request, using `tx.gasprice` as a reference.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function _witOracleEstimateBaseFeeWithCallback(uint24 _callbackGasLimit)
-        virtual internal view
-        returns (uint256)
+    /// @dev Estimate the minimum reward required for posting a data request, based on `tx.gasprice` and
+    /// @dev the given `_witOracleCallbackGasLimit` value.
+    /// @param _witOracleCallbackGasLimit Maximum gas to be spent when reporting the data request result.
+    function _witOracleEstimateBaseFeeWithCallback(
+            uint24 _witOracleCallbackGasLimit
+        )
+        virtual internal view returns (uint256)
     {
         return (
             (100 + __witOracleBaseFeeOverheadPercentage)
                 * __witOracle.estimateBaseFeeWithCallback(
                     tx.gasprice, 
-                    _callbackGasLimit
+                    _witOracleCallbackGasLimit
                 )
         ) / 100;
     }
