@@ -287,7 +287,7 @@ contract WitPriceFeedsV21
         return _checkQueryResponseStatus(latestUpdateQueryId(feedId));
     }
 
-    function lookupWitnetBytecode(bytes4 feedId)
+    function lookupWitOracleRequestBytecode(bytes4 feedId)
         override external view
         returns (bytes memory)
     {
@@ -299,19 +299,19 @@ contract WitPriceFeedsV21
         return _registry().bytecodeOf(__record.radHash);
     }
     
-    function lookupWitnetRadHash(bytes4 feedId)
+    function lookupWitOracleRequestRadHash(bytes4 feedId)
         override public view
         returns (bytes32)
     {
         return __records_(feedId).radHash;
     }
 
-    function lookupWitnetRetrievals(bytes4 feedId)
+    function lookupWitOracleRadonRetrievals(bytes4 feedId)
         override external view
         returns (Witnet.RadonRetrieval[] memory _retrievals)
     {
         return _registry().lookupRadonRequestRetrievals(
-            lookupWitnetRadHash(feedId)
+            lookupWitOracleRequestRadHash(feedId)
         );
     }
 

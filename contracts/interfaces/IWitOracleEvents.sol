@@ -6,7 +6,7 @@ import "../libs/Witnet.sol";
 interface IWitOracleEvents {
     
     /// Emitted every time a new query containing some verified data request is posted to the WitOracle.
-    event WitnetQuery(
+    event WitOracleQuery(
         address evmRequester,
         uint256 evmGasPrice,
         uint256 evmReward,
@@ -16,7 +16,7 @@ interface IWitOracleEvents {
     );
 
     /// Emitted every time a new query containing some unverified data request bytecode is posted to the WRB.
-    event WitnetQuery(
+    event WitOracleQuery(
         address evmRequester,
         uint256 evmGasPrice,
         uint256 evmReward,
@@ -26,7 +26,7 @@ interface IWitOracleEvents {
     );
 
     /// Emitted when the reward of some not-yet reported query gets upgraded.
-    event WitnetQueryUpgrade(
+    event WitOracleQueryUpgrade(
         uint256 queryId,
         address evmSender,
         uint256 evmGasPrice,
@@ -34,20 +34,20 @@ interface IWitOracleEvents {
     );
 
     /// Emitted when a query with no callback gets reported into the WRB.
-    event WitnetQueryResponse(
+    event WitOracleQueryResponse(
         uint256 queryId, 
         uint256 evmGasPrice
     );
 
     /// Emitted when a query with a callback gets successfully reported into the WRB.
-    event WitnetQueryReponseDelivered(
+    event WitOracleQueryReponseDelivered(
         uint256 queryId, 
         uint256 evmGasPrice, 
         uint256 evmCallbackGas
     );
 
     /// Emitted when a query with a callback cannot get reported into the WRB.
-    event WitnetQueryResponseDeliveryFailed(
+    event WitOracleQueryResponseDeliveryFailed(
         uint256 queryId, 
         uint256 evmGasPrice, 
         uint256 evmCallbackActualGas, 

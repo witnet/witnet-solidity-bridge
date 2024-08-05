@@ -36,13 +36,13 @@ abstract contract UsingWitOracleRequest
 
     function __witnetRequestData(
             uint256 _witnetEvmReward,
-            Witnet.RadonSLA memory _witnetQuerySLA
+            Witnet.RadonSLA memory _witOracleQuerySLA
         )
         virtual internal returns (uint256)
     {
         return __witnet.postRequest{value: _witnetEvmReward}(
             __witnetRequestRadHash,
-            _witnetQuerySLA
+            _witOracleQuerySLA
         );
     }
 }

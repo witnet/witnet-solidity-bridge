@@ -33,7 +33,7 @@ contract WitRandomnessV21
 
     /// @notice Unique identifier of the RNG data request used on the Witnet Oracle blockchain for solving randomness.
     /// @dev Can be used to track all randomness requests solved so far on the Witnet Oracle blockchain.
-    bytes32 immutable public override witnetRadHash;
+    bytes32 immutable public override witOracleQueryRadHash;
 
     constructor(
             WitOracle _witnet,
@@ -49,7 +49,7 @@ contract WitRandomnessV21
         );
         // Build Witnet-compliant randomness request:
         WitOracleRadonRegistry _registry = witnet().registry();
-        witnetRadHash = _registry.verifyRadonRequest(
+        witOracleQueryRadHash = _registry.verifyRadonRequest(
             abi.decode(
                 abi.encode([
                     _registry.verifyRadonRetrieval(
@@ -372,7 +372,7 @@ contract WitRandomnessV21
 
     /// @notice Requests the Witnet oracle to generate an EVM-agnostic and trustless source of randomness. 
     /// @dev Only one randomness request per block will be actually posted to the Witnet Oracle. 
-    /// @dev Reverts if given SLA security parameters are below witnetQuerySLA().
+    /// @dev Reverts if given SLA security parameters are below witOracleQuerySLA().
     /// @return Funds actually paid as randomize fee.
     function randomize(Witnet.RadonSLA calldata _querySLA)
         external payable
@@ -390,7 +390,7 @@ contract WitRandomnessV21
     /// @notice when solving randomness requests:
     /// @notice - number of witnessing nodes contributing to randomness generation
     /// @notice - reward in $nanoWIT received by every contributing node in the Witnet blockchain
-    function witnetQuerySLA() 
+    function witOracleQuerySLA() 
         virtual override
         external view
         returns (Witnet.RadonSLA memory)
@@ -449,16 +449,16 @@ contract WitRandomnessV21
         __witnetBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function settleWitnetQuerySLA(Witnet.RadonSLA calldata _witnetQuerySLA)
+    function settleDefaultQuerySLA(Witnet.RadonSLA calldata _witOracleQuerySLA)
         virtual override
         external
         onlyOwner
     {
         _require(
-            _witnetQuerySLA.isValid(),
+            _witOracleQuerySLA.isValid(),
             "invalid SLA"
         );
-        __witnetDefaultSLA = _witnetQuerySLA;
+        __witnetDefaultSLA = _witOracleQuerySLA;
     }
 
 
@@ -478,7 +478,7 @@ contract WitRandomnessV21
             _queryId = __witnet.postRequest{
                 value: msg.value
             }(
-                witnetRadHash,
+                witOracleQueryRadHash,
                 _querySLA
             );
 

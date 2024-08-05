@@ -59,7 +59,7 @@ contract TestWitnetV2 {
         return __request;
     }
 
-    function testWitnetQueryResponsePacking() external {
+    function testWitOracleQueryResponsePacking() external {
         __response = Witnet.QueryResponse({
             reporter: msg.sender,
             finality: uint64(block.number),
@@ -69,7 +69,7 @@ contract TestWitnetV2 {
         });
     }
 
-    function testWitnetQueryResponseUnpacking() external returns (Witnet.QueryResponse memory) {
+    function testWitOracleQueryResponseUnpacking() external returns (Witnet.QueryResponse memory) {
         return __response;
     }
 

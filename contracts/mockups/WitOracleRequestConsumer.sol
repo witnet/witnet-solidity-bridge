@@ -34,7 +34,7 @@ abstract contract WitOracleRequestConsumer
 
     function __witnetRequestData(
             uint256 _witnetEvmReward, 
-            Witnet.RadonSLA memory _witnetQuerySLA
+            Witnet.RadonSLA memory _witOracleQuerySLA
         )
         virtual override
         internal returns (uint256)
@@ -43,7 +43,7 @@ abstract contract WitOracleRequestConsumer
             value: _witnetEvmReward
         }(
             __witnetRequestRadHash,
-            _witnetQuerySLA,
+            _witOracleQuerySLA,
             __witnetCallbackGasLimit
         );
     }

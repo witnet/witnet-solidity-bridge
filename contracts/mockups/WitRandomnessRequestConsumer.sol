@@ -74,7 +74,7 @@ abstract contract WitRandomnessRequestConsumer
 
     function __witnetRandomize(
             uint256 _witnetEvmReward,
-            Witnet.RadonSLA memory _witnetQuerySLA
+            Witnet.RadonSLA memory _witOracleQuerySLA
         )
         virtual internal 
         returns (uint256 _randomizeId)
@@ -83,7 +83,7 @@ abstract contract WitRandomnessRequestConsumer
             value: _witnetEvmReward
         }(
             __witnetRandomnessRadHash,
-            _witnetQuerySLA,
+            _witOracleQuerySLA,
             __witnetCallbackGasLimit
         );
     }

@@ -50,14 +50,14 @@ interface IWitFeeds {
     
     /// Returns the Witnet-compliant bytecode of the data retrieving script to be solved by 
     /// the Witnet oracle blockchain upon every update of the given data feed.
-    function lookupWitnetBytecode(bytes4 feedId) external view returns (bytes memory);
+    function lookupWitOracleRequestBytecode(bytes4 feedId) external view returns (bytes memory);
 
     /// Returns the RAD hash that uniquely identifies the data retrieving script that gets solved 
     /// by the Witnet oracle blockchain upon every update of the given data feed.
-    function lookupWitnetRadHash(bytes4 feedId) external view returns (bytes32);
+    function lookupWitOracleRequestRadHash(bytes4 feedId) external view returns (bytes32);
 
     /// Returns the list of actual data sources and offchain computations for the given data feed.
-    function lookupWitnetRetrievals(bytes4 feedId) external view returns (Witnet.RadonRetrieval[] memory);
+    function lookupWitOracleRadonRetrievals(bytes4 feedId) external view returns (Witnet.RadonRetrieval[] memory);
 
     /// Triggers a fresh update on the Witnet oracle blockchain for the given data feed, 
     /// using the defaultRadonSLA() security parameters.

@@ -47,8 +47,8 @@ abstract contract UsingWitOracle
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
     /// @dev contract until a particular request has been successfully solved and reported by Witnet,
     /// @dev either with an error or successfully.
-    modifier witnetQuerySolved(uint256 _witnetQueryId) {
-        require(_witnetCheckQueryResultAvailability(_witnetQueryId), "UsingWitOracle: unsolved query");
+    modifier witnetQuerySolved(uint256 _queryId) {
+        require(_witnetCheckQueryResultAvailability(_queryId), "UsingWitOracle: unsolved query");
         _;
     }
 
@@ -76,17 +76,17 @@ abstract contract UsingWitOracle
         ) / 100;
     }
 
-    function _witnetCheckQueryQueryResponseStatus(uint256 _witnetQueryId)
+    function _witnetCheckQueryQueryResponseStatus(uint256 _queryId)
         internal view
         returns (Witnet.QueryResponseStatus)
     {
-        return __witnet.getQueryResponseStatus(_witnetQueryId);
+        return __witnet.getQueryResponseStatus(_queryId);
     }
 
-    function _witnetCheckQueryResultError(uint256 _witnetQueryId)
+    function _witnetCheckQueryResultError(uint256 _queryId)
         internal view
         returns (Witnet.ResultError memory)
     {
-        return __witnet.getQueryResultError(_witnetQueryId);
+        return __witnet.getQueryResultError(_queryId);
     }
 }

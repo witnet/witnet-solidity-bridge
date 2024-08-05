@@ -339,14 +339,14 @@ abstract contract WitOracleTrustableBase
         return WitOracleDataLib.seekQueryStatus(_queryId);
     }
 
-    function getQueryStatusBatch(uint256[] calldata _witnetQueryIds)
+    function getQueryStatusBatch(uint256[] calldata _queryIds)
         external view
         override
         returns (Witnet.QueryStatus[] memory _status)
     {
-        _status = new Witnet.QueryStatus[](_witnetQueryIds.length);
-        for (uint _ix = 0; _ix < _witnetQueryIds.length; _ix ++) {
-            _status[_ix] = WitOracleDataLib.seekQueryStatus(_witnetQueryIds[_ix]);
+        _status = new Witnet.QueryStatus[](_queryIds.length);
+        for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
+            _status[_ix] = WitOracleDataLib.seekQueryStatus(_queryIds[_ix]);
         }
     }
 
@@ -381,7 +381,7 @@ abstract contract WitOracleTrustableBase
     {
         _queryId = __postRequest(_queryRAD, _querySLA, 0);
         // Let Web3 observers know that a new request has been posted
-        emit WitnetQuery(
+        emit WitOracleQuery(
             _msgSender(),
             _getGasPrice(),
             _getMsgValue(),
@@ -394,7 +394,7 @@ abstract contract WitOracleTrustableBase
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
     /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
     /// @notice reporter who relays back the Witnet-provable result to this request. The Witnet-provable result will be reported
-    /// @notice directly to the requesting contract. If the report callback fails for any reason, an `WitnetQueryResponseDeliveryFailed`
+    /// @notice directly to the requesting contract. If the report callback fails for any reason, an `WitOracleQueryResponseDeliveryFailed`
     /// @notice will be triggered, and the Witnet audit trail will be saved in storage, but not so the actual CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitOracleConsumer interface;
@@ -423,7 +423,7 @@ abstract contract WitOracleTrustableBase
             _querySLA,
             _queryCallbackGasLimit
         );
-        emit WitnetQuery(
+        emit WitOracleQuery(
             _msgSender(),
             _getGasPrice(),
             _getMsgValue(),
@@ -436,7 +436,7 @@ abstract contract WitOracleTrustableBase
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
     /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
     /// @notice reporter who relays back the Witnet-provable result to this request. The Witnet-provable result will be reported
-    /// @notice directly to the requesting contract. If the report callback fails for any reason, a `WitnetQueryResponseDeliveryFailed`
+    /// @notice directly to the requesting contract. If the report callback fails for any reason, a `WitOracleQueryResponseDeliveryFailed`
     /// @notice event will be triggered, and the Witnet audit trail will be saved in storage, but not so the CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitOracleConsumer interface;
@@ -466,7 +466,7 @@ abstract contract WitOracleTrustableBase
             _queryCallbackGasLimit
         );
         WitOracleDataLib.seekQueryRequest(_queryId).witnetBytecode = _queryUnverifiedBytecode;
-        emit WitnetQuery(
+        emit WitOracleQuery(
             _msgSender(),
             _getGasPrice(),
             _getMsgValue(),
@@ -486,7 +486,7 @@ abstract contract WitOracleTrustableBase
     {
         Witnet.QueryRequest storage __request = WitOracleDataLib.seekQueryRequest(_queryId);
         __request.evmReward += uint72(_getMsgValue());
-        emit WitnetQueryUpgrade(
+        emit WitOracleQueryUpgrade(
             _queryId,
             _msgSender(),
             _getGasPrice(),
@@ -645,15 +645,15 @@ abstract contract WitOracleTrustableBase
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
     /// @dev Fails if:
     /// @dev - the `_queryId` is not in 'Posted' status.
-    /// @dev - provided `_queryResultTallyHash` is zero;
+    /// @dev - provided `_resultTallyHash` is zero;
     /// @dev - length of provided `_result` is zero.
     /// @param _queryId The unique identifier of the data request.
-    /// @param _queryResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
-    /// @param _queryResultCborBytes The result itself as bytes.
+    /// @param _resultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param _resultCborBytes The result itself as bytes.
     function reportResult(
             uint256 _queryId,
-            bytes32 _queryResultTallyHash,
-            bytes calldata _queryResultCborBytes
+            bytes32 _resultTallyHash,
+            bytes calldata _resultCborBytes
         )
         external override
         onlyReporters
@@ -662,7 +662,7 @@ abstract contract WitOracleTrustableBase
     {
         // results cannot be empty:
         _require(
-            _queryResultCborBytes.length != 0, 
+            _resultCborBytes.length != 0, 
             "result cannot be empty"
         );
         // do actual report and return reward transfered to the reproter:
@@ -670,8 +670,8 @@ abstract contract WitOracleTrustableBase
         return __reportResultAndReward(
             _queryId,
             uint32(block.timestamp),
-            _queryResultTallyHash,
-            _queryResultCborBytes
+            _resultTallyHash,
+            _resultCborBytes
         );
     }
 
@@ -679,17 +679,17 @@ abstract contract WitOracleTrustableBase
     /// @dev Fails if:
     /// @dev - called from unauthorized address;
     /// @dev - the `_queryId` is not in 'Posted' status.
-    /// @dev - provided `_queryResultTallyHash` is zero;
-    /// @dev - length of provided `_queryResultCborBytes` is zero.
+    /// @dev - provided `_resultTallyHash` is zero;
+    /// @dev - length of provided `_resultCborBytes` is zero.
     /// @param _queryId The unique query identifier
-    /// @param _queryResultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
-    /// @param _queryResultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
-    /// @param _queryResultCborBytes The result itself as bytes.
+    /// @param _resultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
+    /// @param _resultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param _resultCborBytes The result itself as bytes.
     function reportResult(
             uint256 _queryId,
-            uint32  _queryResultTimestamp,
-            bytes32 _queryResultTallyHash,
-            bytes calldata _queryResultCborBytes
+            uint32  _resultTimestamp,
+            bytes32 _resultTallyHash,
+            bytes calldata _resultCborBytes
         )
         external
         override
@@ -699,26 +699,26 @@ abstract contract WitOracleTrustableBase
     {
         // validate timestamp
         _require(
-            _queryResultTimestamp > 0 
-                && _queryResultTimestamp <= block.timestamp, 
+            _resultTimestamp > 0 
+                && _resultTimestamp <= block.timestamp, 
             "bad timestamp"
         );
         // results cannot be empty
         _require(
-            _queryResultCborBytes.length != 0, 
+            _resultCborBytes.length != 0, 
             "result cannot be empty"
         );
         // do actual report and return reward transfered to the reproter:
         return  __reportResultAndReward(
             _queryId,
-            _queryResultTimestamp,
-            _queryResultTallyHash,
-            _queryResultCborBytes
+            _resultTimestamp,
+            _resultTallyHash,
+            _resultCborBytes
         );
     }
 
     /// @notice Reports Witnet-provided results to multiple requests within a single EVM tx.
-    /// @notice Emits either a WitnetQueryResponse* or a BatchReportError event per batched report.
+    /// @notice Emits either a WitOracleQueryResponse* or a BatchReportError event per batched report.
     /// @dev Fails only if called from unauthorized address.
     /// @param _batchResults Array of BatchResult structs, every one containing:
     ///         - unique query identifier;
@@ -740,9 +740,9 @@ abstract contract WitOracleTrustableBase
                     WitOracleDataLib.notInStatusRevertMessage(Witnet.QueryStatus.Posted)
                 );
             } else if (
-                uint256(_batchResults[_i].queryResultTimestamp) > block.timestamp
-                    || _batchResults[_i].queryResultTimestamp == 0
-                    || _batchResults[_i].queryResultCborBytes.length == 0
+                uint256(_batchResults[_i].resultTimestamp) > block.timestamp
+                    || _batchResults[_i].resultTimestamp == 0
+                    || _batchResults[_i].resultCborBytes.length == 0
             ) {
                 emit BatchReportError(
                     _batchResults[_i].queryId, 
@@ -754,9 +754,9 @@ abstract contract WitOracleTrustableBase
             } else {
                 _batchReward += __reportResult(
                     _batchResults[_i].queryId,
-                    _batchResults[_i].queryResultTimestamp,
-                    _batchResults[_i].queryResultTallyHash,
-                    _batchResults[_i].queryResultCborBytes
+                    _batchResults[_i].resultTimestamp,
+                    _batchResults[_i].resultTallyHash,
+                    _batchResults[_i].resultCborBytes
                 );
             }
         }   
@@ -846,9 +846,9 @@ abstract contract WitOracleTrustableBase
 
     function __reportResult(
             uint256 _queryId,
-            uint32  _queryResultTimestamp,
-            bytes32 _queryResultTallyHash,
-            bytes calldata _queryResultCborBytes
+            uint32  _resultTimestamp,
+            bytes32 _resultTallyHash,
+            bytes calldata _resultCborBytes
         )
         virtual internal
         returns (uint256 _evmReward)
@@ -870,69 +870,69 @@ abstract contract WitOracleTrustableBase
                 string memory _evmCallbackRevertMessage
             ) = __reportResultCallback(
                 _queryId,
-                _queryResultTimestamp,
-                _queryResultTallyHash,
-                _queryResultCborBytes,
+                _resultTimestamp,
+                _resultTallyHash,
+                _resultCborBytes,
                 __request.requester,
                 __request.gasCallback
             );
             if (_evmCallbackSuccess) {
                 // => the callback run successfully
-                emit WitnetQueryReponseDelivered(
+                emit WitOracleQueryReponseDelivered(
                     _queryId,
                     _getGasPrice(),
                     _evmCallbackActualGas
                 );
             } else {
                 // => the callback reverted
-                emit WitnetQueryResponseDeliveryFailed(
+                emit WitOracleQueryResponseDeliveryFailed(
                     _queryId,
                     _getGasPrice(),
                     _evmCallbackActualGas,
                     bytes(_evmCallbackRevertMessage).length > 0 
                         ? _evmCallbackRevertMessage
                         : "WitOracle: callback exceeded gas limit",
-                    _queryResultCborBytes
+                    _resultCborBytes
                 );
             }
             // upon delivery, successfull or not, the audit trail is saved into storage, 
             // but not the actual result which was intended to be passed over to the requester:
             __writeQueryQueryResponse(
                 _queryId, 
-                _queryResultTimestamp, 
-                _queryResultTallyHash, 
+                _resultTimestamp, 
+                _resultTallyHash, 
                 hex""
             );
         } else {
             // => no callback is involved
-            emit WitnetQueryResponse(
+            emit WitOracleQueryResponse(
                 _queryId, 
                 _getGasPrice()
             );
             // write query result and audit trail data into storage 
             __writeQueryQueryResponse(
                 _queryId,
-                _queryResultTimestamp,
-                _queryResultTallyHash,
-                _queryResultCborBytes
+                _resultTimestamp,
+                _resultTallyHash,
+                _resultCborBytes
             );
         }
     }
 
     function __reportResultAndReward(
             uint256 _queryId,
-            uint32  _queryResultTimestamp,
-            bytes32 _queryResultTallyHash,
-            bytes calldata _queryResultCborBytes
+            uint32  _resultTimestamp,
+            bytes32 _resultTallyHash,
+            bytes calldata _resultCborBytes
         )
         virtual internal
         returns (uint256 _evmReward)
     {
         _evmReward = __reportResult(
             _queryId, 
-            _queryResultTimestamp, 
-            _queryResultTallyHash, 
-            _queryResultCborBytes
+            _resultTimestamp, 
+            _resultTallyHash, 
+            _resultCborBytes
         );
         // transfer reward to reporter
         __safeTransferTo(
@@ -943,9 +943,9 @@ abstract contract WitOracleTrustableBase
 
     function __reportResultCallback(
             uint256 _queryId,
-            uint64  _queryResultTimestamp,
-            bytes32 _queryResultTallyHash,
-            bytes calldata _queryResultCborBytes,
+            uint64  _resultTimestamp,
+            bytes32 _resultTallyHash,
+            bytes calldata _resultCborBytes,
             address _evmRequester,
             uint256 _evmCallbackGasLimit
         )
@@ -957,14 +957,14 @@ abstract contract WitOracleTrustableBase
         )
     {
         _evmCallbackActualGas = gasleft();
-        if (_queryResultCborBytes[0] == bytes1(0xd8)) {
-            WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(_queryResultCborBytes).readArray();
+        if (_resultCborBytes[0] == bytes1(0xd8)) {
+            WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(_resultCborBytes).readArray();
             if (_errors.length < 2) {
                 // try to report result with unknown error:
-                try IWitOracleConsumer(_evmRequester).reportWitnetQueryError{gas: _evmCallbackGasLimit}(
+                try IWitOracleConsumer(_evmRequester).reportWitOracleResultError{gas: _evmCallbackGasLimit}(
                     _queryId,
-                    _queryResultTimestamp,
-                    _queryResultTallyHash,
+                    _resultTimestamp,
+                    _resultTallyHash,
                     block.number,
                     Witnet.ResultErrorCodes.Unknown,
                     WitnetCBOR.CBOR({
@@ -982,10 +982,10 @@ abstract contract WitOracleTrustableBase
                 }
             } else {
                 // try to report result with parsable error:
-                try IWitOracleConsumer(_evmRequester).reportWitnetQueryError{gas: _evmCallbackGasLimit}(
+                try IWitOracleConsumer(_evmRequester).reportWitOracleResultError{gas: _evmCallbackGasLimit}(
                     _queryId,
-                    _queryResultTimestamp,
-                    _queryResultTallyHash,
+                    _resultTimestamp,
+                    _resultTallyHash,
                     block.number,
                     Witnet.ResultErrorCodes(_errors[0].readUint()),
                     _errors[0]
@@ -997,12 +997,12 @@ abstract contract WitOracleTrustableBase
             }
         } else {
             // try to report result result with no error :
-            try IWitOracleConsumer(_evmRequester).reportWitnetQueryResult{gas: _evmCallbackGasLimit}(
+            try IWitOracleConsumer(_evmRequester).reportWitOracleResultValue{gas: _evmCallbackGasLimit}(
                 _queryId,
-                _queryResultTimestamp,
-                _queryResultTallyHash,
+                _resultTimestamp,
+                _resultTallyHash,
                 block.number,
-                WitnetCBOR.fromBytes(_queryResultCborBytes)
+                WitnetCBOR.fromBytes(_resultCborBytes)
             ) {
                 _evmCallbackSuccess = true;
             } catch Error(string memory err) {
@@ -1029,18 +1029,18 @@ abstract contract WitOracleTrustableBase
 
     function __writeQueryQueryResponse(
             uint256 _queryId, 
-            uint32  _queryResultTimestamp, 
-            bytes32 _queryResultTallyHash, 
-            bytes memory _queryResultCborBytes
+            uint32  _resultTimestamp, 
+            bytes32 _resultTallyHash, 
+            bytes memory _resultCborBytes
         )
         virtual internal
     {
         WitOracleDataLib.seekQuery(_queryId).response = Witnet.QueryResponse({
             reporter: msg.sender,
             finality: uint64(block.number),
-            resultTimestamp: _queryResultTimestamp,
-            resultTallyHash: _queryResultTallyHash,
-            resultCborBytes: _queryResultCborBytes
+            resultTimestamp: _resultTimestamp,
+            resultTallyHash: _resultTallyHash,
+            resultCborBytes: _resultCborBytes
         });
     }
 

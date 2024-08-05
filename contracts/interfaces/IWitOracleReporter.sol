@@ -12,7 +12,7 @@ interface IWitOracleReporter {
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
     /// @notice queries providing no actual earnings.
     function estimateReportEarnings(
-            uint256[] calldata witnetQueryIds, 
+            uint256[] calldata queryIds, 
             bytes calldata reportTxMsgData,
             uint256 reportTxGasPrice,
             uint256 nanoWitPrice
@@ -27,37 +27,37 @@ interface IWitOracleReporter {
     /// @notice Reports the Witnet-provided result to a previously posted request. 
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
     /// @dev Fails if:
-    /// @dev - the `_witnetQueryId` is not in 'Posted' status.
+    /// @dev - the `_queryId` is not in 'Posted' status.
     /// @dev - provided `_tallyHash` is zero;
     /// @dev - length of provided `_result` is zero.
-    /// @param witnetQueryId The unique identifier of the data request.
-    /// @param witnetQueryResultTallyHash The hash of the corresponding data request transaction in Witnet.
-    /// @param witnetQueryResultCborBytes The result itself as bytes.
+    /// @param queryId The unique identifier of the data request.
+    /// @param resultTallyHash The hash of the corresponding data request transaction in Witnet.
+    /// @param resultCborBytes The result itself as bytes.
     function reportResult(
-            uint256 witnetQueryId,
-            bytes32 witnetQueryResultTallyHash,
-            bytes calldata witnetQueryResultCborBytes
+            uint256 queryId,
+            bytes32 resultTallyHash,
+            bytes calldata resultCborBytes
         ) external returns (uint256);
 
     /// @notice Reports the Witnet-provided result to a previously posted request.
     /// @dev Fails if:
     /// @dev - called from unauthorized address;
-    /// @dev - the `_witnetQueryId` is not in 'Posted' status.
+    /// @dev - the `_queryId` is not in 'Posted' status.
     /// @dev - provided `_tallyHash` is zero;
     /// @dev - length of provided `_result` is zero.
-    /// @param witnetQueryId The unique query identifier
-    /// @param witnetQueryResultTimestamp The timestamp of the solving tally transaction in Witnet.
-    /// @param witnetQueryResultTallyHash The hash of the corresponding data request transaction in Witnet.
-    /// @param witnetQueryResultCborBytes The result itself as bytes.
+    /// @param queryId The unique query identifier
+    /// @param resultTimestamp The timestamp of the solving tally transaction in Witnet.
+    /// @param resultTallyHash The hash of the corresponding data request transaction in Witnet.
+    /// @param resultCborBytes The result itself as bytes.
     function reportResult(
-            uint256 witnetQueryId,
-            uint32  witnetQueryResultTimestamp,
-            bytes32 witnetQueryResultTallyHash,
-            bytes calldata witnetQueryResultCborBytes
+            uint256 queryId,
+            uint32  resultTimestamp,
+            bytes32 resultTallyHash,
+            bytes calldata resultCborBytes
         ) external returns (uint256);
 
     /// @notice Reports Witnet-provided results to multiple requests within a single EVM tx.
-    /// @notice Emits either a WitnetQueryResponse* or a BatchReportError event per batched report.
+    /// @notice Emits either a WitOracleQueryResponse* or a BatchReportError event per batched report.
     /// @dev Fails only if called from unauthorized address.
     /// @param _batchResults Array of BatchResult structs, every one containing:
     ///         - unique query identifier;
@@ -68,9 +68,9 @@ interface IWitOracleReporter {
         
         struct BatchResult {
             uint256 queryId;
-            uint32  queryResultTimestamp;
-            bytes32 queryResultTallyHash;
-            bytes   queryResultCborBytes;
+            uint32  resultTimestamp;
+            bytes32 resultTallyHash;
+            bytes   resultCborBytes;
         }
 
         event BatchReportError(uint256 queryId, string reason);

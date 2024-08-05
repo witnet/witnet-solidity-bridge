@@ -61,7 +61,7 @@ contract MyDapp
     /// @dev by the WitOracleConsumer contract. Within the implementation of this method, the WitOracleConsumer
     /// @dev can call to the WRB as to retrieve the Witnet tracking information (i.e. the `witnetDrTxHash` 
     /// @dev and `witnetDrCommitTxTimestamp`), or the finality status, of the result being reported.
-    function reportWitnetQueryResult(
+    function reportWitOracleResultValue(
             uint256 _queryId, uint64, bytes32, uint256,
             WitnetCBOR.CBOR calldata witnetResultCborValue
         )
@@ -74,15 +74,15 @@ contract MyDapp
         // emit Result(queryId, _witnetReadRandomizeFromResultValue(cborValue));
     }
 
-    function reportWitnetQueryError(
-            uint256 witnetQueryId, 
+    function reportWitOracleResultError(
+            uint256 queryId, 
             uint64, bytes32, uint256, 
             Witnet.ResultErrorCodes errorCode, WitnetCBOR.CBOR calldata
         )
         virtual external
         onlyFromWitnet
     {
-        emit Error(witnetQueryId, errorCode);
+        emit Error(queryId, errorCode);
     }
 
 

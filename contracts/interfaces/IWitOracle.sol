@@ -99,7 +99,7 @@ interface IWitOracle {
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
     /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
     /// @notice reporter who relays back the Witnet-provable result to this request. The Witnet-provable result will be reported
-    /// @notice directly to the requesting contract. If the report callback fails for any reason, an `WitnetQueryResponseDeliveryFailed`
+    /// @notice directly to the requesting contract. If the report callback fails for any reason, an `WitOracleQueryResponseDeliveryFailed`
     /// @notice will be triggered, and the Witnet audit trail will be saved in storage, but not so the actual CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitOracleConsumer interface;
@@ -126,7 +126,7 @@ interface IWitOracle {
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
     /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
     /// @notice reporter who relays back the Witnet-provable result to this request. The Witnet-provable result will be reported
-    /// @notice directly to the requesting contract. If the report callback fails for any reason, a `WitnetQueryResponseDeliveryFailed`
+    /// @notice directly to the requesting contract. If the report callback fails for any reason, a `WitOracleQueryResponseDeliveryFailed`
     /// @notice event will be triggered, and the Witnet audit trail will be saved in storage, but not so the CBOR-encoded result.
     /// @dev Reasons to fail:
     /// @dev - the caller is not a contract implementing the IWitOracleConsumer interface;
