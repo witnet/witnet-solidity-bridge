@@ -3,11 +3,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../contracts/mockups/WitRandomnessRequestConsumer.sol";
+import "../../contracts/mockups/WitOracleRandomnessConsumer.sol";
 
 contract MyDapp
     is
-        WitRandomnessRequestConsumer
+        WitOracleRandomnessConsumer
 {
     using WitnetCBOR for WitnetCBOR.CBOR;
 
@@ -29,7 +29,7 @@ contract MyDapp
     uint256 private immutable __randomizeValue;
 
     constructor(WitOracle _witOracle, uint16 _baseFeeOverheadPercentage, uint24 _callbackGasLimit)
-        WitRandomnessRequestConsumer(
+        WitOracleRandomnessConsumer(
             _witOracle, 
             _baseFeeOverheadPercentage,
             _callbackGasLimit

@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "./WitOracleConsumer.sol";
 import "../WitOracleRequest.sol";
 
-abstract contract WitRandomnessRequestConsumer
+abstract contract WitOracleRandomnessConsumer
     is
         WitOracleConsumer
 {
