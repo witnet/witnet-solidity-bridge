@@ -34,26 +34,18 @@ abstract contract WitOracleConsumer
     /// ===============================================================================================================
     /// --- WitOracleConsumer virtual methods ----------------------------------------------------------------------------
 
-    /// @dev Estimate the minimum reward required for posting a data request (based on `tx.gasprice` and 
-    /// @dev `__witOracleCallbackGasLimit`).
-    function _witOracleEstimateBaseFee() virtual override internal view returns (uint256) {
-        return _witOracleEstimateBaseFeeWithCallback(__witOracleCallbackGasLimit);
-    }
-
-
-    /// @dev Estimate the minimum reward required for posting a data request, based on `tx.gasprice` and
-    /// @dev the given `_witOracleCallbackGasLimit` value.
-    /// @param _witOracleCallbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function _witOracleEstimateBaseFeeWithCallback(
-            uint24 _witOracleCallbackGasLimit
-        )
-        virtual internal view returns (uint256)
+    /// @dev Estimate the minimum reward required for posting a data request (based on given gas price and 
+    /// @dev immutable `__witOracleCallbackGasLimit`).
+    function _witOracleEstimateBaseFee(uint256 _evmGasPrice)
+        virtual override 
+        internal view 
+        returns (uint256)
     {
         return (
             (100 + __witOracleBaseFeeOverheadPercentage)
                 * __witOracle.estimateBaseFeeWithCallback(
-                    tx.gasprice, 
-                    _witOracleCallbackGasLimit
+                    _evmGasPrice, 
+                    __witOracleCallbackGasLimit
                 )
         ) / 100;
     }

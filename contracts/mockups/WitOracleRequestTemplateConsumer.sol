@@ -24,14 +24,14 @@ abstract contract WitOracleRequestTemplateConsumer
         WitOracleConsumer(_callbackGasLimit)
     {}
 
-    /// @dev Estimate the minimum reward required for posting a data request (based on `tx.gasprice` and 
-    /// @dev `__witOracleCallbackGasLimit`).
-    function _witOracleEstimateBaseFee()
-        virtual override(UsingWitOracle, WitOracleConsumer)
-        internal view
+    /// @dev Estimate the minimum reward required for posting a data request (based on given gas price and 
+    /// @dev immutable `__witOracleCallbackGasLimit`).
+    function _witOracleEstimateBaseFee(uint256 _evmGasPrice)
+        virtual override (UsingWitOracle, WitOracleConsumer)
+        internal view 
         returns (uint256)
     {
-        return WitOracleConsumer._witOracleEstimateBaseFee();
+        return WitOracleConsumer._witOracleEstimateBaseFee(_evmGasPrice);
     }
 
     /// @dev Pulls a fresh update from the Wit/oracle blockchain based on some data request built out

@@ -81,13 +81,14 @@ abstract contract UsingWitOracle
     }
 
     /// @dev Estimate the minimum reward required for posting a data request (based on `tx.gasprice`).
-    function _witOracleEstimateBaseFee()
-        virtual internal view
-        returns (uint256)
-    {
+    function _witOracleEstimateBaseFee() virtual internal view returns (uint256) {
+        return _witOracleEstimateBaseFee(tx.gasprice);
+    }
+
+    function _witOracleEstimateBaseFee(uint256 _evmGasPrice) virtual internal view returns (uint256) {
         return (
-            (100 + __witOracleBaseFeeOverheadPercentage)
-                * __witOracle.estimateBaseFee(tx.gasprice) 
+            __witOracle.estimateBaseFee(_evmGasPrice)
+                * (100 + __witOracleBaseFeeOverheadPercentage)
         ) / 100;
     }
 }
