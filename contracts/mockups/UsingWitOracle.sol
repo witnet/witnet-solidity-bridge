@@ -47,9 +47,9 @@ abstract contract UsingWitOracle
         );
         __witOracle = _witOracle;
         __witOracleDefaultQuerySLA = Witnet.RadonSLA({
-            witNumWitnesses: 10,
-            witUnitaryReward: 2 * 10 ** 8,  // defaults to 0.2 $WIT
-            maxTallyResultSize: 32
+            witNumWitnesses: 10,            // defaults to 10 witnesses
+            witUnitaryReward: 2 * 10 ** 8,  // defaults to 0.2 witcoins
+            maxTallyResultSize: 32          // defaults to 32 bytes
         });
         
         __witOracleBaseFeeOverheadPercentage = 33; // defaults to 33%
