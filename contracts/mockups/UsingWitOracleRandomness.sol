@@ -24,5 +24,7 @@ abstract contract UsingWitOracleRandomness
         witOracleRandomness = _witOracleRandomness;
     }
 
+    receive() external payable virtual {}
+
 }
 
