@@ -13,15 +13,15 @@ abstract contract UsingWitRandomness
         IWitOracleEvents,
         IWitRandomnessEvents
 {
-    WitRandomness immutable public witOracleRandomness;
+    WitRandomness immutable public witRandomness;
 
-    constructor(WitRandomness _witOracleRandomness) {
+    constructor(WitRandomness _witRandomness) {
         require(
-            address(_witOracleRandomness).code.length > 0
-                && _witOracleRandomness.specs() == type(WitRandomness).interfaceId,
+            address(_witRandomness).code.length > 0
+                && _witRandomness.specs() == type(WitRandomness).interfaceId,
             "UsingWitRandomness: uncompliant WitRandomness appliance"
         );
-        witOracleRandomness = _witOracleRandomness;
+        witRandomness = _witRandomness;
     }
 
     receive() external payable virtual {}
