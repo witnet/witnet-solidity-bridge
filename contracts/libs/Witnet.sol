@@ -406,7 +406,7 @@ library Witnet {
         return (
             a.witNumWitnesses >= b.witNumWitnesses
                 && a.witUnitaryReward >= b.witUnitaryReward
-                && a.maxTallyResultSize >= b.maxTallyResultSize
+                && a.maxTallyResultSize <= b.maxTallyResultSize
         );
     }
      
