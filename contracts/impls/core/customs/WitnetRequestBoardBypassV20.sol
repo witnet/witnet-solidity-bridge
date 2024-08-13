@@ -653,7 +653,21 @@ contract WitnetRequestBoardBypassV20
         legacyFallback(_queryId) 
         returns (Witnet.Result memory)
     {
-        return Witnet.resultFromCborBytes(__response(_queryId).cborBytes);
+        if (__response(_queryId).cborBytes.length > 0) {
+            return Witnet.resultFromCborBytes(__response(_queryId).cborBytes);
+        } else {
+            return Witnet.Result({
+                success: false,
+                value: WitnetCBOR.CBOR({
+                    buffer: WitnetBuffer.Buffer(hex"", 0),
+                    initialByte: 0,
+                    majorType: 0,
+                    additionalInformation: 0,
+                    len: 0,
+                    tag: 0
+                })
+            });
+        }
     }
 
     /// Retrieves the timestamp in which the result to the referred query was solved by the Witnet DON.
