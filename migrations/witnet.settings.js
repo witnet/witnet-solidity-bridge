@@ -147,7 +147,7 @@ module.exports = {
     },
     ultron: {
       WitnetRequestBoard: [
-        /* _reportResultGasLimit */ 83949,
+        /* _reportResultGasLimit */ 150000,
       ],
     },
   },
