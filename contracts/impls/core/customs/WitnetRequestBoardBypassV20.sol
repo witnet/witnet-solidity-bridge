@@ -220,13 +220,7 @@ contract WitnetRequestBoardBypassV20
             _statusOf(_witnetQueryId) == Witnet.QueryStatus.Posted,
             "WitnetRequestBoardBypassV20: not in Posted status"
         );
-        Witnet.Query storage __record = __storage().queries[_witnetQueryId];
-        __record.response = Witnet.Response({
-            reporter: address(0), //msg.sender,
-            timestamp: 0, // uint256(_witnetResultTimestamp),
-            drTxHash: 0, // _witnetResultTallyHash,
-            cborBytes: _witnetResultCborValue.buffer.data
-        });
+        __storage().queries[_witnetQueryId].response.cborBytes = _witnetResultCborValue.buffer.data;
         emit PostedResult(_witnetQueryId, msg.sender);
     }
 
@@ -235,12 +229,11 @@ contract WitnetRequestBoardBypassV20
     /// @dev It should revert if called from any other address different to the WitnetOracle being used
     /// @dev by the WitnetConsumer contract. 
     /// @param _witnetQueryId The unique identifier of the Witnet query being reported.
-    /// @param _errorArgs Error arguments, if any. An empty buffer is to be passed if no error arguments apply.
     function reportWitnetQueryError(
             uint256 _witnetQueryId, 
             uint64, bytes32, uint256,
             Witnet.ResultErrorCodes, 
-            WitnetCBOR.CBOR calldata _errorArgs
+            WitnetCBOR.CBOR calldata
         ) 
         external override
         onlySurrogate
@@ -250,13 +243,9 @@ contract WitnetRequestBoardBypassV20
             _statusOf(_witnetQueryId) == Witnet.QueryStatus.Posted,
             "WitnetRequestBoardBypassV20: not in Posted status"
         );
-        Witnet.Query storage __record = __storage().queries[_witnetQueryId];
-        __record.response = Witnet.Response({
-            reporter: address(0), //msg.sender,
-            timestamp: 0, //uint256(_witnetResultTimestamp),
-            drTxHash: 0, //_witnetResultTallyHash,
-            cborBytes: _errorArgs.buffer.data
-        });
+        // store no data in case of getting an errored result, while letting:
+        // - checkResultStatus(_witnetQueryId) return Witnet.ResultStatus.Error 
+        // - getQueryStatus(_witnetQueryId) return Witnet.QueryStatus.Reported
         emit PostedResult(_witnetQueryId, msg.sender);
     }
 
@@ -311,7 +300,8 @@ contract WitnetRequestBoardBypassV20
     {
         Witnet.QueryStatus _status = _statusOf(_queryId);
         if (_status == Witnet.QueryStatus.Reported) {
-            if (__response(_queryId).cborBytes[0] == bytes1(0xd8)) {
+            if (__response(_queryId).cborBytes.length == 0) {
+                // either the delivered result was an error, or the result delivery failed
                 return Witnet.ResultStatus.Error;
             } else {
                 return Witnet.ResultStatus.Ready;
@@ -717,16 +707,17 @@ contract WitnetRequestBoardBypassV20
       override internal view
       returns (Witnet.QueryStatus)
     {
-      Witnet.Query storage _query = __storage().queries[_queryId];
-      if (_query.response.cborBytes.length != 0) {
-        return Witnet.QueryStatus.Reported;
-      }
-      else if (_query.from != address(0)) {
-        return Witnet.QueryStatus.Posted;
-      }
-      else {
-        return Witnet.QueryStatus.Unknown;
-      }
+        WitnetV2.ResponseStatus _status = surrogate.getQueryResponseStatus(
+            _queryId
+                - __storage().numQueries
+        );
+        if (uint8(_status) > uint8(WitnetV2.ResponseStatus.Awaiting)) {
+            return Witnet.QueryStatus.Reported;
+        } else if (_status == WitnetV2.ResponseStatus.Awaiting) {
+            return Witnet.QueryStatus.Posted;
+        } else {
+            return Witnet.QueryStatus.Unknown;
+        }
     }
 
     function __legacyFallback() internal {
