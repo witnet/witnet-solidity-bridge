@@ -227,6 +227,14 @@ module.exports = {
       explorerUrl: "https://explorer.fusespark.io/address",
     },
   },
+  "gnosis:mainnet": {
+    port: 9509,
+    network_id: 100,
+    verify: {
+      apiUrl: "https://api.gnosisscan.io/api",
+      explorerUrl: "https://gnosisscan.io/",
+    },
+  },
   "gnosis:testnet": {
     port: 8509,
     network_id: 10200,
