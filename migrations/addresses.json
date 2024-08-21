@@ -244,7 +244,16 @@
         "WitnetRequestBytecodesDefault": "0x34e6465f23aE086e5701A6ca8547aF7c29e0283C",
         "WitnetRequestFactoryDefault": "0x1869A7137dF26397999AA6DB90c7D6D029d13908"
     },
-    "gnosis:mainnet": {},
+    "gnosis:mainnet": {
+        "WitnetErrorsLib": "0x3b7AD1402C243Ba59D45a0364B17A31e260A4301",
+        "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
+        "WitnetPriceFeedsLib": "0x751F77190Ce6212899D5848334838D56CF7eEe91",
+        "WitnetOracleDataLib": "0xE89dc301AEe78917018039FEBE72f9FE5aB730D9",
+        "WitnetRequestBytecodesDefault": "0x7D94ad8e75CBb8d8a2237A4422cC3C809070d825",
+        "WitnetRequestFactoryDefault": "0x3129138bd571d9A76a7e52734ae8A95c28F61C6f",
+        "WitnetOracleTrustableDefault": "0x241A2C0A9ced7acCE24B55f5a8e1ce9707eFF090",
+        "WitnetPriceFeedsDefault": "0xB7bA6b3e5047386a8E7588Ce2188Fc24Ddc36163"
+    },
     "gnosis:testnet": {
         "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
         "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
