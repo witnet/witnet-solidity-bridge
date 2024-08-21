@@ -232,7 +232,7 @@ module.exports = {
     network_id: 100,
     verify: {
       apiUrl: "https://api.gnosisscan.io/api",
-      explorerUrl: "https://gnosisscan.io/",
+      explorerUrl: "https://gnosisscan.io/address",
     },
   },
   "gnosis:testnet": {
