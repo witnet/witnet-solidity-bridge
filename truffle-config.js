@@ -40,6 +40,7 @@ module.exports = {
     cronoscan: process.env.ETHERSCAN_CRONOSCAN_API_KEY,
     elastos: process.env.ETHERSCAN_ELASTOS_API_KEY,
     etherscan: process.env.ETHERSCAN_API_KEY,
+    gnosisscan: process.env.ETHERSCAN_GNOSIS_API_KEY,
     kcc: process.env.ETHERSCAN_KCC_API_KEY,
     mantle: process.env.ETHERSCAN_MANTLE_API_KEY,
     moonscan: process.env.ETHERSCAN_MOONBEAM_API_KEY,
