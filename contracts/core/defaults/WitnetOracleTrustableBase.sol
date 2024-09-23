@@ -649,8 +649,7 @@ abstract contract WitnetOracleTrustableBase
                     WitnetOracleDataLib.notInStatusRevertMessage(WitnetV2.QueryStatus.Posted)
                 );
             } else if (
-                uint256(_batchResults[_i].queryResultTimestamp) > block.timestamp
-                    || _batchResults[_i].queryResultTimestamp == 0
+                _batchResults[_i].queryResultTimestamp == 0
                     || _batchResults[_i].queryResultCborBytes.length == 0
             ) {
                 emit BatchReportError(
