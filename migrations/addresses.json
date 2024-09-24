@@ -488,7 +488,7 @@
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
         "WitnetRequestBytecodesNoSha256": "0x0C39d07778Fc2FF94efe889b107Deaa074041719",
         "WitnetRequestFactoryDefault": "0xE2CA421F5c28a04eb0B22f12512627acA9cF9E04",
-        "WitnetOracleTrustableDefault": "",
+        "WitnetOracleTrustableDefault": "0xe373c42e9Dad4cbc6b94ef8b46943454bC717e61",
         "WitnetPriceFeedsDefault": "0xd26f5c402D274C1b7c443E2215221D70C0b8DeB0"
     },
     "reef:mainnet": {
