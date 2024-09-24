@@ -536,7 +536,7 @@
         "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
         "WitnetRequestBytecodesDefault": "0x51376b77d9944bb9c5685b9d9289dd08D399B5e1",
         "WitnetRequestFactoryDefault": "0xB06a2fEc3Dc38b6f8Ce6337317Fcd4aAB00FE773",
-        "WitnetOracleTrustableOvm2": "",
+        "WitnetOracleTrustableOvm2": "0xaE08701A621449e12e3678587aBe9420E8805eBb",
         "WitnetPriceFeedsDefault": "0x8280929b7F6adcE1CfA15b63cbEC1A7FD8cAEf11"
     },
     "ten:testnet": {
