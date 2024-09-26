@@ -62,4 +62,7 @@ module.exports = {
   ten: {
     WitnetOracle: "WitnetOracleTrustableObscuro",
   },
+  worldchain: {
+    WitnetOracle: "WitnetOracleTrustableOvm2",
+  },
 }
