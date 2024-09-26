@@ -569,5 +569,16 @@
         "WitnetRequestFactoryDefault": "0xB06a2fEc3Dc38b6f8Ce6337317Fcd4aAB00FE773",
         "WitnetOracleTrustableDefault": "0x90A31c3f10391bd0f69a436473C96AAEe4DF0A5e",
         "WitnetPriceFeedsDefault": "0x8280929b7F6adcE1CfA15b63cbEC1A7FD8cAEf11"
+    },
+    "worldchain:sepolia": {
+        "WitnetErrorsLib": "0x3b7AD1402C243Ba59D45a0364B17A31e260A4301",
+        "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
+        "WitnetPriceFeedsLib": "0x751F77190Ce6212899D5848334838D56CF7eEe91",
+        "WitnetOracleDataLib": "0xE89dc301AEe78917018039FEBE72f9FE5aB730D9",
+        "WitnetRequestBytecodesDefault": "0x19B3092a3B40938590D423d3a7a897d8634111d7",
+        "WitnetRequestFactoryDefault": "0x21C8dB6Bc5014979EC23048f77C69D68AE832f41",
+        "WitnetOracleTrustableOvm2": "0x9dB290bF22266896096F0343DbB26008e7f1eF3F",
+        "WitnetPriceFeedsDefault": "0x63F52294041D48B299F0e91b807DF972A4DF9254",
+        "WitnetRandomnessV2": ""
     }
 }
