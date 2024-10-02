@@ -3,6 +3,9 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "../WitOracleRadonRegistry.sol";
+import "../interfaces/IWitOracleConsumer.sol";
+import "../interfaces/IWitOracleEvents.sol";
+import "../interfaces/IWitOracleReporter.sol";
 import "../libs/Witnet.sol";
 
 /// @title Witnet Request Board base data model library
@@ -10,6 +13,7 @@ import "../libs/Witnet.sol";
 library WitOracleDataLib {  
 
     using Witnet for Witnet.QueryRequest;
+    using WitnetCBOR for WitnetCBOR.CBOR;
 
     bytes32 internal constant _WIT_ORACLE_DATA_SLOTHASH =
         /* keccak256("io.witnet.boards.data") */
@@ -36,19 +40,36 @@ library WitOracleDataLib {
         return data().reporters[addr];
     }
 
+    /// Saves query response into storage.
+    function saveQueryResponse(
+            uint256 queryId,
+            uint32  resultTimestamp,
+            bytes32 resultTallyHash,
+            bytes memory resultCborBytes
+        ) internal
+    {
+        seekQuery(queryId).response = Witnet.QueryResponse({
+            reporter: msg.sender,
+            finality: uint64(block.number),
+            resultTimestamp: resultTimestamp,
+            resultTallyHash: resultTallyHash,
+            resultCborBytes: resultCborBytes
+        });
+    }
+
     /// Gets query storage by query id.
-    function seekQuery(uint256 _queryId) internal view returns (Witnet.Query storage) {
-      return data().queries[_queryId];
+    function seekQuery(uint256 queryId) internal view returns (Witnet.Query storage) {
+      return data().queries[queryId];
     }
 
     /// Gets the Witnet.QueryRequest part of a given query.
-    function seekQueryRequest(uint256 _queryId) internal view returns (Witnet.QueryRequest storage) {
-        return data().queries[_queryId].request;
+    function seekQueryRequest(uint256 queryId) internal view returns (Witnet.QueryRequest storage) {
+        return data().queries[queryId].request;
     }   
 
     /// Gets the Witnet.Result part of a given query.
-    function seekQueryResponse(uint256 _queryId) internal view returns (Witnet.QueryResponse storage) {
-        return data().queries[_queryId].response;
+    function seekQueryResponse(uint256 queryId) internal view returns (Witnet.QueryResponse storage) {
+        return data().queries[queryId].response;
     }
 
     function seekQueryStatus(uint256 queryId) internal view returns (Witnet.QueryStatus) {
@@ -125,5 +146,150 @@ library WitOracleDataLib {
         } else {
             return "bad mood";
         }
+    }
+
+    function reportResult(
+            uint256 evmGasPrice,
+            uint256 queryId,
+            uint32  resultTimestamp,
+            bytes32 resultTallyHash,
+            bytes calldata resultCborBytes
+        )
+        public returns (uint256 evmReward)
+    {
+        // read requester address and whether a callback was requested:
+        Witnet.QueryRequest storage __request = seekQueryRequest(queryId);
+                
+        // read query EVM reward:
+        evmReward = __request.evmReward;
+        
+        // set EVM reward right now as to avoid re-entrancy attacks:
+        __request.evmReward = 0; 
+
+        // determine whether a callback is required
+        if (__request.gasCallback > 0) {
+            (
+                uint256 evmCallbackActualGas,
+                bool evmCallbackSuccess,
+                string memory evmCallbackRevertMessage
+            ) = reportResultCallback(
+                __request.requester,
+                __request.gasCallback,
+                queryId,
+                resultTimestamp,
+                resultTallyHash,
+                resultCborBytes
+            );
+            if (evmCallbackSuccess) {
+                // => the callback run successfully
+                emit IWitOracleEvents.WitOracleQueryReponseDelivered(
+                    queryId,
+                    evmGasPrice,
+                    evmCallbackActualGas
+                );
+            } else {
+                // => the callback reverted
+                emit IWitOracleEvents.WitOracleQueryResponseDeliveryFailed(
+                    queryId,
+                    evmGasPrice,
+                    evmCallbackActualGas,
+                    bytes(evmCallbackRevertMessage).length > 0 
+                        ? evmCallbackRevertMessage
+                        : "WitOracleDataLib: callback exceeded gas limit",
+                    resultCborBytes
+                );
+            }
+            // upon delivery, successfull or not, the audit trail is saved into storage, 
+            // but not the actual result which was intended to be passed over to the requester:
+            saveQueryResponse(
+                queryId, 
+                resultTimestamp, 
+                resultTallyHash, 
+                hex""
+            );
+        } else {
+            // => no callback is involved
+            emit IWitOracleEvents.WitOracleQueryResponse(
+                queryId, 
+                evmGasPrice
+            );
+            // write query result and audit trail data into storage 
+            saveQueryResponse(
+                queryId,
+                resultTimestamp,
+                resultTallyHash,
+                resultCborBytes
+            );
+        }
+    }
+
+    function reportResultCallback(
+            address evmRequester,
+            uint256 evmCallbackGasLimit,
+            uint256 queryId,
+            uint64  resultTimestamp,
+            bytes32 resultTallyHash,
+            bytes calldata resultCborBytes
+        )
+        public returns (
+            uint256 evmCallbackActualGas, 
+            bool evmCallbackSuccess, 
+            string memory evmCallbackRevertMessage
+        )
+    {
+        evmCallbackActualGas = gasleft();
+        if (resultCborBytes[0] == bytes1(0xd8)) {
+            WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(resultCborBytes).readArray();
+            if (_errors.length < 2) {
+                // try to report result with unknown error:
+                try IWitOracleConsumer(evmRequester).reportWitOracleResultError{gas: evmCallbackGasLimit}(
+                    queryId,
+                    resultTimestamp,
+                    resultTallyHash,
+                    block.number,
+                    Witnet.ResultErrorCodes.Unknown,
+                    WitnetCBOR.CBOR({
+                        buffer: WitnetBuffer.Buffer({ data: hex"", cursor: 0}),
+                        initialByte: 0,
+                        majorType: 0,
+                        additionalInformation: 0,
+                        len: 0,
+                        tag: 0
+                    })
+                ) {
+                    evmCallbackSuccess = true;
+                } catch Error(string memory err) {
+                    evmCallbackRevertMessage = err;
+                }
+            } else {
+                // try to report result with parsable error:
+                try IWitOracleConsumer(evmRequester).reportWitOracleResultError{gas: evmCallbackGasLimit}(
+                    queryId,
+                    resultTimestamp,
+                    resultTallyHash,
+                    block.number,
+                    Witnet.ResultErrorCodes(_errors[0].readUint()),
+                    _errors[0]
+                ) {
+                    evmCallbackSuccess = true;
+                } catch Error(string memory err) {
+                    evmCallbackRevertMessage = err; 
+                }
+            }
+        } else {
+            // try to report result result with no error :
+            try IWitOracleConsumer(evmRequester).reportWitOracleResultValue{gas: evmCallbackGasLimit}(
+                queryId,
+                resultTimestamp,
+                resultTallyHash,
+                block.number,
+                WitnetCBOR.fromBytes(resultCborBytes)
+            ) {
+                evmCallbackSuccess = true;
+            } catch Error(string memory err) {
+                evmCallbackRevertMessage = err;
+            } catch (bytes memory) {}
+        }
+        evmCallbackActualGas -= gasleft();
     }
 }
