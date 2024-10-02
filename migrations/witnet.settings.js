@@ -4,7 +4,7 @@ module.exports = {
       WitnetBytecodes: "WitnetBytecodesDefault",
       WitnetPriceFeeds: "WitnetPriceFeedsBypassV20:",
       WitnetRandomness: "WitnetRandomnessProxiable",
-      WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
+      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableDefault",
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
     },
     boba: {
@@ -705,7 +705,6 @@ module.exports = {
         network_id: 137,
         skipDryRun: true,
         verify: {
-          apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
           apiUrl: "https://api.polygonscan.com/api",
           explorerUrl: "https://polygonscan.com/",
         },
