@@ -64,6 +64,9 @@ abstract contract WitnetRequestBoardTrustableBase
         } else if (msg.sig == 0xD74803BE) {
             // IWitnetRequestParser.asErrorMessage({bool,CBOR}) --> IWitnetRequestBoardDeprecating.asErrorMessage({bool,WitnetCBOR.CBOR})
             _newSig = IWitnetRequestBoardDeprecating.asErrorMessage.selector;
+        } else if (msg.sig == 0x109A0E3C) {
+            // IWitnetRequestParser.asString({bool,CBOR}) --> IWitnetRequestBoardDeprectating.asString({bool,WitnetCBOR.CBOR})
+            _newSig = IWitnetRequestBoardDeprecating.asString.selector;
         }
         if (_newSig != msg.sig) {
             address _self = address(this);
@@ -781,6 +784,17 @@ abstract contract WitnetRequestBoardTrustableBase
             _resultError.code,
             _resultError.reason
         );
+    }
+
+    /// Decode a string value from a Witnet.Result as a `string` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The decoded `string` from the Witnet.Result.
+    function asString(Witnet.Result memory _result)
+        external pure 
+        override
+        returns (string memory)
+    {
+        return _result.asText();
     }
     
     /// Decode a natural numeric value from a Witnet.Result as a `uint` value.

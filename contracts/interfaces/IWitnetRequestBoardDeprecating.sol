@@ -28,6 +28,11 @@ interface IWitnetRequestBoardDeprecating {
     /// @return A tuple containing the `CBORValue.Error memory` decoded from the `Witnet.Result`, plus a loggable error message.
     function asErrorMessage(Witnet.Result memory _result) external pure returns (Witnet.ResultErrorCodes, string memory);
 
+    /// Decode a string value from a Witnet.Result as a `string` value.
+    /// @param _result An instance of Witnet.Result.
+    /// @return The decoded `string` decoded from the given Witnet.Result.
+    function asString(Witnet.Result memory _result) external pure returns (string memory);
+
     /// Decode a natural numeric value from a Witnet.Result as a `uint` value.
     /// @param _result An instance of Witnet.Result.
     /// @return The `uint` decoded from the Witnet.Result.
