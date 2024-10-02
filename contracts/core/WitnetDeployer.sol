@@ -18,7 +18,7 @@ contract WitnetDeployer {
     /// @param _salt Arbitrary value to modify resulting address.
     /// @return _deployed Just deployed contract address.
     function deploy(bytes memory _initCode, bytes32 _salt)
-        external
+        virtual public
         returns (address _deployed)
     {
         _deployed = determineAddr(_initCode, _salt);
@@ -35,7 +35,7 @@ contract WitnetDeployer {
     /// @param _salt Arbitrary value to modify resulting address.
     /// @return Deterministic contract address.
     function determineAddr(bytes memory _initCode, bytes32 _salt)
-        public view
+        virtual public view
         returns (address)
     {
         return address(
@@ -51,14 +51,14 @@ contract WitnetDeployer {
     }
 
     function determineProxyAddr(bytes32 _salt) 
-        public view
+        virtual public view
         returns (address)
     {
         return Create3.determineAddr(_salt);
     }
 
     function proxify(bytes32 _proxySalt, address _firstImplementation, bytes memory _initData)
-        external 
+        virtual external 
         returns (WitnetProxy)
     {
         address _proxyAddr = determineProxyAddr(_proxySalt);
