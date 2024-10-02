@@ -790,7 +790,8 @@
             "WitnetPriceFeedsImplementation": "0x2159610a10B4922616e9ACa66D2922AA50ea548B",
             "WitnetRandomnessImplementation": "0xF1Aba51c5097487a62DA9c72fb9Aa7B0c98676C1",
             "WitnetRandomnessImplementationv061": "0xc8c0d4dB2D7801D6E2A863934597cFD31689f7D5",
-            "WitnetRequestBoardImplementation": "0xb62C9FAd26D35D160ADC486863Ba9AFeEAab11f9",
+            "WitnetRequestBoardImplementation": "0x11C156079B1F6585333c5aDA8856e5C56953ff3d",
+            "WitnetRequestBoardBypassV20": "0xb62C9FAd26D35D160ADC486863Ba9AFeEAab11f9",
             "WitnetRequestBoardTrustableDefault": "0xF395CEeb77cE9cDc44Fd276bE5Ff307B1902D3f7",
             "WitnetRequestFactoryImplementation": "0xc42656C501623859565C6d080a7Feb1f2B72b55a"
         },

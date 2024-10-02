@@ -4,7 +4,7 @@ module.exports = {
       WitnetBytecodes: "WitnetBytecodesDefault",
       WitnetPriceFeeds: "WitnetPriceFeedsBypassV20:",
       WitnetRandomness: "WitnetRandomnessProxiable",
-      WitnetRequestBoard: "WitnetRequestBoardBypassV20:WitnetRequestBoardTrustableDefault",
+      WitnetRequestBoard: "WitnetRequestBoardTrustableDefault",
       WitnetRequestFactory: "WitnetRequestFactoryDefault",
     },
     boba: {
