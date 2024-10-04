@@ -153,6 +153,61 @@ contract TestWitnetBuffer {
     );
   }
 
+  function testReplaceArgsByIndexFirst() external {
+    string memory input = "Test: \\2\\ \\0\\ \\3\\!";
+    string memory phrase = WitnetBuffer.replace(input, 0, "decentralized");
+    emit Log(phrase, bytes(phrase).length);
+    Assert.equal(
+      keccak256(bytes(phrase)),
+      keccak256(bytes("Test: \\2\\ decentralized \\3\\!")),
+      "String replacement not good :/"
+    );
+  }
+
+  function testReplaceArgsByIndexMiddle() external {
+    string memory input = "Test: \\2\\ \\0\\ \\3\\!";
+    string memory phrase = WitnetBuffer.replace(input, 2, "Hello");
+    emit Log(phrase, bytes(phrase).length);
+    Assert.equal(
+      keccak256(bytes(phrase)),
+      keccak256(bytes("Test: Hello \\0\\ \\3\\!")),
+      "String replacement not good :/"
+    );
+  }
+
+  function testReplaceArgsByIndexLast() external {
+    string memory input = "Test: \\2\\ \\0\\ \\3\\!";
+    string memory phrase = WitnetBuffer.replace(input, 3, "world");
+    emit Log(phrase, bytes(phrase).length);
+    Assert.equal(
+      keccak256(bytes(phrase)),
+      keccak256(bytes("Test: \\2\\ \\0\\ world!")),
+      "String replacement not good :/"
+    );
+  }
+
+  function testReplaceArgsByIndexInexistent() external {
+    string memory input = "Test: \\2\\ \\0\\ \\3\\!";
+    string memory phrase = WitnetBuffer.replace(input, 1, "Bye");
+    emit Log(phrase, bytes(phrase).length);
+    Assert.equal(
+      keccak256(bytes(phrase)),
+      keccak256(bytes("Test: \\2\\ \\0\\ \\3\\!")),
+      "String replacement not good :/"
+    );
+  }
+
+  function testReplaceArgsByIndexMultipleHits() external {
+      string memory input = "Test: \\2\\ \\2\\ \\2\\ \\0\\ \\3\\!";
+    string memory phrase = WitnetBuffer.replace(input, 2, "Hello");
+    emit Log(phrase, bytes(phrase).length);
+    Assert.equal(
+      keccak256(bytes(phrase)),
+      keccak256(bytes("Test: Hello Hello Hello \\0\\ \\3\\!")),
+      "String replacement not good :/"
+    );
+  }
+
   function testRead31bytes() external {
     bytes memory data = hex"58207eadcf3ba9a9a860b4421ee18caa6dca4738fef266aa7b3668a2ff97304cfcab";
     WitnetBuffer.Buffer memory buf = WitnetBuffer.Buffer(data, 1);
