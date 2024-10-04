@@ -131,6 +131,28 @@ contract TestWitOracleRadonEncodingLib {
     );    
   }
 
+  function testReplaceCborStringsFromBytesByArgIndex() external {
+    bytes memory radon = hex"861877821866646461746182186664706F6F6C821864635C305C8218571A000F4240185B";
+    bytes memory newradon = WitOracleRadonEncodingLib.replaceCborStringsFromBytes(radon, 0, "token1Price");
+    // emit Log(newradon, newradon.length);
+    Assert.equal(
+      keccak256(newradon),
+      keccak256(hex'861877821866646461746182186664706F6F6C8218646B746F6B656E3150726963658218571A000F4240185B'),
+      "not good :/"
+    );    
+  }
+
+  function testReplaceCborStringsFromBytesByArgIndexInexistent() external {
+    bytes memory radon = hex"861877821866646461746182186664706F6F6C821864635C305C8218571A000F4240185B";
+    bytes memory newradon = WitOracleRadonEncodingLib.replaceCborStringsFromBytes(radon, 1, "token1Price");
+    // emit Log(newradon, newradon.length);
+    Assert.equal(
+      keccak256(newradon),
+      keccak256(hex'861877821866646461746182186664706F6F6C821864635C305C8218571A000F4240185B'),
+      "not good :/"
+    );    
+  }
+
   function testVerifyRadonScriptOk1() external {
     Assert.equal(
       uint(WitOracleRadonEncodingLib.verifyRadonScriptResultDataType(hex"861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b")),
@@ -170,4 +192,5 @@ contract TestWitOracleRadonEncodingLib {
       "unexpected result data type"
     );
   }
+
 }
