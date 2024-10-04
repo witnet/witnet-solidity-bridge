@@ -96,8 +96,8 @@ contract("WitOracleRadonRegistry", (accounts) => {
 
     let rngSourceHash
     let binanceTickerHash
+    let binanceUsdTickerHash
     let uniswapToken1PriceHash
-    let heavyRetrievalHash
 
     let rngHash
 
@@ -130,7 +130,7 @@ contract("WitOracleRadonRegistry", (accounts) => {
           assert.equal(tx.logs.length, 0, "some unexpected event was emitted")
         })
         it("generates proper hash upon offchain verification of already existing randmoness source", async () => {
-          const hash = await radonRegistry.verifyRadonRetrieval.call(
+          const hash = await radonRegistry.methods["verifyRadonRetrieval(uint8,string,string,string[2][],bytes)"].call(
             2, // requestMethod
             "", // requestURL
             "", // requestBody
@@ -184,6 +184,27 @@ contract("WitOracleRadonRegistry", (accounts) => {
             tx.receipt,
             "NewRadonRetrieval"
           )
+        })
+        it("fork existing retrieval by settling one out of two parameters", async () => {
+          const tx = await radonRegistry.verifyRadonRetrieval(
+            binanceTickerHash,
+            "USD" 
+          )
+          assert.equal(tx.logs.length, 1)
+          expectEvent(
+            tx.receipt,
+            "NewRadonRetrieval"
+          )
+          binanceUsdTickerHash = tx.logs[0].args.hash
+        })
+        it("metadata of forked retrieval gets stored as expected", async () => {
+          const ds = await radonRegistry.lookupRadonRetrieval.call(binanceUsdTickerHash)
+          assert.equal(ds.method, 1) // HTTP-GET
+          assert.equal(ds.dataType, 4) // Integer
+          assert.equal(ds.url, "https://api.binance.us/api/v3/ticker/price?symbol=\\0\\USD")
+          assert.equal(ds.body, "")
+          assert(ds.headers.length === 0)
+          assert.equal(ds.radonScript, "0x841877821864696c61737450726963658218571a000f4240185b")
         })
       })
       context("Witnet.RadonRetrievalMethods.HttpPost", async () => {
