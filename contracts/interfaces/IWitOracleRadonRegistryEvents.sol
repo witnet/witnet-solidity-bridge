@@ -8,7 +8,7 @@ interface IWitOracleRadonRegistryEvents {
 
     /// Emitted every time a new Radon Reducer gets successfully verified and
     /// stored into the WitOracleRadonRegistry.
-    event NewRadonReducer(bytes16 hash);
+    event NewRadonReducer(bytes32 hash);
 
     /// Emitted every time a new Radon Retrieval gets successfully verified and
     /// stored into the WitOracleRadonRegistry.

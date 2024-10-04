@@ -523,7 +523,7 @@ library WitnetBuffer {
     }
   }
 
-  /// @notice Replace bytecode indexed wildcards by correspondent substrings.
+  /// @notice Replace indexed bytes-wildcards by correspondent substrings.
   /// @dev Wildcard format: "\#\", with # in ["0".."9"].
   /// @param input Bytes array containing strings.
   /// @param args Array of substring values for replacing indexed wildcards.
@@ -622,7 +622,102 @@ library WitnetBuffer {
     }
   }
 
-  /// @notice Replace string indexed wildcards by correspondent substrings.
+  /// @notice Replace indexed bytes-wildcard by given substring.
+  /// @dev Wildcard format: "\#\", with # in ["0".."9"].
+  /// @param input Bytes array containing strings.
+  /// @param argIndex Index of the wildcard to be replaced.
+  /// @param argValue Replacing substring to be used.
+  /// @return output Resulting bytes array after replacing all wildcards.
+  /// @return hits Total number of replaced wildcards.
+  function replace(bytes memory input, uint8 argIndex, string memory argValue)
+    internal pure
+    returns (bytes memory output, uint hits)
+  {
+    uint ix = 0; uint lix = 0;
+    uint inputLength;
+    uint inputPointer;
+    uint outputLength;
+    uint outputPointer; 
+    uint argValueLength;
+    uint argValuePointer;
+
+    if (input.length < 3) {
+      return (input, 0);
+    }
+    
+    assembly {
+      // set starting input pointer
+      inputPointer := add(input, 32)
+      // get safe output location
+      output := mload(0x40)
+      // set starting output pointer
+      outputPointer := add(output, 32)
+      // set pointer to arg value substring
+      argValuePointer := add(argValue, 32)
+      // set arg value substring length
+      argValueLength := mload(argValue)
+    }         
+
+    unchecked {
+      uint length = input.length - 2;
+      for (; ix < length; ) {
+        if (
+          input[ix] == bytes1("\\")
+            && input[ix + 2] == bytes1("\\")
+            && input[ix + 1] >= bytes1("0")
+            && input[ix + 1] <= bytes1("9")
+            && uint8(input[ix + 1]) - uint8(bytes1("0")) == argIndex
+        ) {
+          inputLength = (ix - lix);
+          if (ix > lix) {
+            memcpy(
+              outputPointer,
+              inputPointer,
+              inputLength
+            );
+            inputPointer += inputLength + 3;
+            outputPointer += inputLength;
+          } else {
+            inputPointer += 3;
+          }
+          memcpy(
+            outputPointer,
+            argValuePointer,
+            argValueLength
+          );
+          outputLength += inputLength + argValueLength;
+          outputPointer += argValueLength;
+          ix += 3;
+          lix = ix;
+          hits ++;
+        } else {
+          ix ++;
+        }
+      }
+      ix = input.length;    
+    }
+    if (outputLength > 0) {
+      if (ix > lix ) {
+        memcpy(
+          outputPointer,
+          inputPointer,
+          ix - lix
+        );
+        outputLength += (ix - lix);
+      }
+      assembly {
+        // set final output length
+        mstore(output, outputLength)
+        // protect output bytes
+        mstore(0x40, add(mload(0x40), add(outputLength, 32)))
+      }
+    }
+    else {
+      return (input, 0);
+    }
+  }
+
+  /// @notice Replace indexed string wildcards by correspondent substrings.
   /// @dev Wildcard format: "\#\", with # in ["0".."9"].
   /// @param input String potentially containing wildcards.
   /// @param args Array of substring values for replacing indexed wildcards.
@@ -632,6 +727,20 @@ library WitnetBuffer {
     returns (string memory)
   {
     (bytes memory _outputBytes, ) = replace(bytes(input), args);
+    return string(_outputBytes);
+  }
+
+  /// @notice Replace last indexed wildcard by given substring.
+  /// @dev Wildcard format: "\#\", with # in ["0".."9"].
+  /// @param input String potentially containing wildcards.
+  /// @param argIndex Index of the wildcard to be replaced.
+  /// @param argValue Replacing string to be used.
+  /// @return output Resulting string after replacing all wildcards.
+  function replace(string memory input, uint8 argIndex, string memory argValue)
+    internal pure
+    returns (string memory)
+  {
+    (bytes memory _outputBytes, ) = replace(bytes(input), argIndex, argValue);
     return string(_outputBytes);
   }
 

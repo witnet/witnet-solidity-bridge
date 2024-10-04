@@ -93,20 +93,20 @@ contract WitOracleRequestFactoryDefault
 
     function initializeWitOracleRequestTemplate(
             bytes32[] calldata _retrieveHashes,
-            bytes16 _aggregateReduceHash,
-            bytes16 _tallyReduceHash
+            bytes16 _aggregateReducerHash,
+            bytes16 _tallyReducerHash
         )
         virtual public initializer
         returns (address)
     {   
         _require(_retrieveHashes.length > 0, "no retrievals?");
-        _require(_aggregateReduceHash != bytes16(0), "no aggregate reducer?");
-        _require(_tallyReduceHash != bytes16(0), "no tally reducer?");
+        _require(_aggregateReducerHash != bytes16(0), "no aggregate reducer?");
+        _require(_tallyReducerHash != bytes16(0), "no tally reducer?");
 
         WitOracleRequestTemplateStorage storage __data = __witOracleRequestTemplate();
         __data.retrieveHashes = _retrieveHashes;
-        __data.aggregateReduceHash = _aggregateReduceHash;
-        __data.tallyReduceHash = _tallyReduceHash;
+        __data.aggregateReduceHash = _aggregateReducerHash;
+        __data.tallyReduceHash = _tallyReducerHash;
         return address(this);
     }
 
@@ -367,50 +367,43 @@ contract WitOracleRequestFactoryDefault
 
     function buildWitOracleRequest(
             bytes32[] calldata _retrieveHashes,
-            Witnet.RadonReducer calldata _aggregate,
-            Witnet.RadonReducer calldata _tally
+            Witnet.RadonReducer calldata _aggregateReducer,
+            Witnet.RadonReducer calldata _tallyReducer
         )
         virtual override external
         onlyOnFactory
-        returns (address)
+        returns (IWitOracleRequest)
     {
-        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
-
-        // TODO: checks and reducers verification should be done by the registry instead ...
-
-        // Check input retrievals:
-        _require(
-            !_checkParameterizedRadonRetrievals(_registry, _retrieveHashes),
-            "parameterized retrievals"
+        return __buildWitOracleRequest(
+            _getWitOracleRadonRegistry().verifyRadonRequest(
+                _retrieveHashes,
+                _aggregateReducer,
+                _tallyReducer
+            )
         );
+    }
 
-        // Check input reducers:
-        bytes16 _aggregateReduceHash = _registry.verifyRadonReducer(_aggregate);
-        bytes16 _tallyReduceHash = _registry.verifyRadonReducer(_tally);
-
-        // Verify Radon Request:
-        bytes32 _radHash = IWitOracleRadonRegistryLegacy(address(_registry)).verifyRadonRequest(
-            _retrieveHashes, 
-            bytes32(_aggregateReduceHash),
-            bytes32(_tallyReduceHash),
-            uint16(0),
-            new string[][](0)
-        );
-
-        // Determine request's minimal-proxy counter-factual salt and address:
-        (address _requestAddr, bytes32 _requestSalt) = _determineWitOracleRequestAddressAndSalt(_radHash);
-
-        // Create and initialize counter-factual request just once:
-        if (_requestAddr.code.length == 0) {
-            _requestAddr = WitOracleRequestFactoryDefault(_cloneDeterministic(_requestSalt))
-                .initializeWitOracleRequest(
-                    _radHash
-                );
+    function buildWitOracleRequestModal(
+            bytes32 _baseRetrieveHash,
+            string[][] calldata _retrieveArgsValues,
+            Witnet.RadonFilter[] calldata _tallySlashingFiltres
+        )
+        virtual override external
+        onlyOnFactory
+        returns (IWitOracleRequest)
+    {
+        bytes32[] memory _retrieveHashes = new bytes32[](_retrieveArgsValues.length);
+        for (uint _ix = 0; _ix < _retrieveHashes.length; _ix ++) {
+            _retrieveHashes[_ix] = _baseRetrieveHash;
         }
-
-        // Emit event even when building same request more than once
-        emit WitOracleRequestBuilt(_requestAddr);
-        return _requestAddr;
+        return __buildWitOracleRequest(
+            _getWitOracleRadonRegistry().verifyRadonRequest(
+                _retrieveHashes,
+                _retrieveArgsValues,
+                Witnet.RadonReducer({ opcode: Witnet.RadonReduceOpcodes.Mode, filters: new Witnet.RadonFilter[](0) }),
+                Witnet.RadonReducer({ opcode: Witnet.RadonReduceOpcodes.Mode, filters: _tallySlashingFiltres })
+            )
+        );
     }
     
     function buildWitOracleRequestTemplate(
@@ -420,7 +413,7 @@ contract WitOracleRequestFactoryDefault
         )
         virtual override external
         onlyOnFactory
-        returns (address)
+        returns (IWitOracleRequestTemplate)
     {
         WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
 
@@ -430,32 +423,47 @@ contract WitOracleRequestFactoryDefault
             "non-parameterized retrievals"
         );
 
-        // Check input reducers:
-        bytes16 _aggregateReduceHash = _registry.verifyRadonReducer(_aggregate);
-        bytes16 _tallyReduceHash = _registry.verifyRadonReducer(_tally);
-
-        // Determine template's minimal-proxy counter-factual salt and address:
-        (address _templateAddr, bytes32 _templateSalt) = _determineWitOracleRequestTemplateAddressAndSalt(
-            _retrieveHashes,
-            _aggregateReduceHash,
-            _tallyReduceHash
+        return __buildWitOracleRequestTemplate(
+            _retrieveHashes, 
+            bytes16(_registry.verifyRadonReducer(_aggregate)),
+            bytes16(_registry.verifyRadonReducer(_tally))
         );
-        
-        // Create and initialize counter-factual template just once:
-        if (_templateAddr.code.length == 0) {
-            _templateAddr = address(
-                WitOracleRequestFactoryDefault(_cloneDeterministic(_templateSalt))
-                    .initializeWitOracleRequestTemplate(
-                        _retrieveHashes,
-                        _aggregateReduceHash,
-                        _tallyReduceHash
-                    )
+    }
+
+    function buildWitOracleRequestTemplateModal(
+            bytes32 _baseRetrieveHash,
+            string[] calldata _lastArgValues,
+            Witnet.RadonFilter[] calldata _tallySlashingFilters
+        ) 
+        virtual override external
+        returns (IWitOracleRequestTemplate)
+    {
+        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
+
+        // spawn retrievals by repeatedly setting different values to the last parameter
+        // of given retrieval:
+        bytes32[] memory _retrieveHashes = new bytes32[](_lastArgValues.length);
+        for (uint _ix = 0; _ix < _retrieveHashes.length; _ix ++) {
+            _retrieveHashes[_ix] = _registry.verifyRadonRetrieval(
+                _baseRetrieveHash,
+                _lastArgValues[_ix]
             );
         }
-
-        // Emit event even when building same template more than one
-        emit WitOracleRequestTemplateBuilt(_templateAddr);
-        return _templateAddr;
+        return __buildWitOracleRequestTemplate(
+            _retrieveHashes,
+            bytes16(_registry.verifyRadonReducer(
+                Witnet.RadonReducer({ 
+                    opcode: Witnet.RadonReduceOpcodes.Mode, 
+                    filters: new Witnet.RadonFilter[](0) 
+                })
+            )),
+            bytes16(_registry.verifyRadonReducer(
+                Witnet.RadonReducer({ 
+                    opcode: Witnet.RadonReduceOpcodes.Mode, 
+                    filters: _tallySlashingFilters 
+                })
+            ))
+        );
     }
 
     function verifyRadonRetrieval(
@@ -482,38 +490,32 @@ contract WitOracleRequestFactoryDefault
     /// ===============================================================================================================
     /// --- IWitOracleRequestTemplate implementation ---------------------------------------------------------------------
 
-    function buildWitOracleRequest(string[][] calldata _retrieveArgs)
+    function buildWitOracleRequest(string[][] calldata _retrieveArgsValues)
         override external
         onlyOnTemplates
-        returns (address _request)
+        returns (IWitOracleRequest)
     {
-        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
-        WitOracleRequestTemplateStorage storage __template = __witOracleRequestTemplate();
-
         // Verify Radon Request using template's retrieve hashes, aggregate and tally reducers, 
         // and given args:
-        bytes32 _radHash = IWitOracleRadonRegistryLegacy(address(_registry)).verifyRadonRequest(
+        WitOracleRequestTemplateStorage storage __template = __witOracleRequestTemplate();
+        bytes32 _radHash = _getWitOracleRadonRegistry().verifyRadonRequest(
             __template.retrieveHashes,
+            _retrieveArgsValues,
             bytes32(__template.aggregateReduceHash),
-            bytes32(__template.tallyReduceHash),
-            0,
-            _retrieveArgs
+            bytes32(__template.tallyReduceHash)    
         );
-        
-        // Determine request's minimal-proxy counter-factual salt and address:
-        (address _requestAddr, bytes32 _requestSalt) = _determineWitOracleRequestAddressAndSalt(_radHash);
 
-        // Create and initialize counter-factual request just once:
-        if (_requestAddr.code.length == 0) {
-            _requestAddr = WitOracleRequestFactoryDefault(_cloneDeterministic(_requestSalt))
-                .initializeWitOracleRequest(
-                    _radHash
-                );
-        }
+        return __buildWitOracleRequest(_radHash);
+    }
 
-        // Emit event even when building same request more than once
-        emit WitOracleRequestBuilt(_requestAddr);
-        return _requestAddr;
+    function buildWitOracleRequest(string calldata _singleArgValue)
+        override external
+        onlyOnTemplates
+        returns (IWitOracleRequest)
+    {
+        return __buildWitOracleRequest(
+            __verifyRadonRequestFromTemplate(_singleArgValue)
+        );
     }
 
     function getArgsCount()
@@ -531,18 +533,25 @@ contract WitOracleRequestFactoryDefault
         }
     }
 
-    function verifyRadonRequest(string[][] calldata _args)
+    function verifyRadonRequest(string[][] calldata _retrieveArgsValues)
         override external
         onlyOnTemplates
         returns (bytes32)
     {
-        return IWitOracleRadonRegistryLegacy(address(_getWitOracleRadonRegistry())).verifyRadonRequest(
+        return _getWitOracleRadonRegistry().verifyRadonRequest(
             __witOracleRequestTemplate().retrieveHashes,
+            _retrieveArgsValues,
             bytes32(__witOracleRequestTemplate().aggregateReduceHash),
-            bytes32(__witOracleRequestTemplate().tallyReduceHash),
-            0,
-            _args
+            bytes32(__witOracleRequestTemplate().tallyReduceHash)
         );
+    }
+
+    function verifyRadonRequest(string calldata _singleArgValue)
+        override external
+        onlyOnTemplates
+        returns (bytes32)
+    {
+        return __verifyRadonRequestFromTemplate(_singleArgValue);
     }
 
     /// ===============================================================================================================
@@ -569,6 +578,58 @@ contract WitOracleRequestFactoryDefault
 
     /// ===============================================================================================================
     /// --- Internal methods ------------------------------------------------------------------------------------------
+
+    function __buildWitOracleRequest(bytes32 _radHash)
+        virtual internal
+        returns (IWitOracleRequest)
+    {   
+        // Determine request's minimal-proxy counter-factual salt and address:
+        (address _requestAddr, bytes32 _requestSalt) = _determineWitOracleRequestAddressAndSalt(_radHash);
+
+        // Create and initialize counter-factual request just once:
+        if (_requestAddr.code.length == 0) {
+            _requestAddr = WitOracleRequestFactoryDefault(_cloneDeterministic(_requestSalt))
+                .initializeWitOracleRequest(
+                    _radHash
+                );
+        }
+
+        // Emit event even when building same request more than once
+        emit WitOracleRequestBuilt(_requestAddr);
+        return IWitOracleRequest(_requestAddr);
+    }
+
+    function __buildWitOracleRequestTemplate(
+            bytes32[] memory _retrieveHashes,
+            bytes16 _aggregateReducerHash,
+            bytes16 _tallyReducerHash
+        )
+        virtual internal
+        returns (IWitOracleRequestTemplate)
+    {
+        // Determine template's minimal-proxy counter-factual salt and address:
+        (address _templateAddr, bytes32 _templateSalt) = _determineWitOracleRequestTemplateAddressAndSalt(
+            _retrieveHashes,
+            _aggregateReducerHash,
+            _tallyReducerHash
+        );
+        
+        // Create and initialize counter-factual template just once:
+        if (_templateAddr.code.length == 0) {
+            _templateAddr = address(
+                WitOracleRequestFactoryDefault(_cloneDeterministic(_templateSalt))
+                    .initializeWitOracleRequestTemplate(
+                        _retrieveHashes,
+                        _aggregateReducerHash,
+                        _tallyReducerHash
+                    )
+            );
+        }
+
+        // Emit event even when building same template more than one
+        emit WitOracleRequestTemplateBuilt(_templateAddr);
+        return IWitOracleRequestTemplate(_templateAddr);
+    }
  
     function _checkParameterizedRadonRetrievals(WitOracleRadonRegistry _registry, bytes32[] calldata _retrieveHashes) 
         internal view returns (bool _parameterized)
@@ -613,9 +674,9 @@ contract WitOracleRequestFactoryDefault
     }
 
     function _determineWitOracleRequestTemplateAddressAndSalt(
-            bytes32[] calldata _retrieveHashes,
-            bytes16 _aggregateReduceHash,
-            bytes16 _tallyReduceHash
+            bytes32[] memory _retrieveHashes,
+            bytes16 _aggregateReducerHash,
+            bytes16 _tallyReducerHash
         )
         virtual internal view
         returns (address, bytes32)
@@ -627,8 +688,8 @@ contract WitOracleRequestFactoryDefault
                 bytes4(_WITNET_UPGRADABLE_VERSION),
                 // - different templates params:
                 _retrieveHashes,
-                _aggregateReduceHash,
-                _tallyReduceHash
+                _aggregateReducerHash,
+                _tallyReducerHash
             )
         );
         return (
@@ -640,6 +701,26 @@ contract WitOracleRequestFactoryDefault
                     keccak256(_cloneBytecode())
                 )
             )))), _salt
+        );
+    }
+
+    function __verifyRadonRequestFromTemplate(string calldata _singleArgValue)
+        virtual internal
+        returns (bytes32)
+    {
+        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
+        WitOracleRequestTemplateStorage storage __template = __witOracleRequestTemplate();
+        bytes32[] memory _retrieveHashes = new bytes32[](__template.retrieveHashes.length);
+        for (uint _ix = 0; _ix < _retrieveHashes.length; _ix ++) {
+            _retrieveHashes[_ix] = _registry.verifyRadonRetrieval(
+                __template.retrieveHashes[_ix],
+                _singleArgValue
+            );
+        }
+        return _registry.verifyRadonRequest(
+            _retrieveHashes,
+            bytes32(__template.aggregateReduceHash),
+            bytes32(__template.tallyReduceHash)
         );
     }
 }

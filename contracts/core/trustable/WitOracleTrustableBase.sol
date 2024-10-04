@@ -32,7 +32,6 @@ abstract contract WitOracleTrustableBase
     using Witnet for Witnet.QueryResponse;
     using Witnet for Witnet.RadonSLA;
     using Witnet for Witnet.Result;
-    // using WitnetCBOR for WitnetCBOR.CBOR;
 
     WitOracleRequestFactory public immutable override factory;
     WitOracleRadonRegistry public immutable override registry;

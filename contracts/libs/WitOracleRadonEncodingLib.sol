@@ -288,6 +288,26 @@ library WitOracleRadonEncodingLib {
 
     function replaceCborStringsFromBytes(
             bytes memory data,
+            uint8 argIndex,
+            string memory argValue
+        )
+        public pure
+        returns (bytes memory)
+    {
+        WitnetCBOR.CBOR memory cbor = WitnetCBOR.fromBytes(data);
+        while (!cbor.eof()) {
+            if (cbor.majorType == WitnetCBOR.MAJOR_TYPE_STRING) {
+                _replaceCborWildcard(cbor, argIndex, argValue);
+                cbor = cbor.settle();
+            } else {
+                cbor = cbor.skip().settle();
+            }
+        }
+        return cbor.buffer.data;
+    }
+
+    function replaceCborStringsFromBytes(
+            bytes memory data,
             string[] memory args
         )
         public pure
@@ -305,15 +325,32 @@ library WitOracleRadonEncodingLib {
         return cbor.buffer.data;
     }
 
+    function replaceWildcards(Witnet.RadonRetrieval memory self, uint8 argIndex, string memory argValue)
+        public pure
+        returns (Witnet.RadonRetrieval memory)
+    {
+        self.url = WitnetBuffer.replace(self.url, argIndex, argValue);
+        self.body = WitnetBuffer.replace(self.body, argIndex, argValue);
+        self.radonScript = replaceCborStringsFromBytes(self.radonScript, argIndex, argValue);
+        for (uint _ix = 0 ; _ix < self.headers.length; _ix ++) {
+            self.headers[_ix][0] = WitnetBuffer.replace(self.headers[_ix][0], argIndex, argValue);
+            self.headers[_ix][1] = WitnetBuffer.replace(self.headers[_ix][1], argIndex, argValue);
+        }
+        return self;
+    }
+
     function replaceWildcards(Witnet.RadonRetrieval memory self, string[] memory args)
         public pure
+        returns (Witnet.RadonRetrieval memory)
     {
         self.url = WitnetBuffer.replace(self.url, args);
         self.body = WitnetBuffer.replace(self.body, args);
         self.radonScript = replaceCborStringsFromBytes(self.radonScript, args);
         for (uint _ix = 0 ; _ix < self.headers.length; _ix ++) {
+            self.headers[_ix][0] = WitnetBuffer.replace(self.headers[_ix][0], args);
             self.headers[_ix][1] = WitnetBuffer.replace(self.headers[_ix][1], args);
         }
+        return self;
     }
 
     function validate(
@@ -472,6 +509,27 @@ library WitOracleRadonEncodingLib {
     /// ===============================================================================================================
     /// --- WitOracleRadonEncodingLib private methods ---------------------------------------------------------------------------------
 
+    function _replaceCborWildcard(
+            WitnetCBOR.CBOR memory self,
+            uint8 argIndex,
+            string memory argValue
+        ) private pure
+    {
+        uint _rewind = self.len;
+        uint _start = self.buffer.cursor;
+        bytes memory _peeks = bytes(self.readString());
+        (bytes memory _pokes, uint _replacements) = WitnetBuffer.replace(_peeks, argIndex, argValue);
+        if (_replacements > 0) {
+            bytes memory _encodedPokes = encode(string(_pokes));
+            self.buffer.cursor = _start - _rewind;
+            self.buffer.mutate(
+                _peeks.length + _rewind,
+                _encodedPokes
+            );
+            self.buffer.cursor += _encodedPokes.length;
+        }
+    }
+
     function _replaceCborWildcards(
             WitnetCBOR.CBOR memory self,
             string[] memory args
@@ -491,7 +549,6 @@ library WitOracleRadonEncodingLib {
             self.buffer.cursor += _encodedPokes.length;
         }
     }
-
     
     function _verifyRadonScriptResultDataType(WitnetCBOR.CBOR memory self, bool flip)
         private pure

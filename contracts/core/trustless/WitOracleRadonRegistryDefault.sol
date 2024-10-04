@@ -60,6 +60,10 @@ contract WitOracleRadonRegistryDefault
         )
     {}
 
+    function _witOracleHash(bytes memory chunk) virtual internal pure returns (bytes32) {
+        return sha256(chunk);
+    }
+
     receive() external payable {
         _revert("no transfers");
     }
@@ -195,12 +199,13 @@ contract WitOracleRadonRegistryDefault
     }
 
     function hashOf(bytes calldata _radBytecode) external pure override returns (bytes32) {
-        // todo: validate correctness of _radBytecode
+        // todo?: validate correctness of _radBytecode
         return _witOracleHash(_radBytecode);
     }
 
     function lookupRadonReducer(bytes32 _hash)
-        override public view
+        virtual override 
+        public view
         returns (Witnet.RadonReducer memory _reducer)
     {   
         _reducer = __database().reducers[_hash];
@@ -208,7 +213,7 @@ contract WitOracleRadonRegistryDefault
     }
 
     function lookupRadonRetrieval(bytes32 _hash)
-        override external view
+        override public view
         radonRetrievalExists(_hash)
         returns (Witnet.RadonRetrieval memory _source)
     {
@@ -235,35 +240,34 @@ contract WitOracleRadonRegistryDefault
         override external view
         returns (Witnet.RadonRequest memory)
     {
-        RadonRequestPacked storage __packed = __database().requests[_radHash];
         return Witnet.RadonRequest({
             retrieve:  lookupRadonRequestRetrievals(_radHash),
-            aggregate: lookupRadonReducer(bytes32(bytes16(__packed.aggregateTallyHashes))),
-            tally:     lookupRadonReducer(bytes32(bytes16(__packed.aggregateTallyHashes << 128)))
+            aggregate: lookupRadonRequestAggregator(_radHash),
+            tally:     lookupRadonRequestTally(_radHash)
         });
     }
 
     function lookupRadonRequestAggregator(bytes32 _radHash)
-        override external view
+        override public view
         radonRequestExists(_radHash)
         returns (Witnet.RadonReducer memory)
     {
         if (__requests(_radHash).legacyTallyHash != bytes32(0)) {
             return lookupRadonReducer(__requests(_radHash).aggregateTallyHashes);
         } else {
-            return lookupRadonReducer(bytes32(bytes16(__requests(_radHash).aggregateTallyHashes)));
+            return lookupRadonReducer(bytes16(__requests(_radHash).aggregateTallyHashes));
         }
     }
 
     function lookupRadonRequestTally(bytes32 _radHash)
-        override external view
+        override public view
         radonRequestExists(_radHash)
         returns (Witnet.RadonReducer memory)
     {
         if (__requests(_radHash).legacyTallyHash != bytes32(0)) {
             return lookupRadonReducer(__requests(_radHash).legacyTallyHash);
         } else {
-            return lookupRadonReducer(bytes32(bytes16(__requests(_radHash).aggregateTallyHashes << 128)));
+            return lookupRadonReducer(bytes16(__requests(_radHash).aggregateTallyHashes << 128));
         }
     }
 
@@ -301,12 +305,11 @@ contract WitOracleRadonRegistryDefault
         }
     }
 
-    
     function verifyRadonReducer(Witnet.RadonReducer memory _reducer)
         virtual override public
-        returns (bytes16 hash)
+        returns (bytes32 hash)
     {
-        hash = bytes16(keccak256(abi.encode(_reducer)));
+        hash = bytes32(bytes16(keccak256(abi.encode(_reducer))));
         Witnet.RadonReducer storage __reducer = __database().reducers[hash];
         if (
             uint8(__reducer.opcode) == 0
@@ -315,39 +318,82 @@ contract WitOracleRadonRegistryDefault
             _reducer.validate();
             __reducer.opcode = _reducer.opcode;
             __pushRadonReducerFilters(__reducer, _reducer.filters);
-            emit NewRadonReducer(hash);
+            emit NewRadonReducer(bytes16(hash));
         }
     }
     
     function verifyRadonRequest(
-            bytes32[] calldata retrieveHashes,
-            Witnet.RadonReducer calldata aggregate,
-            Witnet.RadonReducer calldata tally
+            bytes32[] calldata _retrieveHashes,
+            Witnet.RadonReducer calldata _aggregateReducer,
+            Witnet.RadonReducer calldata _tallyReducer
         ) 
         override external 
         returns (bytes32 radHash)
     {
-        // TODO
+        return __verifyRadonRequest(
+            _retrieveHashes,
+            new string[][](_retrieveHashes.length),
+            _aggregateReducer,
+            _tallyReducer
+        );
     }
 
     function verifyRadonRequest(
             bytes32[] calldata _retrieveHashes,
-            string[][] calldata _retrieveArgs,
-            Witnet.RadonReducer calldata _aggregate,
-            Witnet.RadonReducer calldata _tally
+            bytes32 _aggregateReducerHash,
+            bytes32 _tallyReducerHash
+        )
+        override external
+        returns (bytes32 radHash)
+    {
+        return __verifyRadonRequest(
+            _retrieveHashes,
+            new string[][](_retrieveHashes.length),
+            _aggregateReducerHash,
+            _tallyReducerHash
+        );
+    }
+
+    function verifyRadonRequest(
+            bytes32[] calldata _retrieveHashes,
+            string[][] calldata _retrieveArgsValues,
+            Witnet.RadonReducer calldata _aggregateReducer,
+            Witnet.RadonReducer calldata _tallyReducer
         ) 
         override external 
-        returns (bytes32 _radHash)
+        returns (bytes32)
     {
-        // TODO
+        return __verifyRadonRequest(
+            _retrieveHashes, 
+            _retrieveArgsValues, 
+            _aggregateReducer, 
+            _tallyReducer
+        );
+    }
+
+    function verifyRadonRequest(
+            bytes32[] calldata _retrieveHashes,
+            string[][] calldata _retrieveArgsValues,
+            bytes32 _aggregateReducerHash,
+            bytes32 _tallyReducerHash
+        )
+        override external
+        returns (bytes32)
+    {
+        return __verifyRadonRequest(
+            _retrieveHashes,
+            _retrieveArgsValues,
+            _aggregateReducerHash,
+            _tallyReducerHash
+        );
     }
 
     function verifyRadonRetrieval(
             Witnet.RadonRetrievalMethods _requestMethod,
-            string calldata _requestURL,
-            string calldata _requestBody,
+            string memory _requestURL,
+            string memory _requestBody,
             string[2][] memory  _requestHeaders,
-            bytes calldata _requestRadonScript
+            bytes memory _requestRadonScript
         )
         virtual override public
         returns (bytes32 hash)
@@ -398,13 +444,42 @@ contract WitOracleRadonRegistryDefault
         }
     }
 
+    function verifyRadonRetrieval(
+            bytes32 _baseRetrieveHash,
+            string calldata _lastArgValue
+        )
+        override external
+        returns (bytes32)
+    {
+        Witnet.RadonRetrieval memory _retrieval = lookupRadonRetrieval(_baseRetrieveHash);
+        _require(
+            _retrieval.argsCount > 0,
+            "non-parameterized radon retrieval"
+        );
+        _retrieval = _retrieval.replaceWildcards(
+            _retrieval.argsCount - 1, 
+            _lastArgValue
+        );
+        return verifyRadonRetrieval(
+            _retrieval.method,
+            _retrieval.url,
+            _retrieval.body,
+            _retrieval.headers,
+            _retrieval.radonScript
+        );
+    }
+
 
     // ================================================================================================================
     // --- IWitOracleRadonRegistryLegacy ---------------------------------------------------------------------------------
 
-    function lookupRadonRequestResultMaxSize(bytes32) override external pure returns (uint16) {
+    function lookupRadonRequestResultMaxSize(bytes32 _radHash) 
+        override external view
+        radonRequestExists(_radHash) 
+        returns (uint16)
+    {
         return 32;
-    }    
+    }
 
     function lookupRadonRequestSources(bytes32 _radHash) 
         override external view 
@@ -423,31 +498,61 @@ contract WitOracleRadonRegistryDefault
     }
 
     function verifyRadonRequest(
-            bytes32[] memory _retrieveHashes,
-            bytes32 _aggregateReduceHash,
-            bytes32 _tallyReduceHash,
+            bytes32[] calldata _retrieveHashes,
+            bytes32 _aggregateReducerHash,
+            bytes32 _tallyReducerHash,
             uint16,
-            string[][] memory _retrieveArgs
+            string[][] calldata _retrieveArgsValues
         )
         virtual override public
+        returns (bytes32)
+    {
+        return __verifyRadonRequest(
+            _retrieveHashes,
+            _retrieveArgsValues,
+            lookupRadonReducer(_aggregateReducerHash),
+            lookupRadonReducer(_tallyReducerHash)
+        );
+    }
+
+    
+    // ================================================================================================================
+    // --- Internal methods -------------------------------------------------------------------------------------------
+
+    function __verifyRadonRequest(
+            bytes32[] calldata _retrieveHashes,
+            string[][] memory _retrieveArgsValues,
+            bytes32 _aggregateReducerHash,
+            bytes32 _tallyReducerHash
+        )
+        virtual internal
+        returns (bytes32 _radHash)
+    {   
+        return __verifyRadonRequest(
+            _retrieveHashes,
+            _retrieveArgsValues,
+            lookupRadonReducer(_aggregateReducerHash),
+            lookupRadonReducer(_tallyReducerHash)
+        );
+    }
+
+    function __verifyRadonRequest(
+            bytes32[] calldata _retrieveHashes,
+            string[][] memory _retrieveArgsValues,
+            Witnet.RadonReducer memory _aggregateReducer,
+            Witnet.RadonReducer memory _tallyReducer
+        )
+        virtual internal
         returns (bytes32 _radHash)
     {
-        // check reducers are valid:
-        _require(
-            uint8(__database().reducers[_aggregateReduceHash].opcode) != 0,
-            "unknown aggregate reducer"
-        );
-        _require(
-            uint8(__database().reducers[_tallyReduceHash].opcode) != 0,
-            "unknown tally reducer"
-        );
-
-        // calculate unique hash:
+        // calculate unique hashes:
+        bytes32 _aggregateReducerHash = verifyRadonReducer(_aggregateReducer);
+        bytes32 _tallyReducerHash = verifyRadonReducer(_tallyReducer);
         bytes32 hash = keccak256(abi.encode(
             _retrieveHashes,
-            _aggregateReduceHash,
-            _tallyReduceHash,
-            _retrieveArgs
+            _aggregateReducerHash,
+            _tallyReducerHash,
+            _retrieveArgsValues
         ));
         
         // verify, compose and register only if hash is not yet known:
@@ -462,13 +567,9 @@ contract WitOracleRadonRegistryDefault
             
             // Check that number of args arrays matches the number of sources:
             _require(
-                _retrieveHashes.length == _retrieveArgs.length,
+                _retrieveHashes.length == _retrieveArgsValues.length,
                 "args mismatch"
             );
-            
-            // Check sources and tally reducers:
-            Witnet.RadonReducer memory _aggregator = __database().reducers[_aggregateReduceHash];
-            Witnet.RadonReducer memory _tally = __database().reducers[_tallyReduceHash];
             
             // Check result type consistency among all sources:
             Witnet.RadonDataTypes _resultDataType;
@@ -486,17 +587,20 @@ contract WitOracleRadonRegistryDefault
                     _revert("mismatching retrievals");
                 }
                 // check enough args are provided for each source
-                if (_retrieveArgs[_ix].length < uint(_retrievals[_ix].argsCount)) {
-                    _revert("missing args");
+                if (_retrieveArgsValues[_ix].length != uint(_retrievals[_ix].argsCount)) {
+                    _revert(string(abi.encodePacked(
+                        "mismatching args count on retrieval #",
+                        Witnet.toString(_ix + 1)
+                    )));
                 }
             }
             
             // Build radon retrieval bytecode:
             bytes memory _bytecode = _retrievals.encode(
-                _retrieveArgs,
-                _aggregator.encode(),
-                _tally.encode(),
-                0 //_resultMaxSize
+                _retrieveArgsValues, 
+                _aggregateReducer.encode(), 
+                _tallyReducer.encode(), 
+                0
             );
             _require(
                 _bytecode.length <= 65535,
@@ -509,7 +613,8 @@ contract WitOracleRadonRegistryDefault
             __database().radsBytecode[_radHash] = _bytecode;
             __database().requests[_radHash] = RadonRequestPacked({
                 _args: new string[][](0),
-                aggregateTallyHashes: (_aggregateReduceHash & 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000) | (_tallyReduceHash >> 128),
+                aggregateTallyHashes: (_aggregateReducerHash & 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000)
+                    | (_tallyReducerHash >> 128),
                 _radHash: bytes32(0),
                 _resultDataType: Witnet.RadonDataTypes.Any,
                 _resultMaxSize: 0,
@@ -522,24 +627,15 @@ contract WitOracleRadonRegistryDefault
         }
     }
 
-    
-    // ================================================================================================================
-    // --- Internal state-modifying methods ---------------------------------------------------------------------------
-
     function __pushRadonReducerFilters(
             Witnet.RadonReducer storage __reducer,
             Witnet.RadonFilter[] memory _filters
         )
         internal
-        virtual
     {
         for (uint _ix = 0; _ix < _filters.length; _ix ++) {
             __reducer.filters.push(_filters[_ix]);
         }
-    }
-
-    function _witOracleHash(bytes memory chunk) virtual internal pure returns (bytes32) {
-        return sha256(chunk);
     }
 
 }

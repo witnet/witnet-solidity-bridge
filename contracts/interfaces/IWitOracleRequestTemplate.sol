@@ -2,18 +2,23 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../libs/Witnet.sol";
+import "./IWitOracleRequest.sol";
 
 interface IWitOracleRequestTemplate {
 
-    /// Build a WitOracleRequest instance that will provide the bytecode and RAD 
+    /// Builds a WitOracleRequest instance that will provide the bytecode and RAD 
     /// hash of some Witnet-compliant Radon Request, provably made out of the 
-    /// data sources, aggregate and tally Radon Reducers that compose this WitOracleRequestTemplate.
-    /// Produced addresses are counter-factual to the given values.
-    /// Reverts if:
-    /// - the ranks of passed array don't match either the number of this template's 
-    ///   data sources, or the number of required parameters by each one of those.
-    function buildWitOracleRequest (string[][] calldata args) external returns (address);
+    /// data sources, aggregate and tally Radon Reducers that compose this instance.
+    /// Reverts if the ranks of passed array don't match either the number of this template's 
+    /// data sources, or the number of required parameters by each one of those.
+    /// @dev Produced addresses are counter-factual to the template address and the given values.
+    function buildWitOracleRequest (string[][] calldata args) external returns (IWitOracleRequest);
+
+    /// Builds a WitOracleRequest instance by specifying one single parameter value
+    /// that will be equally applied to all the template's data sources.
+    /// Reverts if any of the underlying data sources requires more than just one parameter.
+    /// @dev Produced addresses are counter-factual to the template address and the given value.
+    function buildWitOracleRequest (string calldata singleArgValue) external returns (IWitOracleRequest);
 
     /// Returns an array of integers telling the number of parameters required 
     /// by every single data source (i.e. Radon Retrievals) that compose this 
@@ -42,10 +47,6 @@ interface IWitOracleRequestTemplate {
     /// any WitOracleRequest that gets built out of this WitOracleRequestTemplate.
     function getResultDataType() external view returns (Witnet.RadonDataTypes); 
 
-    /// If built out of an upgradable factory, returns the SemVer tag of the 
-    /// factory implementation at the time when this WitOracleRequestTemplate got built.
-    function version() external view returns (string memory);
-
     /// Verifies into the bounded WitOracle's registry the actual bytecode 
     /// and RAD hash of the Witnet-compliant Radon Request that gets provably 
     /// made out of the data sources, aggregate and tally Radon Reducers that 
@@ -57,7 +58,23 @@ interface IWitOracleRequestTemplate {
     ///   template's data sources, or the number of required parameters by 
     ///   each one of those.
     /// @dev This method requires less gas than buildWitOracleRequest(string[][]), and 
-    /// it's usually preferred when parameterized data requests made out of this 
-    /// template are intended to be used just once in lifetime.    
+    /// @dev it's usually preferred when data requests built out of this template
+    /// @dev are intended to be used just once in lifetime.    
     function verifyRadonRequest(string[][] calldata args) external returns (bytes32);
+
+    /// Verifies into the bounded WitOracle's registry the actual bytecode
+    /// and RAD hash of the Witnet-compliant Radon Request that gets provably
+    /// made out as a result of applying the given parameter value to the underlying
+    /// data sources, aggregate and tally reducers that compose this template. 
+    /// While no actual WitOracleRequest instance gets constructed, the returned value
+    /// will be accepted as a valid RAD hash on the bounded WitOracle contract from now on.
+    /// Reverts if any of the underlying data sources requires more than just one parameter.
+    /// @dev This method requires less gas than buildWitOracleRequest(string), and 
+    /// @dev it's usually preferred when data requests built out of this template
+    /// @dev are intended to be used just once in lifetime.
+    function verifyRadonRequest(string calldata singleArgValue) external returns (bytes32);
+
+    /// If built out of an upgradable factory, returns the SemVer tag of the 
+    /// factory implementation at the time when this WitOracleRequestTemplate got built.
+    function version() external view returns (string memory);
 }
