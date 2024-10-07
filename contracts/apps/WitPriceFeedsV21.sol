@@ -587,7 +587,7 @@ contract WitPriceFeedsV21
             return IWitPriceFeedsSolver.Price({
                 value: _latestResult.asUint(),
                 timestamp: _lastValidQueryResponse.resultTimestamp,
-                tallyHash: _lastValidQueryResponse.resultTallyHash,
+                drTxHash: _lastValidQueryResponse.resultDrTxHash,
                 status: latestUpdateQueryResponseStatus(feedId)
             });
         } else {
@@ -613,7 +613,7 @@ contract WitPriceFeedsV21
                 return IWitPriceFeedsSolver.Price({
                     value: 0,
                     timestamp: 0,
-                    tallyHash: 0,
+                    drTxHash: 0,
                     status: latestUpdateQueryResponseStatus(feedId)
                 });
             }

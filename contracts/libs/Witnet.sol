@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitnetCBOR.sol";
 
@@ -11,10 +10,44 @@ library Witnet {
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
 
+    uint32 constant internal WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
+    uint32 constant internal WIT_1_SECS_PER_EPOCH = 45;
+
+    uint32  constant internal WIT_2_GENESIS_BEACON_INDEX = 0;       // TBD
+    uint32  constant internal WIT_2_GENESIS_BEACON_PREV_INDEX = 0;  // TBD
+    bytes24 constant internal WIT_2_GENESIS_BEACON_PREV_ROOT = 0;   // TBD
+    bytes16 constant internal WIT_2_GENESIS_BEACON_DDR_TALLIES_MERKLE_ROOT = 0;  // TBD
+    bytes16 constant internal WIT_2_GENESIS_BEACON_DRO_TALLIES_MERKLE_ROOT = 0;  // TBD
+    uint256 constant internal WIT_2_GENESIS_BEACON_NEXT_COMMITTEE_AGG_PUBKEY_0 = 0; // TBD
+    uint256 constant internal WIT_2_GENESIS_BEACON_NEXT_COMMITTEE_AGG_PUBKEY_1 = 0; // TBD
+    uint256 constant internal WIT_2_GENESIS_BEACON_NEXT_COMMITTEE_AGG_PUBKEY_2 = 0; // TBD
+    uint256 constant internal WIT_2_GENESIS_BEACON_NEXT_COMMITTEE_AGG_PUBKEY_3 = 0; // TBD
+    uint32  constant internal WIT_2_GENESIS_EPOCH = 0;      // TBD
+    uint32  constant internal WIT_2_GENESIS_TIMESTAMP = 0;  // TBD
+    uint32  constant internal WIT_2_SECS_PER_EPOCH = 20;    // TBD
+    uint32  constant internal WIT_2_FAST_FORWARD_COMMITTEE_SIZE = 64; // TBD
+
+    struct Beacon {
+        uint32  index;
+        uint32  prevIndex;
+        bytes24 prevRoot;
+        bytes16 ddrTalliesMerkleRoot;
+        bytes16 droTalliesMerkleRoot;
+        uint256[4] nextCommitteeAggPubkey;
+    }
+    
+    struct FastForward {
+        Beacon beacon;
+        uint256[2] committeeAggSignature;
+        uint256[4][] committeeMissingPubkeys;
+    }
+
+
     /// Struct containing both request and response data related to every query posted to the Witnet Request Board
     struct Query {
         QueryRequest request;
         QueryResponse response;
+        uint256 block;
     }
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
@@ -24,7 +57,7 @@ library Witnet {
         uint72   evmReward;              // EVM amount in wei eventually to be paid to the legit result reporter.
         bytes    radonBytecode;          // Optional: Witnet Data Request bytecode to be solved by the Witnet blockchain.
         bytes32  radonRadHash;           // Optional: Previously verified hash of the Witnet Data Request to be solved.
-        RadonSLA radonSLA;               // Minimum Service-Level parameters to be committed by the Witnet blockchain. 
+        RadonSLA radonSLA;               // Minimum Service-Level parameters to be committed by the Witnet blockchain.
     }
 
     /// QueryResponse metadata and result as resolved by the Witnet blockchain.
@@ -32,8 +65,26 @@ library Witnet {
         address reporter;                // EVM address from which the Data Request result was reported.
         uint64  finality;                // EVM block number at which the reported data will be considered to be finalized.
         uint32  resultTimestamp;         // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
-        bytes32 resultTallyHash;         // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
+        bytes32 resultDrTxHash;          // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
         bytes   resultCborBytes;         // CBOR-encode result to the request, as resolved in the Witnet blockchain.
+        address disputer;
+    }
+
+    struct QueryResponseReport {
+        uint256 queryId;
+        bytes32 queryHash;               // KECCAK256(channel | queryId | blockhash(query.block) | ...)
+        bytes   witDrRelayerSignature;   // ECDSA.signature(queryHash)
+        bytes32 witDrTxHash;
+        uint32  witDrResultEpoch;
+        bytes   witDrResultCborBytes;
+    }
+
+    struct QueryReport {
+        bytes32  witDrRadHash;
+        RadonSLA witDrSLA;
+        bytes32  witDrTxHash;
+        uint32   witDrResultEpoch;
+        bytes    witDrResultCborBytes;
     }
 
     /// QueryResponse status from a requester's point of view.
@@ -43,7 +94,8 @@ library Witnet {
         Ready,
         Error,
         Finalizing,
-        Delivered
+        Delivered,
+        Expired
     }
 
     /// Possible status of a Witnet query.
@@ -51,7 +103,10 @@ library Witnet {
         Unknown,
         Posted,
         Reported,
-        Finalized
+        Finalized,
+        Delayed,
+        Expired,
+        Disputed
     }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
@@ -257,35 +312,6 @@ library Witnet {
         UnhandledIntercept
     }
 
-    function isCircumstantial(ResultErrorCodes self) internal pure returns (bool) {
-        return (self == ResultErrorCodes.CircumstantialFailure);
-    }
-
-    function lackOfConsensus(ResultErrorCodes self) internal pure returns (bool) {
-        return (
-            self == ResultErrorCodes.InsufficientCommits
-                || self == ResultErrorCodes.InsufficientMajority
-                || self == ResultErrorCodes.InsufficientReveals
-        );
-    }
-
-    function isRetriable(ResultErrorCodes self) internal pure returns (bool) {
-        return (
-            lackOfConsensus(self)
-                || isCircumstantial(self)
-                || poorIncentives(self)
-        );
-    }
-
-    function poorIncentives(ResultErrorCodes self) internal pure returns (bool) {
-        return (
-            self == ResultErrorCodes.OversizedTallyResult
-                || self == ResultErrorCodes.InsufficientCommits
-                || self == ResultErrorCodes.BridgePoorIncentives
-                || self == ResultErrorCodes.BridgeOversizedTallyResult
-        );
-    }
-
     /// Possible types either processed by Witnet Radon Scripts or included within results to Witnet Data Requests.
     enum RadonDataTypes {
         /* 0x00 */ Any, 
@@ -377,10 +403,10 @@ library Witnet {
     }
 
     struct RadonSLA {
-        /// Number of witnessing nodes in the Witnet blockchain that contribute to solve some data query.
+        /// Number of witnessing nodes in the Wit/oracle blockchain that will contribute to solve some data request.
         uint8  witNumWitnesses;
         
-        /// Reward in $nanoWit ultimately paid to every earnest node in the Wit/oracle blockchain contributing to solve some data query.        
+        /// Reward in $nanoWit ultimately paid to every earnest node in the Wit/oracle blockchain contributing to solve some data request.
         uint64 witUnitaryReward; 
 
         /// Maximum size accepted for the CBOR-encoded buffer containing successfull result values.
@@ -397,206 +423,77 @@ library Witnet {
     }
 
 
-    /// ===============================================================================================================
-    /// --- 'Witnet.RadonSLA' helper methods ------------------------------------------------------------------------
+    /// =======================================================================
+    /// --- Witnet.Beacon helper functions ------------------------------------
 
-    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
-        internal pure returns (bool)
+    function equals(Beacon storage self, Beacon calldata other)
+        internal view returns (bool)
     {
         return (
-            a.witNumWitnesses >= b.witNumWitnesses
-                && a.witUnitaryReward >= b.witUnitaryReward
-                && a.maxTallyResultSize <= b.maxTallyResultSize
-        );
-    }
-     
-    function isValid(RadonSLA memory sla) internal pure returns (bool) {
-        return (
-            sla.witUnitaryReward > 0 
-                && sla.witNumWitnesses > 0 && sla.witNumWitnesses <= 127
-                && sla.maxTallyResultSize > 0
+            root(self) == root(other)
         );
     }
 
-    function toV1(RadonSLA memory self) internal pure returns (Witnet.RadonSLAv1 memory) {
-        return Witnet.RadonSLAv1({
-            numWitnesses: self.witNumWitnesses,
-            minConsensusPercentage: 51,
-            witnessReward: self.witUnitaryReward,
-            witnessCollateral: self.witUnitaryReward * 100,
-            minerCommitRevealFee: self.witUnitaryReward / self.witNumWitnesses
-        });
+    function root(Beacon calldata self) internal pure returns (bytes24) {
+        return bytes24(keccak256(abi.encode(
+            self.index,
+            self.prevIndex,
+            self.prevRoot,
+            self.ddrTalliesMerkleRoot,
+            self.droTalliesMerkleRoot,
+            self.nextCommitteeAggPubkey
+        )));
+    }
+    
+    function root(Beacon storage self) internal view returns (bytes24) {
+        return bytes24(keccak256(abi.encode(
+            self.index,
+            self.prevIndex,
+            self.prevRoot,
+            self.ddrTalliesMerkleRoot,
+            self.droTalliesMerkleRoot,
+            self.nextCommitteeAggPubkey
+        )));
     }
 
-    /// Sum of all rewards in $nanoWit to be paid to nodes in the Wit/oracle blockchain that contribute to solve some data query.
-    function witTotalReward(RadonSLA storage self) internal view returns (uint64) {
-        return self.witUnitaryReward / (self.witNumWitnesses + 3);
+
+    /// =======================================================================
+    /// --- Witnet.FastForward helper functions -------------------------------
+
+    function head(FastForward[] calldata rollup)
+        internal pure returns (Beacon calldata)
+    {
+        return rollup[rollup.length - 1].beacon;
     }
 
 
     /// ===============================================================================================================
-    /// --- 'uint*' helper methods ------------------------------------------------------------------------------------
+    /// --- Witnet.Query*Report helper methods ------------------------------------------------------------------------
 
-    /// @notice Convert a `uint8` into a 2 characters long `string` representing its two less significant hexadecimal values.
-    function toHexString(uint8 _u)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory b2 = new bytes(2);
-        uint8 d0 = uint8(_u / 16) + 48;
-        uint8 d1 = uint8(_u % 16) + 48;
-        if (d0 > 57)
-            d0 += 7;
-        if (d1 > 57)
-            d1 += 7;
-        b2[0] = bytes1(d0);
-        b2[1] = bytes1(d1);
-        return string(b2);
+    function queryRelayer(QueryResponseReport calldata self) internal pure returns (address) {
+        return recoverAddr(self.witDrRelayerSignature, self.queryHash);
     }
 
-    /// @notice Convert a `uint8` into a 1, 2 or 3 characters long `string` representing its.
-    /// three less significant decimal values.
-    function toString(uint8 _u)
-        internal pure
-        returns (string memory)
-    {
-        if (_u < 10) {
-            bytes memory b1 = new bytes(1);
-            b1[0] = bytes1(uint8(_u) + 48);
-            return string(b1);
-        } else if (_u < 100) {
-            bytes memory b2 = new bytes(2);
-            b2[0] = bytes1(uint8(_u / 10) + 48);
-            b2[1] = bytes1(uint8(_u % 10) + 48);
-            return string(b2);
-        } else {
-            bytes memory b3 = new bytes(3);
-            b3[0] = bytes1(uint8(_u / 100) + 48);
-            b3[1] = bytes1(uint8(_u % 100 / 10) + 48);
-            b3[2] = bytes1(uint8(_u % 10) + 48);
-            return string(b3);
-        }
+    function tallyHash(QueryResponseReport calldata self) internal pure returns (bytes32) {
+        return keccak256(abi.encode(
+            self.queryHash,
+            self.witDrRelayerSignature,
+            self.witDrTxHash,
+            self.witDrResultEpoch,
+            self.witDrResultCborBytes
+        ));
     }
 
-    /// @notice Convert a `uint` into a string` representing its value.
-    function toString(uint v)
-        internal pure 
-        returns (string memory)
-    {
-        uint maxlength = 100;
-        bytes memory reversed = new bytes(maxlength);
-        uint i = 0;
-        do {
-            uint8 remainder = uint8(v % 10);
-            v = v / 10;
-            reversed[i ++] = bytes1(48 + remainder);
-        } while (v != 0);
-        bytes memory buf = new bytes(i);
-        for (uint j = 1; j <= i; j ++) {
-            buf[j - 1] = reversed[i - j];
-        }
-        return string(buf);
+    function tallyHash(QueryReport calldata self) internal pure returns (bytes32) {
+        return keccak256(abi.encode(
+            self.witDrRadHash,
+            self.witDrSLA,
+            self.witDrTxHash,
+            self.witDrResultEpoch,
+            self.witDrResultCborBytes
+        ));
     }
 
-
-    /// ===============================================================================================================
-    /// --- 'bytes' helper methods ------------------------------------------------------------------------------------
-
-    /// @dev Transform given bytes into a Witnet.Result instance.
-    /// @param cborBytes Raw bytes representing a CBOR-encoded value.
-    /// @return A `Witnet.Result` instance.
-    function toWitnetResult(bytes memory cborBytes)
-        internal pure
-        returns (Witnet.Result memory)
-    {
-        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(cborBytes);
-        return _resultFromCborValue(cborValue);
-    }
-
-    function toAddress(bytes memory _value) internal pure returns (address) {
-        return address(toBytes20(_value));
-    }
-
-    function toBytes4(bytes memory _value) internal pure returns (bytes4) {
-        return bytes4(toFixedBytes(_value, 4));
-    }
-    
-    function toBytes20(bytes memory _value) internal pure returns (bytes20) {
-        return bytes20(toFixedBytes(_value, 20));
-    }
-    
-    function toBytes32(bytes memory _value) internal pure returns (bytes32) {
-        return toFixedBytes(_value, 32);
-    }
-
-    function toFixedBytes(bytes memory _value, uint8 _numBytes)
-        internal pure
-        returns (bytes32 _bytes32)
-    {
-        assert(_numBytes <= 32);
-        unchecked {
-            uint _len = _value.length > _numBytes ? _numBytes : _value.length;
-            for (uint _i = 0; _i < _len; _i ++) {
-                _bytes32 |= bytes32(_value[_i] & 0xff) >> (_i * 8);
-            }
-        }
-    }
-
-
-    /// ===============================================================================================================
-    /// --- 'string' helper methods -----------------------------------------------------------------------------------
-
-    function toLowerCase(string memory str)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory lowered = new bytes(bytes(str).length);
-        unchecked {
-            for (uint i = 0; i < lowered.length; i ++) {
-                uint8 char = uint8(bytes(str)[i]);
-                if (char >= 65 && char <= 90) {
-                    lowered[i] = bytes1(char + 32);
-                } else {
-                    lowered[i] = bytes1(char);
-                }
-            }
-        }
-        return string(lowered);
-    }
-
-    /// @notice Converts bytes32 into string.
-    function toString(bytes32 _bytes32)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory _bytes = new bytes(_toStringLength(_bytes32));
-        for (uint _i = 0; _i < _bytes.length;) {
-            _bytes[_i] = _bytes32[_i];
-            unchecked {
-                _i ++;
-            }
-        }
-        return string(_bytes);
-    }
-
-    function tryUint(string memory str)
-        internal pure
-        returns (uint res, bool)
-    {
-        unchecked {
-            for (uint256 i = 0; i < bytes(str).length; i++) {
-                if (
-                    (uint8(bytes(str)[i]) - 48) < 0
-                        || (uint8(bytes(str)[i]) - 48) > 9
-                ) {
-                    return (0, false);
-                }
-                res += (uint8(bytes(str)[i]) - 48) * 10 ** (bytes(str).length - i - 1);
-            }
-            return (res, true);
-        }
-    }
-    
 
     /// ===============================================================================================================
     /// --- 'Witnet.Result' helper methods ----------------------------------------------------------------------------
@@ -615,7 +512,6 @@ library Witnet {
         if (result.value.majorType == uint8(WitnetCBOR.MAJOR_TYPE_BYTES)) {
             return toAddress(result.value.readBytes());
         } else {
-            // TODO
             revert("WitnetLib: reading address from string not yet supported.");
         }
     }
@@ -760,7 +656,263 @@ library Witnet {
 
 
     /// ===============================================================================================================
-    /// --- P-RNG generators ------------------------------------------------------------------------------------------
+    /// --- Witnet.ResultErrorCodes helper methods --------------------------------------------------------------------
+
+    function isCircumstantial(ResultErrorCodes self) internal pure returns (bool) {
+        return (self == ResultErrorCodes.CircumstantialFailure);
+    }
+
+    function isRetriable(ResultErrorCodes self) internal pure returns (bool) {
+        return (
+            lackOfConsensus(self)
+                || isCircumstantial(self)
+                || poorIncentives(self)
+        );
+    }
+
+    function lackOfConsensus(ResultErrorCodes self) internal pure returns (bool) {
+        return (
+            self == ResultErrorCodes.InsufficientCommits
+                || self == ResultErrorCodes.InsufficientMajority
+                || self == ResultErrorCodes.InsufficientReveals
+        );
+    }
+
+    function poorIncentives(ResultErrorCodes self) internal pure returns (bool) {
+        return (
+            self == ResultErrorCodes.OversizedTallyResult
+                || self == ResultErrorCodes.InsufficientCommits
+                || self == ResultErrorCodes.BridgePoorIncentives
+                || self == ResultErrorCodes.BridgeOversizedTallyResult
+        );
+    }
+
+    
+    /// ===============================================================================================================
+    /// --- 'Witnet.RadonSLA' helper methods --------------------------------------------------------------------------
+
+    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
+        internal pure returns (bool)
+    {
+        return (
+            a.witNumWitnesses >= b.witNumWitnesses
+                && a.witUnitaryReward >= b.witUnitaryReward
+                && a.maxTallyResultSize <= b.maxTallyResultSize
+        );
+    }
+     
+    function isValid(RadonSLA memory sla) internal pure returns (bool) {
+        return (
+            sla.witUnitaryReward > 0 
+                && sla.witNumWitnesses > 0 && sla.witNumWitnesses <= 127
+                && sla.maxTallyResultSize > 0
+        );
+    }
+
+    function toV1(RadonSLA memory self) internal pure returns (Witnet.RadonSLAv1 memory) {
+        return Witnet.RadonSLAv1({
+            numWitnesses: self.witNumWitnesses,
+            minConsensusPercentage: 51,
+            witnessReward: self.witUnitaryReward,
+            witnessCollateral: self.witUnitaryReward * 100,
+            minerCommitRevealFee: self.witUnitaryReward / self.witNumWitnesses
+        });
+    }
+
+    /// Sum of all rewards in $nanoWit to be paid to nodes in the Wit/oracle blockchain that contribute to solve some data query.
+    function witTotalReward(RadonSLA storage self) internal view returns (uint64) {
+        return self.witUnitaryReward / (self.witNumWitnesses + 3);
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'bytes*' helper methods -----------------------------------------------------------------------------------
+
+    function merkleHash(bytes32 a, bytes32 b) internal pure returns (bytes32) {
+        return (a < b
+            ? _merkleHash(a, b)
+            : _merkleHash(b, a)
+        );
+    }
+
+    function merkleRoot(bytes32[] calldata proof, bytes32 leaf) internal pure returns (bytes32 _root) {
+        _root = leaf;
+        for (uint _ix = 0; _ix < proof.length; _ix ++) {
+            _root = merkleHash(_root, proof[_ix]);
+        }
+    }
+
+    function radHash(bytes calldata bytecode) internal pure returns (bytes32) {
+        return keccak256(bytecode);
+    }
+
+    function recoverAddr(bytes memory signature, bytes32 hash_)
+        internal pure 
+        returns (address)
+    {
+        if (signature.length != 65) {
+            return (address(0));
+        }
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+        assembly {
+            r := mload(add(signature, 0x20))
+            s := mload(add(signature, 0x40))
+            v := byte(0, mload(add(signature, 0x60)))
+        }
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+            return address(0);
+        }
+        if (v != 27 && v != 28) {
+            return address(0);
+        }
+        return ecrecover(hash_, v, r, s);
+    }
+
+
+    /// @dev Transform given bytes into a Witnet.Result instance.
+    /// @param cborBytes Raw bytes representing a CBOR-encoded value.
+    /// @return A `Witnet.Result` instance.
+    function toWitnetResult(bytes memory cborBytes)
+        internal pure
+        returns (Witnet.Result memory)
+    {
+        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(cborBytes);
+        return _resultFromCborValue(cborValue);
+    }
+
+    function toAddress(bytes memory _value) internal pure returns (address) {
+        return address(toBytes20(_value));
+    }
+
+    function toBytes4(bytes memory _value) internal pure returns (bytes4) {
+        return bytes4(toFixedBytes(_value, 4));
+    }
+    
+    function toBytes20(bytes memory _value) internal pure returns (bytes20) {
+        return bytes20(toFixedBytes(_value, 20));
+    }
+    
+    function toBytes32(bytes memory _value) internal pure returns (bytes32) {
+        return toFixedBytes(_value, 32);
+    }
+
+    function toFixedBytes(bytes memory _value, uint8 _numBytes)
+        internal pure
+        returns (bytes32 _bytes32)
+    {
+        assert(_numBytes <= 32);
+        unchecked {
+            uint _len = _value.length > _numBytes ? _numBytes : _value.length;
+            for (uint _i = 0; _i < _len; _i ++) {
+                _bytes32 |= bytes32(_value[_i] & 0xff) >> (_i * 8);
+            }
+        }
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'string' helper methods -----------------------------------------------------------------------------------
+
+    function toLowerCase(string memory str)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory lowered = new bytes(bytes(str).length);
+        unchecked {
+            for (uint i = 0; i < lowered.length; i ++) {
+                uint8 char = uint8(bytes(str)[i]);
+                if (char >= 65 && char <= 90) {
+                    lowered[i] = bytes1(char + 32);
+                } else {
+                    lowered[i] = bytes1(char);
+                }
+            }
+        }
+        return string(lowered);
+    }
+
+    /// @notice Converts bytes32 into string.
+    function toString(bytes32 _bytes32)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory _bytes = new bytes(_toStringLength(_bytes32));
+        for (uint _i = 0; _i < _bytes.length;) {
+            _bytes[_i] = _bytes32[_i];
+            unchecked {
+                _i ++;
+            }
+        }
+        return string(_bytes);
+    }
+
+    function tryUint(string memory str)
+        internal pure
+        returns (uint res, bool)
+    {
+        unchecked {
+            for (uint256 i = 0; i < bytes(str).length; i++) {
+                if (
+                    (uint8(bytes(str)[i]) - 48) < 0
+                        || (uint8(bytes(str)[i]) - 48) > 9
+                ) {
+                    return (0, false);
+                }
+                res += (uint8(bytes(str)[i]) - 48) * 10 ** (bytes(str).length - i - 1);
+            }
+            return (res, true);
+        }
+    }
+
+
+    /// ===============================================================================================================
+    /// --- 'uint*' helper methods ------------------------------------------------------------------------------------
+
+    function determineBeaconIndexFromEpoch(uint32 epoch) internal pure returns (uint32) {
+        return epoch / 10;
+    }
+    
+    function determineBeaconIndexFromTimestamp(uint32 timestamp) internal pure returns (uint32) {
+        return determineBeaconIndexFromEpoch(
+            determineEpochFromTimestamp(
+                timestamp
+            )
+        );
+    }
+
+    function determineEpochFromTimestamp(uint32 timestamp) internal pure returns (uint32) {
+        if (timestamp > WIT_2_GENESIS_TIMESTAMP) {
+            return (
+                WIT_2_GENESIS_EPOCH
+                    + (timestamp - WIT_2_GENESIS_TIMESTAMP)
+                        / WIT_2_SECS_PER_EPOCH
+            );
+        } else if (timestamp > WIT_1_GENESIS_TIMESTAMP) {
+            return (
+                (timestamp - WIT_1_GENESIS_TIMESTAMP)
+                    / WIT_1_SECS_PER_EPOCH
+            );
+        } else {
+            return 0;
+        }
+    }
+
+    function determineTimestampFromEpoch(uint32 epoch) internal pure returns (uint32) {
+        if (epoch >= WIT_2_GENESIS_EPOCH) {
+            return (
+                WIT_2_GENESIS_TIMESTAMP
+                    + (WIT_2_SECS_PER_EPOCH * (
+                        epoch
+                            - WIT_2_GENESIS_EPOCH)
+                    )
+            );
+        } else return (
+            WIT_1_SECS_PER_EPOCH
+                * epoch
+        );
+    }
 
     /// Generates a pseudo-random uint32 number uniformly distributed within the range `[0 .. range)`, based on
     /// the given `nonce` and `seed` values. 
@@ -776,9 +928,78 @@ library Witnet {
         return uint32((_number * range) >> 224);
     }
 
+    /// @notice Convert a `uint8` into a 2 characters long `string` representing its two less significant hexadecimal values.
+    function toHexString(uint8 _u)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory b2 = new bytes(2);
+        uint8 d0 = uint8(_u / 16) + 48;
+        uint8 d1 = uint8(_u % 16) + 48;
+        if (d0 > 57)
+            d0 += 7;
+        if (d1 > 57)
+            d1 += 7;
+        b2[0] = bytes1(d0);
+        b2[1] = bytes1(d1);
+        return string(b2);
+    }
+
+    /// @notice Convert a `uint8` into a 1, 2 or 3 characters long `string` representing its.
+    /// three less significant decimal values.
+    function toString(uint8 _u)
+        internal pure
+        returns (string memory)
+    {
+        if (_u < 10) {
+            bytes memory b1 = new bytes(1);
+            b1[0] = bytes1(uint8(_u) + 48);
+            return string(b1);
+        } else if (_u < 100) {
+            bytes memory b2 = new bytes(2);
+            b2[0] = bytes1(uint8(_u / 10) + 48);
+            b2[1] = bytes1(uint8(_u % 10) + 48);
+            return string(b2);
+        } else {
+            bytes memory b3 = new bytes(3);
+            b3[0] = bytes1(uint8(_u / 100) + 48);
+            b3[1] = bytes1(uint8(_u % 100 / 10) + 48);
+            b3[2] = bytes1(uint8(_u % 10) + 48);
+            return string(b3);
+        }
+    }
+
+    /// @notice Convert a `uint` into a string` representing its value.
+    function toString(uint v)
+        internal pure 
+        returns (string memory)
+    {
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        do {
+            uint8 remainder = uint8(v % 10);
+            v = v / 10;
+            reversed[i ++] = bytes1(48 + remainder);
+        } while (v != 0);
+        bytes memory buf = new bytes(i);
+        for (uint j = 1; j <= i; j ++) {
+            buf[j - 1] = reversed[i - j];
+        }
+        return string(buf);
+    }
+
 
     /// ===============================================================================================================
     /// --- Witnet library private methods ----------------------------------------------------------------------------
+
+    function _merkleHash(bytes32 _a, bytes32 _b) private pure returns (bytes32 _hash) {
+        assembly {
+            mstore(0x0, _a)
+            mstore(0x20, _b)
+            _hash := keccak256(0x0, 0x40)
+        }
+    }
 
     /// @dev Decode a CBOR value into a Witnet.Result instance.
     function _resultFromCborValue(WitnetCBOR.CBOR memory cbor)

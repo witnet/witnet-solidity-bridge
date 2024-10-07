@@ -8,7 +8,7 @@ interface IWitPriceFeedsSolver {
     struct Price {
         uint value;
         uint timestamp;
-        bytes32 tallyHash;
+        bytes32 drTxHash;
         Witnet.QueryResponseStatus status;
     }
     function class() external pure returns (string memory);
