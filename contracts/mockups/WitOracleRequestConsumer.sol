@@ -59,7 +59,7 @@ abstract contract WitOracleRequestConsumer
         )
         virtual override internal returns (uint256)
     {
-        return __witOracle.postRequestWithCallback{
+        return __witOracle.postQueryWithCallback{
             value: _queryEvmReward
         }(
             __witOracleRequestRadHash,

@@ -56,7 +56,7 @@ abstract contract UsingWitOracleRequest
         )
         virtual internal returns (uint256)
     {
-        return __witOracle.postRequest{
+        return __witOracle.postQuery{
             value: _queryEvmReward
         }(
             __witOracleRequestRadHash,

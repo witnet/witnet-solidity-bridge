@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../WitnetUpgradableBase.sol";
 import "../../WitOracle.sol";
 import "../../data/WitOracleDataLib.sol";
-import "../..//interfaces/IWitOracleLegacy.sol";
+import "../../interfaces/IWitOracleLegacy.sol";
 import "../../interfaces/IWitOracleReporter.sol";
 import "../../interfaces/IWitOracleAdminACLs.sol";
 import "../../interfaces/IWitOracleConsumer.sol";
@@ -33,6 +33,9 @@ abstract contract WitOracleTrustableBase
     using Witnet for Witnet.RadonSLA;
     using Witnet for Witnet.Result;
 
+    using WitnetCBOR for WitnetCBOR.CBOR;
+    using WitOracleDataLib for WitOracleDataLib.Storage;
+
     WitOracleRequestFactory public immutable override factory;
     WitOracleRadonRegistry public immutable override registry;
     
@@ -50,7 +53,10 @@ abstract contract WitOracleTrustableBase
         return type(WitOracleTrustableBase).name;
     }
 
-    modifier checkCallbackRecipient(IWitOracleConsumer _consumer, uint24 _callbackGasLimit) {
+    modifier checkCallbackRecipient(
+            IWitOracleConsumer _consumer, 
+            uint24 _callbackGasLimit
+    ) virtual {
         _require(
             address(_consumer).code.length > 0
                 && _consumer.reportableFrom(address(this))
@@ -59,19 +65,18 @@ abstract contract WitOracleTrustableBase
         ); _;
     }
 
-    modifier checkReward(uint256 _baseFee) {
+    modifier checkReward(uint256 _msgValue, uint256 _baseFee) virtual {
         _require(
-            _getMsgValue() >= _baseFee, 
+            _msgValue >= _baseFee, 
             "insufficient reward"
         ); 
         _require(
-            _getMsgValue() <= _baseFee * 10,
+            _msgValue <= _baseFee * 10,
             "too much reward"
-        );
-        _;
+        ); _;
     }
 
-    modifier checkSLA(Witnet.RadonSLA memory sla) {
+    modifier checkSLA(Witnet.RadonSLA memory sla) virtual {
         _require(
             sla.isValid(), 
             "invalid SLA"
@@ -100,9 +105,8 @@ abstract contract WitOracleTrustableBase
         _require(
             __storage().reporters[msg.sender],
             "unauthorized reporter"
-        );
-        _;
-    } 
+        ); _;
+    }
     
     constructor(
             WitOracleRadonRegistry _registry,
@@ -172,10 +176,7 @@ abstract contract WitOracleTrustableBase
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData)
-        public
-        override
-    {
+    function initialize(bytes memory _initData) virtual override public {
         address _owner = owner();
         address[] memory _newReporters;
 
@@ -368,17 +369,20 @@ abstract contract WitOracleTrustableBase
     /// @param _queryRAD The RAD hash of the data request to be solved by Witnet.
     /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @return _queryId Unique query identifier.
-    function postRequest(
+    function postQuery(
             bytes32 _queryRAD, 
             Witnet.RadonSLA memory _querySLA
         )
         virtual override
         public payable
-        checkReward(estimateBaseFee(_getGasPrice(), _queryRAD))
+        checkReward(
+            _getMsgValue(),
+            estimateBaseFee(_getGasPrice(), _queryRAD)
+        )
         checkSLA(_querySLA)
         returns (uint256 _queryId)
     {
-        _queryId = __postRequest(
+        _queryId = __postQuery(
             _msgSender(), 
             _queryRAD, 
             _querySLA, 
@@ -409,7 +413,7 @@ abstract contract WitOracleTrustableBase
     /// @param _queryRAD The RAD hash of the data request to be solved by Witnet.
     /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @param _queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function postRequestWithCallback(
+    function postQueryWithCallback(
             bytes32 _queryRAD, 
             Witnet.RadonSLA memory _querySLA,
             uint24 _queryCallbackGasLimit
@@ -417,7 +421,7 @@ abstract contract WitOracleTrustableBase
         virtual override public payable 
         returns (uint256)
     {
-        return postRequestWithCallback(
+        return postQueryWithCallback(
             IWitOracleConsumer(_msgSender()),
             _queryRAD,
             _querySLA,
@@ -425,7 +429,7 @@ abstract contract WitOracleTrustableBase
         );
     }
 
-    function postRequestWithCallback(
+    function postQueryWithCallback(
             IWitOracleConsumer _consumer,
             bytes32 _queryRAD,
             Witnet.RadonSLA memory _querySLA,
@@ -433,11 +437,17 @@ abstract contract WitOracleTrustableBase
         )
         virtual override public payable
         checkCallbackRecipient(_consumer, _queryCallbackGasLimit)
-        checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  _queryCallbackGasLimit))
+        checkReward(
+            _getMsgValue(),
+            estimateBaseFeeWithCallback(
+                _getGasPrice(),  
+                _queryCallbackGasLimit
+            )
+        )
         checkSLA(_querySLA)
         returns (uint256 _queryId)
     {
-        _queryId = __postRequest(
+        _queryId = __postQuery(
             address(_consumer),
             _queryRAD,
             _querySLA,
@@ -467,7 +477,7 @@ abstract contract WitOracleTrustableBase
     /// @param _queryUnverifiedBytecode The (unverified) bytecode containing the actual data request to be solved by the Witnet blockchain.
     /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @param _queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function postRequestWithCallback(
+    function postQueryWithCallback(
             bytes calldata _queryUnverifiedBytecode,
             Witnet.RadonSLA memory _querySLA,
             uint24 _queryCallbackGasLimit
@@ -475,7 +485,7 @@ abstract contract WitOracleTrustableBase
         virtual override public payable
         returns (uint256)
     {
-        return postRequestWithCallback(
+        return postQueryWithCallback(
             IWitOracleConsumer(_msgSender()),
             _queryUnverifiedBytecode,
             _querySLA,
@@ -483,7 +493,7 @@ abstract contract WitOracleTrustableBase
         );
     }
 
-    function postRequestWithCallback(
+    function postQueryWithCallback(
             IWitOracleConsumer _consumer,
             bytes calldata _queryUnverifiedBytecode,
             Witnet.RadonSLA memory _querySLA, 
@@ -491,11 +501,17 @@ abstract contract WitOracleTrustableBase
         )
         virtual override public payable 
         checkCallbackRecipient(_consumer, _queryCallbackGasLimit)
-        checkReward(estimateBaseFeeWithCallback(_getGasPrice(),  _queryCallbackGasLimit))
+        checkReward(
+            _getMsgValue(),
+            estimateBaseFeeWithCallback(
+                _getGasPrice(),
+                _queryCallbackGasLimit
+            )
+        )
         checkSLA(_querySLA)
         returns (uint256 _queryId)
     {
-        _queryId = __postRequest(
+        _queryId = __postQuery(
             address(_consumer),
             bytes32(0),
             _querySLA,
@@ -565,7 +581,7 @@ abstract contract WitOracleTrustableBase
         external payable
         returns (uint256)
     {
-        return postRequest(
+        return postQuery(
             _queryRadHash,
             Witnet.RadonSLA({
                 witNumWitnesses: _querySLA.witNumWitnesses,
@@ -584,7 +600,7 @@ abstract contract WitOracleTrustableBase
         external payable
         returns (uint256)
     {
-        return postRequestWithCallback(
+        return postQueryWithCallback(
             _queryRadHash,
             Witnet.RadonSLA({
                 witNumWitnesses: _querySLA.witNumWitnesses,
@@ -604,7 +620,7 @@ abstract contract WitOracleTrustableBase
         external payable
         returns (uint256)
     {
-        return postRequestWithCallback(
+        return postQueryWithCallback(
             _queryRadBytecode,
             Witnet.RadonSLA({
                 witNumWitnesses: _querySLA.witNumWitnesses,
@@ -859,7 +875,7 @@ abstract contract WitOracleTrustableBase
         )));
     }
 
-    function __postRequest(
+    function __postQuery(
             address _requester,
             bytes32 _radHash, 
             Witnet.RadonSLA memory _sla, 
