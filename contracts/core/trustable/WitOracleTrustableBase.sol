@@ -333,6 +333,14 @@ abstract contract WitOracleTrustableBase
         }
     }
 
+    function getQueryResponseStatusTag(uint256 _queryId)
+        virtual override
+        external view
+        returns (string memory)
+    {
+        return WitOracleDataLib.toString(
+            getQueryResponseStatus(_queryId)
+        );
     }
 
     /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
@@ -393,6 +401,15 @@ abstract contract WitOracleTrustableBase
 
         }
     }
+
+    function getQueryStatusTag(uint256 _queryId)
+        virtual override
+        external view
+        returns (string memory)
+    {
+        return WitOracleDataLib.toString(
+            getQueryStatus(_queryId)
+        );
     }
 
     function getQueryStatusBatch(uint256[] calldata _queryIds)

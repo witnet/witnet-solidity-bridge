@@ -63,6 +63,7 @@ interface IWitOracle {
     /// @notice   - 5 => Delivered: at least one response, either successful or with errors, was delivered to the requesting contract.
     /// @param queryId The unique query identifier.
     function getQueryResponseStatus(uint256 queryId) external view returns (Witnet.QueryResponseStatus);
+    function getQueryResponseStatusTag(uint256 queryId) external view returns (string memory);
 
     /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
     /// @param queryId The unique query identifier.
@@ -74,6 +75,7 @@ interface IWitOracle {
 
     /// @notice Gets current status of given query.
     function getQueryStatus(uint256 queryId) external view returns (Witnet.QueryStatus);
+    function getQueryStatusTag(uint256 queryId) external view returns (string memory);
     
     /// @notice Get current status of all given query ids.
     function getQueryStatusBatch(uint256[] calldata queryIds) external view returns (Witnet.QueryStatus[] memory);
