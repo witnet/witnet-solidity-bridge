@@ -85,8 +85,9 @@ abstract contract WitOracleTrustableBase
 
     /// Asserts the given query is currently in the given status.
     modifier inStatus(uint256 _queryId, Witnet.QueryStatus _status) {
-      if (WitOracleDataLib.seekQueryStatus(_queryId) != _status) {
+      if (getQueryStatus(_queryId) != _status) {
         _revert(WitOracleDataLib.notInStatusRevertMessage(_status));
+      
       } else {
         _;
       }
@@ -125,10 +126,6 @@ abstract contract WitOracleTrustableBase
     {
         registry = _registry;
         factory = _factory;
-    }
-
-    receive() external payable { 
-        _revert("no transfers accepted");
     }
 
     /// @dev Provide backwards compatibility for dapps bound to versions <= 0.6.1
@@ -208,7 +205,7 @@ abstract contract WitOracleTrustableBase
         _require(registry.specs() == type(WitOracleRadonRegistry).interfaceId, "uncompliant registry");
         
         // Set reporters, if any
-        __setReporters(_newReporters);
+        WitOracleDataLib.setReporters(_newReporters);
 
         emit Upgraded(_owner, base(), codehash(), version());
     }
@@ -227,18 +224,37 @@ abstract contract WitOracleTrustableBase
     // --- Partial implementation of IWitOracle --------------------------------------------------------------
 
     /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
-    /// @dev Fails if the `_queryId` is not in 'Reported' status, or called from an address different to
+    /// @dev Fails if the `_queryId` is not in 'Finalized' or 'Expired' status, or called from an address different to
     /// @dev the one that actually posted the given request.
+    /// @dev If in 'Expired' status, query reward is transfer back to the requester.
     /// @param _queryId The unique query identifier.
     function fetchQueryResponse(uint256 _queryId)
         virtual override
         external
-        inStatus(_queryId, Witnet.QueryStatus.Finalized)
         onlyRequester(_queryId)
         returns (Witnet.QueryResponse memory _response)
     {
+        Witnet.QueryStatus _queryStatus = getQueryStatus(_queryId);
+
+        uint72 _evmReward;
+        if (_queryStatus == Witnet.QueryStatus.Expired) {
+            _evmReward = WitOracleDataLib.seekQueryRequest(_queryId).evmReward;
+
+        } else if (_queryStatus != Witnet.QueryStatus.Finalized) {
+            _revertInvalidQueryStatus(_queryStatus);
+        }
+
+        // delete query metadata from storage:
         _response = WitOracleDataLib.seekQuery(_queryId).response;
         delete __storage().queries[_queryId];
+
+        if (_evmReward > 0) {
+            // transfer unused reward to requester, only if the query expired:
+            __safeTransferTo(
+                payable(msg.sender),
+                _evmReward
+            );
+        }
     }
 
     /// Gets the whole Query data contents, if any, no matter its current status.
@@ -287,10 +303,36 @@ abstract contract WitOracleTrustableBase
     /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
     /// @param _queryId The unique query identifier.
     function getQueryResponseStatus(uint256 _queryId)
-        virtual override public view
+        virtual override
+        public view
         returns (Witnet.QueryResponseStatus)
     {
-        return WitOracleDataLib.seekQueryResponseStatus(_queryId);
+        Witnet.QueryStatus _queryStatus = getQueryStatus(_queryId);
+        if (_queryStatus == Witnet.QueryStatus.Finalized) {
+            bytes storage __cborValues = WitOracleDataLib.seekQueryResponse(_queryId).resultCborBytes;
+            if (__cborValues.length > 0) {
+                // determine whether stored result is an error by peeking the first byte
+                return (__cborValues[0] == bytes1(0xd8)
+                    ? Witnet.QueryResponseStatus.Error 
+                    : Witnet.QueryResponseStatus.Ready
+                );
+            
+            } else {
+                // the result is final but delivered to the requesting address
+                return Witnet.QueryResponseStatus.Delivered;
+            }
+        
+        } else if (_queryStatus == Witnet.QueryStatus.Posted) {
+            return Witnet.QueryResponseStatus.Awaiting;
+        
+        } else if (_queryStatus == Witnet.QueryStatus.Expired) {
+            return Witnet.QueryResponseStatus.Expired;
+        
+        } else {
+            return Witnet.QueryResponseStatus.Void;
+        }
+    }
+
     }
 
     /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
@@ -310,7 +352,7 @@ abstract contract WitOracleTrustableBase
         public view
         returns (Witnet.ResultError memory)
     {
-        Witnet.QueryResponseStatus _status = WitOracleDataLib.seekQueryResponseStatus(_queryId);
+        Witnet.QueryResponseStatus _status = getQueryResponseStatus(_queryId);
         try WitOracleResultErrorsLib.asResultError(_status, WitOracleDataLib.seekQueryResponse(_queryId).resultCborBytes)
             returns (Witnet.ResultError memory _resultError)
         {
@@ -332,21 +374,35 @@ abstract contract WitOracleTrustableBase
 
     /// Gets current status of given query.
     function getQueryStatus(uint256 _queryId)
-        external view
-        override
+        virtual override
+        public view
         returns (Witnet.QueryStatus)
     {
-        return WitOracleDataLib.seekQueryStatus(_queryId);
+        Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
+        if (__query.response.resultTimestamp != 0) {
+            return Witnet.QueryStatus.Finalized;
+            
+        } else if (__query.block == 0) {
+            return Witnet.QueryStatus.Unknown;
+        
+        } else if (block.number >= __query.block + 64) {
+            return Witnet.QueryStatus.Expired;
+        
+        } else {
+            return Witnet.QueryStatus.Posted;
+
+        }
+    }
     }
 
     function getQueryStatusBatch(uint256[] calldata _queryIds)
+        virtual override
         external view
-        override
         returns (Witnet.QueryStatus[] memory _status)
     {
         _status = new Witnet.QueryStatus[](_queryIds.length);
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
-            _status[_ix] = WitOracleDataLib.seekQueryStatus(_queryIds[_ix]);
+            _status[_ix] = getQueryStatus(_queryIds[_ix]);
         }
     }
 
@@ -633,7 +689,7 @@ abstract contract WitOracleTrustableBase
 
     
     // ================================================================================================================
-    // --- Full implementation of IWitOracleReporter ---------------------------------------------------------
+    // --- Full implementation of IWitOracleReporter ------------------------------------------------------------------
 
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
@@ -650,7 +706,7 @@ abstract contract WitOracleTrustableBase
     {
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
             if (
-                WitOracleDataLib.seekQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
+                getQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
             ) {
                 Witnet.QueryRequest storage __request = WitOracleDataLib.seekQueryRequest(_queryIds[_ix]);
                 if (__request.gasCallback > 0) {
@@ -665,7 +721,7 @@ abstract contract WitOracleTrustableBase
                                     maxTallyResultSize: uint16(0)
                                 })
                             )
-                    );      
+                    );
                 } else {
                     _expenses += (
                         estimateBaseFee(_evmGasPrice)
@@ -822,57 +878,47 @@ abstract contract WitOracleTrustableBase
 
 
     // ================================================================================================================
-    // --- Full implementation of 'IWitOracleAdminACLs' ------------------------------------------------------
+    // --- Full implementation of 'IWitOracleAdminACLs' ---------------------------------------------------------------
 
     /// Tells whether given address is included in the active reporters control list.
-    /// @param _reporter The address to be checked.
-    function isReporter(address _reporter) public view override returns (bool) {
-        return WitOracleDataLib.isReporter(_reporter);
+    /// @param _queryResponseReporter The address to be checked.
+    function isReporter(address _queryResponseReporter) virtual override public view returns (bool) {
+        return WitOracleDataLib.isReporter(_queryResponseReporter);
     }
 
     /// Adds given addresses to the active reporters control list.
     /// @dev Can only be called from the owner address.
     /// @dev Emits the `ReportersSet` event. 
-    /// @param _reporters List of addresses to be added to the active reporters control list.
-    function setReporters(address[] memory _reporters)
-        public
-        override
+    /// @param _queryResponseReporters List of addresses to be added to the active reporters control list.
+    function setReporters(address[] calldata _queryResponseReporters)
+        virtual override public
         onlyOwner
     {
-        __setReporters(_reporters);
+        WitOracleDataLib.setReporters(_queryResponseReporters);
     }
 
     /// Removes given addresses from the active reporters control list.
     /// @dev Can only be called from the owner address.
     /// @dev Emits the `ReportersUnset` event. 
     /// @param _exReporters List of addresses to be added to the active reporters control list.
-    function unsetReporters(address[] memory _exReporters)
-        public
-        override
+    function unsetReporters(address[] calldata _exReporters)
+        virtual override public
         onlyOwner
     {
-        for (uint ix = 0; ix < _exReporters.length; ix ++) {
-            address _reporter = _exReporters[ix];
-            __storage().reporters[_reporter] = false;
-        }
-        emit ReportersUnset(_exReporters);
+        WitOracleDataLib.unsetReporters(_exReporters);
     }
 
 
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
 
-    function __newQueryId(bytes32 _queryRAD, bytes32 _querySLA)
-        virtual internal view
-        returns (uint256)
-    {
-        return uint(keccak256(abi.encode(
-            channel(),
-            block.number,
-            msg.sender,
-            _queryRAD,
-            _querySLA
-        )));
+    function _revertInvalidQueryStatus(Witnet.QueryStatus _queryStatus) virtual internal {
+        _revert(
+            string(abi.encodePacked(
+                "invalid query status: ",
+                WitOracleDataLib.toString(_queryStatus)
+            ))
+        );
     }
 
     function __postQuery(
@@ -950,5 +996,4 @@ abstract contract WitOracleTrustableBase
     function __storage() virtual internal pure returns (WitOracleDataLib.Storage storage _ptr) {
       return WitOracleDataLib.data();
     }
-
 }

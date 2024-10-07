@@ -145,7 +145,7 @@ contract WitOracleTrustableOvm2
     {
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
             if (
-                WitOracleDataLib.seekQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
+                getQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
             ) {
                 Witnet.QueryRequest storage __request = WitOracleDataLib.seekQueryRequest(_queryIds[_ix]);
                 if (__request.gasCallback > 0) {
