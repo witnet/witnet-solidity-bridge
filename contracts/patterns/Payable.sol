@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 abstract contract Payable {
     IERC20 public immutable currency;
 
-    event Received(address from, uint256 value);
-    event Transfer(address to, uint256 value);
+    event Received(address indexed from, uint256 value);
+    event Transfer(address indexed to, uint256 value);
 
     constructor(address _currency) {
         currency = IERC20(_currency);
