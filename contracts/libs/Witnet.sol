@@ -10,8 +10,8 @@ library Witnet {
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
 
-    uint32 constant internal WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
-    uint32 constant internal WIT_1_SECS_PER_EPOCH = 45;
+    uint32 constant internal  WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
+    uint32 constant internal  WIT_1_SECS_PER_EPOCH = 45;
 
     uint32  constant internal WIT_2_GENESIS_BEACON_INDEX = 0;       // TBD
     uint32  constant internal WIT_2_GENESIS_BEACON_PREV_INDEX = 0;  // TBD
@@ -424,7 +424,7 @@ library Witnet {
 
 
     /// =======================================================================
-    /// --- Witnet.Beacon helper functions ------------------------------------
+    /// --- Beacon helper functions ------------------------------------
 
     function equals(Beacon storage self, Beacon calldata other)
         internal view returns (bool)
@@ -458,7 +458,7 @@ library Witnet {
 
 
     /// =======================================================================
-    /// --- Witnet.FastForward helper functions -------------------------------
+    /// --- FastForward helper functions -------------------------------
 
     function head(FastForward[] calldata rollup)
         internal pure returns (Beacon calldata)
@@ -468,7 +468,7 @@ library Witnet {
 
 
     /// ===============================================================================================================
-    /// --- Witnet.Query*Report helper methods ------------------------------------------------------------------------
+    /// --- Query*Report helper methods ------------------------------------------------------------------------
 
     function queryRelayer(QueryResponseReport calldata self) internal pure returns (address) {
         return recoverAddr(self.witDrRelayerSignature, self.queryHash);
@@ -496,15 +496,15 @@ library Witnet {
 
 
     /// ===============================================================================================================
-    /// --- 'Witnet.Result' helper methods ----------------------------------------------------------------------------
+    /// --- 'Result' helper methods ----------------------------------------------------------------------------
 
     modifier _isReady(Result memory result) {
         require(result.success, "Witnet: tried to decode value from errored result.");
         _;
     }
 
-    /// @dev Decode an address from the Witnet.Result's CBOR value.
-    function asAddress(Witnet.Result memory result)
+    /// @dev Decode an address from the Result's CBOR value.
+    function asAddress(Result memory result)
         internal pure
         _isReady(result)
         returns (address)
@@ -516,8 +516,8 @@ library Witnet {
         }
     }
 
-    /// @dev Decode a `bool` value from the Witnet.Result's CBOR value.
-    function asBool(Witnet.Result memory result)
+    /// @dev Decode a `bool` value from the Result's CBOR value.
+    function asBool(Result memory result)
         internal pure
         _isReady(result)
         returns (bool)
@@ -525,8 +525,8 @@ library Witnet {
         return result.value.readBool();
     }
 
-    /// @dev Decode a `bytes` value from the Witnet.Result's CBOR value.
-    function asBytes(Witnet.Result memory result)
+    /// @dev Decode a `bytes` value from the Result's CBOR value.
+    function asBytes(Result memory result)
         internal pure
         _isReady(result)
         returns(bytes memory)
@@ -534,8 +534,8 @@ library Witnet {
         return result.value.readBytes();
     }
 
-    /// @dev Decode a `bytes4` value from the Witnet.Result's CBOR value.
-    function asBytes4(Witnet.Result memory result)
+    /// @dev Decode a `bytes4` value from the Result's CBOR value.
+    function asBytes4(Result memory result)
         internal pure
         _isReady(result)
         returns (bytes4)
@@ -543,8 +543,8 @@ library Witnet {
         return toBytes4(asBytes(result));
     }
 
-    /// @dev Decode a `bytes32` value from the Witnet.Result's CBOR value.
-    function asBytes32(Witnet.Result memory result)
+    /// @dev Decode a `bytes32` value from the Result's CBOR value.
+    function asBytes32(Result memory result)
         internal pure
         _isReady(result)
         returns (bytes32)
@@ -552,8 +552,8 @@ library Witnet {
         return toBytes32(asBytes(result));
     }
 
-    /// @notice Returns the Witnet.Result's unread CBOR value.
-    function asCborValue(Witnet.Result memory result)
+    /// @notice Returns the Result's unread CBOR value.
+    function asCborValue(Result memory result)
         internal pure
         _isReady(result)
         returns (WitnetCBOR.CBOR memory)
@@ -561,8 +561,8 @@ library Witnet {
         return result.value;
     }
 
-    /// @notice Decode array of CBOR values from the Witnet.Result's CBOR value. 
-    function asCborArray(Witnet.Result memory result)
+    /// @notice Decode array of CBOR values from the Result's CBOR value. 
+    function asCborArray(Result memory result)
         internal pure
         _isReady(result)
         returns (WitnetCBOR.CBOR[] memory)
@@ -570,11 +570,11 @@ library Witnet {
         return result.value.readArray();
     }
 
-    /// @dev Decode a fixed16 (half-precision) numeric value from the Witnet.Result's CBOR value.
+    /// @dev Decode a fixed16 (half-precision) numeric value from the Result's CBOR value.
     /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values.
     /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`.
     /// use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
-    function asFixed16(Witnet.Result memory result)
+    function asFixed16(Result memory result)
         internal pure
         _isReady(result)
         returns (int32)
@@ -582,8 +582,8 @@ library Witnet {
         return result.value.readFloat16();
     }
 
-    /// @dev Decode an array of fixed16 values from the Witnet.Result's CBOR value.
-    function asFixed16Array(Witnet.Result memory result)
+    /// @dev Decode an array of fixed16 values from the Result's CBOR value.
+    function asFixed16Array(Result memory result)
         internal pure
         _isReady(result)
         returns (int32[] memory)
@@ -591,8 +591,8 @@ library Witnet {
         return result.value.readFloat16Array();
     }
 
-    /// @dev Decode an `int64` value from the Witnet.Result's CBOR value.
-    function asInt(Witnet.Result memory result)
+    /// @dev Decode an `int64` value from the Result's CBOR value.
+    function asInt(Result memory result)
         internal pure
         _isReady(result)
         returns (int)
@@ -600,10 +600,10 @@ library Witnet {
         return result.value.readInt();
     }
 
-    /// @dev Decode an array of integer numeric values from a Witnet.Result as an `int[]` array.
-    /// @param result An instance of Witnet.Result.
-    /// @return The `int[]` decoded from the Witnet.Result.
-    function asIntArray(Witnet.Result memory result)
+    /// @dev Decode an array of integer numeric values from a Result as an `int[]` array.
+    /// @param result An instance of Result.
+    /// @return The `int[]` decoded from the Result.
+    function asIntArray(Result memory result)
         internal pure
         _isReady(result)
         returns (int[] memory)
@@ -611,10 +611,10 @@ library Witnet {
         return result.value.readIntArray();
     }
 
-    /// @dev Decode a `string` value from the Witnet.Result's CBOR value.
-    /// @param result An instance of Witnet.Result.
-    /// @return The `string` decoded from the Witnet.Result.
-    function asText(Witnet.Result memory result)
+    /// @dev Decode a `string` value from the Result's CBOR value.
+    /// @param result An instance of Result.
+    /// @return The `string` decoded from the Result.
+    function asText(Result memory result)
         internal pure
         _isReady(result)
         returns(string memory)
@@ -622,10 +622,10 @@ library Witnet {
         return result.value.readString();
     }
 
-    /// @dev Decode an array of strings from the Witnet.Result's CBOR value.
-    /// @param result An instance of Witnet.Result.
-    /// @return The `string[]` decoded from the Witnet.Result.
-    function asTextArray(Witnet.Result memory result)
+    /// @dev Decode an array of strings from the Result's CBOR value.
+    /// @param result An instance of Result.
+    /// @return The `string[]` decoded from the Result.
+    function asTextArray(Result memory result)
         internal pure
         _isReady(result)
         returns (string[] memory)
@@ -633,10 +633,10 @@ library Witnet {
         return result.value.readStringArray();
     }
 
-    /// @dev Decode a `uint64` value from the Witnet.Result's CBOR value.
-    /// @param result An instance of Witnet.Result.
-    /// @return The `uint` decoded from the Witnet.Result.
-    function asUint(Witnet.Result memory result)
+    /// @dev Decode a `uint64` value from the Result's CBOR value.
+    /// @param result An instance of Result.
+    /// @return The `uint` decoded from the Result.
+    function asUint(Result memory result)
         internal pure
         _isReady(result)
         returns (uint)
@@ -644,10 +644,10 @@ library Witnet {
         return result.value.readUint();
     }
 
-    /// @dev Decode an array of `uint64` values from the Witnet.Result's CBOR value.
-    /// @param result An instance of Witnet.Result.
-    /// @return The `uint[]` decoded from the Witnet.Result.
-    function asUintArray(Witnet.Result memory result)
+    /// @dev Decode an array of `uint64` values from the Result's CBOR value.
+    /// @param result An instance of Result.
+    /// @return The `uint[]` decoded from the Result.
+    function asUintArray(Result memory result)
         internal pure
         returns (uint[] memory)
     {
@@ -656,7 +656,7 @@ library Witnet {
 
 
     /// ===============================================================================================================
-    /// --- Witnet.ResultErrorCodes helper methods --------------------------------------------------------------------
+    /// --- ResultErrorCodes helper methods --------------------------------------------------------------------
 
     function isCircumstantial(ResultErrorCodes self) internal pure returns (bool) {
         return (self == ResultErrorCodes.CircumstantialFailure);
@@ -689,7 +689,7 @@ library Witnet {
 
     
     /// ===============================================================================================================
-    /// --- 'Witnet.RadonSLA' helper methods --------------------------------------------------------------------------
+    /// --- 'RadonSLA' helper methods --------------------------------------------------------------------------
 
     function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
         internal pure returns (bool)
@@ -709,8 +709,8 @@ library Witnet {
         );
     }
 
-    function toV1(RadonSLA memory self) internal pure returns (Witnet.RadonSLAv1 memory) {
-        return Witnet.RadonSLAv1({
+    function toV1(RadonSLA memory self) internal pure returns (RadonSLAv1 memory) {
+        return RadonSLAv1({
             numWitnesses: self.witNumWitnesses,
             minConsensusPercentage: 51,
             witnessReward: self.witUnitaryReward,
@@ -771,12 +771,12 @@ library Witnet {
     }
 
 
-    /// @dev Transform given bytes into a Witnet.Result instance.
+    /// @dev Transform given bytes into a Result instance.
     /// @param cborBytes Raw bytes representing a CBOR-encoded value.
-    /// @return A `Witnet.Result` instance.
+    /// @return A `Result` instance.
     function toWitnetResult(bytes memory cborBytes)
         internal pure
-        returns (Witnet.Result memory)
+        returns (Result memory)
     {
         WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(cborBytes);
         return _resultFromCborValue(cborValue);
@@ -1001,15 +1001,15 @@ library Witnet {
         }
     }
 
-    /// @dev Decode a CBOR value into a Witnet.Result instance.
+    /// @dev Decode a CBOR value into a Result instance.
     function _resultFromCborValue(WitnetCBOR.CBOR memory cbor)
         private pure
-        returns (Witnet.Result memory)    
+        returns (Result memory)    
     {
         // Witnet uses CBOR tag 39 to represent RADON error code identifiers.
         // [CBOR tag 39] Identifiers for CBOR: https://github.com/lucas-clemente/cbor-specs/blob/master/id.md
         bool success = cbor.tag != 39;
-        return Witnet.Result(success, cbor);
+        return Result(success, cbor);
     }
 
     /// @dev Calculate length of string-equivalent to given bytes32.

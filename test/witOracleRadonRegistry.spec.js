@@ -2,11 +2,9 @@ import("chai")
 
 const utils = require("../src/utils")
 const { expectEvent, expectRevert } = require("@openzeppelin/test-helpers")
-const { expectRevertCustomError } = require("custom-error-test-helper")
 
 const WitOracleRadonRegistry = artifacts.require("WitOracleRadonRegistryDefault")
 const WitOracleRadonEncodingLib = artifacts.require("WitOracleRadonEncodingLib")
-const Witnet = artifacts.require("Witnet")
 
 contract("WitOracleRadonRegistry", (accounts) => {
   const creatorAddress = accounts[0]
@@ -87,8 +85,6 @@ contract("WitOracleRadonRegistry", (accounts) => {
   })
 
   context("IWitOracleRadonRegistry", async () => {
-    let slaHash
-
     let concathashReducerHash
     let modeNoFiltersReducerHash
     let stdev15ReducerHash
@@ -146,7 +142,7 @@ contract("WitOracleRadonRegistry", (accounts) => {
           "emits new data provider and source events when verifying a new http-get source for the first time", async () => {
             const tx = await radonRegistry.verifyRadonRetrieval(
               1, // requestMethod
-              "https://api.binance.us/api/v3/ticker/price?symbol=\\0\\\\1\\", 
+              "https://api.binance.us/api/v3/ticker/price?symbol=\\0\\\\1\\",
               "", // requestBody
               [], // requestHeaders
               "0x841877821864696c61737450726963658218571a000f4240185b", // requestRadonScript
@@ -188,7 +184,7 @@ contract("WitOracleRadonRegistry", (accounts) => {
         it("fork existing retrieval by settling one out of two parameters", async () => {
           const tx = await radonRegistry.verifyRadonRetrieval(
             binanceTickerHash,
-            "USD" 
+            "USD"
           )
           assert.equal(tx.logs.length, 1)
           expectEvent(
@@ -242,7 +238,10 @@ contract("WitOracleRadonRegistry", (accounts) => {
           assert.equal(ds.headers[0][1], "witnet-rust")
           assert.equal(ds.headers[1][0], "content-type")
           assert.equal(ds.headers[1][1], "text/html; charset=utf-8")
-          assert.equal(ds.radonScript, "0x861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b")
+          assert.equal(
+            ds.radonScript,
+            "0x861877821866646461746182186664706f6f6c8218646b746f6b656e3150726963658218571a000f4240185b"
+          )
         })
       })
     })
@@ -369,7 +368,7 @@ contract("WitOracleRadonRegistry", (accounts) => {
           assert(tx.logs.length === 0)
         })
         it("generates same hash when verifying same randomness request offchain", async () => {
-          const hash = await radonRegistry.methods['verifyRadonRequest(bytes32[],bytes32,bytes32,uint16,string[][])'].call(
+          const hash = await radonRegistry.methods["verifyRadonRequest(bytes32[],bytes32,bytes32,uint16,string[][])"].call(
             [ // sources
               rngSourceHash,
             ],
@@ -513,7 +512,7 @@ contract("WitOracleRadonRegistry", (accounts) => {
             tx.receipt,
             "NewRadonRequest"
           )
-          heavyRetrievalHash = tx.logs[0].args.radHash
+          // heavyRetrievalHash = tx.logs[0].args.radHash
         })
       })
     })

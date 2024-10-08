@@ -32,7 +32,7 @@ module.exports = async function () {
     } else if (argv === "--hits") {
       hits = parseInt(args[index + 1])
     } else if (argv === "--network") {
-      [ecosystem, network] = utils.getRealmNetworkFromString(args[index + 1].toLowerCase())
+      [, network] = utils.getRealmNetworkFromString(args[index + 1].toLowerCase())
     } else if (argv === "--hexArgs") {
       hexArgs = args[index + 1].toLowerCase()
       if (hexArgs.startsWith("0x")) hexArgs = hexArgs.slice(2)
