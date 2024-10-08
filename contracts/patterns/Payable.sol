@@ -16,6 +16,9 @@ abstract contract Payable {
     /// Gets current transaction price.
     function _getGasPrice() internal view virtual returns (uint256);
 
+    /// Gets message actual sender.
+    function _getMsgSender() internal view virtual returns (address);
+
     /// Gets current payment value.
     function _getMsgValue() internal view virtual returns (uint256);
 

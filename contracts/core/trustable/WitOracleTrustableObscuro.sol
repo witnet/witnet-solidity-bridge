@@ -54,7 +54,7 @@ contract WitOracleTrustableObscuro
         onlyRequester(_queryId)
         returns (Witnet.Query memory)
     {
-        return WitOracleTrustableBase.getQuery(_queryId);
+        return super.getQuery(_queryId);
     }
 
     /// @notice Retrieves the whole `Witnet.QueryResponse` record referred to a previously posted Witnet Data Request.
@@ -66,7 +66,7 @@ contract WitOracleTrustableObscuro
         onlyRequester(_queryId)
         returns (Witnet.QueryResponse memory _response)
     {
-        return WitOracleTrustableBase.getQueryResponse(_queryId);
+        return super.getQueryResponse(_queryId);
     }
 
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
@@ -77,7 +77,7 @@ contract WitOracleTrustableObscuro
         onlyRequester(_queryId)
         returns (Witnet.ResultError memory)
     {
-        return WitOracleTrustableBase.getQueryResultError(_queryId);
+        return super.getQueryResultError(_queryId);
     }
     
 }

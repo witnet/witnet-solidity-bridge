@@ -5,7 +5,10 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./WitOracleTrustableBase.sol";
+import "../WitnetUpgradableBase.sol";
+import "../trustless/WitOracleTrustlessBase.sol";
+import "../../interfaces/IWitOracleAdminACLs.sol";
+import "../../interfaces/IWitOracleReporter.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -14,18 +17,28 @@ import "./WitOracleTrustableBase.sol";
 /// @author The Witnet Foundation
 contract WitOracleTrustableDefault
     is 
-        WitOracleTrustableBase
+        WitnetUpgradableBase,
+        WitOracleTrustlessBase,
+        IWitOracleAdminACLs,
+        IWitOracleReporter        
 {
     using Witnet for Witnet.RadonSLA;
 
-    function class() virtual override public view returns (string memory) {
+    function class()
+        virtual override(WitOracleTrustlessBase, WitnetUpgradableBase) 
+        public view 
+        returns (string memory)
+    {
         return type(WitOracleTrustableDefault).name;
     }
 
-    uint256 internal immutable __reportResultGasBase;
-    uint256 internal immutable __reportResultWithCallbackGasBase;
-    uint256 internal immutable __reportResultWithCallbackRevertGasBase;
-    uint256 internal immutable __sstoreFromZeroGas;
+    /// Asserts the caller is authorized as a reporter
+    modifier onlyReporters {
+        _require(
+            __storage().reporters[msg.sender],
+            "unauthorized reporter"
+        ); _;
+    }
 
     constructor(
             WitOracleRadonRegistry _registry,
@@ -37,12 +50,16 @@ contract WitOracleTrustableDefault
             uint256 _reportResultWithCallbackRevertGasBase,
             uint256 _sstoreFromZeroGas
         )
-        WitOracleTrustableBase(
-            _registry,
-            _factory,
+        Ownable(msg.sender)
+        Payable(address(0))
+        WitnetUpgradableBase(
             _upgradable, 
-            _versionTag, 
-            address(0)
+            _versionTag,
+            "io.witnet.proxiable.board"
+        )
+        WitOracleTrustlessBase(
+            _registry,
+            _factory
         )
     {
         __reportResultGasBase = _reportResultGasBase;
@@ -53,127 +70,387 @@ contract WitOracleTrustableDefault
 
 
     // ================================================================================================================
-    // --- Overrides 'IWitOracle' ----------------------------------------------------------------------------
+    // --- Upgradeable ------------------------------------------------------------------------------------------------
 
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    function estimateBaseFee(uint256 _gasPrice)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return _gasPrice * (
-            __reportResultGasBase 
-                + 4 * __sstoreFromZeroGas
-        );
-    }
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function initialize(bytes memory _initData) virtual override public {
+        address _owner = owner();
+        address[] memory _newReporters;
 
-    /// @notice Estimate the minimum reward required for posting a data request with a callback.
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint24 _callbackGasLimit)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        uint _reportResultWithCallbackGasThreshold = (
-            __reportResultWithCallbackRevertGasBase
-                + 3 * __sstoreFromZeroGas
-        );
-        if (
-            _callbackGasLimit < _reportResultWithCallbackGasThreshold
-                || __reportResultWithCallbackGasBase + _callbackGasLimit < _reportResultWithCallbackGasThreshold
-        ) {
-            return (
-                _gasPrice
-                    * _reportResultWithCallbackGasThreshold
-            );
+        if (_owner == address(0)) {
+            // get owner (and reporters) from _initData
+            bytes memory _newReportersRaw;
+            (_owner, _newReportersRaw) = abi.decode(_initData, (address, bytes));
+            _transferOwnership(_owner);
+            _newReporters = abi.decode(_newReportersRaw, (address[]));
         } else {
-            return (
-                _gasPrice 
-                    * (
-                        __reportResultWithCallbackGasBase
-                            + _callbackGasLimit
-                    )
+            // only owner can initialize:
+            _require(
+                msg.sender == _owner,
+                "not the owner"
             );
+            // get reporters from _initData
+            _newReporters = abi.decode(_initData, (address[]));
         }
-    }
 
-    /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
-    /// @notice data query in order to avoid getting provable "too low incentives" results from
-    /// @notice the Wit/oracle blockchain. 
-    /// @dev The extra fee gets calculated in proportion to:
-    /// @param _evmGasPrice Tentative EVM gas price at the moment the query result is ready.
-    /// @param _evmWitPrice Tentative nanoWit price in Wei at the moment the query is solved on the Wit/oracle blockchain.
-    /// @param _querySLA The query SLA data security parameters as required for the Wit/oracle blockchain. 
-    function estimateExtraFee(
-            uint256 _evmGasPrice, 
-            uint256 _evmWitPrice, 
-            Witnet.RadonSLA memory _querySLA
-        )
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return (
-            _evmWitPrice * ((3 + _querySLA.witNumWitnesses) * _querySLA.witUnitaryReward)
-                + (_querySLA.maxTallyResultSize > 32
-                    ? _evmGasPrice * __sstoreFromZeroGas * ((_querySLA.maxTallyResultSize - 32) / 32)
-                    : 0
-                )
-        );
-    }
+        if (
+            __proxiable().codehash != bytes32(0)
+                && __proxiable().codehash == codehash()
+        ) {
+            _revert("already upgraded");
+        }
+        __proxiable().codehash = codehash();
 
+        _require(address(registry).code.length > 0, "inexistent registry");
+        _require(registry.specs() == type(WitOracleRadonRegistry).interfaceId, "uncompliant registry");
+        
+        // Set reporters, if any
+        WitOracleDataLib.setReporters(_newReporters);
 
-    /// ===============================================================================================================
-    /// --- IWitOracleLegacy ---------------------------------------------------------------------------------------
-
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256 _gasPrice, uint16 _resultMaxSize)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return _gasPrice * (
-            __reportResultGasBase
-                + __sstoreFromZeroGas * (
-                    4 + (_resultMaxSize == 0 ? 0 : _resultMaxSize - 1) / 32
-                )
-        );
+        emit Upgraded(_owner, base(), codehash(), version());
     }
 
 
     // ================================================================================================================
-    // --- Overrides 'Payable' ----------------------------------------------------------------------------------------
+    // --- IWitOracle -------------------------------------------------------------------------------------------------
 
-    /// Gets current transaction price.
-    function _getGasPrice()
-        internal view
-        virtual override
-        returns (uint256)
+    /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
+    /// @dev Fails if the `_queryId` is not in 'Finalized' or 'Expired' status, or called from an address different to
+    /// @dev the one that actually posted the given request.
+    /// @dev If in 'Expired' status, query reward is transfer back to the requester.
+    /// @param _queryId The unique query identifier.
+    function fetchQueryResponse(uint256 _queryId)
+        virtual override external
+        onlyRequester(_queryId)
+        returns (Witnet.QueryResponse memory)
     {
-        return tx.gasprice;
+        try WitOracleDataLib.fetchQueryResponse(
+            _queryId
+        
+        ) returns (
+            Witnet.QueryResponse memory _queryResponse,
+            uint72 _queryEvmExpiredReward
+        ) {
+            if (_queryEvmExpiredReward > 0) {
+                // transfer unused reward to requester, only if the query expired:
+                __safeTransferTo(
+                    payable(msg.sender),
+                    _queryEvmExpiredReward
+                );
+            }
+            return _queryResponse;            
+        
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+
+        } catch (bytes memory) {
+            _revertWitOracleDataLibUnhandledException();
+        }
     }
 
-    /// Gets current payment value.
-    function _getMsgValue()
-        internal view
+    /// @notice Returns query's result current status from a requester's point of view:
+    /// @notice   - 0 => Void: the query is either non-existent or deleted;
+    /// @notice   - 1 => Awaiting: the query has not yet been reported;
+    /// @notice   - 2 => Ready: the query has been succesfully solved;
+    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
+    /// @param _queryId The unique query identifier.
+    function getQueryResponseStatus(uint256 _queryId)
         virtual override
-        returns (uint256)
+        public view
+        returns (Witnet.QueryResponseStatus)
     {
-        return msg.value;
+        return WitOracleDataLib.getQueryResponseStatus(_queryId);
     }
 
-    /// Transfers ETHs to given address.
-    /// @param _to Recipient address.
-    /// @param _amount Amount of ETHs to transfer.
-    function __safeTransferTo(address payable _to, uint256 _amount)
-        internal
+    /// Gets current status of given query.
+    function getQueryStatus(uint256 _queryId)
         virtual override
+        public view
+        returns (Witnet.QueryStatus)
     {
-        payable(_to).transfer(_amount);
-    }   
+        return WitOracleDataLib.getQueryStatus(_queryId);
+    }
+
+
+    // ================================================================================================================
+    // --- IWitOracleAdminACLs ----------------------------------------------------------------------------------------
+
+    /// Tells whether given address is included in the active reporters control list.
+    /// @param _queryResponseReporter The address to be checked.
+    function isReporter(address _queryResponseReporter) virtual override public view returns (bool) {
+        return WitOracleDataLib.isReporter(_queryResponseReporter);
+    }
+
+    /// Adds given addresses to the active reporters control list.
+    /// @dev Can only be called from the owner address.
+    /// @dev Emits the `ReportersSet` event. 
+    /// @param _queryResponseReporters List of addresses to be added to the active reporters control list.
+    function setReporters(address[] calldata _queryResponseReporters)
+        virtual override public
+        onlyOwner
+    {
+        WitOracleDataLib.setReporters(_queryResponseReporters);
+    }
+
+    /// Removes given addresses from the active reporters control list.
+    /// @dev Can only be called from the owner address.
+    /// @dev Emits the `ReportersUnset` event. 
+    /// @param _exReporters List of addresses to be added to the active reporters control list.
+    function unsetReporters(address[] calldata _exReporters)
+        virtual override public
+        onlyOwner
+    {
+        WitOracleDataLib.unsetReporters(_exReporters);
+    }
+
+
+    // ================================================================================================================
+    // --- IWitOracleReporter -----------------------------------------------------------------------------------------
+
+    /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
+    /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
+    /// @notice queries providing no actual earnings.
+    function estimateReportEarnings(
+            uint256[] calldata _queryIds, 
+            bytes calldata,
+            uint256 _evmGasPrice,
+            uint256 _evmWitPrice
+        )
+        external view
+        virtual override
+        returns (uint256 _revenues, uint256 _expenses)
+    {
+        for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
+            if (
+                getQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
+            ) {
+                Witnet.QueryRequest storage __request = WitOracleDataLib.seekQueryRequest(_queryIds[_ix]);
+                if (__request.gasCallback > 0) {
+                    _expenses += (
+                        estimateBaseFeeWithCallback(_evmGasPrice, __request.gasCallback)
+                            + estimateExtraFee(
+                                _evmGasPrice,
+                                _evmWitPrice,
+                                Witnet.RadonSLA({
+                                    witNumWitnesses: __request.radonSLA.witNumWitnesses,
+                                    witUnitaryReward: __request.radonSLA.witUnitaryReward,
+                                    maxTallyResultSize: uint16(0)
+                                })
+                            )
+                    );
+                } else {
+                    _expenses += (
+                        estimateBaseFee(_evmGasPrice)
+                            + estimateExtraFee(
+                                _evmGasPrice, 
+                                _evmWitPrice, 
+                                __request.radonSLA
+                            )
+                    );
+                }
+                _expenses +=  _evmWitPrice * __request.radonSLA.witUnitaryReward;
+                _revenues += __request.evmReward;
+            }
+        }
+    }
+
+    /// @notice Retrieves the Witnet Data Request bytecodes and SLAs of previously posted queries.
+    /// @dev Returns empty buffer if the query does not exist.
+    /// @param _queryIds Query identifies.
+    function extractWitnetDataRequests(uint256[] calldata _queryIds)
+        external view 
+        virtual override
+        returns (bytes[] memory _bytecodes)
+    {
+        return WitOracleDataLib.extractWitnetDataRequests(registry, _queryIds);
+    }
+
+    /// Reports the Witnet-provable result to a previously posted request. 
+    /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
+    /// @dev Fails if:
+    /// @dev - the `_queryId` is not in 'Posted' status.
+    /// @dev - provided `_resultTallyHash` is zero;
+    /// @dev - length of provided `_result` is zero.
+    /// @param _queryId The unique identifier of the data request.
+    /// @param _resultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param _resultCborBytes The result itself as bytes.
+    function reportResult(
+            uint256 _queryId,
+            bytes32 _resultTallyHash,
+            bytes calldata _resultCborBytes
+        )
+        external override
+        onlyReporters
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
+        returns (uint256)
+    {
+        // results cannot be empty:
+        _require(
+            _resultCborBytes.length != 0, 
+            "result cannot be empty"
+        );
+        // do actual report and return reward transfered to the reproter:
+        // solhint-disable not-rely-on-time
+        return __reportResultAndReward(
+            _queryId,
+            uint32(block.timestamp),
+            _resultTallyHash,
+            _resultCborBytes
+        );
+    }
+
+    /// Reports the Witnet-provable result to a previously posted request.
+    /// @dev Fails if:
+    /// @dev - called from unauthorized address;
+    /// @dev - the `_queryId` is not in 'Posted' status.
+    /// @dev - provided `_resultTallyHash` is zero;
+    /// @dev - length of provided `_resultCborBytes` is zero.
+    /// @param _queryId The unique query identifier
+    /// @param _resultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
+    /// @param _resultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param _resultCborBytes The result itself as bytes.
+    function reportResult(
+            uint256 _queryId,
+            uint32  _resultTimestamp,
+            bytes32 _resultTallyHash,
+            bytes calldata _resultCborBytes
+        )
+        external
+        override
+        onlyReporters
+        inStatus(_queryId, Witnet.QueryStatus.Posted)
+        returns (uint256)
+    {
+        // validate timestamp
+        _require(
+            _resultTimestamp > 0,
+            "bad timestamp"
+        );
+        // results cannot be empty
+        _require(
+            _resultCborBytes.length != 0, 
+            "result cannot be empty"
+        );
+        // do actual report and return reward transfered to the reproter:
+        return  __reportResultAndReward(
+            _queryId,
+            _resultTimestamp,
+            _resultTallyHash,
+            _resultCborBytes
+        );
+    }
+
+    /// @notice Reports Witnet-provided results to multiple requests within a single EVM tx.
+    /// @notice Emits either a WitOracleQueryResponse* or a BatchReportError event per batched report.
+    /// @dev Fails only if called from unauthorized address.
+    /// @param _batchResults Array of BatchResult structs, every one containing:
+    ///         - unique query identifier;
+    ///         - timestamp of the solving tally txs in Witnet. If zero is provided, EVM-timestamp will be used instead;
+    ///         - hash of the corresponding data request tx at the Witnet side-chain level;
+    ///         - data request result in raw bytes.
+    function reportResultBatch(IWitOracleReporter.BatchResult[] calldata _batchResults)
+        external override
+        onlyReporters
+        returns (uint256 _batchReward)
+    {
+        for (uint _i = 0; _i < _batchResults.length; _i ++) {
+            if (
+                getQueryStatus(_batchResults[_i].queryId)
+                    != Witnet.QueryStatus.Posted
+            ) {
+                emit BatchReportError(
+                    _batchResults[_i].queryId,
+                    WitOracleDataLib.notInStatusRevertMessage(Witnet.QueryStatus.Posted)
+                );
+            } else if (
+                uint256(_batchResults[_i].resultTimestamp) > block.timestamp
+                    || _batchResults[_i].resultTimestamp == 0
+                    || _batchResults[_i].resultCborBytes.length == 0
+            ) {
+                emit BatchReportError(
+                    _batchResults[_i].queryId, 
+                    string(abi.encodePacked(
+                        class(),
+                        ": invalid report data"
+                    ))
+                );
+            } else {
+                _batchReward += __reportResult(
+                    _batchResults[_i].queryId,
+                    _batchResults[_i].resultTimestamp,
+                    _batchResults[_i].resultTallyHash,
+                    _batchResults[_i].resultCborBytes
+                );
+            }
+        }   
+        // Transfer rewards to all reported results in one single transfer to the reporter:
+        if (_batchReward > 0) {
+            __safeTransferTo(
+                payable(msg.sender),
+                _batchReward
+            );
+        }
+    }
+
+
+    /// ================================================================================================================
+    /// --- Internal methods -------------------------------------------------------------------------------------------
+
+    function _require(bool _condition, string memory _reason)
+        virtual override (WitOracleTrustlessBase, WitnetUpgradableBase)
+        internal view 
+    {
+        WitOracleTrustlessBase._require(_condition, _reason);
+    }
+
+    function _revert(string memory _reason)
+        virtual override (WitOracleTrustlessBase, WitnetUpgradableBase)
+        internal view
+    {
+        WitOracleTrustlessBase._revert(_reason);
+    }
+
+    function __reportResult(
+            uint256 _queryId,
+            uint32  _resultTimestamp,
+            bytes32 _resultTallyHash,
+            bytes calldata _resultCborBytes
+        )
+        virtual internal
+        returns (uint256)
+    {
+        return WitOracleDataLib.reportResult(
+            msg.sender,
+            tx.gasprice,
+            uint64(block.number),
+            _queryId, 
+            _resultTimestamp, 
+            _resultTallyHash, 
+            _resultCborBytes
+        );
+    }
+
+    function __reportResultAndReward(
+            uint256 _queryId,
+            uint32  _resultTimestamp,
+            bytes32 _resultTallyHash,
+            bytes calldata _resultCborBytes
+        )
+        virtual internal
+        returns (uint256 _evmReward)
+    {
+        _evmReward = __reportResult(
+            _queryId, 
+            _resultTimestamp, 
+            _resultTallyHash, 
+            _resultCborBytes
+        );
+        // transfer reward to reporter
+        __safeTransferTo(
+            payable(msg.sender),
+            _evmReward
+        );
+    }
+
 }

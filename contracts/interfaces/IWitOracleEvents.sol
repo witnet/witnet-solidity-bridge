@@ -25,6 +25,11 @@ interface IWitOracleEvents {
         Witnet.RadonSLA querySLA
     );
 
+    event WitOracleQueryResponseDispute(
+        uint256 queryId,
+        address evmDisputer
+    );
+
     /// Emitted when the reward of some not-yet reported query gets upgraded.
     event WitOracleQueryUpgrade(
         uint256 queryId,

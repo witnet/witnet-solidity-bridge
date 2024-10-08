@@ -39,6 +39,11 @@ library WitOracleDataLib {
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
 
+    /// Unique relay channel identifying the sidechain and request board instance from where data queries are requested.
+    function channel() internal view returns (bytes4) {
+        return bytes4(keccak256(abi.encode(address(this), block.chainid)));
+    }
+
     /// Returns storage pointer to contents of 'WitnetBoardState' struct.
     function data() internal pure returns (Storage storage _ptr)
     {
@@ -47,12 +52,12 @@ library WitOracleDataLib {
         }
     }
 
-    function queryHashOf(Storage storage self, bytes4 channel, uint256 queryId)
+    function queryHashOf(Storage storage self, uint256 queryId)
         internal view returns (bytes32)
     {
         Witnet.Query storage __query = self.queries[queryId];
         return keccak256(abi.encode(
-            channel,
+            channel(),
             queryId,
             blockhash(__query.block),
             __query.request.radonRadHash != bytes32(0)
@@ -60,26 +65,6 @@ library WitOracleDataLib {
                 : keccak256(bytes(__query.request.radonBytecode)),
             __query.request.radonSLA
         ));
-    }
-
-    /// Saves query response into storage.
-    function saveQueryResponse(
-            address evmReporter,
-            uint64  evmFinalityBlock,
-            uint256 queryId,
-            uint32  resultTimestamp,
-            bytes32 resultDrTxHash,
-            bytes memory resultCborBytes
-        ) internal
-    {
-        seekQuery(queryId).response = Witnet.QueryResponse({
-            reporter: evmReporter,
-            finality: evmFinalityBlock,
-            resultTimestamp: resultTimestamp,
-            resultDrTxHash: resultDrTxHash,
-            resultCborBytes: resultCborBytes,
-            disputer: address(0)
-        });
     }
 
     /// Gets query storage by query id.
@@ -182,20 +167,46 @@ library WitOracleDataLib {
     
     /// =======================================================================
     /// --- IWitOracle --------------------------------------------------------
+
+    function fetchQueryResponse(uint256 queryId) public returns (
+            Witnet.QueryResponse memory _queryResponse,
+            uint72 _queryEvmExpiredReward
+        )
+    {
+        Witnet.Query storage __query = seekQuery(queryId);
+        Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
+
+        _queryEvmExpiredReward = __query.request.evmReward;
+        __query.request.evmReward = 0;
+
+        if (
+            _queryStatus != Witnet.QueryStatus.Expired
+                && _queryStatus != Witnet.QueryStatus.Finalized
+        ) {
+            revert(string(abi.encodePacked(
+                "invalid query status: ",
+                toString(_queryStatus)
+            )));
+        }
+
+        _queryResponse = __query.response;
+        delete data().queries[queryId];
+    }    
     
     function fetchQueryResponseTrustlessly(
-            uint256 evmQueryReportingStake,
             uint256 queryId, 
-            Witnet.QueryStatus queryStatus
+            uint256 evmQueryAwaitingBlocks,
+            uint256 evmQueryReportingStake
         )
         public returns (Witnet.QueryResponse memory _queryResponse)
     {
         Witnet.Query storage __query = seekQuery(queryId);
+        Witnet.QueryStatus _queryStatus = getQueryStatusTrustlessly(queryId, evmQueryAwaitingBlocks);
 
         uint72 _evmReward = __query.request.evmReward;
         __query.request.evmReward = 0;
 
-        if (queryStatus == Witnet.QueryStatus.Expired) {
+        if (_queryStatus == Witnet.QueryStatus.Expired) {
             if (_evmReward > 0) {
                 if (__query.response.disputer != address(0)) {
                     // transfer reporter's stake to the disputer
@@ -212,10 +223,10 @@ library WitOracleDataLib {
                 }
             }
         
-        } else if (queryStatus != Witnet.QueryStatus.Finalized) {
+        } else if (_queryStatus != Witnet.QueryStatus.Finalized) {
             revert(string(abi.encodePacked(
                 "invalid query status: ",
-                toString(queryStatus)
+                toString(_queryStatus)
             )));
         }
 
@@ -226,7 +237,24 @@ library WitOracleDataLib {
         // transfer unused reward to requester:
         if (_evmReward > 0) {
             deposit(msg.sender, _evmReward);
-        }    
+        }
+    }
+
+    function getQueryStatus(uint256 queryId) public view returns (Witnet.QueryStatus) {
+        Witnet.Query storage __query = seekQuery(queryId);
+        
+        if (__query.response.resultTimestamp != 0) {
+            return Witnet.QueryStatus.Finalized;
+            
+        } else if (__query.block == 0) {
+            return Witnet.QueryStatus.Unknown;
+        
+        } else if (block.number >= __query.block + 64) {
+            return Witnet.QueryStatus.Expired;
+        
+        } else {
+            return Witnet.QueryStatus.Posted;
+        }
     }
 
     function getQueryStatusTrustlessly(
@@ -236,6 +264,7 @@ library WitOracleDataLib {
         public view returns (Witnet.QueryStatus)
     {
         Witnet.Query storage __query = seekQuery(queryId);
+        
         if (__query.response.resultTimestamp != 0) {
             if (block.number >= __query.response.finality) {
                 if (__query.response.disputer != address(0)) {
@@ -263,6 +292,34 @@ library WitOracleDataLib {
         
         } else {
             return Witnet.QueryStatus.Posted;
+        }
+    }
+
+    function getQueryResponseStatus(uint256 queryId) public view returns (Witnet.QueryResponseStatus) {
+        Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
+        
+        if (_queryStatus == Witnet.QueryStatus.Finalized) {
+            bytes storage __cborValues = WitOracleDataLib.seekQueryResponse(queryId).resultCborBytes;
+            if (__cborValues.length > 0) {
+                // determine whether stored result is an error by peeking the first byte
+                return (__cborValues[0] == bytes1(0xd8)
+                    ? Witnet.QueryResponseStatus.Error 
+                    : Witnet.QueryResponseStatus.Ready
+                );
+            
+            } else {
+                // the result is final but delivered to the requesting address
+                return Witnet.QueryResponseStatus.Delivered;
+            }
+        
+        } else if (_queryStatus == Witnet.QueryStatus.Posted) {
+            return Witnet.QueryResponseStatus.Awaiting;
+        
+        } else if (_queryStatus == Witnet.QueryStatus.Expired) {
+            return Witnet.QueryResponseStatus.Expired;
+        
+        } else {
+            return Witnet.QueryResponseStatus.Void;
         }
     }
 
@@ -365,22 +422,24 @@ library WitOracleDataLib {
             }
         }
     }
-    
-    function reportQueryResponse(
+
+    function reportResult(
             address evmReporter,
             uint256 evmGasPrice,
             uint64  evmFinalityBlock,
-            Witnet.QueryResponseReport calldata report
+            uint256 queryId,
+            uint32  witDrResultTimestamp,
+            bytes32 witDrTxHash,
+            bytes calldata witDrResultCborBytes
         )
         public returns (uint256 evmReward)
-        // todo: turn into private
     {
         // read requester address and whether a callback was requested:
-        Witnet.QueryRequest storage __request = seekQueryRequest(report.queryId);
-                
+        Witnet.QueryRequest storage __request = seekQueryRequest(queryId);
+
         // read query EVM reward:
         evmReward = __request.evmReward;
-        
+
         // set EVM reward right now as to avoid re-entrancy attacks:
         __request.evmReward = 0; 
 
@@ -390,81 +449,86 @@ library WitOracleDataLib {
                 uint256 evmCallbackActualGas,
                 bool evmCallbackSuccess,
                 string memory evmCallbackRevertMessage
-            ) = reportQueryResponseCallback(
+            ) = __reportResultCallback(
                 __request.requester,
                 __request.gasCallback,
                 evmFinalityBlock,
-                report
+                queryId,
+                witDrResultTimestamp,
+                witDrTxHash,
+                witDrResultCborBytes
             );
             if (evmCallbackSuccess) {
                 // => the callback run successfully
                 emit IWitOracleEvents.WitOracleQueryReponseDelivered(
-                    report.queryId,
+                    queryId,
                     evmGasPrice,
                     evmCallbackActualGas
                 );
             } else {
                 // => the callback reverted
                 emit IWitOracleEvents.WitOracleQueryResponseDeliveryFailed(
-                    report.queryId,
+                    queryId,
                     evmGasPrice,
                     evmCallbackActualGas,
                     bytes(evmCallbackRevertMessage).length > 0 
                         ? evmCallbackRevertMessage
                         : "WitOracleDataLib: callback exceeded gas limit",
-                    report.witDrResultCborBytes
+                    witDrResultCborBytes
                 );
             }
             // upon delivery, successfull or not, the audit trail is saved into storage, 
             // but not the actual result which was intended to be passed over to the requester:
-            saveQueryResponse(
+            __saveQueryResponse(
                 evmReporter,
                 evmFinalityBlock,
-                report.queryId, 
-                Witnet.determineTimestampFromEpoch(report.witDrResultEpoch), 
-                report.witDrTxHash,
+                queryId, 
+                witDrResultTimestamp, 
+                witDrTxHash,
                 hex""
             );
         } else {
             // => no callback is involved
             emit IWitOracleEvents.WitOracleQueryResponse(
-                report.queryId, 
+                queryId, 
                 evmGasPrice
             );
             // write query result and audit trail data into storage 
-            saveQueryResponse(
+            __saveQueryResponse(
                 evmReporter,
                 evmFinalityBlock,
-                report.queryId,
-                Witnet.determineTimestampFromEpoch(report.witDrResultEpoch),
-                report.witDrTxHash,
-                report.witDrResultCborBytes
+                queryId,
+                witDrResultTimestamp,
+                witDrTxHash,
+                witDrResultCborBytes
             );
         }
     }
 
-    function reportQueryResponseCallback(
+    function __reportResultCallback(
             address evmRequester,
             uint24  evmCallbackGasLimit,
             uint64  evmFinalityBlock,
-            Witnet.QueryResponseReport calldata report
+            uint256 queryId,
+            uint32  witDrResultTimestamp,
+            bytes32 witDrTxHash,
+            bytes calldata witDrResultCborBytes
         )
-        public returns (
+        private returns (
             uint256 evmCallbackActualGas, 
             bool evmCallbackSuccess, 
             string memory evmCallbackRevertMessage
         )
-        // todo: turn into private
     {
         evmCallbackActualGas = gasleft();
-        if (report.witDrResultCborBytes[0] == bytes1(0xd8)) {
-            WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(report.witDrResultCborBytes).readArray();
+        if (witDrResultCborBytes[0] == bytes1(0xd8)) {
+            WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(witDrResultCborBytes).readArray();
             if (_errors.length < 2) {
                 // try to report result with unknown error:
                 try IWitOracleConsumer(evmRequester).reportWitOracleResultError{gas: evmCallbackGasLimit}(
-                    report.queryId,
-                    Witnet.determineTimestampFromEpoch(report.witDrResultEpoch),
-                    report.witDrTxHash,
+                    queryId,
+                    witDrResultTimestamp,
+                    witDrTxHash,
                     evmFinalityBlock,
                     Witnet.ResultErrorCodes.Unknown,
                     WitnetCBOR.CBOR({
@@ -477,91 +541,63 @@ library WitOracleDataLib {
                     })
                 ) {
                     evmCallbackSuccess = true;
+                
                 } catch Error(string memory err) {
                     evmCallbackRevertMessage = err;
                 }
-            
             } else {
                 // try to report result with parsable error:
                 try IWitOracleConsumer(evmRequester).reportWitOracleResultError{gas: evmCallbackGasLimit}(
-                    report.queryId,
-                    Witnet.determineEpochFromTimestamp(report.witDrResultEpoch),
-                    report.witDrTxHash,
+                    queryId,
+                    witDrResultTimestamp,
+                    witDrTxHash,
                     evmFinalityBlock,
                     Witnet.ResultErrorCodes(_errors[0].readUint()),
                     _errors[0]
                 ) {
                     evmCallbackSuccess = true;
+                
                 } catch Error(string memory err) {
                     evmCallbackRevertMessage = err; 
                 }
             }
-        
         } else {
             // try to report result result with no error :
             try IWitOracleConsumer(evmRequester).reportWitOracleResultValue{gas: evmCallbackGasLimit}(
-                report.queryId,
-                Witnet.determineTimestampFromEpoch(report.witDrResultEpoch),
-                report.witDrTxHash,
+                queryId,
+                witDrResultTimestamp,
+                witDrTxHash,
                 evmFinalityBlock,
-                WitnetCBOR.fromBytes(report.witDrResultCborBytes)
+                WitnetCBOR.fromBytes(witDrResultCborBytes)
             ) {
                 evmCallbackSuccess = true;
+            
             } catch Error(string memory err) {
                 evmCallbackRevertMessage = err;
+            
             } catch (bytes memory) {}
         }
         evmCallbackActualGas -= gasleft();
     }
 
-    function reportQueryResponseTrustlessly(
-            bytes4 channel,
-            uint256 evmGasPrice,
-            uint256 evmQueryAwaitingBlocks,
-            uint256 evmQueryReportingStake,
-            Witnet.QueryStatus queryStatus,
-            Witnet.QueryResponseReport calldata queryResponseReport
-        )
-        public returns (uint256)
+    /// Saves query response into storage.
+    function __saveQueryResponse(
+            address evmReporter,
+            uint64  evmFinalityBlock,
+            uint256 queryId,
+            uint32  witDrResultTimestamp,
+            bytes32 witDrTxHash,
+            bytes memory witDrResultCborBytes
+        ) private
     {
-        (bool _isValidQueryResponseReport, string memory _queryResponseReportInvalidError) = isValidQueryResponseReport(
-            channel, 
-            queryResponseReport
-        );
-        require(
-            _isValidQueryResponseReport,
-            _queryResponseReportInvalidError
-        );
-        
-        address _queryReporter;
-        if (queryStatus == Witnet.QueryStatus.Posted) {
-            _queryReporter = queryResponseReport.queryRelayer();
-            require(
-                _queryReporter == msg.sender,
-                "unauthorized query reporter"
-            );
-        }
-
-        else if (queryStatus == Witnet.QueryStatus.Delayed) {
-            _queryReporter = msg.sender;
-        
-        } else {
-            revert(string(abi.encodePacked(
-                "invalid query status: ",
-                toString(queryStatus)
-            )));
-        }
-
-        // stake from caller's balance:
-        stake(msg.sender, evmQueryReportingStake);
-
-        // save query response into storage:
-        return reportQueryResponse(
-            _queryReporter,
-            evmGasPrice,
-            uint64(block.number + evmQueryAwaitingBlocks),
-            queryResponseReport
-        );
+        seekQuery(queryId).response = Witnet.QueryResponse({
+            reporter: evmReporter,
+            finality: evmFinalityBlock,
+            resultTimestamp: witDrResultTimestamp,
+            resultDrTxHash: witDrTxHash,
+            resultCborBytes: witDrResultCborBytes,
+            disputer: address(0)
+        });
     }
 
 
@@ -569,9 +605,9 @@ library WitOracleDataLib {
     /// --- IWitOracleReporterTrustless ---------------------------------------
 
     function claimQueryReward(
-            uint256 evmQueryReportingStake,
-            uint256 queryId, 
-            Witnet.QueryStatus queryStatus
+            uint256 queryId,
+            uint256 evmQueryAwaitingBlocks,
+            uint256 evmQueryReportingStake
         ) 
         public returns (uint256 evmReward)
     {
@@ -592,7 +628,11 @@ library WitOracleDataLib {
             evmReward
         );
 
-        if (queryStatus == Witnet.QueryStatus.Finalized) {
+        Witnet.QueryStatus _queryStatus = getQueryStatusTrustlessly(
+            queryId, 
+            evmQueryAwaitingBlocks
+        );
+        if (_queryStatus == Witnet.QueryStatus.Finalized) {
             // only the reporter can claim, 
             require(
                 msg.sender == __query.request.requester,
@@ -604,7 +644,7 @@ library WitOracleDataLib {
                 evmQueryReportingStake
             );
 
-        } else if (queryStatus == Witnet.QueryStatus.Expired) {
+        } else if (_queryStatus == Witnet.QueryStatus.Expired) {
             if (__query.response.disputer != address(0)) {
                 // only the disputer can claim,
                 require(
@@ -635,15 +675,15 @@ library WitOracleDataLib {
         } else {
             revert(string(abi.encodePacked(
                 "invalid query status: ",
-                toString(queryStatus)
+                toString(_queryStatus)
             )));
         }
     }
 
     function disputeQueryResponse(
+            uint256 queryId,
             uint256 evmQueryAwaitingBlocks,
-            uint256 evmQueryReportingStake,
-            uint256 queryId
+            uint256 evmQueryReportingStake
         )
         public returns (uint256 evmPotentialReward) 
     {
@@ -661,20 +701,71 @@ library WitOracleDataLib {
         );
     }
 
+    function reportQueryResponseTrustlessly(
+            Witnet.QueryResponseReport calldata responseReport,
+            uint256 evmQueryAwaitingBlocks,
+            uint256 evmQueryReportingStake
+        )
+        public returns (uint256)
+    {
+        (bool _isValidQueryResponseReport, string memory _queryResponseReportInvalidError) = isValidQueryResponseReport(
+            responseReport
+        );
+        require(
+            _isValidQueryResponseReport,
+            _queryResponseReportInvalidError
+        );
+        
+        address _queryReporter;
+        Witnet.QueryStatus _queryStatus = getQueryStatusTrustlessly(
+            responseReport.queryId,
+            evmQueryAwaitingBlocks
+        );
+        if (_queryStatus == Witnet.QueryStatus.Posted) {
+            _queryReporter = responseReport.queryRelayer();
+            require(
+                _queryReporter == msg.sender,
+                "unauthorized query reporter"
+            );
+        }
+
+        else if (_queryStatus == Witnet.QueryStatus.Delayed) {
+            _queryReporter = msg.sender;
+        
+        } else {
+            revert(string(abi.encodePacked(
+                "invalid query status: ",
+                toString(_queryStatus)
+            )));
+        }
+
+        // stake from caller's balance:
+        stake(msg.sender, evmQueryReportingStake);
+
+        // save query response into storage:
+        return reportResult(
+            _queryReporter,
+            tx.gasprice,
+            uint64(block.number + evmQueryAwaitingBlocks),
+            responseReport.queryId,
+            Witnet.determineTimestampFromEpoch(responseReport.witDrResultEpoch),
+            responseReport.witDrTxHash,
+            responseReport.witDrResultCborBytes
+        );
+    }
+
     function rollupQueryResponseProof(
-            bytes4  channel,
-            uint256 evmQueryReportingStake,
-            Witnet.QueryResponseReport calldata queryResponseReport,
-            Witnet.QueryStatus queryStatus,
             Witnet.FastForward[] calldata witOracleRollup,
-            bytes32[] calldata ddrTalliesMerkleTrie
+            Witnet.QueryResponseReport calldata responseReport,
+            bytes32[] calldata ddrTalliesMerkleTrie,
+            uint256 evmQueryAwaitingBlocks,
+            uint256 evmQueryReportingStake
         )
         public returns (uint256 evmTotalReward)
     {
         // validate query response report
         (bool _isValidQueryResponseReport, string memory _queryResponseReportInvalidError) = isValidQueryResponseReport(
-            channel, 
-            queryResponseReport
+            responseReport
         );
         require(_isValidQueryResponseReport, _queryResponseReportInvalidError);
 
@@ -682,28 +773,32 @@ library WitOracleDataLib {
         Witnet.Beacon memory _witOracleHead = rollupBeacons(witOracleRollup);
         require(
             _witOracleHead.index == Witnet.determineBeaconIndexFromEpoch(
-                queryResponseReport.witDrResultEpoch
-            ) + 1, "mismatching head beacon"
+                responseReport.witDrResultEpoch
+            ) + 1, "misleading head beacon"
         );
 
         // validate merkle proof
         require(
             _witOracleHead.ddrTalliesMerkleRoot == Witnet.merkleRoot(
                 ddrTalliesMerkleTrie, 
-                queryResponseReport.tallyHash()
+                responseReport.tallyHash()
             ), "invalid merkle proof"
         );
 
-        Witnet.Query storage __query = seekQuery(queryResponseReport.queryId);
+        Witnet.Query storage __query = seekQuery(responseReport.queryId);
         // process query response report depending on query's current status ...
         {    
-            if (queryStatus == Witnet.QueryStatus.Reported) {                
+            Witnet.QueryStatus _queryStatus = getQueryStatusTrustlessly(
+                responseReport.queryId,
+                evmQueryAwaitingBlocks
+            );
+            if (_queryStatus == Witnet.QueryStatus.Reported) {                
                 // check that proven report actually differs from what was formerly reported
                 require(
                     keccak256(abi.encode(
-                        queryResponseReport.witDrTxHash, 
-                        queryResponseReport.witDrResultEpoch,
-                        queryResponseReport.witDrResultCborBytes
+                        responseReport.witDrTxHash, 
+                        responseReport.witDrResultEpoch,
+                        responseReport.witDrResultCborBytes
                     )) != keccak256(abi.encode(
                         __query.response.resultDrTxHash,
                         Witnet.determineEpochFromTimestamp(__query.response.resultTimestamp),
@@ -724,17 +819,17 @@ library WitOracleDataLib {
 
                 // update query's response data into storage:
                 __query.response.reporter = msg.sender;
-                __query.response.resultCborBytes = queryResponseReport.witDrResultCborBytes;
-                __query.response.resultDrTxHash = queryResponseReport.witDrTxHash;
-                __query.response.resultTimestamp = Witnet.determineTimestampFromEpoch(queryResponseReport.witDrResultEpoch);
+                __query.response.resultCborBytes = responseReport.witDrResultCborBytes;
+                __query.response.resultDrTxHash = responseReport.witDrTxHash;
+                __query.response.resultTimestamp = Witnet.determineTimestampFromEpoch(responseReport.witDrResultEpoch);
         
-            } else if (queryStatus == Witnet.QueryStatus.Disputed) {
+            } else if (_queryStatus == Witnet.QueryStatus.Disputed) {
                 // check that proven report actually matches what was formerly reported
                 require(
                     keccak256(abi.encode(
-                        queryResponseReport.witDrTxHash, 
-                        queryResponseReport.witDrResultEpoch,
-                        queryResponseReport.witDrResultCborBytes
+                        responseReport.witDrTxHash, 
+                        responseReport.witDrResultEpoch,
+                        responseReport.witDrResultCborBytes
                     )) == keccak256(abi.encode(
                         __query.response.resultDrTxHash,
                         Witnet.determineEpochFromTimestamp(__query.response.resultTimestamp),
@@ -759,7 +854,7 @@ library WitOracleDataLib {
             } else {
                 revert(string(abi.encodePacked(
                     "invalid query status: ",
-                    toString(queryStatus)
+                    toString(_queryStatus)
                 )));
             }
             
@@ -771,8 +866,8 @@ library WitOracleDataLib {
     }
 
     function rollupQueryResultProof(
-            Witnet.QueryReport calldata queryReport,
             Witnet.FastForward[] calldata witOracleRollup,
+            Witnet.QueryReport calldata queryReport,
             bytes32[] calldata droTalliesMerkleTrie
         )
         public returns (Witnet.Result memory)
@@ -792,7 +887,7 @@ library WitOracleDataLib {
         require(
             _witOracleHead.index == Witnet.determineBeaconIndexFromEpoch(
                 queryReport.witDrResultEpoch
-            ) + 1, "mismatching head beacon"
+            ) + 1, "misleading head beacon"
         );
 
         // validate merkle proof
@@ -813,12 +908,12 @@ library WitOracleDataLib {
     /// =======================================================================
     /// --- Other public helper methods ---------------------------------------
 
-    function isValidQueryResponseReport(bytes4 channel, Witnet.QueryResponseReport calldata report)
+    function isValidQueryResponseReport(Witnet.QueryResponseReport calldata report)
         public view
         // todo: turn into private
         returns (bool, string memory)
     {
-        if (queryHashOf(data(), channel, report.queryId) != report.queryHash) {
+        if (queryHashOf(data(), report.queryId) != report.queryHash) {
             return (false, "invalid query hash");
         
         } else if (report.witDrResultEpoch == 0) {
@@ -884,6 +979,154 @@ library WitOracleDataLib {
 
     /// =======================================================================
     /// --- Private library methods -------------------------------------------
+
+    // function __reportQueryResponse(
+    //         address evmReporter,
+    //         uint256 evmGasPrice,
+    //         uint64  evmFinalityBlock,
+    //         Witnet.QueryResponseReport calldata report
+    //     )
+    //     private returns (uint256 evmReward)
+    // {
+    //     // read requester address and whether a callback was requested:
+    //     Witnet.QueryRequest storage __request = seekQueryRequest(report.queryId);
+                
+    //     // read query EVM reward:
+    //     evmReward = __request.evmReward;
+        
+    //     // set EVM reward right now as to avoid re-entrancy attacks:
+    //     __request.evmReward = 0; 
+
+    //     // determine whether a callback is required
+    //     if (__request.gasCallback > 0) {
+    //         (
+    //             uint256 evmCallbackActualGas,
+    //             bool evmCallbackSuccess,
+    //             string memory evmCallbackRevertMessage
+    //         ) = __reportQueryResponseCallback(
+    //             __request.requester,
+    //             __request.gasCallback,
+    //             evmFinalityBlock,
+    //             report
+    //         );
+    //         if (evmCallbackSuccess) {
+    //             // => the callback run successfully
+    //             emit IWitOracleEvents.WitOracleQueryReponseDelivered(
+    //                 report.queryId,
+    //                 evmGasPrice,
+    //                 evmCallbackActualGas
+    //             );
+    //         } else {
+    //             // => the callback reverted
+    //             emit IWitOracleEvents.WitOracleQueryResponseDeliveryFailed(
+    //                 report.queryId,
+    //                 evmGasPrice,
+    //                 evmCallbackActualGas,
+    //                 bytes(evmCallbackRevertMessage).length > 0 
+    //                     ? evmCallbackRevertMessage
+    //                     : "WitOracleDataLib: callback exceeded gas limit",
+    //                 report.witDrResultCborBytes
+    //             );
+    //         }
+    //         // upon delivery, successfull or not, the audit trail is saved into storage, 
+    //         // but not the actual result which was intended to be passed over to the requester:
+    //         saveQueryResponse(
+    //             evmReporter,
+    //             evmFinalityBlock,
+    //             report.queryId, 
+    //             Witnet.determineTimestampFromEpoch(report.witDrResultEpoch), 
+    //             report.witDrTxHash,
+    //             hex""
+    //         );
+    //     } else {
+    //         // => no callback is involved
+    //         emit IWitOracleEvents.WitOracleQueryResponse(
+    //             report.queryId, 
+    //             evmGasPrice
+    //         );
+    //         // write query result and audit trail data into storage 
+    //         saveQueryResponse(
+    //             evmReporter,
+    //             evmFinalityBlock,
+    //             report.queryId,
+    //             Witnet.determineTimestampFromEpoch(report.witDrResultEpoch),
+    //             report.witDrTxHash,
+    //             report.witDrResultCborBytes
+    //         );
+    //     }
+    // }
+
+    // function __reportQueryResponseCallback(
+    //         address evmRequester,
+    //         uint24  evmCallbackGasLimit,
+    //         uint64  evmFinalityBlock,
+    //         Witnet.QueryResponseReport calldata report
+    //     )
+    //     private returns (
+    //         uint256 evmCallbackActualGas, 
+    //         bool evmCallbackSuccess, 
+    //         string memory evmCallbackRevertMessage
+    //     )
+    // {
+    //     evmCallbackActualGas = gasleft();
+    //     if (report.witDrResultCborBytes[0] == bytes1(0xd8)) {
+    //         WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(report.witDrResultCborBytes).readArray();
+    //         if (_errors.length < 2) {
+    //             // try to report result with unknown error:
+    //             try IWitOracleConsumer(evmRequester).reportWitOracleResultError{gas: evmCallbackGasLimit}(
+    //                 report.queryId,
+    //                 Witnet.determineTimestampFromEpoch(report.witDrResultEpoch),
+    //                 report.witDrTxHash,
+    //                 evmFinalityBlock,
+    //                 Witnet.ResultErrorCodes.Unknown,
+    //                 WitnetCBOR.CBOR({
+    //                     buffer: WitnetBuffer.Buffer({ data: hex"", cursor: 0}),
+    //                     initialByte: 0,
+    //                     majorType: 0,
+    //                     additionalInformation: 0,
+    //                     len: 0,
+    //                     tag: 0
+    //                 })
+    //             ) {
+    //                 evmCallbackSuccess = true;
+    //             } catch Error(string memory err) {
+    //                 evmCallbackRevertMessage = err;
+    //             }
+            
+    //         } else {
+    //             // try to report result with parsable error:
+    //             try IWitOracleConsumer(evmRequester).reportWitOracleResultError{gas: evmCallbackGasLimit}(
+    //                 report.queryId,
+    //                 Witnet.determineEpochFromTimestamp(report.witDrResultEpoch),
+    //                 report.witDrTxHash,
+    //                 evmFinalityBlock,
+    //                 Witnet.ResultErrorCodes(_errors[0].readUint()),
+    //                 _errors[0]
+    //             ) {
+    //                 evmCallbackSuccess = true;
+    //             } catch Error(string memory err) {
+    //                 evmCallbackRevertMessage = err; 
+    //             }
+    //         }
+        
+    //     } else {
+    //         // try to report result result with no error :
+    //         try IWitOracleConsumer(evmRequester).reportWitOracleResultValue{gas: evmCallbackGasLimit}(
+    //             report.queryId,
+    //             Witnet.determineTimestampFromEpoch(report.witDrResultEpoch),
+    //             report.witDrTxHash,
+    //             evmFinalityBlock,
+    //             WitnetCBOR.fromBytes(report.witDrResultCborBytes)
+    //         ) {
+    //             evmCallbackSuccess = true;
+            
+    //         } catch Error(string memory err) {
+    //             evmCallbackRevertMessage = err;
+            
+    //         } catch (bytes memory) {}
+    //     }
+    //     evmCallbackActualGas -= gasleft();
+    // }
 
     function _verifyFastForwards(Witnet.FastForward[] calldata ff)
         private pure 
