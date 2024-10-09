@@ -68,10 +68,10 @@ interface IWitOracleRequestFactory {
     /// @notice Witnet Radon Retrieval. Modal request templates produce Witnet-compliant data requests
     /// @notice that apply the same data retrieval script to multiple data providers that are expected to
     /// @notice produce exactly the same result. Moreover, data requests built out of a modal request templates
-    /// @notice apply a Mode reducing function at both the Aggregate and Tally stages everytime they get
+    /// @notice apply a Mode reducing function at both the Aggregate and Tally stages every time they get
     /// @notice eventually solved on the Wit/Oracle blockchain. You can optionally specify a list of filters 
     /// @notice to be applied at the Tally resolution stage (i.e. witnessing nodes on the Wit/Oracle blockchain
-    /// @notice reporting results that get ultimately filtred out on the Tally stage would get slashed by losing collateral).
+    /// @notice reporting results that get ultimately filtered out on the Tally stage would get slashed by losing collateral).
     /// @dev Reverts if:
     /// @dev  - unverified base Radon Retrieval is passed;
     /// @dev  - the specified base Radon Retrieval is either not parameterized or requires just one single parameter;

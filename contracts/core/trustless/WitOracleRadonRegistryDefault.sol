@@ -598,8 +598,8 @@ contract WitOracleRadonRegistryDefault
             // Build radon retrieval bytecode:
             bytes memory _bytecode = _retrievals.encode(
                 _retrieveArgsValues, 
-                _aggregateReducer.encode(), 
-                _tallyReducer.encode(), 
+                _aggregateReducer.encode(),
+                _tallyReducer.encode(),
                 0
             );
             _require(
