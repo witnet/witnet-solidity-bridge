@@ -30,6 +30,6 @@ contract WitMockedOracle
     {
         address[] memory _reporters = new address[](1);
         _reporters[0] = msg.sender;
-        __setReporters(_reporters);
+        WitOracleDataLib.setReporters(_reporters);
     }
 } 

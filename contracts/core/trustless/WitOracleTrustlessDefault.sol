@@ -318,7 +318,7 @@ contract WitOracleTrustlessDefault
         }
     }
 
-    function claimQueryRewardsBatch(uint256[] calldata _queryIds)
+    function claimQueryRewardBatch(uint256[] calldata _queryIds)
         virtual override external
         returns (uint256 _evmTotalReward)
     {
@@ -332,17 +332,40 @@ contract WitOracleTrustlessDefault
                 _evmTotalReward += _evmReward;
             
             } catch Error(string memory _reason) {
-                emit BatchReportError(
+                emit BatchQueryError(
                     _queryIds[_ix], 
                     _reason
                 );
         
             } catch (bytes memory) {
-                emit BatchReportError(
+                emit BatchQueryError(
                     _queryIds[_ix], 
                     _revertWitOracleDataLibUnhandledExceptionReason()
                 );
             }
+        }
+    }
+
+    function extractQueryRelayData(uint256 _queryId)
+        virtual override public view
+        returns (QueryRelayData memory _queryRelayData)
+    {
+        Witnet.QueryStatus _queryStatus = getQueryStatus(_queryId);
+        if (
+            _queryStatus == Witnet.QueryStatus.Posted
+                || _queryStatus == Witnet.QueryStatus.Delayed
+        ) {
+            _queryRelayData = WitOracleDataLib.extractQueryRelayData(registry, _queryId);
+        }
+    }
+
+    function extractQueryRelayDataBatch(uint256[] calldata _queryIds)
+        virtual override external view
+        returns (QueryRelayData[] memory _relays)
+    {
+        _relays = new QueryRelayData[](_queryIds.length);
+        for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
+            _relays[_ix] = extractQueryRelayData(_queryIds[_ix]);
         }
     }
 
@@ -393,13 +416,13 @@ contract WitOracleTrustlessDefault
                 _evmTotalReward += _evmPartialReward;
             
             } catch Error(string memory _reason) {
-                emit BatchReportError(
+                emit BatchQueryError(
                     _responseReport.queryId,
                     _reason
                 );
     
             } catch (bytes memory) {
-                emit BatchReportError(
+                emit BatchQueryError(
                     _responseReport.queryId,
                     _revertWitOracleDataLibUnhandledExceptionReason()
                 );

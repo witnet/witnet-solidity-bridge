@@ -8,6 +8,7 @@ import "../interfaces/IWitOracleBlocks.sol";
 import "../interfaces/IWitOracleConsumer.sol";
 import "../interfaces/IWitOracleEvents.sol";
 import "../interfaces/IWitOracleReporter.sol";
+import "../interfaces/IWitOracleReporterTrustless.sol";
 import "../libs/Witnet.sol";
 import "../patterns/Escrowable.sol";
 
@@ -408,18 +409,11 @@ library WitOracleDataLib {
     {
         bytecodes = new bytes[](queryIds.length);
         for (uint _ix = 0; _ix < queryIds.length; _ix ++) {
-            Witnet.QueryRequest storage __request = data().queries[queryIds[_ix]].request;
-            if (__request.radonRadHash != bytes32(0)) {
-                bytecodes[_ix] = registry.bytecodeOf(
-                    __request.radonRadHash,
-                    __request.radonSLA
-                );
-            } else {
-                bytecodes[_ix] = registry.bytecodeOf(
-                    __request.radonBytecode,
-                    __request.radonSLA 
-                );
-            }
+            Witnet.QueryRequest storage __request = seekQueryRequest(queryIds[_ix]);
+            bytecodes[_ix] = (__request.radonRadHash != bytes32(0)
+                ? registry.bytecodeOf(__request.radonRadHash, __request.radonSLA)
+                : registry.bytecodeOf(__request.radonBytecode,__request.radonSLA)
+            );
         }
     }
 
@@ -603,6 +597,27 @@ library WitOracleDataLib {
 
     /// =======================================================================
     /// --- IWitOracleReporterTrustless ---------------------------------------
+
+    function extractQueryRelayData(
+            WitOracleRadonRegistry registry,
+            uint256 queryId
+        )
+        public view
+        returns (IWitOracleReporterTrustless.QueryRelayData memory _queryRelayData)
+    {
+        Witnet.QueryRequest storage __request = seekQueryRequest(queryId);
+        return IWitOracleReporterTrustless.QueryRelayData({
+            queryId: queryId,
+            queryEvmBlock: seekQuery(queryId).block,
+            queryEvmHash: queryHashOf(data(), queryId),
+            queryEvmReward: __request.evmReward,
+            queryWitDrBytecodes: (__request.radonRadHash != bytes32(0)
+                ? registry.bytecodeOf(__request.radonRadHash, __request.radonSLA)
+                : registry.bytecodeOf(__request.radonBytecode,__request.radonSLA)
+            ),
+            queryWitDrSLA: __request.radonSLA
+        });
+    }
 
     function claimQueryReward(
             uint256 queryId,

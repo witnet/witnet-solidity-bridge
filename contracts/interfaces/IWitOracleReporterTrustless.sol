@@ -7,13 +7,25 @@ import "../libs/Witnet.sol";
 /// @title The Witnet Request Board Reporter trustless interface.
 /// @author The Witnet Foundation.
 interface IWitOracleReporterTrustless {
-
-    event BatchReportError(uint256 queryId, string reason);
-
+    
+    event BatchQueryError(uint256 queryId, string reason);
+    
+    function extractQueryRelayData(uint256 queryId) external view returns (QueryRelayData memory);
+    function extractQueryRelayDataBatch(uint256[] calldata queryIds) external view returns (QueryRelayData[] memory);
+        struct QueryRelayData  {
+            uint256 queryId;
+            uint256 queryEvmBlock;
+            bytes32 queryEvmHash;
+            uint256 queryEvmReward;
+            bytes   queryWitDrBytecodes;
+            Witnet.RadonSLA queryWitDrSLA;
+        }
+    
     function claimQueryReward(uint256 queryId) external returns (uint256);
-    function claimQueryRewardsBatch(uint256[] calldata queryIds) external returns (uint256);
+    function claimQueryRewardBatch(uint256[] calldata queryIds) external returns (uint256);
+    
 
-    function disputeQueryResponse(uint256 queryId) external returns (uint256);
+    function disputeQueryResponse (uint256 queryId) external returns (uint256);
 
     function reportQueryResponse(Witnet.QueryResponseReport calldata report) external returns (uint256);
     function reportQueryResponseBatch(Witnet.QueryResponseReport[] calldata reports) external returns (uint256);
