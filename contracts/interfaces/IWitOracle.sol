@@ -63,6 +63,7 @@ interface IWitOracle {
     /// @notice   - 5 => Delivered: at least one response, either successful or with errors, was delivered to the requesting contract.
     /// @param queryId The unique query identifier.
     function getQueryResponseStatus(uint256 queryId) external view returns (Witnet.QueryResponseStatus);
+    function getQueryResponseStatusTag(uint256 queryId) external view returns (string memory);
 
     /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
     /// @param queryId The unique query identifier.
@@ -74,6 +75,7 @@ interface IWitOracle {
 
     /// @notice Gets current status of given query.
     function getQueryStatus(uint256 queryId) external view returns (Witnet.QueryStatus);
+    function getQueryStatusTag(uint256 queryId) external view returns (string memory);
     
     /// @notice Get current status of all given query ids.
     function getQueryStatusBatch(uint256[] calldata queryIds) external view returns (Witnet.QueryStatus[] memory);
@@ -88,11 +90,11 @@ interface IWitOracle {
     /// @dev - the RAD hash was not previously verified by the WitOracleRadonRegistry registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
-    /// @param queryRAD The RAD hash of the data request to be solved by Witnet.
+    /// @param queryRadHash The RAD hash of the data request to be solved by Witnet.
     /// @param querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @return queryId Unique query identifier.
-    function postRequest(
-            bytes32 queryRAD, 
+    function postQuery(
+            bytes32 queryRadHash, 
             Witnet.RadonSLA calldata querySLA
         ) external payable returns (uint256 queryId);
 
@@ -106,19 +108,19 @@ interface IWitOracle {
     /// @dev - the RAD hash was not previously verified by the WitOracleRadonRegistry registry;
     /// @dev - invalid SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
-    /// @param queryRAD The RAD hash of the data request to be solved by Witnet.
+    /// @param queryRadHash The RAD hash of the data request to be solved by Witnet.
     /// @param querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @param queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
     /// @return queryId Unique query identifier.
-    function postRequestWithCallback(
-            bytes32 queryRAD,
+    function postQueryWithCallback(
+            bytes32 queryRadHash,
             Witnet.RadonSLA calldata querySLA,
             uint24 queryCallbackGasLimit
         ) external payable returns (uint256 queryId);
 
-    function postRequestWithCallback(
+    function postQueryWithCallback(
             IWitOracleConsumer consumer,
-            bytes32 queryRAD,
+            bytes32 queryRadHash,
             Witnet.RadonSLA calldata querySLA,
             uint24 queryCallbackGasLimit
         ) external payable returns (uint256 queryId);
@@ -137,13 +139,13 @@ interface IWitOracle {
     /// @param querySLA The data query SLA to be fulfilled on the Witnet blockchain.
     /// @param queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
     /// @return queryId Unique query identifier.
-    function postRequestWithCallback(
+    function postQueryWithCallback(
             bytes calldata queryUnverifiedBytecode,
             Witnet.RadonSLA calldata querySLA,
             uint24 queryCallbackGasLimit
         ) external payable returns (uint256 queryId);
 
-    function postRequestWithCallback(
+    function postQueryWithCallback(
             IWitOracleConsumer consumer,
             bytes calldata queryUnverifiedBytecode,
             Witnet.RadonSLA calldata querySLA,

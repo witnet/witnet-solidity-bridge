@@ -87,7 +87,7 @@ contract WitOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return _getCurrentL1Fee(_resultMaxSize) + WitOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize);
+        return _getCurrentL1Fee(_resultMaxSize) + WitOracleTrustlessBase.estimateBaseFee(_gasPrice, _resultMaxSize);
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
@@ -98,7 +98,7 @@ contract WitOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return _getCurrentL1Fee(32) + WitOracleTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit);
+        return _getCurrentL1Fee(32) + WitOracleTrustlessBase.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit);
     }
 
     /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
@@ -119,7 +119,7 @@ contract WitOracleTrustableOvm2
     {
         return (
             _getCurrentL1Fee(_querySLA.maxTallyResultSize)
-                + WitOracleTrustableDefault.estimateExtraFee(
+                + WitOracleTrustlessBase.estimateExtraFee(
                     _evmGasPrice,
                     _evmWitPrice,
                     _querySLA
@@ -145,13 +145,13 @@ contract WitOracleTrustableOvm2
     {
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
             if (
-                WitOracleDataLib.seekQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
+                getQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
             ) {
                 Witnet.QueryRequest storage __request = WitOracleDataLib.seekQueryRequest(_queryIds[_ix]);
                 if (__request.gasCallback > 0) {
                     _expenses += (
-                        WitOracleTrustableDefault.estimateBaseFeeWithCallback(_evmGasPrice, __request.gasCallback)
-                            + WitOracleTrustableDefault.estimateExtraFee(
+                        WitOracleTrustlessBase.estimateBaseFeeWithCallback(_evmGasPrice, __request.gasCallback)
+                            + WitOracleTrustlessBase.estimateExtraFee(
                                 _evmGasPrice,
                                 _evmWitPrice,
                                 Witnet.RadonSLA({
@@ -163,8 +163,8 @@ contract WitOracleTrustableOvm2
                     );
                 } else {
                     _expenses += (
-                        WitOracleTrustableDefault.estimateBaseFee(_evmGasPrice)
-                            + WitOracleTrustableDefault.estimateExtraFee(
+                        WitOracleTrustlessBase.estimateBaseFee(_evmGasPrice)
+                            + WitOracleTrustlessBase.estimateExtraFee(
                                 _evmGasPrice,
                                 _evmWitPrice,
                                 __request.radonSLA

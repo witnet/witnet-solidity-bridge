@@ -34,10 +34,16 @@ abstract contract WitnetUpgradableBase
     }
     
     /// @dev Reverts if proxy delegatecalls to unexistent method.
-    fallback() virtual external {
-        _revert("not implemented");
+    /* solhint-disable no-complex-fallback */
+    fallback() virtual external { 
+        _revert(string(abi.encodePacked(
+            "not implemented: 0x",
+            _toHexString(uint8(bytes1(msg.sig))),
+            _toHexString(uint8(bytes1(msg.sig << 8))),
+            _toHexString(uint8(bytes1(msg.sig << 16))),
+            _toHexString(uint8(bytes1(msg.sig << 24)))
+        )));
     }
-
 
     function class() virtual public view returns (string memory) {
         return type(WitnetUpgradableBase).name;
@@ -55,6 +61,15 @@ abstract contract WitnetUpgradableBase
     // ================================================================================================================
     // --- Overrides 'Upgradeable' --------------------------------------------------------------------------------------
 
+    /// Tells whether provided address could eventually upgrade the contract.
+    function isUpgradableFrom(address _from) external view virtual override returns (bool) {
+        return (
+            // false if the WRB is intrinsically not upgradable, or `_from` is no owner
+            isUpgradable()
+                && owner() == _from
+        );
+    }
+
     /// Retrieves human-readable version tag of current implementation.
     function version() public view virtual override returns (string memory) {
         return _toString(_WITNET_UPGRADABLE_VERSION);
@@ -68,7 +83,7 @@ abstract contract WitnetUpgradableBase
             bool _condition, 
             string memory _message
         )
-        internal view
+        virtual internal view
     {
         if (!_condition) {
             _revert(_message);
@@ -76,7 +91,7 @@ abstract contract WitnetUpgradableBase
     }
 
     function _revert(string memory _message)
-        internal view
+        virtual internal view
     {
         revert(
             string(abi.encodePacked(
@@ -85,6 +100,22 @@ abstract contract WitnetUpgradableBase
                 _message
             ))
         );
+    }
+
+    function _toHexString(uint8 _u)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory b2 = new bytes(2);
+        uint8 d0 = uint8(_u / 16) + 48;
+        uint8 d1 = uint8(_u % 16) + 48;
+        if (d0 > 57)
+            d0 += 7;
+        if (d1 > 57)
+            d1 += 7;
+        b2[0] = bytes1(d0);
+        b2[1] = bytes1(d1);
+        return string(b2);
     }
 
     /// Converts bytes32 into string.

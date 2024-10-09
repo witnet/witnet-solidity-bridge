@@ -10,14 +10,14 @@ interface IWitOracleConsumer {
     /// @dev It should revert if called from any other address different to the WitOracle being used
     /// @dev by the WitOracleConsumer contract. 
     /// @param queryId The unique identifier of the Witnet query being reported.
-    /// @param resultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param resultDrTxHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
     /// @param resultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
     /// @param resultEvmFinalityBlock EVM block at which the provided data can be considered to be final.
     /// @param witnetResultCborValue The CBOR-encoded resulting value of the Witnet query being reported.
     function reportWitOracleResultValue(
             uint256 queryId, 
             uint64  resultTimestamp,
-            bytes32 resultTallyHash,
+            bytes32 resultDrTxHash,
             uint256 resultEvmFinalityBlock,
             WitnetCBOR.CBOR calldata witnetResultCborValue
         ) external;
@@ -27,7 +27,7 @@ interface IWitOracleConsumer {
     /// @dev It should revert if called from any other address different to the WitOracle being used
     /// @dev by the WitOracleConsumer contract. 
     /// @param queryId The unique identifier of the Witnet query being reported.
-    /// @param resultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param resultDrTxHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
     /// @param resultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
     /// @param resultEvmFinalityBlock EVM block at which the provided data can be considered to be final.
     /// @param errorCode The error code enum identifying the error produced during resolution on the Witnet blockchain.
@@ -35,7 +35,7 @@ interface IWitOracleConsumer {
     function reportWitOracleResultError(
             uint256 queryId, 
             uint64  resultTimestamp,
-            bytes32 resultTallyHash,
+            bytes32 resultDrTxHash,
             uint256 resultEvmFinalityBlock,
             Witnet.ResultErrorCodes errorCode, 
             WitnetCBOR.CBOR calldata errorArgs

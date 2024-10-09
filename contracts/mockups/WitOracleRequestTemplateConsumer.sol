@@ -76,7 +76,7 @@ abstract contract WitOracleRequestTemplateConsumer
         )
     {
         _queryRadHash = __witOracleVerifyRadonRequest(_witOracleRequestArgs);
-        _queryId = __witOracle.postRequestWithCallback{
+        _queryId = __witOracle.postQueryWithCallback{
             value: _queryEvmReward
         }(
             _queryRadHash,

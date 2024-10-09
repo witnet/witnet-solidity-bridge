@@ -64,7 +64,7 @@ contract TestWitnetV2 {
             reporter: msg.sender,
             finality: uint64(block.number),
             resultTimestamp: uint32(block.timestamp),
-            resultTallyHash: blockhash(block.number - 1),
+            resultDrTxHash: blockhash(block.number - 1),
             resultCborBytes: hex"010203040506"
         });
     }

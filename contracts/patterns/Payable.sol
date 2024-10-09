@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 abstract contract Payable {
     IERC20 public immutable currency;
 
-    event Received(address from, uint256 value);
-    event Transfer(address to, uint256 value);
+    event Received(address indexed from, uint256 value);
+    event Transfer(address indexed to, uint256 value);
 
     constructor(address _currency) {
         currency = IERC20(_currency);
@@ -15,6 +15,9 @@ abstract contract Payable {
 
     /// Gets current transaction price.
     function _getGasPrice() internal view virtual returns (uint256);
+
+    /// Gets message actual sender.
+    function _getMsgSender() internal view virtual returns (address);
 
     /// Gets current payment value.
     function _getMsgValue() internal view virtual returns (uint256);

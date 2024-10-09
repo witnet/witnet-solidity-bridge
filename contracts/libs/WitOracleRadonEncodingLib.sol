@@ -405,13 +405,15 @@ library WitOracleRadonEncodingLib {
                     maxDataSize
                 );
             }
-            return maxDataSize + 3; // TODO: determine CBOR-encoding length overhead
+            return maxDataSize + 3; // todo?: determine CBOR-encoding length overhead??
+        
         } else if (
             dataType == Witnet.RadonDataTypes.Integer
                 || dataType == Witnet.RadonDataTypes.Float
                 || dataType == Witnet.RadonDataTypes.Bool
         ) {
             return 9; 
+        
         } else {
             revert UnsupportedRadonDataType(
                 uint8(dataType),
