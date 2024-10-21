@@ -2,7 +2,6 @@
 
 pragma solidity >=0.8.4 <0.9.0;
 
-import "../WitnetUpgradableBase.sol";
 import "../../WitOracleRadonRegistry.sol";
 import "../../data/WitOracleRadonRegistryData.sol";
 import "../../interfaces/IWitOracleRadonRegistryLegacy.sol";
@@ -13,11 +12,10 @@ import "../../libs/WitOracleRadonEncodingLib.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitOracleRadonRegistryDefault
+abstract contract WitOracleRadonRegistryBase
     is 
         WitOracleRadonRegistry,
         WitOracleRadonRegistryData,
-        WitnetUpgradableBase,
         IWitOracleRadonRegistryLegacy
 {   
     using Witnet for bytes;
@@ -30,12 +28,6 @@ contract WitOracleRadonRegistryDefault
     using WitOracleRadonEncodingLib for Witnet.RadonRetrieval[];
     using WitOracleRadonEncodingLib for Witnet.RadonRetrievalMethods;
     using WitOracleRadonEncodingLib for Witnet.RadonSLAv1;
-
-    function class() public view virtual override(IWitAppliance, WitnetUpgradableBase)  returns (string memory) {
-        return type(WitOracleRadonRegistryDefault).name;
-    }
-
-    bytes4 public immutable override specs = type(WitOracleRadonRegistry).interfaceId;
 
     modifier radonRequestExists(bytes32 _radHash) {
         _require(
@@ -51,116 +43,12 @@ contract WitOracleRadonRegistryDefault
         ); _;
     }
 
-    constructor(bool _upgradable, bytes32 _versionTag)
-        Ownable(address(msg.sender))
-        WitnetUpgradableBase(
-            _upgradable,
-            _versionTag,
-            "io.witnet.proxiable.bytecodes"
-        )
-    {}
-
     function _witOracleHash(bytes memory chunk) virtual internal pure returns (bytes32) {
         return sha256(chunk);
     }
 
     receive() external payable {
         _revert("no transfers");
-    }
-
-    
-    // ================================================================================================================
-    // --- Overrides 'Ownable2Step' -----------------------------------------------------------------------------------
-
-    /// Returns the address of the pending owner.
-    function pendingOwner()
-        public view
-        virtual override
-        returns (address)
-    {
-        return __bytecodes().pendingOwner;
-    }
-
-    /// Returns the address of the current owner.
-    function owner()
-        public view
-        virtual override
-        returns (address)
-    {
-        return __bytecodes().owner;
-    }
-
-    /// Starts the ownership transfer of the contract to a new account. Replaces the pending transfer if there is one.
-    /// @dev Can only be called by the current owner.
-    function transferOwnership(address _newOwner)
-        public
-        virtual override
-        onlyOwner
-    {
-        __bytecodes().pendingOwner = _newOwner;
-        emit OwnershipTransferStarted(owner(), _newOwner);
-    }
-
-    /// @dev Transfers ownership of the contract to a new account (`_newOwner`) and deletes any pending owner.
-    /// @dev Internal function without access restriction.
-    function _transferOwnership(address _newOwner)
-        internal
-        virtual override
-    {
-        delete __bytecodes().pendingOwner;
-        address _oldOwner = owner();
-        if (_newOwner != _oldOwner) {
-            __bytecodes().owner = _newOwner;
-            emit OwnershipTransferred(_oldOwner, _newOwner);
-        }
-    }
-
-
-    // ================================================================================================================
-    // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
-
-    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData) 
-        public
-        override
-    {
-        address _owner = __bytecodes().owner;
-        if (_owner == address(0)) {
-            // set owner from  the one specified in _initData
-            _owner = abi.decode(_initData, (address));
-            __bytecodes().owner = _owner;
-        } else {
-            // only owner can initialize:
-            if (msg.sender != _owner) {
-                _revert("not the owner");
-            }
-        }
-
-        if (__bytecodes().base != address(0)) {
-            // current implementation cannot be initialized more than once:
-            if(__bytecodes().base == base()) {
-                _revert("already initialized");
-            }
-        }        
-        __bytecodes().base = base();
-
-        emit Upgraded(
-            _owner,
-            base(),
-            codehash(),
-            version()
-        );
-    }
-
-    /// Tells whether provided address could eventually upgrade the contract.
-    function isUpgradableFrom(address _from) external view override returns (bool) {
-        address _owner = __bytecodes().owner;
-        return (
-            // false if the WRB is intrinsically not upgradable, or `_from` is no owner
-            isUpgradable()
-                && _owner == _from
-        );
     }
 
 
@@ -637,5 +525,4 @@ contract WitOracleRadonRegistryDefault
             __reducer.filters.push(_filters[_ix]);
         }
     }
-
 }

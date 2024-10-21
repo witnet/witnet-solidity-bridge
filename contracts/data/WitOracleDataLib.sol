@@ -175,11 +175,15 @@ library WitOracleDataLib {
         )
     {
         Witnet.Query storage __query = seekQuery(queryId);
-        Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
+        require(
+            msg.sender == __query.request.requester,
+            "not the requester"
+        );
 
         _queryEvmExpiredReward = __query.request.evmReward;
         __query.request.evmReward = 0;
 
+        Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
         if (
             _queryStatus != Witnet.QueryStatus.Expired
                 && _queryStatus != Witnet.QueryStatus.Finalized
@@ -202,11 +206,15 @@ library WitOracleDataLib {
         public returns (Witnet.QueryResponse memory _queryResponse)
     {
         Witnet.Query storage __query = seekQuery(queryId);
-        Witnet.QueryStatus _queryStatus = getQueryStatusTrustlessly(queryId, evmQueryAwaitingBlocks);
-
+        require(
+            msg.sender == __query.request.requester,
+            "not the requester"
+        );
+        
         uint72 _evmReward = __query.request.evmReward;
         __query.request.evmReward = 0;
-
+        
+        Witnet.QueryStatus _queryStatus = getQueryStatusTrustlessly(queryId, evmQueryAwaitingBlocks);
         if (_queryStatus == Witnet.QueryStatus.Expired) {
             if (_evmReward > 0) {
                 if (__query.response.disputer != address(0)) {
@@ -702,7 +710,16 @@ library WitOracleDataLib {
         )
         public returns (uint256 evmPotentialReward) 
     {
-        stake(msg.sender, evmQueryReportingStake);
+        require(
+            getQueryStatusTrustlessly(
+                queryId, 
+                evmQueryAwaitingBlocks
+            ) == Witnet.QueryStatus.Reported, "not in Reported status"
+        );
+        stake(
+            msg.sender, 
+            evmQueryReportingStake
+        );
         Witnet.Query storage __query = seekQuery(queryId);
         __query.response.disputer = msg.sender;
         __query.response.finality = uint64(block.number + evmQueryAwaitingBlocks);

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "../../WitOracle.sol";
 import "../../data/WitOracleDataLib.sol";
@@ -15,9 +14,9 @@ import "../../patterns/Payable.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-abstract contract WitOracleTrustlessBase
+abstract contract WitOracleBase
     is 
-        Payable,
+        Payable, 
         WitOracle,
         IWitOracleLegacy
 {
@@ -28,10 +27,8 @@ abstract contract WitOracleTrustlessBase
         return WitOracleDataLib.channel();
     }
 
-    WitOracleRequestFactory public immutable override factory;
+    // WitOracleRequestFactory public immutable override factory;
     WitOracleRadonRegistry public immutable override registry;
-    
-    bytes4 public immutable override specs = type(WitOracle).interfaceId;
 
     uint256 internal immutable __reportResultGasBase;
     uint256 internal immutable __reportResultWithCallbackGasBase;
@@ -85,21 +82,33 @@ abstract contract WitOracleTrustlessBase
             "not the requester"
         ); _;
     }
+
+    struct EvmImmutables {
+        uint32 reportResultGasBase;
+        uint32 reportResultWithCallbackGasBase;
+        uint32 reportResultWithCallbackRevertGasBase;
+        uint32 sstoreFromZeroGas;
+    }
     
     constructor(
-            WitOracleRadonRegistry _registry,
-            WitOracleRequestFactory _factory
+            EvmImmutables memory _immutables,
+            WitOracleRadonRegistry _registry
+            // WitOracleRequestFactory _factory
         )
     {
         registry = _registry;
-        factory = _factory;
+        // factory = _factory;
+
+        __reportResultGasBase = _immutables.reportResultGasBase;
+        __reportResultWithCallbackGasBase = _immutables.reportResultWithCallbackGasBase;
+        __reportResultWithCallbackRevertGasBase = _immutables.reportResultWithCallbackRevertGasBase;
+        __sstoreFromZeroGas = _immutables.sstoreFromZeroGas;
     }
 
-    function class() virtual public view returns (string memory);
     function getQueryStatus(uint256) virtual public view returns (Witnet.QueryStatus);
     function getQueryResponseStatus(uint256) virtual public view returns (Witnet.QueryResponseStatus);
-    
 
+    
     // ================================================================================================================
     // --- Payable ----------------------------------------------------------------------------------------------------
 
@@ -123,9 +132,9 @@ abstract contract WitOracleTrustlessBase
     /// @param _amount Amount of ETHs to transfer.
     function __safeTransferTo(address payable _to, uint256 _amount) virtual override internal {
         payable(_to).transfer(_amount);
-    }   
-
-
+    }
+    
+    
     // ================================================================================================================
     // --- IWitOracle (partial) ---------------------------------------------------------------------------------------
 
@@ -604,33 +613,6 @@ abstract contract WitOracleTrustlessBase
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
 
-    function _require(bool _condition, string memory _message) virtual internal view {
-        if (!_condition) {
-            _revert(_message);
-        }
-    }
-
-    function _revert(string memory _message) virtual internal view {
-        revert(
-            string(abi.encodePacked(
-                class(),
-                ": ",
-                _message
-            ))
-        );
-    }
-
-    function _revertWitOracleDataLibUnhandledException() internal view {
-        _revert(_revertWitOracleDataLibUnhandledExceptionReason());
-    }
-
-    function _revertWitOracleDataLibUnhandledExceptionReason() internal pure returns (string memory) {
-        return string(abi.encodePacked(
-            type(WitOracleDataLib).name,
-            ": unhandled assertion"
-        ));
-    }
-
     function __postQuery(
             address _requester,
             uint24 _evmCallbackGasLimit,
@@ -656,5 +638,16 @@ abstract contract WitOracleTrustlessBase
     /// Returns storage pointer to contents of 'WitOracleDataLib.Storage' struct.
     function __storage() virtual internal pure returns (WitOracleDataLib.Storage storage _ptr) {
       return WitOracleDataLib.data();
+    }
+
+    function _revertWitOracleDataLibUnhandledException() internal view {
+        _revert(_revertWitOracleDataLibUnhandledExceptionReason());
+    }
+
+    function _revertWitOracleDataLibUnhandledExceptionReason() internal pure returns (string memory) {
+        return string(abi.encodePacked(
+            type(WitOracleDataLib).name,
+            ": unhandled assertion"
+        ));
     }
 }

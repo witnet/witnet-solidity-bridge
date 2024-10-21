@@ -29,9 +29,9 @@ interface IWitOracle {
     /// @param querySLA The query SLA data security parameters as required for the Wit/oracle blockchain. 
     function estimateExtraFee(uint256 evmGasPrice, uint256 evmWitPrice, Witnet.RadonSLA calldata querySLA) external view returns (uint256);
     
-    /// @notice Returns the address of the WitOracleRequestFactory appliance capable of building compliant data request
-    /// @notice templates verified into the same WitOracleRadonRegistry instance returned by registry().
-    function factory() external view returns (WitOracleRequestFactory);
+    // /// @notice Returns the address of the WitOracleRequestFactory appliance capable of building compliant data request
+    // /// @notice templates verified into the same WitOracleRadonRegistry instance returned by registry().
+    // function factory() external view returns (WitOracleRequestFactory);
        
     /// @notice Retrieves a copy of all Witnet-provable data related to a previously posted request, 
     /// removing the whole query from the WRB storage.

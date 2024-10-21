@@ -36,19 +36,16 @@ abstract contract WitnetUpgradableBase
     /// @dev Reverts if proxy delegatecalls to unexistent method.
     /* solhint-disable no-complex-fallback */
     fallback() virtual external { 
-        _revert(string(abi.encodePacked(
-            "not implemented: 0x",
+        revert(string(abi.encodePacked(
+            "WitnetUpgradableBase: not implemented: 0x",
             _toHexString(uint8(bytes1(msg.sig))),
             _toHexString(uint8(bytes1(msg.sig << 8))),
             _toHexString(uint8(bytes1(msg.sig << 16))),
             _toHexString(uint8(bytes1(msg.sig << 24)))
         )));
     }
-
-    function class() virtual public view returns (string memory) {
-        return type(WitnetUpgradableBase).name;
-    }
    
+    
     // ================================================================================================================
     // --- Overrides 'Proxiable' --------------------------------------------------------------------------------------
 
@@ -78,29 +75,6 @@ abstract contract WitnetUpgradableBase
 
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
-
-    function _require(
-            bool _condition, 
-            string memory _message
-        )
-        virtual internal view
-    {
-        if (!_condition) {
-            _revert(_message);
-        }
-    }
-
-    function _revert(string memory _message)
-        virtual internal view
-    {
-        revert(
-            string(abi.encodePacked(
-                class(),
-                ": ",
-                _message
-            ))
-        );
-    }
 
     function _toHexString(uint8 _u)
         internal pure
@@ -147,5 +121,4 @@ abstract contract WitnetUpgradableBase
             }
         }
     }
-
 }

@@ -2,11 +2,9 @@
 
 /* solhint-disable var-name-mixedcase */
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
-// Inherits from:
-import "./WitOracleTrustableDefault.sol";
+import "../base/WitOracleBaseTrustable.sol";
 
 /// @title Witnet Request Board OVM-compatible (Optimism) "trustable" implementation.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -15,58 +13,25 @@ import "./WitOracleTrustableDefault.sol";
 /// @author The Witnet Foundation
 contract WitOracleTrustableReef
     is
-        WitOracleTrustableDefault 
+        WitOracleBaseTrustable
 {
-    function class() virtual override public view returns (string memory) {
+    function class() virtual override public view  returns (string memory) {
         return type(WitOracleTrustableReef).name;
     }
     
     constructor(
+            EvmImmutables memory _immutables,
             WitOracleRadonRegistry _registry,
-            WitOracleRequestFactory _factory,
-            bool _upgradable,
-            bytes32 _versionTag,
-            uint256 _reportResultGasBase,
-            uint256 _reportResultWithCallbackGasBase,
-            uint256 _reportResultWithCallbackRevertGasBase,
-            uint256 _sstoreFromZeroGas
+            // WitOracleRequestFactory _factory,
+            bytes32 _versionTag
         )
-        WitOracleTrustableDefault(
-            _registry,
-            _factory,
-            _upgradable,
-            _versionTag,
-            _reportResultGasBase,
-            _reportResultWithCallbackGasBase,
-            _reportResultWithCallbackRevertGasBase,
-            _sstoreFromZeroGas
+        WitOracleBase(
+            _immutables,
+            _registry
+            // _factory
         )
+        WitOracleBaseTrustable(_versionTag)
     {}
-    
-    // ================================================================================================================
-    // --- Overrides 'IWitOracle' ----------------------------------------------------------------------------
-
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256, uint16 _resultMaxSize)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return WitOracleTrustlessBase.estimateBaseFee(1, _resultMaxSize);
-    }
-
-    /// @notice Estimate the minimum reward required for posting a data request with a callback.
-    /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256, uint24 _callbackGasLimit)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return WitOracleTrustlessBase.estimateBaseFeeWithCallback(1, _callbackGasLimit);
-    }
-
 
     // ================================================================================================================
     // --- Overrides 'Payable' ----------------------------------------------------------------------------------------
@@ -78,5 +43,29 @@ contract WitOracleTrustableReef
         returns (uint256)
     {
         return 1;
+    }
+
+    // ================================================================================================================
+    // --- Overrides 'IWitOracle' ----------------------------------------------------------------------------
+
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
+    function estimateBaseFee(uint256, uint16 _resultMaxSize)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return WitOracleBase.estimateBaseFee(1, _resultMaxSize);
+    }
+
+    /// @notice Estimate the minimum reward required for posting a data request with a callback.
+    /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
+    function estimateBaseFeeWithCallback(uint256, uint24 _callbackGasLimit)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return WitOracleBase.estimateBaseFeeWithCallback(1, _callbackGasLimit);
     }
 }

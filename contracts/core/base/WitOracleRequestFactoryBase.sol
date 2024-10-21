@@ -1,46 +1,34 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitnetUpgradableBase.sol";
 import "../../WitOracleRadonRegistry.sol";
 import "../../WitOracleRequestFactory.sol";
 import "../../data/WitOracleRequestFactoryData.sol";
-import "../../interfaces/IWitOracleRadonRegistryLegacy.sol";
+import "../../interfaces/IWitOracle.sol";
 import "../../patterns/Clonable.sol";
 
-contract WitOracleRequestFactoryDefault
+abstract contract WitOracleRequestFactoryBase
     is
         Clonable,
         WitOracleRequest,
         WitOracleRequestFactory,
         WitOracleRequestFactoryData,
-        WitOracleRequestTemplate,
-        WitnetUpgradableBase        
+        WitOracleRequestTemplate
 {
      /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
     WitOracle immutable public override witOracle;
 
-    modifier notOnFactory {
+    modifier notOnFactory virtual {
         _require(
-            address(this) != __proxy()
-                && address(this) != base(),
+            address(this) != self(),
             "not on factory"
         ); _;
     }
 
-    modifier onlyDelegateCalls override(Clonable, Upgradeable) {
+    modifier onlyOnFactory virtual {
         _require(
-            address(this) != _BASE,
-            "not a delegate call"
-        ); _;
-    }
-
-    modifier onlyOnFactory {
-        _require(
-            address(this) == __proxy()
-                || address(this) == base(),
+            address(this) == self(),
             "not the factory"
         ); _;
     }
@@ -59,23 +47,8 @@ contract WitOracleRequestFactoryDefault
         ); _;
     }
 
-    constructor(
-            WitOracle _witOracle,
-            bool _upgradable,
-            bytes32 _versionTag
-        )
-        Ownable(address(msg.sender))
-        WitnetUpgradableBase(
-            _upgradable,
-            _versionTag,
-            "io.witnet.requests.factory"
-        )
-    {
+    constructor(WitOracle _witOracle) {
         witOracle = _witOracle;
-        // let logic contract be used as a factory, while avoiding further initializations:
-        __proxiable().proxy = address(this);
-        __proxiable().implementation = address(this);
-        __witOracleRequestFactory().owner = address(0);
     }
 
     function _getWitOracleRadonRegistry() virtual internal view returns (WitOracleRadonRegistry) {
@@ -110,107 +83,8 @@ contract WitOracleRequestFactoryDefault
         return address(this);
     }
 
-
     // ================================================================================================================
-    // --- Overrides 'Ownable2Step' -----------------------------------------------------------------------------------
-
-    /// @notice Returns the address of the pending owner.
-    function pendingOwner()
-        public view
-        virtual override
-        returns (address)
-    {
-        return __witOracleRequestFactory().pendingOwner;
-    }
-
-    /// @notice Returns the address of the current owner.
-    function owner()
-        virtual override
-        public view
-        returns (address)
-    {
-        return __witOracleRequestFactory().owner;
-    }
-
-    /// @notice Starts the ownership transfer of the contract to a new account. Replaces the pending transfer if there is one.
-    /// @dev Can only be called by the current owner.
-    function transferOwnership(address _newOwner)
-        virtual override public
-        onlyOwner
-    {
-        __witOracleRequestFactory().pendingOwner = _newOwner;
-        emit OwnershipTransferStarted(owner(), _newOwner);
-    }
-
-    /// @dev Transfers ownership of the contract to a new account (`_newOwner`) and deletes any pending owner.
-    /// @dev Internal function without access restriction.
-    function _transferOwnership(address _newOwner)
-        internal
-        virtual override
-    {
-        delete __witOracleRequestFactory().pendingOwner;
-        address _oldOwner = owner();
-        if (_newOwner != _oldOwner) {
-            __witOracleRequestFactory().owner = _newOwner;
-            emit OwnershipTransferred(_oldOwner, _newOwner);
-        }
-    }
-
-
-    // ================================================================================================================
-    // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
-
-    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData) 
-        virtual override public
-        onlyDelegateCalls
-    {
-        _require(!initialized(), "already initialized");
-        
-        // Trying to intialize an upgradable factory instance...
-        {
-            address _owner = __witOracleRequestFactory().owner;
-            if (_owner == address(0)) {
-                // Upon first initialization of an upgradable factory,
-                // set owner from the one specified in _initData
-                _owner = abi.decode(_initData, (address));
-                __witOracleRequestFactory().owner = _owner;
-            } else {
-                // only the owner can upgrade an upgradable factory
-                _require(
-                    msg.sender == _owner,
-                    "not the owner"
-                );
-            }
-
-            if (__proxiable().proxy == address(0)) {
-                // first initialization of the proxy
-                __proxiable().proxy = address(this);
-            }
-            __proxiable().implementation = base();
-
-            _require(address(witOracle).code.length > 0, "inexistent request board");
-            _require(witOracle.specs() == type(WitOracle).interfaceId, "uncompliant request board");
-            
-            emit Upgraded(msg.sender, base(), codehash(), version());
-        }
-    }
-
-    /// Tells whether provided address could eventually upgrade the contract.
-    function isUpgradableFrom(address _from) external view override returns (bool) {
-        address _owner = __witOracleRequestFactory().owner;
-        return (
-            // false if the logic contract is intrinsically not upgradable, or `_from` is no owner
-            isUpgradable()
-                && _owner == _from
-                && _owner != address(0)
-        );
-    }
-
-
-    // ================================================================================================================
-    /// --- Clonable implementation and override ----------------------------------------------------------------------
+    /// --- Overrides Clonable ----------------------------------------------------------------------------------------
 
     /// @notice Tells whether a WitOracleRequest or a WitOracleRequestTemplate has been properly initialized.
     function initialized()
@@ -221,31 +95,26 @@ contract WitOracleRequestFactoryDefault
         return (
             __witOracleRequestTemplate().tallyReduceHash != bytes16(0)
                 || __witOracleRequest().radHash != bytes32(0)
-                || __implementation() == base()
         );
     }
 
-    /// @notice Contract address to which clones will be re-directed.
-    function self()
-        virtual override
-        public view
-        returns (address)
-    {
-        return (__proxy() != address(0)
-            ? __implementation()
-            : base()
-        );
-    }
+    // /// @notice Contract address to which clones will be re-directed.
+    // function self()
+    //     virtual override
+    //     public view
+    //     returns (address)
+    // {
+    //     return (__proxy() != address(0)
+    //         ? __implementation()
+    //         : base()
+    //     );
+    // }
 
 
     /// ===============================================================================================================
-    /// --- IWitOracleRequestFactory, IWitOracleRequestTemplate, IWitOracleRequest polymorphic methods -------------------------
+    /// --- IWitOracleRequestFactory, IWitOracleRequestTemplate, IWitOracleRequest polymorphic methods ----------------
 
-    function class()
-        virtual override(IWitAppliance, WitnetUpgradableBase)
-        public view
-        returns (string memory)
-    {
+    function class() virtual override public view returns (string memory) {
         if (__witOracleRequest().radHash != bytes32(0)) {
             return type(WitOracleRequest).name;
         } else if (__witOracleRequestTemplate().tallyReduceHash != bytes16(0)) {
@@ -261,17 +130,26 @@ contract WitOracleRequestFactoryDefault
         returns (bytes4)
     {
         if (__witOracleRequest().radHash != bytes32(0)) {
-            return type(WitOracleRequest).interfaceId;
+            return (
+                type(IWitOracleAppliance).interfaceId
+                    ^ type(IWitOracleRequest).interfaceId
+            );
         } else if (__witOracleRequestTemplate().tallyReduceHash != bytes16(0)) {
-            return type(WitOracleRequestTemplate).interfaceId;
+            return (
+                type(IWitOracleAppliance).interfaceId
+                    ^ type(IWitOracleRequestTemplate).interfaceId
+            );
         } else {
-            return type(WitOracleRequestFactory).interfaceId;
+            return (
+                type(IWitOracleAppliance).interfaceId
+                    ^ type(IWitOracleRequestFactory).interfaceId
+            );
         }
     }
 
     
     /// ===============================================================================================================
-    /// --- IWitOracleRequestTemplate, IWitOracleRequest polymorphic methods ------------------------------------------------
+    /// --- IWitOracleRequestTemplate, IWitOracleRequest polymorphic methods ------------------------------------------
 
     function getRadonReducers()
         virtual override (IWitOracleRequest, IWitOracleRequestTemplate)
@@ -354,11 +232,11 @@ contract WitOracleRequestFactoryDefault
     }
 
     function version() 
-        virtual override(IWitOracleRequest, IWitOracleRequestTemplate, WitnetUpgradableBase)
+        virtual override(IWitOracleRequest, IWitOracleRequestTemplate)
         public view
         returns (string memory)
     {
-        return WitnetUpgradableBase.version();
+        return IWitAppliance(address(this)).class();
     }
 
 
@@ -588,7 +466,7 @@ contract WitOracleRequestFactoryDefault
 
         // Create and initialize counter-factual request just once:
         if (_requestAddr.code.length == 0) {
-            _requestAddr = WitOracleRequestFactoryDefault(_cloneDeterministic(_requestSalt))
+            _requestAddr = WitOracleRequestFactoryBase(_cloneDeterministic(_requestSalt))
                 .initializeWitOracleRequest(
                     _radHash
                 );
@@ -617,7 +495,7 @@ contract WitOracleRequestFactoryDefault
         // Create and initialize counter-factual template just once:
         if (_templateAddr.code.length == 0) {
             _templateAddr = address(
-                WitOracleRequestFactoryDefault(_cloneDeterministic(_templateSalt))
+                WitOracleRequestFactoryBase(_cloneDeterministic(_templateSalt))
                     .initializeWitOracleRequestTemplate(
                         _retrieveHashes,
                         _aggregateReducerHash,
@@ -658,7 +536,7 @@ contract WitOracleRequestFactoryDefault
         bytes32 _salt = keccak256(
             abi.encodePacked(
                 _radHash, 
-                bytes4(_WITNET_UPGRADABLE_VERSION)
+                class()
             )
         );
         return (
@@ -684,8 +562,8 @@ contract WitOracleRequestFactoryDefault
         bytes32 _salt = keccak256(
             // As to avoid template address collisions from:
             abi.encodePacked( 
-                // - different factory major or mid versions:
-                bytes4(_WITNET_UPGRADABLE_VERSION),
+                // - different factory implementation class
+                class(),
                 // - different templates params:
                 _retrieveHashes,
                 _aggregateReducerHash,

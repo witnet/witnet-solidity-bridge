@@ -1,10 +1,9 @@
+
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
-import "./WitOracleTrustlessBase.sol";
-
+import "./WitOracleBase.sol";
 import "../../interfaces/IWitOracleBlocks.sol";
 import "../../interfaces/IWitOracleReporterTrustless.sol";
 import "../../patterns/Escrowable.sol";
@@ -14,18 +13,14 @@ import "../../patterns/Escrowable.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitOracleTrustlessDefault
+abstract contract WitOracleBaseTrustless
     is 
         Escrowable,
-        WitOracleTrustlessBase,
+        WitOracleBase,
         IWitOracleBlocks,
         IWitOracleReporterTrustless
 {
     using Witnet for Witnet.QueryResponseReport;
-
-    function class() virtual override public view  returns (string memory) {
-        return type(WitOracleTrustlessDefault).name;
-    }
 
     /// @notice Number of blocks to await for either a dispute or a proven response to some query.
     uint256 immutable public QUERY_AWAITING_BLOCKS;
@@ -44,26 +39,11 @@ contract WitOracleTrustlessDefault
     }
 
     constructor(
-            WitOracleRadonRegistry _registry,
-            WitOracleRequestFactory _factory,
-            uint256 _reportResultGasBase,
-            uint256 _reportResultWithCallbackGasBase,
-            uint256 _reportResultWithCallbackRevertGasBase,
-            uint256 _sstoreFromZeroGas,
             uint256 _queryAwaitingBlocks,
             uint256 _queryReportingStake
         )
         Payable(address(0))
-        WitOracleTrustlessBase(
-            _registry,
-            _factory
-        )
     {
-        __reportResultGasBase = _reportResultGasBase;
-        __reportResultWithCallbackGasBase = _reportResultWithCallbackGasBase;
-        __reportResultWithCallbackRevertGasBase = _reportResultWithCallbackRevertGasBase;
-        __sstoreFromZeroGas = _sstoreFromZeroGas;
-
         _require(_queryAwaitingBlocks < 64, "too many awaiting blocks");
         _require(_queryReportingStake > 0, "no reporting stake?");
         
@@ -71,7 +51,7 @@ contract WitOracleTrustlessDefault
         QUERY_REPORTING_STAKE = _queryReportingStake;
 
         // store genesis beacon:
-        __storage().beacons[
+        WitOracleDataLib.data().beacons[
             Witnet.WIT_2_GENESIS_BEACON_INDEX
         ] = Witnet.Beacon({
             index: Witnet.WIT_2_GENESIS_BEACON_INDEX,
@@ -86,8 +66,7 @@ contract WitOracleTrustlessDefault
                 Witnet.WIT_2_GENESIS_BEACON_NEXT_COMMITTEE_AGG_PUBKEY_3
             ]
         });
-    }
-
+    } 
     
     // ================================================================================================================
     // --- Escrowable -------------------------------------------------------------------------------------------------
@@ -101,7 +80,7 @@ contract WitOracleTrustlessDefault
         virtual override
         returns (uint256)
     {
-        return __storage().escrows[tenant].collateral;
+        return WitOracleDataLib.data().escrows[tenant].collateral;
     }
 
     function balanceOf(address tenant)
@@ -109,7 +88,7 @@ contract WitOracleTrustlessDefault
         virtual override
         returns (uint256)
     {
-        return __storage().escrows[tenant].balance;
+        return WitOracleDataLib.data().escrows[tenant].balance;
     }
 
     function withdraw()
@@ -161,12 +140,11 @@ contract WitOracleTrustlessDefault
 
 
     // ================================================================================================================
-    // --- IWitOracle (trustlessly) -----------------------------------------------------------------------------------
+    // --- Overrides IWitOracle (trustlessly) -------------------------------------------------------------------------
 
     function fetchQueryResponse(uint256 _queryId)
         virtual override
         external
-        onlyRequester(_queryId)
         returns (Witnet.QueryResponse memory)
     {
         try WitOracleDataLib.fetchQueryResponseTrustlessly(
@@ -359,6 +337,7 @@ contract WitOracleTrustlessDefault
         }
     }
 
+
     function extractQueryRelayDataBatch(uint256[] calldata _queryIds)
         virtual override external view
         returns (QueryRelayData[] memory _relays)
@@ -371,14 +350,21 @@ contract WitOracleTrustlessDefault
 
     function disputeQueryResponse(uint256 _queryId) 
         virtual override external
-        inStatus(_queryId, Witnet.QueryStatus.Reported)
         returns (uint256)
     {
-        return WitOracleDataLib.disputeQueryResponse(
+        try WitOracleDataLib.disputeQueryResponse(
             _queryId,
             QUERY_AWAITING_BLOCKS,
             QUERY_REPORTING_STAKE
-        );
+        ) returns (uint256 _evmPotentialReward) {
+            return _evmPotentialReward;
+        
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+        
+        } catch (bytes memory) {
+            _revertWitOracleDataLibUnhandledException();
+        }
     }
 
     function reportQueryResponse(Witnet.QueryResponseReport calldata _responseReport)
