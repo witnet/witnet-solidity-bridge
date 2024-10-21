@@ -41,11 +41,11 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
   })
 
   // Loop on framework domains ...
-  const palette = [ 6, 4, ]
+  const palette = [6, 4]
   for (const domain in framework) {
     if (!addresses[network][domain]) addresses[network][domain] = {}
     const color = palette[Object.keys(framework).indexOf(domain)]
-    
+
     let first = true
     // Loop on domain artifacts ...
     for (const index in framework[domain]) {
@@ -194,7 +194,10 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           baseArtifact.address = targetAddr
           implArtifact.address = targetAddr
           if (!utils.isNullAddress(targetBaseAddr) && targetBaseAddr !== targetAddr) {
-            console.info("  ", `> contract address:  \x1b[3${color}m ${targetBaseAddr} \x1b[0m==> \x1b[9${color}m${targetAddr}\x1b[0m`)
+            console.info("  ",
+              `> contract address:  \x1b[3${color}m ${targetBaseAddr} \x1b[0m==>`,
+              `\x1b[9${color}m${targetAddr}\x1b[0m`
+            )
           } else {
             console.info("  ", `> contract address:  \x1b[9${color}m`, targetAddr, "\x1b[0m")
           }
@@ -202,7 +205,10 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           baseArtifact.address = targetBaseAddr
           implArtifact.address = targetBaseAddr
           if (!utils.isNullAddress(targetBaseAddr) && targetBaseAddr !== targetAddr) {
-            console.info("  ", `> contract address:  \x1b[9${color}m ${targetBaseAddr}\x1b[0m !==`, `\x1b[41m${targetAddr}\x1b[0m`)
+            console.info("  ",
+              `> contract address:  \x1b[9${color}m ${targetBaseAddr}\x1b[0m !==`,
+              `\x1b[41m${targetAddr}\x1b[0m`
+            )
           } else {
             console.info("  ", `> contract address:  \x1b[9${color}m ${targetAddr}\x1b[0m`)
           }

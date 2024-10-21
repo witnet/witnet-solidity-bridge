@@ -47,8 +47,8 @@ module.exports = async function () {
   })
   try {
     from = from || addresses[network]?.WitnetDeployer || addresses.default.WitnetDeployer
-    if (hexArgs === "" && artifact !== "")  {
-      hextArgs = constructorArgs[network][artifact]
+    if (hexArgs === "" && artifact !== "") {
+      hexArgs = constructorArgs[network][artifact]
     }
   } catch {
     console.error(`WitnetDeployer must have been previously deployed on network '${network}'.\n`)
