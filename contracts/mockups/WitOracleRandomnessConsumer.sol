@@ -33,17 +33,15 @@ abstract contract WitOracleRandomnessConsumer
             WitOracleRadonRegistry _registry = witOracle().registry();
             // Build own Witnet Randomness Request:
             __witOracleRandomnessRadHash = _registry.verifyRadonRequest(
-                abi.decode(
-                    abi.encode([
-                        _registry.verifyRadonRetrieval(
-                            Witnet.RadonRetrievalMethods.RNG,
-                            "", // no url
-                            "", // no body
-                            new string[2][](0), // no headers
-                            hex"80" // no retrieval script
-                        )
-                    ]), (bytes32[])
-                ),
+                Witnet.intoMemArray([
+                    _registry.verifyRadonRetrieval(
+                        Witnet.RadonRetrievalMethods.RNG,
+                        "", // no url
+                        "", // no body
+                        new string[2][](0), // no headers
+                        hex"80" // no retrieval script
+                    )
+                ]),
                 Witnet.RadonReducer({
                     opcode: Witnet.RadonReduceOpcodes.Mode,
                     filters: new Witnet.RadonFilter[](0)
@@ -56,7 +54,6 @@ abstract contract WitOracleRandomnessConsumer
         }
         __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
         __witOracleDefaultQuerySLA.maxTallyResultSize = 34;
-        
     }
 
     /// @dev Pure P-RNG generator returning uniformly distributed `_range` values based on

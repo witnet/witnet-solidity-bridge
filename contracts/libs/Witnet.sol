@@ -373,7 +373,6 @@ library Witnet {
         /* 0x0A */ Reserved0x10, //MaximumDeviation,
         /* 0x0B */ ConcatenateAndHash
     }
-
     
     /// Structure containing the Retrieve-Attestation-Delivery parts of a Witnet-compliant Data Request.
     struct RadonRequest {
@@ -796,6 +795,38 @@ library Witnet {
     
     function toBytes32(bytes memory _value) internal pure returns (bytes32) {
         return toFixedBytes(_value, 32);
+    }
+
+    function intoMemArray(bytes32[1] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 1, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[2] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 2, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[3] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 3, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[4] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 4, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[5] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 5, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[6] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 6, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[7] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 7, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[8] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 8, _values), (bytes32[]));
     }
 
     function toFixedBytes(bytes memory _value, uint8 _numBytes)

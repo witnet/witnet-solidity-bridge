@@ -42,25 +42,18 @@ contract WitRandomnessV21
         Ownable(_operator)
         UsingWitOracle(_witOracle)
     {
-        _require(
-            address(_witOracle) == address(0)
-                || _witOracle.specs() == type(WitOracle).interfaceId,
-            "uncompliant oracle"
-        );
         // Build Witnet-compliant randomness request:
         WitOracleRadonRegistry _registry = witOracle().registry();
         witOracleQueryRadHash = _registry.verifyRadonRequest(
-            abi.decode(
-                abi.encode([
-                    _registry.verifyRadonRetrieval(
-                        Witnet.RadonRetrievalMethods.RNG,
-                        "", // no request url
-                        "", // no request body
-                        new string[2][](0), // no request headers
-                        hex"80" // no request Radon script
-                    )
-                ]), (bytes32[])
-            ),
+            Witnet.intoMemArray([
+                _registry.verifyRadonRetrieval(
+                    Witnet.RadonRetrievalMethods.RNG,
+                    "", // no request url
+                    "", // no request body
+                    new string[2][](0), // no request headers
+                    hex"80" // no request Radon script
+                )
+            ]),
             Witnet.RadonReducer({
                 opcode: Witnet.RadonReduceOpcodes.Mode,
                 filters: new Witnet.RadonFilter[](0)
@@ -89,10 +82,6 @@ contract WitRandomnessV21
 
     function class() virtual override public pure returns (string memory) {
         return type(WitRandomnessV21).name;
-    }
-
-    function specs() virtual override external pure returns (bytes4) {
-        return type(WitRandomness).interfaceId;
     }
 
     function witOracle() override (IWitOracleAppliance, UsingWitOracle)
@@ -500,29 +489,6 @@ contract WitRandomnessV21
         // Emit event upon every randomize call, even if multiple within same block:
         // solhint-disable-next-line avoid-tx-origin
         emit Randomizing(tx.origin, _msgSender(), _queryId);
-    }
-
-    function _require(
-            bool _condition, 
-            string memory _message
-        )
-        internal pure
-    {
-        if (!_condition) {
-            _revert(_message);
-        }
-    }
-
-    function _revert(string memory _message)
-        internal pure
-    {
-        revert(
-            string(abi.encodePacked(
-                class(),
-                ": ",
-                _message
-            ))
-        );
     }
 
     /// @dev Recursively searches for the number of the first block after the given one in which a Witnet 
