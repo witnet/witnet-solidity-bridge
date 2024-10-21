@@ -3,7 +3,7 @@ import("chai")
 const utils = require("../src/utils")
 const { expectEvent, expectRevert } = require("@openzeppelin/test-helpers")
 
-const WitOracleRadonRegistry = artifacts.require("WitOracleRadonRegistryDefault")
+const WitOracleRadonRegistry = artifacts.require("WitOracleRadonRegistryUpgradableDefault")
 const WitOracleRadonEncodingLib = artifacts.require("WitOracleRadonEncodingLib")
 
 contract("WitOracleRadonRegistry", (accounts) => {
