@@ -6,48 +6,52 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 module.exports = async function (_, network, [, from]) {
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {}
-
-  const targets = settings.getArtifacts(network)
-  const libs = [
-    targets.WitPriceFeedsLib,
-    targets.WitOracleDataLib,
-    targets.WitOracleRadonEncodingLib,
-    targets.WitOracleResultErrorsLib,
-  ]
-
-  const selection = utils.getWitnetArtifactsFromArgs()
+  if (!addresses[network]?.libs) addresses[network].libs = {}
 
   const deployer = await WitnetDeployer.deployed()
-  for (const index in libs) {
-    const key = libs[index]
-    const artifact = artifacts.require(key)
+  const networkArtifacts = settings.getArtifacts(network);
+  const selection = utils.getWitnetArtifactsFromArgs()
+
+  for (const index in networkArtifacts.libs) {
+    const base = networkArtifacts.libs[index]
+    const impl = networkArtifacts.libs[base]
+    const libImplArtifact = artifacts.require(impl)
+    const libInitCode = libImplArtifact.toJSON().bytecode
+    const libTargetAddr = await deployer.determineAddr.call(libInitCode, "0x0", { from })
+    const libTargetCode = await web3.eth.getCode(libTargetAddr)
+    let libNetworkAddr = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
     if (
-      utils.isNullAddress(addresses[network][key]) ||
-      (await web3.eth.getCode(addresses[network][key])).length < 3 ||
-      selection.includes(key)
+      // lib implementation artifact is listed as --artifacts on CLI
+      selection.includes(impl) || 
+      // or, no address found in addresses file but code is already deployed into target address
+      (utils.isNullAddress(libNetworkAddr) && libTargetCode.length > 3) ||
+      // or, address found in addresses file but no code currently deployed in such
+      (await web3.eth.getCode(libNetworkAddr)).length < 3
     ) {
-      utils.traceHeader(`Deploying '${key}'...`)
-      const libInitCode = artifact.toJSON().bytecode
-      const libAddr = await deployer.determineAddr.call(libInitCode, "0x0", { from })
-      console.info("  ", "> account:          ", from)
-      console.info("  ", "> balance:          ", web3.utils.fromWei(await web3.eth.getBalance(from), "ether"), "ETH")
-      const tx = await deployer.deploy(libInitCode, "0x0", { from })
-      utils.traceTx(tx)
-      if ((await web3.eth.getCode(libAddr)).length > 3) {
-        addresses[network][key] = libAddr
+      if (libTargetCode.length < 3) {
+        utils.traceHeader(`Deploying '${impl}'...`)
+        utils.traceTx(await deployer.deploy(libInitCode, "0x0", { from }))
+        if ((await web3.eth.getCode(libTargetAddr)).length < 3) {
+          console.info(`Error: Library was not deployed on expected address: ${libTargetAddr}`)
+          process.exit(1)
+        }
       } else {
-        console.info(`Error: Library was not deployed on expected address: ${libAddr}`)
-        process.exit(1)
+        utils.traceHeader(`Recovered '${impl}'`)
       }
-      if (!utils.isDryRun(network)) {
+      addresses[network].libs[impl] = libTargetAddr
+      libNetworkAddr = libTargetAddr
+      // if (!utils.isDryRun(network)) {
         await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-      }
+      // }
     } else {
-      utils.traceHeader(`Skipped '${key}'`)
+      utils.traceHeader(`Deployed '${impl}'`)
     }
-    artifact.address = addresses[network][key]
-    console.info("  ", "> library address:  ", artifact.address)
-    console.info("  ", "> library codehash: ", web3.utils.soliditySha3(await web3.eth.getCode(artifact.address)))
+    libImplArtifact.address = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
+    if (libTargetAddr !== libNetworkAddr) {
+      console.info("  ", "> library address:   \x1b[96m", libImplArtifact.address, `\x1b[0m!== \x1b[30;43m${libTargetAddr}\x1b[0m`)
+    } else {
+      console.info("  ", "> library address:   \x1b[96m", libImplArtifact.address, "\x1b[0m")
+    }
     console.info()
   }
 }

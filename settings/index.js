@@ -7,20 +7,18 @@ const utils = require("../src/utils")
 
 module.exports = {
   getArtifacts: (network) => {
-    const [eco, net] = utils.getRealmNetworkFromString(network)
-    return merge(
-      artifacts.default,
-      artifacts[eco],
-      artifacts[net]
-    )
+    let res = artifacts.default;
+    utils.getNetworkTagsFromString(network).forEach(net => {
+      res = merge(res, artifacts[net])
+    });
+    return res;
   },
   getCompilers: (network) => {
-    const [eco, net] = utils.getRealmNetworkFromString(network)
-    return merge(
-      solidity.default,
-      solidity[eco],
-      solidity[net],
-    )
+    let res = solidity.default;
+    utils.getNetworkTagsFromString(network).forEach(net => {
+      res = merge(res, solidity[net])
+    });
+    return res;
   },
   getNetworks: () => {
     return Object.fromEntries(Object.entries(networks)
@@ -38,12 +36,11 @@ module.exports = {
     )
   },
   getSpecs: (network) => {
-    const [eco, net] = utils.getRealmNetworkFromString(network)
-    return merge(
-      specs.default,
-      specs[eco],
-      specs[net]
-    )
+    let res = specs.default;
+    utils.getNetworkTagsFromString(network).forEach(net => {
+      res = merge(res, specs[net])
+    });
+    return res;
   },
   artifacts,
   solidity,
