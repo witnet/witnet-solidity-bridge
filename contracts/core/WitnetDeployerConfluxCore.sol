@@ -4,11 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitnetDeployer.sol";
 
-/// @notice WitnetDeployerCfxCore contract used both as CREATE2 factory (EIP-1014) for Witnet artifacts, 
+/// @notice WitnetDeployerConfluxCore contract used both as CREATE2 factory (EIP-1014) for Witnet artifacts, 
 /// @notice and CREATE3 factory (EIP-3171) for Witnet proxies, on the Conflux Core Ecosystem.
 /// @author Guillermo Díaz <guillermo@otherplane.com>
 
-contract WitnetDeployerCfxCore is WitnetDeployer {
+contract WitnetDeployerConfluxCore is WitnetDeployer {
 
     /// @notice Determine counter-factual address of the contract that would be deployed by the given `_initCode` and a `_salt`.
     /// @param _initCode Creation code, including construction logic and input parameters.
@@ -61,7 +61,7 @@ contract WitnetDeployerCfxCore is WitnetDeployer {
             );
             return WitnetProxy(payable(_proxyAddr));
         } else {
-            revert("WitnetDeployerCfxCore: already proxified");
+            revert("WitnetDeployerConfluxCore: already proxified");
         }
     }
 
