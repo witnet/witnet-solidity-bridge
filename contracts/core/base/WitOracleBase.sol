@@ -93,11 +93,19 @@ abstract contract WitOracleBase
     constructor(
             EvmImmutables memory _immutables,
             WitOracleRadonRegistry _registry
-            // WitOracleRequestFactory _factory
         )
     {
+        _require(
+            address(_registry).code.length > 0,
+            "inexistent registry"
+        );
+        _require(
+            _registry.specs() == (
+                type(IWitAppliance).interfaceId
+                    ^ type(IWitOracleRadonRegistry).interfaceId
+            ), "uncompliant registry"
+        );
         registry = _registry;
-        // factory = _factory;
 
         __reportResultGasBase = _immutables.reportResultGasBase;
         __reportResultWithCallbackGasBase = _immutables.reportResultWithCallbackGasBase;

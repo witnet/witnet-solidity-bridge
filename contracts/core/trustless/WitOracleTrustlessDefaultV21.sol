@@ -22,23 +22,14 @@ contract WitOracleTrustlessDefaultV21
             uint256 _queryAwaitingBlocks,
             uint256 _queryReportingStake,
             WitOracleRadonRegistry _registry
-            // WitOracleRequestFactory _factory
         )
         WitOracleBase(
             _immutables,
             _registry
-            // _factory
         )
         WitOracleBaseTrustless(
             _queryAwaitingBlocks,
             _queryReportingStake
         )
-    {
-        // _require(
-        //     _registry.specs() == (
-        //         type(IWitAppliance).interfaceId
-        //             ^ type(IWitOracleRadonRegistry).interfaceId
-        //     ), "uncompliant registry"
-        // );
-    }
+    {}
 }

@@ -48,6 +48,16 @@ abstract contract WitOracleRequestFactoryBase
     }
 
     constructor(WitOracle _witOracle) {
+        _require(
+            address(_witOracle).code.length > 0,
+            "inexistent oracle"
+        );
+        _require(
+            _witOracle.specs() == (
+                type(IWitAppliance).interfaceId
+                    ^ type(IWitOracle).interfaceId
+            ), "uncompliant WitOracle"
+        );
         witOracle = _witOracle;
     }
 

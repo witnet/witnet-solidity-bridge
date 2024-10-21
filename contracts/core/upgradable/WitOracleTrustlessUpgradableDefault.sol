@@ -10,7 +10,7 @@ import "../base/WitOracleBaseUpgradable.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-abstract contract WitOracleTrustlessUpgradableDefault
+contract WitOracleTrustlessUpgradableDefault
     is 
         WitOracleBaseUpgradable
 {
@@ -23,14 +23,12 @@ abstract contract WitOracleTrustlessUpgradableDefault
             uint256 _queryAwaitingBlocks,
             uint256 _queryReportingStake,
             WitOracleRadonRegistry _registry,
-            // WitOracleRequestFactory _factory,
             bytes32 _versionTag,
             bool _upgradable
         )
         WitOracleBase(
             _immutables,
             _registry
-            // _factory
         )
         WitOracleBaseTrustless(
             _queryAwaitingBlocks,

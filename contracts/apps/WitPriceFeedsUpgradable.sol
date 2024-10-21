@@ -53,6 +53,16 @@ contract WitPriceFeedsUpgradable
             "io.witnet.proxiable.feeds.price"
         )
     {
+        _require(
+            address(_witOracle).code.length > 0,
+            "inexistent oracle"
+        );
+        _require(
+            _witOracle.specs() == (
+                type(IWitAppliance).interfaceId
+                    ^ type(IWitOracle).interfaceId
+            ), "uncompliant oracle"
+        );
         witOracle = _witOracle;
     }
 

@@ -25,13 +25,11 @@ contract WitOracleTrustableOvm2
     constructor(
             EvmImmutables memory _immutables,
             WitOracleRadonRegistry _registry,
-            // WitOracleRequestFactory _factory,
             bytes32 _versionTag
         )
         WitOracleBase(
             _immutables,
             _registry
-            // _factory
         )
         WitOracleBaseTrustable(_versionTag)
     {
