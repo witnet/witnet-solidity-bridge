@@ -3,6 +3,7 @@ const fs = require("fs")
 const utils = require("../src/utils")
 
 const addresses = require("../migrations/addresses")
+const constructorArgs = require("../migrations/constructorArgs.json")
 
 module.exports = async function () {
   let artifact
@@ -46,6 +47,9 @@ module.exports = async function () {
   })
   try {
     from = from || addresses[network]?.WitnetDeployer || addresses.default.WitnetDeployer
+    if (hexArgs === "" && artifact !== "")  {
+      hextArgs = constructorArgs[network][artifact]
+    }
   } catch {
     console.error(`WitnetDeployer must have been previously deployed on network '${network}'.\n`)
     console.info("Usage:\n")
