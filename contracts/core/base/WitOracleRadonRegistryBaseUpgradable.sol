@@ -27,37 +27,11 @@ abstract contract WitOracleRadonRegistryBaseUpgradable
         )
     {}
     
+
     // ================================================================================================================
-    // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
+    // --- Overrides 'Upgradeable' ------------------------------------------------------------------------------------
 
-    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData) 
-        public
-        override
-    {
-        address _owner = __bytecodes().owner;
-        if (_owner == address(0)) {
-            // set owner from  the one specified in _initData
-            _owner = abi.decode(_initData, (address));
-            __bytecodes().owner = _owner;
-        } else {
-            // only owner can initialize:
-            if (msg.sender != _owner) {
-                _revert("not the owner");
-            }
-        }
-
-        if (__bytecodes().base != address(0)) {
-            // current implementation cannot be initialized more than once:
-            if(__bytecodes().base == base()) {
-                _revert("already initialized");
-            }
-        }        
-        __bytecodes().base = base();
-
-        emit Upgraded(_owner, base(), codehash(), version());
-    }
+    function __initializeUpgradableData(bytes memory) virtual override internal {}
 
     // ================================================================================================================
     // --- Overrides 'Ownable2Step' -----------------------------------------------------------------------------------

@@ -117,8 +117,10 @@ abstract contract WitOracleRequestFactoryBase
     function class() virtual override public view returns (string memory) {
         if (__witOracleRequest().radHash != bytes32(0)) {
             return type(WitOracleRequest).name;
+        
         } else if (__witOracleRequestTemplate().tallyReduceHash != bytes16(0)) {
             return type(WitOracleRequestTemplate).name;
+        
         } else {
             return type(WitOracleRequestFactory).name;
         }

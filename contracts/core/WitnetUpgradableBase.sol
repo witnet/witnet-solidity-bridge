@@ -56,7 +56,31 @@ abstract contract WitnetUpgradableBase
 
 
     // ================================================================================================================
-    // --- Overrides 'Upgradeable' --------------------------------------------------------------------------------------
+    // --- Overrides 'Upgradeable' ------------------------------------------------------------------------------------
+
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function initialize(bytes memory _initData) virtual override public {
+        address _owner = owner();
+        if (_owner == address(0)) {
+            // upon first upgrade, extract decode owner address from _intidata
+            (_owner, _initData) = abi.decode(_initData, (address, bytes));
+            _transferOwnership(_owner);
+        
+        } else {
+            // only owner can initialize an existing proxy:
+            require(msg.sender == _owner, "not the owner");
+        }
+        __initializeUpgradableData(_initData);
+        if (
+            __proxiable().codehash != bytes32(0)
+                && __proxiable().codehash == codehash()
+        ) {
+            revert("already initialized codehash");
+        }
+        __proxiable().codehash = codehash();
+        emit Upgraded(owner(), base(), codehash(), version());
+    }
 
     /// Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address _from) external view virtual override returns (bool) {

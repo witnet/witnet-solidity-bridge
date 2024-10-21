@@ -63,50 +63,18 @@ abstract contract WitOracleRequestFactoryBaseUpgradable
         return WitnetUpgradableBase.version();
     }
     
+
     // ================================================================================================================
-    // --- Overrides 'Upgradeable' -------------------------------------------------------------------------------------
+    // --- Overrides 'Upgradeable' ------------------------------------------------------------------------------------
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData) 
-        virtual override public
-        onlyDelegateCalls
-    {
-        _require(!initialized(), "already initialized");
-        
-        // Trying to intialize an upgradable factory instance...
-        {
-            address _owner = __witOracleRequestFactory().owner;
-            if (_owner == address(0)) {
-                // Upon first initialization of an upgradable factory,
-                // set owner from the one specified in _initData
-                _owner = abi.decode(_initData, (address));
-                __witOracleRequestFactory().owner = _owner;
-            } else {
-                // only the owner can upgrade an upgradable factory
-                _require(
-                    msg.sender == _owner,
-                    "not the owner"
-                );
-            }
-
-            if (__proxiable().proxy == address(0)) {
-                // first initialization of the proxy
-                __proxiable().proxy = address(this);
-            }
-            __proxiable().implementation = base();
-
-            _require(address(witOracle).code.length > 0, "inexistent request board");
-            _require(
-                witOracle.specs() == (
-                    type(IWitAppliance).interfaceId
-                        ^ type(IWitOracle).interfaceId
-                ), "uncompliant request board"
-            );
-            
-            emit Upgraded(msg.sender, base(), codehash(), version());
+    function __initializeUpgradableData(bytes memory) virtual override internal {
+        if (__proxiable().codehash == bytes32(0)) {
+            __proxiable().proxy = address(this);
         }
+        __proxiable().implementation = base();
     }
+
 
     // ================================================================================================================
     // --- Overrides 'Ownable2Step' -----------------------------------------------------------------------------------

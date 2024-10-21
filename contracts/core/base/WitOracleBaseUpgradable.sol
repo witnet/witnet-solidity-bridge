@@ -31,17 +31,9 @@ abstract contract WitOracleBaseUpgradable
     // ---Upgradeable -------------------------------------------------------------------------------------------------
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData) virtual override public {
-        address _owner = owner();
-
-        if (_owner == address(0)) {
-            // initializing for the first time...
-
-            // transfer ownership to first initializer
-            _transferOwnership(_owner);
-
-            // save into storage genesis beacon
+    function __initializeUpgradableData(bytes memory _initData) virtual override internal {
+        if (__proxiable().codehash == bytes32(0)) {
+            // upon first initialization, store genesis beacon
             WitOracleDataLib.data().beacons[
                 Witnet.WIT_2_GENESIS_BEACON_INDEX
             ] = Witnet.Beacon({
@@ -57,37 +49,12 @@ abstract contract WitOracleBaseUpgradable
                     Witnet.WIT_2_GENESIS_BEACON_NEXT_COMMITTEE_AGG_PUBKEY_3
                 ]
             });
-
         } else {
-            // only owner can initialize a new upgrade:
-            _require(
-                msg.sender == _owner,
-                "not the owner"
-            );
+            // otherwise, store beacon read from _initData, if any
+            if (_initData.length > 0) {
+                Witnet.Beacon memory _initBeacon = abi.decode(_initData, (Witnet.Beacon));
+                WitOracleDataLib.data().beacons[_initBeacon.index] = _initBeacon;
+            }
         }
-
-        if (
-            __proxiable().codehash != bytes32(0)
-                && __proxiable().codehash == codehash()
-        ) {
-            _revert("already upgraded");
-        }
-        __proxiable().codehash = codehash();
-
-        _require(address(registry).code.length > 0, "inexistent registry");
-        _require(
-            registry.specs() == (
-                type(IWitAppliance).interfaceId
-                    ^ type(IWitOracleRadonRegistry).interfaceId
-            ), "uncompliant registry"
-        );
-        
-        // Settle given beacon, if any:
-        if (_initData.length > 0) {
-            Witnet.Beacon memory _beacon = abi.decode(_initData, (Witnet.Beacon));
-            WitOracleDataLib.data().beacons[_beacon.index] = _beacon;
-        }
-
-        emit Upgraded(_owner, base(), codehash(), version());
     }
 }

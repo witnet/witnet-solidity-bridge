@@ -91,52 +91,27 @@ contract WitPriceFeedsUpgradable
     // --- Overrides 'Upgradeable' ------------------------------------------------------------------------------------
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData)
-        public
-        override
-    {
-        address _owner = owner();
-        if (_owner == address(0)) {
-            // set owner as specified by first argument in _initData
-            _owner = abi.decode(_initData, (address));
-            _transferOwnership(_owner);
-            // settle default Radon SLA upon first initialization
+    function __initializeUpgradableData(bytes memory _initData) virtual override internal {
+        if (__proxiable().codehash == bytes32(0)) {
             __defaultRadonSLA = Witnet.RadonSLA({
                 witNumWitnesses: 10,
-                witUnitaryReward: 2 * 10 ** 8,   // 0.2 $WIT
+                witUnitaryReward: 2 * 10 ** 8,
                 maxTallyResultSize: 16
             });
             // settle default base fee overhead percentage
             __baseFeeOverheadPercentage = 10;
         } else {
-            // only the owner can initialize:
-            _require(
-                msg.sender == _owner,
-                "not the owner"
-            );
+            // otherwise, store beacon read from _initData, if any
+            if (_initData.length > 0) {
+                (uint16 _baseFeeOverheadPercentage, Witnet.RadonSLA memory _defaultRadonSLA) = abi.decode(
+                    _initData, (uint16, Witnet.RadonSLA)
+                );
+                __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
+                __defaultRadonSLA = _defaultRadonSLA;
+            }
         }
-
-        if (
-            __proxiable().codehash != bytes32(0)
-                && __proxiable().codehash == codehash()
-        ) {
-            _revert("already upgraded");
-        }        
-        __proxiable().codehash = codehash();
-
-        _require(
-            address(witOracle).code.length > 0,
-            "inexistent oracle"
-        );
-        _require(
-            witOracle.specs() == (
-                type(IWitAppliance).interfaceId
-                    ^ type(IWitOracle).interfaceId
-            ), "uncompliant oracle"
-        );
-        emit Upgraded(_owner, base(), codehash(), version());
     }
+
 
     /// Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address _from) external view override returns (bool) {

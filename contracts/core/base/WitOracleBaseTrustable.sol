@@ -44,47 +44,8 @@ abstract contract WitOracleBaseTrustable
     // --- Upgradeable ------------------------------------------------------------------------------------------------
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
-    /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData) virtual override public {
-        address _owner = owner();
-        address[] memory _newReporters;
-
-        if (_owner == address(0)) {
-            // get owner (and reporters) from _initData
-            bytes memory _newReportersRaw;
-            (_owner, _newReportersRaw) = abi.decode(_initData, (address, bytes));
-            _transferOwnership(_owner);
-            _newReporters = abi.decode(_newReportersRaw, (address[]));
-        } else {
-            // only owner can initialize:
-            _require(
-                msg.sender == _owner,
-                "not the owner"
-            );
-            // get reporters from _initData
-            _newReporters = abi.decode(_initData, (address[]));
-        }
-
-        if (
-            __proxiable().codehash != bytes32(0)
-                && __proxiable().codehash == codehash()
-        ) {
-            _revert("already upgraded");
-        }
-        __proxiable().codehash = codehash();
-
-        _require(address(registry).code.length > 0, "inexistent registry");
-        _require(
-            registry.specs() == (
-                type(IWitAppliance).interfaceId
-                    ^ type(IWitOracleRadonRegistry).interfaceId
-            ), "uncompliant registry"
-        );
-        
-        // Set reporters, if any
-        WitOracleDataLib.setReporters(_newReporters);
-
-        emit Upgraded(_owner, base(), codehash(), version());
+    function __initializeUpgradableData(bytes memory _initData) virtual override internal {
+        WitOracleDataLib.setReporters(abi.decode(_initData, (address[])));
     }
 
 
