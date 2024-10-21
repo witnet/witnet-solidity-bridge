@@ -16,7 +16,7 @@ import "../patterns/Ownable2Step.sol";
 /// @title WitPriceFeeds: Price Feeds live repository reliant on the Witnet Oracle blockchain.
 /// @author Guillermo Díaz <guillermo@otherplane.com>
 
-contract WitPriceFeedsV21
+contract WitPriceFeedsUpgradable
     is
         Ownable2Step,
         WitPriceFeeds,
@@ -31,11 +31,10 @@ contract WitPriceFeedsV21
     using Witnet for Witnet.RadonSLA;
     using Witnet for Witnet.Result;
 
-    function class() virtual override(IWitAppliance, WitnetUpgradableBase) public view returns (string memory) {
-        return type(WitPriceFeedsV21).name;
+    function class() virtual override public view returns (string memory) {
+        return type(WitPriceFeedsUpgradable).name;
     }
 
-    bytes4 immutable public override specs = type(WitPriceFeeds).interfaceId;
     WitOracle immutable public override witOracle;
     WitOracleRadonRegistry immutable internal __registry;
 
@@ -44,8 +43,8 @@ contract WitPriceFeedsV21
     
     constructor(
             WitOracle _witOracle,
-            bool _upgradable,
-            bytes32 _versionTag
+            bytes32 _versionTag,
+            bool _upgradable
         )
         Ownable(address(msg.sender))
         WitnetUpgradableBase(
@@ -131,8 +130,10 @@ contract WitPriceFeedsV21
             "inexistent oracle"
         );
         _require(
-            witOracle.specs() == type(WitOracle).interfaceId, 
-            "uncompliant oracle"
+            witOracle.specs() == (
+                type(IWitAppliance).interfaceId
+                    ^ type(IWitOracle).interfaceId
+            ), "uncompliant oracle"
         );
         emit Upgraded(_owner, base(), codehash(), version());
     }
