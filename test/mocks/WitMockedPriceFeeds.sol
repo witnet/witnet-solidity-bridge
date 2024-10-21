@@ -15,8 +15,8 @@ contract WitMockedPriceFeeds is WitPriceFeedsUpgradable {
     constructor(WitMockedOracle _witOracle)
         WitPriceFeedsUpgradable(
             _witOracle,
-            false,
-            bytes32("mocked")
+            bytes32("mocked"),
+            false
         )
     {}
 }

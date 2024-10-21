@@ -52,7 +52,7 @@
     "networks": "node ./scripts/networks.js 2>&1",
     "ops:rng:sla": "npx truffle migrate --migrations_directory ./migrations/ops/rng/sla --network",
     "prepare": "npx truffle compile --all && npx hardhat compile --force && node ./scripts/prepare.js",
-    "test": "pnpm run clean && npx truffle test",
+    "test": "npx truffle test",
     "verify:apps": "node ./scripts/verify-apps.js 2>&1",
     "verify:core": "node ./scripts/verify-core.js 2>&1",
     "verify:libs": "node ./scripts/verify-libs.js 2>&1",

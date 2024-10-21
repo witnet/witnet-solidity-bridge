@@ -65,7 +65,8 @@ contract TestWitnetV2 {
             finality: uint64(block.number),
             resultTimestamp: uint32(block.timestamp),
             resultDrTxHash: blockhash(block.number - 1),
-            resultCborBytes: hex"010203040506"
+            resultCborBytes: hex"010203040506",
+            disputer: address(0)
         });
     }
 

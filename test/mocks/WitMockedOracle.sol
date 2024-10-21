@@ -21,11 +21,9 @@ contract WitMockedOracle
 {
     constructor(WitMockedRadonRegistry _registry) 
         WitOracleTrustableDefault(
+            EvmImmutables(60000, 65000, 70000, 20000),
             WitOracleRadonRegistry(_registry),
-            WitOracleRequestFactory(address(0)), 
-            false,
-            bytes32("mocked"),
-            60000, 65000, 70000, 20000
+            bytes32("mocked")
         )
     {
         address[] memory _reporters = new address[](1);
