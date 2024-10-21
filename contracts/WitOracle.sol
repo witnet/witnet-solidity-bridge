@@ -16,4 +16,11 @@ abstract contract WitOracle
         IWitAppliance,
         IWitOracle,
         IWitOracleEvents
-{}
+{
+    function specs() virtual override external pure returns (bytes4) {
+        return (
+            type(IWitAppliance).interfaceId
+                ^ type(IWitOracle).interfaceId
+        );
+    }
+}

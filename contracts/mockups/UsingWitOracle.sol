@@ -42,8 +42,10 @@ abstract contract UsingWitOracle
     /// @param _witOracle Address of the WitOracle bridging contract.
     constructor(WitOracle _witOracle) {
         require(
-            _witOracle.specs() == type(WitOracle).interfaceId,
-            "UsingWitOracle: uncompliant WitOracle"
+            _witOracle.specs() == (
+                type(IWitAppliance).interfaceId
+                    ^ type(IWitOracle).interfaceId
+            ), "UsingWitOracle: uncompliant WitOracle"
         );
         __witOracle = _witOracle;
         __witOracleDefaultQuerySLA = Witnet.RadonSLA({

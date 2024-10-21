@@ -12,4 +12,11 @@ abstract contract WitOracleRadonRegistry
         IWitAppliance,
         IWitOracleRadonRegistry,
         IWitOracleRadonRegistryEvents
-{}
+{
+    function specs() virtual override external pure returns (bytes4) {
+        return (
+            type(IWitAppliance).interfaceId
+                ^ type(IWitOracleRadonRegistry).interfaceId
+        );
+    }
+}

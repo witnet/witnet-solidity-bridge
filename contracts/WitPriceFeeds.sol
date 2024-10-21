@@ -18,4 +18,13 @@ abstract contract WitPriceFeeds
             "Price-"
         ) 
     {}
+
+    function specs() virtual override external pure returns (bytes4) {
+        return (
+            type(IWitOracleAppliance).interfaceId
+                ^ type(IERC2362).interfaceId
+                ^ type(IWitFeeds).interfaceId
+                ^ type(IWitPriceFeeds).interfaceId
+        );
+    }
 }
