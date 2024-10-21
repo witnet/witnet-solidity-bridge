@@ -7,18 +7,18 @@ const utils = require("../src/utils")
 
 module.exports = {
   getArtifacts: (network) => {
-    let res = artifacts.default;
+    let res = artifacts.default
     utils.getNetworkTagsFromString(network).forEach(net => {
       res = merge(res, artifacts[net])
-    });
-    return res;
+    })
+    return res
   },
   getCompilers: (network) => {
-    let res = solidity.default;
+    let res = solidity.default
     utils.getNetworkTagsFromString(network).forEach(net => {
       res = merge(res, solidity[net])
-    });
-    return res;
+    })
+    return res
   },
   getNetworks: () => {
     return Object.fromEntries(Object.entries(networks)
@@ -36,11 +36,11 @@ module.exports = {
     )
   },
   getSpecs: (network) => {
-    let res = specs.default;
+    let res = specs.default
     utils.getNetworkTagsFromString(network).forEach(net => {
       res = merge(res, specs[net])
-    });
-    return res;
+    })
+    return res
   },
   artifacts,
   solidity,

@@ -9,7 +9,7 @@ module.exports = async function (_, network, [, from]) {
   if (!addresses[network]?.libs) addresses[network].libs = {}
 
   const deployer = await WitnetDeployer.deployed()
-  const networkArtifacts = settings.getArtifacts(network);
+  const networkArtifacts = settings.getArtifacts(network)
   const selection = utils.getWitnetArtifactsFromArgs()
 
   for (const index in networkArtifacts.libs) {
@@ -22,7 +22,7 @@ module.exports = async function (_, network, [, from]) {
     let libNetworkAddr = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
     if (
       // lib implementation artifact is listed as --artifacts on CLI
-      selection.includes(impl) || 
+      selection.includes(impl) ||
       // or, no address found in addresses file but code is already deployed into target address
       (utils.isNullAddress(libNetworkAddr) && libTargetCode.length > 3) ||
       // or, address found in addresses file but no code currently deployed in such
@@ -41,16 +41,16 @@ module.exports = async function (_, network, [, from]) {
       addresses[network].libs[impl] = libTargetAddr
       libNetworkAddr = libTargetAddr
       // if (!utils.isDryRun(network)) {
-        await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
       // }
     } else {
       utils.traceHeader(`Deployed '${impl}'`)
     }
     libImplArtifact.address = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
     if (libTargetAddr !== libNetworkAddr) {
-      console.info("  ", "> library address:   \x1b[96m", libImplArtifact.address, `\x1b[0m!== \x1b[30;43m${libTargetAddr}\x1b[0m`)
+      console.info("   > library address:   \x1b[96m", libImplArtifact.address, `\x1b[0m!== \x1b[30;43m${libTargetAddr}\x1b[0m`)
     } else {
-      console.info("  ", "> library address:   \x1b[96m", libImplArtifact.address, "\x1b[0m")
+      console.info("   > library address:   \x1b[96m", libImplArtifact.address, "\x1b[0m")
     }
     console.info()
   }

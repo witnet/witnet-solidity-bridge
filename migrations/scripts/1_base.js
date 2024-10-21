@@ -1,4 +1,3 @@
-const ethUtils = require("ethereumjs-util")
 const fs = require("fs")
 const settings = require("../../settings")
 const utils = require("../../src/utils")
@@ -7,14 +6,14 @@ const WitnetDeployer = artifacts.require("WitnetDeployer")
 
 module.exports = async function (truffleDeployer, network, [,,, master]) {
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
-  if (!addresses[network]) addresses[network] = {};
+  if (!addresses[network]) addresses[network] = {}
 
   const deployerAddr = utils.getNetworkBaseArtifactAddress(network, addresses, "WitnetDeployer")
   if (utils.isNullAddress(deployerAddr) || (await web3.eth.getCode(deployerAddr)).length < 3) {
     // Settle WitnetDeployer bytecode and source code as to guarantee
     // salted addresses remain as expected no matter if the solc version
     // is changed in migrations/witnet.settings.js
-    const impl = settings.getArtifacts(network).WitnetDeployer;
+    const impl = settings.getArtifacts(network).WitnetDeployer
     utils.traceHeader("Defrosted 'WitnetDeployer'")
     fs.writeFileSync(
       `build/contracts/${impl}.json`,
@@ -29,25 +28,24 @@ module.exports = async function (truffleDeployer, network, [,,, master]) {
     console.info("  ", "> evm version:       ", metadata.settings.evmVersion.toUpperCase())
     console.info("  ", "> artifact codehash: ", web3.utils.soliditySha3(WitnetDeployer.toJSON().deployedBytecode))
 
-    await truffleDeployer.deploy(WitnetDeployer, { 
+    await truffleDeployer.deploy(WitnetDeployer, {
       from: settings.getSpecs(network)?.WitnetDeployer?.from || web3.utils.toChecksumAddress(master),
     })
     addresses[network].WitnetDeployer = WitnetDeployer.address
     await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-  
   } else {
-    WitnetDeployer.address = addresses[network].WitnetDeployer;
+    WitnetDeployer.address = addresses[network].WitnetDeployer
     utils.traceHeader("Deployed 'WitnetDeployer'")
     console.info("  ", "> contract address:  \x1b[95m", WitnetDeployer.address, "\x1b[0m")
     console.info()
   }
-    
+
   // Settle WitnetDeployer bytecode and source code as to guarantee
   // that proxified base artifacts can get automatically verified
   utils.traceHeader("Defrosting 'WitnetProxy'")
   fs.writeFileSync(
-    `build/contracts/WitnetProxy.json`,
-    fs.readFileSync(`migrations/frosts/WitnetProxy.json`),
+    "build/contracts/WitnetProxy.json",
+    fs.readFileSync("migrations/frosts/WitnetProxy.json"),
     { encoding: "utf8", flag: "w" }
   )
   const WitnetProxy = artifacts.require("WitnetProxy")

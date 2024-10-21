@@ -1,29 +1,29 @@
 module.exports = {
   default: {
     WitOracle: {
-      baseDeps: [ 
-        "WitOracleRadonRegistry", 
+      baseDeps: [
+        "WitOracleRadonRegistry",
       ],
-      baseLibs: [ 
+      baseLibs: [
         "WitOracleDataLib",
         "WitOracleResultErrorsLib",
       ],
       immutables: {
-        types: [ "(uint32, uint32, uint32, uint32)", ],
+        types: ["(uint32, uint32, uint32, uint32)"],
         values: [
           [
             /* _reportResultGasBase */ 58282,
             /* _reportResultWithCallbackGasBase */ 65273,
             /* _reportResultWithCallbackRevertGasBase */ 69546,
             /* _sstoreFromZeroGas */ 20000,
-          ]
+          ],
         ],
       },
       vanity: 13710368043, // 0x77703aE126B971c9946d562F41Dd47071dA00777
     },
     WitOracleTrustless: {
       immutables: {
-        types: ["uint256", "uint256", ],
+        types: ["uint256", "uint256"],
         values: [
           /* _evmQueryAwaitingBlocks */ 16,
           /* _evmQueryReportingStake */ "1000000000000000000",
@@ -31,14 +31,14 @@ module.exports = {
       },
     },
     WitOracleRadonRegistry: {
-      baseLibs: [ 
-        "WitOracleRadonEncodingLib", 
+      baseLibs: [
+        "WitOracleRadonEncodingLib",
       ],
       vanity: 6765579443, // 0x000B61Fe075F545fd37767f40391658275900000
     },
     WitOracleRequestFactory: {
-      baseDeps: [ 
-        "WitOracle", 
+      baseDeps: [
+        "WitOracle",
       ],
       vanity: 1240014136, // 0x000DB36997AF1F02209A6F995883B9B699900000
     },

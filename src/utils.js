@@ -38,7 +38,7 @@ function fromAscii (str) {
   return "0x" + arr1.join("")
 }
 
-function getNetworkAppsArtifactAddress(network, addresses, artifact) {
+function getNetworkAppsArtifactAddress (network, addresses, artifact) {
   const tags = getNetworkTagsFromString(network)
   for (const index in tags) {
     const network = tags[index]
@@ -49,7 +49,7 @@ function getNetworkAppsArtifactAddress(network, addresses, artifact) {
   return addresses?.default?.apps[artifact] ?? ""
 }
 
-function getNetworkBaseArtifactAddress(network, addresses, artifact) {
+function getNetworkBaseArtifactAddress (network, addresses, artifact) {
   const tags = getNetworkTagsFromString(network)
   for (const index in tags) {
     const network = tags[index]
@@ -60,7 +60,7 @@ function getNetworkBaseArtifactAddress(network, addresses, artifact) {
   return addresses?.default[artifact] ?? ""
 }
 
-function getNetworkArtifactAddress(network, domain, addresses, artifact) {
+function getNetworkArtifactAddress (network, domain, addresses, artifact) {
   const tags = getNetworkTagsFromString(network)
   for (const index in tags) {
     const network = tags[index]
@@ -71,7 +71,7 @@ function getNetworkArtifactAddress(network, domain, addresses, artifact) {
   return addresses?.default?.core[artifact] ?? ""
 }
 
-function getNetworkCoreArtifactAddress(network, addresses, artifact) {  
+function getNetworkCoreArtifactAddress (network, addresses, artifact) {
   const tags = getNetworkTagsFromString(network)
   for (const index in tags) {
     const network = tags[index]
@@ -82,7 +82,7 @@ function getNetworkCoreArtifactAddress(network, addresses, artifact) {
   return addresses?.default?.core[artifact] ?? ""
 }
 
-function getNetworkLibsArtifactAddress(network, addresses, artifact) {
+function getNetworkLibsArtifactAddress (network, addresses, artifact) {
   const tags = getNetworkTagsFromString(network)
   for (const index in tags) {
     const network = tags[index]
@@ -90,14 +90,14 @@ function getNetworkLibsArtifactAddress(network, addresses, artifact) {
       return addresses[network].libs[artifact]
     }
   }
-  return addresses?.default?.libs?.[artifact] ?? ""  
+  return addresses?.default?.libs?.[artifact] ?? ""
 }
 
 function getNetworkTagsFromString (network) {
   network = network ? network.toLowerCase() : "development"
   const tags = []
   const parts = network.split(":")
-  for (ix = 0; ix < parts.length; ix ++) {
+  for (let ix = 0; ix < parts.length; ix++) {
     tags.push(parts.slice(0, ix + 1).join(":"))
   }
   return tags
@@ -146,7 +146,7 @@ function getWitnetArtifactsFromArgs () {
     }
     return argv
   })
-  if (selection.length == 0) {
+  if (selection.length === 0) {
     process.argv[2]?.split(" ").map((argv, index, args) => {
       if (argv === "--artifacts") {
         selection = args[index + 1].split(",")
@@ -167,10 +167,10 @@ function isNullAddress (addr) {
       addr === "0x0000000000000000000000000000000000000000"
 }
 
-function isUpgradableArtifact(impl) {
+function isUpgradableArtifact (impl) {
   return (
     impl.indexOf("Upgradable") > -1 || impl.indexOf("Trustable") > -1
-  );
+  )
 }
 
 function padLeft (str, char, size) {
@@ -215,14 +215,14 @@ async function overwriteJsonFile (filename, extra) {
   lockfile.unlockSync(filename)
 }
 
-function traceData(header, data, width, color) {
+function traceData (header, data, width, color) {
   process.stdout.write(header)
-  if (color) process.stdout.write(color);
-  for (let ix = 0; ix < data.length / width; ix ++) {
+  if (color) process.stdout.write(color)
+  for (let ix = 0; ix < data.length / width; ix++) {
     if (ix > 0) process.stdout.write(" ".repeat(header.length))
     process.stdout.write(data.slice(width * ix, width * (ix + 1)))
     process.stdout.write("\n")
-  } 
+  }
   if (color) process.stdout.write("\x1b[0m")
 }
 
@@ -235,12 +235,14 @@ function traceHeader (header) {
 function traceTx (tx) {
   console.info("  ", "> EVM tx sender:     \x1b[93m", tx.receipt.from, "\x1b[0m")
   console.info("  ", "> EVM tx hash:       \x1b[33m", tx.receipt.transactionHash.slice(2), "\x1b[0m")
-  console.info("  ", "> EVM tx gas used:   ", `\x1b[33m${tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}\x1b[0m`)
+  console.info("  ", "> EVM tx gas used:   ",
+    `\x1b[33m${tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}\x1b[0m`
+  )
   if (tx.receipt?.effectiveGasPrice) {
     console.info("  ", "> EVM tx gas price:  ", `\x1b[33m${tx.receipt.effectiveGasPrice / 10 ** 9}`, "gwei\x1b[0m")
     console.info("  ", "> EVM tx total cost: ", `\x1b[33m${parseFloat(
-      (BigInt(tx.receipt.gasUsed) * BigInt(tx.receipt.effectiveGasPrice))
-        / BigInt(10 ** 18)
+      (BigInt(tx.receipt.gasUsed) * BigInt(tx.receipt.effectiveGasPrice)) /
+        BigInt(10 ** 18)
     ).toString()}`,
     "ETH\x1b[0m"
     )
