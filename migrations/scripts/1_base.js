@@ -27,7 +27,6 @@ module.exports = async function (truffleDeployer, network, [,,, master]) {
     console.info("  ", "> optimizer:         ", JSON.stringify(metadata.settings.optimizer))
     console.info("  ", "> evm version:       ", metadata.settings.evmVersion.toUpperCase())
     console.info("  ", "> artifact codehash: ", web3.utils.soliditySha3(WitnetDeployer.toJSON().deployedBytecode))
-
     await truffleDeployer.deploy(WitnetDeployer, {
       from: settings.getSpecs(network)?.WitnetDeployer?.from || web3.utils.toChecksumAddress(master),
     })
@@ -36,7 +35,7 @@ module.exports = async function (truffleDeployer, network, [,,, master]) {
   } else {
     WitnetDeployer.address = addresses[network].WitnetDeployer
     utils.traceHeader("Deployed 'WitnetDeployer'")
-    console.info("  ", "> contract address:  \x1b[95m", WitnetDeployer.address, "\x1b[0m")
+    console.info("  ", "> contract address:  \x1b[93m", WitnetDeployer.address, "\x1b[0m")
     console.info()
   }
 

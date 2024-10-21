@@ -41,16 +41,19 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
   })
 
   // Loop on framework domains ...
+  const palette = [ 6, 4, ]
   for (const domain in framework) {
     if (!addresses[network][domain]) addresses[network][domain] = {}
-
+    const color = palette[Object.keys(framework).indexOf(domain)]
+    
+    let first = true
     // Loop on domain artifacts ...
     for (const index in framework[domain]) {
       const base = framework[domain][index]
       const impl = networkArtifacts[domain][base]
 
       if (impl.indexOf(base) < 0) {
-        console.error(`Mismatching inheriting artifact names on settings/artifacts.js: ${base} <! ${impl}`)
+        console.info(`Mismatching inheriting artifact names on settings/artifacts.js: ${base} <! ${impl}`)
         process.exit(1)
       }
 
@@ -62,38 +65,49 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
       ) {
         // skip dapps that haven't yet been deployed, not have they been selected from command line
         continue
+      } else {
+        if (first) {
+          console.info(`  \x1b[1;39;4${color}m`, domain.toUpperCase(), "ARTIFACTS", " ".repeat(106 - domain.length), "\x1b[0m")
+          first = false
+        }
       }
 
       const baseArtifact = artifacts.require(base)
       const implArtifact = artifacts.require(impl)
 
-      const targetSpecs = await unfoldCoreTargetSpecs(domain, impl, base, from, network, networkArtifacts, networkSpecs)
-      const targetAddr = await determineCoreTargetAddr(impl, targetSpecs, networkArtifacts)
+      const targetSpecs = await unfoldTargetSpecs(domain, impl, base, from, network, networkArtifacts, networkSpecs)
+      const targetAddr = await determineTargetAddr(impl, targetSpecs, networkArtifacts)
       const targetCode = await web3.eth.getCode(targetAddr)
 
       if (targetCode.length < 3) {
         utils.traceHeader(`Deploying '${impl}'...`)
         if (targetSpecs?.constructorArgs?.types.length > 0) {
-          console.info("  ", "> constructor types: \x1b[90m", targetSpecs.constructorArgs.types, "\x1b[0m")
-          utils.traceData("   > constructor values: ", encodeCoreTargetConstructorArgs(targetSpecs).slice(2), 64, "\x1b[90m")
+          console.info("  ", "> constructor types: \x1b[90m", JSON.stringify(targetSpecs.constructorArgs.types), "\x1b[0m")
+          utils.traceData("   > constructor values: ", encodeTargetConstructorArgs(targetSpecs).slice(2), 64, "\x1b[90m")
         }
-        await deployCoreTarget(impl, targetSpecs, networkArtifacts)
+        await deployTarget(impl, targetSpecs, networkArtifacts)
         // save constructor args
-        constructorArgs[network][impl] = encodeCoreTargetConstructorArgs(targetSpecs).slice(2)
+        constructorArgs[network][impl] = encodeTargetConstructorArgs(targetSpecs).slice(2)
         await utils.overwriteJsonFile("./migrations/constructorArgs.json", constructorArgs)
       }
 
       if (targetSpecs.isUpgradable) {
         if (!utils.isNullAddress(targetBaseAddr) && (await web3.eth.getCode(targetBaseAddr)).length > 3) {
           // a proxy address with deployed code is found in the addresses file...
-          const proxyImplAddr = await getProxyImplementation(targetSpecs.from, targetBaseAddr)
-          if (
-            proxyImplAddr === targetAddr ||
-            utils.isNullAddress(proxyImplAddr) || selection.includes(base) || process.argv.includes("--upgrade-all")
-          ) {
-            implArtifact.address = targetAddr
-          } else {
-            implArtifact.address = proxyImplAddr
+          try {
+            const proxyImplAddr = await getProxyImplementation(targetSpecs.from, targetBaseAddr)
+            if (
+              proxyImplAddr === targetAddr ||
+              utils.isNullAddress(proxyImplAddr) || selection.includes(base) || process.argv.includes("--upgrade-all")
+            ) {
+              implArtifact.address = targetAddr
+            } else {
+              implArtifact.address = proxyImplAddr
+            }
+          } catch (ex) {
+            console.info("Error: trying to upgrade from non-upgradable artifact?")
+            console.info(ex)
+            process.exit(1)
           }
         } else {
           targetBaseAddr = await deployCoreBase(targetSpecs, targetAddr)
@@ -153,15 +167,14 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
         }
 
         if (implArtifact.address !== targetAddr) {
-          console.info("  ", "> contract address:  \x1b[96m", baseArtifact.address, "\x1b[0m")
+          console.info("  ", `> contract address:   \x1b[9${color}m${baseArtifact.address} \x1b[0m`)
           console.info("  ",
-            "                     \x1b[96m -->\x1b[36m",
+            `                     \x1b[9${color}m -->\x1b[3${color}m`,
             implArtifact.address,
             "!==", `\x1b[30;43m${targetAddr}\x1b[0m`
           )
         } else {
-          console.info("  ", "> contract address:  \x1b[96m",
-            baseArtifact.address, "-->\x1b[36m",
+          console.info("  ", `> contract address:  \x1b[9${color}m ${baseArtifact.address} -->\x1b[3${color}m`,
             implArtifact.address, "\x1b[0m"
           )
         }
@@ -181,17 +194,17 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           baseArtifact.address = targetAddr
           implArtifact.address = targetAddr
           if (!utils.isNullAddress(targetBaseAddr) && targetBaseAddr !== targetAddr) {
-            console.info("  ", "> contract address:  \x1b[36m", targetBaseAddr, "\x1b[0m==>", `\x1b[96m${targetAddr}\x1b[0m`)
+            console.info("  ", `> contract address:  \x1b[3${color}m ${targetBaseAddr} \x1b[0m==> \x1b[9${color}m${targetAddr}\x1b[0m`)
           } else {
-            console.info("  ", "> contract address:  \x1b[96m", targetAddr, "\x1b[0m")
+            console.info("  ", `> contract address:  \x1b[9${color}m`, targetAddr, "\x1b[0m")
           }
         } else {
           baseArtifact.address = targetBaseAddr
           implArtifact.address = targetBaseAddr
           if (!utils.isNullAddress(targetBaseAddr) && targetBaseAddr !== targetAddr) {
-            console.info("  ", "> contract address:  \x1b[96m", targetBaseAddr, "\x1b[0m!==", `\x1b[41m${targetAddr}\x1b[0m`)
+            console.info("  ", `> contract address:  \x1b[9${color}m ${targetBaseAddr}\x1b[0m !==`, `\x1b[41m${targetAddr}\x1b[0m`)
           } else {
-            console.info("  ", "> contract address:  \x1b[96m", targetAddr, "\x1b[0m")
+            console.info("  ", `> contract address:  \x1b[9${color}m ${targetAddr}\x1b[0m`)
           }
         }
         addresses[network][domain][base] = baseArtifact.address
@@ -199,7 +212,7 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
       }
       const core = await implArtifact.at(baseArtifact.address)
       try {
-        console.info("  ", "> contract curator:  \x1b[95m", await core.owner.call({ from }), "\x1b[0m")
+        console.info("  ", "> contract curator:  \x1b[33m", await core.owner.call({ from }), "\x1b[0m")
       } catch {}
       console.info("  ", "> contract class:    \x1b[1;39m", await core.class.call({ from }), "\x1b[0m")
       if (targetSpecs.isUpgradable) {
@@ -234,7 +247,7 @@ async function deployCoreBase (targetSpecs, targetAddr) {
     utils.traceTx(await deployer.proxify(proxySalt, targetAddr, initdata, { from: targetSpecs.from }))
   }
   if ((await web3.eth.getCode(proxyAddr)).length < 3) {
-    console.error(`Error: WitnetProxy was not deployed on the expected address: ${proxyAddr}`)
+    console.info(`Error: WitnetProxy was not deployed on the expected address: ${proxyAddr}`)
     process.exit(1)
   }
   return proxyAddr
@@ -254,22 +267,21 @@ async function upgradeCoreBase (proxyAddr, targetSpecs, targetAddr) {
   return proxyAddr
 }
 
-async function deployCoreTarget (target, targetSpecs, networkArtifacts) {
+async function deployTarget (target, targetSpecs, networkArtifacts) {
   const deployer = await WitnetDeployer.deployed()
-  console.log(target, targetSpecs)
-  const targetInitCode = encodeCoreTargetInitCode(target, targetSpecs, networkArtifacts)
+  const targetInitCode = encodeTargetInitCode(target, targetSpecs, networkArtifacts)
   const targetSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
   const targetAddr = await deployer.determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
   utils.traceTx(await deployer.deploy(targetInitCode, targetSalt, { from: targetSpecs.from }))
   if ((await web3.eth.getCode(targetAddr)).length <= 3) {
-    console.error(`Error: Contract ${target} was not deployed on the expected address: ${targetAddr}`)
+    console.info(`Error: Contract ${target} was not deployed on the expected address: ${targetAddr}`)
     process.exit(1)
   }
   return targetAddr
 }
 
-async function determineCoreTargetAddr (target, targetSpecs, networkArtifacts) {
-  const targetInitCode = encodeCoreTargetInitCode(target, targetSpecs, networkArtifacts)
+async function determineTargetAddr (target, targetSpecs, networkArtifacts) {
+  const targetInitCode = encodeTargetInitCode(target, targetSpecs, networkArtifacts)
   const targetSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
   return (await WitnetDeployer.deployed()).determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
 }
@@ -280,27 +292,32 @@ async function determineProxyAddr (from, nonce) {
   return await deployer.determineProxyAddr.call(salt, { from })
 }
 
-function encodeCoreTargetConstructorArgs (targetSpecs) {
+function encodeTargetConstructorArgs (targetSpecs) {
   return web3.eth.abi.encodeParameters(targetSpecs.constructorArgs.types, targetSpecs.constructorArgs.values)
 }
 
-function encodeCoreTargetInitCode (target, targetSpecs, networkArtifacts) {
+function encodeTargetInitCode (target, targetSpecs, networkArtifacts) {
   // extract bytecode from target's artifact, replacing lib references to actual addresses
+  const targetCodeUnlinked = artifacts.require(target).toJSON().bytecode
+  if (targetCodeUnlinked.length < 3) {
+    console.info(`Error: cannot deploy abstract arfifact ${target}.`)
+    process.exit(1)
+  }
   const targetCode = linkBaseLibs(
-    artifacts.require(target).toJSON().bytecode,
+    targetCodeUnlinked,
     targetSpecs.baseLibs,
     networkArtifacts
   )
   if (targetCode.indexOf("__") > -1) {
-    console.info(targetCode)
-    console.error(
+    // console.info(targetCode)
+    console.info(
       `Error: artifact ${target} depends on library`,
       targetCode.substring(targetCode.indexOf("__"), 42),
       "which is not known or has not been deployed."
     )
     process.exit(1)
   }
-  const targetConstructorArgsEncoded = encodeCoreTargetConstructorArgs(targetSpecs)
+  const targetConstructorArgsEncoded = encodeTargetConstructorArgs(targetSpecs)
   return targetCode + targetConstructorArgsEncoded.slice(2)
 }
 
@@ -321,10 +338,10 @@ function linkBaseLibs (bytecode, baseLibs, networkArtifacts) {
   return bytecode
 }
 
-async function unfoldCoreTargetSpecs (domain, target, targetBase, from, network, networkArtifacts, networkSpecs, ancestors) {
+async function unfoldTargetSpecs (domain, target, targetBase, from, network, networkArtifacts, networkSpecs, ancestors) {
   if (!ancestors) ancestors = []
   else if (ancestors.includes(targetBase)) {
-    console.error(`Core dependencies loop detected: '${targetBase}' in ${ancestors}`,)
+    console.info(`Core dependencies loop detected: '${targetBase}' in ${ancestors}`,)
     process.exit(1)
   }
   const specs = {
@@ -374,11 +391,11 @@ async function unfoldCoreTargetSpecs (domain, target, targetBase, from, network,
         )
         specs.intrinsics.values.push(await determineProxyAddr(specs.from, depsProxySalt))
       } else {
-        const depsImplSpecs = await unfoldCoreTargetSpecs(
+        const depsImplSpecs = await unfoldTargetSpecs(
           domain, depsImpl, depsBase, specs.from, network, networkArtifacts, networkSpecs,
           [...ancestors, targetBase]
         )
-        const depsImplAddr = await determineCoreTargetAddr(depsImpl, depsImplSpecs, networkArtifacts)
+        const depsImplAddr = await determineTargetAddr(depsImpl, depsImplSpecs, networkArtifacts)
         specs.intrinsics.values.push(depsImplAddr)
       }
     }
