@@ -68,7 +68,7 @@ function getNetworkArtifactAddress (network, domain, addresses, artifact) {
       return addresses[network][domain][artifact]
     }
   }
-  return addresses?.default?.core[artifact] ?? ""
+  return addresses?.default[domain][artifact] ?? ""
 }
 
 function getNetworkCoreArtifactAddress (network, addresses, artifact) {

@@ -26,7 +26,9 @@ module.exports = async function (_, network, [, from]) {
       // or, no address found in addresses file but code is already deployed into target address
       (utils.isNullAddress(libNetworkAddr) && libTargetCode.length > 3) ||
       // or, address found in addresses file but no code currently deployed in such
-      (await web3.eth.getCode(libNetworkAddr)).length < 3
+      (await web3.eth.getCode(libNetworkAddr)).length < 3 ||
+      // or. --libs specified on CLI
+      (libTargetAddr !== libNetworkAddr && process.argv.includes("--upgrade-all"))
     ) {
       if (libTargetCode.length < 3) {
         utils.traceHeader(`Deploying '${impl}'...`)
@@ -48,9 +50,9 @@ module.exports = async function (_, network, [, from]) {
     }
     libImplArtifact.address = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
     if (libTargetAddr !== libNetworkAddr) {
-      console.info("   > library address:   \x1b[96m", libImplArtifact.address, `\x1b[0m!== \x1b[30;43m${libTargetAddr}\x1b[0m`)
+      console.info("   > library address:   \x1b[92m", libImplArtifact.address, `\x1b[0m!== \x1b[30;42m${libTargetAddr}\x1b[0m`)
     } else {
-      console.info("   > library address:   \x1b[96m", libImplArtifact.address, "\x1b[0m")
+      console.info("   > library address:   \x1b[92m", libImplArtifact.address, "\x1b[0m")
     }
     console.info()
   }

@@ -8,7 +8,7 @@ module.exports = {
     core: {
       WitOracle: "WitOracleTrustableDefault",
       WitOracleRadonRegistry: "WitOracleRadonRegistryUpgradableDefault",
-      WitOracleRequestFactory: "WitOracleRequestFactorUpgradableDefault",
+      WitOracleRequestFactory: "WitOracleRequestFactoryUpgradableDefault",
     },
     libs: {
       WitOracleDataLib: "WitOracleDataLib",
