@@ -340,6 +340,10 @@ contract WitPriceFeedsUpgradable
         );
     }
 
+    function witnet() virtual override external view returns (address) {
+        return address(witOracle);
+    }
+
 
     // ================================================================================================================
     // --- Implements 'IWitFeedsAdmin' -----------------------------------------------------------------------------

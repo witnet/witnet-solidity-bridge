@@ -9,4 +9,5 @@ interface IWitFeedsLegacy {
     }
     function estimateUpdateBaseFee(uint256 evmGasPrice) external view returns (uint);
     function requestUpdate(bytes4, RadonSLA calldata) external payable returns (uint256 usedFunds);
+    function witnet() external view returns (address);
 }
