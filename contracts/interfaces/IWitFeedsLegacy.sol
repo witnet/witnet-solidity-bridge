@@ -7,5 +7,6 @@ interface IWitFeedsLegacy {
         uint8 witNumWitnesses;
         uint64 witUnitaryReward;
     }
+    function estimateUpdateBaseFee(uint256 evmGasPrice) external view returns (uint);
     function requestUpdate(bytes4, RadonSLA calldata) external payable returns (uint256 usedFunds);
 }

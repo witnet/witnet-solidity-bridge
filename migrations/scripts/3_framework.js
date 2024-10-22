@@ -80,23 +80,11 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
 
       if (targetSpecs.isUpgradable) {
         
+        let proxyImplAddr;
         if (!utils.isNullAddress(targetBaseAddr) && (await web3.eth.getCode(targetBaseAddr)).length > 3) {
           // a proxy address with actual code is found in the addresses file...
           try {
-            const proxyImplAddr = await getProxyImplementation(targetSpecs.from, targetBaseAddr)
-            if (targetCode.length < 3) {
-              const proxyImpl = await WitnetUpgradableBase.at(proxyImplAddr)
-              const proxyGithubTag = (await proxyImpl.version.call({ from: targetSpecs.from })).slice(-7)
-              // if new implementation is not yet deployed, 
-              // but github tag equals to that of the proxy's current implementation:
-              if (proxyGithubTag === version.slice(-7) && !utils.isDryRun(network)) {
-                console.info("   > \x1b[41mPlease, commit your latest changes before upgrading on a public chain.\x1b[0m")
-                process.exit(1)
-              
-              } else {
-                targetAddr = await deployTarget(network, impl, targetSpecs, networkArtifacts)
-              }
-            }
+            proxyImplAddr = await getProxyImplementation(targetSpecs.from, targetBaseAddr)    
             if (
               proxyImplAddr === targetAddr ||
               utils.isNullAddress(proxyImplAddr) || selection.includes(base) || process.argv.includes("--upgrade-all")
@@ -113,8 +101,10 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           }
         
         } else {
+          // no proxy address in file or no code in it...
           targetBaseAddr = await deployCoreBase(targetSpecs, targetAddr)
           implArtifact.address = await deployTarget(network, target, targetSpecs, networkArtifacts)
+          proxyImplAddr = implArtifact.address
           // settle new proxy address in file
           addresses = await settleArtifactAddress(addresses, network, domain, base, targetBaseAddr)
         }
@@ -126,47 +116,46 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           implArtifact.link(libArtifact)
         };
 
-        // determines whether a new implementation is available, and ask the user to upgrade the proxy if so:
-        let upgradeProxy = targetAddr !== await getProxyImplementation(targetSpecs.from, targetBaseAddr)
-        if (upgradeProxy) {
-          const target = await implArtifact.at(targetAddr)
-          const targetVersion = await target.version.call({ from: targetSpecs.from })
-          const legacy = await implArtifact.at(targetBaseAddr)
-          const legacyVersion = await legacy.version.call({ from: targetSpecs.from })
-          if (!selection.includes(base) && !process.argv.includes("--upgrade-all") && !utils.isDryRun(network)) {
-            const targetClass = await target.class.call({ from: targetSpecs.from })
-            const legacyClass = await legacy.class.call({ from: targetSpecs.from })
-            if (legacyClass !== targetClass || legacyVersion !== targetVersion) {
-              console.info(
-                `\n   > Upgrade artifact to `
-                + `\x1b[1;39m${targetClass} v${targetVersion}\x1b[0m? (y/N) `
-              )
-              upgradeProxy = ["y", "yes"].includes(await utils.prompt(""))
-            } else {
-              const legacyCodeHash = web3.utils.soliditySha3(await web3.eth.getCode(legacy.address))
-              const targetCodeHash = web3.utils.soliditySha3(await web3.eth.getCode(target.address))
-              if (legacyCodeHash !== targetCodeHash) {
-                console.info(
-                  "\m   > Upgrade artifact to \x1b[1;39mlatest compilation of ",
-                  `v${targetVersion.slice(0, 6)}\x1b[0m? (y/N) `
-                )
-                upgradeProxy = ["y", "yes"].includes(await utils.prompt(""))
-              }
-            }
+        // determine whether a new implementation is available and prepared for upgrade, 
+        // and whether an upgrade should be perform...
+        const legacy = await implArtifact.at(proxyImplAddr)
+        const legacyClass = await legacy.class.call({ from: targetSpecs.from })
+        const legacyVersion = await legacy.version.call({ from: targetSpecs.from })
+        
+        let upgradeProxy = targetAddr !== proxyImplAddr;
+        if (upgradeProxy && !selection.includes(base)) {  
+          if (legacyClass == impl && legacyVersion.slice(0, 5) === version.slice(0, 5) && !utils.isDryRun(network)) {
+            upgradeProxy = false;
+            // targetAddr = proxyImplAddr;
           } else {
-            upgradeProxy = selection.includes(base) || process.argv.includes("--upgrade-all")
+            upgradeProxy = process.argv.includes("--upgrade-all")
+            // console.info(
+            //   `\n   > Upgrade artifact to ` + `\x1b[1;39m${impl} v${version}\x1b[0m? (y/N) `
+            // )
+            // upgradeProxy = ["y", "yes"].includes(await utils.prompt(""))
           }
         }
         if (upgradeProxy) {
+          if (targetCode.length < 3) {
+            targetAddr = await deployTarget(network, impl, targetSpecs, networkArtifacts, legacyVersion)
+          }
           utils.traceHeader(`Upgrading '${base}'...`)
           await upgradeCoreBase(baseArtifact.address, targetSpecs, targetAddr)
           implArtifact.address = targetAddr
-        
         } else {
           utils.traceHeader(`Upgradable '${base}'`)
+          if (selection.includes(base)) {
+            console.info(`   > \x1b[90mSorry, nothing to upgrade.\x1b[0m`)
+          }
+          if (legacyVersion && legacyVersion.slice(0, 5) === version.slice(0, 5)) {
+            if (legacyVersion.slice(-7) !== version.slice(-7)) {
+              console.info(`   > \x1b[90mPlease, bump up package version before upgrading.\x1b[0m`)
+            } 
+          } else if (legacyVersion && legacyVersion.slice(-7) === version.slice(-7)) {
+            console.info(`   > \x1b[90mPlease, commit your changes before upgrading.\x1b[0m`)
+          }
         }
-
-        if (implArtifact.address !== targetAddr) {
+        if (implArtifact.address !== targetAddr && legacyVersion.slice(0, 5) === version.slice(0, 5)) {
           console.info("  ", `> contract address:   \x1b[9${color}m${baseArtifact.address} \x1b[0m`)
           console.info("  ",
             `                     \x1b[9${color}m -->\x1b[3${color}m`,
@@ -184,13 +173,6 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           targetAddr = await deployTarget(network, impl, targetSpecs, networkArtifacts)
         }
         utils.traceHeader(`Immutable '${base}'`)
-        // if (targetCode.length > 3) {
-        //   // if not deployed during this migration, and artifact required constructor args...
-        //   if (targetSpecs?.constructorArgs?.types.length > 0) {
-        //     console.info("  ", "> constructor types: \x1b[90m", targetSpecs.constructorArgs.types, "\x1b[0m")
-        //     utils.traceData("   > constructor values: ", constructorArgs[network][impl], 64, "\x1b[90m")
-        //   }
-        // }
         if (
           selection.includes(impl) || utils.isNullAddress(targetBaseAddr) ||
           (await web3.eth.getCode(targetBaseAddr)).length < 3
@@ -216,24 +198,22 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           } else {
             console.info("  ", `> contract address:  \x1b[9${color}m ${targetAddr}\x1b[0m`)
           }
-        
-        addresses = await saveAddresses(addresses, network, domain, base, baseArtifact.address)}
+        }
+        addresses = await saveAddresses(addresses, network, domain, base, baseArtifact.address)
       }
       const core = await implArtifact.at(baseArtifact.address)
       try {
         console.info("  ", "> contract curator:  \x1b[35m", await core.owner.call({ from }), "\x1b[0m")
       } catch {}
       console.info("  ", "> contract class:    \x1b[1;39m", await core.class.call({ from }), "\x1b[0m")
-      if (targetSpecs.isUpgradable) {
-        const coreVersion = await core.version.call({ from })
-        const nextCore = await implArtifact.at(targetAddr)
-        const nextCoreVersion = await nextCore.version.call({ from })
-        if (implArtifact.address !== targetAddr && coreVersion !== nextCoreVersion) {
-          console.info("  ", "> contract version:  \x1b[1;39m", coreVersion, "\x1b[0m!==", `\x1b[33m${nextCoreVersion}\x1b[0m`)
+      try {
+        const deployedVersion = await core.version.call({ from })
+        if (deployedVersion.slice(0, 5) !== version.slice(0, 5)) {
+          console.info("  ", "> contract version:  \x1b[1;39m", deployedVersion, "\x1b[0m!==", `\x1b[93m${version}\x1b[0m`)
         } else {
-          console.info("  ", "> contract version:  \x1b[1;39m", coreVersion, "\x1b[0m")
+          console.info("  ", "> contract version:  \x1b[1;39m", deployedVersion, "\x1b[0m")
         }
-      }
+      } catch {}
       console.info("  ", "> contract specs:    ", await core.specs.call({ from }), "\x1b[0m")
       console.info()
     }
@@ -276,7 +256,7 @@ async function upgradeCoreBase (proxyAddr, targetSpecs, targetAddr) {
   return proxyAddr
 }
 
-async function deployTarget (network, target, targetSpecs, networkArtifacts) {
+async function deployTarget (network, target, targetSpecs, networkArtifacts, legacyVersion) {
   const constructorArgs = await utils.readJsonFromFile("./migrations/constructorArgs.json")
   const deployer = await WitnetDeployer.deployed()
   const targetInitCode = encodeTargetInitCode(target, targetSpecs, networkArtifacts)
@@ -284,6 +264,9 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts) {
   const targetSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
   const targetAddr = await deployer.determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
   utils.traceHeader(`Deploying '${target}'...`)
+  if (legacyVersion && legacyVersion.slice(-7) === version.slice(-7)) {
+    console.info(   `   > \x1b[41mWARNING:\x1b[0m           \x1b[31mLatest changes were not committed into Github!\x1b[0m`)
+  }
   if (targetSpecs?.constructorArgs?.types.length > 0) {
     console.info("  ", "> constructor types: \x1b[90m", JSON.stringify(targetSpecs.constructorArgs.types), "\x1b[0m")
     utils.traceData("   > constructor values: ", targetConstructorArgs, 64, "\x1b[90m")

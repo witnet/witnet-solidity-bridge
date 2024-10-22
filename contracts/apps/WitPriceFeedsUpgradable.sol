@@ -213,6 +213,10 @@ contract WitPriceFeedsUpgradable
     {
         return __defaultRadonSLA;
     }
+
+    function estimateUpdateBaseFee(uint256 _evmGasPrice) virtual override public view returns (uint256) {
+        return estimateUpdateRequestFee(_evmGasPrice);
+    }
     
     function estimateUpdateRequestFee(uint256 _evmGasPrice)
         virtual override
