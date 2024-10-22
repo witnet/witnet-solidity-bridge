@@ -278,7 +278,7 @@ contract WitPriceFeedsUpgradable
     }
 
     function lookupWitOracleRequestBytecode(bytes4 feedId)
-        override external view
+        override public view
         returns (bytes memory)
     {
         Record storage __record = __records_(feedId);
@@ -287,6 +287,13 @@ contract WitPriceFeedsUpgradable
             "no RAD hash"
         );
         return _registry().bytecodeOf(__record.radHash);
+    }
+
+    function lookupWitnetBytecode(bytes4 feedId) 
+        override external view
+        returns (bytes memory)
+    {
+        return lookupWitOracleRequestBytecode(feedId);
     }
     
     function lookupWitOracleRequestRadHash(bytes4 feedId)
