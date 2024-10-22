@@ -72,7 +72,7 @@ contract WitOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return _getCurrentL1Fee(_resultMaxSize) + WitOracleBase.estimateBaseFee(_gasPrice, _resultMaxSize);
+        return _getCurrentL1Fee(_resultMaxSize) + WitOracleBaseTrustable.estimateBaseFee(_gasPrice, _resultMaxSize);
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.

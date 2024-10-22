@@ -54,7 +54,7 @@ contract WitOracleTrustableReef
         virtual override
         returns (uint256)
     {
-        return WitOracleBase.estimateBaseFee(1, _resultMaxSize);
+        return WitOracleBaseTrustable.estimateBaseFee(1, _resultMaxSize);
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.

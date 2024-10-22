@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../../WitOracle.sol";
 import "../../data/WitOracleDataLib.sol";
-import "../../interfaces/IWitOracleLegacy.sol";
 import "../../interfaces/IWitOracleConsumer.sol";
 import "../../libs/WitOracleResultErrorsLib.sol";
 import "../../patterns/Payable.sol";
@@ -17,8 +16,7 @@ import "../../patterns/Payable.sol";
 abstract contract WitOracleBase
     is 
         Payable, 
-        WitOracle,
-        IWitOracleLegacy
+        WitOracle
 {
     using Witnet for Witnet.RadonSLA;
     using WitOracleDataLib for WitOracleDataLib.Storage;
@@ -349,7 +347,7 @@ abstract contract WitOracleBase
         public payable
         checkReward(
             _getMsgValue(),
-            estimateBaseFee(_getGasPrice(), _queryRAD)
+            estimateBaseFee(_getGasPrice())
         )
         checkSLA(_querySLA)
         returns (uint256 _queryId)
@@ -519,101 +517,6 @@ abstract contract WitOracleBase
             _getMsgSender(),
             _getGasPrice(),
             __request.evmReward
-        );
-    }
-
-
-    /// ===============================================================================================================
-    /// --- IWitOracleLegacy ---------------------------------------------------------------------------------------
-
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256 _gasPrice, uint16 _resultMaxSize)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return _gasPrice * (
-            __reportResultGasBase
-                + __sstoreFromZeroGas * (
-                    4 + (_resultMaxSize == 0 ? 0 : _resultMaxSize - 1) / 32
-                )
-        );
-    }
-
-    /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
-    /// @param gasPrice Expected gas price to pay upon posting the data request.
-    /// @param radHash The hash of some Witnet Data Request previously posted in the WitOracleRadonRegistry registry.
-    function estimateBaseFee(uint256 gasPrice, bytes32 radHash)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        // Check this rad hash is actually verified:
-        registry.lookupRadonRequestResultDataType(radHash);
-
-        // Base fee is actually invariant to max result size:
-        return estimateBaseFee(gasPrice);
-    }
-
-    function postRequest(
-            bytes32 _queryRadHash, 
-            IWitOracleLegacy.RadonSLA calldata _querySLA
-        )
-        virtual override
-        external payable
-        returns (uint256)
-    {
-        return postQuery(
-            _queryRadHash,
-            Witnet.RadonSLA({
-                witNumWitnesses: _querySLA.witNumWitnesses,
-                witUnitaryReward: _querySLA.witUnitaryReward,
-                maxTallyResultSize: 32
-            })
-        );
-    }
-
-    function postRequestWithCallback(
-            bytes32 _queryRadHash,
-            IWitOracleLegacy.RadonSLA calldata _querySLA,
-            uint24 _queryCallbackGas
-        )
-        virtual override
-        external payable
-        returns (uint256)
-    {
-        return postQueryWithCallback(
-            _queryRadHash,
-            Witnet.RadonSLA({
-                witNumWitnesses: _querySLA.witNumWitnesses,
-                witUnitaryReward: _querySLA.witUnitaryReward,
-                maxTallyResultSize: 32
-            }),
-            _queryCallbackGas
-        );
-    }
-
-    function postRequestWithCallback(
-            bytes calldata _queryRadBytecode,
-            IWitOracleLegacy.RadonSLA calldata _querySLA,
-            uint24 _queryCallbackGas
-        )
-        virtual override
-        external payable
-        returns (uint256)
-    {
-        return postQueryWithCallback(
-            _queryRadBytecode,
-            Witnet.RadonSLA({
-                witNumWitnesses: _querySLA.witNumWitnesses,
-                witUnitaryReward: _querySLA.witUnitaryReward,
-                maxTallyResultSize: 32
-            }),
-            _queryCallbackGas
         );
     }
 
