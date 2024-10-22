@@ -5,7 +5,7 @@ const utils = require("../../src/utils")
 const version = `${
   require("../../package").version
 }-${
-  require("child_process").execSync("git rev-parse HEAD").toString().trim().substring(0, 7)
+  require("child_process").execSync("git log -1 --format=%h ../../contracts").toString().trim().substring(0, 7)
 }`
 
 const selection = utils.getWitnetArtifactsFromArgs()
@@ -41,7 +41,7 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
   })
 
   // Loop on framework domains ...
-  const palette = [6, 4]
+  const palette = [6, 4,]
   for (const domain in framework) {
     const color = palette[Object.keys(framework).indexOf(domain)]
 
@@ -77,6 +77,7 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
       const targetSpecs = await unfoldTargetSpecs(domain, impl, base, from, network, networkArtifacts, networkSpecs)
       let targetAddr = await determineTargetAddr(impl, targetSpecs, networkArtifacts)
       const targetCode = await web3.eth.getCode(targetAddr)
+      const targetVersion = getArtifactVersion(impl, targetSpecs.baseLibs, networkArtifacts)
 
       if (targetSpecs.isUpgradable) {
         
@@ -119,20 +120,20 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
         // determine whether a new implementation is available and prepared for upgrade, 
         // and whether an upgrade should be perform...
         const legacy = await implArtifact.at(proxyImplAddr)
-        const legacyClass = await legacy.class.call({ from: targetSpecs.from })
         const legacyVersion = await legacy.version.call({ from: targetSpecs.from })
+        const targetVersion = getArtifactVersion(impl)
         
-        let upgradeProxy = targetAddr !== proxyImplAddr;
-        if (upgradeProxy && !selection.includes(base)) {  
-          if (legacyClass == impl && legacyVersion.slice(0, 5) === version.slice(0, 5) && !utils.isDryRun(network)) {
+        let skipUpgrade = false, upgradeProxy = (
+          targetAddr !== proxyImplAddr 
+            && versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
+        );
+        if (upgradeProxy && !utils.isDryRun(impl)) {
+          if (versionLastCommitOf(targetVersion) === versionLastCommitOf(legacyVersion)) {
             upgradeProxy = false;
-            // targetAddr = proxyImplAddr;
-          } else {
-            upgradeProxy = process.argv.includes("--upgrade-all")
-            // console.info(
-            //   `\n   > Upgrade artifact to ` + `\x1b[1;39m${impl} v${version}\x1b[0m? (y/N) `
-            // )
-            // upgradeProxy = ["y", "yes"].includes(await utils.prompt(""))
+            skipUpgrade = true;
+          } else if (!selection.includes(base) && !process.argv.includes("--upgrade-all")) {
+              upgradeProxy = false;
+              skipUpgrade = true;
           }
         }
         if (upgradeProxy) {
@@ -142,20 +143,21 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           utils.traceHeader(`Upgrading '${base}'...`)
           await upgradeCoreBase(baseArtifact.address, targetSpecs, targetAddr)
           implArtifact.address = targetAddr
+        
         } else {
           utils.traceHeader(`Upgradable '${base}'`)
-          if (selection.includes(base)) {
+          if (versionLastCommitOf(targetVersion) === versionLastCommitOf(legacyVersion)) {
+            console.info(`   > \x1b[${skipUpgrade ? "31" : "90"}mPlease, commit your changes before upgrading.\x1b[0m`)
+          } else if (selection.includes(base) || process.argv.includes("--upgrade-all")) {
             console.info(`   > \x1b[90mSorry, nothing to upgrade.\x1b[0m`)
           }
-          if (legacyVersion && legacyVersion.slice(0, 5) === version.slice(0, 5)) {
-            if (legacyVersion.slice(-7) !== version.slice(-7)) {
-              console.info(`   > \x1b[90mPlease, bump up package version before upgrading.\x1b[0m`)
-            } 
-          } else if (legacyVersion && legacyVersion.slice(-7) === version.slice(-7)) {
-            console.info(`   > \x1b[90mPlease, commit your changes before upgrading.\x1b[0m`)
-          }
         }
-        if (implArtifact.address !== targetAddr && legacyVersion.slice(0, 5) === version.slice(0, 5)) {
+
+        if (
+          targetAddr !== implArtifact.address 
+          && versionTagOf(targetVersion) === versionTagOf(legacyVersion)
+          && versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
+        ) {
           console.info("  ", `> contract address:   \x1b[9${color}m${baseArtifact.address} \x1b[0m`)
           console.info("  ",
             `                     \x1b[9${color}m -->\x1b[3${color}m`,
@@ -208,10 +210,10 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
       console.info("  ", "> contract class:    \x1b[1;39m", await core.class.call({ from }), "\x1b[0m")
       try {
         const deployedVersion = await core.version.call({ from })
-        if (deployedVersion.slice(0, 5) !== version.slice(0, 5)) {
-          console.info("  ", "> contract version:  \x1b[1;39m", deployedVersion, "\x1b[0m!==", `\x1b[93m${version}\x1b[0m`)
+        if (versionCodehashOf(deployedVersion) !== versionCodehashOf(getArtifactVersion(impl))) {
+          console.info("  ", `> contract version:   \x1b[1;39m${deployedVersion.slice(0, 5)}\x1b[0m${deployedVersion.slice(5)} !== \x1b[93m${version}\x1b[0m`)
         } else {
-          console.info("  ", "> contract version:  \x1b[1;39m", deployedVersion, "\x1b[0m")
+          console.info("  ", `> contract version:   \x1b[1;39m${deployedVersion.slice(0, 5)}\x1b[0m${deployedVersion.slice(5)}`)
         }
       } catch {}
       console.info("  ", "> contract specs:    ", await core.specs.call({ from }), "\x1b[0m")
@@ -419,7 +421,7 @@ async function unfoldTargetSpecs (domain, target, targetBase, from, network, net
   if (specs.isUpgradable) {
     // Add version tag to intrinsical constructor args if target artifact is expected to be upgradable
     specs.intrinsics.types.push("bytes32")
-    specs.intrinsics.values.push(utils.fromAscii(version))
+    specs.intrinsics.values.push(utils.fromAscii(getArtifactVersion(target, specs.baseLibs, networkArtifacts)))
     if (target.indexOf("Trustable") < 0) {
       // Add _upgradable constructor args on non-trustable (ergo trustless) but yet upgradable targets
       specs.intrinsics.types.push("bool")
@@ -440,3 +442,13 @@ async function unfoldTargetSpecs (domain, target, targetBase, from, network, net
   }
   return specs
 }
+
+function getArtifactVersion(target, targetBaseLibs, networkArtifacts) {
+  const bytecode = linkBaseLibs(artifacts.require(target).bytecode, targetBaseLibs, networkArtifacts)
+  return `${version}-${web3.utils.soliditySha3(bytecode).slice(2, 9)}`  
+}
+
+function versionTagOf(version) { return version.slice(0, 5) }
+function versionLastCommitOf(version) { return version.length >= 13 ? version.slice(6, 13) : "" }
+function versionCodehashOf(version) { return version.length >= 20 ? version.slice(-7) : "" }
+
