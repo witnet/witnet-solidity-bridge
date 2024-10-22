@@ -118,6 +118,9 @@ contract WitPriceFeedsUpgradable
                 );
                 __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
                 __defaultRadonSLA = _defaultRadonSLA;
+            } else if (__defaultRadonSLA.maxTallyResultSize < 16) {
+                // possibly, an upgrade from a previous branch took place:
+                __defaultRadonSLA.maxTallyResultSize = 16;
             }
         }
     }
