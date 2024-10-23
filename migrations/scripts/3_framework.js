@@ -331,6 +331,7 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
     console.info("  ", "> compiler:          ", metadata.compiler.version)
     console.info("  ", "> evm version:       ", metadata.settings.evmVersion.toUpperCase())
     console.info("  ", "> optimizer:         ", JSON.stringify(metadata.settings.optimizer))
+    console.info("  ", "> source code path:  ", metadata.settings.compilationTarget)
     console.info("  ", "> artifact codehash: ", web3.utils.soliditySha3(target.artifact.toJSON().deployedBytecode))
   }
   try {
@@ -445,14 +446,6 @@ function linkBaseLibs (bytecode, baseLibs, networkArtifacts) {
   }
   return bytecode
 }
-
-// async function saveAddresses(addresses, network, domain, base, addr) {
-//   if (!addresses[network]) addresses[network] = {}
-//   if (!addresses[network][domain]) addresses[network][domain] = {}
-//   addresses[network][domain][base] = addr
-//   await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-//   return addresses
-// }
 
 async function unfoldTargetSpecs (domain, target, targetBase, from, network, networkArtifacts, networkSpecs, ancestors) {
   if (!ancestors) ancestors = []

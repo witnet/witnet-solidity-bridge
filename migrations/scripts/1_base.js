@@ -25,7 +25,7 @@ module.exports = async function (truffleDeployer, network, [,,, master]) {
     console.info("  ", "> compiler:          ", metadata.compiler.version)
     console.info("  ", "> evm version:       ", metadata.settings.evmVersion.toUpperCase())
     console.info("  ", "> optimizer:         ", JSON.stringify(metadata.settings.optimizer))
-    console.info("  ", "> code source path:  ", metadata.settings.compilationTarget)
+    console.info("  ", "> source code path:  ", metadata.settings.compilationTarget)
     console.info("  ", "> artifact codehash: ", web3.utils.soliditySha3(WitnetDeployer.toJSON().deployedBytecode))
     await truffleDeployer.deploy(WitnetDeployer, {
       from: settings.getSpecs(network)?.WitnetDeployer?.from || web3.utils.toChecksumAddress(master),
