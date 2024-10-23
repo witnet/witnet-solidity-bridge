@@ -251,15 +251,11 @@ library WitOracleDataLib {
 
     function getQueryStatus(uint256 queryId) public view returns (Witnet.QueryStatus) {
         Witnet.Query storage __query = seekQuery(queryId);
-        
         if (__query.response.resultTimestamp != 0) {
             return Witnet.QueryStatus.Finalized;
             
-        } else if (__query.block == 0) {
-            return Witnet.QueryStatus.Unknown;
-        
-        } else if (block.number >= __query.block + 64) {
-            return Witnet.QueryStatus.Expired;
+        } else if (__query.request.requester != address(0)) {
+            return Witnet.QueryStatus.Posted;
         
         } else {
             return Witnet.QueryStatus.Posted;

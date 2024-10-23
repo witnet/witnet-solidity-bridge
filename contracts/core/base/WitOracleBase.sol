@@ -537,13 +537,11 @@ abstract contract WitOracleBase
         _queryId = ++ __storage().nonce;
         Witnet.QueryRequest storage __request = WitOracleDataLib.seekQueryRequest(_queryId);
         _require(__request.requester == address(0), "already posted");
-        {
-            __request.requester = _requester;
-            __request.gasCallback = _evmCallbackGasLimit;
-            __request.evmReward = _evmReward;
-            __request.radonRadHash = _radHash;
-            __request.radonSLA = _sla;
-        }
+        __request.requester = _requester;
+        __request.gasCallback = _evmCallbackGasLimit;
+        __request.evmReward = _evmReward;
+        __request.radonRadHash = _radHash;
+        __request.radonSLA = _sla;
     }
 
     /// Returns storage pointer to contents of 'WitOracleDataLib.Storage' struct.
