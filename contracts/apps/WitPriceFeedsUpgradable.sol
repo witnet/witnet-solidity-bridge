@@ -280,6 +280,13 @@ contract WitPriceFeedsUpgradable
         return _checkQueryResponseStatus(latestUpdateQueryId(feedId));
     }
 
+    function latestUpdateResponseStatus(bytes4 feedId)
+        override public view
+        returns (Witnet.QueryResponseStatus)
+    {
+        return latestUpdateQueryResponseStatus(feedId);
+    }
+
     function lookupWitOracleRequestBytecode(bytes4 feedId)
         override public view
         returns (bytes memory)
