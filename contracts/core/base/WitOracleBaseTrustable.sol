@@ -196,6 +196,34 @@ abstract contract WitOracleBaseTrustable
         );
     }
 
+    function __postQuery(
+            address _requester,
+            uint24 _evmCallbackGasLimit,
+            uint72 _evmReward,
+            bytes32 _radHash, 
+            Witnet.RadonSLA memory _sla
+        ) 
+        virtual override
+        internal
+        returns (uint256 _queryId)
+    {
+        _queryId = super.__postQuery(
+            _requester,
+            _evmCallbackGasLimit,
+            _evmReward,
+            _radHash,
+            _sla
+        );
+        emit IWitOracleLegacy.WitnetQuery(
+            _queryId, 
+            msg.value, 
+            IWitOracleLegacy.RadonSLA({
+                witNumWitnesses: _sla.witNumWitnesses,
+                witUnitaryReward: _sla.witUnitaryReward
+            })
+        );
+    }
+
     function postRequestWithCallback(
             bytes32 _queryRadHash,
             IWitOracleLegacy.RadonSLA calldata _querySLA,

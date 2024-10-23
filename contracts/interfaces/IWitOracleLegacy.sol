@@ -3,6 +3,8 @@ pragma solidity >=0.7.0 <0.9.0;
 
 interface IWitOracleLegacy {
 
+    event WitnetQuery(uint256 id, uint256 evmReward, RadonSLA witnetSLA);
+
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `resultMaxSize`. 
     /// @param gasPrice Expected gas price to pay upon posting the data request.
