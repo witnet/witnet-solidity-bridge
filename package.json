@@ -50,7 +50,7 @@
     "fmt": "pnpm run fmt:js && pnpm run fmt:sol",
     "migrate": "npx truffle migrate --network",
     "networks": "node ./scripts/networks.js 2>&1",
-    "ops:rng:sla": "npx truffle migrate --migrations_directory ./migrations/ops/rng/sla --network",
+    "ops:drp:wrb": "npx truffle migrate --migrations_directory ./migrations/ops/drp/wrb --compile-none --network",
     "prepare": "npx truffle compile --all && npx hardhat compile --force && node ./scripts/prepare.js",
     "test": "npx truffle test",
     "verify:apps": "node ./scripts/verify-apps.js 2>&1",
