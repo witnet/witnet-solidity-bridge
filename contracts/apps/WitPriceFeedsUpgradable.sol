@@ -265,6 +265,13 @@ contract WitPriceFeedsUpgradable
     {
         return witOracle.getQueryResponse(latestUpdateQueryId(feedId));
     }
+    
+    function latestUpdateResponse(bytes4 feedId) 
+        override external view 
+        returns (Witnet.QueryResponse memory)
+    {
+        return witOracle.getQueryResponse(latestUpdateQueryId(feedId));        
+    }
 
     function latestUpdateResultError(bytes4 feedId)
         override external view 
