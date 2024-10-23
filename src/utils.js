@@ -9,6 +9,7 @@ module.exports = {
   getNetworkAppsArtifactAddress,
   getNetworkArtifactAddress,
   getNetworkBaseArtifactAddress,
+  getNetworkBaseImplArtifactAddresses,
   getNetworkCoreArtifactAddress,
   getNetworkLibsArtifactAddress,
   getNetworkTagsFromString,
@@ -69,6 +70,28 @@ function getNetworkArtifactAddress (network, domain, addresses, artifact) {
     }
   }
   return addresses?.default[domain][artifact] ?? ""
+}
+
+function getNetworkBaseImplArtifactAddresses (network, domain, addresses, base, exception) {
+  const entries = []
+  const tags = [ "default", ...getNetworkTagsFromString(network)]
+  for (const index in tags) {
+    const network = tags[index]
+    if (addresses[network] && addresses[network][domain]) {
+      Object.keys(addresses[network][domain]).forEach(impl => {
+        if (
+          (!exception || impl !== exception) && 
+          impl !== base && 
+          impl.indexOf(base) == 0 &&
+          addresses[network][domain][impl] &&
+          !entries.map(entry => entry?.impl).includes(impl)
+        ) {
+          entries.push({ impl, addr: addresses[network][domain][impl] })
+        }
+      })
+    }
+  }
+  return entries
 }
 
 function getNetworkCoreArtifactAddress (network, addresses, artifact) {
@@ -227,9 +250,9 @@ function traceData (header, data, width, color) {
 }
 
 function traceHeader (header) {
-  console.log("")
-  console.log("  ", header)
-  console.log("  ", `${"-".repeat(header.length)}`)
+  console.info("")
+  console.info("  ", header)
+  console.info("  ", `${"-".repeat(header.length)}`)
 }
 
 function traceTx (tx) {
@@ -250,7 +273,7 @@ function traceTx (tx) {
 }
 
 function traceVerify (network, verifyArgs) {
-  console.log(
+  console.info(
     execSync(
       `npx truffle run verify --network ${network} ${verifyArgs} ${process.argv.slice(3)}`,
       { stdout: "inherit" }

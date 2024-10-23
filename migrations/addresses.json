@@ -2,7 +2,7 @@
     "default": {
         "apps": {
             "WitPriceFeeds": "0x1111AbA2164AcdC6D291b08DfB374280035E1111",
-            "WitRandomness": "0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB"
+            "WitRandomnessV2": "0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB"
         },
         "core": {
             "WitOracle": "0x77703aE126B971c9946d562F41Dd47071dA00777",
@@ -10,17 +10,17 @@
             "WitOracleRequestFactory": "0x000DB36997AF1F02209A6F995883B9B699900000"
         },
         "libs": {
-            "WitOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
-            "WitOracleRadonEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
-            "WitOracleResultErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
-            "WitPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837"
+            "WitOracleDataLib": "0xBb0eAbB3f5936DfA8d3d9A59457B73bBce811829",
+            "WitOracleRadonEncodingLib": "0x47730caFE285C32BF369fC76791D0165f810dB5d",
+            "WitOracleResultErrorsLib": "0x50489bD0ad5ab17641A472d007746F07D80D90A4",
+            "WitPriceFeedsLib": "0xA2d9384Cfd3529D1287Bc06e58897EBb8dfF2E94"
         },
         "WitnetDeployer": "0x03232aBE800D1638B30432FeEF300581De323a4E"
     },
     "conflux:core": {
         "apps": {
             "WitPriceFeeds": "0x8ba3C59e1029cd90010e8C731461ddFC5f49091b",
-            "WitRandomness": "0x897832C89ec306A74f9eC29abfFcaDBfCb11A13B"
+            "WitRandomnessV2": "0x897832C89ec306A74f9eC29abfFcaDBfCb11A13B"
         },
         "core": {
             "WitOracle": "0x8346D6ba3b7a04923492007cC3A2eE7135Db7463",
@@ -49,7 +49,7 @@
     "meter:mainnet": {
         "apps": {
             "WitPriceFeeds": "0x27EF7A3e155F96e68A9988EAdBF8bd3eFdba1438",
-            "WitRandomness": "0x4d239f070e475E454148093781211c9eE34f476C"
+            "WitRandomnessV2": "0x4d239f070e475E454148093781211c9eE34f476C"
         },
         "core": {
             "WitOracle": "0x1f28E4d955eccE989c00b3871446AB22B3Fa9Cc8",
@@ -67,7 +67,7 @@
         "WitnetDeployer": "0xE9D654A97eC431C4f1faba550d0a26399f6fEc80",
         "apps": {
             "WitPriceFeeds": "0xD9f5Af15288294678B0863A20F4B83eeeEAa775C",
-            "WitRandomness": "0x2dE368AFC80b13E4a42990004ebC74ce125486F9"
+            "WitRandomnessV2": "0x2dE368AFC80b13E4a42990004ebC74ce125486F9"
         },
         "core": {
             "WitOracle": "0x51e12A16d52DE519f7b13bFeDa42Fb61214d32a0",
@@ -92,7 +92,7 @@
     "reef": {
         "apps": {
             "WitPriceFeeds": "0xA9991dCd62a863f0F0aabF95a6a252d132b5c8D4",
-            "WitRandomness": "0x84CD0bde18f78101064A2c8b8BaE5e1fCe1BCc0d"
+            "WitRandomnessV2": "0x84CD0bde18f78101064A2c8b8BaE5e1fCe1BCc0d"
         },
         "core": {
             "WitOracle": "0x604b98893335CEf7Dc40061731F40aC5C6239907",

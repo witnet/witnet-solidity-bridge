@@ -31,7 +31,11 @@ module.exports = async function (_, network, [, from]) {
       (libTargetAddr !== libNetworkAddr && process.argv.includes("--upgrade-all"))
     ) {
       if (libTargetCode.length < 3) {
-        utils.traceHeader(`Deploying '${impl}'...`)
+        if (utils.isNullAddress(libNetworkAddr)) {
+          utils.traceHeader(`Deploying '${impl}'...`)
+        } else {
+          utils.traceHeader(`Upgrading '${impl}'...`)
+        }
         utils.traceTx(await deployer.deploy(libInitCode, "0x0", { from }))
         if ((await web3.eth.getCode(libTargetAddr)).length < 3) {
           console.info(`Error: Library was not deployed on expected address: ${libTargetAddr}`)

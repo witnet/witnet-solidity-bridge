@@ -6,7 +6,7 @@ const addresses = require("../migrations/addresses")
 const constructorArgs = require("../migrations/constructorArgs.json")
 
 module.exports = async function () {
-  let artifact
+  let artifactName
   let count = 0
   let from
   let hits = 10
@@ -19,7 +19,7 @@ module.exports = async function () {
     if (argv === "--offset") {
       offset = parseInt(args[index + 1])
     } else if (argv === "--artifact") {
-      artifact = artifacts.require(args[index + 1])
+      artifactName = args[index + 1]
     } else if (argv === "--prefix") {
       prefix = args[index + 1].toLowerCase()
       if (!web3.utils.isHexStrict(prefix)) {
@@ -45,27 +45,31 @@ module.exports = async function () {
     }
     return argv
   })
-  try {
-    from = from || addresses[network]?.WitnetDeployer || addresses.default.WitnetDeployer
-    if (hexArgs === "" && artifact !== "") {
-      hexArgs = constructorArgs[network][artifact]
+  if (hexArgs === "" && artifactName !== "") {
+    hexArgs = constructorArgs[network][artifactName]
+    if (!hexArgs) {
+      console.error("No --hexArgs was set!")
+      exit()
     }
-  } catch {
-    console.error(`WitnetDeployer must have been previously deployed on network '${network}'.\n`)
-    console.info("Usage:\n")
-    console.info("  --artifact => Truffle artifact name (mandatory)")
-    console.info("  --hexArgs  => Hexified constructor arguments")
-    console.info("  --hits     => Number of vanity hits to look for (default: 10)")
-    console.info("  --network  => Network name")
-    console.info("  --offset   => Salt starting value minus 1 (default: 0)")
-    console.info("  --prefix   => Prefix hex string to look for (default: 0x00)")
-    console.info("  --suffix   => suffix hex string to look for (default: 0x00)")
-    process.exit(1)
   }
-  if (!artifact) {
+  from = from || addresses[network]?.WitnetDeployer || addresses.default?.WitnetDeployer
+  if (!from) {
+    console.error("No --from was set!")
+    exit()
+  }
+  if (hexArgs === "" && artifactName !== "") {
+    console.log(network, constructorArgs[network], constructorArgs[network][artifactName])
+    hexArgs = constructorArgs[network][artifactName]
+    if (!hexArgs) {
+      console.error("No --hexArgs was set!")
+      exit()
+    }
+  }
+  if (!artifactName) {
     console.error("No --artifact was set!")
     process.exit(1)
   }
+  const artifact = artifacts.require(artifactName)
   const initCode = artifact.toJSON().bytecode + hexArgs
   console.log("Init code: ", initCode)
   console.log("Artifact:  ", artifact?.contractName)
@@ -87,4 +91,16 @@ module.exports = async function () {
     }
     offset++
   }
+}
+
+function exit() {
+  console.info("Usage:\n")
+  console.info("  --artifact => Truffle artifact name (mandatory)")
+  console.info("  --hexArgs  => Hexified constructor arguments")
+  console.info("  --hits     => Number of vanity hits to look for (default: 10)")
+  console.info("  --network  => Network name")
+  console.info("  --offset   => Salt starting value minus 1 (default: 0)")
+  console.info("  --prefix   => Prefix hex string to look for (default: 0x00)")
+  console.info("  --suffix   => suffix hex string to look for (default: 0x00)")
+  process.exit(1)
 }

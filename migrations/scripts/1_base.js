@@ -23,9 +23,9 @@ module.exports = async function (truffleDeployer, network, [,,, master]) {
     const WitnetDeployer = artifacts.require(impl)
     const metadata = JSON.parse(WitnetDeployer.metadata)
     console.info("  ", "> compiler:          ", metadata.compiler.version)
-    console.info("  ", "> compilation target:", metadata.settings.compilationTarget)
-    console.info("  ", "> optimizer:         ", JSON.stringify(metadata.settings.optimizer))
     console.info("  ", "> evm version:       ", metadata.settings.evmVersion.toUpperCase())
+    console.info("  ", "> optimizer:         ", JSON.stringify(metadata.settings.optimizer))
+    console.info("  ", "> code source path:  ", metadata.settings.compilationTarget)
     console.info("  ", "> artifact codehash: ", web3.utils.soliditySha3(WitnetDeployer.toJSON().deployedBytecode))
     await truffleDeployer.deploy(WitnetDeployer, {
       from: settings.getSpecs(network)?.WitnetDeployer?.from || web3.utils.toChecksumAddress(master),
@@ -52,7 +52,7 @@ module.exports = async function (truffleDeployer, network, [,,, master]) {
   const WitnetProxy = artifacts.require("WitnetProxy")
   const metadata = JSON.parse(WitnetProxy.metadata)
   console.info("  ", "> compiler:          ", metadata.compiler.version)
-  console.info("  ", "> optimizer:         ", JSON.stringify(metadata.settings.optimizer))
   console.info("  ", "> evm version:       ", metadata.settings.evmVersion.toUpperCase())
+  console.info("  ", "> optimizer:         ", JSON.stringify(metadata.settings.optimizer))
   console.info("  ", "> artifact codehash: ", web3.utils.soliditySha3(WitnetProxy.toJSON().deployedBytecode))
 }
