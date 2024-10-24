@@ -469,6 +469,15 @@ module.exports = {
     port: 9516,
     network_id: 1231,
   },
+  "worldchain:mainnet": {
+    port: 9501,
+    network_id: 480,
+    verify: {
+      apiKey: "MY_API_KEY",
+      apiUrl: "https://worldchain-mainnet.explorer.alchemy.com/api",
+      explorerUrl: "https://worldchain-mainnet.explorer.alchemy.com/address",
+    },    
+  },
   "worldchain:sepolia": {
     port: 8501,
     network_id: 4801,
