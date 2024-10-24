@@ -15,14 +15,22 @@ module.exports = async function (_, network, [, from]) {
   for (const index in networkArtifacts.libs) {
     const base = networkArtifacts.libs[index]
     const impl = networkArtifacts.libs[base]
+    let libNetworkAddr = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
+    if (
+      process.argv.includes("--artifacts") && !process.argv.includes("--upgrade-all") 
+      && !selection.includes(impl) && !selection.includes(base)
+    ) {
+      utils.traceHeader(`Skipped '${impl}`)
+      console.info("   > library address:   ", libNetworkAddr)
+      continue;
+    }
     const libImplArtifact = artifacts.require(impl)
     const libInitCode = libImplArtifact.toJSON().bytecode
     const libTargetAddr = await deployer.determineAddr.call(libInitCode, "0x0", { from })
     const libTargetCode = await web3.eth.getCode(libTargetAddr)
-    let libNetworkAddr = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
     if (
-      // lib implementation artifact is listed as --artifacts on CLI
-      selection.includes(impl) ||
+      // lib implementation artifact is listed as --artifacts on CLI 
+      selection.includes(impl) || selection.includes(base) ||
       // or, no address found in addresses file but code is already deployed into target address
       (utils.isNullAddress(libNetworkAddr) && libTargetCode.length > 3) ||
       // or, address found in addresses file but no code currently deployed in such

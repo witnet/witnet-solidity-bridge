@@ -53,8 +53,7 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
       const impl = networkArtifacts[domain][base]
 
       if (impl.indexOf(base) < 0) {
-        console.info(`Mismatching inheriting artifact names on settings/artifacts.js: ${base} <! ${impl}`)
-        process.exit(1)
+        panic(impl, `Mismatching inheritance on settings/artifacts.js: "${base}" <! "${impl}"`)
       }
       // pasa si:
       //    - la base está seleccionada
@@ -83,6 +82,12 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
 
       if (utils.isUpgradableArtifact(impl)) {
 
+        if (process.argv.includes("--artifacts") && !selection.includes(base) && !process.argv.includes("--upgrade-all")) {
+          utils.traceHeader(`Skipped '${base}'`)
+          console.info("  ", `> contract address:   ${targetBaseAddr}`)
+            continue
+        }
+
         const targetSpecs = await unfoldTargetSpecs(domain, impl, base, from, network, networkArtifacts, networkSpecs)
         const targetAddr = await determineTargetAddr(impl, targetSpecs, networkArtifacts)        
         const targetCode = await web3.eth.getCode(targetAddr)
@@ -102,9 +107,7 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
               implArtifact.address = proxyImplAddr
             }
           } catch (ex) {
-            console.info("Error: trying to upgrade from non-upgradable artifact?")
-            console.info(ex)
-            process.exit(1)
+            panic(base, "Trying to upgrade non-upgradable artifact?", ex)
           }
         
         } else {
@@ -164,7 +167,13 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
             && versionLastCommitOf(targetVersion) !== versionLastCommitOf(legacyVersion)
             && versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
           ) {
-            console.info(`   > \x1b[90mPlease, consider bumping up the package version.\x1b[0m`)
+            if (process.argv.includes("--changelog")) {
+              const changelog = execSync(`git log ${versionCodehashOf(legacyVersion)}^.. --format=%s ../../contracts`).toString()
+              console.log(changelog)
+
+            } else {
+              console.info(`   > \x1b[90mPlease, consider bumping up the package version.\x1b[0m`)
+            }
           }
         }
         if (
@@ -195,28 +204,35 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
         ]
         for (const ix in targets) {
           const target = targets[ix]
+
+          if (process.argv.includes("--artifacts") && !process.argv.includes("--upgrade-all") && !selection.includes(target.impl)) {
+            utils.traceHeader(`Skipped '${target.impl}'`)
+            console.info("  ", `> contract address:  ${target.addr}`)
+            continue;
+          }
           
-          let targetAddr;
+          let targetAddr = target.addr
+          target.specs = await unfoldTargetSpecs(domain, impl, base, from, network, networkArtifacts, networkSpecs)
+          
           if (target.impl === impl) {
-            target.specs = await unfoldTargetSpecs(domain, impl, base, from, network, networkArtifacts, networkSpecs)
             targetAddr = await determineTargetAddr(impl, target.specs, networkArtifacts)
           }
+          
           if (
             selection.includes(target.impl) &&
             (target.impl === impl || utils.isNullAddress(target.addr) || (await web3.eth.getCode(target.addr)).length < 3)
           ) {
             if (target.impl !== impl) {
-              if (!fs.existsSync(`../frosts/${domain}/${target.impl}.json`)) {
-                traceHeader(`Legacy '${target.impl}'`)
+              if (!fs.existsSync(`migrations/frosts/${domain}/${target.impl}.json`)) {
+                utils.traceHeader(`Legacy '${target.impl}'`)
                 console.info("  ", `> \x1b[91mMissing migrations/frosts/${domain}/${target.impl}.json\x1b[0m`)
                 continue;
               } else {
                 fs.writeFileSync(
                   `build/contracts/${target.impl}.json`,
-                  fs.readFileSync(`migrations/frosts/${target.impl}.json`),
+                  fs.readFileSync(`migrations/frosts/${domain}/${target.impl}.json`),
                   { encoding: "utf8", flag: "w" }
                 )
-                targetAddr = target.addr
                 target.addr = await defrostTarget(network, target.impl, target.specs, target.addr)
               }
             } else {
@@ -310,29 +326,27 @@ async function upgradeCoreBase (proxyAddr, targetSpecs, targetAddr) {
 }
 
 async function defrostTarget (network, target, targetSpecs, targetAddr) {
-  const deployer = WitnetDeployer.deployed()
+  const deployer = await WitnetDeployer.deployed()
+  utils.traceHeader(`Defrosting '${target}'...`)
   const artifact = artifacts.require(target)
   const defrostCode = artifact.bytecode
   if (defrostCode.indexOf("__") > -1) {
-    console.info(`Cannot defrost '${target}: external libs not yet supported.`)
-    process.exit(1)
+    panic("Frosted libs not yet supported")
   }
   const constructorArgs = await utils.readJsonFromFile("./migrations/constructorArgs.json")
   const defrostConstructorArgs = constructorArgs[network][target] || constructorArgs.default[target] || ""
-  const defrostInitCode = targetCode + defrostConstructorArgs
+  const defrostInitCode = defrostCode + defrostConstructorArgs
   const defrostSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
-  const defrostAddr = await deployer.determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
+  const defrostAddr = await deployer.determineAddr.call(defrostInitCode, defrostSalt, { from: targetSpecs.from })
   if (defrostAddr !== targetAddr) {
-    console.info(`Cannot defrost '${target}: irreproducible address: ${defrostAddr} != ${targetAddr}`)
-    process.exit(1)
-  } else {
-    utils.traceHeader(`Defrosted ${target.impl}`)
-    const metadata = JSON.parse(target.artifact.metadata)
+    panic("Irreproducible address", `\x1b[91m${defrostAddr}\x1b[0m != \x1b[97m${targetAddr}\x1b[0m`)
+  } else {1
+    const metadata = JSON.parse(artifact.metadata)
     console.info("  ", "> compiler:          ", metadata.compiler.version)
     console.info("  ", "> evm version:       ", metadata.settings.evmVersion.toUpperCase())
     console.info("  ", "> optimizer:         ", JSON.stringify(metadata.settings.optimizer))
     console.info("  ", "> source code path:  ", metadata.settings.compilationTarget)
-    console.info("  ", "> artifact codehash: ", web3.utils.soliditySha3(target.artifact.toJSON().deployedBytecode))
+    console.info("  ", "> artifact codehash: ", web3.utils.soliditySha3(artifact.toJSON().deployedBytecode))
   }
   try {
     utils.traceHeader(`Deploying '${target}'...`)
@@ -342,9 +356,7 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
     }
     utils.traceTx(await deployer.deploy(defrostInitCode, defrostSalt, { from: targetSpecs.from }))
   } catch (ex) {
-    console.info(`Cannot defrost '${target}': deployment failed:`)
-    console.log(ex)
-    process.exit(1)
+    panic("Deployment failed", null, ex)
   }
   return defrostAddr
 }
@@ -358,7 +370,7 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
   const targetAddr = await deployer.determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
   utils.traceHeader(`Deploying '${target}'...`)
   if (targetSpecs.isUpgradable && versionLastCommitOf(legacyVersion) && legacyVersion.slice(-7) === version.slice(-7)) {
-    console.info(   `   > \x1b[41mWARNING:\x1b[0m           \x1b[31mLatest changes were not committed into Github!\x1b[0m`)
+    console.info(   `   > \x1b[91mLatest changes were not previously committed into Github!\x1b[0m`)
   }
   if (targetSpecs?.baseLibs && Array.isArray(targetSpecs.baseLibs)) {
     for (const index in targetSpecs.baseLibs) {
@@ -374,19 +386,19 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
   try {
     utils.traceTx(await deployer.deploy(targetInitCode, targetSalt, { from: targetSpecs.from }))
   } catch (ex) {
-    console.info(`Error: cannot deploy artifact ${target} on expected address ${targetAddr}:`)
-    console.log(ex)
-    process.exit(1)
+    panic("Deployment failed", `Expected address: ${targetAddr}`, ex)
   }
-  if ((await web3.eth.getCode(targetAddr)).length <= 3) {
-    console.info(`Error: deployment of '${target}' into ${targetAddr} failed.`)
-    process.exit(1)
-  } else {
-    if (!constructorArgs[network]) constructorArgs[network] = {}
-    constructorArgs[network][target] = targetConstructorArgs
-    await utils.overwriteJsonFile("./migrations/constructorArgs.json", constructorArgs)
-  }
+  if (!constructorArgs[network]) constructorArgs[network] = {}
+  constructorArgs[network][target] = targetConstructorArgs
+  await utils.overwriteJsonFile("./migrations/constructorArgs.json", constructorArgs)
   return targetAddr
+}
+
+function panic(header, body, exception) {
+  console.info("  ", `> \x1b[97;41m ${header} failed \x1b[0m ${body}`)
+  if (exception) console.info(exception)
+  console.info()
+  process.exit(0)
 }
 
 async function determineTargetAddr (target, targetSpecs, networkArtifacts) {
@@ -409,8 +421,7 @@ function encodeTargetInitCode (target, targetSpecs, networkArtifacts) {
   // extract bytecode from target's artifact, replacing lib references to actual addresses
   const targetCodeUnlinked = artifacts.require(target).toJSON().bytecode
   if (targetCodeUnlinked.length < 3) {
-    console.info(`Error: cannot deploy abstract arfifact ${target}.`)
-    process.exit(1)
+    panic(target, "Abstract contract")
   }
   const targetCode = linkBaseLibs(
     targetCodeUnlinked,
@@ -418,13 +429,7 @@ function encodeTargetInitCode (target, targetSpecs, networkArtifacts) {
     networkArtifacts
   )
   if (targetCode.indexOf("__") > -1) {
-    // console.info(targetCode)
-    console.info(
-      `Error: artifact ${target} depends on library`,
-      targetCode.substring(targetCode.indexOf("__"), 42),
-      "which is not known or has not been deployed."
-    )
-    process.exit(1)
+    panic(target, `Missing library: ${targetCode.substring(targetCode.indexOf("__"), 42)}`)
   }
   const targetConstructorArgsEncoded = encodeTargetConstructorArgs(targetSpecs)
   return targetCode + targetConstructorArgsEncoded.slice(2)
@@ -450,8 +455,7 @@ function linkBaseLibs (bytecode, baseLibs, networkArtifacts) {
 async function unfoldTargetSpecs (domain, target, targetBase, from, network, networkArtifacts, networkSpecs, ancestors) {
   if (!ancestors) ancestors = []
   else if (ancestors.includes(targetBase)) {
-    console.info(`Core dependencies loop detected: '${targetBase}' in ${ancestors}`,)
-    process.exit(1)
+    panic(target, `Dependencies loop: "${targetBase}" in ${ancestors}`)
   }
   const specs = {
     baseDeps: [],
