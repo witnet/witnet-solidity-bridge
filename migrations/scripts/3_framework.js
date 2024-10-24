@@ -82,7 +82,12 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
 
       if (utils.isUpgradableArtifact(impl)) {
 
-        if (process.argv.includes("--artifacts") && !selection.includes(base) && !process.argv.includes("--upgrade-all")) {
+        if (
+          process.argv.includes("--artifacts") 
+          && process.argv.includes("--compile-none")
+          && !process.argv.includes("--upgrade-all")
+          && !selection.includes(base)          
+        ) {
           utils.traceHeader(`Skipped '${base}'`)
           console.info("  ", `> contract address:   ${targetBaseAddr}`)
             continue
@@ -153,28 +158,9 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
         
         } else {
           utils.traceHeader(`Upgradable '${base}'`)
-          if (skipUpgrade) {
-            console.info(`   > \x1b[91mPlease, commit your changes before upgrading!\x1b[0m`)  
-          
-          } else if (
-            selection.includes(base)
-            && versionCodehashOf(targetVersion) === versionCodehashOf(legacyVersion)
-          ) {
-            console.info(`   > \x1b[91mSorry, nothing to upgrade.\x1b[0m`)
-          
-          } else if (
-            versionTagOf(targetVersion) === versionTagOf(legacyVersion) 
-            && versionLastCommitOf(targetVersion) !== versionLastCommitOf(legacyVersion)
-            && versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
-          ) {
-            if (process.argv.includes("--changelog")) {
-              const changelog = execSync(`git log ${versionCodehashOf(legacyVersion)}^.. --format=%s ../../contracts`).toString()
-              console.log(changelog)
-
-            } else {
-              console.info(`   > \x1b[90mPlease, consider bumping up the package version.\x1b[0m`)
-            }
-          }
+        }
+        if (!upgradeProxy && targetVersion.slice(0, 4) !== legacyVersion.slice(0, 4)) {
+          console.info(`   > \x1b[30;43m MAJOR UPGRADE IS REQUIRED \x1b[0m`)
         }
         if (
           targetAddr !== implArtifact.address 
@@ -193,6 +179,37 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           )
         }
         await traceDeployedContractInfo(await implArtifact.at(baseArtifact.address), from, targetVersion)
+        if (!upgradeProxy) {
+          if (skipUpgrade) {
+            console.info(`   > \x1b[91mPlease, commit your changes before upgrading!\x1b[0m`)  
+          
+          } else if (
+            selection.includes(base)
+            && versionCodehashOf(targetVersion) === versionCodehashOf(legacyVersion)
+          ) {
+            console.info(`   > \x1b[91mSorry, nothing to upgrade.\x1b[0m`)
+          
+          } else if (
+            versionLastCommitOf(targetVersion) !== versionLastCommitOf(legacyVersion) &&
+            versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
+          ) {
+            if (targetVersion.slice(0, 4) === legacyVersion.slice(0, 4) || process.argv.includes("--changelog")) {
+              const changelog = require("child_process").execSync(
+                `git log ${versionLastCommitOf(legacyVersion)}.. --date=short --color --format="%C(yellow)%cd %C(bold)%s%C(dim)" -- contracts/`
+              ).toString()
+              const changes = changelog.split("\n").slice(0, -1)
+              console.info(`   > contract changelog: ${changes[0]}\x1b[0m`)
+              changes.slice(1).forEach(log => {
+                console.info(`                         ${log}\x1b[0m`)
+              })
+            }
+            if (versionTagOf(targetVersion) === versionTagOf(legacyVersion)) {
+              // both on same release tag
+              console.info(`   > \x1b[90mPlease, consider bumping up the package version.\x1b[0m`)
+            }
+          }
+        }
+        console.info()
       
       } else {
         
@@ -205,7 +222,12 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
         for (const ix in targets) {
           const target = targets[ix]
 
-          if (process.argv.includes("--artifacts") && !process.argv.includes("--upgrade-all") && !selection.includes(target.impl)) {
+          if (
+            process.argv.includes("--artifacts") 
+            && process.argv.includes("--compile-none") 
+            && !process.argv.includes("--upgrade-all") 
+            && !selection.includes(target.impl)
+        ) {
             utils.traceHeader(`Skipped '${target.impl}'`)
             console.info("  ", `> contract address:  ${target.addr}`)
             continue;
@@ -260,6 +282,7 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
             implArtifact.address = target.addr
           }
           await traceDeployedContractInfo(await baseArtifact.at(target.addr), from)
+          console.info()
         } // for targets
       } // !targetSpecs.isUpgradable
     } // for bases
@@ -279,13 +302,12 @@ async function traceDeployedContractInfo(contract, from, targetVersion) {
     // if (versionTagOf(deployedVersion) !== versionTagOf(getArtifactVersion(impl))) {
     // if (deployedVersion !== targetVersion) {
     if (targetVersion && versionCodehashOf(deployedVersion) !== versionCodehashOf(targetVersion)) {
-      console.info("  ", `> contract version:   \x1b[1;39m${deployedVersion.slice(0, 5)}\x1b[0m${deployedVersion.slice(5)} !== \x1b[93m${targetVersion}\x1b[0m`)
+      console.info("  ", `> contract version:   \x1b[1;39m${deployedVersion.slice(0, 5)}\x1b[0m${deployedVersion.slice(5)} !== \x1b[33m${targetVersion}\x1b[0m`)
     } else {
       console.info("  ", `> contract version:   \x1b[1;39m${deployedVersion.slice(0, 5)}\x1b[0m${deployedVersion.slice(5)}`)
     }
   } catch {}
   console.info("  ", "> contract specs:    ", await contract.specs.call({ from }), "\x1b[0m")
-  console.info()
 }
 
 async function deployCoreBase (targetSpecs, targetAddr) {
