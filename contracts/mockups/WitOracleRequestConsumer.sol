@@ -59,7 +59,7 @@ abstract contract WitOracleRequestConsumer
         )
         virtual override internal returns (Witnet.QueryId)
     {
-        return __witOracle.pullData{
+        return __witOracle.postQuery{
             value: _queryEvmReward
         }(
             __witOracleRequestRadHash,

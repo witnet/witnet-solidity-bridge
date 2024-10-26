@@ -793,7 +793,7 @@ contract WitPriceFeedsUpgradable
                     try witOracle.fetchQueryResponse(_latestId) {} catch {}
                 }
                 // Post update request to the WRB:
-                _latestId = witOracle.pullData{value: _usedFunds}(
+                _latestId = witOracle.postQuery{value: _usedFunds}(
                     __feed.radHash,
                     querySLA
                 );

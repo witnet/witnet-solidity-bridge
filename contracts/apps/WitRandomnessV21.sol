@@ -468,7 +468,7 @@ contract WitRandomnessV21
             _evmUsedFunds = msg.value;
             
             // Post the Witnet Randomness request:
-            _queryId = __witOracle.pullData{
+            _queryId = __witOracle.postQuery{
                 value: msg.value
             }(
                 witOracleQueryRadHash,

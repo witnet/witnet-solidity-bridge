@@ -96,6 +96,9 @@ library Witnet {
         Disputed
     }
 
+    struct QueryCallback {
+        address consumer;               // consumer contract address to which the query result will be reported
+        uint24  gasLimit;               // expected max amount of gas required by the callback method in the consumer contract
     }
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.

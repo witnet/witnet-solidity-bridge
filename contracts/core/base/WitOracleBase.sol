@@ -34,14 +34,11 @@ abstract contract WitOracleBase
     uint256 internal immutable __reportResultWithCallbackRevertGasBase;
     uint256 internal immutable __sstoreFromZeroGas;
 
-    modifier checkCallbackRecipient(
-            IWitOracleConsumer _consumer, 
-            uint24 _evmCallbackGasLimit
-    ) virtual {
+    modifier checkQueryCallback(Witnet.QueryCallback memory callback) virtual {
         _require(
-            address(_consumer).code.length > 0
-                && _consumer.reportableFrom(address(this))
-                && _evmCallbackGasLimit > 0,
+            address(callback.consumer).code.length > 0
+                && IWitOracleConsumer(callback.consumer).reportableFrom(address(this))
+                && callback.gasLimit > 0,
             "invalid callback"
         ); _;
     }
@@ -329,23 +326,24 @@ abstract contract WitOracleBase
     {
         return Witnet.QueryId.wrap(__storage().nonce + 1);
     }
+
+    function postQuery(
             bytes32 _queryRAD, 
-            Witnet.RadonSLA memory _querySLA
+            Witnet.QuerySLA memory _querySLA
         )
         virtual override
         public payable
-        checkReward(
+        checkQueryReward(
             _getMsgValue(),
             estimateBaseFee(_getGasPrice())
         )
-        checkSLA(_querySLA)
-        returns (uint256 _queryId)
+        checkQuerySLA(_querySLA)
+        returns (Witnet.QueryId _queryId)
     {
         _queryId = __postQuery(
-            _getMsgSender(), 
-            0,
+            _getMsgSender(), 0,
             uint72(_getMsgValue()),
-            _queryRAD, 
+            _queryRAD,
             _querySLA
             
         );
@@ -354,63 +352,33 @@ abstract contract WitOracleBase
             _getMsgSender(),
             _getGasPrice(),
             _getMsgValue(),
-            _queryId, 
-            _queryRAD,
+            Witnet.QueryId.unwrap(_queryId), 
+            _queryRAD, 
             _querySLA
         );
     }
    
-    /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
-    /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
-    /// @notice reporter who relays back the Witnet-provable result to this request. The Witnet-provable result will be reported
-    /// @notice directly to the requesting contract. If the report callback fails for any reason, an `WitOracleQueryResponseDeliveryFailed`
-    /// @notice will be triggered, and the Witnet audit trail will be saved in storage, but not so the actual CBOR-encoded result.
-    /// @dev Reasons to fail:
-    /// @dev - the caller is not a contract implementing the IWitOracleConsumer interface;
-    /// @dev - the RAD hash was not previously verified by the WitOracleRadonRegistry registry;
-    /// @dev - invalid SLA parameters were provided;
-    /// @dev - zero callback gas limit is provided;
-    /// @dev - insufficient value is paid as reward.
-    /// @param _queryRAD The RAD hash of the data request to be solved by Witnet.
-    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
-    /// @param _queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function postQueryWithCallback(
+    function postQuery(
             bytes32 _queryRAD, 
-            Witnet.RadonSLA memory _querySLA,
-            uint24 _queryCallbackGasLimit
+            Witnet.QuerySLA memory _querySLA,
+            Witnet.QueryCallback memory _queryCallback
         )
-        virtual override public payable 
-        returns (uint256)
-    {
-        return postQueryWithCallback(
-            IWitOracleConsumer(_getMsgSender()),
-            _queryRAD,
-            _querySLA,
-            _queryCallbackGasLimit
-        );
-    }
-
-    function postQueryWithCallback(
-            IWitOracleConsumer _consumer,
-            bytes32 _queryRAD,
-            Witnet.RadonSLA memory _querySLA,
-            uint24 _queryCallbackGasLimit
-        )
-        virtual override public payable
-        checkCallbackRecipient(_consumer, _queryCallbackGasLimit)
-        checkReward(
+        virtual override
+        public payable
+        checkQueryReward(
             _getMsgValue(),
             estimateBaseFeeWithCallback(
                 _getGasPrice(),  
-                _queryCallbackGasLimit
+                _queryCallback.gasLimit
             )
         )
-        checkSLA(_querySLA)
-        returns (uint256 _queryId)
+        checkQuerySLA(_querySLA)
+        checkQueryCallback(_queryCallback)
+        returns (Witnet.QueryId _queryId)
     {
         _queryId = __postQuery(
-            address(_consumer),
-            _queryCallbackGasLimit,
+            _queryCallback.consumer,
+            _queryCallback.gasLimit,
             uint72(_getMsgValue()),
             _queryRAD,
             _querySLA
@@ -419,76 +387,46 @@ abstract contract WitOracleBase
             _getMsgSender(),
             _getGasPrice(),
             _getMsgValue(),
-            _queryId,
-            _queryRAD,
+            Witnet.QueryId.unwrap(_queryId), 
+            _queryRAD, 
             _querySLA
         );
     }
 
-    /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and solved by 
-    /// @notice the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be transferred to the 
-    /// @notice reporter who relays back the Witnet-provable result to this request. The Witnet-provable result will be reported
-    /// @notice directly to the requesting contract. If the report callback fails for any reason, a `WitOracleQueryResponseDeliveryFailed`
-    /// @notice event will be triggered, and the Witnet audit trail will be saved in storage, but not so the CBOR-encoded result.
-    /// @dev Reasons to fail:
-    /// @dev - the caller is not a contract implementing the IWitOracleConsumer interface;
-    /// @dev - the provided bytecode is empty;
-    /// @dev - invalid SLA parameters were provided;
-    /// @dev - zero callback gas limit is provided;
-    /// @dev - insufficient value is paid as reward.
-    /// @param _queryUnverifiedBytecode The (unverified) bytecode containing the actual data request to be solved by the Witnet blockchain.
-    /// @param _querySLA The data query SLA to be fulfilled on the Witnet blockchain.
-    /// @param _queryCallbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function postQueryWithCallback(
-            bytes calldata _queryUnverifiedBytecode,
-            Witnet.RadonSLA memory _querySLA,
-            uint24 _queryCallbackGasLimit
+    function postQuery(
+            bytes calldata _queryRAD,
+            Witnet.QuerySLA memory _querySLA,
+            Witnet.QueryCallback memory _queryCallback
         )
-        virtual override public payable
-        returns (uint256)
-    {
-        return postQueryWithCallback(
-            IWitOracleConsumer(_getMsgSender()),
-            _queryUnverifiedBytecode,
-            _querySLA,
-            _queryCallbackGasLimit
-        );
-    }
-
-    function postQueryWithCallback(
-            IWitOracleConsumer _consumer,
-            bytes calldata _queryUnverifiedBytecode,
-            Witnet.RadonSLA memory _querySLA, 
-            uint24 _queryCallbackGasLimit
-        )
-        virtual override public payable 
-        checkCallbackRecipient(_consumer, _queryCallbackGasLimit)
-        checkReward(
+        virtual override
+        public payable
+        checkQueryReward(
             _getMsgValue(),
             estimateBaseFeeWithCallback(
-                _getGasPrice(),
-                _queryCallbackGasLimit
+                _getGasPrice(),  
+                _queryCallback.gasLimit
             )
         )
-        checkSLA(_querySLA)
-        returns (uint256 _queryId)
+        checkQuerySLA(_querySLA)
+        checkQueryCallback(_queryCallback)
+        returns (Witnet.QueryId _queryId)
     {
         _queryId = __postQuery(
-            address(_consumer),
-            _queryCallbackGasLimit,
+            _queryCallback.consumer,
+            _queryCallback.gasLimit,
             uint72(_getMsgValue()),
-            bytes32(0),
+            _queryRAD,
             _querySLA
         );
-        WitOracleDataLib.seekQueryRequest(_queryId).radonBytecode = _queryUnverifiedBytecode;
         emit WitOracleQuery(
             _getMsgSender(),
             _getGasPrice(),
             _getMsgValue(),
-            _queryId,
-            _queryUnverifiedBytecode,
+            Witnet.QueryId.unwrap(_queryId), 
+            _queryRAD, 
             _querySLA
         );
+    }   
 
     /// @notice Enables data requesters to settle the actual validators in the Wit/oracle
     /// @notice sidechain that will be entitled whatsover to solve 

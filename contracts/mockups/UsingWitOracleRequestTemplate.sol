@@ -70,7 +70,7 @@ abstract contract UsingWitOracleRequestTemplate
         )
         virtual internal returns (Witnet.QueryId)
     {
-        return __witOracle.pullData{
+        return __witOracle.postQuery{
             value: _queryEvmReward
         }(
             _queryRadHash,

@@ -197,6 +197,19 @@ abstract contract WitOracleBaseTrustable
         external payable
         returns (uint256)
     {
+        return Witnet.QueryId.unwrap(
+            postQuery(
+                _queryRadHash,
+                Witnet.QuerySLA({
+                    witCommitteeCapacity: _querySLA.witCommitteeCapacity,
+                    witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward,
+                    witResultMaxSize: 32,
+                    witCapability: Witnet.QueryCapability.wrap(0)
+                })
+            )
+        );
+    }
+
     function __postQuery(
             address _requester,
             uint24  _callbackGas,
@@ -263,14 +276,20 @@ abstract contract WitOracleBaseTrustable
         external payable
         returns (uint256)
     {
-        return postQueryWithCallback(
-            _queryRadHash,
-            Witnet.RadonSLA({
-                witNumWitnesses: _querySLA.witNumWitnesses,
-                witUnitaryReward: _querySLA.witUnitaryReward,
-                maxTallyResultSize: 32
-            }),
-            _queryCallbackGas
+        return Witnet.QueryId.unwrap(
+            postQuery(
+                _queryRadHash,
+                Witnet.QuerySLA({
+                    witCommitteeCapacity: uint8(_querySLA.witCommitteeCapacity),
+                    witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward,
+                    witResultMaxSize: 32,
+                    witCapability: Witnet.QueryCapability.wrap(0)
+                }),
+                Witnet.QueryCallback({
+                    consumer: msg.sender,
+                    gasLimit: _queryCallbackGas
+                })
+            )
         );
     }
 
@@ -283,20 +302,38 @@ abstract contract WitOracleBaseTrustable
         external payable
         returns (uint256)
     {
-        return postQueryWithCallback(
-            _queryRadBytecode,
-            Witnet.RadonSLA({
-                witNumWitnesses: _querySLA.witNumWitnesses,
-                witUnitaryReward: _querySLA.witUnitaryReward,
-                maxTallyResultSize: 32
-            }),
-            _queryCallbackGas
+        return Witnet.QueryId.unwrap(
+            postQuery(
+                _queryRadBytecode,
+                Witnet.QuerySLA({
+                    witCommitteeCapacity: _querySLA.witCommitteeCapacity,
+                    witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward,
+                    witResultMaxSize: 32,
+                    witCapability: Witnet.QueryCapability.wrap(0)
+                }),
+                Witnet.QueryCallback({
+                    consumer: msg.sender,
+                    gasLimit: _queryCallbackGas
+                })
+            )
         );
     }
 
 
-    // ================================================================================================================
-    // --- Implements IWitOracleReporter ------------------------------------------------------------------------------
+    // =========================================================================================================================
+    // --- Implements IWitOracleTrustable --------------------------------------------------------------------------------------
+
+    function pushData(Witnet.DataPushReport calldata _report, bytes calldata _signature) 
+        virtual override
+        external 
+        returns (Witnet.DataResult memory)
+    {
+        _revert("todo");
+    }
+
+
+    // =========================================================================================================================
+    // --- Implements IWitOracleTrustableReporter ------------------------------------------------------------------------------
 
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 

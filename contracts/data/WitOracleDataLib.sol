@@ -425,7 +425,7 @@ library WitOracleDataLib {
             Witnet.Query storage __query = seekQuery(Witnet.QueryId.wrap(queryIds[_ix]));
             bytecodes[_ix] = (__query.request.radonRadHash != bytes32(0)
                 ? registry.bytecodeOf(__query.request.radonRadHash, __query.slaParams)
-                : registry.bytecodeOf(__query.request.radonBytecode, __query.slaParam.toV1())
+                : registry.bytecodeOf(__query.request.radonBytecode, __query.slaParams)
             );
         }
     }
@@ -748,11 +748,11 @@ library WitOracleDataLib {
         )
         public returns (uint256)
     {
-        (bool _isValidDataPullReport, string memory _queryResponseReportInvalidError) = _isValidDataPullReport(
+        (bool _isValidReport, string memory _queryResponseReportInvalidError) = _isValidDataPullReport(
             responseReport
         );
         require(
-            _isValidDataPullReport,
+            _isValidReport,
             _queryResponseReportInvalidError
         );
         
@@ -804,10 +804,10 @@ library WitOracleDataLib {
         public returns (uint256 evmTotalReward)
     {
         // validate query response report
-        (bool _isValidDataPullReport, string memory _queryResponseReportInvalidError) = _isValidDataPullReport(
+        (bool _isValidReport, string memory _queryResponseReportInvalidError) = _isValidDataPullReport(
             responseReport
         );
-        require(_isValidDataPullReport, _queryResponseReportInvalidError);
+        require(_isValidReport, _queryResponseReportInvalidError);
 
         // validate rollup proofs
         Witnet.Beacon memory _witOracleHead = rollupBeacons(witOracleRollup);
