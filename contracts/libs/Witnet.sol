@@ -48,6 +48,20 @@ library Witnet {
         bytes   witDrResultCborBytes;
         bytes32 witDrTxHash;
     }
+
+    struct DataPushReport {
+        QuerySLA witDrSLA;
+        bytes32  witDrRadHash;
+        uint32   witDrResultEpoch;
+        bytes    witDrResultCborBytes;
+        bytes32  witDrTxHash;
+    }
+
+    struct DataResult {
+        RadonDataTypes  dataType;
+        WitnetCBOR.CBOR value;
+    }
+    
     struct FastForward {
         Beacon beacon;
         uint256[2] committeeAggSignature;
@@ -119,14 +133,14 @@ library Witnet {
         uint64  witCommitteeUnitaryReward; // unitary reward in nanowits for true witnesses and validators in the wit/oracle blockchain.
         QueryCapability witCapability;     // optional: identifies some pre-established capability-compliant commitee required for solving the query.
     }
-    }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
+    // todo: Result -> DataResult
     struct Result {
         bool success;           // Flag stating whether the request could get solved successfully, or not.
         WitnetCBOR.CBOR value;  // Resulting value, in CBOR-serialized bytes.
     }
-
+    
     /// Final query's result status from a requester's point of view.
     enum ResultStatus {
         Void,
@@ -505,7 +519,7 @@ library Witnet {
         );
     }
 
-    function tallyHash(QueryResponseReport calldata self) internal pure returns (bytes32) {
+    function tallyHash(DataPullReport calldata self) internal pure returns (bytes32) {
         return keccak256(abi.encode(
             self.queryHash,
             self.witDrRelayerSignature,
@@ -515,7 +529,7 @@ library Witnet {
         ));
     }
 
-    function tallyHash(QueryReport calldata self) internal pure returns (bytes32) {
+    function tallyHash(DataPushReport calldata self) internal pure returns (bytes32) {
         return keccak256(abi.encode(
             self.witDrRadHash,
             self.witDrSLA,

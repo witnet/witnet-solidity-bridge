@@ -6,7 +6,8 @@ import "./WitOracleBase.sol";
 import "../WitnetUpgradableBase.sol";
 import "../../interfaces/IWitOracleAdminACLs.sol";
 import "../../interfaces/IWitOracleLegacy.sol";
-import "../../interfaces/IWitOracleReporter.sol";
+import "../../interfaces/IWitOracleTrustable.sol";
+import "../../interfaces/IWitOracleTrustableReporter.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -19,9 +20,10 @@ abstract contract WitOracleBaseTrustable
         WitnetUpgradableBase,
         IWitOracleAdminACLs,
         IWitOracleLegacy,
-        IWitOracleReporter
+        IWitOracleTrustable,
+        IWitOracleTrustableReporter
 {
-    using Witnet for Witnet.RadonSLA;
+    using Witnet for Witnet.QuerySLA;
 
     /// Asserts the caller is authorized as a reporter
     modifier onlyReporters virtual {
@@ -29,6 +31,14 @@ abstract contract WitOracleBaseTrustable
             WitOracleDataLib.data().reporters[msg.sender],
             "unauthorized reporter"
         ); _;
+    }
+
+    function specs() virtual override external pure returns (bytes4) {
+        return (
+            type(IWitAppliance).interfaceId
+                ^ type(IWitOracle).interfaceId
+                ^ type(IWitOracleTrustable).interfaceId
+        );
     }
 
     constructor(bytes32 _versionTag)
