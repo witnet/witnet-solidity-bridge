@@ -5,7 +5,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitOracleBase.sol";
 import "../../interfaces/IWitOracleBlocks.sol";
-import "../../interfaces/IWitOracleReporterTrustless.sol";
+import "../../interfaces/IWitOracleTrustless.sol";
+import "../../interfaces/IWitOracleTrustlessReporter.sol";
 import "../../patterns/Escrowable.sol";
 
 /// @title Witnet Request Board "trustless" implementation contract for regular EVM-compatible chains.
@@ -18,9 +19,10 @@ abstract contract WitOracleBaseTrustless
         Escrowable,
         WitOracleBase,
         IWitOracleBlocks,
-        IWitOracleReporterTrustless
+        IWitOracleTrustless,
+        IWitOracleTrustlessReporter
 {
-    using Witnet for Witnet.QueryResponseReport;
+    using Witnet for Witnet.DataPullReport;
 
     /// @notice Number of blocks to await for either a dispute or a proven response to some query.
     uint256 immutable public QUERY_AWAITING_BLOCKS;
@@ -28,7 +30,7 @@ abstract contract WitOracleBaseTrustless
     /// @notice Amount in wei to be staked upon reporting or disputing some query.
     uint256 immutable public QUERY_REPORTING_STAKE;
 
-    modifier checkReward(uint256 _msgValue, uint256 _baseFee) virtual override {
+    modifier checkQueryReward(uint256 _msgValue, uint256 _baseFee) virtual override {
         if (_msgValue < _baseFee) {
             __burn(msg.sender, _baseFee - _msgValue);
         
@@ -36,6 +38,15 @@ abstract contract WitOracleBaseTrustless
             _revert("too much reward");
 
         } _;   
+    }
+
+    function specs() virtual override external pure returns (bytes4) {
+        return (
+            type(IWitAppliance).interfaceId
+                ^ type(IWitOracle).interfaceId
+                ^ type(IWitOracleBlocks).interfaceId
+                ^ type(IWitOracleTrustless).interfaceId
+        );
     }
 
     constructor(
@@ -272,7 +283,38 @@ abstract contract WitOracleBaseTrustless
 
 
     // ================================================================================================================
-    // --- IWitOracleReporterTrustless --------------------------------------------------------------------------------
+    // --- Overrides IWitOracle (trustlessly) -------------------------------------------------------------------------
+
+    /// @notice Verify the data report was actually produced by the Wit/oracle sidechain,
+    /// @notice reverting if the verification fails, or returning the self-contained Witnet.Result value.
+    function pushData(
+                Witnet.DataPushReport calldata _report, 
+                Witnet.FastForward[] calldata _rollup, 
+                bytes32[] calldata _droMerkleTrie
+            ) 
+            external returns (Witnet.DataResult memory)
+    {
+        try WitOracleDataLib.rollupDataPushReport(
+            _report,
+            _rollup,
+            _droMerkleTrie
+        
+        ) returns (
+            Witnet.DataResult memory _queryResult
+        ) {
+            return _queryResult;
+        
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+        
+        } catch (bytes memory) {
+            _revertWitOracleDataLibUnhandledException();
+        }
+    }
+
+
+    // ================================================================================================================
+    // --- IWitOracleTrustlessReporter --------------------------------------------------------------------------------
 
     function claimQueryReward(Witnet.QueryId _queryId)
         virtual override external
@@ -324,27 +366,27 @@ abstract contract WitOracleBaseTrustless
         }
     }
 
-    function extractQueryRelayData(uint256 _queryId)
+    function extractDataRequest(Witnet.QueryId _queryId)
         virtual override public view
-        returns (QueryRelayData memory _queryRelayData)
+        returns (DataRequest memory _dr)
     {
         Witnet.QueryStatus _queryStatus = getQueryStatus(_queryId);
         if (
             _queryStatus == Witnet.QueryStatus.Posted
                 || _queryStatus == Witnet.QueryStatus.Delayed
         ) {
-            _queryRelayData = WitOracleDataLib.extractQueryRelayData(registry, _queryId);
+            _dr = WitOracleDataLib.extractDataRequest(registry, _queryId);
         }
     }
 
 
-    function extractQueryRelayDataBatch(uint256[] calldata _queryIds)
+    function extractDataRequestBatch(Witnet.QueryId[] calldata _queryIds)
         virtual override external view
-        returns (QueryRelayData[] memory _relays)
+        returns (DataRequest[] memory _drs)
     {
-        _relays = new QueryRelayData[](_queryIds.length);
+        _drs = new DataRequest[](_queryIds.length);
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
-            _relays[_ix] = extractQueryRelayData(_queryIds[_ix]);
+            _drs[_ix] = extractDataRequest(_queryIds[_ix]);
         }
     }
 

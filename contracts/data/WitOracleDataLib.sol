@@ -7,8 +7,8 @@ import "../interfaces/IWitOracleAdminACLs.sol";
 import "../interfaces/IWitOracleBlocks.sol";
 import "../interfaces/IWitOracleConsumer.sol";
 import "../interfaces/IWitOracleEvents.sol";
-import "../interfaces/IWitOracleReporter.sol";
-import "../interfaces/IWitOracleReporterTrustless.sol";
+import "../interfaces/IWitOracleTrustableReporter.sol";
+import "../interfaces/IWitOracleTrustlessReporter.sol";
 import "../libs/Witnet.sol";
 import "../patterns/Escrowable.sol";
 
@@ -17,7 +17,7 @@ import "../patterns/Escrowable.sol";
 library WitOracleDataLib {  
 
     using Witnet for Witnet.Beacon;
-    using Witnet for Witnet.QueryReport;
+    using Witnet for Witnet.DataPushReport;
     using Witnet for Witnet.DataPullReport;
     using Witnet for Witnet.QuerySLA;
     
@@ -45,11 +45,6 @@ library WitOracleDataLib {
     
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
-
-    /// Unique relay channel identifying the sidechain and request board instance from where data queries are requested.
-    function channel() internal view returns (bytes4) {
-        return bytes4(keccak256(abi.encode(address(this), block.chainid)));
-    }
 
     /// Returns storage pointer to contents of 'WitnetBoardState' struct.
     function data() internal pure returns (Storage storage _ptr)
@@ -415,8 +410,8 @@ library WitOracleDataLib {
     }
 
 
-    /// =======================================================================
-    /// --- IWitOracleReporter ------------------------------------------------
+    /// ================================================================================
+    /// --- IWitOracleTrustableReporter ------------------------------------------------
 
     function extractWitnetDataRequests(
             WitOracleRadonRegistry registry, 
@@ -427,10 +422,10 @@ library WitOracleDataLib {
     {
         bytecodes = new bytes[](queryIds.length);
         for (uint _ix = 0; _ix < queryIds.length; _ix ++) {
-            Witnet.QueryRequest storage __request = seekQueryRequest(queryIds[_ix]);
-            bytecodes[_ix] = (__request.radonRadHash != bytes32(0)
-                ? registry.bytecodeOf(__request.radonRadHash, __request.radonSLA)
-                : registry.bytecodeOf(__request.radonBytecode,__request.radonSLA)
+            Witnet.Query storage __query = seekQuery(Witnet.QueryId.wrap(queryIds[_ix]));
+            bytecodes[_ix] = (__query.request.radonRadHash != bytes32(0)
+                ? registry.bytecodeOf(__query.request.radonRadHash, __query.slaParams)
+                : registry.bytecodeOf(__query.request.radonBytecode, __query.slaParam.toV1())
             );
         }
     }
@@ -613,24 +608,30 @@ library WitOracleDataLib {
     /// =======================================================================
     /// --- IWitOracleTrustlessReporter ---------------------------------------
 
-    function extractQueryRelayData(
+    function extractDataRequest(
             WitOracleRadonRegistry registry,
-            uint256 queryId
+            Witnet.QueryId queryId
         )
         public view
-        returns (IWitOracleReporterTrustless.QueryRelayData memory _queryRelayData)
+        returns (IWitOracleTrustlessReporter.DataRequest memory)
     {
-        Witnet.QueryRequest storage __request = seekQueryRequest(queryId);
-        return IWitOracleReporterTrustless.QueryRelayData({
+        Witnet.Query storage __query = seekQuery(queryId);
+        return IWitOracleTrustlessReporter.DataRequest({
             queryId: queryId,
-            queryEvmBlock: seekQuery(queryId).block,
-            queryEvmHash: queryHashOf(data(), queryId),
-            queryEvmReward: __request.evmReward,
-            queryWitDrBytecodes: (__request.radonRadHash != bytes32(0)
-                ? registry.bytecodeOf(__request.radonRadHash, __request.radonSLA)
-                : registry.bytecodeOf(__request.radonBytecode,__request.radonSLA)
+            queryHash: __query.hash,
+            queryReward: __query.reward,
+            radonBytecode: (__query.request.radonRadHash != bytes32(0)
+                ? registry.bytecodeOf(__query.request.radonRadHash)
+                : __query.request.radonBytecode
             ),
-            queryWitDrSLA: __request.radonSLA
+            radonSLA: IWitOracleTrustlessReporter.RadonSLAv21({
+                params: __query.slaParams,
+                members: data()
+                    .committees
+                        [__query.request.requester]
+                        [__query.slaParams.witCapability]
+                    .members
+            })
         });
     }
 
@@ -904,71 +905,49 @@ library WitOracleDataLib {
         }
     }
 
-    function rollupQueryResultProof(
-            Witnet.FastForward[] calldata witOracleRollup,
-            Witnet.QueryReport calldata queryReport,
-            bytes32[] calldata droTalliesMerkleTrie
+    function rollupDataPushReport(
+            Witnet.DataPushReport calldata report,
+            Witnet.FastForward[] calldata rollup,
+            bytes32[] calldata droMerkleTrie
         )
-        public returns (Witnet.Result memory)
+        public returns (Witnet.DataResult memory)
     {
         // validate query report
         require(
-            queryReport.witDrRadHash != bytes32(0)
-                && queryReport.witDrResultCborBytes.length > 0
-                && queryReport.witDrResultEpoch > 0
-                && queryReport.witDrTxHash != bytes32(0)
-                && queryReport.witDrSLA.isValid()
+            report.witDrRadHash != bytes32(0)
+                && report.witDrResultCborBytes.length > 0
+                && report.witDrResultEpoch > 0
+                && report.witDrTxHash != bytes32(0)
+                && report.witDrSLA.isValid()
             , "invalid query report"
         );
 
         // validate rollup proofs
-        Witnet.Beacon memory _witOracleHead = rollupBeacons(witOracleRollup);
+        Witnet.Beacon memory _witOracleHead = rollupBeacons(rollup);
         require(
             _witOracleHead.index == Witnet.determineBeaconIndexFromEpoch(
-                queryReport.witDrResultEpoch
+                report.witDrResultEpoch
             ) + 1, "misleading head beacon"
         );
 
         // validate merkle proof
         require(
             _witOracleHead.droTalliesMerkleRoot == Witnet.merkleRoot(
-                droTalliesMerkleTrie, 
-                queryReport.tallyHash()
+                droMerkleTrie, 
+                report.tallyHash()
             ), "invalid merkle proof"
         );
 
         // deserialize result cbor bytes into Witnet.Result
-        return Witnet.toWitnetResult(
-            queryReport.witDrResultCborBytes
-        );
+        // todo!!! return Witnet.DataResult instead
+        // return Witnet.toWitnetResult(
+        //     report.witDrResultCborBytes
+        // );
     }
 
 
     /// =======================================================================
     /// --- Other public helper methods ---------------------------------------
-
-    function isValidDataPullReport(Witnet.DataPullReport calldata report)
-        public view
-        // todo: turn into private
-        returns (bool, string memory)
-    {
-        if (
-            Witnet.QueryHash.unwrap(report.queryHash)
-                != Witnet.QueryHash.unwrap(seekQuery(report.queryId).hash)
-        ) {
-            return (false, "invalid query hash");
-        
-        } else if (report.witDrResultEpoch == 0) {
-            return (false, "invalid result epoch");
-        
-        } else if (report.witDrResultCborBytes.length == 0) {
-            return (false, "invalid empty result");
-        
-        } else {
-            return (true, new string(0));
-        
-        }
-    }
 
     function notInStatusRevertMessage(Witnet.QueryStatus self) public pure returns (string memory) {
         if (self == Witnet.QueryStatus.Posted) {
