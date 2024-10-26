@@ -18,8 +18,8 @@ interface IWitOracleLegacy {
     function estimateBaseFee(uint256 gasPrice, bytes32 radHash) external view returns (uint256);
 
     struct RadonSLA {
-        uint8 witNumWitnesses;
-        uint64 witUnitaryReward;
+        uint8 witCommitteeCapacity;
+        uint64 witCommitteeUnitaryReward;
     }
     function postRequest(bytes32, RadonSLA calldata) external payable returns (uint256);
     function postRequestWithCallback(bytes32, RadonSLA calldata, uint24) external payable returns (uint256);

@@ -17,9 +17,9 @@ abstract contract WitOracleConsumer
         _;
     }
 
-    /// @param _callbackGasLimit Maximum gas to be spent by the IWitOracleConsumer's callback methods.
-    constructor (uint24 _callbackGasLimit) {
-        __witOracleCallbackGasLimit = _callbackGasLimit;
+    /// @param _callbackGas Maximum gas to be spent by the IWitOracleConsumer's callback methods.
+    constructor (uint24 _callbackGas) {
+        __witOracleCallbackGasLimit = _callbackGas;
     }
 
     

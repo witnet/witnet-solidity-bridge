@@ -26,15 +26,15 @@ abstract contract UsingWitOracle
 
     /// @notice Default SLA data security parameters to be fulfilled by the Wit/oracle blockchain
     /// @notice when solving a data request.
-    function witOracleDefaultQuerySLA() virtual public view returns (Witnet.RadonSLA memory) {
+    function witOracleDefaultQuerySLA() virtual public view returns (Witnet.QuerySLA memory) {
         return __witOracleDefaultQuerySLA;
     }
-    Witnet.RadonSLA internal __witOracleDefaultQuerySLA;
+    Witnet.QuerySLA internal __witOracleDefaultQuerySLA;
 
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
     /// @dev contract until a particular request has been successfully solved and reported from the Wit/oracle blockchain,
     /// @dev either with an error or successfully.
-    modifier witOracleQuerySolved(uint256 _queryId) {
+    modifier witOracleQuerySolved(Witnet.QueryId _queryId) {
         require(_witOracleCheckQueryResultAvailability(_queryId), "UsingWitOracle: unsolved query");
         _;
     }
@@ -48,10 +48,11 @@ abstract contract UsingWitOracle
             ), "UsingWitOracle: uncompliant WitOracle"
         );
         __witOracle = _witOracle;
-        __witOracleDefaultQuerySLA = Witnet.RadonSLA({
-            witNumWitnesses: 10,            // defaults to 10 witnesses
-            witUnitaryReward: 2 * 10 ** 8,  // defaults to 0.2 witcoins
-            maxTallyResultSize: 32          // defaults to 32 bytes
+        __witOracleDefaultQuerySLA = Witnet.QuerySLA({
+            witCommitteeCapacity: 10,            // defaults to 10 witnesses
+            witCommitteeUnitaryReward: 2 * 10 ** 8,  // defaults to 0.2 witcoins
+            witResultMaxSize: 32,          // defaults to 32 bytes
+            witCapability: Witnet.QueryCapability.wrap(0)
         });
         
         __witOracleBaseFeeOverheadPercentage = 33; // defaults to 33%
@@ -59,7 +60,7 @@ abstract contract UsingWitOracle
 
     /// @dev Check if given query was already reported back from the Wit/oracle blockchain.
     /// @param _id The unique identifier of a previously posted data request.
-    function _witOracleCheckQueryResultAvailability(uint256 _id)
+    function _witOracleCheckQueryResultAvailability(Witnet.QueryId _id)
         internal view
         returns (bool)
     {
@@ -67,7 +68,7 @@ abstract contract UsingWitOracle
     }
 
     /// @dev Returns a struct describing the resulting error from some given query id.
-    function _witOracleCheckQueryResultError(uint256 _queryId)
+    function _witOracleCheckQueryResultError(Witnet.QueryId _queryId)
         internal view
         returns (Witnet.ResultError memory)
     {
@@ -75,7 +76,7 @@ abstract contract UsingWitOracle
     }
 
     /// @dev Return current response status to some given gquery id.
-    function _witOracleCheckQueryResponseStatus(uint256 _queryId)
+    function _witOracleCheckQueryResponseStatus(Witnet.QueryId _queryId)
         internal view
         returns (Witnet.QueryResponseStatus)
     {

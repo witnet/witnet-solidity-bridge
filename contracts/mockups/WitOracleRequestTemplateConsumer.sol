@@ -14,14 +14,14 @@ abstract contract WitOracleRequestTemplateConsumer
     
     /// @param _witOracleRequestTemplate Address of the WitOracleRequestTemplate from which actual data requests will get built.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
-    /// @param _callbackGasLimit Maximum gas to be spent by the IWitOracleConsumer's callback methods.
+    /// @param _callbackGas Maximum gas to be spent by the IWitOracleConsumer's callback methods.
     constructor(
             WitOracleRequestTemplate _witOracleRequestTemplate, 
             uint16 _baseFeeOverheadPercentage,
-            uint24 _callbackGasLimit
+            uint24 _callbackGas
         )
         UsingWitOracleRequestTemplate(_witOracleRequestTemplate, _baseFeeOverheadPercentage)
-        WitOracleConsumer(_callbackGasLimit)
+        WitOracleConsumer(_callbackGas)
     {}
 
     /// @dev Estimate the minimum reward required for posting a data request (based on given gas price and 
@@ -46,7 +46,7 @@ abstract contract WitOracleRequestTemplateConsumer
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward
         )
-        virtual override internal returns (bytes32, uint256)
+        virtual override internal returns (bytes32, Witnet.QueryId)
     {
         return __witOraclePostQuery(
             _witOracleRequestArgs,
@@ -67,21 +67,24 @@ abstract contract WitOracleRequestTemplateConsumer
     function __witOraclePostQuery(
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward,
-            Witnet.RadonSLA memory _querySLA
+            Witnet.QuerySLA memory _querySLA
         )
         virtual override internal
         returns (
             bytes32 _queryRadHash, 
-            uint256 _queryId
+            Witnet.QueryId _queryId
         )
     {
         _queryRadHash = __witOracleVerifyRadonRequest(_witOracleRequestArgs);
-        _queryId = __witOracle.postQueryWithCallback{
+        _queryId = __witOracle.pullData{
             value: _queryEvmReward
         }(
             _queryRadHash,
             _querySLA,
-            __witOracleCallbackGasLimit
+            Witnet.QueryCallback({
+                consumer: address(this),
+                gasLimit: __witOracleCallbackGasLimit
+            })
         );
     }
 }

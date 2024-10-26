@@ -20,7 +20,7 @@ abstract contract WitOracleRadonRegistryBase
 {   
     using Witnet for bytes;
     using Witnet for string;
-    using Witnet for Witnet.RadonSLA;
+    using Witnet for Witnet.QuerySLA;
     
     using WitOracleRadonEncodingLib for Witnet.RadonDataTypes;
     using WitOracleRadonEncodingLib for Witnet.RadonReducer;
@@ -63,7 +63,7 @@ abstract contract WitOracleRadonRegistryBase
         return __database().radsBytecode[_radHash];
     }
 
-    function bytecodeOf(bytes32 _radHash, Witnet.RadonSLA calldata _sla)
+    function bytecodeOf(bytes32 _radHash, Witnet.QuerySLA calldata _sla)
         override external view 
         returns (bytes memory)
     {
@@ -75,7 +75,7 @@ abstract contract WitOracleRadonRegistryBase
         );
     }
 
-    function bytecodeOf(bytes calldata _radBytecode, Witnet.RadonSLA calldata _sla)
+    function bytecodeOf(bytes calldata _radBytecode, Witnet.QuerySLA calldata _sla)
         override external pure
         returns (bytes memory)
     {

@@ -17,8 +17,8 @@ interface IWitOracle {
     
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param evmGasPrice Expected gas price to pay upon posting the data request.
-    /// @param callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 evmGasPrice, uint24 callbackGasLimit) external view returns (uint256);
+    /// @param callbackGas Maximum gas to be spent when reporting the data request result.
+    function estimateBaseFeeWithCallback(uint256 evmGasPrice, uint24 callbackGas) external view returns (uint256);
 
     /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
     /// @notice data query in order to avoid getting provable "too low incentives" results from
@@ -27,7 +27,7 @@ interface IWitOracle {
     /// @param evmGasPrice Tentative EVM gas price at the moment the query result is ready.
     /// @param evmWitPrice  Tentative nanoWit price in Wei at the moment the query is solved on the Wit/oracle blockchain.
     /// @param querySLA The query SLA data security parameters as required for the Wit/oracle blockchain. 
-    function estimateExtraFee(uint256 evmGasPrice, uint256 evmWitPrice, Witnet.RadonSLA calldata querySLA) external view returns (uint256);
+    function estimateExtraFee(uint256 evmGasPrice, uint256 evmWitPrice, Witnet.QuerySLA calldata querySLA) external view returns (uint256);
     
     // /// @notice Returns the address of the WitOracleRequestFactory appliance capable of building compliant data request
     // /// @notice templates verified into the same WitOracleRadonRegistry instance returned by registry().
@@ -38,21 +38,19 @@ interface IWitOracle {
     /// @dev Fails if the query was not in 'Reported' status, or called from an address different to
     /// @dev the one that actually posted the given request.
     /// @param queryId The unique query identifier.
-    function fetchQueryResponse(uint256 queryId) external returns (Witnet.QueryResponse memory);
+    function fetchQueryResponse(Witnet.QueryId queryId) external returns (Witnet.QueryResponse memory);
    
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
-    function getQuery(uint256 queryId) external view returns (Witnet.Query memory);
+    function getQuery(Witnet.QueryId queryId) external view returns (Witnet.Query memory);
 
     /// @notice Gets the current EVM reward the report can claim, if not done yet.
-    function getQueryEvmReward(uint256 queryId) external view returns (uint256);
+    function getQueryEvmReward(Witnet.QueryId) external view returns (Witnet.QueryReward);
 
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
-    /// @param queryId The unique query identifier.
-    function getQueryRequest(uint256 queryId) external view returns (Witnet.QueryRequest memory);
+    function getQueryRequest(Witnet.QueryId) external view returns (Witnet.QueryRequest memory);
 
     /// @notice Retrieves the whole `Witnet.QueryResponse` record referred to a previously posted Witnet Data Request.
-    /// @param queryId The unique query identifier.
-    function getQueryResponse(uint256 queryId) external view returns (Witnet.QueryResponse memory);
+    function getQueryResponse(Witnet.QueryId) external view returns (Witnet.QueryResponse memory);
 
     /// @notice Returns query's result current status from a requester's point of view:
     /// @notice   - 0 => Void: the query is either non-existent or deleted;
@@ -61,27 +59,24 @@ interface IWitOracle {
     /// @notice   - 3 => Error: the query response was finalized, and contains a result with errors.
     /// @notice   - 4 => Finalizing: some result to the query has been reported, but cannot yet be considered finalized.
     /// @notice   - 5 => Delivered: at least one response, either successful or with errors, was delivered to the requesting contract.
-    /// @param queryId The unique query identifier.
-    function getQueryResponseStatus(uint256 queryId) external view returns (Witnet.QueryResponseStatus);
-    function getQueryResponseStatusTag(uint256 queryId) external view returns (string memory);
+    function getQueryResponseStatus(Witnet.QueryId) external view returns (Witnet.QueryResponseStatus);
+    function getQueryResponseStatusTag(Witnet.QueryId) external view returns (string memory);
 
     /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
-    /// @param queryId The unique query identifier.
-    function getQueryResultCborBytes(uint256 queryId) external view returns (bytes memory);
+    function getQueryResultCborBytes(Witnet.QueryId) external view returns (bytes memory);
 
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
-    /// @param queryId The unique query identifier.
-    function getQueryResultError(uint256 queryId) external view returns (Witnet.ResultError memory);
+    function getQueryResultError(Witnet.QueryId) external view returns (Witnet.ResultError memory);
 
     /// @notice Gets current status of given query.
-    function getQueryStatus(uint256 queryId) external view returns (Witnet.QueryStatus);
-    function getQueryStatusTag(uint256 queryId) external view returns (string memory);
+    function getQueryStatus(Witnet.QueryId) external view returns (Witnet.QueryStatus);
+    function getQueryStatusTag(Witnet.QueryId) external view returns (string memory);
     
     /// @notice Get current status of all given query ids.
-    function getQueryStatusBatch(uint256[] calldata queryIds) external view returns (Witnet.QueryStatus[] memory);
+    function getQueryStatusBatch(Witnet.QueryId[] calldata) external view returns (Witnet.QueryStatus[] memory);
 
     /// @notice Returns next query id to be generated by the Witnet Request Board.
-    function getNextQueryId() external view returns (uint256);
+    function getNextQueryId() external view returns (Witnet.QueryId);
 
     /// @notice Requests the execution of the given Witnet Data Request, in expectation that it will be relayed and 
     /// @notice solved by the Witnet blockchain. A reward amount is escrowed by the Witnet Request Board that will be 
@@ -157,8 +152,11 @@ interface IWitOracle {
     /// @notice calling postRequest(bytes32,..) methods.
     function registry() external view returns (WitOracleRadonRegistry);
 
-    /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
-    /// @param queryId The unique query identifier.
-    function upgradeQueryEvmReward(uint256 queryId) external payable;
+    /// @notice Enables data requesters to settle the actual validators in the Wit/oracle
+    /// @notice sidechain that will be entitled to solve data requests requiring to
+    /// @notice support some given `Wit2.Capability`.
+    function settleMyOwnCapableCommittee(Witnet.QueryCapability, Witnet.QueryCapabilityMember[] calldata) external;
 
+    /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
+    function upgradeQueryEvmReward(Witnet.QueryId) external payable;
 }

@@ -58,12 +58,12 @@ contract WitOracleTrustableReef
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
-    /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256, uint24 _callbackGasLimit)
+    /// @param _callbackGas Maximum gas to be spent when reporting the data request result.
+    function estimateBaseFeeWithCallback(uint256, uint24 _callbackGas)
         public view
         virtual override
         returns (uint256)
     {
-        return WitOracleBase.estimateBaseFeeWithCallback(1, _callbackGasLimit);
+        return WitOracleBase.estimateBaseFeeWithCallback(1, _callbackGas);
     }
 }

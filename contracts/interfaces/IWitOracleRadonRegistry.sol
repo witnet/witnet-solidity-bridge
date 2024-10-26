@@ -13,14 +13,14 @@ interface IWitOracleRadonRegistry {
     /// made out of the given Radon Request and Radon SLA security parameters. 
     function bytecodeOf(
             bytes32 radHash, 
-            Witnet.RadonSLA calldata sla
+            Witnet.QuerySLA calldata sla
         ) external view returns (bytes memory);
     
     /// Returns the Witnet-compliant DRO bytecode for some data request object 
     /// made out of the given RAD bytecode and Radon SLA security parameters. 
     function bytecodeOf(
             bytes calldata radBytecode, 
-            Witnet.RadonSLA calldata sla
+            Witnet.QuerySLA calldata sla
         ) external view returns (bytes memory);
     
     /// Returns the hash of the given Witnet-compliant bytecode. Returned value

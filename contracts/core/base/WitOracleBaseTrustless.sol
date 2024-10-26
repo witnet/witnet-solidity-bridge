@@ -142,7 +142,7 @@ abstract contract WitOracleBaseTrustless
     // ================================================================================================================
     // --- Overrides IWitOracle (trustlessly) -------------------------------------------------------------------------
 
-    function fetchQueryResponse(uint256 _queryId)
+    function fetchQueryResponse(Witnet.QueryId _queryId)
         virtual override
         external
         returns (Witnet.QueryResponse memory)
@@ -165,7 +165,7 @@ abstract contract WitOracleBaseTrustless
         }
     }
 
-    function getQueryStatus(uint256 _queryId)
+    function getQueryStatus(Witnet.QueryId _queryId)
         virtual override
         public view
         returns (Witnet.QueryStatus)
@@ -179,7 +179,7 @@ abstract contract WitOracleBaseTrustless
     /// @notice   - 2 => Ready: the query has been succesfully solved;
     /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
     /// @param _queryId The unique query identifier.
-    function getQueryResponseStatus(uint256 _queryId)
+    function getQueryResponseStatus(Witnet.QueryId _queryId)
         virtual override
         public view
         returns (Witnet.QueryResponseStatus)
@@ -274,7 +274,7 @@ abstract contract WitOracleBaseTrustless
     // ================================================================================================================
     // --- IWitOracleReporterTrustless --------------------------------------------------------------------------------
 
-    function claimQueryReward(uint256 _queryId)
+    function claimQueryReward(Witnet.QueryId _queryId)
         virtual override external
         returns (uint256)
     {
@@ -296,7 +296,7 @@ abstract contract WitOracleBaseTrustless
         }
     }
 
-    function claimQueryRewardBatch(uint256[] calldata _queryIds)
+    function claimQueryRewardBatch(Witnet.QueryId[] calldata _queryIds)
         virtual override external
         returns (uint256 _evmTotalReward)
     {
@@ -348,7 +348,7 @@ abstract contract WitOracleBaseTrustless
         }
     }
 
-    function disputeQueryResponse(uint256 _queryId) 
+    function disputeQueryResponse(Witnet.QueryId _queryId) 
         virtual override external
         returns (uint256)
     {
@@ -367,7 +367,7 @@ abstract contract WitOracleBaseTrustless
         }
     }
 
-    function reportQueryResponse(Witnet.QueryResponseReport calldata _responseReport)
+    function reportQueryResponse(Witnet.DataPullReport calldata _responseReport)
         virtual override public 
         returns (uint256)
     {
@@ -387,12 +387,12 @@ abstract contract WitOracleBaseTrustless
         }
     }
     
-    function reportQueryResponseBatch(Witnet.QueryResponseReport[] calldata _responseReports)
+    function reportQueryResponseBatch(Witnet.DataPullReport[] calldata _responseReports)
         virtual override external 
         returns (uint256 _evmTotalReward)
     {
         for (uint _ix = 0; _ix < _responseReports.length; _ix ++) {
-            Witnet.QueryResponseReport calldata _responseReport = _responseReports[_ix];
+            Witnet.DataPullReport calldata _responseReport = _responseReports[_ix];
             try WitOracleDataLib.reportQueryResponseTrustlessly(
                 _responseReport,
                 QUERY_AWAITING_BLOCKS,
@@ -418,7 +418,7 @@ abstract contract WitOracleBaseTrustless
 
     function rollupQueryResponseProof(
             Witnet.FastForward[] calldata _witOracleRollup, 
-            Witnet.QueryResponseReport calldata _responseReport,
+            Witnet.DataPullReport calldata _responseReport,
             bytes32[] calldata _queryResponseReportMerkleProof
         ) 
         virtual override external
@@ -440,32 +440,6 @@ abstract contract WitOracleBaseTrustless
             _revert(_reason);
         }
         catch (bytes memory) {
-            _revertWitOracleDataLibUnhandledException();
-        }
-    }
-
-    function rollupQueryResultProof(
-            Witnet.FastForward[] calldata _witOracleRollup,
-            Witnet.QueryReport calldata _queryReport,
-            bytes32[] calldata _queryReportMerkleProof
-        )
-        virtual override external
-        returns (Witnet.Result memory)
-    {
-        try WitOracleDataLib.rollupQueryResultProof(
-            _witOracleRollup,
-            _queryReport,
-            _queryReportMerkleProof
-        
-        ) returns (
-            Witnet.Result memory _queryResult
-        ) {
-            return _queryResult;
-        
-        } catch Error(string memory _reason) {
-            _revert(_reason);
-        
-        } catch (bytes memory) {
             _revertWitOracleDataLibUnhandledException();
         }
     }

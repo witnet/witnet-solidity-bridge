@@ -27,6 +27,10 @@ library Witnet {
     uint32  constant internal WIT_2_SECS_PER_EPOCH = 20;    // TBD
     uint32  constant internal WIT_2_FAST_FORWARD_COMMITTEE_SIZE = 64; // TBD
 
+    function channel(address wrb) internal view returns (bytes4) {
+        return bytes4(keccak256(abi.encode(address(wrb), block.chainid)));
+    }
+
     struct Beacon {
         uint32  index;
         uint32  prevIndex;
@@ -35,56 +39,66 @@ library Witnet {
         bytes16 droTalliesMerkleRoot;
         uint256[4] nextCommitteeAggPubkey;
     }
-    
+
+    struct DataPullReport {
+        QueryId queryId;
+        QueryHash queryHash;             // KECCAK256(channel | blockhash(block.number - 1) | ...)
+        bytes   witDrRelayerSignature;   // ECDSA.signature(queryHash)
+        uint32  witDrResultEpoch;
+        bytes   witDrResultCborBytes;
+        bytes32 witDrTxHash;
+    }
     struct FastForward {
         Beacon beacon;
         uint256[2] committeeAggSignature;
         uint256[4][] committeeMissingPubkeys;
     }
 
+    type QueryCapability is bytes20;
+    type QueryCapabilityMember is bytes4;
+    type QueryBlock is uint64;
+    type QueryHash is bytes15;
+    type QueryId is uint256;
+    type QueryReward is uint72;
 
     /// Struct containing both request and response data related to every query posted to the Witnet Request Board
     struct Query {
-        QueryRequest request;
+        QueryRequest  request;
         QueryResponse response;
-        uint256 block;
+        QuerySLA    slaParams;        // Minimum Service-Level parameters to be committed by the Witnet blockchain.
+        QueryBlock  checkpoint;
+        QueryHash   hash;             // Unique query hash determined by payload, WRB instance, chain id and EVM's previous block hash.
+        QueryReward reward;           // EVM amount in wei eventually to be paid to the legit result reporter.
+    }
+
+    /// Possible status of a Witnet query.
+    enum QueryStatus {
+        Unknown,
+        Posted,
+        Reported,
+        Finalized,
+        Delayed,
+        Expired,
+        Disputed
+    }
+
     }
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct QueryRequest {
         address  requester;              // EVM address from which the request was posted.
-        uint24   gasCallback;            // Max callback gas limit upon response, if a callback is required.
-        uint72   evmReward;              // EVM amount in wei eventually to be paid to the legit result reporter.
+        uint24   callbackGas; uint72 _0; // Max callback gas limit upon response, if a callback is required.
         bytes    radonBytecode;          // Optional: Witnet Data Request bytecode to be solved by the Witnet blockchain.
         bytes32  radonRadHash;           // Optional: Previously verified hash of the Witnet Data Request to be solved.
-        RadonSLA radonSLA;               // Minimum Service-Level parameters to be committed by the Witnet blockchain.
     }
 
     /// QueryResponse metadata and result as resolved by the Witnet blockchain.
     struct QueryResponse {
-        address reporter;                // EVM address from which the Data Request result was reported.
-        uint64  finality;                // EVM block number at which the reported data will be considered to be finalized.
+        address reporter; uint64 _0;     // EVM address from which the Data Request result was reported.
         uint32  resultTimestamp;         // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
         bytes32 resultDrTxHash;          // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
         bytes   resultCborBytes;         // CBOR-encode result to the request, as resolved in the Witnet blockchain.
         address disputer;
-    }
-
-    struct QueryResponseReport {
-        uint256 queryId;
-        bytes32 queryHash;               // KECCAK256(channel | queryId | blockhash(query.block) | ...)
-        bytes   witDrRelayerSignature;   // ECDSA.signature(queryHash)
-        bytes32 witDrTxHash;
-        uint32  witDrResultEpoch;
-        bytes   witDrResultCborBytes;
-    }
-
-    struct QueryReport {
-        bytes32  witDrRadHash;
-        RadonSLA witDrSLA;
-        bytes32  witDrTxHash;
-        uint32   witDrResultEpoch;
-        bytes    witDrResultCborBytes;
     }
 
     /// QueryResponse status from a requester's point of view.
@@ -98,15 +112,13 @@ library Witnet {
         Expired
     }
 
-    /// Possible status of a Witnet query.
-    enum QueryStatus {
-        Unknown,
-        Posted,
-        Reported,
-        Finalized,
-        Delayed,
-        Expired,
-        Disputed
+    /// Structure containing all possible SLA security parameters of Wit/2.1 Data Requests
+    struct QuerySLA {
+        uint16  witResultMaxSize;          // max size permitted to whatever query result may come from the wit/oracle blockchain.
+        uint16  witCommitteeCapacity;      // max number of eligibile witnesses in the wit/oracle blockchain for solving some query.
+        uint64  witCommitteeUnitaryReward; // unitary reward in nanowits for true witnesses and validators in the wit/oracle blockchain.
+        QueryCapability witCapability;     // optional: identifies some pre-established capability-compliant commitee required for solving the query.
+    }
     }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
@@ -401,18 +413,8 @@ library Witnet {
         /* 4 */ HttpHead
     }
 
-    struct RadonSLA {
-        /// Number of witnessing nodes in the Wit/oracle blockchain that will contribute to solve some data request.
-        uint8  witNumWitnesses;
-        
-        /// Reward in $nanoWit ultimately paid to every earnest node in the Wit/oracle blockchain contributing to solve some data request.
-        uint64 witUnitaryReward; 
+    /// Structure containing all possible SLA security parameters of a Witnet-compliant Data Request.
 
-        /// Maximum size accepted for the CBOR-encoded buffer containing successfull result values.
-        uint16 maxTallyResultSize; 
-    }
-
-    /// Structure containing the SLA security parameters of a Witnet-compliant Data Request.
     struct RadonSLAv1 {
         uint8 numWitnesses;
         uint8 minConsensusPercentage;
@@ -467,10 +469,40 @@ library Witnet {
 
 
     /// ===============================================================================================================
-    /// --- Query*Report helper methods ------------------------------------------------------------------------
+    /// --- Query* helper methods -------------------------------------------------------------------------------------
 
-    function queryRelayer(QueryResponseReport calldata self) internal pure returns (address) {
-        return recoverAddr(self.witDrRelayerSignature, self.queryHash);
+    function hashify(QueryHash hash) internal pure returns (bytes32) {
+        return keccak256(abi.encode(QueryHash.unwrap(hash)));
+    }
+
+    function hashify(QueryId _queryId, bytes32 _radHash, bytes32 _slaHash) internal view returns (Witnet.QueryHash) {
+        return Witnet.QueryHash.wrap(bytes15(
+            keccak256(abi.encode(
+                channel(address(this)), 
+                blockhash(block.number - 1),
+                _queryId, _radHash, _slaHash
+            ))
+        ));
+    }
+
+    function hashify(QuerySLA memory querySLA) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(
+            querySLA.witResultMaxSize,
+            querySLA.witCommitteeCapacity,
+            querySLA.witCommitteeUnitaryReward,
+            querySLA.witCapability
+        ));
+    }
+
+
+    /// ===============================================================================================================
+    /// --- *Report helper methods ------------------------------------------------------------------------------------
+
+    function queryRelayer(DataPullReport calldata self) internal pure returns (address) {
+        return recoverAddr(
+            self.witDrRelayerSignature, 
+            hashify(self.queryHash)
+        );
     }
 
     function tallyHash(QueryResponseReport calldata self) internal pure returns (bytes32) {
@@ -686,41 +718,40 @@ library Witnet {
         );
     }
 
-    
-    /// ===============================================================================================================
-    /// --- 'RadonSLA' helper methods --------------------------------------------------------------------------
 
-    function equalOrGreaterThan(RadonSLA memory a, RadonSLA memory b) 
-        internal pure returns (bool)
-    {
+    /// ========================================================================================================
+    /// --- 'QuerySLA' helper methods --------------------------------------------------------------------------
+
+    function equalOrGreaterThan(QuerySLA calldata self, QuerySLA storage stored) internal view returns (bool) {
         return (
-            a.witNumWitnesses >= b.witNumWitnesses
-                && a.witUnitaryReward >= b.witUnitaryReward
-                && a.maxTallyResultSize <= b.maxTallyResultSize
-        );
-    }
-     
-    function isValid(RadonSLA memory sla) internal pure returns (bool) {
-        return (
-            sla.witUnitaryReward > 0 
-                && sla.witNumWitnesses > 0 && sla.witNumWitnesses <= 127
-                && sla.maxTallyResultSize > 0
+            QueryCapability.unwrap(self.witCapability) == QueryCapability.unwrap(stored.witCapability)
+                && self.witCommitteeCapacity >= stored.witCommitteeCapacity
+                && self.witCommitteeUnitaryReward >= stored.witCommitteeUnitaryReward 
+                && self.witResultMaxSize <= stored.witResultMaxSize
         );
     }
 
-    function toV1(RadonSLA memory self) internal pure returns (RadonSLAv1 memory) {
+    function isValid(QuerySLA memory self) internal pure returns (bool) {
+        return (
+            self.witResultMaxSize > 0
+                && self.witCommitteeUnitaryReward > 0
+                && self.witCommitteeCapacity > 0
+                && (QueryCapability.unwrap(self.witCapability) != 0 || self.witCommitteeCapacity <= 127)
+        );
+    }
+
+    function toV1(QuerySLA calldata self) internal pure returns (RadonSLAv1 memory) {
         return RadonSLAv1({
-            numWitnesses: self.witNumWitnesses,
-            minConsensusPercentage: 51,
-            witnessReward: self.witUnitaryReward,
-            witnessCollateral: self.witUnitaryReward * 100,
-            minerCommitRevealFee: self.witUnitaryReward / self.witNumWitnesses
+            numWitnesses: uint8(self.witCommitteeCapacity),
+            minConsensusPercentage: 66,
+            witnessReward: self.witCommitteeUnitaryReward,
+            witnessCollateral: self.witCommitteeUnitaryReward * 100,
+            minerCommitRevealFee: self.witCommitteeUnitaryReward / self.witCommitteeCapacity
         });
     }
 
-    /// Sum of all rewards in $nanoWit to be paid to nodes in the Wit/oracle blockchain that contribute to solve some data query.
-    function witTotalReward(RadonSLA storage self) internal view returns (uint64) {
-        return self.witUnitaryReward / (self.witNumWitnesses + 3);
+    function witTotalReward(QuerySLA storage self) internal view returns (uint64) {
+        return self.witCommitteeUnitaryReward / (self.witCommitteeCapacity + 3);
     }
 
 

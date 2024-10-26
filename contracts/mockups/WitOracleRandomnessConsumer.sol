@@ -12,21 +12,21 @@ abstract contract WitOracleRandomnessConsumer
 {
     using Witnet for bytes;
     using Witnet for bytes32;
-    using Witnet for Witnet.RadonSLA;
+    using Witnet for Witnet.QuerySLA;
     using WitnetCBOR for WitnetCBOR.CBOR;
 
     bytes32 internal immutable __witOracleRandomnessRadHash;
 
     /// @param _witOracle Address of the WitOracle contract.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
-    /// @param _callbackGasLimit Maximum gas to be spent by the IWitOracleConsumer's callback methods.
+    /// @param _callbackGas Maximum gas to be spent by the IWitOracleConsumer's callback methods.
     constructor(
             WitOracle _witOracle, 
             uint16 _baseFeeOverheadPercentage,
-            uint24 _callbackGasLimit
+            uint24 _callbackGas
         )
         UsingWitOracle(_witOracle)
-        WitOracleConsumer(_callbackGasLimit)
+        WitOracleConsumer(_callbackGas)
     {
         // On-chain building of the Witnet Randomness Request:
         {
@@ -53,7 +53,7 @@ abstract contract WitOracleRandomnessConsumer
             );
         }
         __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
-        __witOracleDefaultQuerySLA.maxTallyResultSize = 34;
+        __witOracleDefaultQuerySLA.witResultMaxSize = 34;
     }
 
     /// @dev Pure P-RNG generator returning uniformly distributed `_range` values based on
@@ -85,7 +85,7 @@ abstract contract WitOracleRandomnessConsumer
     function __witOracleRandomize(
             uint256 _queryEvmReward
         )
-        virtual internal returns (uint256)
+        virtual internal returns (Witnet.QueryId)
     {
         return __witOracleRandomize(
             _queryEvmReward, 
@@ -98,16 +98,19 @@ abstract contract WitOracleRandomnessConsumer
     /// @dev on the given `_querySLA` data security parameters.
     function __witOracleRandomize(
             uint256 _queryEvmReward,
-            Witnet.RadonSLA memory _querySLA
+            Witnet.QuerySLA memory _querySLA
         )
-        virtual internal returns (uint256)
+        virtual internal returns (Witnet.QueryId)
     {
-        return __witOracle.postQueryWithCallback{
+        return __witOracle.pullData{
             value: _queryEvmReward
         }(
             __witOracleRandomnessRadHash,
             _querySLA,
-            __witOracleCallbackGasLimit
+            Witnet.QueryCallback({
+                consumer: address(this),
+                gasLimit: __witOracleCallbackGasLimit
+            })
         );
     }
 }

@@ -4,30 +4,36 @@ pragma solidity >=0.7.0 <0.9.0;
 import "../libs/Witnet.sol";
 
 interface IWitOracleEvents {
+
+    event WitOracleCommittee(
+        address indexed evmSubscriber,
+        Witnet.QueryCapability indexed witCapability,
+        Witnet.QueryCapabilityMember[] witCapabilityMembers
+    );
     
     /// Emitted every time a new query containing some verified data request is posted to the WitOracle.
     event WitOracleQuery(
-        address evmRequester,
+        address requester,
         uint256 evmGasPrice,
         uint256 evmReward,
         uint256 queryId, 
         bytes32 queryRadHash,
-        Witnet.RadonSLA querySLA
+        Witnet.QuerySLA querySLA
     );
 
     /// Emitted every time a new query containing some unverified data request bytecode is posted to the WRB.
     event WitOracleQuery(
-        address evmRequester,
+        address requester,
         uint256 evmGasPrice,
         uint256 evmReward,
         uint256 queryId,
         bytes   queryBytecode,
-        Witnet.RadonSLA querySLA
+        Witnet.QuerySLA querySLA
     );
 
     event WitOracleQueryResponseDispute(
         uint256 queryId,
-        address evmDisputer
+        address evmResponseDisputer
     );
 
     /// Emitted when the reward of some not-yet reported query gets upgraded.

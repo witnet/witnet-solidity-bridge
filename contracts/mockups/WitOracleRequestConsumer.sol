@@ -14,14 +14,14 @@ abstract contract WitOracleRequestConsumer
 
     /// @param _witOracleRequest Address of the WitOracleRequest contract containing the actual data request.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
-    /// @param _callbackGasLimit Maximum gas to be spent by the IWitOracleConsumer's callback methods.
+    /// @param _callbackGas Maximum gas to be spent by the IWitOracleConsumer's callback methods.
     constructor(
             WitOracleRequest _witOracleRequest, 
             uint16 _baseFeeOverheadPercentage,
-            uint24 _callbackGasLimit
+            uint24 _callbackGas
         )
         UsingWitOracleRequest(_witOracleRequest, _baseFeeOverheadPercentage)
-        WitOracleConsumer(_callbackGasLimit)
+        WitOracleConsumer(_callbackGas)
     {}
 
     /// @dev Estimate the minimum reward required for posting a data request (based on given gas price and 
@@ -41,7 +41,7 @@ abstract contract WitOracleRequestConsumer
     function __witOraclePostQuery(
             uint256 _queryEvmReward
         )
-        virtual override internal returns (uint256)
+        virtual override internal returns (Witnet.QueryId)
     {
         return __witOraclePostQuery(
             _queryEvmReward,
@@ -55,16 +55,19 @@ abstract contract WitOracleRequestConsumer
     /// @param _querySLA The required SLA data security params for the Wit/oracle blockchain to accomplish.
     function __witOraclePostQuery(
             uint256 _queryEvmReward, 
-            Witnet.RadonSLA memory _querySLA
+            Witnet.QuerySLA memory _querySLA
         )
-        virtual override internal returns (uint256)
+        virtual override internal returns (Witnet.QueryId)
     {
-        return __witOracle.postQueryWithCallback{
+        return __witOracle.pullData{
             value: _queryEvmReward
         }(
             __witOracleRequestRadHash,
             _querySLA,
-            __witOracleCallbackGasLimit
+            Witnet.QueryCallback({
+                consumer: address(this),
+                gasLimit: __witOracleCallbackGasLimit
+            })
         );
     }
 }

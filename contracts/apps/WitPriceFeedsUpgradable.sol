@@ -28,7 +28,7 @@ contract WitPriceFeedsUpgradable
 {
     using Witnet for bytes;
     using Witnet for Witnet.QueryResponse;
-    using Witnet for Witnet.RadonSLA;
+    using Witnet for Witnet.QuerySLA;
     using Witnet for Witnet.Result;
 
     function class() virtual override public view returns (string memory) {
@@ -38,7 +38,7 @@ contract WitPriceFeedsUpgradable
     WitOracle immutable public override witOracle;
     WitOracleRadonRegistry immutable internal __registry;
 
-    Witnet.RadonSLA private __defaultRadonSLA;
+    Witnet.QuerySLA private __defaultRadonSLA;
     uint16 private __baseFeeOverheadPercentage;
     
     constructor(
@@ -103,24 +103,25 @@ contract WitPriceFeedsUpgradable
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     function __initializeUpgradableData(bytes memory _initData) virtual override internal {
         if (__proxiable().codehash == bytes32(0)) {
-            __defaultRadonSLA = Witnet.RadonSLA({
-                witNumWitnesses: 10,
-                witUnitaryReward: 2 * 10 ** 8,
-                maxTallyResultSize: 16
+            __defaultRadonSLA = Witnet.QuerySLA({
+                witCommitteeCapacity: 10,
+                witCommitteeUnitaryReward: 2 * 10 ** 8,
+                witResultMaxSize: 16,
+                witCapability: Witnet.QueryCapability.wrap(0)
             });
             // settle default base fee overhead percentage
             __baseFeeOverheadPercentage = 10;
         } else {
             // otherwise, store beacon read from _initData, if any
             if (_initData.length > 0) {
-                (uint16 _baseFeeOverheadPercentage, Witnet.RadonSLA memory _defaultRadonSLA) = abi.decode(
-                    _initData, (uint16, Witnet.RadonSLA)
+                (uint16 _baseFeeOverheadPercentage, Witnet.QuerySLA memory _defaultRadonSLA) = abi.decode(
+                    _initData, (uint16, Witnet.QuerySLA)
                 );
                 __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
                 __defaultRadonSLA = _defaultRadonSLA;
-            } else if (__defaultRadonSLA.maxTallyResultSize < 16) {
+            } else if (__defaultRadonSLA.witResultMaxSize < 16) {
                 // possibly, an upgrade from a previous branch took place:
-                __defaultRadonSLA.maxTallyResultSize = 16;
+                __defaultRadonSLA.witResultMaxSize = 16;
             }
         }
     }
@@ -212,7 +213,7 @@ contract WitPriceFeedsUpgradable
     function defaultRadonSLA()
         override
         public view
-        returns (Witnet.RadonSLA memory)
+        returns (Witnet.QuerySLA memory)
     {
         return __defaultRadonSLA;
     }
@@ -233,7 +234,7 @@ contract WitPriceFeedsUpgradable
 
     function lastValidQueryId(bytes4 feedId)
         override public view
-        returns (uint256)
+        returns (Witnet.QueryId)
     {
         return _lastValidQueryId(feedId);
     }
@@ -247,7 +248,7 @@ contract WitPriceFeedsUpgradable
 
     function latestUpdateQueryId(bytes4 feedId)
         override public view
-        returns (uint256)
+        returns (Witnet.QueryId)
     {
         return __records_(feedId).latestUpdateQueryId;
     }
@@ -337,7 +338,7 @@ contract WitPriceFeedsUpgradable
         return __requestUpdate(feedId, __defaultRadonSLA);
     }
     
-    function requestUpdate(bytes4 feedId, Witnet.RadonSLA memory updateSLA)
+    function requestUpdate(bytes4 feedId, Witnet.QuerySLA calldata updateSLA)
         public payable
         virtual override
         returns (uint256 _usedFunds)
@@ -349,17 +350,18 @@ contract WitPriceFeedsUpgradable
         return __requestUpdate(feedId, updateSLA);
     }
 
-    function requestUpdate(bytes4 feedId, IWitFeedsLegacy.RadonSLA memory updateSLA)
+    function requestUpdate(bytes4 feedId, IWitFeedsLegacy.RadonSLA calldata updateSLA)
         external payable
         virtual override
         returns (uint256)
     {
-        return requestUpdate(
-            feedId,
-            Witnet.RadonSLA({
-                witNumWitnesses: updateSLA.witNumWitnesses,
-                witUnitaryReward: updateSLA.witUnitaryReward,
-                maxTallyResultSize: __defaultRadonSLA.maxTallyResultSize
+        return __requestUpdate(
+            feedId, 
+            Witnet.QuerySLA({
+                witCommitteeCapacity: updateSLA.witCommitteeCapacity,
+                witCommitteeUnitaryReward: updateSLA.witCommitteeUnitaryReward,
+                witResultMaxSize: __defaultRadonSLA.witResultMaxSize,
+                witCapability: Witnet.QueryCapability.wrap(0)
             })
         );
     }
@@ -452,7 +454,7 @@ contract WitPriceFeedsUpgradable
         __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function settleDefaultRadonSLA(Witnet.RadonSLA calldata defaultSLA)
+    function settleDefaultRadonSLA(Witnet.QuerySLA calldata defaultSLA)
         override public
         onlyOwner
     {
@@ -598,8 +600,8 @@ contract WitPriceFeedsUpgradable
         public view
         returns (IWitPriceFeedsSolver.Price memory)
     {
-        uint _queryId = _lastValidQueryId(feedId);
-        if (_queryId > 0) {
+        Witnet.QueryId _queryId = _lastValidQueryId(feedId);
+        if (Witnet.QueryId.unwrap(_queryId) > 0) {
             Witnet.QueryResponse memory _lastValidQueryResponse = lastValidQueryResponse(feedId);
             Witnet.Result memory _latestResult = _lastValidQueryResponse.resultCborBytes.toWitnetResult();
             return IWitPriceFeedsSolver.Price({
@@ -701,11 +703,11 @@ contract WitPriceFeedsUpgradable
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
 
-    function _checkQueryResponseStatus(uint _queryId)
+    function _checkQueryResponseStatus(Witnet.QueryId _queryId)
         internal view
         returns (Witnet.QueryResponseStatus)
     {
-        if (_queryId > 0) {
+        if (Witnet.QueryId.unwrap(_queryId) > 0) {
             return witOracle.getQueryResponseStatus(_queryId);
         } else {
             return Witnet.QueryResponseStatus.Ready;
@@ -722,11 +724,11 @@ contract WitPriceFeedsUpgradable
 
     function _lastValidQueryId(bytes4 feedId)
         virtual internal view
-        returns (uint256)
+        returns (Witnet.QueryId)
     {
-        uint _latestUpdateQueryId = latestUpdateQueryId(feedId);
+        Witnet.QueryId _latestUpdateQueryId = latestUpdateQueryId(feedId);
         if (
-            _latestUpdateQueryId > 0
+            Witnet.QueryId.unwrap(_latestUpdateQueryId) > 0
                 && witOracle.getQueryResponseStatus(_latestUpdateQueryId) == Witnet.QueryResponseStatus.Ready
         ) {
             return _latestUpdateQueryId;
@@ -745,7 +747,7 @@ contract WitPriceFeedsUpgradable
         }
     }
 
-    function __requestUpdate(bytes4[] memory _deps, Witnet.RadonSLA memory sla)
+    function __requestUpdate(bytes4[] memory _deps, Witnet.QuerySLA memory sla)
         virtual internal
         returns (uint256 _usedFunds)
     {
@@ -755,7 +757,7 @@ contract WitPriceFeedsUpgradable
         }
     }
 
-    function __requestUpdate(bytes4 feedId, Witnet.RadonSLA memory querySLA)
+    function __requestUpdate(bytes4 feedId, Witnet.QuerySLA memory querySLA)
         virtual internal
         returns (uint256 _usedFunds)
     {
@@ -764,13 +766,13 @@ contract WitPriceFeedsUpgradable
         if (__feed.radHash != 0) {
             _usedFunds = estimateUpdateRequestFee(tx.gasprice);
             _require(msg.value >= _usedFunds, "insufficient reward");
-            uint _latestId = __feed.latestUpdateQueryId;
+            Witnet.QueryId _latestId = __feed.latestUpdateQueryId;
             Witnet.QueryResponseStatus _latestStatus = _checkQueryResponseStatus(_latestId);
             if (_latestStatus == Witnet.QueryResponseStatus.Awaiting) {
                 // latest update is still pending, so just increase the reward
                 // accordingly to current tx gasprice:
-                Witnet.QueryRequest memory _request = witOracle.getQueryRequest(_latestId);
-                int _deltaReward = int(int72(_request.evmReward)) - int(_usedFunds);
+                uint72 _evmReward = Witnet.QueryReward.unwrap(witOracle.getQueryEvmReward(_latestId));
+                int _deltaReward = int(int72(_evmReward)) - int(_usedFunds);
                 if (_deltaReward > 0) {
                     _usedFunds = uint(_deltaReward);
                     witOracle.upgradeQueryEvmReward{value: _usedFunds}(_latestId);
@@ -781,7 +783,7 @@ contract WitPriceFeedsUpgradable
                 // Check if latest update ended successfully:
                 if (_latestStatus == Witnet.QueryResponseStatus.Ready) {
                     // If so, remove previous last valid query from the WRB:
-                    if (__feed.lastValidQueryId > 0) {
+                    if (Witnet.QueryId.unwrap(__feed.lastValidQueryId) > 0) {
                         witOracle.fetchQueryResponse(__feed.lastValidQueryId);
                     }
                     __feed.lastValidQueryId = _latestId;
@@ -791,7 +793,7 @@ contract WitPriceFeedsUpgradable
                     try witOracle.fetchQueryResponse(_latestId) {} catch {}
                 }
                 // Post update request to the WRB:
-                _latestId = witOracle.postQuery{value: _usedFunds}(
+                _latestId = witOracle.pullData{value: _usedFunds}(
                     __feed.radHash,
                     querySLA
                 );
@@ -802,7 +804,7 @@ contract WitPriceFeedsUpgradable
                     tx.origin, 
                     _msgSender(),
                     feedId,
-                    _latestId
+                    Witnet.QueryId.unwrap(_latestId)
                 );
             }            
         } else if (__feed.solver != address(0)) {

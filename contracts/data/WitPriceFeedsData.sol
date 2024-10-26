@@ -2,6 +2,8 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+import "../libs/Witnet.sol";
+
 /// @title WitFeeds data model.
 /// @author The Witnet Foundation.
 abstract contract WitPriceFeedsData {
@@ -20,8 +22,8 @@ abstract contract WitPriceFeedsData {
         string  caption;
         uint8   decimals;
         uint256 index;
-        uint256 lastValidQueryId;
-        uint256 latestUpdateQueryId;
+        Witnet.QueryId lastValidQueryId;
+        Witnet.QueryId latestUpdateQueryId;
         bytes32 radHash;
         address solver;         // logic contract address for reducing values on routed feeds.
         int256  solverReductor; // as to reduce resulting number of decimals on routed feeds.

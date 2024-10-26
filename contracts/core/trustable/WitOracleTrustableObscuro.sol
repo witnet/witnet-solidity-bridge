@@ -34,7 +34,7 @@ contract WitOracleTrustableObscuro
 
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
     /// @dev Fails if or if `msg.sender` is not the actual requester.
-    function getQuery(uint256 _queryId)
+    function getQuery(Witnet.QueryId _queryId)
         public view
         virtual override
         onlyRequester(_queryId)
@@ -46,7 +46,7 @@ contract WitOracleTrustableObscuro
     /// @notice Retrieves the whole `Witnet.QueryResponse` record referred to a previously posted Witnet Data Request.
     /// @dev Fails if the `_queryId` is not in 'Reported' status, or if `msg.sender` is not the actual requester.
     /// @param _queryId The unique query identifier
-    function getQueryResponse(uint256 _queryId)
+    function getQueryResponse(Witnet.QueryId _queryId)
         public view
         virtual override
         onlyRequester(_queryId)
@@ -57,7 +57,7 @@ contract WitOracleTrustableObscuro
 
     /// @notice Gets error code identifying some possible failure on the resolution of the given query.
     /// @param _queryId The unique query identifier.
-    function getQueryResultError(uint256 _queryId)
+    function getQueryResultError(Witnet.QueryId _queryId)
         public view
         virtual override
         onlyRequester(_queryId)

@@ -38,7 +38,7 @@ abstract contract UsingWitOracleRequest
     function __witOraclePostQuery(
             uint256 _queryEvmReward
         )
-        virtual internal returns (uint256)
+        virtual internal returns (Witnet.QueryId)
     {
         return __witOraclePostQuery(
             _queryEvmReward, 
@@ -52,11 +52,11 @@ abstract contract UsingWitOracleRequest
     /// @param _querySLA The required SLA data security params for the Wit/oracle blockchain to accomplish.
     function __witOraclePostQuery(
             uint256 _queryEvmReward,
-            Witnet.RadonSLA memory _querySLA
+            Witnet.QuerySLA memory _querySLA
         )
-        virtual internal returns (uint256)
+        virtual internal returns (Witnet.QueryId)
     {
-        return __witOracle.postQuery{
+        return __witOracle.pullData{
             value: _queryEvmReward
         }(
             __witOracleRequestRadHash,
