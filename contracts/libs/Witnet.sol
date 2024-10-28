@@ -9,9 +9,16 @@ library Witnet {
     using WitnetBuffer for WitnetBuffer.Buffer;
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
+
+    type BlockNumber is uint64;
     type ResultTimestamp is uint32;
     type TransactionHash is bytes32;
     
+    type QueryCapability is bytes20;
+    type QueryCapabilityMember is bytes4;
+    type QueryHash is bytes15;
+    type QueryId is uint256;
+    type QueryReward is uint72;
 
     uint32 constant internal  WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
     uint32 constant internal  WIT_1_SECS_PER_EPOCH = 45;
@@ -75,21 +82,14 @@ library Witnet {
         uint256[4][] committeeMissingPubkeys;
     }
 
-    type QueryCapability is bytes20;
-    type QueryCapabilityMember is bytes4;
-    type QueryBlock is uint64;
-    type QueryHash is bytes15;
-    type QueryId is uint256;
-    type QueryReward is uint72;
-
     /// Struct containing both request and response data related to every query posted to the Witnet Request Board
     struct Query {
         QueryRequest  request;
         QueryResponse response;
         QuerySLA    slaParams;        // Minimum Service-Level parameters to be committed by the Witnet blockchain.
-        QueryBlock  checkpoint;
         QueryHash   hash;             // Unique query hash determined by payload, WRB instance, chain id and EVM's previous block hash.
         QueryReward reward;           // EVM amount in wei eventually to be paid to the legit result reporter.
+        BlockNumber checkpoint;
     }
 
     /// Possible status of a Witnet query.
@@ -540,6 +540,30 @@ library Witnet {
         )));
     }
 
+    
+    /// =======================================================================
+    /// --- BlockNumber helper functions --------------------------------------
+
+    function egt(BlockNumber a, BlockNumber b) internal pure returns (bool) {
+        return BlockNumber.unwrap(a) >= BlockNumber.unwrap(b);
+    }
+
+    function elt(BlockNumber a, BlockNumber b) internal pure returns (bool) {
+        return BlockNumber.unwrap(a) <= BlockNumber.unwrap(b);
+    }
+
+    function gt(BlockNumber a, BlockNumber b) internal pure returns (bool) {
+        return BlockNumber.unwrap(a) > BlockNumber.unwrap(b);
+    }
+
+    function lt(BlockNumber a, BlockNumber b) internal pure returns (bool) {
+        return BlockNumber.unwrap(a) < BlockNumber.unwrap(b);
+    }
+
+    function isZero(BlockNumber b) internal pure returns (bool) {
+        return (BlockNumber.unwrap(b) == 0);
+    }
+
 
     /// =======================================================================
     /// --- FastForward helper functions -------------------------------
@@ -816,6 +840,13 @@ library Witnet {
                 || self == ResultStatus.BridgeOversizedTallyResult
         );
     }
+
+
+    /// ========================================================================================================
+    /// --- 'QueryId' helper methods ---------------------------------------------------------------------------
+
+    function isZero(QueryId a) internal pure returns (bool) {
+        return (QueryId.unwrap(a) == 0);
     }
 
 

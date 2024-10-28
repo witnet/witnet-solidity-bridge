@@ -455,7 +455,7 @@ abstract contract WitOracleBase
     {
         _queryId = Witnet.QueryId.wrap(++ __storage().nonce);
         Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
-        __query.checkpoint = Witnet.QueryBlock.wrap(uint64(block.number));
+        __query.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number));
         __query.hash = Witnet.hashify(
             _queryId, 
             _radonRadHash, 

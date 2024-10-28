@@ -12,6 +12,6 @@ interface IWitRandomnessEvents {
     event Randomizing(
             address evmOrigin,
             address evmSender,
-            uint256 witOracleQueryId
+            Witnet.QueryId witOracleQueryId
     );
 }

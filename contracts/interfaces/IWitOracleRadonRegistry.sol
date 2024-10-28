@@ -90,11 +90,11 @@ interface IWitOracleRadonRegistry {
             Witnet.RadonReducer calldata tally
         ) external returns (bytes32 radHash);
 
-        function verifyRadonRequest(
-                bytes32[] calldata retrieveHashes,
-                bytes32 aggregateReducerHash,
-                bytes32 tallyReducerHash
-            ) external returns (bytes32 radHash);
+    function verifyRadonRequest(
+            bytes32[] calldata retrieveHashes,
+            bytes32 aggregateReducerHash,
+            bytes32 tallyReducerHash
+        ) external returns (bytes32 radHash);
 
     /// Verifies and registers the specified Radon Request out of the given data sources (i.e. retrievals), 
     /// data sources parameters (if required), and the aggregate and tally Radon Reducers. Returns a unique 
@@ -111,12 +111,12 @@ interface IWitOracleRadonRegistry {
             Witnet.RadonReducer calldata tally
         ) external returns (bytes32 radHash);
 
-        function verifyRadonRequest(
-                bytes32[] calldata retrieveHashes,
-                string[][] calldata retrieveArgsValues,
-                bytes32 aggregateReducerHash,
-                bytes32 tallyReducerHash
-            ) external returns (bytes32 radHash);
+    function verifyRadonRequest(
+            bytes32[] calldata retrieveHashes,
+            string[][] calldata retrieveArgsValues,
+            bytes32 aggregateReducerHash,
+            bytes32 tallyReducerHash
+        ) external returns (bytes32 radHash);
 
     /// Verifies and registers the specified Radon Retrieval (i.e. public data source) into this registry contract. 
     /// Returns a unique retrieval hash that identifies the verified Radon Retrieval.

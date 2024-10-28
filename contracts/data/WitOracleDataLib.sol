@@ -671,7 +671,7 @@ library WitOracleDataLib {
         ) private
     {
         Witnet.Query storage __query = seekQuery(Witnet.QueryId.wrap(queryId));
-        __query.checkpoint = Witnet.QueryBlock.wrap(evmFinalityBlock);
+        __query.checkpoint = Witnet.BlockNumber.wrap(evmFinalityBlock);
         __query.response = Witnet.QueryResponse({
             reporter: evmReporter,
             resultTimestamp: witDrResultTimestamp,
@@ -752,6 +752,7 @@ library WitOracleDataLib {
                 evmQueryReportingStake
             );
 
+        // TODO: properly handle QueryStatus.Disputed .... 
         } else if (_queryStatus == Witnet.QueryStatus.Expired) {
             if (__query.response.disputer != address(0)) {
                 // only the disputer can claim,
@@ -770,6 +771,7 @@ library WitOracleDataLib {
                     msg.sender,
                     evmQueryReportingStake
                 );
+                // TODO: should reward be transferred back to requester ??
                 _evmReward += evmQueryReportingStake;
 
             } else {
@@ -806,7 +808,7 @@ library WitOracleDataLib {
             evmQueryReportingStake
         );
         Witnet.Query storage __query = seekQuery(queryId);
-        __query.checkpoint = Witnet.QueryBlock.wrap(uint64(block.number + evmQueryAwaitingBlocks));
+        __query.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number + evmQueryAwaitingBlocks));
         __query.response.disputer = msg.sender;
         emit IWitOracleEvents.WitOracleQueryResponseDispute(
             Witnet.QueryId.unwrap(queryId),
@@ -978,7 +980,7 @@ library WitOracleDataLib {
             // finalize query:
             evmTotalReward = Witnet.QueryReward.unwrap(__query.reward) + evmQueryReportingStake;
             __query.reward = Witnet.QueryReward.wrap(0); // no claimQueryReward(.) will be required (nor accepted whatsoever)
-            __query.checkpoint = Witnet.QueryBlock.wrap(uint64(block.number)); // set query status to Finalized
+            __query.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number)); // set query status to Finalized
         }
     }
 
