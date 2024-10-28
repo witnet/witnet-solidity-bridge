@@ -17,8 +17,10 @@ contract WitRandomnessV21
         IWitRandomnessAdmin
 {
     using Witnet for bytes;
-    using Witnet for Witnet.Result;
+    using Witnet for uint64;
+    using Witnet for Witnet.DataResult;
     using Witnet for Witnet.QuerySLA;
+    using Witnet for Witnet.ResultStatus;
 
     struct Randomize {
         uint256 queryId;
@@ -282,37 +284,89 @@ contract WitRandomnessV21
     }
 
     /// @notice Returns status of the first non-errored randomize request posted on or after the given block number.
-    /// @dev Possible values:
-    /// @dev - 0 -> Void: no randomize request was actually posted on or after the given block number.
-    /// @dev - 1 -> Awaiting: a randomize request was found but it's not yet solved by the Witnet blockchain.
-    /// @dev - 2 -> Ready: a successfull randomize value was reported and ready to be read.
-    /// @dev - 3 -> Error: all randomize requests after the given block were solved with errors.
-    /// @dev - 4 -> Finalizing: a randomize resolution has been reported from the Witnet blockchain, but it's not yet final.  
-    function getRandomizeStatus(uint256 _blockNumber)
+    /// @dev - 0 -> Unknown: no randomize request was actually posted on or after the given block number.
+    /// @dev - 1 -> Posted: a randomize request was found but it's not yet solved by the Witnet blockchain.
+    /// @dev - 2 -> Reported: a randomize result was reported but cannot yet be considered to be final
+    /// @dev - 3 -> Ready: a successfull randomize value was reported and it'sready to be read.
+    /// @dev - 4 -> Error: all randomize requests after the given block were solved with errors.
+    function getRandomizeStatus(Witnet.BlockNumber _blockNumber)
         virtual override
         public view 
-        returns (Witnet.QueryResponseStatus)
+        returns (RandomizeStatus)
     {
-        if (__storage().randomize_[_blockNumber].queryId == 0) {
+        if (__storage().randomize_[_blockNumber].queryId.isZero()) {
             _blockNumber = getRandomizeNextBlock(_blockNumber);
         }
-        uint256 _queryId = __storage().randomize_[_blockNumber].queryId;
-        if (_queryId == 0) {
-            return Witnet.QueryResponseStatus.Void;
+        Witnet.QueryId _queryId = __storage().randomize_[_blockNumber].queryId;
+        if (_queryId.isZero()) {
+            return RandomizeStatus.Void;
+        }
+        Witnet.ResultStatus _status = __witOracle.getQueryResultStatus(_queryId);
+        if (_status == Witnet.ResultStatus.BoardAwaitingResult) {
+            return RandomizeStatus.Posted;
+        
+        } else if (_status == Witnet.ResultStatus.BoardFinalizingResult) {
+            return RandomizeStatus.Finalizing;
+
+        } else if (_status != Witnet.ResultStatus.NoErrors) {
+            return RandomizeStatus.Ready;
         
         } else {
-            Witnet.QueryResponseStatus _status = __witOracle.getQueryResponseStatus(
-                Witnet.QueryId.wrap(_queryId)
-            );
-            if (_status == Witnet.QueryResponseStatus.Error) {
-                uint256 _nextRandomizeBlock = __storage().randomize_[_blockNumber].nextBlock;
-                if (_nextRandomizeBlock != 0) {
-                    return getRandomizeStatus(_nextRandomizeBlock);
-                } else {
-                    return Witnet.QueryResponseStatus.Error;
-                }
+            Witnet.BlockNumber _nextRandomizeBlock = __storage().randomize_[_blockNumber].nextBlock;
+            if (!_nextRandomizeBlock.isZero()) {
+                return getRandomizeStatus(_nextRandomizeBlock);
             } else {
-                return _status;
+                return RandomizeStatus.Error;
+            }
+        }
+    }
+
+    function getRandomizeStatusDescription(Witnet.BlockNumber _blockNumber) 
+        virtual override 
+        public view
+        returns (string memory)
+    {
+        if (__storage().randomize_[_blockNumber].queryId.isZero()) {
+            _blockNumber = getRandomizeNextBlock(_blockNumber);
+        }
+        Witnet.QueryId _queryId = __storage().randomize_[_blockNumber].queryId;
+        if (_queryId.isZero()) {
+            return string(abi.encodePacked(
+                "No randomize after block #",
+                Witnet.BlockNumber.unwrap(_blockNumber).toString()
+            ));
+        }
+        Witnet.ResultStatus _status = __witOracle.getQueryResultStatus(_queryId);
+        if (_status == Witnet.ResultStatus.BoardAwaitingResult) {
+            return string(abi.encodePacked(
+                "Randomize posted as for block #",
+                Witnet.toString(Witnet.BlockNumber.unwrap(_blockNumber))
+            ));
+        
+        } else if (_status == Witnet.ResultStatus.BoardFinalizingResult) {
+            return string(abi.encodePacked(
+                "Finalizing randomize as for block #",
+                Witnet.toString(Witnet.BlockNumber.unwrap(_blockNumber))
+            ));
+
+        } else if (_status != Witnet.ResultStatus.NoErrors) {
+            return string(abi.encodePacked(
+                "Randomize result ready as for block #",
+                Witnet.toString(Witnet.BlockNumber.unwrap(_blockNumber))
+            ));
+        
+        } else {
+            Witnet.BlockNumber _nextRandomizeBlock = __storage().randomize_[_blockNumber].nextBlock;
+            if (!_nextRandomizeBlock.isZero()) {
+                return getRandomizeStatusDescription(_nextRandomizeBlock);
+            
+            } else {
+                return string(abi.encodePacked(
+                    "Randomize failed as for block #",
+                    Witnet.toString(Witnet.BlockNumber.unwrap(_blockNumber)),
+                    ": ",
+                    __witOracle.getQueryResultStatusDescription(_queryId)
+                ));
             }
         }
     }
@@ -325,7 +379,7 @@ contract WitRandomnessV21
         returns (bool)
     {
         return (
-            getRandomizeStatus(_blockNumber) == Witnet.QueryResponseStatus.Ready
+            getRandomizeStatus(_blockNumber) == RandomizeStatus.Ready
         );
     }
 

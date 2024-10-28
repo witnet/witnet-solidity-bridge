@@ -52,25 +52,13 @@ interface IWitOracle {
     /// @notice Retrieves the whole `Witnet.QueryResponse` record referred to a previously posted Witnet Data Request.
     function getQueryResponse(Witnet.QueryId) external view returns (Witnet.QueryResponse memory);
 
-    /// @notice Returns query's result current status from a requester's point of view:
-    /// @notice   - 0 => Void: the query is either non-existent or deleted;
-    /// @notice   - 1 => Awaiting: the query has not yet been reported;
-    /// @notice   - 2 => Ready: the query response was finalized, and contains a result with no erros.
-    /// @notice   - 3 => Error: the query response was finalized, and contains a result with errors.
-    /// @notice   - 4 => Finalizing: some result to the query has been reported, but cannot yet be considered finalized.
-    /// @notice   - 5 => Delivered: at least one response, either successful or with errors, was delivered to the requesting contract.
-    function getQueryResponseStatus(Witnet.QueryId) external view returns (Witnet.QueryResponseStatus);
-    function getQueryResponseStatusTag(Witnet.QueryId) external view returns (string memory);
-
-    /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
-    function getQueryResultCborBytes(Witnet.QueryId) external view returns (bytes memory);
-
-    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
-    function getQueryResultError(Witnet.QueryId) external view returns (Witnet.ResultError memory);
+    function getQueryResult(Witnet.QueryId) external view returns (Witnet.DataResult memory);
+    function getQueryResultStatus(Witnet.QueryId) external view returns (Witnet.ResultStatus);
+    function getQueryResultStatusDescription(Witnet.QueryId) external view returns (string memory);
 
     /// @notice Gets current status of given query.
     function getQueryStatus(Witnet.QueryId) external view returns (Witnet.QueryStatus);
-    function getQueryStatusTag(Witnet.QueryId) external view returns (string memory);
+    function getQueryStatusString(Witnet.QueryId) external view returns (string memory);
     
     /// @notice Get current status of all given query ids.
     function getQueryStatusBatch(Witnet.QueryId[] calldata) external view returns (Witnet.QueryStatus[] memory);
@@ -125,7 +113,7 @@ interface IWitOracle {
 
     /// @notice Enables data requesters to settle the actual validators in the Wit/oracle
     /// @notice sidechain that will be entitled to solve data requests requiring to
-    /// @notice support some given `Wit2.Capability`.
+    /// @notice support the specified `Wit2.Capability`.
     function settleMyOwnCapableCommittee(Witnet.QueryCapability, Witnet.QueryCapabilityMember[] calldata) external;
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.

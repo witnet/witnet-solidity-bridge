@@ -110,7 +110,6 @@ abstract contract WitOracleBase
     }
 
     function getQueryStatus(Witnet.QueryId) virtual public view returns (Witnet.QueryStatus);
-    function getQueryResponseStatus(Witnet.QueryId) virtual public view returns (Witnet.QueryResponseStatus);
 
     
     // ================================================================================================================
@@ -232,8 +231,7 @@ abstract contract WitOracleBase
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     /// @param _queryId The unique query identifier.
     function getQueryRequest(Witnet.QueryId _queryId)
-        external view 
-        override
+        external view override
         returns (Witnet.QueryRequest memory)
     {
         return WitOracleDataLib.seekQueryRequest(_queryId);
@@ -243,63 +241,37 @@ abstract contract WitOracleBase
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier
     function getQueryResponse(Witnet.QueryId _queryId)
-        public view
-        virtual override
+        virtual override public view
         returns (Witnet.QueryResponse memory)
     {
         return WitOracleDataLib.seekQueryResponse(_queryId);
     }
 
-    function getQueryResponseStatusTag(Witnet.QueryId _queryId)
-        virtual override
-        external view
+    function getQueryResult(Witnet.QueryId _queryId)
+        virtual override public view 
+        returns (Witnet.DataResult memory)
+    {
+        return WitOracleDataLib.getQueryResult(_queryId);
+    }
+
+    function getQueryResultStatus(Witnet.QueryId _queryId)
+        virtual override public view 
+        returns (Witnet.ResultStatus)
+    {
+        return WitOracleDataLib.getQueryResultStatus(_queryId);
+    }
+
+    function getQueryResultStatusDescription(Witnet.QueryId _queryId)
+        virtual override public view
         returns (string memory)
     {
-        return WitOracleDataLib.toString(
-            getQueryResponseStatus(_queryId)
+        return WitOracleResultStatusLib.toString(
+            WitOracleDataLib.getQueryResult(_queryId)
         );
     }
 
-    /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
-    /// @param _queryId The unique query identifier.
-    function getQueryResultCborBytes(Witnet.QueryId _queryId) 
-        external view 
-        virtual override
-        returns (bytes memory)
-    {
-        return WitOracleDataLib.seekQueryResponse(_queryId).resultCborBytes;
-    }
-
-    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
-    /// @param _queryId The unique query identifier.
-    function getQueryResultError(Witnet.QueryId _queryId)
-        virtual override 
-        public view
-        returns (Witnet.ResultError memory)
-    {
-        Witnet.QueryResponseStatus _status = getQueryResponseStatus(_queryId);
-        try WitOracleResultErrorsLib.asResultError(_status, WitOracleDataLib.seekQueryResponse(_queryId).resultCborBytes)
-            returns (Witnet.ResultError memory _resultError)
-        {
-            return _resultError;
-        } 
-        catch Error(string memory _reason) {
-            return Witnet.ResultError({
-                code: Witnet.ResultErrorCodes.Unknown,
-                reason: string(abi.encodePacked("WitOracleResultErrorsLib: ", _reason))
-            });
-        }
-        catch (bytes memory) {
-            return Witnet.ResultError({
-                code: Witnet.ResultErrorCodes.Unknown,
-                reason: "WitOracleResultErrorsLib: assertion failed"
-            });
-        }
-    }
-
-    function getQueryStatusTag(Witnet.QueryId _queryId)
-        virtual override
-        external view
+    function getQueryStatusString(Witnet.QueryId _queryId)
+        virtual override external view 
         returns (string memory)
     {
         return WitOracleDataLib.toString(

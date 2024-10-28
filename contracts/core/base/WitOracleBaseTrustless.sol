@@ -183,20 +183,6 @@ abstract contract WitOracleBaseTrustless
         return WitOracleDataLib.getQueryStatusTrustlessly(_queryId, QUERY_AWAITING_BLOCKS);
     }
 
-    /// @notice Returns query's result current status from a requester's point of view:
-    /// @notice   - 0 => Void: the query is either non-existent or deleted;
-    /// @notice   - 1 => Awaiting: the query has not yet been reported;
-    /// @notice   - 2 => Ready: the query has been succesfully solved;
-    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
-    /// @param _queryId The unique query identifier.
-    function getQueryResponseStatus(Witnet.QueryId _queryId)
-        virtual override
-        public view
-        returns (Witnet.QueryResponseStatus)
-    {
-        return WitOracleDataLib.getQueryResponseStatusTrustlessly(_queryId, QUERY_AWAITING_BLOCKS);
-    }
-
 
     // ================================================================================================================
     // --- IWitOracleBlocks -------------------------------------------------------------------------------------------

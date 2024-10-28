@@ -264,7 +264,7 @@ library WitOracleDataLib {
             return Witnet.QueryStatus.Posted;
         
         } else {
-            return Witnet.QueryStatus.Posted;
+            return Witnet.QueryStatus.Unknown;
         }
     }
 
@@ -275,25 +275,19 @@ library WitOracleDataLib {
         public view returns (Witnet.QueryStatus)
     {
         Witnet.Query storage __query = seekQuery(queryId);
-        
         if (__query.response.resultTimestamp != 0) {
-            if (block.number >= Witnet.QueryBlock.unwrap(__query.checkpoint)) {
+            if (block.number >= Witnet.BlockNumber.unwrap(__query.checkpoint)) {
                 if (__query.response.disputer != address(0)) {
-                    return Witnet.QueryStatus.Expired;
+                    return Witnet.QueryStatus.Disputed;
 
                 } else {
                     return Witnet.QueryStatus.Finalized;
                 }
             } else {
-                if (__query.response.disputer != address(0)) {
-                    return Witnet.QueryStatus.Disputed;
-                    
-                } else {
-                    return Witnet.QueryStatus.Reported;
-                }
+                return Witnet.QueryStatus.Reported;
             }
         } else {
-            uint256 _checkpoint = Witnet.QueryBlock.unwrap(__query.checkpoint);
+            uint256 _checkpoint = Witnet.BlockNumber.unwrap(__query.checkpoint);
             if (_checkpoint == 0) {
                 return Witnet.QueryStatus.Unknown;
             
@@ -309,7 +303,134 @@ library WitOracleDataLib {
         }
     }
 
-    function getQueryResponseStatus(Witnet.QueryId queryId) public view returns (Witnet.QueryResponseStatus) {
+    function getQueryResult(Witnet.QueryId queryId) public view returns (Witnet.DataResult memory _result) {
+        Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
+        return _getQueryResult(queryId, _queryStatus);
+    }
+
+    function getQueryResultTrustlessly(
+            Witnet.QueryId queryId,
+            uint256 evmQueryAwaitingBlocks
+        ) 
+        public view 
+        returns (Witnet.DataResult memory _result)
+    {
+        Witnet.QueryStatus _queryStatus = getQueryStatusTrustlessly(
+            queryId,
+            evmQueryAwaitingBlocks
+        );
+        return _getQueryResult(queryId, _queryStatus);
+    }
+
+    function _getQueryResult(Witnet.QueryId queryId, Witnet.QueryStatus queryStatus)
+        private view
+        returns (Witnet.DataResult memory)
+    {
+        return intoDataResult(seekQueryResponse(queryId), queryStatus);
+    }
+
+    function intoDataResult(Witnet.QueryResponse memory queryResponse, Witnet.QueryStatus queryStatus)
+        public pure
+        returns (Witnet.DataResult memory _result)
+    {
+        _result.drTxHash = Witnet.TransactionHash.wrap(queryResponse.resultDrTxHash);
+        _result.timestamp = Witnet.ResultTimestamp.wrap(queryResponse.resultTimestamp);
+        if (queryResponse.resultCborBytes.length > 0) {
+            _result.value = WitnetCBOR.fromBytes(queryResponse.resultCborBytes);
+            _result.dataType = Witnet.peekRadonDataType(_result.value);
+        }
+        if (queryStatus == Witnet.QueryStatus.Finalized) {
+            if (queryResponse.resultCborBytes.length > 0) {
+                // determine whether stored result is an error by peeking the first byte
+                if (queryResponse.resultCborBytes[0] == bytes1(0xd8)) {
+                    if (
+                        _result.dataType == Witnet.RadonDataTypes.Array
+                            && WitnetCBOR.readLength(_result.value.buffer, _result.value.additionalInformation) >= 1
+                    ) {
+                        if (Witnet.peekRadonDataType(_result.value) != Witnet.RadonDataTypes.Integer) {
+                            _result.status = Witnet.ResultStatus(_result.value.readInt());
+                            _result.dataType = Witnet.peekRadonDataType(_result.value);
+                        
+                        } else {
+                            _result.status = Witnet.ResultStatus.UnhandledIntercept;
+                        }
+                    } else {
+                        _result.status = Witnet.ResultStatus.UnhandledIntercept;
+                    }            
+                } else {
+                    _result.status = Witnet.ResultStatus.NoErrors;
+                }
+            } else {
+                // the result is final but was delivered to some consuming contract:
+                _result.status = Witnet.ResultStatus.BoardAlreadyDelivered;
+            }
+        
+        } else if (queryStatus == Witnet.QueryStatus.Reported) {
+            _result.status = Witnet.ResultStatus.BoardFinalizingResult;
+
+        } else if (
+            queryStatus == Witnet.QueryStatus.Posted
+                || queryStatus == Witnet.QueryStatus.Delayed
+        ) {
+            _result.status = Witnet.ResultStatus.BoardAwaitingResult;
+        
+        } else if (
+            queryStatus == Witnet.QueryStatus.Expired
+                || queryStatus == Witnet.QueryStatus.Disputed
+        ) {
+            _result.status = Witnet.ResultStatus.BoardResolutionTimeout;
+        
+        } else {
+            _result.status = Witnet.ResultStatus.UnhandledIntercept;
+        }
+    }
+
+    function getQueryResultStatus(Witnet.QueryId queryId) public view returns (Witnet.ResultStatus) {
+        Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
+        Witnet.QueryResponse storage __response = seekQueryResponse(queryId);
+        if (_queryStatus == Witnet.QueryStatus.Finalized) {
+            if (__response.resultCborBytes.length > 0) {
+                // determine whether stored result is an error by peeking the first byte
+                if (__response.resultCborBytes[0] == bytes1(0xd8)) {
+                    WitnetCBOR.CBOR[] memory _error = WitnetCBOR.fromBytes(__response.resultCborBytes).readArray();
+                    if (_error.length < 2) {
+                        return Witnet.ResultStatus.UnhandledIntercept;
+                    } else {
+                        return Witnet.ResultStatus(_error[0].readUint());
+                    }
+                } else {
+                    return Witnet.ResultStatus.NoErrors;
+                }
+
+            } else {
+                // the result is final but was delivered to some consuming contract:
+                return Witnet.ResultStatus.BoardAlreadyDelivered;
+            }
+        
+        } else if (_queryStatus == Witnet.QueryStatus.Reported) {
+            return Witnet.ResultStatus.BoardFinalizingResult;
+
+        } else if (
+            _queryStatus == Witnet.QueryStatus.Posted
+                || _queryStatus == Witnet.QueryStatus.Delayed
+        ) {
+            return Witnet.ResultStatus.BoardAwaitingResult;
+        
+        } else if (
+            _queryStatus == Witnet.QueryStatus.Expired
+                || _queryStatus == Witnet.QueryStatus.Disputed
+        ) {
+            return Witnet.ResultStatus.BoardResolutionTimeout;
+        
+        } else {
+            return Witnet.ResultStatus.UnhandledIntercept;
+        }
+    }
+
+    function getQueryResponseStatus(Witnet.QueryId queryId)
+        public view 
+        returns (IWitOracleLegacy.QueryResponseStatus)
+    {
         Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
         
         if (_queryStatus == Witnet.QueryStatus.Finalized) {
@@ -317,23 +438,23 @@ library WitOracleDataLib {
             if (__cborValues.length > 0) {
                 // determine whether stored result is an error by peeking the first byte
                 return (__cborValues[0] == bytes1(0xd8)
-                    ? Witnet.QueryResponseStatus.Error 
-                    : Witnet.QueryResponseStatus.Ready
+                    ? IWitOracleLegacy.QueryResponseStatus.Error 
+                    : IWitOracleLegacy.QueryResponseStatus.Ready
                 );
             
             } else {
                 // the result is final but delivered to the requesting address
-                return Witnet.QueryResponseStatus.Delivered;
+                return IWitOracleLegacy.QueryResponseStatus.Delivered;
             }
         
         } else if (_queryStatus == Witnet.QueryStatus.Posted) {
-            return Witnet.QueryResponseStatus.Awaiting;
+            return IWitOracleLegacy.QueryResponseStatus.Awaiting;
         
         } else if (_queryStatus == Witnet.QueryStatus.Expired) {
-            return Witnet.QueryResponseStatus.Expired;
+            return IWitOracleLegacy.QueryResponseStatus.Expired;
         
         } else {
-            return Witnet.QueryResponseStatus.Void;
+            return IWitOracleLegacy.QueryResponseStatus.Void;
         }
     }
 
@@ -341,7 +462,7 @@ library WitOracleDataLib {
             Witnet.QueryId queryId,
             uint256 evmQueryAwaitingBlocks
         )
-        public view returns (Witnet.QueryResponseStatus)
+        public view returns (IWitOracleLegacy.QueryResponseStatus)
     {
         Witnet.QueryStatus _queryStatus = getQueryStatusTrustlessly(
             queryId,
@@ -352,31 +473,31 @@ library WitOracleDataLib {
             if (__cborValues.length > 0) {
                 // determine whether stored result is an error by peeking the first byte
                 return (__cborValues[0] == bytes1(0xd8)
-                    ? Witnet.QueryResponseStatus.Error 
-                    : Witnet.QueryResponseStatus.Ready
+                    ? IWitOracleLegacy.QueryResponseStatus.Error 
+                    : IWitOracleLegacy.QueryResponseStatus.Ready
                 );
             
             } else {
                 // the result is final but delivered to the requesting address
-                return Witnet.QueryResponseStatus.Delivered;
+                return IWitOracleLegacy.QueryResponseStatus.Delivered;
             }
+        } else if (_queryStatus == Witnet.QueryStatus.Reported) {
+            return IWitOracleLegacy.QueryResponseStatus.Finalizing;
+        
         } else if (
             _queryStatus == Witnet.QueryStatus.Posted
                 || _queryStatus == Witnet.QueryStatus.Delayed
         ) {
-            return Witnet.QueryResponseStatus.Awaiting;
+            return IWitOracleLegacy.QueryResponseStatus.Awaiting;
         
         } else if (
-            _queryStatus == Witnet.QueryStatus.Reported
+            _queryStatus == Witnet.QueryStatus.Expired
                 || _queryStatus == Witnet.QueryStatus.Disputed
         ) {
-            return Witnet.QueryResponseStatus.Finalizing;
-        
-        } else if (_queryStatus == Witnet.QueryStatus.Expired) {
-            return Witnet.QueryResponseStatus.Expired;
+            return IWitOracleLegacy.QueryResponseStatus.Expired;
         
         } else {
-            return Witnet.QueryResponseStatus.Void;
+            return IWitOracleLegacy.QueryResponseStatus.Void;
         }
     }
 
@@ -524,61 +645,29 @@ library WitOracleDataLib {
         )
     {
         evmCallbackActualGas = gasleft();
-        if (witDrResultCborBytes[0] == bytes1(0xd8)) {
-            WitnetCBOR.CBOR[] memory _errors = WitnetCBOR.fromBytes(witDrResultCborBytes).readArray();
-            if (_errors.length < 2) {
-                // try to report result with unknown error:
-                try IWitOracleConsumer(requester).reportWitOracleResultError{gas: evmCallbackGasLimit}(
-                    queryId,
-                    witDrResultTimestamp,
-                    witDrTxHash,
-                    evmFinalityBlock,
-                    Witnet.ResultErrorCodes.Unknown,
-                    WitnetCBOR.CBOR({
-                        buffer: WitnetBuffer.Buffer({ data: hex"", cursor: 0}),
-                        initialByte: 0,
-                        majorType: 0,
-                        additionalInformation: 0,
-                        len: 0,
-                        tag: 0
-                    })
-                ) {
-                    evmCallbackSuccess = true;
-                
-                } catch Error(string memory err) {
-                    evmCallbackRevertMessage = err;
-                }
-            } else {
-                // try to report result with parsable error:
-                try IWitOracleConsumer(requester).reportWitOracleResultError{gas: evmCallbackGasLimit}(
-                    queryId,
-                    witDrResultTimestamp,
-                    witDrTxHash,
-                    evmFinalityBlock,
-                    Witnet.ResultErrorCodes(_errors[0].readUint()),
-                    _errors[0]
-                ) {
-                    evmCallbackSuccess = true;
-                
-                } catch Error(string memory err) {
-                    evmCallbackRevertMessage = err; 
-                }
-            }
-        } else {
-            // try to report result result with no error :
-            try IWitOracleConsumer(requester).reportWitOracleResultValue{gas: evmCallbackGasLimit}(
-                queryId,
-                witDrResultTimestamp,
-                witDrTxHash,
-                evmFinalityBlock,
-                WitnetCBOR.fromBytes(witDrResultCborBytes)
-            ) {
-                evmCallbackSuccess = true;
-            
-            } catch Error(string memory err) {
-                evmCallbackRevertMessage = err;
-            
-            } catch (bytes memory) {}
+        Witnet.DataResult memory _result = intoDataResult(
+            Witnet.QueryResponse({
+                reporter: address(0),
+                resultTimestamp: witDrResultTimestamp,
+                resultDrTxHash: witDrTxHash,
+                resultCborBytes: witDrResultCborBytes,
+                disputer: address(0), _0: 0
+            }),
+            evmFinalityBlock == block.number ? Witnet.QueryStatus.Finalized : Witnet.QueryStatus.Reported
+        );
+        try IWitOracleConsumer(requester).reportWitOracleQueryResult{
+            gas: evmCallbackGasLimit
+        } (
+            Witnet.QueryId.wrap(queryId),
+            _result
+        ) {
+            evmCallbackSuccess = true;
+        
+        } catch Error(string memory err) {
+            evmCallbackRevertMessage = err;
+        
+        } catch (bytes memory) {
+            evmCallbackRevertMessage = "callback revert";
         }
         evmCallbackActualGas -= gasleft();
     }
@@ -938,11 +1027,15 @@ library WitOracleDataLib {
             ), "invalid merkle proof"
         );
 
-        // deserialize result cbor bytes into Witnet.Result
-        // todo!!! return Witnet.DataResult instead
-        // return Witnet.toWitnetResult(
-        //     report.witDrResultCborBytes
-        // );
+        return intoDataResult(
+            Witnet.QueryResponse({
+                reporter: address(0), disputer: address(0), _0: 0,
+                resultCborBytes: report.witDrResultCborBytes,
+                resultDrTxHash: report.witDrTxHash,
+                resultTimestamp: Witnet.determineTimestampFromEpoch(report.witDrResultEpoch)
+            }),
+            Witnet.QueryStatus.Finalized
+        );
     }
 
 
@@ -951,11 +1044,11 @@ library WitOracleDataLib {
 
     function notInStatusRevertMessage(Witnet.QueryStatus self) public pure returns (string memory) {
         if (self == Witnet.QueryStatus.Posted) {
-            return "query not in Posted status";
+            return "not in Posted status";
         } else if (self == Witnet.QueryStatus.Reported) {
-            return "query not in Reported status";
+            return "not in Reported status";
         } else if (self == Witnet.QueryStatus.Finalized) {
-            return "query not in Finalized status";
+            return "not in Finalized status";
         } else {
             return "bad mood";
         }
@@ -974,24 +1067,6 @@ library WitOracleDataLib {
             return "Expired";
         } else if (_status == Witnet.QueryStatus.Disputed) {
             return "Disputed";
-        } else {
-            return "Unknown";
-        }
-    }
-
-    function toString(Witnet.QueryResponseStatus _status) external pure returns (string memory) {
-        if (_status == Witnet.QueryResponseStatus.Awaiting) {
-            return "Awaiting";
-        } else if (_status == Witnet.QueryResponseStatus.Ready) {
-            return "Ready";
-        } else if (_status == Witnet.QueryResponseStatus.Error) {
-            return "Reverted";
-        } else if (_status == Witnet.QueryResponseStatus.Finalizing) {
-            return "Finalizing";
-        } else if (_status == Witnet.QueryResponseStatus.Delivered) {
-            return "Delivered";
-        } else if (_status == Witnet.QueryResponseStatus.Expired) {
-            return "Expired";
         } else {
             return "Unknown";
         }

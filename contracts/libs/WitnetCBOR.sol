@@ -425,18 +425,18 @@ library WitnetCBOR {
   /// @return The value represented by the input, as an `int128` value.
   function readInt(CBOR memory cbor)
     internal pure
-    returns (int)
+    returns (int64)
   {
     if (cbor.majorType == 1) {
       uint64 _value = readLength(
         cbor.buffer,
         cbor.additionalInformation
       );
-      return int(-1) - int(uint(_value));
+      return int64(-1) - int64(uint64(_value));
     } else if (cbor.majorType == 0) {
       // Any `uint64` can be safely casted to `int128`, so this method supports majorType 1 as well so as to have offer
       // a uniform API for positive and negative numbers
-      return int(readUint(cbor));
+      return int64(readUint(cbor));
     }
     else {
       revert UnexpectedMajorType(cbor.majorType, 1);
@@ -449,11 +449,11 @@ library WitnetCBOR {
   function readIntArray(CBOR memory cbor)
     internal pure
     isMajorType(cbor, MAJOR_TYPE_ARRAY)
-    returns (int[] memory array)
+    returns (int64[] memory array)
   {
     uint64 length = readLength(cbor.buffer, cbor.additionalInformation);
     if (length < UINT64_MAX) {
-      array = new int[](length);
+      array = new int64[](length);
       for (uint i = 0; i < length; ) {
         CBOR memory item = fromBuffer(cbor.buffer);
         array[i] = readInt(item);
@@ -525,7 +525,7 @@ library WitnetCBOR {
   function readUint(CBOR memory cbor)
     internal pure
     isMajorType(cbor, MAJOR_TYPE_INT)
-    returns (uint)
+    returns (uint64)
   {
     return readLength(
       cbor.buffer,
@@ -539,11 +539,11 @@ library WitnetCBOR {
   function readUintArray(CBOR memory cbor)
     internal pure
     isMajorType(cbor, MAJOR_TYPE_ARRAY)
-    returns (uint[] memory values)
+    returns (uint64[] memory values)
   {
     uint64 length = readLength(cbor.buffer, cbor.additionalInformation);
     if (length < UINT64_MAX) {
-      values = new uint[](length);
+      values = new uint64[](length);
       for (uint ix = 0; ix < length; ) {
         CBOR memory item = fromBuffer(cbor.buffer);
         values[ix] = readUint(item);

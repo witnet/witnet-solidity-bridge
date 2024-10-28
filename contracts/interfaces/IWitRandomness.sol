@@ -64,14 +64,22 @@ interface IWitRandomness {
     /// @return First block found before the given one, or `0` otherwise.
     function getRandomizePrevBlock(uint256 blockNumber) external view returns (uint256);
 
-    /// @notice Gets current status of the first non-failing randomize request posted on or after the given block number.
-    /// @dev Possible values:
-    /// @dev - 0 -> Void: no randomize request was actually posted on or after the given block number.
-    /// @dev - 1 -> Awaiting: a randomize request was found but it's not yet solved by the Witnet blockchain.
-    /// @dev - 2 -> Ready: a successfull randomize value was reported and ready to be read.
-    /// @dev - 3 -> Error: all randomize resolutions after the given block were solved with errors.
-    /// @dev - 4 -> Finalizing: a randomize resolution has been reported from the Witnet blockchain, but it's not yet final.  
-    function getRandomizeStatus(uint256 blockNumber) external view returns (Witnet.QueryResponseStatus);
+    /// @notice Returns status of the first non-errored randomize request posted on or after the given block number.
+    /// @dev - 0 -> Unknown: no randomize request was actually posted on or after the given block number.
+    /// @dev - 1 -> Posted: a randomize request was found but it's not yet solved by the Witnet blockchain.
+    /// @dev - 2 -> Reported: a randomize result was reported but cannot yet be considered to be final
+    /// @dev - 3 -> Ready: a successfull randomize value was reported and ready to be read.
+    /// @dev - 4 -> Error: all randomize requests after the given block were solved with errors.
+    function getRandomizeStatus(Witnet.BlockNumber blockNumber) external view returns (RandomizeStatus);    
+        enum RandomizeStatus {
+            Void,
+            Posted,
+            Finalizing,
+            Ready,
+            Error
+        }
+    function getRandomizeStatusDescription(Witnet.BlockNumber blockNumber) external view returns (string memory);
+        
 
     /// @notice Returns `true` only if a successfull resolution from the Witnet blockchain is found for the first 
     /// @notice non-failing randomize request posted on or after the given block number.

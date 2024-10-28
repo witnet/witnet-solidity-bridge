@@ -4,6 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 interface IWitOracleLegacy {
 
+    struct RadonSLA {
+        uint8  witCommitteeCapacity;
+        uint64 witCommitteeUnitaryReward;
+    }
+
     event WitnetQuery(uint256 id, uint256 evmReward, RadonSLA witnetSLA);
 
     /// @notice Estimate the minimum reward required for posting a data request.
@@ -18,10 +23,37 @@ interface IWitOracleLegacy {
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     function estimateBaseFee(uint256 gasPrice, bytes32 radHash) external view returns (uint256);
 
-    struct RadonSLA {
-        uint8 witCommitteeCapacity;
-        uint64 witCommitteeUnitaryReward;
-    }
+    /// @notice Returns query's result current status from a requester's point of view:
+    /// @notice   - 0 => Void: the query is either non-existent or deleted;
+    /// @notice   - 1 => Awaiting: the query has not yet been reported;
+    /// @notice   - 2 => Ready: the query response was finalized, and contains a result with no erros.
+    /// @notice   - 3 => Error: the query response was finalized, and contains a result with errors.
+    /// @notice   - 4 => Finalizing: some result to the query has been reported, but cannot yet be considered finalized.
+    /// @notice   - 5 => Delivered: at least one response, either successful or with errors, was delivered to the requesting contract.
+    function getQueryResponseStatus(uint256) external view returns (QueryResponseStatus);
+
+        /// QueryResponse status from a requester's point of view.
+        enum QueryResponseStatus {
+            Void,
+            Awaiting,
+            Ready,
+            Error,
+            Finalizing,
+            Delivered,
+            Expired
+        }
+
+    /// @notice Retrieves the CBOR-encoded buffer containing the Witnet-provided result to the given query.
+    function getQueryResultCborBytes(uint256) external view returns (bytes memory);
+
+    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
+    function getQueryResultError(uint256) external view returns (ResultError memory);
+
+        /// Data struct describing an error when trying to fetch a Witnet-provided result to a Data Request.
+        struct ResultError {
+            uint8 code;
+            string reason;
+        }
     function postRequest(bytes32, RadonSLA calldata) external payable returns (uint256);
     function postRequestWithCallback(bytes32, RadonSLA calldata, uint24) external payable returns (uint256);
     function postRequestWithCallback(bytes calldata, RadonSLA calldata, uint24) external payable returns (uint256);

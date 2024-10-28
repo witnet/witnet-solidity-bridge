@@ -34,8 +34,13 @@ abstract contract UsingWitOracle
     /// @dev contract until a particular request has been successfully solved and reported from the Wit/oracle blockchain,
     /// @dev either with an error or successfully.
     modifier witOracleQuerySolved(Witnet.QueryId _queryId) {
-        require(_witOracleCheckQueryResultAvailability(_queryId), "UsingWitOracle: unsolved query");
-        _;
+        Witnet.QueryStatus _queryStatus = _witOracleCheckQueryStatus(_queryId);
+        require(
+            _queryStatus == Witnet.QueryStatus.Finalized
+                || _queryStatus == Witnet.QueryStatus.Expired
+                || _queryStatus == Witnet.QueryStatus.Disputed
+            , "UsingWitOracle: unsolved query"
+        ); _;
     }
 
     /// @param _witOracle Address of the WitOracle bridging contract.
@@ -48,9 +53,9 @@ abstract contract UsingWitOracle
         );
         __witOracle = _witOracle;
         __witOracleDefaultQuerySLA = Witnet.QuerySLA({
-            witCommitteeCapacity: 10,            // defaults to 10 witnesses
-            witCommitteeUnitaryReward: 2 * 10 ** 8,  // defaults to 0.2 witcoins
-            witResultMaxSize: 32,          // defaults to 32 bytes
+            witResultMaxSize: 32, // defaults to 32 bytes
+            witCommitteeCapacity: 10, // defaults to 10 witnesses
+            witCommitteeUnitaryReward: 2 * 10 ** 8, // defaults to 0.2 witcoins
             witCapability: Witnet.QueryCapability.wrap(0)
         });
         
@@ -59,27 +64,11 @@ abstract contract UsingWitOracle
 
     /// @dev Check if given query was already reported back from the Wit/oracle blockchain.
     /// @param _id The unique identifier of a previously posted data request.
-    function _witOracleCheckQueryResultAvailability(Witnet.QueryId _id)
+    function _witOracleCheckQueryStatus(Witnet.QueryId _id)
         internal view
-        returns (bool)
+        returns (Witnet.QueryStatus)
     {
-        return __witOracle.getQueryStatus(_id) == Witnet.QueryStatus.Reported;
-    }
-
-    /// @dev Returns a struct describing the resulting error from some given query id.
-    function _witOracleCheckQueryResultError(Witnet.QueryId _queryId)
-        internal view
-        returns (Witnet.ResultError memory)
-    {
-        return __witOracle.getQueryResultError(_queryId);
-    }
-
-    /// @dev Return current response status to some given gquery id.
-    function _witOracleCheckQueryResponseStatus(Witnet.QueryId _queryId)
-        internal view
-        returns (Witnet.QueryResponseStatus)
-    {
-        return __witOracle.getQueryResponseStatus(_queryId);
+        return __witOracle.getQueryStatus(_id);
     }
 
     /// @dev Estimate the minimum reward required for posting a data request (based on `tx.gasprice`).

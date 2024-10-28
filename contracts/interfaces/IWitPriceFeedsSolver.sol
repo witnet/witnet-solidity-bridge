@@ -6,10 +6,10 @@ import "../libs/Witnet.sol";
 
 interface IWitPriceFeedsSolver {
     struct Price {
-        uint value;
-        uint timestamp;
-        bytes32 drTxHash;
-        Witnet.QueryResponseStatus status;
+        uint64 value;
+        Witnet.ResultTimestamp timestamp;
+        Witnet.TransactionHash drTxHash;
+        Witnet.ResultStatus status;
     }
     function class() external pure returns (string memory);
     function delegator() external view returns (address);

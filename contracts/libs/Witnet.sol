@@ -9,6 +9,9 @@ library Witnet {
     using WitnetBuffer for WitnetBuffer.Buffer;
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
+    type ResultTimestamp is uint32;
+    type TransactionHash is bytes32;
+    
 
     uint32 constant internal  WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
     uint32 constant internal  WIT_1_SECS_PER_EPOCH = 45;
@@ -57,9 +60,13 @@ library Witnet {
         bytes32  witDrTxHash;
     }
 
+    /// Data struct containing the Witnet-provided result to a Data Request.
     struct DataResult {
-        RadonDataTypes  dataType;
-        WitnetCBOR.CBOR value;
+        ResultStatus status;
+        RadonDataTypes    dataType;
+        TransactionHash   drTxHash;
+        ResultTimestamp   timestamp;
+        WitnetCBOR.CBOR   value;
     }
     
     struct FastForward {
@@ -118,17 +125,6 @@ library Witnet {
         address disputer;
     }
 
-    /// QueryResponse status from a requester's point of view.
-    enum QueryResponseStatus {
-        Void,
-        Awaiting,
-        Ready,
-        Error,
-        Finalizing,
-        Delivered,
-        Expired
-    }
-
     /// Structure containing all possible SLA security parameters of Wit/2.1 Data Requests
     struct QuerySLA {
         uint16  witResultMaxSize;          // max size permitted to whatever query result may come from the wit/oracle blockchain.
@@ -137,168 +133,207 @@ library Witnet {
         QueryCapability witCapability;     // optional: identifies some pre-established capability-compliant commitee required for solving the query.
     }
 
-    /// Data struct containing the Witnet-provided result to a Data Request.
-    // todo: Result -> DataResult
-    struct Result {
-        bool success;           // Flag stating whether the request could get solved successfully, or not.
-        WitnetCBOR.CBOR value;  // Resulting value, in CBOR-serialized bytes.
-    }
-    
-    /// Final query's result status from a requester's point of view.
     enum ResultStatus {
-        Void,
-        Awaiting,
-        Ready,
-        Error
-    }
-
-    /// Data struct describing an error when trying to fetch a Witnet-provided result to a Data Request.
-    struct ResultError {
-        ResultErrorCodes code;
-        string reason;
-    }
-
-    enum ResultErrorCodes {
-        /// 0x00: Unknown error. Something went really bad!
-        Unknown, 
+        /// 0x00: No errors.
+        NoErrors,
         
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Source-specific format error sub-codes ============================================================================
+        
         /// 0x01: At least one of the source scripts is not a valid CBOR-encoded value.
         SourceScriptNotCBOR, 
+        
         /// 0x02: The CBOR value decoded from a source script is not an Array.
         SourceScriptNotArray,
+        
         /// 0x03: The Array value decoded form a source script is not a valid Data Request.
         SourceScriptNotRADON,
+        
         /// 0x04: The request body of at least one data source was not properly formated.
         SourceRequestBody,
+        
         /// 0x05: The request headers of at least one data source was not properly formated.
         SourceRequestHeaders,
+        
         /// 0x06: The request URL of at least one data source was not properly formated.
         SourceRequestURL,
+        
         /// Unallocated
         SourceFormat0x07, SourceFormat0x08, SourceFormat0x09, SourceFormat0x0A, SourceFormat0x0B, SourceFormat0x0C,
         SourceFormat0x0D, SourceFormat0x0E, SourceFormat0x0F, 
         
+        
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Complexity error sub-codes ========================================================================================
+        
         /// 0x10: The request contains too many sources.
         RequestTooManySources,
+        
         /// 0x11: The script contains too many calls.
         ScriptTooManyCalls,
+        
         /// Unallocated
         Complexity0x12, Complexity0x13, Complexity0x14, Complexity0x15, Complexity0x16, Complexity0x17, Complexity0x18,
         Complexity0x19, Complexity0x1A, Complexity0x1B, Complexity0x1C, Complexity0x1D, Complexity0x1E, Complexity0x1F,
 
+        
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Lack of support error sub-codes ===================================================================================
+        
         /// 0x20: Some Radon operator code was found that is not supported (1+ args).
         UnsupportedOperator,
+        
         /// 0x21: Some Radon filter opcode is not currently supported (1+ args).
         UnsupportedFilter,
+        
         /// 0x22: Some Radon request type is not currently supported (1+ args).
         UnsupportedHashFunction,
+        
         /// 0x23: Some Radon reducer opcode is not currently supported (1+ args)
         UnsupportedReducer,
+        
         /// 0x24: Some Radon hash function is not currently supported (1+ args).
         UnsupportedRequestType, 
+        
         /// 0x25: Some Radon encoding function is not currently supported (1+ args).
         UnsupportedEncodingFunction,
+        
         /// Unallocated
         Operator0x26, Operator0x27, 
+        
         /// 0x28: Wrong number (or type) of arguments were passed to some Radon operator.
         WrongArguments,
+        
         /// Unallocated
         Operator0x29, Operator0x2A, Operator0x2B, Operator0x2C, Operator0x2D, Operator0x2E, Operator0x2F,
+        
         
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Retrieve-specific circumstantial error sub-codes ================================================================================
         /// 0x30: A majority of data sources returned an HTTP status code other than 200 (1+ args):
         HttpErrors,
+        
         /// 0x31: A majority of data sources timed out:
         RetrievalsTimeout,
+        
         /// Unallocated
         RetrieveCircumstance0x32, RetrieveCircumstance0x33, RetrieveCircumstance0x34, RetrieveCircumstance0x35,
         RetrieveCircumstance0x36, RetrieveCircumstance0x37, RetrieveCircumstance0x38, RetrieveCircumstance0x39,
         RetrieveCircumstance0x3A, RetrieveCircumstance0x3B, RetrieveCircumstance0x3C, RetrieveCircumstance0x3D,
         RetrieveCircumstance0x3E, RetrieveCircumstance0x3F,
         
+        
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Scripting-specific runtime error sub-code =========================================================================
         /// 0x40: Math operator caused an underflow.
         MathUnderflow,
+        
         /// 0x41: Math operator caused an overflow.
         MathOverflow,
+        
         /// 0x42: Math operator tried to divide by zero.
         MathDivisionByZero,            
+        
         /// 0x43:Wrong input to subscript call.
         WrongSubscriptInput,
+        
         /// 0x44: Value cannot be extracted from input binary buffer.
         BufferIsNotValue,
+        
         /// 0x45: Value cannot be decoded from expected type.
         Decode,
+        
         /// 0x46: Unexpected empty array.
         EmptyArray,
+        
         /// 0x47: Value cannot be encoded to expected type.
         Encode,
+        
         /// 0x48: Failed to filter input values (1+ args).
         Filter,
+        
         /// 0x49: Failed to hash input value.
         Hash,
+        
         /// 0x4A: Mismatching array ranks.
         MismatchingArrays,
+        
         /// 0x4B: Failed to process non-homogenous array.
         NonHomegeneousArray,
+        
         /// 0x4C: Failed to parse syntax of some input value, or argument.
         Parse,
+        
         /// 0x4E: Parsing logic limits were exceeded.
         ParseOverflow,
+        
         /// 0x4F: Unallocated
         ScriptError0x4F,
     
+        
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Actual first-order result error codes =============================================================================
+        
         /// 0x50: Not enough reveals were received in due time:
         InsufficientReveals,
+        
         /// 0x51: No actual reveal majority was reached on tally stage:
         InsufficientMajority,
+        
         /// 0x52: Not enough commits were received before tally stage:
         InsufficientCommits,
+        
         /// 0x53: Generic error during tally execution (to be deprecated after WIP #0028)
         TallyExecution,
+        
         /// 0x54: A majority of data sources could either be temporarily unresponsive or failing to report the requested data:
         CircumstantialFailure,
+        
         /// 0x55: At least one data source is inconsistent when queried through multiple transports at once:
         InconsistentSources,
+        
         /// 0x56: Any one of the (multiple) Retrieve, Aggregate or Tally scripts were badly formated:
         MalformedDataRequest,
+        
         /// 0x57: Values returned from a majority of data sources don't match the expected schema:
         MalformedQueryResponses,
+        
         /// Unallocated:    
         OtherError0x58, OtherError0x59, OtherError0x5A, OtherError0x5B, OtherError0x5C, OtherError0x5D, OtherError0x5E, 
+        
         /// 0x5F: Size of serialized tally result exceeds allowance:
         OversizedTallyResult,
 
+        
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Inter-stage runtime error sub-codes ===============================================================================
+        
         /// 0x60: Data aggregation reveals could not get decoded on the tally stage:
         MalformedReveals,
+        
         /// 0x61: The result to data aggregation could not get encoded:
         EncodeReveals,  
+        
         /// 0x62: A mode tie ocurred when calculating some mode value on the aggregation or the tally stage:
         ModeTie, 
+        
         /// Unallocated:
         OtherError0x63, OtherError0x64, OtherError0x65, OtherError0x66, OtherError0x67, OtherError0x68, OtherError0x69, 
         OtherError0x6A, OtherError0x6B, OtherError0x6C, OtherError0x6D, OtherError0x6E, OtherError0x6F,
         
+        
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Runtime access error sub-codes ====================================================================================
+        
         /// 0x70: Tried to access a value from an array using an index that is out of bounds (1+ args):
         ArrayIndexOutOfBounds,
+        
         /// 0x71: Tried to access a value from a map using a key that does not exist (1+ args):
         MapKeyNotFound,
+        
         /// 0X72: Tried to extract value from a map using a JSON Path that returns no values (+1 args):
         JsonPathNotFound,
+        
         /// Unallocated:
         OtherError0x73, OtherError0x74, OtherError0x75, OtherError0x76, OtherError0x77, OtherError0x78, 
         OtherError0x79, OtherError0x7A, OtherError0x7B, OtherError0x7C, OtherError0x7D, OtherError0x7E, OtherError0x7F, 
@@ -317,24 +352,55 @@ library Witnet {
         OtherError0xD4, OtherError0xD5, OtherError0xD6, OtherError0xD7, OtherError0xD8, OtherError0xD9, OtherError0xDA,
         OtherError0xDB, OtherError0xDC, OtherError0xDD, OtherError0xDE, OtherError0xDF,
         
+        
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Inter-client generic error codes ==================================================================================
         /// Data requests that cannot be relayed into the Witnet blockchain should be reported
         /// with one of these errors. 
+        
         /// 0xE0: Requests that cannot be parsed must always get this error as their result.
         BridgeMalformedDataRequest,
+        
         /// 0xE1: Witnesses exceeds 100
         BridgePoorIncentives,
+        
         /// 0xE2: The request is rejected on the grounds that it may cause the submitter to spend or stake an
         /// amount of value that is unjustifiably high when compared with the reward they will be getting
         BridgeOversizedTallyResult,
         
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// Unallocated =======================================================================================================
+        /// Unallocated:
         OtherError0xE3, OtherError0xE4, OtherError0xE5, OtherError0xE6, OtherError0xE7, OtherError0xE8, OtherError0xE9,
-        OtherError0xEA, OtherError0xEB, OtherError0xEC, OtherError0xED, OtherError0xEE, OtherError0xEF, OtherError0xF0,
-        OtherError0xF1, OtherError0xF2, OtherError0xF3, OtherError0xF4, OtherError0xF5, OtherError0xF6, OtherError0xF7,
-        OtherError0xF8, OtherError0xF9, OtherError0xFA, OtherError0xFB, OtherError0xFC, OtherError0xFD, OtherError0xFE,
+        OtherError0xEA, OtherError0xEB, OtherError0xEC, OtherError0xED, OtherError0xEE, OtherError0xEF, 
+        
+        
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Transient errors as determined by the Request Board contract ======================================================
+        
+        /// 0xF0: 
+        BoardAwaitingResult,
+
+        /// 0xF1:
+        BoardFinalizingResult,
+
+        /// 0xF2:
+        BoardBeingDisputed,
+
+        /// Unallocated
+        OtherError0xF3, OtherError0xF4, OtherError0xF5, OtherError0xF6, OtherError0xF7,
+
+        
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// Final errors as determined by the Request Board contract ==========================================================
+
+        /// 0xF8:
+        BoardAlreadyDelivered,
+
+        /// 0xF9:
+        BoardResolutionTimeout,
+
+        /// Unallocated:
+        OtherError0xFA, OtherError0xFB, OtherError0xFC, OtherError0xFD, OtherError0xFE,
+        
         
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// 0xFF: Some tally error is not intercepted but it should (0+ args)
@@ -542,175 +608,184 @@ library Witnet {
         ));
     }
 
+    
+    /// ========================================================================================================
+    /// --- 'DataResult' helper methods ------------------------------------------------------------------------
 
-    /// ===============================================================================================================
-    /// --- 'Result' helper methods ----------------------------------------------------------------------------
-
-    modifier _isReady(Result memory result) {
-        require(result.success, "Witnet: tried to decode value from errored result.");
-        _;
+    function noErrors(DataResult memory self) internal pure returns (bool) {
+        return self.status == ResultStatus.NoErrors;
     }
 
-    /// @dev Decode an address from the Result's CBOR value.
-    function asAddress(Result memory result)
-        internal pure
-        _isReady(result)
-        returns (address)
+    function keepWaiting(DataResult memory self) internal pure returns (bool) {
+        return keepWaiting(self.status);
+    }
+
+    function hasErrors(DataResult memory self) internal pure returns (bool) {
+        return hasErrors(self.status);
+    }
+
+    modifier _checkDataType(DataResult memory self, RadonDataTypes expectedDataType) {
+        require(
+            !keepWaiting(self)
+                && self.dataType == expectedDataType
+            , "cbor: cannot fetch data"
+        ); _; 
+        self.dataType = peekRadonDataType(self.value);
+    }
+
+    function fetchAddress(DataResult memory self) 
+        internal pure 
+        _checkDataType(self, RadonDataTypes.Bytes) 
+        returns (address _res)
     {
-        if (result.value.majorType == uint8(WitnetCBOR.MAJOR_TYPE_BYTES)) {
-            return toAddress(result.value.readBytes());
-        } else {
-            revert("WitnetLib: reading address from string not yet supported.");
-        }
+        return toAddress(self.value.readBytes());
     }
 
-    /// @dev Decode a `bool` value from the Result's CBOR value.
-    function asBool(Result memory result)
-        internal pure
-        _isReady(result)
+    function fetchBool(DataResult memory self) 
+        internal pure 
+        _checkDataType(self, RadonDataTypes.Bool) 
         returns (bool)
     {
-        return result.value.readBool();
+        return self.value.readBool();
     }
 
-    /// @dev Decode a `bytes` value from the Result's CBOR value.
-    function asBytes(Result memory result)
-        internal pure
-        _isReady(result)
-        returns(bytes memory)
+    function fetchBytes(DataResult memory self)
+        internal pure 
+        _checkDataType(self, RadonDataTypes.Bytes) 
+        returns (bytes memory)
     {
-        return result.value.readBytes();
+        return self.value.readBytes();
     }
 
-    /// @dev Decode a `bytes4` value from the Result's CBOR value.
-    function asBytes4(Result memory result)
-        internal pure
-        _isReady(result)
+    function fetchBytes4(DataResult memory self)
+        internal pure 
+        _checkDataType(self, RadonDataTypes.Bytes) 
         returns (bytes4)
     {
-        return toBytes4(asBytes(result));
+        return toBytes4(self.value.readBytes());
     }
 
-    /// @dev Decode a `bytes32` value from the Result's CBOR value.
-    function asBytes32(Result memory result)
-        internal pure
-        _isReady(result)
+    function fetchBytes32(DataResult memory self)
+        internal pure 
+        _checkDataType(self, RadonDataTypes.Bytes) 
         returns (bytes32)
     {
-        return toBytes32(asBytes(result));
+        return toBytes32(self.value.readBytes());
     }
 
-    /// @notice Returns the Result's unread CBOR value.
-    function asCborValue(Result memory result)
-        internal pure
-        _isReady(result)
-        returns (WitnetCBOR.CBOR memory)
-    {
-        return result.value;
-    }
-
-    /// @notice Decode array of CBOR values from the Result's CBOR value. 
-    function asCborArray(Result memory result)
-        internal pure
-        _isReady(result)
+    function fetchCborArray(DataResult memory self)
+        internal pure 
+        _checkDataType(self, RadonDataTypes.Array) 
         returns (WitnetCBOR.CBOR[] memory)
     {
-        return result.value.readArray();
+        return self.value.readArray();
     }
 
     /// @dev Decode a fixed16 (half-precision) numeric value from the Result's CBOR value.
     /// @dev Due to the lack of support for floating or fixed point arithmetic in the EVM, this method offsets all values.
     /// by 5 decimal orders so as to get a fixed precision of 5 decimal positions, which should be OK for most `fixed16`.
     /// use cases. In other words, the output of this method is 10,000 times the actual value, encoded into an `int32`.
-    function asFixed16(Result memory result)
-        internal pure
-        _isReady(result)
+    function fetchFloatFixed16(DataResult memory self)
+        internal pure 
+        _checkDataType(self, RadonDataTypes.Float) 
         returns (int32)
     {
-        return result.value.readFloat16();
+        return self.value.readFloat16();
     }
 
     /// @dev Decode an array of fixed16 values from the Result's CBOR value.
-    function asFixed16Array(Result memory result)
+    function fetchFloatFixed16Array(DataResult memory self)
         internal pure
-        _isReady(result)
+        _checkDataType(self, RadonDataTypes.Array)
         returns (int32[] memory)
     {
-        return result.value.readFloat16Array();
+        return self.value.readFloat16Array();
     }
 
-    /// @dev Decode an `int64` value from the Result's CBOR value.
-    function asInt(Result memory result)
+    /// @dev Decode a `int64` value from the DataResult's CBOR value.
+    function fetchInt(DataResult memory self)
         internal pure
-        _isReady(result)
-        returns (int)
+        _checkDataType(self, RadonDataTypes.Integer)
+        returns (int64)
     {
-        return result.value.readInt();
+        return self.value.readInt();
     }
 
-    /// @dev Decode an array of integer numeric values from a Result as an `int[]` array.
-    /// @param result An instance of Result.
-    /// @return The `int[]` decoded from the Result.
-    function asIntArray(Result memory result)
+    function fetchInt64Array(DataResult memory self)
         internal pure
-        _isReady(result)
-        returns (int[] memory)
+        _checkDataType(self, RadonDataTypes.Array)
+        returns (int64[] memory)
     {
-        return result.value.readIntArray();
+        return self.value.readIntArray();
     }
 
-    /// @dev Decode a `string` value from the Result's CBOR value.
-    /// @param result An instance of Result.
-    /// @return The `string` decoded from the Result.
-    function asText(Result memory result)
+    function fetchString(DataResult memory self)
         internal pure
-        _isReady(result)
-        returns(string memory)
+        _checkDataType(self, RadonDataTypes.String)
+        returns (string memory)
     {
-        return result.value.readString();
+        return self.value.readString();
     }
 
-    /// @dev Decode an array of strings from the Result's CBOR value.
-    /// @param result An instance of Result.
-    /// @return The `string[]` decoded from the Result.
-    function asTextArray(Result memory result)
+    function fetchStringArray(DataResult memory self)
         internal pure
-        _isReady(result)
+        _checkDataType(self, RadonDataTypes.Array)
         returns (string[] memory)
     {
-        return result.value.readStringArray();
+        return self.value.readStringArray();
     }
 
-    /// @dev Decode a `uint64` value from the Result's CBOR value.
-    /// @param result An instance of Result.
-    /// @return The `uint` decoded from the Result.
-    function asUint(Result memory result)
+    /// @dev Decode a `uint64` value from the DataResult's CBOR value.
+    function fetchUint(DataResult memory self)
         internal pure
-        _isReady(result)
-        returns (uint)
+        _checkDataType(self, RadonDataTypes.Integer)
+        returns (uint64)
     {
-        return result.value.readUint();
+        return self.value.readUint();
     }
 
-    /// @dev Decode an array of `uint64` values from the Result's CBOR value.
-    /// @param result An instance of Result.
-    /// @return The `uint[]` decoded from the Result.
-    function asUintArray(Result memory result)
+    function fetchUint64Array(DataResult memory self)
         internal pure
-        returns (uint[] memory)
+        _checkDataType(self, RadonDataTypes.Array)
+        returns (uint64[] memory)
     {
-        return result.value.readUintArray();
+        return self.value.readUintArray();
+    }
+
+    bytes7 private constant _CBOR_MAJOR_TYPE_TO_RADON_DATA_TYPES_MAP = 0x04040307010600;
+    function peekRadonDataType(WitnetCBOR.CBOR memory cbor) internal pure returns (RadonDataTypes _type) {
+        _type = RadonDataTypes.Any;
+        if (!cbor.eof()) {
+            if (cbor.majorType <= 6) {
+                return RadonDataTypes(uint8(bytes1(_CBOR_MAJOR_TYPE_TO_RADON_DATA_TYPES_MAP[cbor.majorType])));
+            
+            } else if (cbor.majorType == 7) {
+                if (cbor.additionalInformation == 20 || cbor.additionalInformation == 21) {
+                    return RadonDataTypes.Bool;
+                
+                } else if (cbor.additionalInformation >= 25 && cbor.additionalInformation <= 27) {
+                    return RadonDataTypes.Float;
+                }
+            }
+        }
     }
 
 
     /// ===============================================================================================================
-    /// --- ResultErrorCodes helper methods --------------------------------------------------------------------
+    /// --- ResultStatus helper methods --------------------------------------------------------------------
 
-    function isCircumstantial(ResultErrorCodes self) internal pure returns (bool) {
-        return (self == ResultErrorCodes.CircumstantialFailure);
+    function hasErrors(ResultStatus self) internal pure returns (bool) {
+        return (
+            self != ResultStatus.NoErrors
+                && !keepWaiting(self)
+        );
     }
 
-    function isRetriable(ResultErrorCodes self) internal pure returns (bool) {
+    function isCircumstantial(ResultStatus self) internal pure returns (bool) {
+        return (self == ResultStatus.CircumstantialFailure);
+    }
+
+    function isRetriable(ResultStatus self) internal pure returns (bool) {
         return (
             lackOfConsensus(self)
                 || isCircumstantial(self)
@@ -718,21 +793,29 @@ library Witnet {
         );
     }
 
-    function lackOfConsensus(ResultErrorCodes self) internal pure returns (bool) {
+    function keepWaiting(ResultStatus self) internal pure returns (bool) {
         return (
-            self == ResultErrorCodes.InsufficientCommits
-                || self == ResultErrorCodes.InsufficientMajority
-                || self == ResultErrorCodes.InsufficientReveals
+            self == ResultStatus.BoardAwaitingResult
+                || self == ResultStatus.BoardFinalizingResult
         );
     }
 
-    function poorIncentives(ResultErrorCodes self) internal pure returns (bool) {
+    function lackOfConsensus(ResultStatus self) internal pure returns (bool) {
         return (
-            self == ResultErrorCodes.OversizedTallyResult
-                || self == ResultErrorCodes.InsufficientCommits
-                || self == ResultErrorCodes.BridgePoorIncentives
-                || self == ResultErrorCodes.BridgeOversizedTallyResult
+            self == ResultStatus.InsufficientCommits
+                || self == ResultStatus.InsufficientMajority
+                || self == ResultStatus.InsufficientReveals
         );
+    }
+
+    function poorIncentives(ResultStatus self) internal pure returns (bool) {
+        return (
+            self == ResultStatus.OversizedTallyResult
+                || self == ResultStatus.InsufficientCommits
+                || self == ResultStatus.BridgePoorIncentives
+                || self == ResultStatus.BridgeOversizedTallyResult
+        );
+    }
     }
 
 
@@ -815,18 +898,6 @@ library Witnet {
             return address(0);
         }
         return ecrecover(hash_, v, r, s);
-    }
-
-
-    /// @dev Transform given bytes into a Result instance.
-    /// @param cborBytes Raw bytes representing a CBOR-encoded value.
-    /// @return A `Result` instance.
-    function toWitnetResult(bytes memory cborBytes)
-        internal pure
-        returns (Result memory)
-    {
-        WitnetCBOR.CBOR memory cborValue = WitnetCBOR.fromBytes(cborBytes);
-        return _resultFromCborValue(cborValue);
     }
 
     function toAddress(bytes memory _value) internal pure returns (address) {
@@ -1078,17 +1149,6 @@ library Witnet {
             mstore(0x20, _b)
             _hash := keccak256(0x0, 0x40)
         }
-    }
-
-    /// @dev Decode a CBOR value into a Result instance.
-    function _resultFromCborValue(WitnetCBOR.CBOR memory cbor)
-        private pure
-        returns (Result memory)    
-    {
-        // Witnet uses CBOR tag 39 to represent RADON error code identifiers.
-        // [CBOR tag 39] Identifiers for CBOR: https://github.com/lucas-clemente/cbor-specs/blob/master/id.md
-        bool success = cbor.tag != 39;
-        return Result(success, cbor);
     }
 
     /// @dev Calculate length of string-equivalent to given bytes32.

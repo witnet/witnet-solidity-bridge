@@ -107,19 +107,6 @@ abstract contract WitOracleBaseTrustable
         return WitOracleDataLib.getQueryStatus(_queryId);
     }
 
-    /// @notice Returns query's result current status from a requester's point of view:
-    /// @notice   - 0 => Void: the query is either non-existent or deleted;
-    /// @notice   - 1 => Awaiting: the query has not yet been reported;
-    /// @notice   - 2 => Ready: the query has been succesfully solved;
-    /// @notice   - 3 => Error: the query couldn't get solved due to some issue.
-    /// @param _queryId The unique query identifier.
-    function getQueryResponseStatus(Witnet.QueryId _queryId)
-        virtual override public view
-        returns (Witnet.QueryResponseStatus)
-    {
-        return WitOracleDataLib.getQueryResponseStatus(_queryId);
-    }
-
 
     // ================================================================================================================
     // --- Implements IWitOracleAdminACLs -----------------------------------------------------------------------------
@@ -154,7 +141,7 @@ abstract contract WitOracleBaseTrustable
 
 
     /// ===============================================================================================================
-    /// --- IWitOracleLegacy ---------------------------------------------------------------------------------------
+    /// --- IWitOracleLegacy ------------------------------------------------------------------------------------------
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
@@ -187,6 +174,18 @@ abstract contract WitOracleBaseTrustable
 
         // Base fee is actually invariant to max result size:
         return estimateBaseFee(gasPrice);
+    }
+
+    function getQueryResponseStatus(uint256 queryId) virtual override external view returns (IWitOracleLegacy.QueryResponseStatus) {
+        // todo
+    }
+
+    function getQueryResultCborBytes(uint256 queryId) virtual override external view returns (bytes memory) {
+        // todo
+    }
+
+    function getQueryResultError(uint256 queryId) virtual override external view returns (IWitOracleLegacy.ResultError memory) {
+        // todo
     }
 
     function postRequest(

@@ -55,14 +55,30 @@ contract WitOracleTrustableObscuro
         return super.getQueryResponse(_queryId);
     }
 
-    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
-    /// @param _queryId The unique query identifier.
-    function getQueryResultError(Witnet.QueryId _queryId)
-        public view
+    function getQueryResult(Witnet.QueryId _queryId)
         virtual override
+        public view
         onlyRequester(_queryId)
-        returns (Witnet.ResultError memory)
+        returns (Witnet.DataResult memory)
     {
-        return super.getQueryResultError(_queryId);
-    }  
+        return WitOracleBase.getQueryResult(_queryId);
+    }
+
+    function getQueryResultStatus(Witnet.QueryId _queryId)
+        virtual override
+        public view
+        onlyRequester(_queryId)
+        returns (Witnet.ResultStatus)
+    {
+        return super.getQueryResultStatus(_queryId);
+    }
+
+    function getQueryResultStatusDescription(Witnet.QueryId _queryId)
+        virtual override
+        public view
+        onlyRequester(_queryId)
+        returns (string memory)
+    {
+        return WitOracleBase.getQueryResultStatusDescription(_queryId);
+    }
 }

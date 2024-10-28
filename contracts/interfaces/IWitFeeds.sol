@@ -49,14 +49,14 @@ interface IWitFeeds {
 
     /// Returns the response from the Witnet oracle blockchain to the latest update attempt 
     /// for the given data feed.
-    function latestUpdateQueryResponse(bytes4 feedId) external view returns (Witnet.QueryResponse memory);
+    function latestUpdateQueryResult(bytes4 feedId) external view returns (Witnet.DataResult memory);
 
     /// Tells the current response status of the latest update attempt for the given data feed.
-    function latestUpdateQueryResponseStatus(bytes4 feedId) external view returns (Witnet.QueryResponseStatus);
+    function latestUpdateQueryResultStatus(bytes4 feedId) external view returns (Witnet.ResultStatus);
 
     /// Describes the error returned from the Witnet oracle blockchain in response to the latest 
     /// update attempt for the given data feed, if any.
-    function latestUpdateResultError(bytes4 feedId) external view returns (Witnet.ResultError memory);
+    function latestUpdateQueryResultStatusDescription(bytes4 feedId) external view returns (string memory);
     
     /// Returns the ERC-2362 caption of the given feed identifier, if known. 
     function lookupCaption(bytes4) external view returns (string memory);
