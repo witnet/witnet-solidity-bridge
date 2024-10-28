@@ -7,6 +7,7 @@ import "../interfaces/IWitOracleAdminACLs.sol";
 import "../interfaces/IWitOracleBlocks.sol";
 import "../interfaces/IWitOracleConsumer.sol";
 import "../interfaces/IWitOracleEvents.sol";
+import "../interfaces/IWitOracleLegacy.sol";
 import "../interfaces/IWitOracleTrustableReporter.sol";
 import "../interfaces/IWitOracleTrustlessReporter.sol";
 import "../libs/Witnet.sol";
@@ -178,18 +179,12 @@ library WitOracleDataLib {
     /// =======================================================================
     /// --- IWitOracle --------------------------------------------------------
 
-    function fetchQueryResponse(Witnet.QueryId queryId) public returns (
-            Witnet.QueryResponse memory _queryResponse,
-            Witnet.QueryReward _queryEvmExpiredReward
-        )
-    {
+    function deleteQuery(Witnet.QueryId queryId) public returns (Witnet.QueryReward _evmPayback) {
         Witnet.Query storage __query = seekQuery(queryId);
         require(
             msg.sender == __query.request.requester,
             "not the requester"
         );
-        _queryEvmExpiredReward = __query.reward;
-        __query.reward = Witnet.QueryReward.wrap(0);
         Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
         if (
             _queryStatus != Witnet.QueryStatus.Expired
@@ -200,29 +195,28 @@ library WitOracleDataLib {
                 toString(_queryStatus)
             )));
         }
-        _queryResponse = __query.response;
+        _evmPayback = __query.reward;
         delete data().queries[queryId];
-    }    
+    }   
     
-    function fetchQueryResponseTrustlessly(
+    function deleteQueryTrustlessly(
             Witnet.QueryId queryId, 
             uint256 evmQueryAwaitingBlocks,
             uint256 evmQueryReportingStake
         )
-        public returns (Witnet.QueryResponse memory _queryResponse)
+        public returns (Witnet.QueryReward _evmPayback)
     {
         Witnet.Query storage __query = seekQuery(queryId);
         require(
             msg.sender == __query.request.requester,
             "not the requester"
         );
-        
-        Witnet.QueryReward _evmReward = __query.reward;
-        __query.reward = Witnet.QueryReward.wrap(0);
-        
+        _evmPayback = __query.reward;
         Witnet.QueryStatus _queryStatus = getQueryStatusTrustlessly(queryId, evmQueryAwaitingBlocks);
+        // TODO: properly handle QueryStatus.Disputed .....
+        // TODO: should pending reward be transferred to requester ??
         if (_queryStatus == Witnet.QueryStatus.Expired) {
-            if (Witnet.QueryReward.unwrap(_evmReward) > 0) {
+            if (Witnet.QueryReward.unwrap(_evmPayback) > 0) {
                 if (__query.response.disputer != address(0)) {
                     // transfer reporter's stake to the disputer
                     slash(
@@ -246,13 +240,7 @@ library WitOracleDataLib {
         }
 
         // completely delete query metadata from storage:
-        _queryResponse = __query.response;
         delete data().queries[queryId];
-
-        // transfer unused reward to requester:
-        if (Witnet.QueryReward.unwrap(_evmReward) > 0) {
-            deposit(msg.sender, Witnet.QueryReward.unwrap(_evmReward));
-        }
     }
 
     function getQueryStatus(Witnet.QueryId queryId) public view returns (Witnet.QueryStatus) {

@@ -11,7 +11,7 @@ import "../interfaces/IWitOracleLegacy.sol";
 import "../libs/WitPriceFeedsLib.sol";
 import "../patterns/Ownable2Step.sol";
 
-/// @title WitPriceFeeds: Price Feeds live repository reliant on the Witnet Oracle blockchain.
+/// @title WitPriceFeeds: Price Feeds live repository reliant on the Wit/oracle blockchain.
 /// @author Guillermo Díaz <guillermo@otherplane.com>
 
 contract WitPriceFeedsUpgradable
@@ -790,16 +790,21 @@ contract WitPriceFeedsUpgradable
                 }
             } else {
                 // Check if latest update ended successfully:
-                if (_latestStatus == Witnet.QueryResponseStatus.Ready) {
+                if (_latestStatus == Witnet.ResultStatus.NoErrors) {
                     // If so, remove previous last valid query from the WRB:
                     if (Witnet.QueryId.unwrap(__feed.lastValidQueryId) > 0) {
-                        witOracle.fetchQueryResponse(__feed.lastValidQueryId);
+                        _usedFunds += Witnet.QueryReward.unwrap(
+                            witOracle.deleteQuery(__feed.lastValidQueryId)
+                        );
                     }
                     __feed.lastValidQueryId = _latestId;
                 } else {
                     // Otherwise, try to delete latest query, as it was faulty
                     // and we are about to post a new update request:
-                    try witOracle.fetchQueryResponse(_latestId) {} catch {}
+                    try witOracle.deleteQuery(_latestId) 
+                    returns (Witnet.QueryReward _unsedReward) {
+                        _usedFunds += Witnet.QueryReward.unwrap(_unsedReward);
+                    } catch {}
                 }
                 // Post update request to the WRB:
                 _latestId = witOracle.postQuery{value: _usedFunds}(

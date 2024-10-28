@@ -152,20 +152,29 @@ abstract contract WitOracleBaseTrustless
     // ================================================================================================================
     // --- Overrides IWitOracle (trustlessly) -------------------------------------------------------------------------
 
-    function fetchQueryResponse(Witnet.QueryId _queryId)
-        virtual override
-        external
-        returns (Witnet.QueryResponse memory)
+    /// @notice Removes all query data from storage. Pays back reward on expired queries.
+    /// @dev Fails if the query is not in a final status, or not called from the actual requester.
+    function deleteQuery(Witnet.QueryId _queryId)
+        virtual override external
+        returns (Witnet.QueryReward)
     {
-        try WitOracleDataLib.fetchQueryResponseTrustlessly(
+        try WitOracleDataLib.deleteQueryTrustlessly(
             _queryId,
             QUERY_AWAITING_BLOCKS,
             QUERY_REPORTING_STAKE
         
         ) returns (
-            Witnet.QueryResponse memory _queryResponse
+            Witnet.QueryReward _queryReward
         ) {
-            return _queryResponse;
+            uint256 _evmPayback = Witnet.QueryReward.unwrap(_queryReward);
+            if (_evmPayback > 0) {
+                // transfer unused reward to requester, only if the query expired:
+                __safeTransferTo(
+                    payable(msg.sender),
+                    _evmPayback
+                );
+            }
+            return _queryReward;
         
         } catch Error(string memory _reason) {
             _revert(_reason);

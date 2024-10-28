@@ -65,31 +65,27 @@ abstract contract WitOracleBaseTrustable
     // ================================================================================================================
     // --- IWitOracle -------------------------------------------------------------------------------------------------
 
-    /// Retrieves copy of all response data related to a previously posted request, removing the whole query from storage.
-    /// @dev Fails if the `_queryId` is not in 'Finalized' or 'Expired' status, or called from an address different to
-    /// @dev the one that actually posted the given request.
-    /// @dev If in 'Expired' status, query reward is transfer back to the requester.
-    /// @param _queryId The unique query identifier.
-    function fetchQueryResponse(Witnet.QueryId _queryId)
-        virtual override external
-        returns (Witnet.QueryResponse memory)
+    /// @notice Removes all query data from storage. Pays back reward on expired queries.
+    /// @dev Fails if the query is not in a final status, or not called from the actual requester.
+    function deleteQuery(Witnet.QueryId _queryId)
+        virtual override public
+        returns (Witnet.QueryReward)
     {
-        try WitOracleDataLib.fetchQueryResponse(
+        try WitOracleDataLib.deleteQuery(
             _queryId
         
         ) returns (
-            Witnet.QueryResponse memory queryResponse,
-            Witnet.QueryReward queryEvmExpiredReward
+            Witnet.QueryReward _queryReward
         ) {
-            uint256 _queryEvmExpiredReward = Witnet.QueryReward.unwrap(queryEvmExpiredReward);
-            if (_queryEvmExpiredReward > 0) {
+            uint256 _evmPayback = Witnet.QueryReward.unwrap(_queryReward);
+            if (_evmPayback > 0) {
                 // transfer unused reward to requester, only if the query expired:
                 __safeTransferTo(
                     payable(msg.sender),
-                    _queryEvmExpiredReward
+                    _evmPayback
                 );
             }
-            return queryResponse;
+            return _queryReward;
         
         } catch Error(string memory _reason) {
             _revert(_reason);
@@ -175,6 +171,11 @@ abstract contract WitOracleBaseTrustable
 
         // Base fee is actually invariant to max result size:
         return estimateBaseFee(gasPrice);
+    }
+
+    function fetchQueryResponse(uint256 queryId) virtual override external returns (bytes memory) {
+        deleteQuery(Witnet.QueryId.wrap(queryId));
+        return hex"";
     }
 
     function getQueryResponseStatus(uint256 queryId) virtual override external view returns (IWitOracleLegacy.QueryResponseStatus) {
