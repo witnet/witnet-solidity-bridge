@@ -3,7 +3,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitnetProxy.sol";
-
 import "../libs/Create3.sol";
 
 /// @notice WitnetDeployer contract used both as CREATE2 (EIP-1014) factory for Witnet artifacts, 

@@ -13,5 +13,4 @@ interface IWitFeedsEvents {
         bytes4  erc2362Id4,
         uint256 witOracleQueryId
     );
-
 }
