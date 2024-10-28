@@ -39,15 +39,6 @@ abstract contract WitOracleBaseTrustless
         } _;   
     }
 
-    function specs() virtual override external pure returns (bytes4) {
-        return (
-            type(IWitAppliance).interfaceId
-                ^ type(IWitOracle).interfaceId
-                ^ type(IWitOracleBlocks).interfaceId
-                ^ type(IWitOracleTrustless).interfaceId
-        );
-    }
-
     constructor(
             uint256 _queryAwaitingBlocks,
             uint256 _queryReportingStake

@@ -34,14 +34,6 @@ abstract contract WitOracleBaseTrustable
         ); _;
     }
 
-    function specs() virtual override external pure returns (bytes4) {
-        return (
-            type(IWitAppliance).interfaceId
-                ^ type(IWitOracle).interfaceId
-                ^ type(IWitOracleTrustable).interfaceId
-        );
-    }
-
     constructor(bytes32 _versionTag)
         Ownable(msg.sender)
         Payable(address(0))
@@ -551,7 +543,7 @@ abstract contract WitOracleBaseTrustable
             })
         );
     }
-    
+
     function __reportResult(
             uint256 _queryId,
             uint32  _resultTimestamp,
