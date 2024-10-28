@@ -13,7 +13,7 @@ module.exports = {
     libs: {
       WitOracleDataLib: "WitOracleDataLib",
       WitOracleRadonEncodingLib: "WitOracleRadonEncodingLib",
-      WitOracleResultErrorsLib: "WitOracleResultErrorsLib",
+      WitOracleResultStatusLib: "WitOracleResultStatusLib",
       WitPriceFeedsLib: "WitPriceFeedsLib",
     },
   },

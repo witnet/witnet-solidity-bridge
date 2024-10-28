@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../../WitOracle.sol";
 import "../../data/WitOracleDataLib.sol";
 import "../../interfaces/IWitOracleConsumer.sol";
-import "../../libs/WitOracleResultErrorsLib.sol";
+import "../../libs/WitOracleResultStatusLib.sol";
 import "../../patterns/Payable.sol";
 
 /// @title Witnet Request Board "trustless" base implementation contract.
