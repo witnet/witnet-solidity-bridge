@@ -23,6 +23,7 @@ abstract contract WitOracleBaseTrustable
         IWitOracleTrustable,
         IWitOracleTrustableReporter
 {
+    using Witnet for Witnet.DataPushReport;
     using Witnet for Witnet.QuerySLA;
 
     /// Asserts the caller is authorized as a reporter
@@ -209,63 +210,6 @@ abstract contract WitOracleBaseTrustable
         );
     }
 
-    function __postQuery(
-            address _requester,
-            uint24  _callbackGas,
-            uint72  _evmReward,
-            bytes32 _radonRadHash,
-            Witnet.QuerySLA memory _querySLA
-        ) 
-        virtual override
-        internal
-        returns (Witnet.QueryId _queryId)
-    {
-        _queryId = super.__postQuery(
-            _requester,
-            _callbackGas,
-            _evmReward,
-            _radonRadHash,
-            _querySLA
-        );
-        emit IWitOracleLegacy.WitnetQuery(
-            Witnet.QueryId.unwrap(_queryId), 
-            msg.value, 
-            IWitOracleLegacy.RadonSLA({
-                witCommitteeCapacity: uint8(_querySLA.witCommitteeCapacity),
-                witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward
-            })
-        );
-    }
-
-    function __postQuery(
-            address _requester,
-            uint24  _callbackGas,
-            uint72  _evmReward,
-            bytes calldata _radonRadBytecode,
-            Witnet.QuerySLA memory _querySLA
-        ) 
-        virtual override
-        internal
-        returns (Witnet.QueryId _queryId)
-    {
-        _queryId = super.__postQuery(
-            _requester,
-            _callbackGas,
-            _evmReward,
-            _radonRadBytecode,
-            _querySLA
-        );
-        emit IWitOracleLegacy.WitnetQuery(
-            Witnet.QueryId.unwrap(_queryId), 
-            msg.value, 
-            IWitOracleLegacy.RadonSLA({
-                witCommitteeCapacity: uint8(_querySLA.witCommitteeCapacity),
-                witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward
-            })
-        );
-    }
-
-
     function postRequestWithCallback(
             bytes32 _queryRadHash,
             IWitOracleLegacy.RadonSLA calldata _querySLA,
@@ -322,12 +266,45 @@ abstract contract WitOracleBaseTrustable
     // =========================================================================================================================
     // --- Implements IWitOracleTrustable --------------------------------------------------------------------------------------
 
+    /// @notice Verify the push data report is valid and was actually signed by a trustable reporter,
+    /// @notice reverting if verification fails, or returning a Witnet.DataResult struct otherwise.
     function pushData(Witnet.DataPushReport calldata _report, bytes calldata _signature) 
-        virtual override
-        external 
+        virtual override external 
+        checkQuerySLA(_report.witDrSLA)
         returns (Witnet.DataResult memory)
     {
-        _revert("todo");
+        _require(
+            __storage().reporters[Witnet.recoverAddr(_signature, _report.tallyHash())],
+            "unauthorized reporter"
+        );
+        return WitOracleDataLib.intoDataResult(
+            Witnet.QueryResponse({
+                reporter: address(0), disputer: address(0), _0: 0,
+                resultCborBytes: _report.witDrResultCborBytes,
+                resultDrTxHash: _report.witDrTxHash,
+                resultTimestamp: Witnet.determineTimestampFromEpoch(_report.witDrResultEpoch)
+            }), 
+            Witnet.QueryStatus.Finalized
+        );
+    }
+
+    /// @notice Verify the push data report is valid, reverting if not valid or not reported from an authorized 
+    /// @notice reporter, or returning a Witnet.DataResult struct otherwise.
+    function pushData(Witnet.DataPushReport calldata _report)
+        virtual override external
+        checkQuerySLA(_report.witDrSLA)
+        onlyReporters
+        returns (Witnet.DataResult memory)
+    {
+        return WitOracleDataLib.intoDataResult(
+            Witnet.QueryResponse({
+                reporter: address(0), disputer: address(0), _0: 0,
+                resultCborBytes: _report.witDrResultCborBytes,
+                resultDrTxHash: _report.witDrTxHash,
+                resultTimestamp: Witnet.determineTimestampFromEpoch(_report.witDrResultEpoch)
+            }), 
+            Witnet.QueryStatus.Finalized
+        );
     }
 
 
@@ -518,6 +495,62 @@ abstract contract WitOracleBaseTrustable
     /// ================================================================================================================
     /// --- Internal methods -------------------------------------------------------------------------------------------
 
+    function __postQuery(
+            address _requester,
+            uint24  _callbackGas,
+            uint72  _evmReward,
+            bytes32 _radonRadHash,
+            Witnet.QuerySLA memory _querySLA
+        ) 
+        virtual override
+        internal
+        returns (Witnet.QueryId _queryId)
+    {
+        _queryId = super.__postQuery(
+            _requester,
+            _callbackGas,
+            _evmReward,
+            _radonRadHash,
+            _querySLA
+        );
+        emit IWitOracleLegacy.WitnetQuery(
+            Witnet.QueryId.unwrap(_queryId), 
+            msg.value, 
+            IWitOracleLegacy.RadonSLA({
+                witCommitteeCapacity: uint8(_querySLA.witCommitteeCapacity),
+                witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward
+            })
+        );
+    }
+
+    function __postQuery(
+            address _requester,
+            uint24  _callbackGas,
+            uint72  _evmReward,
+            bytes calldata _radonRadBytecode,
+            Witnet.QuerySLA memory _querySLA
+        ) 
+        virtual override
+        internal
+        returns (Witnet.QueryId _queryId)
+    {
+        _queryId = super.__postQuery(
+            _requester,
+            _callbackGas,
+            _evmReward,
+            _radonRadBytecode,
+            _querySLA
+        );
+        emit IWitOracleLegacy.WitnetQuery(
+            Witnet.QueryId.unwrap(_queryId), 
+            msg.value, 
+            IWitOracleLegacy.RadonSLA({
+                witCommitteeCapacity: uint8(_querySLA.witCommitteeCapacity),
+                witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward
+            })
+        );
+    }
+    
     function __reportResult(
             uint256 _queryId,
             uint32  _resultTimestamp,
