@@ -6,7 +6,7 @@ module.exports = {
       ],
       baseLibs: [
         "WitOracleDataLib",
-        "WitOracleResultErrorsLib",
+        "WitOracleResultStatusLib",
       ],
       immutables: {
         types: ["(uint32, uint32, uint32, uint32)"],
