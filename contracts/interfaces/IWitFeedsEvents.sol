@@ -2,6 +2,8 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+import "../libs/Witnet.sol";
+
 interface IWitFeedsEvents {
     
     /// A fresh update on the data feed identified as `erc2364Id4` has just been 
@@ -11,6 +13,6 @@ interface IWitFeedsEvents {
         address evmOrigin,
         address evmSender,
         bytes4  erc2362Id4,
-        uint256 witOracleQueryId
+        Witnet.QueryId witOracleQueryId
     );
 }

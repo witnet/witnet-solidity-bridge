@@ -408,7 +408,7 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
   try {
     utils.traceTx(await deployer.deploy(targetInitCode, targetSalt, { from: targetSpecs.from }))
   } catch (ex) {
-    panic("Deployment failed", `Expected address: ${targetAddr}`, ex)
+    panic("Deployment failed", `Expected address: ${targetAddr}`)
   }
   if (!constructorArgs[network]) constructorArgs[network] = {}
   constructorArgs[network][target] = targetConstructorArgs

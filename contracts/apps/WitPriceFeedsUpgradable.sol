@@ -3,12 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../WitPriceFeeds.sol";
 import "../core/WitnetUpgradableBase.sol";
-import "../data/WitPriceFeedsData.sol";
+
+import "../data/WitPriceFeedsDataLib.sol";
+
 import "../interfaces/IWitFeedsAdmin.sol";
 import "../interfaces/IWitFeedsLegacy.sol";
 import "../interfaces/IWitPriceFeedsSolverFactory.sol";
 import "../interfaces/IWitOracleLegacy.sol";
-import "../libs/WitPriceFeedsLib.sol";
+
 import "../patterns/Ownable2Step.sol";
 
 /// @title WitPriceFeeds: Price Feeds live repository reliant on the Wit/oracle blockchain.
@@ -18,7 +20,6 @@ contract WitPriceFeedsUpgradable
     is
         Ownable2Step,
         WitPriceFeeds,
-        WitPriceFeedsData,
         WitnetUpgradableBase,
         IWitFeedsAdmin,
         IWitFeedsLegacy,
@@ -76,7 +77,7 @@ contract WitPriceFeedsUpgradable
             msg.sig == IWitPriceFeedsSolver.solve.selector
                 && msg.sender == address(this)
         ) {
-            address _solver = __records_(bytes4(bytes8(msg.data) << 32)).solver;
+            address _solver = WitPriceFeedsDataLib.seekRecord(bytes4(bytes8(msg.data) << 32)).solver;
             _require(
                 _solver != address(0),
                 "unsettled solver"
@@ -111,6 +112,7 @@ contract WitPriceFeedsUpgradable
             });
             // settle default base fee overhead percentage
             __baseFeeOverheadPercentage = 10;
+        
         } else {
             // otherwise, store beacon read from _initData, if any
             if (_initData.length > 0) {
@@ -139,76 +141,7 @@ contract WitPriceFeedsUpgradable
 
 
     // ================================================================================================================
-    // --- Implements 'IFeeds' ----------------------------------------------------------------------------------------
-
-    /// @notice Returns unique hash determined by the combination of data sources being used
-    /// @notice on non-routed price feeds, and dependencies of routed price feeds.
-    /// @dev Ergo, `footprint()` changes if any data source is modified, or the dependecy tree
-    /// @dev on any routed price feed is altered.
-    function footprint() 
-        virtual override
-        public view
-        returns (bytes4 _footprint)
-    {
-        if (__storage().ids.length > 0) {
-            _footprint = _footprintOf(__storage().ids[0]);
-            for (uint _ix = 1; _ix < __storage().ids.length; _ix ++) {
-                _footprint ^= _footprintOf(__storage().ids[_ix]);
-            }
-        }
-    }
-
-    function hash(string memory caption)
-        virtual override
-        public pure
-        returns (bytes4)
-    {
-        return bytes4(keccak256(bytes(caption)));
-    }
-
-    function lookupCaption(bytes4 feedId)
-        override
-        public view
-        returns (string memory)
-    {
-        return __records_(feedId).caption;
-    }
-
-    function supportedFeeds()
-        virtual override
-        external view
-        returns (bytes4[] memory _ids, string[] memory _captions, bytes32[] memory _solvers)
-    {
-        _ids = __storage().ids;
-        _captions = new string[](_ids.length);
-        _solvers = new bytes32[](_ids.length);
-        for (uint _ix = 0; _ix < _ids.length; _ix ++) {
-            Record storage __record = __records_(_ids[_ix]);
-            _captions[_ix] = __record.caption;
-            _solvers[_ix] = address(__record.solver) == address(0) ? __record.radHash : bytes32(bytes20(__record.solver));
-        }
-    }
-    
-    function supportsCaption(string calldata caption)
-        virtual override
-        external view
-        returns (bool)
-    {
-        bytes4 feedId = hash(caption);
-        return hash(__records_(feedId).caption) == feedId;
-    }
-    
-    function totalFeeds() 
-        override 
-        external view
-        returns (uint256)
-    {
-        return __storage().ids.length;
-    }
-
-
-    // ================================================================================================================
-    // --- Implements 'IWitFeeds' ----------------------------------------------------------------------------------
+    // --- Implements 'IWitFeeds' -------------------------------------------------------------------------------------
 
     function defaultRadonSLA()
         override
@@ -231,26 +164,86 @@ contract WitPriceFeedsUpgradable
             * (100 + __baseFeeOverheadPercentage)
         ) / 100; 
     }
+    
+    /// @notice Returns unique hash determined by the combination of data sources being used
+    /// @notice on non-routed price feeds, and dependencies of routed price feeds.
+    /// @dev Ergo, `footprint()` changes if any data source is modified, or the dependecy tree
+    /// @dev on any routed price feed is altered.
+    function footprint() 
+        virtual override
+        public view
+        returns (bytes4 _footprint)
+    {
+        if (__storage().ids.length > 0) {
+            _footprint = _footprintOf(__storage().ids[0]);
+            for (uint _ix = 1; _ix < __storage().ids.length; _ix ++) {
+                _footprint ^= _footprintOf(__storage().ids[_ix]);
+            }
+        }
+    }
+
+    function hash(string memory caption)
+        virtual override
+        public pure
+        returns (bytes4)
+    {
+        return WitPriceFeedsDataLib.hash(caption);
+    }
+
+    function lookupCaption(bytes4 feedId)
+        override
+        public view
+        returns (string memory)
+    {
+        return WitPriceFeedsDataLib.seekRecord(feedId).caption;
+    }
+
+    function supportedFeeds()
+        virtual override
+        external view
+        returns (bytes4[] memory _ids, string[] memory _captions, bytes32[] memory _solvers)
+    {
+        return WitPriceFeedsDataLib.supportedFeeds();
+    }
+    
+    function supportsCaption(string calldata caption)
+        virtual override
+        external view
+        returns (bool)
+    {
+        bytes4 feedId = hash(caption);
+        return hash(WitPriceFeedsDataLib.seekRecord(feedId).caption) == feedId;
+    }
+    
+    function totalFeeds() 
+        override 
+        external view
+        returns (uint256)
+    {
+        return __storage().ids.length;
+    }
 
     function lastValidQueryId(bytes4 feedId)
         override public view
         returns (Witnet.QueryId)
     {
-        return _lastValidQueryId(feedId);
+        return WitPriceFeedsDataLib.lastValidQueryId(witOracle, feedId);
     }
 
     function lastValidQueryResponse(bytes4 feedId)
         override public view
         returns (Witnet.QueryResponse memory)
     {
-        return witOracle.getQueryResponse(_lastValidQueryId(feedId));
+        return witOracle.getQueryResponse(
+            WitPriceFeedsDataLib.lastValidQueryId(witOracle, feedId)
+        );
     }
 
     function latestUpdateQueryId(bytes4 feedId)
         override public view
         returns (Witnet.QueryId)
     {
-        return __records_(feedId).latestUpdateQueryId;
+        return WitPriceFeedsDataLib.seekRecord(feedId).latestUpdateQueryId;
     }
 
     function latestUpdateQueryRequest(bytes4 feedId)
@@ -271,7 +264,7 @@ contract WitPriceFeedsUpgradable
         override public view
         returns (Witnet.ResultStatus)
     {
-        return _coalesceQueryResultStatus(latestUpdateQueryId(feedId));
+        return WitPriceFeedsDataLib.latestUpdateQueryResultStatus(witOracle, feedId);
     }
 
     function latestUpdateQueryResultStatusDescription(bytes4 feedId) 
@@ -287,7 +280,7 @@ contract WitPriceFeedsUpgradable
         override public view
         returns (bytes memory)
     {
-        Record storage __record = __records_(feedId);
+        WitPriceFeedsDataLib.Record storage __record = WitPriceFeedsDataLib.seekRecord(feedId);
         _require(
             __record.radHash != 0,
             "no RAD hash"
@@ -299,7 +292,7 @@ contract WitPriceFeedsUpgradable
         override public view
         returns (bytes32)
     {
-        return __records_(feedId).radHash;
+        return WitPriceFeedsDataLib.seekRecord(feedId).radHash;
     }
 
     function lookupWitOracleRadonRetrievals(bytes4 feedId)
@@ -322,12 +315,8 @@ contract WitPriceFeedsUpgradable
     function requestUpdate(bytes4 feedId, Witnet.QuerySLA calldata updateSLA)
         public payable
         virtual override
-        returns (uint256 _usedFunds)
+        returns (uint256)
     {
-        _require(
-            updateSLA.equalOrGreaterThan(__defaultRadonSLA),
-            "unsecure update"
-        );
         return __requestUpdate(feedId, updateSLA);
     }
     
@@ -428,36 +417,25 @@ contract WitPriceFeedsUpgradable
         Ownable.transferOwnership(_newOwner);
     }
 
-    function deleteFeed(string calldata caption)
-        virtual override
-        external 
-        onlyOwner
-    {
-        bytes4 feedId = hash(caption);
-        bytes4[] storage __ids = __storage().ids;
-        Record storage __record = __records_(feedId);
-        uint _index = __record.index;
-        _require(_index != 0, "unknown feed");
-        {
-            bytes4 _lastFeedId = __ids[__ids.length - 1];
-            __ids[_index - 1] = _lastFeedId;
-            __ids.pop();
-            __records_(_lastFeedId).index = _index;
-            delete __storage().records[feedId];
+    function deleteFeed(string calldata caption) virtual override external onlyOwner {
+        try WitPriceFeedsDataLib.deleteFeed(caption) {
+        
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+
+        } catch (bytes memory) {
+            _revertWitPriceFeedsDataLibUnhandledException();
         }
-        emit WitnetFeedDeleted(feedId);
     }
 
-    function deleteFeeds()
-        virtual override
-        external
-        onlyOwner
-    {
-        bytes4[] storage __ids = __storage().ids;
-        for (uint _ix = __ids.length; _ix > 0; _ix --) {
-            bytes4 _feedId = __ids[_ix - 1];
-            delete __storage().records[_feedId]; __ids.pop();
-            emit WitnetFeedDeleted(_feedId);
+    function deleteFeeds() virtual override external onlyOwner {
+        try WitPriceFeedsDataLib.deleteFeeds() {
+        
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+
+        } catch (bytes memory) {
+            _revertWitPriceFeedsDataLibUnhandledException();
         }
     }
 
@@ -475,7 +453,6 @@ contract WitPriceFeedsUpgradable
     {
         _require(defaultSLA.isValid(), "invalid SLA");
         __defaultRadonSLA = defaultSLA;
-        emit WitnetRadonSLA(defaultSLA);
     }
     
     function settleFeedRequest(string calldata caption, bytes32 radHash)
@@ -486,21 +463,14 @@ contract WitPriceFeedsUpgradable
             _registry().lookupRadonRequestResultDataType(radHash) == dataType,
             "bad result data type"
         );
-        bytes4 feedId = hash(caption);
-        Record storage __record = __records_(feedId);
-        if (__record.index == 0) {
-            // settle new feed:
-            __record.caption = caption;
-            __record.decimals = _validateCaption(caption);
-            __record.index = __storage().ids.length + 1;
-            __record.radHash = radHash;
-            __storage().ids.push(feedId);
-        } else if (__record.radHash != radHash) {
-            // update radHash on existing feed:
-            __record.radHash = radHash;
-            __record.solver = address(0);
+        try WitPriceFeedsDataLib.settleFeedRequest(caption, radHash) {
+
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+        
+        } catch (bytes memory) {
+            _revertWitPriceFeedsDataLibUnhandledException();
         }
-        emit WitnetFeedSettled(feedId, radHash);
     }
 
     function settleFeedRequest(string calldata caption, WitOracleRequest request)
@@ -530,59 +500,21 @@ contract WitPriceFeedsUpgradable
         onlyOwner
     {
         _require(
+            bytes6(bytes(caption)) == bytes6(__prefix),
+            "bad caption prefix"
+        );
+        _require(
             solver != address(0),
             "no solver address"
         );
-        bytes4 feedId = hash(caption);        
-        Record storage __record = __records_(feedId);
-        if (__record.index == 0) {
-            // settle new feed:
-            __record.caption = caption;
-            __record.decimals = _validateCaption(caption);
-            __record.index = __storage().ids.length + 1;
-            __record.solver = solver;
-            __storage().ids.push(feedId);
-        } else if (__record.solver != solver) {
-            // update radHash on existing feed:
-            __record.radHash = 0;
-            __record.solver = solver;
+        try WitPriceFeedsDataLib.settleFeedSolver(caption, solver, deps) {
+        
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+        
+        } catch (bytes memory) {
+            _revertWitPriceFeedsDataLibUnhandledException();
         }
-        // validate solver first-level dependencies
-        {
-            // solhint-disable-next-line avoid-low-level-calls
-            (bool _success, bytes memory _reason) = solver.delegatecall(abi.encodeWithSelector(
-                IWitPriceFeedsSolver.validate.selector,
-                feedId,
-                deps
-            ));
-            if (!_success) {
-                assembly {
-                    _reason := add(_reason, 4)
-                }
-                _revert(string(abi.encodePacked(
-                    "solver validation failed: ",
-                    string(abi.decode(_reason,(string)))
-                )));
-            }
-        }
-        // smoke-test the solver 
-        {   
-            // solhint-disable-next-line avoid-low-level-calls
-            (bool _success, bytes memory _reason) = address(this).staticcall(abi.encodeWithSelector(
-                IWitPriceFeedsSolver.solve.selector,
-                feedId
-            ));
-            if (!_success) {
-                assembly {
-                    _reason := add(_reason, 4)
-                }
-                _revert(string(abi.encodePacked(
-                    "smoke-test failed: ",
-                    string(abi.decode(_reason,(string)))
-                )));
-            }
-        }
-        emit WitnetFeedSolverSettled(feedId, solver);
     }
 
 
@@ -594,7 +526,7 @@ contract WitPriceFeedsUpgradable
         external view
         returns (uint8)
     {
-        return __records_(feedId).decimals;
+        return WitPriceFeedsDataLib.seekRecord(feedId).decimals;
     }
     
     function lookupPriceSolver(bytes4 feedId)
@@ -602,12 +534,7 @@ contract WitPriceFeedsUpgradable
         external view
         returns (IWitPriceFeedsSolver _solverAddress, string[] memory _solverDeps)
     {
-        _solverAddress = IWitPriceFeedsSolver(__records_(feedId).solver);
-        bytes4[] memory _deps = _depsOf(feedId);
-        _solverDeps = new string[](_deps.length);
-        for (uint _ix = 0; _ix < _deps.length; _ix ++) {
-            _solverDeps[_ix] = lookupCaption(_deps[_ix]);
-        }
+        return WitPriceFeedsDataLib.seekPriceSolver(feedId);
     }
 
     function latestPrice(bytes4 feedId)
@@ -615,42 +542,17 @@ contract WitPriceFeedsUpgradable
         public view
         returns (IWitPriceFeedsSolver.Price memory)
     {
-        Witnet.QueryId _queryId = _lastValidQueryId(feedId);
-        if (Witnet.QueryId.unwrap(_queryId) > 0) {
-            Witnet.DataResult memory _lastValidResult = witOracle.getQueryResult(_queryId);
-            return IWitPriceFeedsSolver.Price({
-                value: _lastValidResult.fetchUint(),
-                timestamp: _lastValidResult.timestamp,
-                drTxHash: _lastValidResult.drTxHash,
-                status: latestUpdateQueryResultStatus(feedId)
-            });
-        } else {
-            address _solver = __records_(feedId).solver;
-            if (_solver != address(0)) {
-                // solhint-disable-next-line avoid-low-level-calls
-                (bool _success, bytes memory _result) = address(this).staticcall(abi.encodeWithSelector(
-                    IWitPriceFeedsSolver.solve.selector,
-                    feedId
-                ));
-                if (!_success) {
-                    assembly {
-                        _result := add(_result, 4)
-                    }
-                    revert(string(abi.encodePacked(
-                        "WitPriceFeeds: ",
-                        string(abi.decode(_result, (string)))
-                    )));
-                } else {
-                    return abi.decode(_result, (IWitPriceFeedsSolver.Price));
-                }
-            } else {
-                return IWitPriceFeedsSolver.Price({
-                    value: 0,
-                    timestamp: Witnet.ResultTimestamp.wrap(0),
-                    drTxHash: Witnet.TransactionHash.wrap(0),
-                    status: latestUpdateQueryResultStatus(feedId)
-                });
-            }
+        try WitPriceFeedsDataLib.latestPrice(
+            witOracle, 
+            feedId
+        ) returns (IWitPriceFeedsSolver.Price memory _latestPrice) {
+            return _latestPrice;
+        
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+        
+        } catch (bytes memory) {
+            _revertWitPriceFeedsDataLibUnhandledException();
         }
     }
 
@@ -670,25 +572,36 @@ contract WitPriceFeedsUpgradable
     // --- Implements 'IWitPriceFeedsSolverFactory' ---------------------------------------------------------------------
 
     function deployPriceSolver(bytes calldata initcode, bytes calldata constructorParams)
-        virtual override
-        external
+        virtual override external
         onlyOwner
-        returns (address _solver)
+        returns (address)
     {
-        _solver = WitPriceFeedsLib.deployPriceSolver(initcode, constructorParams);
-        emit NewPriceFeedsSolver(
-            _solver, 
-            _solver.codehash, 
+        try WitPriceFeedsDataLib.deployPriceSolver(
+            initcode, 
             constructorParams
-        );
+        ) returns (
+            address _solver
+        ) {
+            emit NewPriceFeedsSolver(
+                _solver, 
+                _solver.codehash, 
+                constructorParams
+            );
+            return _solver;
+        
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+
+        } catch (bytes memory) {
+            _revertWitPriceFeedsDataLibUnhandledException();
+        }
     }
 
     function determinePriceSolverAddress(bytes calldata initcode, bytes calldata constructorParams)
-        virtual override
-        public view
+        virtual override public view
         returns (address _address)
     {
-        return WitPriceFeedsLib.determinePriceSolverAddress(initcode, constructorParams);
+        return WitPriceFeedsDataLib.determinePriceSolverAddress(initcode, constructorParams);
     }
 
 
@@ -714,124 +627,110 @@ contract WitPriceFeedsUpgradable
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
 
-    function _coalesceQueryResultStatus(Witnet.QueryId _queryId)
-        internal view
-        returns (Witnet.ResultStatus)
-    {
-        if (Witnet.QueryId.unwrap(_queryId) > 0) {
-            return witOracle.getQueryResultStatus(_queryId);
-        } else {
-            return Witnet.ResultStatus.NoErrors;
-        }
-    }
-
     function _footprintOf(bytes4 _id4) virtual internal view returns (bytes4) {
-        if (__records_(_id4).radHash != bytes32(0)) {
-            return bytes4(keccak256(abi.encode(_id4, __records_(_id4).radHash)));
+        if (WitPriceFeedsDataLib.seekRecord(_id4).radHash != bytes32(0)) {
+            return bytes4(keccak256(abi.encode(_id4, WitPriceFeedsDataLib.seekRecord(_id4).radHash)));
         } else {
-            return bytes4(keccak256(abi.encode(_id4, __records_(_id4).solverDepsFlag)));
-        }
-    }
-
-    function _lastValidQueryId(bytes4 feedId)
-        virtual internal view
-        returns (Witnet.QueryId _queryId)
-    {
-        _queryId = latestUpdateQueryId(feedId);
-        if (
-            Witnet.QueryId.unwrap(_queryId) == 0
-                || witOracle.getQueryResultStatus(_queryId) != Witnet.ResultStatus.NoErrors 
-        ) {
-            _queryId = __records_(feedId).lastValidQueryId;
+            return bytes4(keccak256(abi.encode(_id4, WitPriceFeedsDataLib.seekRecord(_id4).solverDepsFlag)));
         }
     }
 
     function _validateCaption(string calldata caption)
         internal view returns (uint8)
     {
-        try WitPriceFeedsLib.validateCaption(__prefix, caption) returns (uint8 _decimals) {
+        _require(
+            bytes6(bytes(caption)) == bytes6(__prefix),
+            "bad caption prefix"
+        );
+        try WitPriceFeedsDataLib.validateCaption(caption) returns (uint8 _decimals) {
             return _decimals;
-        } catch Error(string memory reason) {
-            _revert(reason);
+        
+        } catch Error(string memory _reason) {
+            _revert(_reason);
+
+        } catch (bytes memory) {
+            _revertWitPriceFeedsDataLibUnhandledException();
         }
+    }
+
+    function _revertWitPriceFeedsDataLibUnhandledException() internal view {
+        _revert(_revertWitPriceFeedsDataLibUnhandledExceptionReason());
+    }
+
+    function _revertWitPriceFeedsDataLibUnhandledExceptionReason() internal pure returns (string memory) {
+        return string(abi.encodePacked(
+            type(WitPriceFeedsDataLib).name,
+            ": unhandled assertion"
+        ));
     }
 
     function __requestUpdate(bytes4[] memory _deps, Witnet.QuerySLA memory sla)
         virtual internal
-        returns (uint256 _usedFunds)
+        returns (uint256 _evmUsedFunds)
     {
-        uint _partial = msg.value / _deps.length;
+        uint _evmUnitaryUpdateRequestFee = msg.value / _deps.length;
         for (uint _ix = 0; _ix < _deps.length; _ix ++) {
-            _usedFunds += this.requestUpdate{value: _partial}(_deps[_ix], sla);
+            _evmUsedFunds += this.requestUpdate{
+                value: _evmUnitaryUpdateRequestFee
+            }(
+                _deps[_ix], 
+                sla
+            );
         }
     }
 
-    function __requestUpdate(bytes4 feedId, Witnet.QuerySLA memory querySLA)
+    function __requestUpdate(
+            bytes4 feedId, 
+            Witnet.QuerySLA memory querySLA
+        )
         virtual internal
-        returns (uint256 _usedFunds)
+        returns (uint256)
     {
-        // TODO: let requester settle the reward (see WRV2.randomize(..))
-        Record storage __feed = __records_(feedId);
-        if (__feed.radHash != 0) {
-            _usedFunds = estimateUpdateRequestFee(tx.gasprice);
-            _require(msg.value >= _usedFunds, "insufficient reward");
-            Witnet.QueryId _latestId = __feed.latestUpdateQueryId;
-            Witnet.ResultStatus _latestStatus = _coalesceQueryResultStatus(_latestId);
-            if (_latestStatus.keepWaiting()) {
-                // latest update is still pending, so just increase the reward
-                // accordingly to current tx gasprice:
-                uint72 _evmReward = Witnet.QueryReward.unwrap(witOracle.getQueryEvmReward(_latestId));
-                int _deltaReward = int(int72(_evmReward)) - int(_usedFunds);
-                if (_deltaReward > 0) {
-                    _usedFunds = uint(_deltaReward);
-                    witOracle.upgradeQueryEvmReward{value: _usedFunds}(_latestId);
-                } else {
-                    _usedFunds = 0;
+        if (WitPriceFeedsDataLib.seekRecord(feedId).radHash != 0) {
+            // TODO: let requester settle the reward (see WRV2.randomize(..))
+            uint256 _evmUpdateRequestFee = estimateUpdateRequestFee(tx.gasprice);
+            _require(
+                msg.value >= _evmUpdateRequestFee,
+                "insufficient update fee"
+            );
+            try WitPriceFeedsDataLib.requestUpdate(
+                witOracle,
+                feedId,
+                querySLA,
+                _evmUpdateRequestFee
+            
+            ) returns (
+                Witnet.QueryId _latestQueryId,
+                uint256 _evmUsedFunds
+            
+            ) {
+                if (_evmUsedFunds < msg.value) {
+                    // transfer back unused funds:
+                    payable(msg.sender).transfer(msg.value - _evmUsedFunds);
                 }
-            } else {
-                // Check if latest update ended successfully:
-                if (_latestStatus == Witnet.ResultStatus.NoErrors) {
-                    // If so, remove previous last valid query from the WRB:
-                    if (Witnet.QueryId.unwrap(__feed.lastValidQueryId) > 0) {
-                        _usedFunds += Witnet.QueryReward.unwrap(
-                            witOracle.deleteQuery(__feed.lastValidQueryId)
-                        );
-                    }
-                    __feed.lastValidQueryId = _latestId;
-                } else {
-                    // Otherwise, try to delete latest query, as it was faulty
-                    // and we are about to post a new update request:
-                    try witOracle.deleteQuery(_latestId) 
-                    returns (Witnet.QueryReward _unsedReward) {
-                        _usedFunds += Witnet.QueryReward.unwrap(_unsedReward);
-                    } catch {}
-                }
-                // Post update request to the WRB:
-                _latestId = witOracle.postQuery{value: _usedFunds}(
-                    __feed.radHash,
-                    querySLA
-                );
-                // Update latest query id:
-                __feed.latestUpdateQueryId = _latestId;
                 // solhint-disable avoid-tx-origin:
-                emit PullingUpdate(
-                    tx.origin, 
-                    _msgSender(),
-                    feedId,
-                    Witnet.QueryId.unwrap(_latestId)
-                );
-            }            
-        } else if (__feed.solver != address(0)) {
-            _usedFunds = __requestUpdate(
-                _depsOf(feedId), 
+                emit PullingUpdate(tx.origin, _msgSender(), feedId, _latestQueryId);
+                return _evmUsedFunds;
+            
+            } catch Error(string memory _reason) {
+                _revert(_reason);
+
+            } catch (bytes memory) {
+                _revertWitPriceFeedsDataLibUnhandledException();
+            }
+        
+        } else if (WitPriceFeedsDataLib.seekRecord(feedId).solver != address(0)) {
+            return __requestUpdate(
+                WitPriceFeedsDataLib.depsOf(feedId),
                 querySLA
             );
+
         } else {
             _revert("unknown feed");
         }
-        if (_usedFunds < msg.value) {
-            // transfer back unused funds:
-            payable(msg.sender).transfer(msg.value - _usedFunds);
-        }
+    }
+
+    function __storage() internal pure returns (WitPriceFeedsDataLib.Storage storage) {
+        return WitPriceFeedsDataLib.data();
     }
 }

@@ -22,7 +22,7 @@ const libs = [
   artifacts.WitOracleRadonEncodingLib,
   artifacts.WitOracleResultErrorsLib,
   artifacts.WitOracleDataLib,
-  artifacts.WitPriceFeedsLib,
+  artifacts.WitPriceFeedsDataLib,
 ]
 for (const index in libs) {
   utils.traceVerify(network, `${libs[index]}@${addresses[network][libs[index]]}`)

@@ -14,7 +14,7 @@ module.exports = {
       WitOracleDataLib: "WitOracleDataLib",
       WitOracleRadonEncodingLib: "WitOracleRadonEncodingLib",
       WitOracleResultStatusLib: "WitOracleResultStatusLib",
-      WitPriceFeedsLib: "WitPriceFeedsLib",
+      WitPriceFeedsDataLib: "WitPriceFeedsDataLib",
     },
   },
   "polygon:amoy": {

@@ -9,10 +9,9 @@ import "../WitOracleRequestTemplate.sol";
 
 interface IWitFeedsAdmin {
 
-    event WitnetFeedDeleted(bytes4 feedId);
-    event WitnetFeedSettled(bytes4 feedId, bytes32 radHash);
-    event WitnetFeedSolverSettled(bytes4 feedId, address solver);
-    event WitnetRadonSLA(Witnet.QuerySLA sla);
+    event WitFeedDeleted(string caption, bytes4 feedId);
+    event WitFeedSettled(string caption, bytes4 feedId, bytes32 radHash);
+    event WitFeedSolverSettled(string caption, bytes4 feedId, address solver);
 
     function acceptOwnership() external;
     function baseFeeOverheadPercentage() external view returns (uint16);
