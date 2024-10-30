@@ -234,7 +234,7 @@ library Witnet {
         /// 0x42: Math operator tried to divide by zero.
         MathDivisionByZero,            
         
-        /// 0x43:Wrong input to subscript call.
+        /// 0x43: Wrong input to subscript call.
         WrongSubscriptInput,
         
         /// 0x44: Value cannot be extracted from input binary buffer.
@@ -264,11 +264,11 @@ library Witnet {
         /// 0x4C: Failed to parse syntax of some input value, or argument.
         Parse,
         
-        /// 0x4E: Parsing logic limits were exceeded.
+        /// 0x4D: Parsing logic limits were exceeded.
         ParseOverflow,
         
-        /// 0x4F: Unallocated
-        ScriptError0x4F,
+        /// Unallocated
+        ScriptError0x4E, ScriptError0x4F,
     
         
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
