@@ -121,9 +121,14 @@ contract WitPriceFeedsUpgradable
                 );
                 __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
                 __defaultRadonSLA = _defaultRadonSLA;
-            } else if (__defaultRadonSLA.witResultMaxSize < 16) {
+            } else if (!__defaultRadonSLA.isValid()) {
                 // possibly, an upgrade from a previous branch took place:
-                __defaultRadonSLA.witResultMaxSize = 16;
+                __defaultRadonSLA = Witnet.QuerySLA({
+                witCommitteeCapacity: 10,
+                witCommitteeUnitaryReward: 2 * 10 ** 8,
+                witResultMaxSize: 16,
+                witCapability: Witnet.QueryCapability.wrap(0)
+            });
             }
         }
     }
@@ -617,9 +622,13 @@ contract WitPriceFeedsUpgradable
         return (
             int(uint(_latestPrice.value)),
             Witnet.ResultTimestamp.unwrap(_latestPrice.timestamp),
-            _latestPrice.status == Witnet.ResultStatus.NoErrors
+            (_latestPrice.latestStatus == IWitPriceFeedsSolver.LatestUpdateStatus.Ready
                 ? 200
-                : (_latestPrice.status.keepWaiting() ? 404 : 400)
+                : (_latestPrice.latestStatus == IWitPriceFeedsSolver.LatestUpdateStatus.Awaiting
+                    ? 404 
+                    : 400
+                )
+            )
         );
     }
 
