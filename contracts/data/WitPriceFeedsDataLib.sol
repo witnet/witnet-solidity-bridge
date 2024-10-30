@@ -167,7 +167,7 @@ library WitPriceFeedsDataLib {
                 value: _lastValidResult.fetchUint(),
                 timestamp: _lastValidResult.timestamp,
                 drTxHash: _lastValidResult.drTxHash,
-                status: latestUpdateQueryResultStatus(witOracle, feedId)
+                latestStatus: _intoLatestUpdateStatus(latestUpdateQueryResultStatus(witOracle, feedId))
             });
         
         } else {
@@ -191,7 +191,7 @@ library WitPriceFeedsDataLib {
                     value: 0,
                     timestamp: Witnet.ResultTimestamp.wrap(0),
                     drTxHash: Witnet.TransactionHash.wrap(0),
-                    status: latestUpdateQueryResultStatus(witOracle, feedId)
+                    latestStatus: _intoLatestUpdateStatus(latestUpdateQueryResultStatus(witOracle, feedId))
                 });
             }
         }
@@ -439,4 +439,18 @@ library WitPriceFeedsDataLib {
             constructorParams
         );
     }
+
+    function _intoLatestUpdateStatus(Witnet.ResultStatus _resultStatus)
+        private pure 
+        returns (IWitPriceFeedsSolver.LatestUpdateStatus)
+    {
+        return (_resultStatus.keepWaiting() 
+            ? IWitPriceFeedsSolver.LatestUpdateStatus.Awaiting
+            : (_resultStatus.hasErrors()
+                ? IWitPriceFeedsSolver.LatestUpdateStatus.Error
+                : IWitPriceFeedsSolver.LatestUpdateStatus.Ready
+            )
+        );
+    }
+
 }
