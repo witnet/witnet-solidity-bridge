@@ -322,6 +322,10 @@ contract WitPriceFeedsUpgradable
         virtual override
         returns (uint256)
     {
+        _require(
+            updateSLA.equalOrGreaterThan(__defaultRadonSLA),
+            "unsecure update request"
+        );
         return __requestUpdate(feedId, updateSLA);
     }
     
@@ -696,12 +700,7 @@ contract WitPriceFeedsUpgradable
         returns (uint256)
     {
         if (WitPriceFeedsDataLib.seekRecord(feedId).radHash != 0) {
-            // TODO: let requester settle the reward (see WRV2.randomize(..))
-            uint256 _evmUpdateRequestFee = estimateUpdateRequestFee(tx.gasprice);
-            _require(
-                msg.value >= _evmUpdateRequestFee,
-                "insufficient update fee"
-            );
+            uint256 _evmUpdateRequestFee = msg.value;
             try WitPriceFeedsDataLib.requestUpdate(
                 witOracle,
                 feedId,
