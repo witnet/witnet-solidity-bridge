@@ -69,11 +69,11 @@ library Witnet {
 
     /// Data struct containing the Witnet-provided result to a Data Request.
     struct DataResult {
-        ResultStatus status;
-        RadonDataTypes    dataType;
-        TransactionHash   drTxHash;
-        ResultTimestamp   timestamp;
-        WitnetCBOR.CBOR   value;
+        ResultStatus    status;
+        RadonDataTypes  dataType;
+        TransactionHash drTxHash;
+        ResultTimestamp timestamp;
+        WitnetCBOR.CBOR value;
     }
     
     struct FastForward {

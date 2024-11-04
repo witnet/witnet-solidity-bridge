@@ -170,16 +170,24 @@ abstract contract WitOracleBaseTrustable
         return hex"";
     }
 
-    function getQueryResponseStatus(uint256 queryId) virtual override external view returns (IWitOracleLegacy.QueryResponseStatus) {
-        // todo
+    function getQueryResponseStatus(uint256 queryId) virtual override public view returns (IWitOracleLegacy.QueryResponseStatus) {
+        return WitOracleDataLib.getQueryResponseStatus(
+            Witnet.QueryId.wrap(queryId)
+        );
     }
 
     function getQueryResultCborBytes(uint256 queryId) virtual override external view returns (bytes memory) {
-        // todo
+        return getQueryResponse(Witnet.QueryId.wrap(queryId)).resultCborBytes;
     }
 
     function getQueryResultError(uint256 queryId) virtual override external view returns (IWitOracleLegacy.ResultError memory) {
-        // todo
+        Witnet.DataResult memory _result = getQueryResult(
+            Witnet.QueryId.wrap(queryId)
+        );
+        return IWitOracleLegacy.ResultError({
+            code: uint8(_result.status),
+            reason: WitOracleResultStatusLib.toString(_result)
+        });
     }
 
     function postRequest(
