@@ -474,6 +474,14 @@ function linkBaseLibs (bytecode, baseLibs, networkArtifacts) {
   return bytecode
 }
 
+async function settleArtifactAddress(addresses, network, domain, artifact, addr) {
+  if (!addresses[network]) addresses[network] = {}
+  if (!addresses[network][domain]) addresses[network][domain] = {}
+  addresses[network][domain][artifact] = addr
+  await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+  return addresses
+}
+
 async function unfoldTargetSpecs (domain, target, targetBase, from, network, networkArtifacts, networkSpecs, ancestors) {
   if (!ancestors) ancestors = []
   else if (ancestors.includes(targetBase)) {
