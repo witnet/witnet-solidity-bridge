@@ -672,13 +672,10 @@ library WitOracleDataLib {
     {
         Witnet.Query storage __query = seekQuery(Witnet.QueryId.wrap(queryId));
         __query.checkpoint = Witnet.BlockNumber.wrap(evmFinalityBlock);
-        __query.response = Witnet.QueryResponse({
-            reporter: evmReporter,
-            resultTimestamp: witDrResultTimestamp,
-            resultDrTxHash: witDrTxHash,
-            resultCborBytes: witDrResultCborBytes,
-            disputer: address(0), _0: 0
-        });
+        __query.response.reporter = evmReporter; 
+        __query.response.resultTimestamp = witDrResultTimestamp;
+        __query.response.resultDrTxHash = witDrTxHash;
+        __query.response.resultCborBytes = witDrResultCborBytes;
     }
 
 

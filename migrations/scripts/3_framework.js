@@ -408,7 +408,7 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
   try {
     utils.traceTx(await deployer.deploy(targetInitCode, targetSalt, { from: targetSpecs.from }))
   } catch (ex) {
-    panic("Deployment failed", `Expected address: ${targetAddr}`)
+    panic("Deployment failed", `Expected address: ${targetAddr}`, ex)
   }
   if (!constructorArgs[network]) constructorArgs[network] = {}
   constructorArgs[network][target] = targetConstructorArgs
@@ -417,7 +417,7 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
 }
 
 function panic(header, body, exception) {
-  console.info("  ", `> \x1b[97;41m ${header} failed \x1b[0m ${body}`)
+  console.info("  ", `> \x1b[97;41m ${header} \x1b[0m ${body}`)
   if (exception) console.info(exception)
   console.info()
   process.exit(0)

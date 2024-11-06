@@ -7,7 +7,7 @@ import "../libs/Witnet.sol";
 interface IWitOracleConsumer {
 
     /// @notice Method to be called from the WitOracle contract as soon as the given Witnet `queryId`
-    /// @notice gets reported, if reported with no errors.
+    /// @notice gets reported.
     /// @dev It should revert if called from any other address different to the WitOracle being used
     /// @dev by the WitOracleConsumer contract. 
     /// @param queryId The unique identifier of the Witnet query being reported.

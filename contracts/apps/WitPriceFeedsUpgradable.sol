@@ -124,11 +124,11 @@ contract WitPriceFeedsUpgradable
             } else if (!__defaultRadonSLA.isValid()) {
                 // possibly, an upgrade from a previous branch took place:
                 __defaultRadonSLA = Witnet.QuerySLA({
-                witCommitteeCapacity: 10,
-                witCommitteeUnitaryReward: 2 * 10 ** 8,
-                witResultMaxSize: 16,
-                witCapability: Witnet.QueryCapability.wrap(0)
-            });
+                    witCommitteeCapacity: 10,
+                    witCommitteeUnitaryReward: 2 * 10 ** 8,
+                    witResultMaxSize: 16,
+                    witCapability: Witnet.QueryCapability.wrap(0)
+                });
             }
         }
     }

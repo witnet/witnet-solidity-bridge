@@ -118,10 +118,10 @@ library Witnet {
 
     /// QueryResponse metadata and result as resolved by the Witnet blockchain.
     struct QueryResponse {
-        address reporter; uint64 _0;     // EVM address from which the Data Request result was reported.
-        uint32  resultTimestamp;         // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
-        bytes32 resultDrTxHash;          // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
-        bytes   resultCborBytes;         // CBOR-encode result to the request, as resolved in the Witnet blockchain.
+        address reporter; uint64 _0;    // EVM address from which the Data Request result was reported.
+        uint32  resultTimestamp;        // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
+        bytes32 resultDrTxHash;         // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
+        bytes   resultCborBytes;        // CBOR-encode result to the request, as resolved in the Witnet blockchain.
         address disputer;
     }
 

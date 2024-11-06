@@ -1,6 +1,6 @@
 # witnet-solidity-bridge
 
-Solidity source code of the smart contracts composing the **Witnet EVM Bridge** framework. This framework enables smart contracts operating in a long range of EVM-compatible chains to interact with the [Witnet Oracle Blockchain](https://witnet.io) for retrieving and aggregating offchain public data, or as an entropy source for randomness generation.
+Solidity source code of the smart contracts composing the **Witnet EVM Bridge** framework. This framework enables smart contracts operating in a long range of EVM-compatible chains to interact with the [Wit/oracle Blockchain](https://witnet.io) for retrieving and aggregating offchain public data, or as an entropy source for randomness generation.
 
 ## Install the package
 

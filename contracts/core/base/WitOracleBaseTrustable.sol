@@ -280,7 +280,7 @@ abstract contract WitOracleBaseTrustable
         );
         return WitOracleDataLib.intoDataResult(
             Witnet.QueryResponse({
-                reporter: address(0), disputer: address(0), _0: 0,
+                reporter: address(0), disputer: address(0), _0: 0, 
                 resultCborBytes: _report.witDrResultCborBytes,
                 resultDrTxHash: _report.witDrTxHash,
                 resultTimestamp: Witnet.determineTimestampFromEpoch(_report.witDrResultEpoch)
@@ -299,7 +299,7 @@ abstract contract WitOracleBaseTrustable
     {
         return WitOracleDataLib.intoDataResult(
             Witnet.QueryResponse({
-                reporter: address(0), disputer: address(0), _0: 0,
+                reporter: address(0), disputer: address(0), _0: 0, 
                 resultCborBytes: _report.witDrResultCborBytes,
                 resultDrTxHash: _report.witDrTxHash,
                 resultTimestamp: Witnet.determineTimestampFromEpoch(_report.witDrResultEpoch)
@@ -460,7 +460,10 @@ abstract contract WitOracleBaseTrustable
             ) {
                 emit BatchReportError(
                     _batchResults[_i].queryId,
-                    WitOracleDataLib.notInStatusRevertMessage(Witnet.QueryStatus.Posted)
+                    string(abi.encodePacked(
+                        class(),
+                        ": ", WitOracleDataLib.notInStatusRevertMessage(Witnet.QueryStatus.Posted)
+                    ))
                 );
             } else if (
                 uint256(_batchResults[_i].resultTimestamp) > block.timestamp
