@@ -1,6 +1,6 @@
 const utils = require("../../../../src/utils")
 
-const IWitnetOracleReporter = artifacts.require("IWitOracleReporter")
+const IWitnetOracleReporter = artifacts.require("IWitOracleTrustableReporter")
 const WitOracle = artifacts.require("WitOracle")
 
 module.exports = async function (_deployer, network, [,, from]) {
@@ -18,7 +18,7 @@ module.exports = async function (_deployer, network, [,, from]) {
     const queryId = queryIds[index]
     console.info("  ", "-".repeat(86))
     console.info("  ", "> Query id:          ", queryId)
-    const queryStatus = await wrb.getQueryStatusTag(queryId)
+    const queryStatus = await wrb.getQueryStatusString(queryId)
     console.info("  ", "> Query status:      ", queryStatus)
     if (queryStatus === "Posted") {
       utils.traceTx(await reporter.methods['reportResult(uint256,bytes32,bytes)'](
