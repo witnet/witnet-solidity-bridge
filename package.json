@@ -54,10 +54,7 @@
     "ops:drp:wrb": "npx truffle migrate --migrations_directory ./migrations/ops/drp/wrb --compile-none --network",
     "prepare": "npx truffle compile --all && npx hardhat compile --force && node ./scripts/prepare.js",
     "test": "npx truffle test",
-    "verify:apps": "node ./scripts/verify-apps.js 2>&1",
-    "verify:core": "node ./scripts/verify-core.js 2>&1",
-    "verify:libs": "node ./scripts/verify-libs.js 2>&1",
-    "verify:impls": "node ./scripts/verify-impls.js 2>&1"
+    "verify": "node ./scripts/verify.js 2>&1"
   },
   "dependencies": {
     "dotenv": "^16.4.4",

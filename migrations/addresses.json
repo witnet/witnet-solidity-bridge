@@ -82,11 +82,14 @@
         }
     },
     "optimism:sepolia": {
+        "apps": {
+            "WitRandomnessV21": "0xb2F0D91e488040e3236244D3708FF9A9Ee95736B"
+        },
         "libs": {
-            "WitOracleDataLib": "0x25d57Cf8a047B14172Ba2a929C1441E1A77c3f9D",
-            "WitOracleRadonEncodingLib": "0xf321bcD29CFc6134c9Bf42F759f428F3A6010919",
-            "WitOracleResultErrorsLib": "0x4f2F381Ed2020095F1a1B5a0BDe5AB30da916BC9",
-            "WitPriceFeedsLib": "0x85aa4A0fDa112c47d4216448EE4D49Afd072675e"
+            "WitOracleDataLib": "0xC1cB7e8EdB730C3eE9aAE2B1Fc6FCfAF37C0Aa20",
+            "WitOracleRadonEncodingLib": "0xE8b7925a262e01227384Eb29BE18BD16D169acb5",
+            "WitOracleResultStatusLib": "0x377Ec7C9FFF573c90BE764c785717e6eA9cEa099",
+            "WitPriceFeedsDataLib": "0x7c53160008c518EEE3bf68bc95A9043BD96Bf587"
         }
     },
     "reef": {
