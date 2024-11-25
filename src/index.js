@@ -3,21 +3,11 @@ const merge = require("lodash.merge")
 const utils = require("./utils")
 module.exports = {
   getAddresses: (network) => {
-    const [eco, net] = utils.getRealmNetworkFromString(network)
-    if (addresses[net]) {
-      const merged = merge(
-        addresses.default,
-        addresses[eco],
-        addresses[net],
-      )
-      return {
-        WitOracle: merged?.WitOracle,
-        WitPriceFeeds: merged?.WitPriceFeeds,
-        WitRandomnessV21: merged?.WitRandomnessV21,
-      }
-    } else {
-      return {}
-    }
+    let res = addresses?.default
+    utils.getNetworkTagsFromString(network).forEach(net => {
+      res = merge(res, addresses[net])
+    })
+    return res
   },
   supportedEcosystems: () => {
     const ecosystems = []
