@@ -16,7 +16,7 @@ module.exports = {
   getRealmNetworkFromArgs,
   getRealmNetworkFromString,
   getWitnetArtifactsFromArgs,
-  getWitnetRequestMethodString,
+  getWitOracleRequestMethodString,
   isDryRun,
   isNullAddress,
   isUpgradableArtifact,
@@ -146,7 +146,7 @@ function getRealmNetworkFromString (network) {
   }
 }
 
-function getWitnetRequestMethodString (method) {
+function getWitOracleRequestMethodString (method) {
   if (!method) {
     return "HTTP-GET"
   } else {
