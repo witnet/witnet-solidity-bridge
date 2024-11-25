@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "./WitMockedOracle.sol";
-import "../apps/WitRandomnessV21.sol";
+import "../../apps/WitRandomnessV21.sol";
 
 /// @title Mocked implementation of `WitRandomness`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 

@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../core/upgradable/WitOracleRadonRegistryUpgradableDefault.sol";
+import "../../core/upgradable/WitOracleRadonRegistryUpgradableDefault.sol";
 
 /// @title Mocked implementation of `WitOracleRadonRegistry`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
