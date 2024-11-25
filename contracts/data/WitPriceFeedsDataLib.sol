@@ -50,7 +50,7 @@ library WitPriceFeedsDataLib {
     /// @dev The maximum number of dependencies is hard-limited to 8, as to limit number
     /// @dev of SSTORE operations (`__storage().records[feedId].solverDepsFlag`), 
     /// @dev no matter the actual number of depending feeds involved.
-    function depsOf(bytes4 feedId) public view returns (bytes4[] memory _deps) {
+    function depsOf(bytes4 feedId) internal view returns (bytes4[] memory _deps) {
         bytes32 _solverDepsFlag = data().records[feedId].solverDepsFlag;
         _deps = new bytes4[](8);
         uint _len;
