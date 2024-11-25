@@ -135,18 +135,12 @@ abstract contract WitOracleBaseTrustable
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
     /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256 _gasPrice, uint16 _resultMaxSize)
+    function estimateBaseFee(uint256 _gasPrice, uint16)
         public view
         virtual override
         returns (uint256)
     {
-        return _gasPrice * (
-            __reportResultGasBase
-                + __sstoreFromZeroGas * (
-                    4 + (_resultMaxSize == 0 ? 0 : _resultMaxSize - 1) / 32
-                )
-        );
+        return estimateBaseFee(_gasPrice);
     }
 
     /// @notice Estimate the minimum reward required for posting a data request.

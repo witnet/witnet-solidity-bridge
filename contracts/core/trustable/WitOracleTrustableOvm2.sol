@@ -60,19 +60,18 @@ contract WitOracleTrustableOvm2
         }
     }
 
+
     // ================================================================================================================
-    // --- Overrides 'IWitOracle' ----------------------------------------------------------------------------
+    // --- Overrides 'IWitOracle' -------------------------------------------------------------------------------------
 
     /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256 _gasPrice, uint16 _resultMaxSize)
-        public view 
+    /// @param _evmGasPrice Expected gas price to pay upon posting the data request.
+    function estimateBaseFee(uint256 _evmGasPrice)
+        public view
         virtual override
         returns (uint256)
     {
-        return _getCurrentL1Fee(_resultMaxSize) + WitOracleBaseTrustable.estimateBaseFee(_gasPrice, _resultMaxSize);
+        return _getCurrentL1Fee(32) + WitOracleBase.estimateBaseFee(_evmGasPrice);
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
@@ -111,6 +110,23 @@ contract WitOracleTrustableOvm2
                 )
         );
     }
+
+
+    // ================================================================================================================
+    // --- Overrides 'IWitOracleLegacy' -------------------------------------------------------------------------------
+
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
+    function estimateBaseFee(uint256 _gasPrice, uint16 _resultMaxSize)
+        public view 
+        virtual override
+        returns (uint256)
+    {
+        return _getCurrentL1Fee(_resultMaxSize) + WitOracleBaseTrustable.estimateBaseFee(_gasPrice, _resultMaxSize);
+    }
+
 
     // ================================================================================================================
     // --- Overrides 'IWitOracleTrustableReporter' --------------------------------------------------------------------------
