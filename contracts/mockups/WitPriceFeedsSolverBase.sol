@@ -3,7 +3,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "../data/WitPriceFeedsDataLib.sol";
-import "../interfaces/IWitPriceFeeds.sol";
 
 abstract contract WitPriceFeedsSolverBase
     is

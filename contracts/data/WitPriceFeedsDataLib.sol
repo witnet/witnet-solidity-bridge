@@ -4,9 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../interfaces/IWitFeedsAdmin.sol";
 import "../interfaces/IWitPriceFeedsSolver.sol";
-
 import "../libs/Slices.sol";
-import "../libs/Witnet.sol";
 
 /// @title WitFeeds data model.
 /// @author The Witnet Foundation.
