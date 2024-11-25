@@ -564,9 +564,9 @@ library Witnet {
         return (BlockNumber.unwrap(b) == 0);
     }
 
-
+    
     /// =======================================================================
-    /// --- FastForward helper functions -------------------------------
+    /// --- FastForward helper functions --------------------------------------
 
     function head(FastForward[] calldata rollup)
         internal pure returns (Beacon calldata)
@@ -842,6 +842,14 @@ library Witnet {
     }
 
 
+    /// =======================================================================
+    /// --- ResultTimestamp helper functions ----------------------------------
+
+    function gt(ResultTimestamp a, ResultTimestamp b) internal pure returns (bool) {
+        return ResultTimestamp.unwrap(a) > ResultTimestamp.unwrap(b);
+    }
+
+    
     /// ========================================================================================================
     /// --- 'QueryId' helper methods ---------------------------------------------------------------------------
 
