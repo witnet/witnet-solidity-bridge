@@ -187,11 +187,11 @@ abstract contract WitOracleBase
 
     /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
     /// @notice data query in order to avoid getting provable "too low incentives" results from
-    /// @notice the Wit/oracle blockchain. 
+    /// @notice the Wit/Oracle blockchain. 
     /// @dev The extra fee gets calculated in proportion to:
     /// @param _evmGasPrice Tentative EVM gas price at the moment the query result is ready.
-    /// @param _evmWitPrice Tentative nanoWit price in Wei at the moment the query is solved on the Wit/oracle blockchain.
-    /// @param _querySLA The query SLA data security parameters as required for the Wit/oracle blockchain. 
+    /// @param _evmWitPrice Tentative nanoWit price in Wei at the moment the query is solved on the Wit/Oracle blockchain.
+    /// @param _querySLA The query SLA data security parameters as required for the Wit/Oracle blockchain. 
     function estimateExtraFee(
             uint256 _evmGasPrice, 
             uint256 _evmWitPrice, 
@@ -400,7 +400,7 @@ abstract contract WitOracleBase
         );
     }   
 
-    /// @notice Enables data requesters to settle the actual validators in the Wit/oracle
+    /// @notice Enables data requesters to settle the actual validators in the Wit/Oracle
     /// @notice sidechain that will be entitled whatsover to solve 
     /// @notice data requests, as presumed to be capable of supporting some given `Wit2.Capability`.
     function settleMyOwnCapableCommittee(

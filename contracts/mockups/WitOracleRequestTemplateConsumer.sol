@@ -35,7 +35,7 @@ abstract contract WitOracleRequestTemplateConsumer
         return WitOracleConsumer._witOracleEstimateBaseFee(_evmGasPrice);
     }
 
-    /// @dev Pulls a fresh update from the Wit/oracle blockchain based on some data request built out
+    /// @dev Pulls a fresh update from the Wit/Oracle blockchain based on some data request built out
     /// @dev of the underlying `witOracleRequestTemplate`, the default `__witOracleDefaultQuerySLA` data
     /// @dev security parameters and the immutable value of `__witOracleCallbackGasLimit`.
     /// @dev Returns the unique RAD hash of the just-built data request, and some unique query id. 
@@ -56,7 +56,7 @@ abstract contract WitOracleRequestTemplateConsumer
         );
     }
 
-    /// @dev Pulls a fresh update from the Wit/oracle blockchain based on some data request built out
+    /// @dev Pulls a fresh update from the Wit/Oracle blockchain based on some data request built out
     /// @dev of the underlying `witOracleRequestTemplate`, and the given `_querSLA` data security parameters,
     /// @dev and the immutable value of `__witOracleCallbackGasLimit`. 
     /// @dev Returns the unique RAD hash of the just-built data request, and some unique query id. 
@@ -64,7 +64,7 @@ abstract contract WitOracleRequestTemplateConsumer
     /// @dev parameterized data sources (i.e. Radon Retrievals). 
     /// @param _witOracleRequestArgs Parameters passed to the `witOracleRequestTemplate` for building a new data request.
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle bridge when pulling the data update.
-    /// @param _querySLA The required SLA data security params for the Wit/oracle blockchain to accomplish.
+    /// @param _querySLA The required SLA data security params for the Wit/Oracle blockchain to accomplish.
     function __witOraclePostQuery(
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward,

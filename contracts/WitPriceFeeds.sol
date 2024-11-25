@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import "./WitFeeds.sol";
 import "./interfaces/IWitPriceFeeds.sol";
 
-/// @title WitPriceFeeds: Price Feeds live repository reliant on the Wit/oracle blockchain.
+/// @title WitPriceFeeds: Price Feeds live repository reliant on the Wit/Oracle blockchain.
 /// @author The Witnet Foundation.
 abstract contract WitPriceFeeds
     is

@@ -270,7 +270,7 @@ abstract contract WitOracleBaseTrustless
     // ================================================================================================================
     // --- Overrides IWitOracle (trustlessly) -------------------------------------------------------------------------
 
-    /// @notice Verify the data report was actually produced by the Wit/oracle sidechain,
+    /// @notice Verify the data report was actually produced by the Wit/Oracle sidechain,
     /// @notice reverting if the verification fails, or returning the self-contained Witnet.Result value.
     function pushData(
                 Witnet.DataPushReport calldata _report, 

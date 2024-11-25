@@ -73,12 +73,12 @@ abstract contract WitOracleRandomnessConsumer
     }
 
     /// @dev Helper function for decoding randomness seed embedded within a CBOR-encoded result
-    /// @dev as provided from the Wit/oracle blockchain. 
+    /// @dev as provided from the Wit/Oracle blockchain. 
     function _witOracleRandomizeSeedFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
         return cborValue.readBytes().toBytes32();
     }
 
-    /// @dev Trigger some randomness request to be solved by the Wit/oracle blockchain, by paying the
+    /// @dev Trigger some randomness request to be solved by the Wit/Oracle blockchain, by paying the
     /// @dev exact amount of `_queryEvmReward` of the underlying WitOracle bridge contract, and based 
     /// @dev on the `__witOracleDefaultQuerySLA` data security parameters. 
     function __witOracleRandomize(
@@ -92,7 +92,7 @@ abstract contract WitOracleRandomnessConsumer
         );
     }
 
-    /// @dev Trigger some randomness request to be solved by the Wit/oracle blockchain, by paying the
+    /// @dev Trigger some randomness request to be solved by the Wit/Oracle blockchain, by paying the
     /// @dev exact amount of `_queryEvmReward` of the underlying WitOracle bridge contract, and based
     /// @dev on the given `_querySLA` data security parameters.
     function __witOracleRandomize(

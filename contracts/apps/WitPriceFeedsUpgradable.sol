@@ -13,7 +13,7 @@ import "../interfaces/IWitOracleLegacy.sol";
 
 import "../patterns/Ownable2Step.sol";
 
-/// @title WitPriceFeeds: Price Feeds live repository reliant on the Wit/oracle blockchain.
+/// @title WitPriceFeeds: Price Feeds live repository reliant on the Wit/Oracle blockchain.
 /// @author Guillermo Díaz <guillermo@otherplane.com>
 
 contract WitPriceFeedsUpgradable
@@ -131,6 +131,12 @@ contract WitPriceFeedsUpgradable
                 });
             }
         }
+        // for (uint _ix = 0; _ix < __storage().ids.length; _ix ++) {
+        //     bytes4 _feedId = __storage().ids[_ix];
+        //     WitPriceFeedsDataLib.Record storage __record = WitPriceFeedsDataLib.seekRecord(_feedId);
+        //     __record.lastValidQueryId = Witnet.QueryId.wrap(0);
+        //     __record.latestUpdateQueryId = Witnet.QueryId.wrap(0);
+        // }
     }
 
 
@@ -165,8 +171,9 @@ contract WitPriceFeedsUpgradable
         public view
         returns (uint)
     {
-        return (IWitOracleLegacy(address(witOracle)).estimateBaseFee(_evmGasPrice, 32)
-            * (100 + __baseFeeOverheadPercentage)
+        return (
+            witOracle.estimateBaseFee(_evmGasPrice)
+                * (100 + __baseFeeOverheadPercentage)
         ) / 100; 
     }
     

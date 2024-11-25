@@ -27,7 +27,7 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
     apps: merge(Object.keys(networkArtifacts.apps), [],),
   }
 
-  // Settle WitOracle as first  dependency on all Wit/oracle appliances
+  // Settle WitOracle as first  dependency on all Wit/Oracle appliances
   framework.apps.forEach(appliance => {
     if (!networkSpecs[appliance]) networkSpecs[appliance] = {}
     networkSpecs[appliance].baseDeps = merge([], networkSpecs[appliance]?.baseDeps, ["WitOracle"])

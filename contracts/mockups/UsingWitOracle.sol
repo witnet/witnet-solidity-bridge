@@ -23,7 +23,7 @@ abstract contract UsingWitOracle
     /// @dev the Witnet blockchain levels, respectivelly. 
     uint16 internal __witOracleBaseFeeOverheadPercentage;
 
-    /// @notice Default SLA data security parameters to be fulfilled by the Wit/oracle blockchain
+    /// @notice Default SLA data security parameters to be fulfilled by the Wit/Oracle blockchain
     /// @notice when solving a data request.
     function witOracleDefaultQuerySLA() virtual public view returns (Witnet.QuerySLA memory) {
         return __witOracleDefaultQuerySLA;
@@ -31,7 +31,7 @@ abstract contract UsingWitOracle
     Witnet.QuerySLA internal __witOracleDefaultQuerySLA;
 
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
-    /// @dev contract until a particular request has been successfully solved and reported from the Wit/oracle blockchain,
+    /// @dev contract until a particular request has been successfully solved and reported from the Wit/Oracle blockchain,
     /// @dev either with an error or successfully.
     modifier witOracleQuerySolved(Witnet.QueryId _queryId) {
         Witnet.QueryStatus _queryStatus = _witOracleCheckQueryStatus(_queryId);
@@ -62,7 +62,7 @@ abstract contract UsingWitOracle
         __witOracleBaseFeeOverheadPercentage = 33; // defaults to 33%
     }
 
-    /// @dev Check if given query was already reported back from the Wit/oracle blockchain.
+    /// @dev Check if given query was already reported back from the Wit/Oracle blockchain.
     /// @param _id The unique identifier of a previously posted data request.
     function _witOracleCheckQueryStatus(Witnet.QueryId _id)
         internal view

@@ -72,7 +72,7 @@ interface IWitOracleRadonRegistry {
 
     /// Verifies and registers the given sequence of dataset filters and reducing function to be 
     /// potentially used as either Aggregate or Tally reducers within the resolution workflow
-    /// of Radon Requests in the Wit/oracle blockchain. Returns a unique hash that identifies the 
+    /// of Radon Requests in the Wit/Oracle blockchain. Returns a unique hash that identifies the 
     /// given Radon Reducer in the registry. Reverts if unsupported reducing or filtering methods
     /// are specified.
     function verifyRadonReducer(Witnet.RadonReducer calldata reducer) external returns (bytes32 hash);
