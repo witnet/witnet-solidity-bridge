@@ -9,6 +9,16 @@ abstract contract WitPriceFeedsSolverBase
     is
         IWitPriceFeedsSolver
 {
+    /// ===============================================================================================================
+    /// --- Yet to be implemented IWitPriceFeedsSolver methods --------------------------------------------------------
+    
+    function class() virtual external pure returns (string memory);
+    function solve(bytes4) virtual external view returns (Price memory);
+
+    
+    /// ===============================================================================================================
+    /// --- Base implementation ---------------------------------------------------------------------------------------
+    
     address public immutable override delegator;
 
     modifier onlyDelegator {

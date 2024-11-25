@@ -13,7 +13,7 @@ abstract contract WitOracleConsumer
     /// @dev Maximum gas to be spent by the IWitOracleConsumer's callback methods.  
     uint24 internal immutable __witOracleCallbackGasLimit;
   
-    modifier onlyFromWitnet {
+    modifier onlyFromWitOracle {
         require(msg.sender == address(__witOracle), "WitOracleConsumer: unauthorized");
         _;
     }

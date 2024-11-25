@@ -33,7 +33,7 @@ module.exports = {
   artifacts: {
     WitOracle: require("../artifacts/contracts/WitOracle.sol/WitOracle.json"),
     WitPriceFeeds: require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json"),
-    WitnetPriceRouteSolver: require("../artifacts/contracts/interfaces/IWitPriceFeedsSolver.sol/IWitPriceFeedsSolver.json"),
+    IWitPriceFeedsSolver: require("../artifacts/contracts/interfaces/IWitPriceFeedsSolver.sol/IWitPriceFeedsSolver.json"),
     WitRandomness: require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json"),
     WitOracleRequest: require("../artifacts/contracts/WitOracleRequest.sol/WitOracleRequest.json"),
     WitOracleRadonRegistry: require("../artifacts/contracts/WitOracleRadonRegistry.sol/WitOracleRadonRegistry.json"),

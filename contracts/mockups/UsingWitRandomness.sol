@@ -12,7 +12,8 @@ abstract contract UsingWitRandomness
         IWitOracleEvents,
         IWitRandomnessEvents
 {
-    WitRandomness immutable public witRandomness;
+    WitOracle public immutable witOracle;
+    WitRandomness internal immutable __RNG;
 
     constructor(WitRandomness _witRandomness) {
         require(
@@ -23,9 +24,12 @@ abstract contract UsingWitRandomness
                 ),
             "UsingWitRandomness: uncompliant WitRandomness appliance"
         );
-        witRandomness = _witRandomness;
+        __RNG = _witRandomness;
+        witOracle = __RNG.witOracle();
     }
 
+    /// @dev As to accept transfers back from the `WitRandomness` appliance
+    /// @dev when excessive fee is passed over to the `__RNG.randomize()` method. 
     receive() external payable virtual {}
 
 }

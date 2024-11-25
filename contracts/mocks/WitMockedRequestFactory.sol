@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "./WitMockedOracle.sol";
-import "../../contracts/core/upgradable/WitOracleRequestFactoryUpgradableDefault.sol";
+import "../core/upgradable/WitOracleRequestFactoryUpgradableDefault.sol";
 
 /// @title Mocked implementation of `WitOracleRequestFactory`.
 /// @dev TO BE USED ONLY ON DEVELOPMENT ENVIRONMENTS. 
