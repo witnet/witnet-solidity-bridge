@@ -86,11 +86,12 @@
             "WitRandomnessV21": "0xb2F0D91e488040e3236244D3708FF9A9Ee95736B"
         },
         "libs": {
-            "WitOracleDataLib": "0xC1cB7e8EdB730C3eE9aAE2B1Fc6FCfAF37C0Aa20",
-            "WitOracleRadonEncodingLib": "0xE8b7925a262e01227384Eb29BE18BD16D169acb5",
-            "WitOracleResultStatusLib": "0x377Ec7C9FFF573c90BE764c785717e6eA9cEa099",
-            "WitPriceFeedsDataLib": "0x7c53160008c518EEE3bf68bc95A9043BD96Bf587"
+            "WitOracleDataLib": "0xF5D4CBbc7c18A614C978cC1eBbc1CB6365f5f62a",
+            "WitOracleRadonEncodingLib": "0x3342560E1feba114f0817Bc9E769a69e78580B48",
+            "WitOracleResultStatusLib": "0x1A40C54464D3fB01a2c161D426D64CaeD3975D94",
+            "WitPriceFeedsDataLib": "0xC4c00D1F15038f2820FF3D090e878bb562dC2B1F"
         }
+    },
     },
     "reef": {
         "apps": {
@@ -111,6 +112,5 @@
             "WitOracleResultErrorsLib": "0xE2996CE29D5351E22a01E9dD73ADd8A0264E7318",
             "WitPriceFeedsLib": "0xcaa6dE265EF1545788E9576660Bc6d5ae1Edb0F5"
         }
-    },
-    "reef:testnet": {}
+    }
 }

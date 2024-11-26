@@ -13,7 +13,7 @@ if (process.argv.length < 3) {
 const network = process.argv[2].toLowerCase().replaceAll(".", ":")
 const networkArtifacts = settings.getArtifacts(network)
 
-utils.traceVerify(network, networkArtifacts?.WitnetDeployer)
+utils.traceVerify(network, `${networkArtifacts?.WitnetDeployer} --forceConstructorArgs string: --verifiers etherscan,sourcify`)
 
 const framework = {
   libs: networkArtifacts.libs,
