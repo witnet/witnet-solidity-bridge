@@ -3,6 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "./interfaces/IWitFeeds.sol";
+import "./interfaces/IWitFeedsAdmin.sol";
 import "./interfaces/IWitFeedsEvents.sol";
 import "./interfaces/IWitOracleAppliance.sol";
 
@@ -12,6 +13,7 @@ abstract contract WitFeeds
     is 
         IERC2362,
         IWitFeeds,
+        IWitFeedsAdmin,
         IWitFeedsEvents,
         IWitOracleAppliance,
         IWitOracleEvents

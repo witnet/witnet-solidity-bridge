@@ -6,7 +6,6 @@ import "../core/WitnetUpgradableBase.sol";
 
 import "../data/WitPriceFeedsDataLib.sol";
 
-import "../interfaces/IWitFeedsAdmin.sol";
 import "../interfaces/IWitFeedsLegacy.sol";
 import "../interfaces/IWitPriceFeedsSolverFactory.sol";
 import "../interfaces/IWitOracleLegacy.sol";
@@ -19,9 +18,8 @@ import "../patterns/Ownable2Step.sol";
 contract WitPriceFeedsUpgradable
     is
         Ownable2Step,
-        WitPriceFeeds,
         WitnetUpgradableBase,
-        IWitFeedsAdmin,
+        WitPriceFeeds,
         IWitFeedsLegacy,
         IWitPriceFeedsSolverFactory
 {
