@@ -7,9 +7,10 @@ import "../libs/Witnet.sol";
 
 interface IWitFeedsLegacy {   
     struct RadonSLA {
-        uint8 witCommitteeCapacity;
-        uint64 witCommitteeUnitaryReward;
+        uint8  numWitnesses;
+        uint64 unitaryReward;
     }
+    function defaultRadonSLA() external view returns (RadonSLA memory);
     function estimateUpdateBaseFee(uint256 evmGasPrice) external view returns (uint);
     function latestUpdateResponse(bytes4 feedId) external view returns (Witnet.QueryResponse memory);
     function latestUpdateResponseStatus(bytes4 feedId) external view returns (IWitOracleLegacy.QueryResponseStatus);

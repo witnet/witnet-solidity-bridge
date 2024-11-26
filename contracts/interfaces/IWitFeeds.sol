@@ -5,7 +5,14 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../WitOracle.sol";
 import "../WitOracleRadonRegistry.sol";
 
-interface IWitFeeds {   
+interface IWitFeeds {
+
+    struct UpdateSLA {
+        // Max number of eligibile witnesses in the Wit/Oracle blockchain for solving some price update.
+        uint16 numWitnesses;
+        // Unitary reward in nanowits for true and responsive witnesses and validators in the Wit/Oracle blockchain.
+        uint64 unitaryReward;
+    }
 
     /// Primitive data type produced by successful data updates of all supported
     /// feeds (e.g. Witnet.RadonDataTypes.Integer in WitPriceFeeds).
@@ -16,7 +23,7 @@ interface IWitFeeds {
     
     /// Default SLA data security parameters that will be fulfilled on Witnet upon 
     /// every feed update, if no others are specified by the requester.
-    function defaultRadonSLA() external view returns (Witnet.QuerySLA memory);
+    function defaultUpdateSLA() external view returns (UpdateSLA memory);
 
     /// Estimates the minimum EVM fee required to be paid upon requesting a data 
     /// update with the given the _evmGasPrice value.
@@ -78,7 +85,7 @@ interface IWitFeeds {
 
     /// Triggers a fresh update for the given data feed, requiring also the SLA data security parameters
     /// that will have to be fulfilled on Witnet. 
-    function requestUpdate(bytes4 feedId, Witnet.QuerySLA calldata updateSLA) external payable returns (uint256 usedFunds);
+    function requestUpdate(bytes4 feedId, UpdateSLA calldata) external payable returns (uint256 usedFunds);
 
     /// Returns the list of feed ERC-2362 ids, captions and RAD hashes of all currently supported 
     /// data feeds. The RAD hash of a data feed determines in a verifiable way the actual data sources 

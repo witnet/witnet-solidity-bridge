@@ -39,7 +39,7 @@ contract WitPriceFeedsUpgradable
     WitOracle immutable public override witOracle;
     WitOracleRadonRegistry immutable internal __registry;
 
-    Witnet.QuerySLA private __defaultRadonSLA;
+    Witnet.QuerySLA private __defaultQuerySLA;
     uint16 private __baseFeeOverheadPercentage;
     
     constructor(
@@ -104,7 +104,7 @@ contract WitPriceFeedsUpgradable
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     function __initializeUpgradableData(bytes memory _initData) virtual override internal {
         if (__proxiable().codehash == bytes32(0)) {
-            __defaultRadonSLA = Witnet.QuerySLA({
+            __defaultQuerySLA = Witnet.QuerySLA({
                 witCommitteeCapacity: 10,
                 witCommitteeUnitaryReward: 2 * 10 ** 8,
                 witResultMaxSize: 16,
@@ -116,14 +116,15 @@ contract WitPriceFeedsUpgradable
         } else {
             // otherwise, store beacon read from _initData, if any
             if (_initData.length > 0) {
-                (uint16 _baseFeeOverheadPercentage, Witnet.QuerySLA memory _defaultRadonSLA) = abi.decode(
+                (uint16 _baseFeeOverheadPercentage, Witnet.QuerySLA memory _defaultQuerySLA) = abi.decode(
                     _initData, (uint16, Witnet.QuerySLA)
                 );
                 __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
-                __defaultRadonSLA = _defaultRadonSLA;
-            } else if (!__defaultRadonSLA.isValid()) {
+                __defaultQuerySLA = _defaultQuerySLA;
+            
+            } else if (!__defaultQuerySLA.isValid()) {
                 // possibly, an upgrade from a previous branch took place:
-                __defaultRadonSLA = Witnet.QuerySLA({
+                __defaultQuerySLA = Witnet.QuerySLA({
                     witCommitteeCapacity: 10,
                     witCommitteeUnitaryReward: 2 * 10 ** 8,
                     witResultMaxSize: 16,
@@ -131,12 +132,6 @@ contract WitPriceFeedsUpgradable
                 });
             }
         }
-        // for (uint _ix = 0; _ix < __storage().ids.length; _ix ++) {
-        //     bytes4 _feedId = __storage().ids[_ix];
-        //     WitPriceFeedsDataLib.Record storage __record = WitPriceFeedsDataLib.seekRecord(_feedId);
-        //     __record.lastValidQueryId = Witnet.QueryId.wrap(0);
-        //     __record.latestUpdateQueryId = Witnet.QueryId.wrap(0);
-        // }
     }
 
 
@@ -154,12 +149,15 @@ contract WitPriceFeedsUpgradable
     // ================================================================================================================
     // --- Implements 'IWitFeeds' -------------------------------------------------------------------------------------
 
-    function defaultRadonSLA()
+    function defaultUpdateSLA()
         override
         public view
-        returns (Witnet.QuerySLA memory)
+        returns (IWitFeeds.UpdateSLA memory)
     {
-        return __defaultRadonSLA;
+        return IWitFeeds.UpdateSLA({
+            numWitnesses: __defaultQuerySLA.witCommitteeCapacity,
+            unitaryReward: __defaultQuerySLA.witCommitteeUnitaryReward
+        });
     }
 
     function estimateUpdateBaseFee(uint256 _evmGasPrice) virtual override public view returns (uint256) {
@@ -321,25 +319,31 @@ contract WitPriceFeedsUpgradable
         virtual override
         returns (uint256)
     {
-        return __requestUpdate(feedId, __defaultRadonSLA);
+        return __requestUpdate(feedId, __defaultQuerySLA);
     }
     
-    function requestUpdate(bytes4 feedId, Witnet.QuerySLA calldata updateSLA)
+    function requestUpdate(bytes4 feedId, IWitFeeds.UpdateSLA calldata updateSLA)
         public payable
         virtual override
         returns (uint256)
     {
-        _require(
-            updateSLA.equalOrGreaterThan(__defaultRadonSLA),
-            "unsecure update request"
+        return __requestUpdate(
+            feedId, 
+            _intoQuerySLA(updateSLA)
         );
-        return __requestUpdate(feedId, updateSLA);
     }
     
 
     /// ===============================================================================================================
     /// --- IWitFeedsLegacy -------------------------------------------------------------------------------------------
     
+    function defaultRadonSLA() override external view returns (IWitFeedsLegacy.RadonSLA memory) {
+        return IWitFeedsLegacy.RadonSLA({
+            numWitnesses: uint8(__defaultQuerySLA.witCommitteeCapacity),
+            unitaryReward: __defaultQuerySLA.witCommitteeUnitaryReward
+        });
+    }
+
     function latestUpdateResponse(bytes4 feedId) 
         override external view 
         returns (Witnet.QueryResponse memory)
@@ -370,19 +374,17 @@ contract WitPriceFeedsUpgradable
         return lookupWitOracleRequestBytecode(feedId);
     }
     
-    function requestUpdate(bytes4 feedId, IWitFeedsLegacy.RadonSLA calldata updateSLA)
+    function requestUpdate(bytes4 feedId, IWitFeedsLegacy.RadonSLA calldata legacySLA)
         external payable
         virtual override
         returns (uint256)
     {
         return __requestUpdate(
             feedId, 
-            Witnet.QuerySLA({
-                witCommitteeCapacity: updateSLA.witCommitteeCapacity,
-                witCommitteeUnitaryReward: updateSLA.witCommitteeUnitaryReward,
-                witResultMaxSize: __defaultRadonSLA.witResultMaxSize,
-                witCapability: Witnet.QueryCapability.wrap(0)
-            })
+            _intoQuerySLA(IWitFeeds.UpdateSLA({
+                numWitnesses: legacySLA.numWitnesses,
+                unitaryReward: legacySLA.unitaryReward
+            }))
         );
     }
 
@@ -463,12 +465,16 @@ contract WitPriceFeedsUpgradable
         __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function settleDefaultRadonSLA(Witnet.QuerySLA calldata defaultSLA)
+    function settleDefaultUpdateSLA(uint16 _numWitnesses, uint64 _unitaryReward)
         override public
         onlyOwner
     {
-        _require(defaultSLA.isValid(), "invalid SLA");
-        __defaultRadonSLA = defaultSLA;
+        __defaultQuerySLA.witCommitteeCapacity = _numWitnesses;
+        __defaultQuerySLA.witCommitteeUnitaryReward = _unitaryReward;
+        _require(
+            __defaultQuerySLA.isValid(), 
+            "invalid update SLA"
+        );
     }
     
     function settleFeedRequest(string calldata caption, bytes32 radHash)
@@ -655,6 +661,23 @@ contract WitPriceFeedsUpgradable
         }
     }
 
+    function _intoQuerySLA(IWitFeeds.UpdateSLA memory _updateSLA) internal view returns (Witnet.QuerySLA memory) {
+        if (
+            _updateSLA.numWitnesses >= __defaultQuerySLA.witCommitteeCapacity
+                && _updateSLA.unitaryReward >= __defaultQuerySLA.witCommitteeUnitaryReward
+        ) {
+            return Witnet.QuerySLA({
+                witCapability: __defaultQuerySLA.witCapability,
+                witCommitteeCapacity: _updateSLA.numWitnesses,
+                witCommitteeUnitaryReward: _updateSLA.unitaryReward,
+                witResultMaxSize: __defaultQuerySLA.witResultMaxSize
+            });
+        
+        } else {
+            _revert("unsecure update request");
+        }
+    }
+
     function _validateCaption(string calldata caption)
         internal view returns (uint8)
     {
@@ -684,7 +707,7 @@ contract WitPriceFeedsUpgradable
         ));
     }
 
-    function __requestUpdate(bytes4[] memory _deps, Witnet.QuerySLA memory sla)
+    function __requestUpdate(bytes4[] memory _deps, IWitFeeds.UpdateSLA memory sla)
         virtual internal
         returns (uint256 _evmUsedFunds)
     {
@@ -737,7 +760,10 @@ contract WitPriceFeedsUpgradable
         } else if (WitPriceFeedsDataLib.seekRecord(feedId).solver != address(0)) {
             return __requestUpdate(
                 WitPriceFeedsDataLib.depsOf(feedId),
-                querySLA
+                IWitFeeds.UpdateSLA({
+                    numWitnesses: querySLA.witCommitteeCapacity,
+                    unitaryReward: querySLA.witCommitteeUnitaryReward
+                })
             );
 
         } else {

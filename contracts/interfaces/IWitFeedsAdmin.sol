@@ -20,7 +20,7 @@ interface IWitFeedsAdmin {
     function owner() external view returns (address);
     function pendingOwner() external returns (address);
     function settleBaseFeeOverheadPercentage(uint16) external;
-    function settleDefaultRadonSLA(Witnet.QuerySLA calldata) external;
+    function settleDefaultUpdateSLA(uint16, uint64) external;
     function settleFeedRequest(string calldata caption, bytes32 radHash) external;
     function settleFeedRequest(string calldata caption, WitOracleRequest request) external;
     function settleFeedRequest(string calldata caption, WitOracleRequestTemplate template, string[][] calldata) external;

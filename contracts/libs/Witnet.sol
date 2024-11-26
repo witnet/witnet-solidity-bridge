@@ -127,9 +127,9 @@ library Witnet {
 
     /// Structure containing all possible SLA security parameters of Wit/2.1 Data Requests
     struct QuerySLA {
-        uint16  witResultMaxSize;          // max size permitted to whatever query result may come from the wit/oracle blockchain.
-        uint16  witCommitteeCapacity;      // max number of eligibile witnesses in the wit/oracle blockchain for solving some query.
-        uint64  witCommitteeUnitaryReward; // unitary reward in nanowits for true witnesses and validators in the wit/oracle blockchain.
+        uint16  witResultMaxSize;          // max size permitted to whatever query result may come from the Wit/Oralce blockchain.
+        uint16  witCommitteeCapacity;      // max number of eligibile witnesses in the Wit/Oralce blockchain for solving some query.
+        uint64  witCommitteeUnitaryReward; // unitary reward in nanowits for true witnesses and validators in the Wit/Oralce blockchain.
         QueryCapability witCapability;     // optional: identifies some pre-established capability-compliant commitee required for solving the query.
     }
 
