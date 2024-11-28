@@ -7,7 +7,6 @@ import "../core/WitnetUpgradableBase.sol";
 import "../data/WitPriceFeedsDataLib.sol";
 
 import "../interfaces/IWitFeedsLegacy.sol";
-import "../interfaces/IWitPriceFeedsSolverFactory.sol";
 import "../interfaces/IWitOracleLegacy.sol";
 
 import "../patterns/Ownable2Step.sol";
@@ -17,18 +16,16 @@ import "../patterns/Ownable2Step.sol";
 
 contract WitPriceFeedsUpgradable
     is
-        Ownable2Step,
-        WitnetUpgradableBase,
         WitPriceFeeds,
         IWitFeedsLegacy,
-        IWitPriceFeedsSolverFactory
+        Ownable2Step,
+        WitnetUpgradableBase
 {
     using Witnet for bytes;
     using Witnet for Witnet.DataResult;
     using Witnet for Witnet.QueryResponse;
     using Witnet for Witnet.QuerySLA;
     using Witnet for Witnet.ResultStatus;
-
 
     function class() virtual override public view returns (string memory) {
         return type(WitPriceFeedsUpgradable).name;
