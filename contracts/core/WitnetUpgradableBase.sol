@@ -34,15 +34,18 @@ abstract contract WitnetUpgradableBase
     }
     
     /// @dev Reverts if proxy delegatecalls to unexistent method.
-    fallback() virtual external {
-        _revert("not implemented");
-    }
-
-
-    function class() virtual public view returns (string memory) {
-        return type(WitnetUpgradableBase).name;
+    /* solhint-disable no-complex-fallback */
+    fallback() virtual external { 
+        revert(string(abi.encodePacked(
+            "WitnetUpgradableBase: not implemented: 0x",
+            _toHexString(uint8(bytes1(msg.sig))),
+            _toHexString(uint8(bytes1(msg.sig << 8))),
+            _toHexString(uint8(bytes1(msg.sig << 16))),
+            _toHexString(uint8(bytes1(msg.sig << 24)))
+        )));
     }
    
+    
     // ================================================================================================================
     // --- Overrides 'Proxiable' --------------------------------------------------------------------------------------
 
@@ -53,7 +56,40 @@ abstract contract WitnetUpgradableBase
 
 
     // ================================================================================================================
-    // --- Overrides 'Upgradeable' --------------------------------------------------------------------------------------
+    // --- Overrides 'Upgradeable' ------------------------------------------------------------------------------------
+
+    /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
+    /// @dev Must fail when trying to upgrade to same logic contract more than once.
+    function initialize(bytes memory _initData) virtual override public {
+        address _owner = owner();
+        if (_owner == address(0)) {
+            // upon first upgrade, extract decode owner address from _intidata
+            (_owner, _initData) = abi.decode(_initData, (address, bytes));
+            _transferOwnership(_owner);
+        
+        } else {
+            // only owner can initialize an existing proxy:
+            require(msg.sender == _owner, "not the owner");
+        }
+        __initializeUpgradableData(_initData);
+        if (
+            __proxiable().codehash != bytes32(0)
+                && __proxiable().codehash == codehash()
+        ) {
+            revert("already initialized codehash");
+        }
+        __proxiable().codehash = codehash();
+        emit Upgraded(owner(), base(), codehash(), version());
+    }
+
+    /// Tells whether provided address could eventually upgrade the contract.
+    function isUpgradableFrom(address _from) external view virtual override returns (bool) {
+        return (
+            // false if the WRB is intrinsically not upgradable, or `_from` is no owner
+            isUpgradable()
+                && owner() == _from
+        );
+    }
 
     /// Retrieves human-readable version tag of current implementation.
     function version() public view virtual override returns (string memory) {
@@ -64,27 +100,20 @@ abstract contract WitnetUpgradableBase
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
 
-    function _require(
-            bool _condition, 
-            string memory _message
-        )
-        internal view
+    function _toHexString(uint8 _u)
+        internal pure
+        returns (string memory)
     {
-        if (!_condition) {
-            _revert(_message);
-        }
-    }
-
-    function _revert(string memory _message)
-        internal view
-    {
-        revert(
-            string(abi.encodePacked(
-                class(),
-                ": ",
-                _message
-            ))
-        );
+        bytes memory b2 = new bytes(2);
+        uint8 d0 = uint8(_u / 16) + 48;
+        uint8 d1 = uint8(_u % 16) + 48;
+        if (d0 > 57)
+            d0 += 7;
+        if (d1 > 57)
+            d1 += 7;
+        b2[0] = bytes1(d0);
+        b2[1] = bytes1(d1);
+        return string(b2);
     }
 
     /// Converts bytes32 into string.
@@ -116,5 +145,4 @@ abstract contract WitnetUpgradableBase
             }
         }
     }
-
 }

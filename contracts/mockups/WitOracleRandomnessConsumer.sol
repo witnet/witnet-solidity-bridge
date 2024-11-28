@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitOracleConsumer.sol";
 import "../WitOracleRequest.sol";
@@ -12,38 +11,36 @@ abstract contract WitOracleRandomnessConsumer
 {
     using Witnet for bytes;
     using Witnet for bytes32;
-    using Witnet for Witnet.RadonSLA;
+    using Witnet for Witnet.QuerySLA;
     using WitnetCBOR for WitnetCBOR.CBOR;
 
     bytes32 internal immutable __witOracleRandomnessRadHash;
 
     /// @param _witOracle Address of the WitOracle contract.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
-    /// @param _callbackGasLimit Maximum gas to be spent by the IWitOracleConsumer's callback methods.
+    /// @param _callbackGas Maximum gas to be spent by the IWitOracleConsumer's callback methods.
     constructor(
             WitOracle _witOracle, 
             uint16 _baseFeeOverheadPercentage,
-            uint24 _callbackGasLimit
+            uint24 _callbackGas
         )
         UsingWitOracle(_witOracle)
-        WitOracleConsumer(_callbackGasLimit)
+        WitOracleConsumer(_callbackGas)
     {
         // On-chain building of the Witnet Randomness Request:
         {
             WitOracleRadonRegistry _registry = witOracle().registry();
             // Build own Witnet Randomness Request:
             __witOracleRandomnessRadHash = _registry.verifyRadonRequest(
-                abi.decode(
-                    abi.encode([
-                        _registry.verifyRadonRetrieval(
-                            Witnet.RadonRetrievalMethods.RNG,
-                            "", // no url
-                            "", // no body
-                            new string[2][](0), // no headers
-                            hex"80" // no retrieval script
-                        )
-                    ]), (bytes32[])
-                ),
+                Witnet.intoMemArray([
+                    _registry.verifyRadonRetrieval(
+                        Witnet.RadonRetrievalMethods.RNG,
+                        "", // no url
+                        "", // no body
+                        new string[2][](0), // no headers
+                        hex"80" // no retrieval script
+                    )
+                ]),
                 Witnet.RadonReducer({
                     opcode: Witnet.RadonReduceOpcodes.Mode,
                     filters: new Witnet.RadonFilter[](0)
@@ -55,8 +52,7 @@ abstract contract WitOracleRandomnessConsumer
             );
         }
         __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
-        __witOracleDefaultQuerySLA.maxTallyResultSize = 34;
-        
+        __witOracleDefaultQuerySLA.witResultMaxSize = 34;
     }
 
     /// @dev Pure P-RNG generator returning uniformly distributed `_range` values based on
@@ -77,18 +73,18 @@ abstract contract WitOracleRandomnessConsumer
     }
 
     /// @dev Helper function for decoding randomness seed embedded within a CBOR-encoded result
-    /// @dev as provided from the Wit/oracle blockchain. 
+    /// @dev as provided from the Wit/Oracle blockchain. 
     function _witOracleRandomizeSeedFromResultValue(WitnetCBOR.CBOR calldata cborValue) internal pure returns (bytes32) {
         return cborValue.readBytes().toBytes32();
     }
 
-    /// @dev Trigger some randomness request to be solved by the Wit/oracle blockchain, by paying the
+    /// @dev Trigger some randomness request to be solved by the Wit/Oracle blockchain, by paying the
     /// @dev exact amount of `_queryEvmReward` of the underlying WitOracle bridge contract, and based 
     /// @dev on the `__witOracleDefaultQuerySLA` data security parameters. 
     function __witOracleRandomize(
             uint256 _queryEvmReward
         )
-        virtual internal returns (uint256)
+        virtual internal returns (Witnet.QueryId)
     {
         return __witOracleRandomize(
             _queryEvmReward, 
@@ -96,21 +92,24 @@ abstract contract WitOracleRandomnessConsumer
         );
     }
 
-    /// @dev Trigger some randomness request to be solved by the Wit/oracle blockchain, by paying the
+    /// @dev Trigger some randomness request to be solved by the Wit/Oracle blockchain, by paying the
     /// @dev exact amount of `_queryEvmReward` of the underlying WitOracle bridge contract, and based
     /// @dev on the given `_querySLA` data security parameters.
     function __witOracleRandomize(
             uint256 _queryEvmReward,
-            Witnet.RadonSLA memory _querySLA
+            Witnet.QuerySLA memory _querySLA
         )
-        virtual internal returns (uint256)
+        virtual internal returns (Witnet.QueryId)
     {
-        return __witOracle.postRequestWithCallback{
+        return __witOracle.postQuery{
             value: _queryEvmReward
         }(
             __witOracleRandomnessRadHash,
             _querySLA,
-            __witOracleCallbackGasLimit
+            Witnet.QueryCallback({
+                consumer: address(this),
+                gasLimit: __witOracleCallbackGasLimit
+            })
         );
     }
 }

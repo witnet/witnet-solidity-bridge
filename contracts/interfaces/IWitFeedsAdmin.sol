@@ -9,10 +9,9 @@ import "../WitOracleRequestTemplate.sol";
 
 interface IWitFeedsAdmin {
 
-    event WitnetFeedDeleted(bytes4 feedId);
-    event WitnetFeedSettled(bytes4 feedId, bytes32 radHash);
-    event WitnetFeedSolverSettled(bytes4 feedId, address solver);
-    event WitnetRadonSLA(Witnet.RadonSLA sla);
+    event WitFeedDeleted(string caption, bytes4 feedId);
+    event WitFeedSettled(string caption, bytes4 feedId, bytes32 radHash);
+    event WitFeedSolverSettled(string caption, bytes4 feedId, address solver);
 
     function acceptOwnership() external;
     function baseFeeOverheadPercentage() external view returns (uint16);
@@ -21,7 +20,7 @@ interface IWitFeedsAdmin {
     function owner() external view returns (address);
     function pendingOwner() external returns (address);
     function settleBaseFeeOverheadPercentage(uint16) external;
-    function settleDefaultRadonSLA(Witnet.RadonSLA calldata) external;
+    function settleDefaultUpdateSLA(uint16, uint64) external;
     function settleFeedRequest(string calldata caption, bytes32 radHash) external;
     function settleFeedRequest(string calldata caption, WitOracleRequest request) external;
     function settleFeedRequest(string calldata caption, WitOracleRequestTemplate template, string[][] calldata) external;

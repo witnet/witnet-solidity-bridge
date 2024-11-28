@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity >=0.8.0 <0.9.0;
 
 import "../libs/Witnet.sol";
@@ -13,14 +14,14 @@ interface IWitOracleRadonRegistry {
     /// made out of the given Radon Request and Radon SLA security parameters. 
     function bytecodeOf(
             bytes32 radHash, 
-            Witnet.RadonSLA calldata sla
+            Witnet.QuerySLA calldata sla
         ) external view returns (bytes memory);
     
     /// Returns the Witnet-compliant DRO bytecode for some data request object 
     /// made out of the given RAD bytecode and Radon SLA security parameters. 
     function bytecodeOf(
             bytes calldata radBytecode, 
-            Witnet.RadonSLA calldata sla
+            Witnet.QuerySLA calldata sla
         ) external view returns (bytes memory);
     
     /// Returns the hash of the given Witnet-compliant bytecode. Returned value
@@ -71,7 +72,7 @@ interface IWitOracleRadonRegistry {
 
     /// Verifies and registers the given sequence of dataset filters and reducing function to be 
     /// potentially used as either Aggregate or Tally reducers within the resolution workflow
-    /// of Radon Requests in the Wit/oracle blockchain. Returns a unique hash that identifies the 
+    /// of Radon Requests in the Wit/Oracle blockchain. Returns a unique hash that identifies the 
     /// given Radon Reducer in the registry. Reverts if unsupported reducing or filtering methods
     /// are specified.
     function verifyRadonReducer(Witnet.RadonReducer calldata reducer) external returns (bytes32 hash);
@@ -89,11 +90,11 @@ interface IWitOracleRadonRegistry {
             Witnet.RadonReducer calldata tally
         ) external returns (bytes32 radHash);
 
-        function verifyRadonRequest(
-                bytes32[] calldata retrieveHashes,
-                bytes32 aggregateReducerHash,
-                bytes32 tallyReducerHash
-            ) external returns (bytes32 radHash);
+    function verifyRadonRequest(
+            bytes32[] calldata retrieveHashes,
+            bytes32 aggregateReducerHash,
+            bytes32 tallyReducerHash
+        ) external returns (bytes32 radHash);
 
     /// Verifies and registers the specified Radon Request out of the given data sources (i.e. retrievals), 
     /// data sources parameters (if required), and the aggregate and tally Radon Reducers. Returns a unique 
@@ -110,12 +111,12 @@ interface IWitOracleRadonRegistry {
             Witnet.RadonReducer calldata tally
         ) external returns (bytes32 radHash);
 
-        function verifyRadonRequest(
-                bytes32[] calldata retrieveHashes,
-                string[][] calldata retrieveArgsValues,
-                bytes32 aggregateReducerHash,
-                bytes32 tallyReducerHash
-            ) external returns (bytes32 radHash);
+    function verifyRadonRequest(
+            bytes32[] calldata retrieveHashes,
+            string[][] calldata retrieveArgsValues,
+            bytes32 aggregateReducerHash,
+            bytes32 tallyReducerHash
+        ) external returns (bytes32 radHash);
 
     /// Verifies and registers the specified Radon Retrieval (i.e. public data source) into this registry contract. 
     /// Returns a unique retrieval hash that identifies the verified Radon Retrieval.

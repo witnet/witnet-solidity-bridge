@@ -65,6 +65,7 @@ abstract contract Upgradeable is Initializable, Proxiable {
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.    
     /// @dev Must fail when trying to upgrade to same logic contract more than once.
     function initialize(bytes memory) virtual external;
+    function __initializeUpgradableData(bytes memory _initData) virtual internal;
 
     /// @dev Retrieves human-redable named version of current implementation.
     function version() virtual public view returns (string memory); 

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.0;
 
 import "./UsingWitOracle.sol";
@@ -12,14 +13,14 @@ abstract contract WitOracleConsumer
     /// @dev Maximum gas to be spent by the IWitOracleConsumer's callback methods.  
     uint24 internal immutable __witOracleCallbackGasLimit;
   
-    modifier onlyFromWitnet {
+    modifier onlyFromWitOracle {
         require(msg.sender == address(__witOracle), "WitOracleConsumer: unauthorized");
         _;
     }
 
-    /// @param _callbackGasLimit Maximum gas to be spent by the IWitOracleConsumer's callback methods.
-    constructor (uint24 _callbackGasLimit) {
-        __witOracleCallbackGasLimit = _callbackGasLimit;
+    /// @param _callbackGas Maximum gas to be spent by the IWitOracleConsumer's callback methods.
+    constructor (uint24 _callbackGas) {
+        __witOracleCallbackGasLimit = _callbackGas;
     }
 
     

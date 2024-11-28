@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.0;
 
 import "./UsingWitOracle.sol";
@@ -28,7 +29,7 @@ abstract contract UsingWitOracleRequestTemplate
         __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    /// @dev Verify and register into the witOracle() registry a Wit/oracle compliant data request based
+    /// @dev Verify and register into the witOracle() registry a Wit/Oracle compliant data request based
     /// @dev on the underlying `witOracleRequestTemplate`. Returns the RAD hash of the successfully verifed
     /// @dev data request. Reverts if the number of given parameters don't match as required by the underlying
     /// @dev template's parameterized data sources (i.e. Radon Retrievals).
@@ -40,7 +41,7 @@ abstract contract UsingWitOracleRequestTemplate
         return witOracleRequestTemplate.verifyRadonRequest(_witOracleRequestArgs);
     }
 
-    /// @dev Pulls a fresh update from the Wit/oracle blockchain of some pre-verified Wit/oracle compliant 
+    /// @dev Pulls a fresh update from the Wit/Oracle blockchain of some pre-verified Wit/Oracle compliant 
     /// @dev data request, and the default `__witOracleDefaultQuerySLA` data security parameters.
     /// @dev Returns some unique query id. 
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle bridge when pulling the data update.
@@ -49,7 +50,7 @@ abstract contract UsingWitOracleRequestTemplate
             uint256 _queryEvmReward, 
             bytes32 _queryRadHash
         )
-        virtual internal returns (uint256)
+        virtual internal returns (Witnet.QueryId)
     {
         return __witOraclePostQuery(
             _queryEvmReward,
@@ -58,19 +59,19 @@ abstract contract UsingWitOracleRequestTemplate
         );
     }
 
-    /// @dev Pulls a fresh update from the Wit/oracle blockchain of some pre-verified Wit/oracle compliant 
+    /// @dev Pulls a fresh update from the Wit/Oracle blockchain of some pre-verified Wit/Oracle compliant 
     /// @dev data request, and the given `_querSLA` data security parameters. Returns some unique query id.
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle bridge when pulling the data update.
     /// @param _queryRadHash RAD hash of some pre-verified data request in the witOracle()'s registry. 
-    /// @param _querySLA The required SLA data security params for the Wit/oracle blockchain to accomplish.
+    /// @param _querySLA The required SLA data security params for the Wit/Oracle blockchain to accomplish.
     function __witOraclePostQuery(
             uint256 _queryEvmReward, 
             bytes32 _queryRadHash, 
-            Witnet.RadonSLA memory _querySLA
+            Witnet.QuerySLA memory _querySLA
         )
-        virtual internal returns (uint256)
+        virtual internal returns (Witnet.QueryId)
     {
-        return __witOracle.postRequest{
+        return __witOracle.postQuery{
             value: _queryEvmReward
         }(
             _queryRadHash,
@@ -78,7 +79,7 @@ abstract contract UsingWitOracleRequestTemplate
         );
     }
 
-    /// @dev Pulls a fresh update from the Wit/oracle blockchain based on some data request built out
+    /// @dev Pulls a fresh update from the Wit/Oracle blockchain based on some data request built out
     /// @dev of the underlying `witOracleRequestTemplate`, and the default `__witOracleDefaultQuerySLA` 
     /// @dev data security parameters. Returns the unique RAD hash of the just-built data request, and some 
     /// @dev unique query id. Reverts if the number of given parameters don't match as required by the 
@@ -89,7 +90,7 @@ abstract contract UsingWitOracleRequestTemplate
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward
         )
-        virtual internal returns (bytes32, uint256)
+        virtual internal returns (bytes32, Witnet.QueryId)
     {
         return __witOraclePostQuery(
             _witOracleRequestArgs,
@@ -98,22 +99,22 @@ abstract contract UsingWitOracleRequestTemplate
         );
     }
 
-    /// @dev Pulls a fresh update from the Wit/oracle blockchain based on some data request built out
+    /// @dev Pulls a fresh update from the Wit/Oracle blockchain based on some data request built out
     /// @dev of the underlying `witOracleRequestTemplate`, and the given `_querSLA` data security parameters.
     /// @dev Returns the unique RAD hash of the just-built data request, and some unique query id. 
     /// @dev Reverts if the number of given parameters don't match as required by the underlying template's 
     /// @dev parameterized data sources (i.e. Radon Retrievals). 
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle bridge when pulling the data update.
-    /// @param _querySLA The required SLA data security params for the Wit/oracle blockchain to accomplish.
+    /// @param _querySLA The required SLA data security params for the Wit/Oracle blockchain to accomplish.
     /// @param _witOracleRequestArgs Parameters passed to the `witOracleRequestTemplate` for building a new data request.
     function __witOraclePostQuery(
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward,
-            Witnet.RadonSLA memory _querySLA
+            Witnet.QuerySLA memory _querySLA
         )
         virtual internal returns (
             bytes32 _queryRadHash,
-            uint256 _queryId
+            Witnet.QueryId _queryId
         )
     {
         _queryRadHash = __witOracleVerifyRadonRequest(_witOracleRequestArgs);

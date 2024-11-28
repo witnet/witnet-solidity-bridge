@@ -5,11 +5,17 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../libs/Witnet.sol";
 
 interface IWitPriceFeedsSolver {
+    enum LatestUpdateStatus {
+        Void,
+        Awaiting,
+        Ready,
+        Error
+    }
     struct Price {
-        uint value;
-        uint timestamp;
-        bytes32 tallyHash;
-        Witnet.QueryResponseStatus status;
+        uint64 value;
+        Witnet.ResultTimestamp timestamp;
+        Witnet.TransactionHash drTxHash;
+        LatestUpdateStatus latestStatus;
     }
     function class() external pure returns (string memory);
     function delegator() external view returns (address);

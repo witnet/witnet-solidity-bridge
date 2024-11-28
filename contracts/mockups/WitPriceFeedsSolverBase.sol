@@ -2,14 +2,22 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../data/WitPriceFeedsData.sol";
-import "../interfaces/IWitPriceFeeds.sol";
+import "../data/WitPriceFeedsDataLib.sol";
 
 abstract contract WitPriceFeedsSolverBase
     is
-        IWitPriceFeedsSolver,
-        WitPriceFeedsData
+        IWitPriceFeedsSolver
 {
+    /// ===============================================================================================================
+    /// --- Yet to be implemented IWitPriceFeedsSolver methods --------------------------------------------------------
+    
+    function class() virtual external pure returns (string memory);
+    function solve(bytes4) virtual external view returns (Price memory);
+
+    
+    /// ===============================================================================================================
+    /// --- Base implementation ---------------------------------------------------------------------------------------
+    
     address public immutable override delegator;
 
     modifier onlyDelegator {
@@ -37,7 +45,7 @@ abstract contract WitPriceFeedsSolverBase
         );
         for (uint _ix = 0; _ix < deps.length; _ix ++) {
             bytes4 _depsId4 = bytes4(keccak256(bytes(deps[_ix])));
-            Record storage __depsFeed = __records_(_depsId4);
+            WitPriceFeedsDataLib.Record storage __depsFeed = WitPriceFeedsDataLib.seekRecord(_depsId4);
             require(
                 __depsFeed.index > 0, 
                 string(abi.encodePacked(
@@ -55,7 +63,7 @@ abstract contract WitPriceFeedsSolverBase
             _depsFlag |= (bytes32(_depsId4) >> (32 * _ix));
             _innerDecimals += __depsFeed.decimals;
         }
-        Record storage __feed = __records_(feedId);
+        WitPriceFeedsDataLib.Record storage __feed = WitPriceFeedsDataLib.seekRecord(feedId);
         __feed.solverReductor = int(uint(__feed.decimals)) - int(_innerDecimals);
         __feed.solverDepsFlag = _depsFlag;
     }

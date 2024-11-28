@@ -13,3 +13,11 @@ if (fs.existsSync("./artifacts")) {
 if (fs.existsSync("./build/contracts")) {
   exec("sed -i -- \"/\bsourcePath\b/d\" build/contracts/*.json")
 }
+
+if (fs.existsSync("./migrations/frosts")) {
+  exec(`sed -i -- /\bsourcePath\b/d migrations/frosts/*.json`)
+}
+
+if (fs.existsSync("./migrations/frosts/apps")) {
+  exec(`sed -i -- /\bsourcePath\b/d migrations/frosts/apps/*.json`)
+}

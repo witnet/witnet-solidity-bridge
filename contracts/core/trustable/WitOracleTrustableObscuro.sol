@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-/* solhint-disable var-name-mixedcase */
+pragma solidity >=0.8.0 <0.9.0;
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
-
-import "./WitOracleTrustableDefault.sol";
+import "../base/WitOracleBaseTrustable.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -14,70 +11,74 @@ import "./WitOracleTrustableDefault.sol";
 /// @author The Witnet Foundation
 contract WitOracleTrustableObscuro
     is 
-        WitOracleTrustableDefault
+        WitOracleBaseTrustable
 {
     function class() virtual override public view returns (string memory) {
-        return type(WitOracleTrustableObscuro).name;
+        return type(WitOracleBaseTrustable).name;
     }
 
     constructor(
+            EvmImmutables memory _immutables,
             WitOracleRadonRegistry _registry,
-            WitOracleRequestFactory _factory,
-            bool _upgradable,
-            bytes32 _versionTag,
-            uint256 _reportResultGasBase,
-            uint256 _reportResultWithCallbackGasBase,
-            uint256 _reportResultWithCallbackRevertGasBase,
-            uint256 _sstoreFromZeroGas
+            bytes32 _versionTag
         )
-        WitOracleTrustableDefault(
-            _registry,
-            _factory, 
-            _upgradable, 
-            _versionTag,
-            _reportResultGasBase,
-            _reportResultWithCallbackGasBase,
-            _reportResultWithCallbackRevertGasBase,
-            _sstoreFromZeroGas
+        WitOracleBase(
+            _immutables,
+            _registry
         )
+        WitOracleBaseTrustable(_versionTag)
     {}
 
-
     // ================================================================================================================
-    // --- Overrides implementation of 'IWitOracleView' ------------------------------------------------------
+    // --- Overrides 'IWitOracle' -------------------------------------------------------------------------------------
 
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
     /// @dev Fails if or if `msg.sender` is not the actual requester.
-    function getQuery(uint256 _queryId)
+    function getQuery(Witnet.QueryId _queryId)
         public view
         virtual override
         onlyRequester(_queryId)
         returns (Witnet.Query memory)
     {
-        return WitOracleTrustableBase.getQuery(_queryId);
+        return super.getQuery(_queryId);
     }
 
     /// @notice Retrieves the whole `Witnet.QueryResponse` record referred to a previously posted Witnet Data Request.
     /// @dev Fails if the `_queryId` is not in 'Reported' status, or if `msg.sender` is not the actual requester.
     /// @param _queryId The unique query identifier
-    function getQueryResponse(uint256 _queryId)
+    function getQueryResponse(Witnet.QueryId _queryId)
         public view
         virtual override
         onlyRequester(_queryId)
         returns (Witnet.QueryResponse memory _response)
     {
-        return WitOracleTrustableBase.getQueryResponse(_queryId);
+        return super.getQueryResponse(_queryId);
     }
 
-    /// @notice Gets error code identifying some possible failure on the resolution of the given query.
-    /// @param _queryId The unique query identifier.
-    function getQueryResultError(uint256 _queryId)
-        public view
+    function getQueryResult(Witnet.QueryId _queryId)
         virtual override
+        public view
         onlyRequester(_queryId)
-        returns (Witnet.ResultError memory)
+        returns (Witnet.DataResult memory)
     {
-        return WitOracleTrustableBase.getQueryResultError(_queryId);
+        return WitOracleBase.getQueryResult(_queryId);
     }
-    
+
+    function getQueryResultStatus(Witnet.QueryId _queryId)
+        virtual override
+        public view
+        onlyRequester(_queryId)
+        returns (Witnet.ResultStatus)
+    {
+        return super.getQueryResultStatus(_queryId);
+    }
+
+    function getQueryResultStatusDescription(Witnet.QueryId _queryId)
+        virtual override
+        public view
+        onlyRequester(_queryId)
+        returns (string memory)
+    {
+        return WitOracleBase.getQueryResultStatusDescription(_queryId);
+    }
 }

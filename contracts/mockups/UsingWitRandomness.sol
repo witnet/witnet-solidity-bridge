@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "../WitRandomness.sol";
 
@@ -13,17 +12,24 @@ abstract contract UsingWitRandomness
         IWitOracleEvents,
         IWitRandomnessEvents
 {
-    WitRandomness immutable public witRandomness;
+    WitOracle public immutable witOracle;
+    WitRandomness internal immutable __RNG;
 
     constructor(WitRandomness _witRandomness) {
         require(
             address(_witRandomness).code.length > 0
-                && _witRandomness.specs() == type(WitRandomness).interfaceId,
+                && _witRandomness.specs() == (
+                    type(IWitOracleAppliance).interfaceId
+                        ^ type(IWitRandomness).interfaceId
+                ),
             "UsingWitRandomness: uncompliant WitRandomness appliance"
         );
-        witRandomness = _witRandomness;
+        __RNG = _witRandomness;
+        witOracle = __RNG.witOracle();
     }
 
+    /// @dev As to accept transfers back from the `WitRandomness` appliance
+    /// @dev when excessive fee is passed over to the `__RNG.randomize()` method. 
     receive() external payable virtual {}
 
 }

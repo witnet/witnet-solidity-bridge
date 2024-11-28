@@ -3,21 +3,11 @@ const merge = require("lodash.merge")
 const utils = require("./utils")
 module.exports = {
   getAddresses: (network) => {
-    const [eco, net] = utils.getRealmNetworkFromString(network)
-    if (addresses[net]) {
-      const merged = merge(
-        addresses.default,
-        addresses[eco],
-        addresses[net],
-      )
-      return {
-        WitOracle: merged?.WitOracle,
-        WitPriceFeeds: merged?.WitPriceFeeds,
-        WitRandomnessV21: merged?.WitRandomnessV21,
-      }
-    } else {
-      return {}
-    }
+    let res = addresses?.default
+    utils.getNetworkTagsFromString(network).forEach(net => {
+      res = merge(res, addresses[net])
+    })
+    return res
   },
   supportedEcosystems: () => {
     const ecosystems = []
@@ -32,14 +22,14 @@ module.exports = {
   supportedNetworks,
   artifacts: {
     WitOracle: require("../artifacts/contracts/WitOracle.sol/WitOracle.json"),
-    WitPriceFeeds: require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json"),
-    WitnetPriceRouteSolver: require("../artifacts/contracts/interfaces/IWitPriceFeedsSolver.sol/IWitPriceFeedsSolver.json"),
-    WitRandomness: require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json"),
     WitOracleRequest: require("../artifacts/contracts/WitOracleRequest.sol/WitOracleRequest.json"),
     WitOracleRadonRegistry: require("../artifacts/contracts/WitOracleRadonRegistry.sol/WitOracleRadonRegistry.json"),
     WitOracleRequestFactory: require("../artifacts/contracts/WitOracleRequestFactory.sol/WitOracleRequestFactory.json"),
     WitOracleRequestTemplate: require("../artifacts/contracts/WitOracleRequestTemplate.sol/WitOracleRequestTemplate.json"),
+    WitPriceFeeds: require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json"),
+    WitRandomness: require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json"),
     WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json"),
+    IWitPriceFeedsSolver: require("../artifacts/contracts/interfaces/IWitPriceFeedsSolver.sol/IWitPriceFeedsSolver.json"),
   },
   settings: require("../settings"),
   utils,

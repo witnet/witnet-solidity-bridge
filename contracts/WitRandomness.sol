@@ -13,4 +13,11 @@ abstract contract WitRandomness
         IWitOracleEvents,
         IWitRandomness,
         IWitRandomnessEvents
-{}
+{
+    function specs() virtual override external pure returns (bytes4) {
+        return (
+            type(IWitOracleAppliance).interfaceId
+                ^ type(IWitRandomness).interfaceId
+        );
+    }
+}

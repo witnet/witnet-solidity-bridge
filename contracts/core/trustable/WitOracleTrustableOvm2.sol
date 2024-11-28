@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-/* solhint-disable var-name-mixedcase */
+pragma solidity >=0.8.0 <0.9.0;
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
-
-import "./WitOracleTrustableDefault.sol";
+import "../base/WitOracleBaseTrustable.sol";
 
 // solhint-disable-next-line
 interface OVM_GasPriceOracle {
@@ -19,34 +16,22 @@ interface OVM_GasPriceOracle {
 /// @author The Witnet Foundation
 contract WitOracleTrustableOvm2
     is 
-        WitOracleTrustableDefault
+        WitOracleBaseTrustable
 {
-    using Witnet for Witnet.RadonSLA;
-
     function class() virtual override public view returns (string memory) {
         return type(WitOracleTrustableOvm2).name;
     }
 
     constructor(
+            EvmImmutables memory _immutables,
             WitOracleRadonRegistry _registry,
-            WitOracleRequestFactory _factory,
-            bool _upgradable,
-            bytes32 _versionTag,
-            uint256 _reportResultGasBase,
-            uint256 _reportResultWithCallbackGasBase,
-            uint256 _reportResultWithCallbackRevertGasBase,
-            uint256 _sstoreFromZeroGas
+            bytes32 _versionTag
         )
-        WitOracleTrustableDefault(
-            _registry,
-            _factory,
-            _upgradable,
-            _versionTag,
-            _reportResultGasBase,
-            _reportResultWithCallbackGasBase,
-            _reportResultWithCallbackRevertGasBase,
-            _sstoreFromZeroGas
+        WitOracleBase(
+            _immutables,
+            _registry
         )
+        WitOracleBaseTrustable(_versionTag)
     {
         __gasPriceOracleL1 = OVM_GasPriceOracle(0x420000000000000000000000000000000000000F);
     }
@@ -75,8 +60,60 @@ contract WitOracleTrustableOvm2
         }
     }
 
+
     // ================================================================================================================
-    // --- Overrides 'IWitOracle' ----------------------------------------------------------------------------
+    // --- Overrides 'IWitOracle' -------------------------------------------------------------------------------------
+
+    /// @notice Estimate the minimum reward required for posting a data request.
+    /// @param _evmGasPrice Expected gas price to pay upon posting the data request.
+    function estimateBaseFee(uint256 _evmGasPrice)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return _getCurrentL1Fee(32) + WitOracleBase.estimateBaseFee(_evmGasPrice);
+    }
+
+    /// @notice Estimate the minimum reward required for posting a data request with a callback.
+    /// @param _gasPrice Expected gas price to pay upon posting the data request.
+    /// @param _callbackGas Maximum gas to be spent when reporting the data request result.
+    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint24 _callbackGas)
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return _getCurrentL1Fee(32) + WitOracleBase.estimateBaseFeeWithCallback(_gasPrice, _callbackGas);
+    }
+
+    /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
+    /// @notice data query in order to avoid getting provable "too low incentives" results from
+    /// @notice the Wit/Oracle blockchain. 
+    /// @dev The extra fee gets calculated in proportion to:
+    /// @param _evmGasPrice Tentative EVM gas price at the moment the query result is ready.
+    /// @param _evmWitPrice Tentative nanoWit price in Wei at the moment the query is solved on the Wit/Oracle blockchain.
+    /// @param _querySLA The query SLA data security parameters as required for the Wit/Oracle blockchain. 
+    function estimateExtraFee(
+            uint256 _evmGasPrice, 
+            uint256 _evmWitPrice, 
+            Witnet.QuerySLA memory _querySLA
+        )
+        public view
+        virtual override
+        returns (uint256)
+    {
+        return (
+            _getCurrentL1Fee(_querySLA.witResultMaxSize)
+                + WitOracleBase.estimateExtraFee(
+                    _evmGasPrice,
+                    _evmWitPrice,
+                    _querySLA
+                )
+        );
+    }
+
+
+    // ================================================================================================================
+    // --- Overrides 'IWitOracleLegacy' -------------------------------------------------------------------------------
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
@@ -87,48 +124,12 @@ contract WitOracleTrustableOvm2
         virtual override
         returns (uint256)
     {
-        return _getCurrentL1Fee(_resultMaxSize) + WitOracleTrustableDefault.estimateBaseFee(_gasPrice, _resultMaxSize);
+        return _getCurrentL1Fee(_resultMaxSize) + WitOracleBaseTrustable.estimateBaseFee(_gasPrice, _resultMaxSize);
     }
 
-    /// @notice Estimate the minimum reward required for posting a data request with a callback.
-    /// @param _gasPrice Expected gas price to pay upon posting the data request.
-    /// @param _callbackGasLimit Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256 _gasPrice, uint24 _callbackGasLimit)
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return _getCurrentL1Fee(32) + WitOracleTrustableDefault.estimateBaseFeeWithCallback(_gasPrice, _callbackGasLimit);
-    }
-
-    /// @notice Estimate the extra reward (i.e. over the base fee) to be paid when posting a new
-    /// @notice data query in order to avoid getting provable "too low incentives" results from
-    /// @notice the Wit/oracle blockchain. 
-    /// @dev The extra fee gets calculated in proportion to:
-    /// @param _evmGasPrice Tentative EVM gas price at the moment the query result is ready.
-    /// @param _evmWitPrice Tentative nanoWit price in Wei at the moment the query is solved on the Wit/oracle blockchain.
-    /// @param _querySLA The query SLA data security parameters as required for the Wit/oracle blockchain. 
-    function estimateExtraFee(
-            uint256 _evmGasPrice, 
-            uint256 _evmWitPrice, 
-            Witnet.RadonSLA memory _querySLA
-        )
-        public view
-        virtual override
-        returns (uint256)
-    {
-        return (
-            _getCurrentL1Fee(_querySLA.maxTallyResultSize)
-                + WitOracleTrustableDefault.estimateExtraFee(
-                    _evmGasPrice,
-                    _evmWitPrice,
-                    _querySLA
-                )
-        );
-    }
 
     // ================================================================================================================
-    // --- Overrides 'IWitOracleReporter' --------------------------------------------------------------------------
+    // --- Overrides 'IWitOracleTrustableReporter' --------------------------------------------------------------------------
 
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
@@ -144,35 +145,35 @@ contract WitOracleTrustableOvm2
         returns (uint256 _revenues, uint256 _expenses)
     {
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
+            Witnet.QueryId _queryId = Witnet.QueryId.wrap(_queryIds[_ix]);
             if (
-                WitOracleDataLib.seekQueryStatus(_queryIds[_ix]) == Witnet.QueryStatus.Posted
+                getQueryStatus(_queryId) == Witnet.QueryStatus.Posted
             ) {
-                Witnet.QueryRequest storage __request = WitOracleDataLib.seekQueryRequest(_queryIds[_ix]);
-                if (__request.gasCallback > 0) {
+                Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
+                if (__query.request.callbackGas > 0) {
                     _expenses += (
-                        WitOracleTrustableDefault.estimateBaseFeeWithCallback(_evmGasPrice, __request.gasCallback)
-                            + WitOracleTrustableDefault.estimateExtraFee(
-                                _evmGasPrice,
-                                _evmWitPrice,
-                                Witnet.RadonSLA({
-                                    witNumWitnesses: __request.radonSLA.witNumWitnesses,
-                                    witUnitaryReward: __request.radonSLA.witUnitaryReward,
-                                    maxTallyResultSize: uint16(0)
+                        WitOracleBase.estimateBaseFeeWithCallback(_evmGasPrice, __query.request.callbackGas)
+                            + WitOracleBase.estimateExtraFee(
+                                _evmGasPrice, _evmWitPrice,
+                                Witnet.QuerySLA({
+                                    witCommitteeCapacity: __query.slaParams.witCommitteeCapacity,
+                                    witCommitteeUnitaryReward: __query.slaParams.witCommitteeUnitaryReward,
+                                    witResultMaxSize: uint16(0),
+                                    witCapability: Witnet.QueryCapability.wrap(0)
                                 })
                             )
                     );
                 } else {
                     _expenses += (
-                        WitOracleTrustableDefault.estimateBaseFee(_evmGasPrice)
-                            + WitOracleTrustableDefault.estimateExtraFee(
-                                _evmGasPrice,
-                                _evmWitPrice,
-                                __request.radonSLA
+                        WitOracleBase.estimateBaseFee(_evmGasPrice)
+                            + WitOracleBase.estimateExtraFee(
+                                _evmGasPrice, _evmWitPrice,
+                                __query.slaParams
                             )
                     );
                 }
-                _expenses += __request.radonSLA.witUnitaryReward * _evmWitPrice;
-                _revenues += __request.evmReward;
+                _expenses += __query.slaParams.witCommitteeUnitaryReward * _evmWitPrice;
+                _revenues += Witnet.QueryReward.unwrap(__query.reward);
             }
         }
         _expenses += __gasPriceOracleL1.getL1Fee(_evmMsgData);

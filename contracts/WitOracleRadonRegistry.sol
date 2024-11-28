@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "./interfaces/IWitAppliance.sol";
 import "./interfaces/IWitOracleRadonRegistry.sol";
@@ -12,4 +11,11 @@ abstract contract WitOracleRadonRegistry
         IWitAppliance,
         IWitOracleRadonRegistry,
         IWitOracleRadonRegistryEvents
-{}
+{
+    function specs() virtual override external pure returns (bytes4) {
+        return (
+            type(IWitAppliance).interfaceId
+                ^ type(IWitOracleRadonRegistry).interfaceId
+        );
+    }
+}

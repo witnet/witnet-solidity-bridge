@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <0.9.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "../WitPriceFeeds.sol";
 
@@ -18,7 +17,10 @@ abstract contract UsingWitPriceFeeds
     constructor(WitPriceFeeds _witPriceFeeds) {
         require(
             address(_witPriceFeeds).code.length > 0
-                && _witPriceFeeds.specs() == type(WitPriceFeeds).interfaceId,
+                && _witPriceFeeds.specs() == (
+                    type(IWitOracleAppliance).interfaceId
+                        ^ type(IWitPriceFeeds).interfaceId
+                ),
             "UsingWitPriceFeeds: uncompliant WitPriceFeeds appliance"
         );
         witPriceFeeds = _witPriceFeeds;
