@@ -25,6 +25,7 @@
     "fmt": "npm run fmt:js && npm run fmt:sol",
     "migrate": "node ./scripts/migrate.js 2>&1",
     "networks": "node ./scripts/networks.js 2>&1",
+    "ops:drs:err": "truffle migrate --compile-none --migrations_directory ./migrations/ops/drs/err --network",
     "ops:rng:sla": "truffle migrate --migrations_directory ./migrations/ops/rng/sla --network",
     "test": "npm run clean && truffle test"
   },
@@ -63,6 +64,6 @@
     "truffle": "~5.11.5",
     "truffle-assertions": "0.9.2",
     "truffle-flattener": "~1.6.0",
-    "truffle-plugin-verify": "~0.6.2"
+    "truffle-plugin-verify": "^0.6.7"
   }
 }

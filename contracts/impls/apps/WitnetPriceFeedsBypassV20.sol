@@ -24,6 +24,8 @@ contract WitnetPriceFeedsBypassV20
         WitnetUpgradableBase
 {
     using Witnet for bytes4;
+    using WitnetV2 for WitnetV2.RadonSLA;
+
     WitnetPriceFeedsV20 immutable public surrogate;
 
     constructor (
@@ -143,10 +145,22 @@ contract WitnetPriceFeedsBypassV20
     // ================================================================================================================
     // --- Partial interception of 'IWitnetFeeds' ---------------------------------------------------------------------
 
+    function defaultRadonSLA() 
+        public view
+        returns (Witnet.RadonSLA memory)
+    {
+        return abi.decode(
+            _staticcall(abi.encodeWithSignature(
+                "defaulRadonSLA()"
+            )),
+            (WitnetV2.RadonSLA)
+        ).toV1();
+    }
+
     function estimateUpdateBaseFee(bytes4, uint256 _gasPrice, uint256) public view returns (uint256) {
         return abi.decode(
             _staticcall(abi.encodeWithSignature(
-                "estimateUpdateBaseFee(uint256)", 
+                "estimateUpdateUpdateRequestFee(uint256)", 
                 _gasPrice
             )),
             (uint256)
@@ -156,7 +170,7 @@ contract WitnetPriceFeedsBypassV20
     function estimateUpdateBaseFee(bytes4, uint256 _gasPrice, uint256, bytes32) external view returns (uint256) {
         return abi.decode(
             _staticcall(abi.encodeWithSignature(
-                "estimateUpdateBaseFee(uint256)", 
+                "estimateUpdateUpdateRequestFee(uint256)", 
                 _gasPrice
             )),
             (uint256)
