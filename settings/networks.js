@@ -365,7 +365,7 @@ module.exports = {
       explorerUrl: "https://www.okx.com/explorer/oktc-test/",
     },
   },
-  "okx:x1:sepolia": {
+  "okx:xlayer:sepolia": {
     port: 8505,
     network_id: 195,
     verify: {
