@@ -473,16 +473,6 @@
         "WitnetRequestBytecodesNoSha256": "0xd3a3C178F76D788B4054C3945281F94e7122a8fD",
         "WitnetRequestFactoryDefault": "0xB06a2fEc3Dc38b6f8Ce6337317Fcd4aAB00FE773"
     },
-    "syscoin:rollux:testnet": {
-        "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
-        "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
-        "WitnetPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837",
-        "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
-        "WitnetRequestBytecodesDefault": "0x51376b77d9944bb9c5685b9d9289dd08D399B5e1",
-        "WitnetRequestFactoryDefault": "0xB06a2fEc3Dc38b6f8Ce6337317Fcd4aAB00FE773",
-        "WitnetOracleTrustableOvm2": "0xaE08701A621449e12e3678587aBe9420E8805eBb",
-        "WitnetPriceFeedsDefault": "0x8280929b7F6adcE1CfA15b63cbEC1A7FD8cAEf11"
-    },
     "ten:testnet": {
         "WitnetProxy": "0xaC3E870BF8D13Dc39f76936b6AF8279eF5a9211F",
         "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
