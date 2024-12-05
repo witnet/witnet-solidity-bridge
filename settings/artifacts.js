@@ -38,7 +38,7 @@ module.exports = {
   "okx:x1:mainnet": {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
-  "okx:x1:sepolia": {
+  "okx:xlayer:sepolia": {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
   "polygon:zkevm:goerli": {
