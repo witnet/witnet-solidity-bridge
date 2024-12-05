@@ -50,9 +50,6 @@ module.exports = {
   scroll: {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
-  "syscoin:rollux:testnet": {
-    WitnetOracle: "WitnetOracleTrustableOvm2",
-  },
   "syscoin:rollux:mainnet": {
     WitnetOracle: "WitnetOracleTrustableOvm2",
   },
