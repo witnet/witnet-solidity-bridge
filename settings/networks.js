@@ -427,14 +427,6 @@ module.exports = {
       explorerUrl: "https://zkevm.polygonscan.com/",
     },
   },
-  "reef:testnet": {
-    port: 8532,
-    network_id: 13939,
-  },
-  "reef:mainnet": {
-    port: 9532,
-    network_id: 13939,
-  },
   "scroll:sepolia": {
     port: 8514,
     network_id: 534351,
