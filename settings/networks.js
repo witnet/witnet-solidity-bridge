@@ -278,11 +278,11 @@ module.exports = {
     //   explorerUrl: "https://scan.kcc.io/",
     // },
   },
-  "klaytn:testnet": {
+  "kaia:testnet": {
     port: 8527,
     network_id: 1001,
   },
-  "klaytn:mainnet": {
+  "kaia:mainnet": {
     port: 9527,
     network_id: 8217,
   },
