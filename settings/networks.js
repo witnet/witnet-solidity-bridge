@@ -316,10 +316,6 @@ module.exports = {
       explorerUrl: "https://sepolia-explorer.metisdevops.link",
     },
   },
-  "meter:testnet": {
-    port: 8523,
-    network_id: 83,
-  },
   "meter:mainnet": {
     port: 9523,
     network_id: 82,
