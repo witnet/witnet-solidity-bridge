@@ -84,23 +84,5 @@ module.exports = {
     WitnetRandomness: {
       from: "0xE169Bf81Ecf738d02fD8d3824DFe02153b334eF7",
     },
-  },
-  reef: {
-    WitnetDeployer: {
-      from: "0xB309D64D6535E95eDBA9A899A8a8D11f1BEC9357",
-    },
-    WitnetPriceFeeds: {
-      from: "0xB309D64D6535E95eDBA9A899A8a8D11f1BEC9357",
-    },
-    WitnetOracle: {
-      immutables: {
-        values: [
-          /* _reportResultGasBase */ "0x3100A1CAC7EF19DC",
-        ],
-      },
-    },
-    WitnetRandomness: {
-      from: "0xB309D64D6535E95eDBA9A899A8a8D11f1BEC9357",
-    },
-  },
+  }
 }
