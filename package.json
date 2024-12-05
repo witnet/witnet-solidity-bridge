@@ -1,6 +1,6 @@
 {
   "name": "witnet-solidity-bridge",
-  "version": "2.0.17",
+  "version": "2.0.18",
   "description": "Witnet Solidity Bridge contracts for EVM-compatible chains",
   "author": "Witnet Foundation <info@witnet.foundation>",
   "license": "MIT",
