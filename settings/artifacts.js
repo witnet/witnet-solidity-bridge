@@ -47,9 +47,6 @@ module.exports = {
   "polygon:zkevm:mainnet": {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
-  reef: {
-    WitnetOracle: "WitnetOracleTrustableReef",
-  },
   scroll: {
     WitnetRequestBytecodes: "WitnetRequestBytecodesNoSha256",
   },
