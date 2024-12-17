@@ -334,6 +334,16 @@
         "WitnetRequestBytecodesDefault": "0xD1960cdC1593Bb9CA75263266dAB75EE33163187",
         "WitnetRequestFactoryDefault": "0x9ef37BF321828AD49F3D31Fd9Cd36921ee317190"
     },
+    "metis:mainnet": {
+        "WitnetErrorsLib": "0x3b7AD1402C243Ba59D45a0364B17A31e260A4301",
+        "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
+        "WitnetPriceFeedsLib": "0x751F77190Ce6212899D5848334838D56CF7eEe91",
+        "WitnetOracleDataLib": "0xE89dc301AEe78917018039FEBE72f9FE5aB730D9",
+        "WitnetRequestBytecodesDefault": "0x0cD95BaBBc2947f3e2dD01867B99eF7c666Dd740",
+        "WitnetRequestFactoryDefault": "0xfdb4C63E434BF05b85b6d4b038b7F5f119a09193",
+        "WitnetOracleTrustableDefault": "0x04f33b86124D7024Aac8E6966C6e82A060F138eB",
+        "WitnetPriceFeedsDefault": "0x37DF79C4ABE7ebe50093d3Af7CF92A6BB9971f64"
+    },
     "metis:sepolia": {
         "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
         "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
