@@ -50,5 +50,6 @@ module.exports = {
     polygonscan: process.env.ETHERSCAN_POLYGON_API_KEY,
     routescan: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
     scrollscan: process.env.ETHERSCAN_SCROLL_API_KEY,
+    uniscan: process.env.ETHERSCAN_UNISCAN_API_KEY,
   },
 }

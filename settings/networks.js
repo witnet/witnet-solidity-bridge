@@ -479,6 +479,15 @@ module.exports = {
     port: 9516,
     network_id: 1231,
   },
+  "unichain:sepolia": {
+    port: 8500,
+    network_id: 1301,
+    confirmations: 8,
+    verify: {
+      apiUrl: "https://api-sepolia.uniscan.xyz/api",
+      explorerUrl: "https://sepolia.uniscan.xyz/address",
+    },
+  },
   "worldchain:mainnet": {
     port: 9501,
     network_id: 480,
