@@ -306,6 +306,16 @@ module.exports = {
     port: 9536,
     network_id: 1088,
   },
+  "metis:mainnet": {
+    port: 7536,
+    network_id: 1088,
+    verify: {
+      apiKey: "MY_API_KEY",
+      // apiUrl: "https://explorer.metisdevops.link/api",
+      apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/1088/etherscan",
+      explorerUrl: "https://explorer.metisdevops.link",
+    },
+  },
   "metis:sepolia": {
     port: 8536,
     network_id: 59902,
