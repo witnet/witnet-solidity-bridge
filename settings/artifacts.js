@@ -17,11 +17,6 @@ module.exports = {
       WitPriceFeedsDataLib: "WitPriceFeedsDataLib",
     },
   },
-  "polygon:amoy": {
-    core: {
-      WitOracleRequestFactory: "WitOracleRequestFactoryDefaultV21",
-    },
-  },
   base: {
     core: { WitOracle: "WitOracleTrustableOvm2" },
   },
