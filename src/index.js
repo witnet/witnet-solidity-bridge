@@ -1,4 +1,5 @@
 const addresses = require("../migrations/addresses.json")
+const constructorArgs = require("../migrations/constructorArgs.json")
 const merge = require("lodash.merge")
 const utils = require("./utils")
 module.exports = {
@@ -11,7 +12,7 @@ module.exports = {
   },
   supportedEcosystems: () => {
     const ecosystems = []
-    supportedNetworks().forEach(network => {
+    Object.keys(supportedNetworks()).forEach(network => {
       const [ecosystem] = utils.getRealmNetworkFromString(network)
       if (!ecosystems.includes(ecosystem)) {
         ecosystems.push(ecosystem)
@@ -20,25 +21,40 @@ module.exports = {
     return ecosystems
   },
   supportedNetworks,
-  artifacts: {
-    WitOracle: require("../artifacts/contracts/WitOracle.sol/WitOracle.json"),
-    WitOracleRequest: require("../artifacts/contracts/WitOracleRequest.sol/WitOracleRequest.json"),
-    WitOracleRadonRegistry: require("../artifacts/contracts/WitOracleRadonRegistry.sol/WitOracleRadonRegistry.json"),
-    WitOracleRequestFactory: require("../artifacts/contracts/WitOracleRequestFactory.sol/WitOracleRequestFactory.json"),
-    WitOracleRequestTemplate: require("../artifacts/contracts/WitOracleRequestTemplate.sol/WitOracleRequestTemplate.json"),
-    WitPriceFeeds: require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json"),
-    WitRandomness: require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json"),
-    WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json"),
-    IWitPriceFeedsSolver: require("../artifacts/contracts/interfaces/IWitPriceFeedsSolver.sol/IWitPriceFeedsSolver.json"),
+  supportsNetwork,
+  ABIs: {
+    WitOracle: require("../artifacts/contracts/WitOracle.sol/WitOracle.json").abi,
+    WitOracleRequest: require("../artifacts/contracts/WitOracleRequest.sol/WitOracleRequest.json").abi,
+    WitOracleRadonRegistry: require("../artifacts/contracts/WitOracleRadonRegistry.sol/WitOracleRadonRegistry.json").abi,
+    WitOracleRequestFactory: require("../artifacts/contracts/WitOracleRequestFactory.sol/WitOracleRequestFactory.json").abi,
+    WitOracleRequestTemplate: require("../artifacts/contracts/WitOracleRequestTemplate.sol/WitOracleRequestTemplate.json").abi,
+    WitPriceFeeds: require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json").abi,
+    WitRandomness: require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json").abi,
+    WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json").abi,
+    IWitPriceFeedsSolver: require("../artifacts/contracts/interfaces/IWitPriceFeedsSolver.sol/IWitPriceFeedsSolver.json").abi,
   },
   settings: require("../settings"),
   utils,
 }
 
+function supportsNetwork(network) {
+  return network && Object.keys(constructorArgs).includes(network.toLowerCase())
+}
+
 function supportedNetworks (ecosystem) {
-  return Object
-    .entries(addresses)
-    .filter(value => value[0].indexOf(":") > -1 && (!ecosystem || value[0].startsWith(ecosystem)))
-    .map(value => value[0])
-    .sort()
+  const networks = require('../settings/networks')
+  return Object.fromEntries(
+    Object.keys(constructorArgs)
+      .sort()
+      .filter(network => network.indexOf(":") >= 0 && (!ecosystem || network.startsWith(ecosystem.toLowerCase())))
+      .map(network => [
+        network,
+        {
+          mainnet: networks[network]?.mainnet || false,
+          network_id: networks[network].network_id,
+          port: networks[network].port,
+          verified: networks[network]?.verify?.explorerUrl
+        }
+      ])
+  );
 }

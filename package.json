@@ -16,7 +16,6 @@
   ],
   "exports": {
     ".": "./src/index.js",
-    "./assets": "./src/index.js",
     "./utils": "./src/utils.js"
   },
   "files": [

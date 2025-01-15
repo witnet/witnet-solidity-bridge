@@ -12,6 +12,7 @@ module.exports = {
     },
   },
   "arbitrum:one": {
+    mainnet: true,
     network_id: 42161,
     port: 9517,
     verify: {
@@ -20,6 +21,7 @@ module.exports = {
     },
   },
   "avalanche:mainnet": {
+    mainnet: true,
     network_id: 43114,
     port: 9533,
     verify: {
@@ -38,6 +40,7 @@ module.exports = {
     },
   },
   "base:mainnet": {
+    mainnet: true,
     network_id: 8453,
     port: 9502,
     verify: {
@@ -64,6 +67,7 @@ module.exports = {
     },
   },
   "boba:bnb:mainnet": {
+    mainnet: true,
     network_id: 56288,
     port: 9510,
     verify: {
@@ -73,6 +77,7 @@ module.exports = {
     },
   },
   "boba:eth:mainnet": {
+    mainnet: true,
     network_id: 288,
     port: 9539,
     verify: {
@@ -98,6 +103,7 @@ module.exports = {
     },
   },
   "celo:mainnet": {
+    mainnet: true,
     network_id: 42220,
     port: 9538,
     verify: {
@@ -114,6 +120,7 @@ module.exports = {
     },
   },
   "conflux:core:mainnet": {
+    mainnet: true,
     port: 9540,
     network_id: 1029,
     gasPrice: 10,
@@ -135,6 +142,7 @@ module.exports = {
     },
   },
   "conflux:espace:mainnet": {
+    mainnet: true,
     port: 9529,
     network_id: 1030,
     networkCheckTimeout: 999999,
@@ -155,6 +163,7 @@ module.exports = {
     },
   },
   "cronos:mainnet": {
+    mainnet: true,
     port: 9530,
     network_id: 25,
     confirmations: 2,
@@ -178,6 +187,7 @@ module.exports = {
     },
   },
   "dogechain:mainnet": {
+    mainnet: true,
     port: 9519,
     network_id: 2000,
     verify: {
@@ -195,6 +205,7 @@ module.exports = {
     },
   },
   "elastos:mainnet": {
+    mainnet: true,
     port: 9513,
     network_id: 20,
     verify: {
@@ -203,6 +214,7 @@ module.exports = {
     },
   },
   "ethereum:mainnet": {
+    mainnet: true,
     network_id: 1,
     port: 9545,
     verify: {
@@ -246,6 +258,7 @@ module.exports = {
     },
   },
   "kava:mainnet": {
+    mainnet: true,
     port: 9526,
     network_id: 2222,
     verify: {
@@ -263,6 +276,7 @@ module.exports = {
     },
   },
   "kcc:mainnet": {
+    mainnet: true,
     port: 9537,
     network_id: 321,
     // verify: {
@@ -275,6 +289,7 @@ module.exports = {
     network_id: 1001,
   },
   "klaytn:mainnet": {
+    mainnet: true,
     port: 9527,
     network_id: 8217,
   },
@@ -287,6 +302,7 @@ module.exports = {
     },
   },
   "mantle:mainnet": {
+    mainnet: true,
     port: 9508,
     network_id: 5000,
     verify: {
@@ -295,6 +311,7 @@ module.exports = {
     },
   },
   "metis:mainnet": {
+    mainnet: true,
     port: 9536,
     network_id: 1088,
   },
@@ -313,10 +330,12 @@ module.exports = {
     network_id: 83,
   },
   "meter:mainnet": {
+    mainnet: true,
     port: 9523,
     network_id: 82,
   },
   "moonbeam:mainnet": {
+    mainnet: true,
     port: 9531,
     network_id: 1284,
     verify: {
@@ -325,6 +344,7 @@ module.exports = {
     },
   },
   "moonbeam:moonriver": {
+    mainnet: true,
     port: 7531,
     network_id: 1285,
     verify: {
@@ -350,6 +370,7 @@ module.exports = {
     },
   },
   "okx:oktchain:mainnet": {
+    mainnet: true,
     port: 9528,
     network_id: 66,
     verify: {
@@ -376,6 +397,7 @@ module.exports = {
     },
   },
   "optimism:mainnet": {
+    mainnet: true,
     port: 9520,
     network_id: 10,
     confirmations: 3,
@@ -388,6 +410,7 @@ module.exports = {
   "polygon:amoy": {
     port: 8535,
     network_id: 80002,
+    confirmations: 2,
     verify: {
       apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
       apiUrl: "https://api-amoy.polygonscan.com/api",
@@ -395,6 +418,7 @@ module.exports = {
     },
   },
   "polygon:mainnet": {
+    mainnet: true,
     port: 9535,
     network_id: 137,
     verify: {
@@ -412,6 +436,7 @@ module.exports = {
     },
   },
   "polygon:zkevm:mainnet": {
+    mainnet: true,
     port: 9512,
     network_id: 1101,
     verify: {
@@ -424,6 +449,7 @@ module.exports = {
     network_id: 13939,
   },
   "reef:mainnet": {
+    mainnet: true,
     port: 9532,
     network_id: 13939,
   },
@@ -436,6 +462,7 @@ module.exports = {
     },
   },
   "scroll:mainnet": {
+    mainnet: true,
     port: 9514,
     network_id: 534352,
     verify: {
@@ -448,6 +475,7 @@ module.exports = {
     network_id: 5700,
   },
   "syscoin:mainnet": {
+    mainnet: true,
     port: 9521,
     network_id: 57,
   },
@@ -470,6 +498,7 @@ module.exports = {
     network_id: 1230,
   },
   "ultron:mainnet": {
+    mainnet: true,
     port: 9516,
     network_id: 1231,
   },
