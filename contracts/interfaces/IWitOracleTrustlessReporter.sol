@@ -8,23 +8,7 @@ import "../libs/Witnet.sol";
 /// @author The Witnet Foundation.
 interface IWitOracleTrustlessReporter {
     
-    event BatchQueryError(Witnet.QueryId queryId, string reason);
-    
-    function extractDataRequest(Witnet.QueryId queryId) external view returns (DataRequest memory);
-    function extractDataRequestBatch(Witnet.QueryId[] calldata queryIds) external view returns (DataRequest[] memory);
-        
-        struct DataRequest  {
-            Witnet.QueryId queryId;
-            Witnet.QueryHash queryHash;
-            Witnet.QueryReward queryReward;
-            bytes radonBytecode;
-            RadonSLAv21 radonSLA;
-        }
-        
-        struct RadonSLAv21 {
-            Witnet.QuerySLA params;
-            Witnet.QueryCapabilityMember[] members;
-        }
+    event BatchQueryError(Witnet.QueryId queryId, string reason);    
     
     function claimQueryReward(Witnet.QueryId queryId) external returns (uint256);
     function claimQueryRewardBatch(Witnet.QueryId[] calldata queryIds) external returns (uint256);

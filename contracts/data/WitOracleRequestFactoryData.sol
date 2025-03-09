@@ -26,7 +26,7 @@ contract WitOracleRequestFactoryData {
 
     struct WitOracleRequestStorage {
         /// Radon RAD hash.
-        bytes32 radHash;
+        Witnet.RadonHash radHash;
         // /// Array of string arguments passed upon initialization.
         // string[][] args;
     }

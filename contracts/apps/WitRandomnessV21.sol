@@ -147,7 +147,7 @@ contract WitRandomnessV21
         public view 
         returns (
             Witnet.TransactionHash _resultDrTxHash,
-            Witnet.ResultTimestamp  _resultTimestamp
+            Witnet.Timestamp  _resultTimestamp
         )
     {
         Witnet.QueryResponse memory _response = __witOracle.getQueryResponse(
@@ -155,7 +155,7 @@ contract WitRandomnessV21
         );
         return (
             Witnet.TransactionHash.wrap(_response.resultDrTxHash),
-            Witnet.ResultTimestamp.wrap(_response.resultTimestamp)
+            Witnet.Timestamp.wrap(_response.resultTimestamp)
         );
     }
 
@@ -357,16 +357,12 @@ contract WitRandomnessV21
     /// @dev Only one randomness request per block will be actually posted to the Wit/Oracle. 
     /// @dev Reverts if given SLA security parameters are below witOracleDefaultQuerySLA().
     /// @return Funds actually paid as randomize fee.
-    function randomize(Witnet.QuerySLA calldata _querySLA)
+    function randomizeWithParams(RandomizeSLA calldata _randomizeSLA)
         external payable
         virtual override
         returns (uint256)
     {
-        _require(
-            _querySLA.equalOrGreaterThan(__witOracleDefaultQuerySLA),
-            "unsecure randomize"
-        );
-        return __postRandomizeQuery(_querySLA);
+        return __postRandomizeQuery(_intoQuerySLA(_randomizeSLA));
     }
 
     /// @notice Returns the SLA parameters required for the Wit/Oracle blockchain to fulfill 
@@ -486,6 +482,22 @@ contract WitRandomnessV21
                 ))
             );
             return _fetchRandomizeValidResultQueryId(_nextRandomizeBlock);
+        }
+    }
+
+    function _intoQuerySLA(RandomizeSLA calldata _randomizeSLA) internal view returns (Witnet.QuerySLA memory) {
+        if (
+            _randomizeSLA.witCommitteeSize >= __witOracleDefaultQuerySLA.witCommitteeSize
+                && _randomizeSLA.witInclusionFees >= __witOracleDefaultQuerySLA.witInclusionFees
+        ) {
+            return Witnet.QuerySLA({
+                witCommitteeSize: _randomizeSLA.witCommitteeSize,
+                witInclusionFees: _randomizeSLA.witInclusionFees,
+                witResultMaxSize: __witOracleDefaultQuerySLA.witResultMaxSize
+            });
+        
+        } else {
+            _revert("unsecure randomize");
         }
     }
 

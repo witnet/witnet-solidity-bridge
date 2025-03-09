@@ -11,14 +11,16 @@ library Witnet {
     using WitnetCBOR for WitnetCBOR.CBOR[];
 
     type BlockNumber is uint64;
-    type ResultTimestamp is uint32;
-    type TransactionHash is bytes32;
     
-    type QueryCapability is bytes20;
-    type QueryCapabilityMember is bytes4;
+    type QueryEvmReward is uint72;
     type QueryHash is bytes15;
-    type QueryId is uint256;
-    type QueryReward is uint72;
+    type QueryId is uint64;
+
+    type RadonHash is bytes32;
+    type ServiceProvider is bytes20;
+    
+    type Timestamp is uint64;
+    type TransactionHash is bytes32;
 
     uint32 constant internal  WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
     uint32 constant internal  WIT_1_SECS_PER_EPOCH = 45;
@@ -52,19 +54,19 @@ library Witnet {
 
     struct DataPullReport {
         QueryId queryId;
-        QueryHash queryHash;             // KECCAK256(channel | blockhash(block.number - 1) | ...)
-        bytes   witDrRelayerSignature;   // ECDSA.signature(queryHash)
-        uint32  witDrResultEpoch;
-        bytes   witDrResultCborBytes;
-        bytes32 witDrTxHash;
+        QueryHash queryHash;           // KECCAK256(channel | blockhash(block.number - 1) | ...)
+        bytes witDrRelayerSignature;   // ECDSA.signature(queryHash)
+        BlockNumber witDrResultEpoch;
+        bytes witDrResultCborBytes;
+        TransactionHash witDrTxHash;
     }
 
     struct DataPushReport {
-        QuerySLA witDrSLA;
-        bytes32  witDrRadHash;
-        uint32   witDrResultEpoch;
-        bytes    witDrResultCborBytes;
-        bytes32  witDrTxHash;
+        RadonHash witRadonHash;
+        QuerySLA  witDrSLA;
+        BlockNumber witDrTxEpoch;
+        TransactionHash witDrTxHash;
+        bytes witResultCborBytes;
     }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
@@ -72,7 +74,7 @@ library Witnet {
         ResultStatus    status;
         RadonDataTypes  dataType;
         TransactionHash drTxHash;
-        ResultTimestamp timestamp;
+        Timestamp       timestamp;
         WitnetCBOR.CBOR value;
     }
     
@@ -84,11 +86,11 @@ library Witnet {
 
     /// Struct containing both request and response data related to every query posted to the Witnet Request Board
     struct Query {
-        QueryRequest  request;
+        QueryRequest request;
         QueryResponse response;
-        QuerySLA    slaParams;        // Minimum Service-Level parameters to be committed by the Witnet blockchain.
-        QueryHash   hash;             // Unique query hash determined by payload, WRB instance, chain id and EVM's previous block hash.
-        QueryReward reward;           // EVM amount in wei eventually to be paid to the legit result reporter.
+        QuerySLA slaParams;      // Minimum Service-Level parameters to be committed by the Witnet blockchain.
+        QueryHash hash;          // Unique query hash determined by payload, WRB instance, chain id and EVM's previous block hash.
+        QueryEvmReward reward;   // EVM amount in wei eventually to be paid to the legit reporter.
         BlockNumber checkpoint;
     }
 
@@ -110,27 +112,26 @@ library Witnet {
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct QueryRequest {
-        address  requester;              // EVM address from which the request was posted.
-        uint24   callbackGas; uint72 _0; // Max callback gas limit upon response, if a callback is required.
-        bytes    radonBytecode;          // Optional: Witnet Data Request bytecode to be solved by the Witnet blockchain.
-        bytes32  radonRadHash;           // Optional: Previously verified hash of the Witnet Data Request to be solved.
+        address   requester;              // EVM address from which the request was posted.
+        uint24    callbackGas; uint72 _0; // Max callback gas limit upon response, if a callback is required.
+        bytes     radonBytecode;          // Optional: Witnet Data Request bytecode to be solved by the Witnet blockchain.
+        RadonHash radonHash;           // Optional: Previously verified hash of the Witnet Data Request to be solved.
     }
 
     /// QueryResponse metadata and result as resolved by the Witnet blockchain.
     struct QueryResponse {
-        address reporter; uint64 _0;    // EVM address from which the Data Request result was reported.
-        uint32  resultTimestamp;        // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
-        bytes32 resultDrTxHash;         // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
-        bytes   resultCborBytes;        // CBOR-encode result to the request, as resolved in the Witnet blockchain.
+        address reporter; uint32 _0;    // EVM address from which the Data Request result was reported.
+        Timestamp resultTimestamp;      // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
+        TransactionHash resultDrTxHash; // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
+        bytes resultCborBytes;          // CBOR-encode result to the request, as resolved in the Witnet blockchain.
         address disputer;
     }
 
-    /// Structure containing all possible SLA security parameters of Wit/2.1 Data Requests
+    /// Structure containing all possible SLA security parameters for Wit/2.1 Data Requests
     struct QuerySLA {
-        uint16  witResultMaxSize;          // max size permitted to whatever query result may come from the Wit/Oralce blockchain.
-        uint16  witCommitteeCapacity;      // max number of eligibile witnesses in the Wit/Oralce blockchain for solving some query.
-        uint64  witCommitteeUnitaryReward; // unitary reward in nanowits for true witnesses and validators in the Wit/Oralce blockchain.
-        QueryCapability witCapability;     // optional: identifies some pre-established capability-compliant commitee required for solving the query.
+        uint16  witResultMaxSize; // max size permitted to whatever query result may come from the Wit/Oracle blockchain.
+        uint16  witCommitteeSize; // max number of eligibile witnesses in the Wit/Oracle blockchain for solving some query.
+        uint64  witInclusionFees; // min fees in nanowits to be paid for getting the query solved and reported from the Wit/Oracle.
     }
 
     enum ResultStatus {
@@ -582,12 +583,12 @@ library Witnet {
         return keccak256(abi.encode(QueryHash.unwrap(hash)));
     }
 
-    function hashify(QueryId _queryId, bytes32 _radHash, bytes32 _slaHash) internal view returns (Witnet.QueryHash) {
+    function hashify(QueryId _queryId, Witnet.RadonHash _radHash, bytes32 _slaHash) internal view returns (Witnet.QueryHash) {
         return Witnet.QueryHash.wrap(bytes15(
             keccak256(abi.encode(
                 channel(address(this)), 
                 blockhash(block.number - 1),
-                _queryId, _radHash, _slaHash
+                _queryId, Witnet.RadonHash.unwrap(_radHash), _slaHash
             ))
         ));
     }
@@ -595,9 +596,8 @@ library Witnet {
     function hashify(QuerySLA memory querySLA) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(
             querySLA.witResultMaxSize,
-            querySLA.witCommitteeCapacity,
-            querySLA.witCommitteeUnitaryReward,
-            querySLA.witCapability
+            querySLA.witCommitteeSize,
+            querySLA.witInclusionFees
         ));
     }
 
@@ -622,13 +622,13 @@ library Witnet {
         ));
     }
 
-    function tallyHash(DataPushReport calldata self) internal pure returns (bytes32) {
+    function tallyHash(DataPushReport memory self) internal pure returns (bytes32) {
         return keccak256(abi.encode(
-            self.witDrRadHash,
+            self.witRadonHash,
             self.witDrSLA,
+            self.witDrTxEpoch,
             self.witDrTxHash,
-            self.witDrResultEpoch,
-            self.witDrResultCborBytes
+            self.witResultCborBytes
         ));
     }
 
@@ -796,7 +796,19 @@ library Witnet {
 
 
     /// ===============================================================================================================
-    /// --- ResultStatus helper methods --------------------------------------------------------------------
+    /// --- RadonHash helper methods ----------------------------------------------------------------------------------
+
+    function isZero(RadonHash h) internal pure returns (bool) {
+        return RadonHash.unwrap(h) == bytes32(0);
+    }
+
+    function isZero(Timestamp t) internal pure returns (bool) {
+        return Timestamp.unwrap(t) == 0;
+    }
+
+    
+    /// ===============================================================================================================
+    /// --- ResultStatus helper methods -------------------------------------------------------------------------------
 
     function hasErrors(ResultStatus self) internal pure returns (bool) {
         return (
@@ -843,10 +855,10 @@ library Witnet {
 
 
     /// =======================================================================
-    /// --- ResultTimestamp helper functions ----------------------------------
+    /// --- Timestamp helper functions ----------------------------------
 
-    function gt(ResultTimestamp a, ResultTimestamp b) internal pure returns (bool) {
-        return ResultTimestamp.unwrap(a) > ResultTimestamp.unwrap(b);
+    function gt(Timestamp a, Timestamp b) internal pure returns (bool) {
+        return Timestamp.unwrap(a) > Timestamp.unwrap(b);
     }
 
     
@@ -863,9 +875,8 @@ library Witnet {
 
     function equalOrGreaterThan(QuerySLA calldata self, QuerySLA storage stored) internal view returns (bool) {
         return (
-            QueryCapability.unwrap(self.witCapability) == QueryCapability.unwrap(stored.witCapability)
-                && self.witCommitteeCapacity >= stored.witCommitteeCapacity
-                && self.witCommitteeUnitaryReward >= stored.witCommitteeUnitaryReward 
+                self.witCommitteeSize >= stored.witCommitteeSize
+                && self.witInclusionFees >= stored.witInclusionFees 
                 && self.witResultMaxSize <= stored.witResultMaxSize
         );
     }
@@ -873,24 +884,19 @@ library Witnet {
     function isValid(QuerySLA memory self) internal pure returns (bool) {
         return (
             self.witResultMaxSize > 0
-                && self.witCommitteeUnitaryReward > 0
-                && self.witCommitteeCapacity > 0
-                && (QueryCapability.unwrap(self.witCapability) != 0 || self.witCommitteeCapacity <= 127)
+                && self.witInclusionFees > 0
+                && self.witCommitteeSize > 0
         );
     }
 
     function toV1(QuerySLA calldata self) internal pure returns (RadonSLAv1 memory) {
         return RadonSLAv1({
-            numWitnesses: uint8(self.witCommitteeCapacity),
-            minConsensusPercentage: 66,
-            witnessReward: self.witCommitteeUnitaryReward,
-            witnessCollateral: self.witCommitteeUnitaryReward * 100,
-            minerCommitRevealFee: self.witCommitteeUnitaryReward / self.witCommitteeCapacity
+            numWitnesses: uint8(self.witCommitteeSize),
+            minConsensusPercentage: 51,
+            witnessReward: self.witInclusionFees,
+            witnessCollateral: self.witInclusionFees * 125,
+            minerCommitRevealFee: self.witInclusionFees / (3 * self.witCommitteeSize)
         });
-    }
-
-    function witTotalReward(QuerySLA storage self) internal view returns (uint64) {
-        return self.witCommitteeUnitaryReward / (self.witCommitteeCapacity + 3);
     }
 
 
@@ -911,8 +917,8 @@ library Witnet {
         }
     }
 
-    function radHash(bytes calldata bytecode) internal pure returns (bytes32) {
-        return keccak256(bytecode);
+    function radHash(bytes calldata bytecode) internal pure returns (Witnet.RadonHash) {
+        return Witnet.RadonHash.wrap(keccak256(bytecode));
     }
 
     function recoverAddr(bytes memory signature, bytes32 hash_)
@@ -1059,11 +1065,11 @@ library Witnet {
     /// ===============================================================================================================
     /// --- 'uint*' helper methods ------------------------------------------------------------------------------------
 
-    function determineBeaconIndexFromEpoch(uint32 epoch) internal pure returns (uint32) {
-        return epoch / 10;
+    function determineBeaconIndexFromEpoch(BlockNumber epoch) internal pure returns (uint64) {
+        return BlockNumber.unwrap(epoch) / 10;
     }
     
-    function determineBeaconIndexFromTimestamp(uint32 timestamp) internal pure returns (uint32) {
+    function determineBeaconIndexFromTimestamp(Timestamp timestamp) internal pure returns (uint64) {
         return determineBeaconIndexFromEpoch(
             determineEpochFromTimestamp(
                 timestamp
@@ -1071,35 +1077,35 @@ library Witnet {
         );
     }
 
-    function determineEpochFromTimestamp(uint32 timestamp) internal pure returns (uint32) {
-        if (timestamp > WIT_2_GENESIS_TIMESTAMP) {
-            return (
+    function determineEpochFromTimestamp(Timestamp timestamp) internal pure returns (BlockNumber) {
+        if (Timestamp.unwrap(timestamp) > WIT_2_GENESIS_TIMESTAMP) {
+            return BlockNumber.wrap(
                 WIT_2_GENESIS_EPOCH
-                    + (timestamp - WIT_2_GENESIS_TIMESTAMP)
+                    + (Timestamp.unwrap(timestamp) - WIT_2_GENESIS_TIMESTAMP)
                         / WIT_2_SECS_PER_EPOCH
             );
-        } else if (timestamp > WIT_1_GENESIS_TIMESTAMP) {
-            return (
-                (timestamp - WIT_1_GENESIS_TIMESTAMP)
+        } else if (Timestamp.unwrap(timestamp) > WIT_1_GENESIS_TIMESTAMP) {
+            return BlockNumber.wrap(
+                (Timestamp.unwrap(timestamp) - WIT_1_GENESIS_TIMESTAMP)
                     / WIT_1_SECS_PER_EPOCH
             );
         } else {
-            return 0;
+            return BlockNumber.wrap(0);
         }
     }
 
-    function determineTimestampFromEpoch(uint32 epoch) internal pure returns (uint32) {
-        if (epoch >= WIT_2_GENESIS_EPOCH) {
-            return (
+    function determineTimestampFromEpoch(BlockNumber epoch) internal pure returns (Timestamp) {
+        if (BlockNumber.unwrap(epoch) >= WIT_2_GENESIS_EPOCH) {
+            return Timestamp.wrap(
                 WIT_2_GENESIS_TIMESTAMP
                     + (WIT_2_SECS_PER_EPOCH * (
-                        epoch
+                        BlockNumber.unwrap(epoch)
                             - WIT_2_GENESIS_EPOCH)
                     )
             );
-        } else return (
-            WIT_1_SECS_PER_EPOCH
-                * epoch
+        } else return Timestamp.wrap(
+            WIT_1_GENESIS_TIMESTAMP
+                + (WIT_1_SECS_PER_EPOCH * BlockNumber.unwrap(epoch))
         );
     }
 

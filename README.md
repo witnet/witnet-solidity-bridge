@@ -54,7 +54,7 @@ Javacript methods and resources:
 - List of supported EVM chains:
     - `supportedNetworks()`
 - WEB addresses at a given chain:
-    - `getAddresses(network)`
+    - `getNetworkAddresses(network)`
 - WEB artifacts:
     - `assets.WitOracle`
     - `assets.WitPriceFeeds`

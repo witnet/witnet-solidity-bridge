@@ -14,7 +14,7 @@ interface IWitOracle {
     /// @notice Removes all query data from storage. Pays back reward on expired queries.
     /// @dev Fails if the query is not in a final status, or not called from the actual requester.
     /// @param queryId The unique query identifier.
-    function deleteQuery(Witnet.QueryId queryId) external returns (Witnet.QueryReward);
+    function deleteQuery(Witnet.QueryId queryId) external returns (Witnet.QueryEvmReward);
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @param evmGasPrice Expected gas price to pay upon posting the data request.
@@ -40,8 +40,8 @@ interface IWitOracle {
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
     function getQuery(Witnet.QueryId queryId) external view returns (Witnet.Query memory);
 
-    /// @notice Gets the current EVM reward the report can claim, if not done yet.
-    function getQueryEvmReward(Witnet.QueryId) external view returns (Witnet.QueryReward);
+    /// @notice Gets the current EVM reward the reporter can claim, if not done yet.
+    function getQueryEvmReward(Witnet.QueryId) external view returns (Witnet.QueryEvmReward);
 
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     function getQueryRequest(Witnet.QueryId) external view returns (Witnet.QueryRequest memory);
@@ -63,7 +63,7 @@ interface IWitOracle {
     /// @notice Request real world data from the Wit/Oracle sidechain. 
     /// @notice The paid fee is escrowed as a reward for the reporter that eventually relays back 
     /// @notice a valid query result from the Wit/Oracle sidechain.
-    /// @notice Query results are CBOR-encoded, and can contain either some data, or an error.
+    /// @notice Query results are CBOR-encoded, and can contain either some     data, or an error.
     /// @dev Reasons to revert:
     /// @dev - the data request's RAD hash was not previously verified into the WitOracleRadonRegistry contract;
     /// @dev - invalid query SLA parameters were provided;
@@ -104,11 +104,6 @@ interface IWitOracle {
     /// @notice and templates must be previously verified so they can be passed as reference when 
     /// @notice calling postRequest(bytes32,..) methods.
     function registry() external view returns (WitOracleRadonRegistry);
-
-    /// @notice Enables data requesters to settle the actual validators in the Wit/Oracle
-    /// @notice sidechain that will be entitled to solve data requests requiring to
-    /// @notice support the specified `Wit2.Capability`.
-    function settleMyOwnCapableCommittee(Witnet.QueryCapability, Witnet.QueryCapabilityMember[] calldata) external;
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     function upgradeQueryEvmReward(Witnet.QueryId) external payable;

@@ -187,7 +187,7 @@ library WitPriceFeedsDataLib {
             } else {
                 return IWitPriceFeedsSolver.Price({
                     value: 0,
-                    timestamp: Witnet.ResultTimestamp.wrap(0),
+                    timestamp: Witnet.Timestamp.wrap(0),
                     drTxHash: Witnet.TransactionHash.wrap(0),
                     latestStatus: _intoLatestUpdateStatus(latestUpdateQueryResultStatus(witOracle, feedId))
                 });
@@ -212,7 +212,7 @@ library WitPriceFeedsDataLib {
         
         Witnet.ResultStatus _latestStatus = latestUpdateQueryResultStatus(witOracle, feedId);   
         if (_latestStatus.keepWaiting()) {
-            uint72 _evmUpdateRequestCurrentFee = Witnet.QueryReward.unwrap(
+            uint72 _evmUpdateRequestCurrentFee = Witnet.QueryEvmReward.unwrap(
                 witOracle.getQueryEvmReward(_latestQueryId)
             );
             if (evmUpdateRequestFee > _evmUpdateRequestCurrentFee) {
@@ -234,7 +234,7 @@ library WitPriceFeedsDataLib {
             if (_latestStatus == Witnet.ResultStatus.NoErrors) {
                 // If so, remove previous last valid query from the WRB:
                 if (!__feed.lastValidQueryId.isZero()) {
-                    evmUpdateRequestFee += Witnet.QueryReward.unwrap(
+                    evmUpdateRequestFee += Witnet.QueryEvmReward.unwrap(
                         witOracle.deleteQuery(__feed.lastValidQueryId)
                     );
                 }
@@ -242,8 +242,8 @@ library WitPriceFeedsDataLib {
             } else {
                 // Otherwise, try to delete latest query, as it was faulty
                 // and we are about to post a new update request:
-                try witOracle.deleteQuery(_latestQueryId) returns (Witnet.QueryReward _unsedReward) {
-                    evmUpdateRequestFee += Witnet.QueryReward.unwrap(_unsedReward);
+                try witOracle.deleteQuery(_latestQueryId) returns (Witnet.QueryEvmReward _unsedReward) {
+                    evmUpdateRequestFee += Witnet.QueryEvmReward.unwrap(_unsedReward);
                 
                 } catch {}
             }

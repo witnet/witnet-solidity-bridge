@@ -42,9 +42,9 @@ abstract contract WitOracleRadonRegistryData {
         
         mapping (bytes32 => Witnet.RadonReducer) reducers;
         mapping (bytes32 => Witnet.RadonRetrieval) retrievals;
-        mapping (bytes32 => RadonRequestPacked) requests;
-        mapping (bytes32 => bytes32) rads;
-        mapping (bytes32 => bytes) radsBytecode;
+        mapping (Witnet.RadonHash => RadonRequestPacked) requests;
+        mapping (bytes32 => Witnet.RadonHash) rads;
+        mapping (Witnet.RadonHash => bytes) radsBytecode;
     }
 
     constructor() {
@@ -74,7 +74,7 @@ abstract contract WitOracleRadonRegistryData {
         return __bytecodes().db;
     }
 
-    function __requests(bytes32 _radHash)
+    function __requests(Witnet.RadonHash _radHash)
         internal view
         returns (RadonRequestPacked storage _ptr)
     {

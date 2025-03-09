@@ -5,8 +5,8 @@ pragma solidity >=0.8.0 <0.9.0;
 interface IWitOracleLegacy {
 
     struct RadonSLA {
-        uint8  witCommitteeCapacity;
-        uint64 witCommitteeUnitaryReward;
+        uint8  witCommitteeSize;
+        uint64 witUnitaryReward;
     }
 
     event WitnetQuery(uint256 id, uint256 evmReward, RadonSLA witnetSLA);

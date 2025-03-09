@@ -9,9 +9,9 @@ interface IWitFeeds {
 
     struct UpdateSLA {
         // Max number of eligibile witnesses in the Wit/Oracle blockchain for solving some price update.
-        uint16 numWitnesses;
-        // Unitary reward in nanowits for true and responsive witnesses and validators in the Wit/Oracle blockchain.
-        uint64 unitaryReward;
+        uint16 witCommitteeSize;
+        // Minimum expenditure in nanoWits for getting the price update solved and reported from the Wit/Oracle.
+        uint64 witInclusionFees;
     }
 
     /// Primitive data type produced by successful data updates of all supported

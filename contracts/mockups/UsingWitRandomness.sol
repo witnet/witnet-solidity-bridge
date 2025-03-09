@@ -9,7 +9,7 @@ import "../WitRandomness.sol";
 /// @author The Witnet Foundation.
 abstract contract UsingWitRandomness
     is
-        IWitOracleEvents,
+        IWitOracleQueriableEvents,
         IWitRandomnessEvents
 {
     WitOracle public immutable witOracle;

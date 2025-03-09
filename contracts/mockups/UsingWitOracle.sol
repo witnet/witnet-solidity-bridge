@@ -9,7 +9,7 @@ import "../WitOracle.sol";
 /// @author The Witnet Foundation.
 abstract contract UsingWitOracle
     is
-        IWitOracleEvents
+        IWitOracleQueriableEvents
 {   
     /// @notice Immutable reference to the WitOracle contract.
     function witOracle() virtual public view returns (WitOracle) {
@@ -25,10 +25,7 @@ abstract contract UsingWitOracle
 
     /// @notice Default SLA data security parameters to be fulfilled by the Wit/Oracle blockchain
     /// @notice when solving a data request.
-    function witOracleDefaultQuerySLA() virtual public view returns (Witnet.QuerySLA memory) {
-        return __witOracleDefaultQuerySLA;
-    }
-    Witnet.QuerySLA internal __witOracleDefaultQuerySLA;
+    Witnet.QuerySLA internal __witOracleDefaultQueryParams;
 
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
     /// @dev contract until a particular request has been successfully solved and reported from the Wit/Oracle blockchain,
@@ -52,11 +49,10 @@ abstract contract UsingWitOracle
             ), "UsingWitOracle: uncompliant WitOracle"
         );
         __witOracle = _witOracle;
-        __witOracleDefaultQuerySLA = Witnet.QuerySLA({
+        __witOracleDefaultQueryParams = Witnet.QuerySLA({
             witResultMaxSize: 32, // defaults to 32 bytes
-            witCommitteeCapacity: 10, // defaults to 10 witnesses
-            witCommitteeUnitaryReward: 2 * 10 ** 8, // defaults to 0.2 witcoins
-            witCapability: Witnet.QueryCapability.wrap(0)
+            witCommitteeSize: 10, // defaults to 10 witnesses
+            witInclusionFees: 2 * 10 ** 8 // defaults to 0.2 witcoins
         });
         
         __witOracleBaseFeeOverheadPercentage = 33; // defaults to 33%

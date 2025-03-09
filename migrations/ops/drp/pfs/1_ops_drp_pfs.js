@@ -36,8 +36,8 @@ module.exports = async function (_deployer, _network, [,, from]) {
     const lastPriceUpdate = prices[ix]
     const lastPrice = parseInt(lastPriceUpdate.value)
     const bytecode = await pfs_legacy.lookupWitnetBytecode.call(id4)
-    const dryrun = exec(`npx witnet-toolkit trace-query --hex ${bytecode.slice(2)} | tail -n 2 | head -n 1 | awk -F: '{ print $3 }' | sed 's/ //g' | tr -d \"│\"`).toString().split("\n")[0]
-    const currentPrice = parseInt(dryrun)
+    const dryrun = JSON.parse(exec(`npx witnet radon dryrun ${bytecode.slice(2)} --json`).toString())
+    const currentPrice = parseInt(dryrun?.RadonInteger)
     const cborBytes = "0x" + cbor.encode(parseInt(currentPrice)).toString("hex")
     const deviation = ((100 * (currentPrice - lastPrice)) / lastPrice)
     const pending = parseInt(latestStatus.toString()) == 1

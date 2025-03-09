@@ -13,9 +13,11 @@ import "../patterns/Escrowable.sol";
 library WitOracleBlocksLib {  
 
     using Witnet for Witnet.Beacon;
+    using Witnet for Witnet.BlockNumber;
     using Witnet for Witnet.DataPullReport;
     using Witnet for Witnet.DataPushReport;
     using Witnet for Witnet.QuerySLA;
+    using Witnet for Witnet.Timestamp;
 
     bytes32 internal constant _WIT_ORACLE_BLOCKS_SLOTHASH =
         /* keccak256("io.witnet.boards.blocks") */
@@ -111,16 +113,24 @@ library WitOracleBlocksLib {
     }
 
     function rollupBeacons(Witnet.FastForward[] calldata rollup) 
-        public returns (Witnet.Beacon memory head)
+        public 
+        returns (Witnet.Beacon memory head)
+    {
+        head = verifyBeacons(rollup);
+        data().beacons[head.index] = head;
+        data().lastKnownBeaconIndex = head.index;
+        emit IWitOracleBlocks.Rollup(head);
+    }
+
+    function verifyBeacons(Witnet.FastForward[] calldata rollup)
+        public view
+        returns (Witnet.Beacon memory head)
     {
         require(
             data().beacons[rollup[0].beacon.index].equals(rollup[0].beacon),
             "fast-forwarding from unmatching beacon"
         );
-        head = _verifyFastForwards(rollup);
-        data().beacons[head.index] = head;
-        data().lastKnownBeaconIndex = head.index;
-        emit IWitOracleBlocks.Rollup(head);
+        return _verifyFastForwards(rollup);
     }
 
     function seekBeacon(uint256 _index) internal view returns (Witnet.Beacon storage) {
@@ -238,7 +248,7 @@ library WitOracleBlocksLib {
         )
         public view returns (Witnet.QueryStatus)
     {
-        if (self.response.resultTimestamp != 0) {
+        if (!self.response.resultTimestamp.isZero()) {
             if (block.number >= Witnet.BlockNumber.unwrap(self.checkpoint)) {
                 if (self.response.disputer != address(0)) {
                     return Witnet.QueryStatus.Disputed;
@@ -368,8 +378,8 @@ library WitOracleBlocksLib {
         );
         self.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number + evmQueryAwaitingBlocks));
         self.response.disputer = msg.sender;
-        emit IWitOracleEvents.WitOracleQueryResponseDispute(
-            Witnet.QueryId.unwrap(queryId),
+        emit IWitOracleQueriableEvents.WitOracleQueryResponseDispute(
+            queryId,
             msg.sender
         );
         return (
@@ -387,9 +397,9 @@ library WitOracleBlocksLib {
             address _evmReporter,
             uint256 _evmGasPrice,
             uint64  _evmFinalityBlock,
-            uint256 _queryId,
-            uint64  _witResultTimestamp,
-            bytes32 _witDrTxHash,
+            Witnet.QueryId _queryId,
+            Witnet.Timestamp _witDrTxTimestamp,
+            Witnet.TransactionHash _witDrTxHash,
             bytes memory _witResultCborBytes
         )
     {
@@ -428,8 +438,8 @@ library WitOracleBlocksLib {
         // save query response into storage:
         _evmGasPrice = tx.gasprice;
         _evmFinalityBlock = uint64(block.number + evmQueryAwaitingBlocks);
-        _queryId = Witnet.QueryId.unwrap(responseReport.queryId);
-        _witResultTimestamp = Witnet.determineTimestampFromEpoch(responseReport.witDrResultEpoch);
+        _queryId = responseReport.queryId;
+        _witDrTxTimestamp = Witnet.determineTimestampFromEpoch(responseReport.witDrResultEpoch);
         _witDrTxHash = responseReport.witDrTxHash;
         _witResultCborBytes = responseReport.witDrResultCborBytes;
     }
@@ -546,6 +556,49 @@ library WitOracleBlocksLib {
         }
     }
 
+    function parseDataPushReport(
+            Witnet.DataPushReport calldata report,
+            Witnet.FastForward[] calldata rollup,
+            bytes32[] calldata droMerkleTrie
+        )
+        public view returns (Witnet.DataResult memory)
+    {
+        // validate query report
+        require(
+            Witnet.RadonHash.unwrap(report.witRadonHash) != bytes32(0)
+                && report.witResultCborBytes.length > 0
+                && Witnet.BlockNumber.unwrap(report.witDrTxEpoch) > 0
+                && Witnet.TransactionHash.unwrap(report.witDrTxHash) != bytes32(0)
+                && report.witDrSLA.isValid()
+            , "invalid query report"
+        );
+
+        // validate rollup proofs
+        Witnet.Beacon memory _witOracleHead = verifyBeacons(rollup);
+        require(
+            _witOracleHead.index == Witnet.determineBeaconIndexFromEpoch(report.witDrTxEpoch) + 1, 
+            "misleading head beacon"
+        );
+
+        // validate merkle proof
+        require(
+            _witOracleHead.droTalliesMerkleRoot == Witnet.merkleRoot(
+                droMerkleTrie, 
+                report.tallyHash()
+            ), "invalid merkle proof"
+        );
+
+        return WitOracleDataLib.intoDataResult(
+            Witnet.QueryResponse({
+                reporter: address(0), disputer: address(0), _0: 0,
+                resultCborBytes: report.witResultCborBytes,
+                resultDrTxHash: report.witDrTxHash,
+                resultTimestamp: Witnet.determineTimestampFromEpoch(report.witDrTxEpoch)
+            }),
+            Witnet.QueryStatus.Finalized
+        );
+    }
+
     function rollupDataPushReport(
             Witnet.DataPushReport calldata report,
             Witnet.FastForward[] calldata rollup,
@@ -566,9 +619,8 @@ library WitOracleBlocksLib {
         // validate rollup proofs
         Witnet.Beacon memory _witOracleHead = rollupBeacons(rollup);
         require(
-            _witOracleHead.index == Witnet.determineBeaconIndexFromEpoch(
-                Witnet.BlockNumber.unwrap(report.witDrTxEpoch)
-            ) + 1, "misleading head beacon"
+            _witOracleHead.index == Witnet.determineBeaconIndexFromEpoch(report.witDrTxEpoch) + 1, 
+            "misleading head beacon"
         );
 
         // validate merkle proof
@@ -583,10 +635,8 @@ library WitOracleBlocksLib {
             Witnet.QueryResponse({
                 reporter: address(0), disputer: address(0), _0: 0,
                 resultCborBytes: report.witResultCborBytes,
-                resultDrTxHash: Witnet.TransactionHash.unwrap(report.witDrTxHash),
-                resultTimestamp: Witnet.determineTimestampFromEpoch(
-                    Witnet.BlockNumber.unwrap(report.witDrTxEpoch)
-                )
+                resultDrTxHash: report.witDrTxHash,
+                resultTimestamp: Witnet.determineTimestampFromEpoch(report.witDrTxEpoch)
             }),
             Witnet.QueryStatus.Finalized
         );
@@ -616,7 +666,7 @@ library WitOracleBlocksLib {
         ) {
             return (false, "invalid query hash");
         
-        } else if (report.witDrResultEpoch == 0) {
+        } else if (report.witDrResultEpoch.isZero()) {
             return (false, "invalid result epoch");
         
         } else if (report.witDrResultCborBytes.length == 0) {

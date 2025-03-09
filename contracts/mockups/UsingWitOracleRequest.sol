@@ -14,7 +14,7 @@ abstract contract UsingWitOracleRequest
     
     /// @dev Immutable RAD hash of the underlying data request being solved on the Wit/Oracle blockchain
     /// @dev upon every fresh data update pulled from this contract.
-    bytes32 immutable internal __witOracleRequestRadHash;
+    Witnet.RadonHash immutable internal __wirOracleRequestHash;
  
     /// @param _witOracleRequest Address of the WitOracleRequest contract containing the actual data request.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
@@ -29,12 +29,12 @@ abstract contract UsingWitOracleRequest
             "UsingWitOracleRequest: uncompliant WitOracleRequest"
         );
         witOracleRequest = _witOracleRequest;
-        __witOracleRequestRadHash = _witOracleRequest.radHash();
+        __wirOracleRequestHash = _witOracleRequest.radHash();
         __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
     /// @dev Pulls a data update from the Wit/Oracle blockchain based on the underlying `witOracleRequest`,
-    /// @dev and the default `__witOracleDefaultQuerySLA` data security parameters. 
+    /// @dev and the default `__witOracleDefaultQueryParams` data security parameters. 
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle when pulling the data update.
     function __witOraclePostQuery(
             uint256 _queryEvmReward
@@ -43,7 +43,7 @@ abstract contract UsingWitOracleRequest
     {
         return __witOraclePostQuery(
             _queryEvmReward, 
-            __witOracleDefaultQuerySLA
+            __witOracleDefaultQueryParams
         );
     }
 
@@ -60,7 +60,7 @@ abstract contract UsingWitOracleRequest
         return __witOracle.postQuery{
             value: _queryEvmReward
         }(
-            __witOracleRequestRadHash,
+            __wirOracleRequestHash,
             _querySLA
         );
     }

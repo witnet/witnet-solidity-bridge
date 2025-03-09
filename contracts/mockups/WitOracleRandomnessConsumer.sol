@@ -14,7 +14,7 @@ abstract contract WitOracleRandomnessConsumer
     using Witnet for Witnet.QuerySLA;
     using WitnetCBOR for WitnetCBOR.CBOR;
 
-    bytes32 internal immutable __witOracleRandomnessRadHash;
+    Witnet.RadonHash internal immutable __witOracleRandomnessRadHash;
 
     /// @param _witOracle Address of the WitOracle contract.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
@@ -52,7 +52,7 @@ abstract contract WitOracleRandomnessConsumer
             );
         }
         __witOracleBaseFeeOverheadPercentage = _baseFeeOverheadPercentage;
-        __witOracleDefaultQuerySLA.witResultMaxSize = 34;
+        __witOracleDefaultQueryParams.witResultMaxSize = 34;
     }
 
     /// @dev Pure P-RNG generator returning uniformly distributed `_range` values based on
@@ -80,7 +80,7 @@ abstract contract WitOracleRandomnessConsumer
 
     /// @dev Trigger some randomness request to be solved by the Wit/Oracle blockchain, by paying the
     /// @dev exact amount of `_queryEvmReward` of the underlying WitOracle bridge contract, and based 
-    /// @dev on the `__witOracleDefaultQuerySLA` data security parameters. 
+    /// @dev on the `__witOracleDefaultQueryParams` data security parameters. 
     function __witOracleRandomize(
             uint256 _queryEvmReward
         )
@@ -88,7 +88,7 @@ abstract contract WitOracleRandomnessConsumer
     {
         return __witOracleRandomize(
             _queryEvmReward, 
-            __witOracleDefaultQuerySLA
+            __witOracleDefaultQueryParams
         );
     }
 

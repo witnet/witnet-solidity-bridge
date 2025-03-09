@@ -18,10 +18,10 @@ interface IWitOracleTrustableReporter {
             uint256 witEthPrice9
         ) external view returns (uint256 evmRevenues, uint256 evmExpenses);
 
-    /// @notice Retrieves the Witnet Data Request bytecodes and SLAs of previously posted queries.
+    /// @notice Retrieves the Witnet Data Request bytecodes of previously posted queries.
     /// @dev Returns empty buffer if the query does not exist.
     /// @param queryIds Query identifiers.
-    function extractWitnetDataRequests(uint256[] calldata queryIds) 
+    function extractRadonRequests(uint256[] calldata queryIds) 
         external view returns (bytes[] memory drBytecodes);
 
     /// @notice Reports the Witnet-provided result to a previously posted request. 

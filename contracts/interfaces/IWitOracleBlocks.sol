@@ -8,8 +8,8 @@ interface IWitOracleBlocks {
 
     event Rollup(Witnet.Beacon head);
 
-    function determineBeaconIndexFromTimestamp(uint32 timestamp) external pure returns (uint32);
-    function determineEpochFromTimestamp(uint32 timestamp) external pure returns (uint32);
+    function determineBeaconIndexFromTimestamp(uint64 timestamp) external pure returns (uint64);
+    function determineEpochFromTimestamp(uint64 timestamp) external pure returns (uint64);
 
     function getBeaconByIndex(uint32 index) external view returns (Witnet.Beacon memory);
     function getGenesisBeacon() external pure returns (Witnet.Beacon memory);

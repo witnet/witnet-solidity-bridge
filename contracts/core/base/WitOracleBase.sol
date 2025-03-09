@@ -19,7 +19,6 @@ abstract contract WitOracleBase
         WitOracle
 {
     using Witnet for Witnet.QuerySLA;
-    using WitOracleDataLib for WitOracleDataLib.Committee;
     using WitOracleDataLib for WitOracleDataLib.Storage;
 
     function channel() virtual override public view returns (bytes4) {
@@ -202,7 +201,7 @@ abstract contract WitOracleBase
         returns (uint256)
     {
         return (
-            _evmWitPrice * ((3 + _querySLA.witCommitteeCapacity) * _querySLA.witCommitteeUnitaryReward)
+            _evmWitPrice * _querySLA.witInclusionFees
                 + (_querySLA.witResultMaxSize > 32
                     ? _evmGasPrice * __sstoreFromZeroGas * ((_querySLA.witResultMaxSize - 32) / 32)
                     : 0
@@ -223,7 +222,7 @@ abstract contract WitOracleBase
     function getQueryEvmReward(Witnet.QueryId _queryId) 
         external view 
         virtual override
-        returns (Witnet.QueryReward)
+        returns (Witnet.QueryEvmReward)
     {
         return __storage().queries[_queryId].reward;
     }
@@ -400,23 +399,6 @@ abstract contract WitOracleBase
         );
     }   
 
-    /// @notice Enables data requesters to settle the actual validators in the Wit/Oracle
-    /// @notice sidechain that will be entitled whatsover to solve 
-    /// @notice data requests, as presumed to be capable of supporting some given `Wit2.Capability`.
-    function settleMyOwnCapableCommittee(
-            Witnet.QueryCapability _capability, 
-            Witnet.QueryCapabilityMember[] calldata _members
-        )
-        virtual override external
-    {
-        __storage().committees[msg.sender][_capability].settle(_members);
-        emit WitOracleCommittee(
-            msg.sender, 
-            _capability, 
-            _members
-        );
-    }
-  
     /// Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Fails if the `_queryId` is not in 'Posted' status.
     /// @param _queryId The unique query identifier.
@@ -427,10 +409,10 @@ abstract contract WitOracleBase
     {
         Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
         uint256 _newReward = (
-            Witnet.QueryReward.unwrap(__query.reward)
+            Witnet.QueryEvmReward.unwrap(__query.reward)
                 + _getMsgValue()
         );
-        __query.reward = Witnet.QueryReward.wrap(uint72(_newReward));
+        __query.reward = Witnet.QueryEvmReward.wrap(uint72(_newReward));
         emit WitOracleQueryUpgrade(
             Witnet.QueryId.unwrap(_queryId),
             _getMsgSender(),
@@ -447,7 +429,7 @@ abstract contract WitOracleBase
             address _requester,
             uint24  _callbackGas,
             uint72  _evmReward,
-            bytes32 _radonRadHash,
+            bytes32 _radonHash,
             Witnet.QuerySLA memory _querySLA
         )
         virtual internal
@@ -458,15 +440,15 @@ abstract contract WitOracleBase
         __query.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number));
         __query.hash = Witnet.hashify(
             _queryId, 
-            _radonRadHash, 
-            WitOracleDataLib.hashify(_querySLA, _requester)
+            _radonHash, 
+            WitOracleDataLib.hashify(_querySLA, _requester, _radonHash)
         );
-        __query.reward = Witnet.QueryReward.wrap(_evmReward);
+        __query.reward = Witnet.QueryEvmReward.wrap(_evmReward);
         __query.request = Witnet.QueryRequest({
             requester: _requester,
             callbackGas: _callbackGas,
             radonBytecode: new bytes(0), _0: 0, 
-            radonRadHash: _radonRadHash
+            radonHash: _radonHash
         });
         __query.slaParams = _querySLA;
     }
@@ -483,17 +465,18 @@ abstract contract WitOracleBase
     {
         _queryId = Witnet.QueryId.wrap(++ __storage().nonce);
         Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
+        bytes32 _radonHash = Witnet.radHash(_radonBytecode);
         __query.hash = Witnet.hashify(
             _queryId, 
-            Witnet.radHash(_radonBytecode),
-            WitOracleDataLib.hashify(_querySLA, _requester)
+            _radonHash,
+            WitOracleDataLib.hashify(_querySLA, _requester, _radonHash)
         );
-        __query.reward = Witnet.QueryReward.wrap(_evmReward);
+        __query.reward = Witnet.QueryEvmReward.wrap(_evmReward);
         __query.request = Witnet.QueryRequest({
             requester: _requester,
             callbackGas: _callbackGas,
             radonBytecode: _radonBytecode,
-            radonRadHash: bytes32(0), _0: 0
+            radonHash: bytes32(0), _0: 0
         });
         __query.slaParams = _querySLA;
     }

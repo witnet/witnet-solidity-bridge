@@ -61,15 +61,15 @@ abstract contract WitOracleBaseTrustable
     /// @dev Fails if the query is not in a final status, or not called from the actual requester.
     function deleteQuery(Witnet.QueryId _queryId)
         virtual override public
-        returns (Witnet.QueryReward)
+        returns (Witnet.QueryEvmReward)
     {
         try WitOracleDataLib.deleteQuery(
             _queryId
         
         ) returns (
-            Witnet.QueryReward _queryReward
+            Witnet.QueryEvmReward _queryReward
         ) {
-            uint256 _evmPayback = Witnet.QueryReward.unwrap(_queryReward);
+            uint256 _evmPayback = Witnet.QueryEvmReward.unwrap(_queryReward);
             if (_evmPayback > 0) {
                 // transfer unused reward to requester, only if the query expired:
                 __safeTransferTo(
@@ -196,10 +196,9 @@ abstract contract WitOracleBaseTrustable
             postQuery(
                 _queryRadHash,
                 Witnet.QuerySLA({
-                    witCommitteeCapacity: _querySLA.witCommitteeCapacity,
-                    witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward,
                     witResultMaxSize: 32,
-                    witCapability: Witnet.QueryCapability.wrap(0)
+                    witCommitteeSize: _querySLA.witCommitteeSize,
+                    witInclusionFees: _querySLA.witUnitaryReward * 3
                 })
             )
         );
@@ -218,10 +217,9 @@ abstract contract WitOracleBaseTrustable
             postQuery(
                 _queryRadHash,
                 Witnet.QuerySLA({
-                    witCommitteeCapacity: uint8(_querySLA.witCommitteeCapacity),
-                    witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward,
                     witResultMaxSize: 32,
-                    witCapability: Witnet.QueryCapability.wrap(0)
+                    witCommitteeSize: _querySLA.witCommitteeSize,
+                    witInclusionFees: _querySLA.witUnitaryReward * 3
                 }),
                 Witnet.QueryCallback({
                     consumer: msg.sender,
@@ -244,10 +242,9 @@ abstract contract WitOracleBaseTrustable
             postQuery(
                 _queryRadBytecode,
                 Witnet.QuerySLA({
-                    witCommitteeCapacity: _querySLA.witCommitteeCapacity,
-                    witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward,
                     witResultMaxSize: 32,
-                    witCapability: Witnet.QueryCapability.wrap(0)
+                    witCommitteeSize: _querySLA.witCommitteeSize,
+                    witInclusionFees: _querySLA.witUnitaryReward * 3
                 }),
                 Witnet.QueryCallback({
                     consumer: msg.sender,
@@ -272,12 +269,14 @@ abstract contract WitOracleBaseTrustable
             __storage().reporters[Witnet.recoverAddr(_signature, _report.tallyHash())],
             "unauthorized reporter"
         );
-        return WitOracleDataLib.intoDataResult(
+        return WitOracleDataLib.extractDataResult(
             Witnet.QueryResponse({
                 reporter: address(0), disputer: address(0), _0: 0, 
-                resultCborBytes: _report.witDrResultCborBytes,
-                resultDrTxHash: _report.witDrTxHash,
-                resultTimestamp: Witnet.determineTimestampFromEpoch(_report.witDrResultEpoch)
+                resultCborBytes: _report.witResultCborBytes,
+                resultDrTxHash: Witnet.TransactionHash.unwrap(_report.witDrTxHash),
+                resultTimestamp: Witnet.determineTimestampFromEpoch(
+                    Witnet.BlockNumber.unwrap(_report.witDrTxEpoch)
+                )
             }), 
             Witnet.QueryStatus.Finalized
         );
@@ -291,12 +290,14 @@ abstract contract WitOracleBaseTrustable
         onlyReporters
         returns (Witnet.DataResult memory)
     {
-        return WitOracleDataLib.intoDataResult(
+        return WitOracleDataLib.extractDataResult(
             Witnet.QueryResponse({
                 reporter: address(0), disputer: address(0), _0: 0, 
-                resultCborBytes: _report.witDrResultCborBytes,
-                resultDrTxHash: _report.witDrTxHash,
-                resultTimestamp: Witnet.determineTimestampFromEpoch(_report.witDrResultEpoch)
+                resultCborBytes: _report.witResultCborBytes,
+                resultDrTxHash: Witnet.TransactionHash.unwrap(_report.witDrTxHash),
+                resultTimestamp: Witnet.determineTimestampFromEpoch(
+                    Witnet.BlockNumber.unwrap(_report.witDrTxEpoch)
+                )
             }), 
             Witnet.QueryStatus.Finalized
         );
@@ -330,10 +331,9 @@ abstract contract WitOracleBaseTrustable
                         estimateBaseFeeWithCallback(_evmGasPrice, __query.request.callbackGas)
                             + estimateExtraFee(_evmGasPrice, _evmWitPrice,
                                 Witnet.QuerySLA({
-                                    witCommitteeCapacity: __query.slaParams.witCommitteeCapacity,
-                                    witCommitteeUnitaryReward: __query.slaParams.witCommitteeUnitaryReward,
                                     witResultMaxSize: uint16(0),
-                                    witCapability: Witnet.QueryCapability.wrap(0)
+                                    witCommitteeSize: __query.slaParams.witCommitteeSize,
+                                    witInclusionFees: __query.slaParams.witInclusionFees
                                 })
                             )
                     );
@@ -343,21 +343,21 @@ abstract contract WitOracleBaseTrustable
                             + estimateExtraFee(_evmGasPrice, _evmWitPrice, __query.slaParams)
                     );
                 }
-                _expenses +=  _evmWitPrice * __query.slaParams.witCommitteeUnitaryReward;
-                _revenues += Witnet.QueryReward.unwrap(__query.reward);
+                _expenses +=  _evmWitPrice * __query.slaParams.witInclusionFees;
+                _revenues += Witnet.QueryEvmReward.unwrap(__query.reward);
             }
         }
     }
 
-    /// @notice Retrieves the Witnet Data Request bytecodes and SLAs of previously posted queries.
+    /// @notice Retrieves the Witnet Data Request bytecodes of previously posted queries.
     /// @dev Returns empty buffer if the query does not exist.
     /// @param _queryIds Query identifies.
-    function extractWitnetDataRequests(uint256[] calldata _queryIds)
+    function extractRadonRequests(uint256[] calldata _queryIds)
         external view 
         virtual override
         returns (bytes[] memory _bytecodes)
     {
-        return WitOracleDataLib.extractWitnetDataRequests(registry, _queryIds);
+        return WitOracleDataLib.extractRadonRequests(registry, _queryIds);
     }
 
     /// Reports the Witnet-provable result to a previously posted request. 
@@ -497,7 +497,7 @@ abstract contract WitOracleBaseTrustable
             address _requester,
             uint24  _callbackGas,
             uint72  _evmReward,
-            bytes32 _radonRadHash,
+            bytes32 _radonHash,
             Witnet.QuerySLA memory _querySLA
         ) 
         virtual override
@@ -508,15 +508,15 @@ abstract contract WitOracleBaseTrustable
             _requester,
             _callbackGas,
             _evmReward,
-            _radonRadHash,
+            _radonHash,
             _querySLA
         );
         emit IWitOracleLegacy.WitnetQuery(
             Witnet.QueryId.unwrap(_queryId), 
             msg.value, 
             IWitOracleLegacy.RadonSLA({
-                witCommitteeCapacity: uint8(_querySLA.witCommitteeCapacity),
-                witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward
+                witCommitteeSize: uint8(_querySLA.witCommitteeSize),
+                witUnitaryReward: _querySLA.witInclusionFees / 3
             })
         );
     }
@@ -543,8 +543,8 @@ abstract contract WitOracleBaseTrustable
             Witnet.QueryId.unwrap(_queryId), 
             msg.value, 
             IWitOracleLegacy.RadonSLA({
-                witCommitteeCapacity: uint8(_querySLA.witCommitteeCapacity),
-                witCommitteeUnitaryReward: _querySLA.witCommitteeUnitaryReward
+                witCommitteeSize: uint8(_querySLA.witCommitteeSize),
+                witUnitaryReward: _querySLA.witInclusionFees / 3
             })
         );
     }

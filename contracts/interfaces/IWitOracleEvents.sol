@@ -6,12 +6,6 @@ import "../libs/Witnet.sol";
 
 interface IWitOracleEvents {
 
-    event WitOracleCommittee(
-        address indexed evmSubscriber,
-        Witnet.QueryCapability indexed witCapability,
-        Witnet.QueryCapabilityMember[] witCapabilityMembers
-    );
-    
     /// Emitted every time a new query containing some verified data request is posted to the WitOracle.
     event WitOracleQuery(
         address requester,

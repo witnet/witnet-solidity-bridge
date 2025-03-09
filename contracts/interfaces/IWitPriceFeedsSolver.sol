@@ -13,7 +13,7 @@ interface IWitPriceFeedsSolver {
     }
     struct Price {
         uint64 value;
-        Witnet.ResultTimestamp timestamp;
+        Witnet.Timestamp timestamp;
         Witnet.TransactionHash drTxHash;
         LatestUpdateStatus latestStatus;
     }

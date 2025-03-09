@@ -36,7 +36,7 @@ abstract contract WitOracleRequestTemplateConsumer
     }
 
     /// @dev Pulls a fresh update from the Wit/Oracle blockchain based on some data request built out
-    /// @dev of the underlying `witOracleRequestTemplate`, the default `__witOracleDefaultQuerySLA` data
+    /// @dev of the underlying `witOracleRequestTemplate`, the default `__witOracleDefaultQueryParams` data
     /// @dev security parameters and the immutable value of `__witOracleCallbackGasLimit`.
     /// @dev Returns the unique RAD hash of the just-built data request, and some unique query id. 
     /// @dev Reverts if the number of given parameters don't match as required by the underlying template's 
@@ -47,12 +47,12 @@ abstract contract WitOracleRequestTemplateConsumer
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward
         )
-        virtual override internal returns (bytes32, Witnet.QueryId)
+        virtual override internal returns (Witnet.RadonHash, Witnet.QueryId)
     {
         return __witOraclePostQuery(
             _witOracleRequestArgs,
             _queryEvmReward, 
-            __witOracleDefaultQuerySLA
+            __witOracleDefaultQueryParams
         );
     }
 
@@ -72,7 +72,7 @@ abstract contract WitOracleRequestTemplateConsumer
         )
         virtual override internal
         returns (
-            bytes32 _queryRadHash, 
+            Witnet.RadonHash _queryRadHash, 
             Witnet.QueryId _queryId
         )
     {

@@ -3,13 +3,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "../WitOracleRadonRegistry.sol";
-import "../interfaces/IWitOracleAdminACLs.sol";
+import "../interfaces/IWitOracleTrustableAdmin.sol";
 import "../interfaces/IWitOracleConsumer.sol";
-import "../interfaces/IWitOracleEvents.sol";
-import "../interfaces/IWitOracleExperimental.sol";
-import "../interfaces/IWitOracleLegacy.sol";
+import "../interfaces/IWitOracleQueriableEvents.sol";
+import "../interfaces/IWitOracleQueriableExperimental.sol";
 import "../interfaces/IWitOracleTrustableReporter.sol";
 import "../interfaces/IWitOracleTrustlessReporter.sol";
+import "../interfaces/legacy/IWitOracleLegacy.sol";
 import "../libs/Witnet.sol";
 
 /// @title Witnet Request Board base data model library
@@ -17,8 +17,9 @@ import "../libs/Witnet.sol";
 library WitOracleDataLib {  
 
     using Witnet for Witnet.DataPushReport;
-    // using Witnet for Witnet.DataPullReport;
     using Witnet for Witnet.QuerySLA;
+    using Witnet for Witnet.RadonHash;
+    using Witnet for Witnet.Timestamp;
     
     using WitnetCBOR for WitnetCBOR.CBOR;
 
@@ -27,7 +28,7 @@ library WitOracleDataLib {
         0xf595240b351bc8f951c2f53b26f4e78c32cb62122cf76c19b7fdda7d4968e183;
 
     struct Storage {
-        uint256 nonce;
+        uint64 nonce;
         mapping (Witnet.QueryId => Witnet.Query) queries;
         mapping (address => bool) reporters;
         mapping (address => mapping (Witnet.RadonHash => Committee)) committees;
@@ -53,16 +54,16 @@ library WitOracleDataLib {
     function hashify(
             Witnet.QuerySLA memory querySLA, 
             address evmRequester, 
-            bytes32 radHash
+            Witnet.RadonHash radonHash
         ) 
         internal view
     returns (bytes32) {
         return (
-            data().committees[evmRequester][Witnet.RadonHash.wrap(radHash)].hash != bytes32(0)
+            data().committees[evmRequester][radonHash].hash != bytes32(0)
                 ? querySLA.hashify()
                 : keccak256(abi.encode(
                     querySLA.hashify(),
-                    data().committees[evmRequester][Witnet.RadonHash.wrap(radHash)].hash
+                    data().committees[evmRequester][radonHash].hash
                 )
             )
         );
@@ -87,8 +88,8 @@ library WitOracleDataLib {
         internal pure
         returns (Witnet.DataResult memory _result)
     {
-        _result.drTxHash = Witnet.TransactionHash.wrap(queryResponse.resultDrTxHash);
-        _result.timestamp = Witnet.Timestamp.wrap(queryResponse.resultTimestamp);
+        _result.drTxHash = queryResponse.resultDrTxHash;
+        _result.timestamp = queryResponse.resultTimestamp;
         if (queryResponse.resultCborBytes.length > 0) {
             _result.value = WitnetCBOR.fromBytes(queryResponse.resultCborBytes);
             _result.dataType = Witnet.peekRadonDataType(_result.value);
@@ -159,7 +160,7 @@ library WitOracleDataLib {
 
 
     /// =======================================================================
-    /// --- IWitOracleAdminACLs -----------------------------------------------
+    /// --- IWitOracleTrustableAdmin -----------------------------------------------
 
     function isReporter(address addr) internal view returns (bool) {
         return data().reporters[addr];
@@ -169,14 +170,14 @@ library WitOracleDataLib {
         for (uint ix = 0; ix < reporters.length; ix ++) {
             data().reporters[reporters[ix]] = true;
         }
-        emit IWitOracleAdminACLs.ReportersSet(reporters);
+        emit IWitOracleTrustableAdmin.ReportersSet(reporters);
     }
 
     function unsetReporters(address[] calldata reporters) public {
         for (uint ix = 0; ix < reporters.length; ix ++) {
             data().reporters[reporters[ix]] = false;
         }
-        emit IWitOracleAdminACLs.ReportersUnset(reporters);
+        emit IWitOracleTrustableAdmin.ReportersUnset(reporters);
     }
 
     
@@ -184,7 +185,7 @@ library WitOracleDataLib {
     /// --- IWitOracle --------------------------------------------------------
 
     function extractDataResult(
-            Witnet.QueryResponse calldata queryResponse, 
+            Witnet.QueryResponse memory queryResponse, 
             Witnet.QueryStatus queryStatus
         )
         public pure 
@@ -192,6 +193,27 @@ library WitOracleDataLib {
     {
         return intoDataResult(queryResponse, queryStatus);
     }
+
+    function parseDataReport(bytes calldata _report, bytes calldata _signature)
+        public view
+        returns (address _evmReporter, Witnet.DataResult memory _data)
+    {
+        Witnet.DataPushReport memory _dataPushReport = abi.decode(_report, (Witnet.DataPushReport));
+        _evmReporter = Witnet.recoverAddr(_signature, _dataPushReport.tallyHash());
+        require(data().reporters[_evmReporter], "WitOracleDataLib: invalid signature");
+        _data = extractDataResult(
+            Witnet.QueryResponse({
+                reporter: address(0), disputer: address(0), _0: 0, 
+                resultCborBytes: _dataPushReport.witResultCborBytes,
+                resultDrTxHash: _dataPushReport.witDrTxHash,
+                resultTimestamp: Witnet.determineTimestampFromEpoch(_dataPushReport.witDrTxEpoch)
+            }), 
+            Witnet.QueryStatus.Finalized
+        );
+    }
+
+    /// =======================================================================
+    /// --- IWitOracleQueriable -----------------------------------------------
 
     function deleteQuery(Witnet.QueryId queryId) 
         public 
@@ -218,7 +240,7 @@ library WitOracleDataLib {
 
     function getQueryStatus(Witnet.QueryId queryId) public view returns (Witnet.QueryStatus) {
         Witnet.Query storage __query = seekQuery(queryId);
-        if (__query.response.resultTimestamp != 0) {
+        if (!__query.response.resultTimestamp.isZero()) {
             return Witnet.QueryStatus.Finalized;
             
         } else if (__query.request.requester != address(0)) {
@@ -313,15 +335,15 @@ library WitOracleDataLib {
 
     function extractRadonRequests(
             WitOracleRadonRegistry registry, 
-            uint256[] calldata queryIds
+            Witnet.QueryId[] calldata queryIds
         )
         public view
         returns (bytes[] memory bytecodes)
     {
         bytecodes = new bytes[](queryIds.length);
         for (uint _ix = 0; _ix < queryIds.length; _ix ++) {
-            Witnet.Query storage __query = seekQuery(Witnet.QueryId.wrap(queryIds[_ix]));
-            bytecodes[_ix] = (__query.request.radonHash != bytes32(0)
+            Witnet.Query storage __query = seekQuery(queryIds[_ix]);
+            bytecodes[_ix] = (!__query.request.radonHash.isZero()
                 ? registry.bytecodeOf(__query.request.radonHash, __query.slaParams)
                 : registry.bytecodeOf(__query.request.radonBytecode, __query.slaParams)
             );
@@ -332,15 +354,15 @@ library WitOracleDataLib {
             address evmReporter,
             uint256 evmGasPrice,
             uint64  evmFinalityBlock,
-            uint256 queryId,
-            uint64  witDrResultTimestamp,
-            bytes32 witDrTxHash,
+            Witnet.QueryId queryId,
+            Witnet.Timestamp witDrTxTimestamp,
+            Witnet.TransactionHash witDrTxHash,
             bytes calldata witDrResultCborBytes
         )
         public returns (uint256 evmReward)
     {
         // read requester address and whether a callback was requested:
-        Witnet.Query storage __query = seekQuery(Witnet.QueryId.wrap(queryId));
+        Witnet.Query storage __query = seekQuery(queryId);
 
         // read query EVM reward:
         evmReward = Witnet.QueryEvmReward.unwrap(__query.reward);
@@ -355,20 +377,20 @@ library WitOracleDataLib {
                 __query.request.callbackGas,
                 evmFinalityBlock,
                 queryId,
-                witDrResultTimestamp,
+                witDrTxTimestamp,
                 witDrTxHash,
                 witDrResultCborBytes
             );
             if (_evmCallbackSuccess) {
                 // => the callback run successfully
-                emit IWitOracleEvents.WitOracleQueryReponseDelivered(
+                emit IWitOracleQueriableEvents.WitOracleQueryReponseDelivered(
                     queryId,
                     evmGasPrice,
                     _evmCallbackActualGas
                 );
             } else {
                 // => the callback reverted
-                emit IWitOracleEvents.WitOracleQueryResponseDeliveryFailed(
+                emit IWitOracleQueriableEvents.WitOracleQueryResponseDeliveryFailed(
                     queryId,
                     evmGasPrice,
                     _evmCallbackActualGas,
@@ -384,13 +406,13 @@ library WitOracleDataLib {
                 evmReporter,
                 evmFinalityBlock,
                 queryId, 
-                witDrResultTimestamp, 
+                witDrTxTimestamp, 
                 witDrTxHash,
                 hex""
             );
         } else {
             // => no callback is involved
-            emit IWitOracleEvents.WitOracleQueryResponse(
+            emit IWitOracleQueriableEvents.WitOracleQueryResponse(
                 queryId, 
                 evmGasPrice
             );
@@ -399,7 +421,7 @@ library WitOracleDataLib {
                 evmReporter,
                 evmFinalityBlock,
                 queryId,
-                witDrResultTimestamp,
+                witDrTxTimestamp,
                 witDrTxHash,
                 witDrResultCborBytes
             );
@@ -410,9 +432,9 @@ library WitOracleDataLib {
             address requester,
             uint24  evmCallbackGasLimit,
             uint64  evmFinalityBlock,
-            uint256 queryId,
-            uint64  witDrResultTimestamp,
-            bytes32 witDrTxHash,
+            Witnet.QueryId queryId,
+            Witnet.Timestamp witDrTxTimestamp,
+            Witnet.TransactionHash witDrTxHash,
             bytes calldata witDrResultCborBytes
         )
         private returns (
@@ -425,7 +447,7 @@ library WitOracleDataLib {
         Witnet.DataResult memory _result = intoDataResult(
             Witnet.QueryResponse({
                 reporter: address(0),
-                resultTimestamp: witDrResultTimestamp,
+                resultTimestamp: witDrTxTimestamp,
                 resultDrTxHash: witDrTxHash,
                 resultCborBytes: witDrResultCborBytes,
                 disputer: address(0), _0: 0
@@ -435,7 +457,7 @@ library WitOracleDataLib {
         try IWitOracleConsumer(requester).reportWitOracleQueryResult{
             gas: evmCallbackGasLimit
         } (
-            Witnet.QueryId.wrap(queryId),
+            queryId,
             _result
         ) {
             evmCallbackSuccess = true;
@@ -453,36 +475,36 @@ library WitOracleDataLib {
     function __saveQueryResponse(
             address evmReporter,
             uint64  evmFinalityBlock,
-            uint256 queryId,
-            uint64  witDrResultTimestamp,
-            bytes32 witDrTxHash,
+            Witnet.QueryId queryId,
+            Witnet.Timestamp witDrTxTimestamp,
+            Witnet.TransactionHash witDrTxHash,
             bytes memory witDrResultCborBytes
         ) private
     {
-        Witnet.Query storage __query = seekQuery(Witnet.QueryId.wrap(queryId));
+        Witnet.Query storage __query = seekQuery(queryId);
         __query.checkpoint = Witnet.BlockNumber.wrap(evmFinalityBlock);
         __query.response.reporter = evmReporter; 
-        __query.response.resultTimestamp = witDrResultTimestamp;
+        __query.response.resultTimestamp = witDrTxTimestamp;
         __query.response.resultDrTxHash = witDrTxHash;
         __query.response.resultCborBytes = witDrResultCborBytes;
     }
 
 
     /// =======================================================================
-    /// --- IWitOracleExperimental --------------------------------------------
+    /// --- IWitOracleQueriableExperimental --------------------------------------------
 
     function extractDDR(
             WitOracleRadonRegistry registry,
             Witnet.QueryId queryId
         )
         public view
-        returns (IWitOracleExperimental.DDR memory)
+        returns (IWitOracleQueriableExperimental.DDR memory)
     {
         Witnet.Query storage __query = seekQuery(queryId);
         
         bytes memory _radonBytecode;
-        bytes32 _radonHash = __query.request.radonHash;
-        if (_radonHash == bytes32(0)) {
+        Witnet.RadonHash _radonHash = __query.request.radonHash;
+        if (_radonHash.isZero()) {
             _radonBytecode = __query.request.radonBytecode;
             _radonHash = registry.hashOf(_radonBytecode);
         } else {
@@ -491,16 +513,16 @@ library WitOracleDataLib {
         
         Witnet.ServiceProvider[] memory _providers = data().committees
             [__query.request.requester]
-            [Witnet.RadonHash.wrap(_radonHash)]
+            [_radonHash]
             .members;
 
         Witnet.QuerySLA memory _querySLA = __query.slaParams;
         
-        return IWitOracleExperimental.DDR({
+        return IWitOracleQueriableExperimental.DDR({
             queryId: queryId,
             queryHash: __query.hash,
             queryEvmReward: __query.reward,
-            queryParams: IWitOracleExperimental.QueryParams({
+            queryParams: IWitOracleQueriableExperimental.QueryParams({
                 witResultMaxSize: _querySLA.witResultMaxSize,
                 witCommitteeSize: _querySLA.witCommitteeSize,
                 witInclusionFees: _querySLA.witInclusionFees,

@@ -9,22 +9,20 @@ import "../WitPriceFeeds.sol";
 /// @author The Witnet Foundation.
 abstract contract UsingWitPriceFeeds
     is
-        IWitFeedsEvents,
-        IWitOracleEvents
+        IWitPythEvents,
+        IWitOracleQueriableEvents
 {
     WitPriceFeeds immutable public witPriceFeeds;
-
     constructor(WitPriceFeeds _witPriceFeeds) {
         require(
             address(_witPriceFeeds).code.length > 0
                 && _witPriceFeeds.specs() == (
-                    type(IWitOracleAppliance).interfaceId
+                    type(IERC2362).interfaceId
                         ^ type(IWitPriceFeeds).interfaceId
+                        ^ type(IWitOracleAppliance).interfaceId
                 ),
             "UsingWitPriceFeeds: uncompliant WitPriceFeeds appliance"
         );
         witPriceFeeds = _witPriceFeeds;
     }
-
-    receive() external payable virtual {}
 }

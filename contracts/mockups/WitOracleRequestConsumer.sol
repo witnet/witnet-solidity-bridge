@@ -36,7 +36,7 @@ abstract contract WitOracleRequestConsumer
     }
 
     /// @dev Pulls a data update from the Wit/Oracle blockchain based on the underlying `witOracleRequest`,
-    /// @dev the default `__witOracleDefaultQuerySLA` data security parameters and the immutable value of
+    /// @dev the default `__witOracleDefaultQueryParams` data security parameters and the immutable value of
     /// @dev `__witOracleCalbackGasLimit`.
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle when pulling the data update.
     function __witOraclePostQuery(
@@ -46,7 +46,7 @@ abstract contract WitOracleRequestConsumer
     {
         return __witOraclePostQuery(
             _queryEvmReward,
-            __witOracleDefaultQuerySLA
+            __witOracleDefaultQueryParams
         );
     }
 
@@ -63,7 +63,7 @@ abstract contract WitOracleRequestConsumer
         return __witOracle.postQuery{
             value: _queryEvmReward
         }(
-            __witOracleRequestRadHash,
+            __wirOracleRequestHash,
             _querySLA,
             Witnet.QueryCallback({
                 consumer: address(this),

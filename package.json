@@ -49,6 +49,7 @@
     "fmt": "pnpm run fmt:js && pnpm run fmt:sol",
     "migrate": "npx truffle migrate --network",
     "networks": "node ./scripts/networks.js 2>&1",
+    "ops:rng:sla": "npx truffle migrate --migrations_directory ./migrations/ops/rng/sla --compile-none --network",
     "ops:drp:pfs": "npx truffle migrate --migrations_directory ./migrations/ops/drp/pfs --compile-none --network",
     "ops:drp:wrb": "npx truffle migrate --migrations_directory ./migrations/ops/drp/wrb --compile-none --network",
     "prepare": "npx truffle compile --all && npx hardhat compile --force && node ./scripts/prepare.js",
@@ -83,7 +84,7 @@
     "truffle": "^5.11.5",
     "truffle-assertions": "^0.9.2",
     "truffle-flattener": "^1.6.0",
-    "witnet-toolkit": "^2.0.1",
-    "truffle-plugin-verify": "^0.6.7"
+    "truffle-plugin-verify": "^0.6.7",
+    "witnet-toolkit": "^2.0.1-beta.0"
   }
 }

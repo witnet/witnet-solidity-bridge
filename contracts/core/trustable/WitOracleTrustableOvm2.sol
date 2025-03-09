@@ -156,10 +156,9 @@ contract WitOracleTrustableOvm2
                             + WitOracleBase.estimateExtraFee(
                                 _evmGasPrice, _evmWitPrice,
                                 Witnet.QuerySLA({
-                                    witCommitteeCapacity: __query.slaParams.witCommitteeCapacity,
-                                    witCommitteeUnitaryReward: __query.slaParams.witCommitteeUnitaryReward,
                                     witResultMaxSize: uint16(0),
-                                    witCapability: Witnet.QueryCapability.wrap(0)
+                                    witCommitteeSize: __query.slaParams.witCommitteeSize,
+                                    witInclusionFees: __query.slaParams.witInclusionFees
                                 })
                             )
                     );
@@ -172,8 +171,8 @@ contract WitOracleTrustableOvm2
                             )
                     );
                 }
-                _expenses += __query.slaParams.witCommitteeUnitaryReward * _evmWitPrice;
-                _revenues += Witnet.QueryReward.unwrap(__query.reward);
+                _expenses += __query.slaParams.witInclusionFees * _evmWitPrice;
+                _revenues += Witnet.QueryEvmReward.unwrap(__query.reward);
             }
         }
         _expenses += __gasPriceOracleL1.getL1Fee(_evmMsgData);
