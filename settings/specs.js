@@ -22,6 +22,9 @@ module.exports = {
       vanity: 13710368043, // 0x77703aE126B971c9946d562F41Dd47071dA00777
     },
     WitOracleTrustless: {
+      baseLibs: [
+        "WitOracleBlocksLib",
+      ],
       immutables: {
         types: ["uint256", "uint256"],
         values: [
