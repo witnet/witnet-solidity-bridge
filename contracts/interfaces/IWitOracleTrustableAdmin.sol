@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /// @title Witnet Request Board ACLs administration interface.
 /// @author The Witnet Foundation.
-interface IWitOracleAdminACLs {
+interface IWitOracleTrustableAdmin {
     
     event ReportersSet(address[] reporters);
     event ReportersUnset(address[] reporters);

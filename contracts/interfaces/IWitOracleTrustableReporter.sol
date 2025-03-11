@@ -12,7 +12,7 @@ interface IWitOracleTrustableReporter {
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
     /// @notice queries providing no actual earnings.
     function estimateReportEarnings(
-            uint256[] calldata queryIds, 
+            Witnet.QueryId[] calldata queryIds, 
             bytes calldata evmReportTxMsgData,
             uint256 evmReportTxGasPrice,
             uint256 witEthPrice9
@@ -21,7 +21,7 @@ interface IWitOracleTrustableReporter {
     /// @notice Retrieves the Witnet Data Request bytecodes of previously posted queries.
     /// @dev Returns empty buffer if the query does not exist.
     /// @param queryIds Query identifiers.
-    function extractRadonRequests(uint256[] calldata queryIds) 
+    function extractRadonRequests(Witnet.QueryId[] calldata queryIds) 
         external view returns (bytes[] memory drBytecodes);
 
     /// @notice Reports the Witnet-provided result to a previously posted request. 
@@ -34,8 +34,8 @@ interface IWitOracleTrustableReporter {
     /// @param resultTallyHash The hash of the corresponding data request transaction in Witnet.
     /// @param resultCborBytes The result itself as bytes.
     function reportResult(
-            uint256 queryId,
-            bytes32 resultTallyHash,
+            Witnet.QueryId queryId,
+            Witnet.TransactionHash resultTallyHash,
             bytes calldata resultCborBytes
         ) external returns (uint256);
 
@@ -50,9 +50,9 @@ interface IWitOracleTrustableReporter {
     /// @param resultTallyHash The hash of the corresponding data request transaction in Witnet.
     /// @param resultCborBytes The result itself as bytes.
     function reportResult(
-            uint256 queryId,
-            uint32  resultTimestamp,
-            bytes32 resultTallyHash,
+            Witnet.QueryId queryId,
+            Witnet.Timestamp resultTimestamp,
+            Witnet.TransactionHash resultTallyHash,
             bytes calldata resultCborBytes
         ) external returns (uint256);
 
@@ -67,11 +67,11 @@ interface IWitOracleTrustableReporter {
     function reportResultBatch(BatchResult[] calldata _batchResults) external returns (uint256);
         
         struct BatchResult {
-            uint256 queryId;
-            uint32  resultTimestamp;
-            bytes32 resultTallyHash;
-            bytes   resultCborBytes;
+            Witnet.QueryId queryId;
+            Witnet.Timestamp drTxTimestamp;
+            Witnet.TransactionHash drTxHash;
+            bytes resultCborBytes;
         }
 
-        event BatchReportError(uint256 queryId, string reason);
+        event BatchReportError(Witnet.QueryId queryId, string reason);
 }

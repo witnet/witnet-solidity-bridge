@@ -6,7 +6,7 @@ import "./IWitOracleConsumer.sol";
 
 import "../WitOracleRadonRegistry.sol";
 
-interface IWitOracleExperimental {
+interface IWitOracleQueriableExperimental {
     
     event WitOracleServiceCommittee(
         address indexed evmSubscriber,

@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../base/WitOracleBaseTrustable.sol";
+import "../base/WitOracleBaseQueriableTrustable.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -11,10 +11,10 @@ import "../base/WitOracleBaseTrustable.sol";
 /// @author The Witnet Foundation
 contract WitOracleTrustableObscuro
     is 
-        WitOracleBaseTrustable
+        WitOracleBaseQueriableTrustable
 {
     function class() virtual override public view returns (string memory) {
-        return type(WitOracleBaseTrustable).name;
+        return type(WitOracleBaseQueriableTrustable).name;
     }
 
     constructor(
@@ -22,11 +22,11 @@ contract WitOracleTrustableObscuro
             WitOracleRadonRegistry _registry,
             bytes32 _versionTag
         )
-        WitOracleBase(
+        WitOracleBaseQueriable(
             _immutables,
             _registry
         )
-        WitOracleBaseTrustable(_versionTag)
+        WitOracleBaseQueriableTrustable(_versionTag)
     {}
 
     // ================================================================================================================
@@ -61,7 +61,7 @@ contract WitOracleTrustableObscuro
         onlyRequester(_queryId)
         returns (Witnet.DataResult memory)
     {
-        return WitOracleBase.getQueryResult(_queryId);
+        return WitOracleBaseQueriable.getQueryResult(_queryId);
     }
 
     function getQueryResultStatus(Witnet.QueryId _queryId)
@@ -79,6 +79,6 @@ contract WitOracleTrustableObscuro
         onlyRequester(_queryId)
         returns (string memory)
     {
-        return WitOracleBase.getQueryResultStatusDescription(_queryId);
+        return WitOracleBaseQueriable.getQueryResultStatusDescription(_queryId);
     }
 }

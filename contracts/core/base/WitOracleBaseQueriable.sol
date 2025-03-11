@@ -2,20 +2,18 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+import "./WitOracleBasePushOnly.sol";
 import "../../WitOracle.sol";
 import "../../data/WitOracleDataLib.sol";
 import "../../interfaces/IWitOracleConsumer.sol";
 import "../../libs/WitOracleResultStatusLib.sol";
 import "../../patterns/Payable.sol";
 
-/// @title Witnet Request Board "trustless" base implementation contract.
-/// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
-/// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
-/// The result of the requests will be posted back to this contract by the bridge nodes too.
+/// @title Queriable WitOracle base implementation.
 /// @author The Witnet Foundation
-abstract contract WitOracleBase
+abstract contract WitOracleBaseQueriable
     is 
-        Payable, 
+        Payable,
         WitOracle
 {
     using Witnet for Witnet.QuerySLA;
@@ -25,7 +23,6 @@ abstract contract WitOracleBase
         return Witnet.channel(address(this));
     }
 
-    // WitOracleRequestFactory public immutable override factory;
     WitOracleRadonRegistry public immutable override registry;
 
     uint256 internal immutable __reportResultGasBase;
@@ -62,12 +59,11 @@ abstract contract WitOracleBase
 
     /// Asserts the given query is currently in the given status.
     modifier inStatus(Witnet.QueryId _queryId, Witnet.QueryStatus _status) {
-      if (getQueryStatus(_queryId) != _status) {
-        _revert(WitOracleDataLib.notInStatusRevertMessage(_status));
-      
-      } else {
-        _;
-      }
+        if (getQueryStatus(_queryId) != _status) {
+            _revert(WitOracleDataLib.notInStatusRevertMessage(_status));
+        } else {
+            _;
+        }
     }
 
     /// Asserts the caller actually posted the referred query.
@@ -299,7 +295,7 @@ abstract contract WitOracleBase
     }
 
     function postQuery(
-            bytes32 _queryRAD, 
+            Witnet.RadonHash _queryRAD, 
             Witnet.QuerySLA memory _querySLA
         )
         virtual override
@@ -323,14 +319,14 @@ abstract contract WitOracleBase
             _getMsgSender(),
             _getGasPrice(),
             _getMsgValue(),
-            Witnet.QueryId.unwrap(_queryId), 
+            _queryId, 
             _queryRAD, 
             _querySLA
         );
     }
    
     function postQuery(
-            bytes32 _queryRAD, 
+            Witnet.RadonHash _queryRAD, 
             Witnet.QuerySLA memory _querySLA,
             Witnet.QueryCallback memory _queryCallback
         )
@@ -358,7 +354,7 @@ abstract contract WitOracleBase
             _getMsgSender(),
             _getGasPrice(),
             _getMsgValue(),
-            Witnet.QueryId.unwrap(_queryId), 
+            _queryId, 
             _queryRAD, 
             _querySLA
         );
@@ -393,7 +389,7 @@ abstract contract WitOracleBase
             _getMsgSender(),
             _getGasPrice(),
             _getMsgValue(),
-            Witnet.QueryId.unwrap(_queryId), 
+            _queryId, 
             _queryRAD, 
             _querySLA
         );
@@ -414,7 +410,7 @@ abstract contract WitOracleBase
         );
         __query.reward = Witnet.QueryEvmReward.wrap(uint72(_newReward));
         emit WitOracleQueryUpgrade(
-            Witnet.QueryId.unwrap(_queryId),
+            _queryId,
             _getMsgSender(),
             _getGasPrice(),
             _newReward
@@ -429,7 +425,7 @@ abstract contract WitOracleBase
             address _requester,
             uint24  _callbackGas,
             uint72  _evmReward,
-            bytes32 _radonHash,
+            Witnet.RadonHash _radonHash,
             Witnet.QuerySLA memory _querySLA
         )
         virtual internal
@@ -465,7 +461,7 @@ abstract contract WitOracleBase
     {
         _queryId = Witnet.QueryId.wrap(++ __storage().nonce);
         Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
-        bytes32 _radonHash = Witnet.radHash(_radonBytecode);
+        Witnet.RadonHash _radonHash = Witnet.radHash(_radonBytecode);
         __query.hash = Witnet.hashify(
             _queryId, 
             _radonHash,
@@ -476,24 +472,24 @@ abstract contract WitOracleBase
             requester: _requester,
             callbackGas: _callbackGas,
             radonBytecode: _radonBytecode,
-            radonHash: bytes32(0), _0: 0
+            radonHash: Witnet.RadonHash.wrap(0), _0: 0
         });
         __query.slaParams = _querySLA;
     }
 
-    /// Returns storage pointer to contents of 'WitOracleDataLib.Storage' struct.
-    function __storage() virtual internal pure returns (WitOracleDataLib.Storage storage _ptr) {
-      return WitOracleDataLib.data();
+    function _revertUnhandledException() virtual internal view {
+        _revert(_revertUnhandledExceptionReason());
     }
 
-    function _revertWitOracleDataLibUnhandledException() internal view {
-        _revert(_revertWitOracleDataLibUnhandledExceptionReason());
-    }
-
-    function _revertWitOracleDataLibUnhandledExceptionReason() internal pure returns (string memory) {
+    function _revertUnhandledExceptionReason() virtual internal pure returns (string memory) {
         return string(abi.encodePacked(
             type(WitOracleDataLib).name,
             ": unhandled assertion"
         ));
     }
+
+    /// Returns storage pointer to contents of 'WitOracleDataLib.Storage' struct.
+    function __storage() virtual internal pure returns (WitOracleDataLib.Storage storage _ptr) {
+        return WitOracleDataLib.data();
+    }    
 }

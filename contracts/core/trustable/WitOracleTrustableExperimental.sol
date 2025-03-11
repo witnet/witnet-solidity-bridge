@@ -2,8 +2,8 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../base/WitOracleBaseTrustable.sol";
-import "../../interfaces/IWitOracleExperimental.sol";
+import "../base/WitOracleBaseQueriableTrustable.sol";
+import "../../interfaces/IWitOracleQueriableExperimental.sol";
 
 /// @title Witnet Request Board "trustable" implementation contract.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -12,8 +12,8 @@ import "../../interfaces/IWitOracleExperimental.sol";
 /// @author The Witnet Foundation
 contract WitOracleTrustableExperimental
     is 
-        IWitOracleExperimental,
-        WitOracleBaseTrustable
+        IWitOracleQueriableExperimental,
+        WitOracleBaseQueriableTrustable
 {
     using WitOracleDataLib for WitOracleDataLib.Committee;
 
@@ -26,20 +26,20 @@ contract WitOracleTrustableExperimental
             WitOracleRadonRegistry _registry,
             bytes32 _versionTag
         )
-        WitOracleBase(
+        WitOracleBaseQueriable(
             _immutables,
             _registry
         )
-        WitOracleBaseTrustable(_versionTag)
+        WitOracleBaseQueriableTrustable(_versionTag)
     {}
 
 
     // ================================================================================================================
-    // --- IWitOracleExperimental -------------------------------------------------------------------------------------
+    // --- IWitOracleQueriableExperimental -------------------------------------------------------------------------------------
 
     function extractDelegatedDataRequest(Witnet.QueryId _queryId)
         virtual override public view
-        returns (IWitOracleExperimental.DDR memory _dr)
+        returns (IWitOracleQueriableExperimental.DDR memory _dr)
     {
         Witnet.QueryStatus _queryStatus = getQueryStatus(_queryId);
         if (
@@ -52,7 +52,7 @@ contract WitOracleTrustableExperimental
 
     function extractDelegatedDataRequestBatch(Witnet.QueryId[] calldata _queryIds)
         virtual override external view
-        returns (IWitOracleExperimental.DDR[] memory _drs)
+        returns (IWitOracleQueriableExperimental.DDR[] memory _drs)
     {
         _drs = new DDR[](_queryIds.length);
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {

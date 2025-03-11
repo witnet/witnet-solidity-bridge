@@ -2,24 +2,19 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./WitOracleBase.sol";
+import "./WitOracleBaseQueriable.sol";
 import "../../data/WitOracleBlocksLib.sol";
 import "../../interfaces/IWitOracleBlocks.sol";
-import "../../interfaces/IWitOracleTrustless.sol";
 import "../../interfaces/IWitOracleTrustlessReporter.sol";
 import "../../patterns/Escrowable.sol";
 
-/// @title Witnet Request Board "trustless" implementation contract for regular EVM-compatible chains.
-/// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
-/// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
-/// The result of the requests will be posted back to this contract by the bridge nodes too.
+/// @title Queriable WitOracle "trustless" base implementation.
 /// @author The Witnet Foundation
-abstract contract WitOracleBaseTrustless
+abstract contract WitOracleBaseQueriableTrustless
     is 
         Escrowable,
-        WitOracleBase,
+        WitOracleBaseQueriable,
         IWitOracleBlocks,
-        IWitOracleTrustless,
         IWitOracleTrustlessReporter
 {
     using Witnet for Witnet.DataPullReport;
@@ -145,6 +140,65 @@ abstract contract WitOracleBaseTrustless
     // ================================================================================================================
     // --- Overrides IWitOracle (trustlessly) -------------------------------------------------------------------------
 
+    function parseDataReport(bytes calldata _report, bytes calldata _proof)
+        virtual override 
+        external view
+        returns (Witnet.DataResult memory)
+    {
+        Witnet.DataPushReport memory _dataPushReport = abi.decode(_report, (Witnet.DataPushReport));
+        (Witnet.FastForward[] memory _rollup, bytes32[] memory _merkle) = abi.decode(
+            _proof, 
+            (Witnet.FastForward[], bytes32[])
+        );
+        try WitOracleBlocksLib.parseDataPushReport(
+            _dataPushReport,
+            _rollup,
+            _merkle
+        
+        ) returns (
+            Witnet.DataResult memory _queryResult
+        ) {
+            return _queryResult;
+        
+        } catch Error(string memory _reason) {
+            revert(_reason);
+        
+        } catch (bytes memory) {
+            revert("unhandled assertion");
+        }
+    }
+
+    function pushDataReport(bytes calldata _report, bytes calldata _proof)
+        virtual override external
+        returns (Witnet.DataResult memory)
+    {
+        Witnet.DataPushReport memory _dataPushReport = abi.decode(_report, (Witnet.DataPushReport));
+        (Witnet.FastForward[] memory _rollup, bytes32[] memory _merkle) = abi.decode(
+            _proof, 
+            (Witnet.FastForward[], bytes32[])
+        );
+        try WitOracleBlocksLib.rollupDataPushReport(
+            _dataPushReport,
+            _rollup,
+            _merkle
+        
+        ) returns (
+            Witnet.DataResult memory _queryResult
+        ) {
+            return _queryResult;
+        
+        } catch Error(string memory _reason) {
+            revert(_reason);
+        
+        } catch (bytes memory) {
+            revert("unhandled assertion");
+        }
+    }
+
+
+    // ================================================================================================================
+    // --- Overrides IWitOracleQueriable (truslessly) -----------------------------------------------------------------
+
     /// @notice Removes all query data from storage. Pays back reward on expired queries.
     /// @dev Fails if the query is not in a final status, or not called from the actual requester.
     function deleteQuery(Witnet.QueryId _queryId)
@@ -173,7 +227,7 @@ abstract contract WitOracleBaseTrustless
             _revert(_reason);
         
         } catch (bytes memory) {
-            _revertWitOracleDataLibUnhandledException();
+            _revertUnhandledException();
         }
     }
 
@@ -187,11 +241,11 @@ abstract contract WitOracleBaseTrustless
             .getQueryStatusTrustlessly(QUERY_AWAITING_BLOCKS);
     }
 
-
+    
     // ================================================================================================================
     // --- IWitOracleBlocks -------------------------------------------------------------------------------------------
 
-    function determineBeaconIndexFromTimestamp(uint64 timestamp)
+    function determineBeaconIndexFromTimestamp(Witnet.Timestamp timestamp)
         virtual override
         external pure
         returns (uint64)
@@ -199,10 +253,10 @@ abstract contract WitOracleBaseTrustless
         return Witnet.determineBeaconIndexFromTimestamp(timestamp);
     }
     
-    function determineEpochFromTimestamp(uint64 timestamp)
+    function determineEpochFromTimestamp(Witnet.Timestamp timestamp)
         virtual override
         external pure
-        returns (uint64)
+        returns (Witnet.BlockNumber)
     {
         return Witnet.determineEpochFromTimestamp(timestamp);
     }
@@ -266,38 +320,7 @@ abstract contract WitOracleBaseTrustless
             _revert(_reason);
         
         } catch (bytes memory) {
-            _revertWitOracleDataLibUnhandledException();
-        }
-    }
-
-
-    // ================================================================================================================
-    // --- Overrides IWitOracle (trustlessly) -------------------------------------------------------------------------
-
-    /// @notice Verify the data report was actually produced by the Wit/Oracle sidechain,
-    /// @notice reverting if the verification fails, or returning the self-contained Witnet.Result value.
-    function pushData(
-                Witnet.DataPushReport calldata _report, 
-                Witnet.FastForward[] calldata _rollup, 
-                bytes32[] calldata _droMerkleTrie
-            ) 
-            external returns (Witnet.DataResult memory)
-    {
-        try WitOracleBlocksLib.rollupDataPushReport(
-            _report,
-            _rollup,
-            _droMerkleTrie
-        
-        ) returns (
-            Witnet.DataResult memory _queryResult
-        ) {
-            return _queryResult;
-        
-        } catch Error(string memory _reason) {
-            _revert(_reason);
-        
-        } catch (bytes memory) {
-            _revertWitOracleDataLibUnhandledException();
+            _revertUnhandledException();
         }
     }
 
@@ -323,7 +346,7 @@ abstract contract WitOracleBaseTrustless
             _revert(_reason);
         
         } catch (bytes memory) {
-            _revertWitOracleDataLibUnhandledException();
+            _revertUnhandledException();
         }
     }
 
@@ -349,7 +372,7 @@ abstract contract WitOracleBaseTrustless
             } catch (bytes memory) {
                 emit BatchQueryError(
                     _queryIds[_ix], 
-                    _revertWitOracleDataLibUnhandledExceptionReason()
+                    _revertUnhandledExceptionReason()
                 );
             }
         }
@@ -370,7 +393,7 @@ abstract contract WitOracleBaseTrustless
             _revert(_reason);
         
         } catch (bytes memory) {
-            _revertWitOracleDataLibUnhandledException();
+            _revertUnhandledException();
         }
     }
 
@@ -387,9 +410,9 @@ abstract contract WitOracleBaseTrustless
             address evmReporter,
             uint256 evmGasPrice,
             uint64  evmFinalityBlock,
-            uint256 queryId,
-            uint64 witDrResultTimestamp,
-            bytes32 witDrTxHash,
+            Witnet.QueryId queryId,
+            Witnet.Timestamp witDrResultTimestamp,
+            Witnet.TransactionHash witDrTxHash,
             bytes memory witDrResultCborBytes
         ) {
             try WitOracleDataLib
@@ -410,14 +433,14 @@ abstract contract WitOracleBaseTrustless
                 _revert(_reason);
             
             } catch (bytes memory) {
-                _revertWitOracleDataLibUnhandledException();    
+                _revertUnhandledException();    
             }
         
         } catch Error(string memory _reason) {
             _revert(_reason);
         
         } catch (bytes memory) {
-            _revertWitOracleDataLibUnhandledException();
+            _revertUnhandledException();
         }
     }
     
@@ -435,9 +458,9 @@ abstract contract WitOracleBaseTrustless
                 address evmReporter,
                 uint256 evmGasPrice,
                 uint64  evmFinalityBlock,
-                uint256 queryId,
-                uint64 witDrResultTimestamp,
-                bytes32 witDrTxHash,
+                Witnet.QueryId queryId,
+                Witnet.Timestamp witDrResultTimestamp,
+                Witnet.TransactionHash witDrTxHash,
                 bytes memory witDrResultCborBytes
             ) {
                 try WitOracleDataLib.reportResult(
@@ -462,7 +485,7 @@ abstract contract WitOracleBaseTrustless
                 } catch (bytes memory) {
                     emit BatchQueryError(
                         _responseReport.queryId,
-                        _revertWitOracleDataLibUnhandledExceptionReason()
+                        _revertUnhandledExceptionReason()
                     );
                 }
             
@@ -475,7 +498,7 @@ abstract contract WitOracleBaseTrustless
             } catch (bytes memory) {
                 emit BatchQueryError(
                     _responseReport.queryId,
-                    _revertWitOracleDataLibUnhandledExceptionReason()
+                    _revertUnhandledExceptionReason()
                 );
             }
         }
@@ -505,7 +528,7 @@ abstract contract WitOracleBaseTrustless
             _revert(_reason);
         }
         catch (bytes memory) {
-            _revertWitOracleDataLibUnhandledException();
+            _revertUnhandledException();
         }
     }
 }

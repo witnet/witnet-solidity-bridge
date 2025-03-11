@@ -4,7 +4,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../base/WitOracleBaseTrustable.sol";
+import "../base/WitOracleBaseQueriableTrustable.sol";
 
 /// @title Witnet Request Board OVM-compatible (Optimism) "trustable" implementation.
 /// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
@@ -13,7 +13,7 @@ import "../base/WitOracleBaseTrustable.sol";
 /// @author The Witnet Foundation
 contract WitOracleTrustableReef
     is
-        WitOracleBaseTrustable
+        WitOracleBaseQueriableTrustable
 {
     function class() virtual override public view  returns (string memory) {
         return type(WitOracleTrustableReef).name;
@@ -24,11 +24,11 @@ contract WitOracleTrustableReef
             WitOracleRadonRegistry _registry,
             bytes32 _versionTag
         )
-        WitOracleBase(
+        WitOracleBaseQueriable(
             _immutables,
             _registry
         )
-        WitOracleBaseTrustable(_versionTag)
+        WitOracleBaseQueriableTrustable(_versionTag)
     {}
 
     // ================================================================================================================
@@ -54,7 +54,7 @@ contract WitOracleTrustableReef
         virtual override
         returns (uint256)
     {
-        return WitOracleBaseTrustable.estimateBaseFee(1, _resultMaxSize);
+        return WitOracleBaseQueriableTrustable.estimateBaseFee(1, _resultMaxSize);
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
@@ -64,6 +64,6 @@ contract WitOracleTrustableReef
         virtual override
         returns (uint256)
     {
-        return WitOracleBase.estimateBaseFeeWithCallback(1, _callbackGas);
+        return WitOracleBaseQueriable.estimateBaseFeeWithCallback(1, _callbackGas);
     }
 }
