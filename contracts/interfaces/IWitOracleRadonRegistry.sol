@@ -8,12 +8,12 @@ interface IWitOracleRadonRegistry {
 
     /// Returns the Witnet-compliant RAD bytecode for some Radon Request 
     /// identified by its unique RAD hash. 
-    function bytecodeOf(bytes32 radHash) external view returns (bytes memory);
+    function bytecodeOf(Witnet.RadonHash radHash) external view returns (bytes memory);
 
     /// Returns the Witnet-compliant DRO bytecode for some data request object 
     /// made out of the given Radon Request and Radon SLA security parameters. 
     function bytecodeOf(
-            bytes32 radHash, 
+            Witnet.RadonHash radHash, 
             Witnet.QuerySLA calldata sla
         ) external view returns (bytes memory);
     
@@ -24,10 +24,13 @@ interface IWitOracleRadonRegistry {
             Witnet.QuerySLA calldata sla
         ) external view returns (bytes memory);
     
+    /// Tells whether the given Radon Hash has been verified into the registry, or not.
+    function exists(Witnet.RadonHash radHash) external view returns (bool);
+
     /// Returns the hash of the given Witnet-compliant bytecode. Returned value
     /// can be used to trace back in the Witnet blockchain all past resolutions 
     /// of the given data request payload.
-    function hashOf(bytes calldata) external view returns (bytes32);
+    function hashOf(bytes calldata) external view returns (Witnet.RadonHash);
 
     /// Returns the whole Witnet.RadonReducer metadata struct for the given hash.
     /// Reverts if unknown.
@@ -35,28 +38,28 @@ interface IWitOracleRadonRegistry {
 
     /// Returns the whole Witnet.RadonRequest metadata struct for the given RAD hash value. 
     /// Reverts if unknown.
-    function lookupRadonRequest(bytes32 radHash) external view returns (Witnet.RadonRequest memory);
+    function lookupRadonRequest(Witnet.RadonHash radHash) external view returns (Witnet.RadonRequest memory);
     
     /// Returns the Aggregate reducer that is applied to the data extracted from the data sources 
     /// (i.e. Radon Retrievals) whenever the given Radon Request gets solved on the Witnet blockchain. 
     /// Reverts if unknown.
-    function lookupRadonRequestAggregator(bytes32 radHash) external view returns (Witnet.RadonReducer memory);
+    function lookupRadonRequestAggregator(Witnet.RadonHash radHash) external view returns (Witnet.RadonReducer memory);
     
     /// Returns the deterministic data type returned by successful resolutions of the given Radon Request. 
     /// Reverts if unknown.
-    function lookupRadonRequestResultDataType(bytes32 radHash) external view returns (Witnet.RadonDataTypes);
+    function lookupRadonRequestResultDataType(Witnet.RadonHash radHash) external view returns (Witnet.RadonDataTypes);
 
     /// Returns introspective metadata for the index-th data source of some pre-verified Radon Request. 
     /// Reverts if out of range.
-    function lookupRadonRequestRetrievalByIndex(bytes32 radHash, uint256 index) external view returns (Witnet.RadonRetrieval memory);
+    function lookupRadonRequestRetrievalByIndex(Witnet.RadonHash radHash, uint256 index) external view returns (Witnet.RadonRetrieval memory);
 
     /// Returns an array (one or more items) containing the introspective metadata of the given Radon Request's 
     /// data sources (i.e. Radon Retrievals). Reverts if unknown.
-    function lookupRadonRequestRetrievals(bytes32 radHash) external view returns (Witnet.RadonRetrieval[] memory);
+    function lookupRadonRequestRetrievals(Witnet.RadonHash radHash) external view returns (Witnet.RadonRetrieval[] memory);
 
     /// Returns the Tally reducer that is applied to aggregated values revealed by the witnessing nodes on the 
     /// Witnet blockchain. Reverts if unknown.
-    function lookupRadonRequestTally(bytes32 radHash) external view returns (Witnet.RadonReducer memory);
+    function lookupRadonRequestTally(Witnet.RadonHash radHash) external view returns (Witnet.RadonReducer memory);
 
     /// Returns introspective metadata of some previously verified Radon Retrieval 
     /// (i.e. public data source). Reverts if unknown.
@@ -88,13 +91,13 @@ interface IWitOracleRadonRegistry {
             bytes32[] calldata retrieveHashes,
             Witnet.RadonReducer calldata aggregate,
             Witnet.RadonReducer calldata tally
-        ) external returns (bytes32 radHash);
+        ) external returns (Witnet.RadonHash radHash);
 
     function verifyRadonRequest(
             bytes32[] calldata retrieveHashes,
             bytes32 aggregateReducerHash,
             bytes32 tallyReducerHash
-        ) external returns (bytes32 radHash);
+        ) external returns (Witnet.RadonHash radHash);
 
     /// Verifies and registers the specified Radon Request out of the given data sources (i.e. retrievals), 
     /// data sources parameters (if required), and the aggregate and tally Radon Reducers. Returns a unique 
@@ -109,14 +112,14 @@ interface IWitOracleRadonRegistry {
             string[][] calldata retrieveArgs,
             Witnet.RadonReducer calldata aggregate,
             Witnet.RadonReducer calldata tally
-        ) external returns (bytes32 radHash);
+        ) external returns (Witnet.RadonHash radHash);
 
     function verifyRadonRequest(
             bytes32[] calldata retrieveHashes,
             string[][] calldata retrieveArgsValues,
             bytes32 aggregateReducerHash,
             bytes32 tallyReducerHash
-        ) external returns (bytes32 radHash);
+        ) external returns (Witnet.RadonHash radHash);
 
     /// Verifies and registers the specified Radon Retrieval (i.e. public data source) into this registry contract. 
     /// Returns a unique retrieval hash that identifies the verified Radon Retrieval.

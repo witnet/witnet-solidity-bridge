@@ -47,7 +47,7 @@ module.exports = {
     },
     WitPriceFeeds: {
       baseLibs: [
-        "WitPriceFeedsDataLib",
+        "WitPriceFeedsLegacyDataLib",
       ],
       from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",
       vanity: 1865150170, // 0x1111AbA2164AcdC6D291b08DfB374280035E1111

@@ -12,7 +12,7 @@ interface IWitOracleRequest {
 
     /// Returns the Witnet-compliant RAD hash of the data request (i.e. Radon Request) 
     /// contained within this WitOracleRequest. 
-    function radHash() external view returns (bytes32);
+    function radHash() external view returns (Witnet.RadonHash);
 
     /// Returns the filters and reducing functions to be applied by witnessing nodes 
     /// on the Witnet blockchain both at the:

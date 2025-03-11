@@ -144,13 +144,13 @@ abstract contract WitOracleRequestFactoryBaseUpgradable
         );
     }
 
-    function _determineWitOracleRequestAddressAndSalt(bytes32 _radHash)
+    function _determineWitOracleRequestAddressAndSalt(Witnet.RadonHash _radHash)
         virtual override internal view
         returns (address, bytes32)
     {
         bytes32 _salt = keccak256(
             abi.encodePacked(
-                _radHash, 
+                Witnet.RadonHash.unwrap(_radHash), 
                 bytes4(_WITNET_UPGRADABLE_VERSION)
             )
         );

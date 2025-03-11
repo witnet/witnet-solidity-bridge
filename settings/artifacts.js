@@ -2,7 +2,7 @@ module.exports = {
   default: {
     WitnetDeployer: "WitnetDeployer",
     apps: {
-      WitPriceFeeds: "WitPriceFeedsUpgradable",
+      WitPriceFeeds: "WitPriceFeedsLegacyUpgradable",
       WitRandomness: "WitRandomnessV21",
     },
     core: {
@@ -14,7 +14,7 @@ module.exports = {
       WitOracleDataLib: "WitOracleDataLib",
       WitOracleRadonEncodingLib: "WitOracleRadonEncodingLib",
       WitOracleResultStatusLib: "WitOracleResultStatusLib",
-      WitPriceFeedsDataLib: "WitPriceFeedsDataLib",
+      WitPriceFeedsLegacyDataLib: "WitPriceFeedsLegacyDataLib",
     },
   },
   base: {

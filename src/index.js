@@ -31,7 +31,7 @@ module.exports = {
     WitPriceFeeds: require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json").abi,
     WitRandomness: require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json").abi,
     WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json").abi,
-    IWitPriceFeedsSolver: require("../artifacts/contracts/interfaces/IWitPriceFeedsSolver.sol/IWitPriceFeedsSolver.json").abi,
+    IWitPriceFeedsLegacySolver: require("../artifacts/contracts/interfaces/IWitPriceFeedsLegacySolver.sol/IWitPriceFeedsLegacySolver.json").abi,
   },
   settings: require("../settings"),
   utils,

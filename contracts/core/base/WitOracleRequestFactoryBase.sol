@@ -16,7 +16,9 @@ abstract contract WitOracleRequestFactoryBase
         WitOracleRequestFactoryData,
         WitOracleRequestTemplate
 {
-     /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
+    using Witnet for Witnet.RadonHash;
+
+    /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
     WitOracle immutable public override witOracle;
 
     modifier notOnFactory virtual {
@@ -35,7 +37,7 @@ abstract contract WitOracleRequestFactoryBase
 
     modifier onlyOnRequests {
         _require(
-            __witOracleRequest().radHash != bytes32(0),
+            !__witOracleRequest().radHash.isZero(),
             "not a request"
         ); _;
     }
@@ -65,11 +67,11 @@ abstract contract WitOracleRequestFactoryBase
         return witOracle.registry();
     }
 
-    function initializeWitOracleRequest(bytes32 _radHash)
+    function initializeWitOracleRequest(Witnet.RadonHash _radHash)
         virtual public initializer
         returns (address)
     {
-        _require(_radHash != bytes32(0), "no rad hash?");
+        _require(!_radHash.isZero(), "no rad hash?");
         __witOracleRequest().radHash = _radHash;   
         return address(this);
     }
@@ -104,7 +106,7 @@ abstract contract WitOracleRequestFactoryBase
     {
         return (
             __witOracleRequestTemplate().tallyReduceHash != bytes16(0)
-                || __witOracleRequest().radHash != bytes32(0)
+                || !__witOracleRequest().radHash.isZero()
         );
     }
 
@@ -125,7 +127,7 @@ abstract contract WitOracleRequestFactoryBase
     /// --- IWitOracleRequestFactory, IWitOracleRequestTemplate, IWitOracleRequest polymorphic methods ----------------
 
     function class() virtual override public view returns (string memory) {
-        if (__witOracleRequest().radHash != bytes32(0)) {
+        if (!__witOracleRequest().radHash.isZero()) {
             return type(WitOracleRequest).name;
         
         } else if (__witOracleRequestTemplate().tallyReduceHash != bytes16(0)) {
@@ -141,7 +143,7 @@ abstract contract WitOracleRequestFactoryBase
         external view
         returns (bytes4)
     {
-        if (__witOracleRequest().radHash != bytes32(0)) {
+        if (!__witOracleRequest().radHash.isZero()) {
             return (
                 type(IWitOracleAppliance).interfaceId
                     ^ type(IWitOracleRequest).interfaceId
@@ -170,7 +172,7 @@ abstract contract WitOracleRequestFactoryBase
         returns (Witnet.RadonReducer memory, Witnet.RadonReducer memory)
     {
         WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
-        if (__witOracleRequest().radHash != bytes32(0)) {
+        if (!__witOracleRequest().radHash.isZero()) {
             return (
                 _registry.lookupRadonRequestAggregator(__witOracleRequest().radHash),
                 _registry.lookupRadonRequestTally(__witOracleRequest().radHash)
@@ -189,7 +191,7 @@ abstract contract WitOracleRequestFactoryBase
         notOnFactory
         returns (Witnet.RadonRetrieval memory)
     {
-        if (__witOracleRequest().radHash != bytes32(0)) {
+        if (!__witOracleRequest().radHash.isZero()) {
             return _getWitOracleRadonRegistry().lookupRadonRequestRetrievalByIndex(
                 __witOracleRequest().radHash,
                 _index
@@ -212,7 +214,7 @@ abstract contract WitOracleRequestFactoryBase
         returns (Witnet.RadonRetrieval[] memory _retrievals)
     {
         WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
-        if (__witOracleRequest().radHash != bytes32(0)) {
+        if (!__witOracleRequest().radHash.isZero()) {
             return _registry.lookupRadonRequestRetrievals(
                 __witOracleRequest().radHash
             );
@@ -232,7 +234,7 @@ abstract contract WitOracleRequestFactoryBase
         notOnFactory
         returns (Witnet.RadonDataTypes)
     {
-        if (__witOracleRequest().radHash != bytes32(0)) {
+        if (!__witOracleRequest().radHash.isZero()) {
             return _getWitOracleRadonRegistry().lookupRadonRequestResultDataType(
                 __witOracleRequest().radHash
             );
@@ -388,7 +390,7 @@ abstract contract WitOracleRequestFactoryBase
         // Verify Radon Request using template's retrieve hashes, aggregate and tally reducers, 
         // and given args:
         WitOracleRequestTemplateStorage storage __template = __witOracleRequestTemplate();
-        bytes32 _radHash = _getWitOracleRadonRegistry().verifyRadonRequest(
+        Witnet.RadonHash _radHash = _getWitOracleRadonRegistry().verifyRadonRequest(
             __template.retrieveHashes,
             _retrieveArgsValues,
             bytes32(__template.aggregateReduceHash),
@@ -426,7 +428,7 @@ abstract contract WitOracleRequestFactoryBase
     function verifyRadonRequest(string[][] calldata _retrieveArgsValues)
         override external
         onlyOnTemplates
-        returns (bytes32)
+        returns (Witnet.RadonHash)
     {
         return _getWitOracleRadonRegistry().verifyRadonRequest(
             __witOracleRequestTemplate().retrieveHashes,
@@ -439,7 +441,7 @@ abstract contract WitOracleRequestFactoryBase
     function verifyRadonRequest(string calldata _singleArgValue)
         override external
         onlyOnTemplates
-        returns (bytes32)
+        returns (Witnet.RadonHash)
     {
         return __verifyRadonRequestFromTemplate(_singleArgValue);
     }
@@ -460,7 +462,7 @@ abstract contract WitOracleRequestFactoryBase
     function radHash()
         override external view
         onlyOnRequests
-        returns (bytes32)
+        returns (Witnet.RadonHash)
     {
         return __witOracleRequest().radHash;
     }
@@ -469,7 +471,7 @@ abstract contract WitOracleRequestFactoryBase
     /// ===============================================================================================================
     /// --- Internal methods ------------------------------------------------------------------------------------------
 
-    function __buildWitOracleRequest(bytes32 _radHash)
+    function __buildWitOracleRequest(Witnet.RadonHash _radHash)
         virtual internal
         returns (IWitOracleRequest)
     {   
@@ -541,13 +543,13 @@ abstract contract WitOracleRequestFactoryBase
         }
     }
 
-    function _determineWitOracleRequestAddressAndSalt(bytes32 _radHash)
+    function _determineWitOracleRequestAddressAndSalt(Witnet.RadonHash _radHash)
         virtual internal view
         returns (address, bytes32)
     {
         bytes32 _salt = keccak256(
             abi.encodePacked(
-                _radHash, 
+                Witnet.RadonHash.unwrap(_radHash), 
                 class()
             )
         );
@@ -596,7 +598,7 @@ abstract contract WitOracleRequestFactoryBase
 
     function __verifyRadonRequestFromTemplate(string calldata _singleArgValue)
         virtual internal
-        returns (bytes32)
+        returns (Witnet.RadonHash)
     {
         WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
         WitOracleRequestTemplateStorage storage __template = __witOracleRequestTemplate();

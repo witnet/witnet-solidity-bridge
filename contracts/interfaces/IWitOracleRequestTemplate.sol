@@ -60,7 +60,7 @@ interface IWitOracleRequestTemplate {
     /// @dev This method requires less gas than buildWitOracleRequest(string[][]), and 
     /// @dev it's usually preferred when data requests built out of this template
     /// @dev are intended to be used just once in lifetime.    
-    function verifyRadonRequest(string[][] calldata args) external returns (bytes32);
+    function verifyRadonRequest(string[][] calldata args) external returns (Witnet.RadonHash);
 
     /// Verifies into the bounded WitOracle's registry the actual bytecode
     /// and RAD hash of the Witnet-compliant Radon Request that gets provably
@@ -72,7 +72,7 @@ interface IWitOracleRequestTemplate {
     /// @dev This method requires less gas than buildWitOracleRequest(string), and 
     /// @dev it's usually preferred when data requests built out of this template
     /// @dev are intended to be used just once in lifetime.
-    function verifyRadonRequest(string calldata singleArgValue) external returns (bytes32);
+    function verifyRadonRequest(string calldata singleArgValue) external returns (Witnet.RadonHash);
 
     /// If built out of an upgradable factory, returns the SemVer tag of the 
     /// factory implementation at the time when this WitOracleRequestTemplate got built.

@@ -16,5 +16,5 @@ interface IWitOracleRadonRegistryEvents {
 
     /// Emitted every time a new Radon Request gets successfully verified and
     /// stored into the WitOracleRadonRegistry.
-    event NewRadonRequest(bytes32 radHash);
+    event NewRadonRequest(Witnet.RadonHash radonHash);
 }

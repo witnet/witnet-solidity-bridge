@@ -12,8 +12,8 @@ contract WitOracleRadonRegistryUpgradableNoSha256
         return type(WitOracleRadonRegistryUpgradableNoSha256).name;
     }
     
-    function _witOracleHash(bytes memory chunk) virtual override internal pure returns (bytes32) {
-        return keccak256(chunk);
+    function _witOracleHash(bytes memory chunk) virtual override internal pure returns (Witnet.RadonHash) {
+        return Witnet.RadonHash.wrap(keccak256(chunk));
     }
 
     constructor(

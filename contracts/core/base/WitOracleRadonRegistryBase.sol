@@ -4,7 +4,7 @@ pragma solidity >=0.8.4 <0.9.0;
 
 import "../../WitOracleRadonRegistry.sol";
 import "../../data/WitOracleRadonRegistryData.sol";
-import "../../interfaces/IWitOracleRadonRegistryLegacy.sol";
+import "../../interfaces/legacy/IWitOracleRadonRegistryLegacy.sol";
 import "../../libs/WitOracleRadonEncodingLib.sol";
 
 /// @title Witnet Request Board EVM-default implementation contract.
@@ -21,6 +21,7 @@ abstract contract WitOracleRadonRegistryBase
     using Witnet for bytes;
     using Witnet for string;
     using Witnet for Witnet.QuerySLA;
+    using Witnet for Witnet.RadonHash;
     
     using WitOracleRadonEncodingLib for Witnet.RadonDataTypes;
     using WitOracleRadonEncodingLib for Witnet.RadonReducer;
@@ -29,7 +30,7 @@ abstract contract WitOracleRadonRegistryBase
     using WitOracleRadonEncodingLib for Witnet.RadonRetrievalMethods;
     using WitOracleRadonEncodingLib for Witnet.RadonSLAv1;
 
-    modifier radonRequestExists(bytes32 _radHash) {
+    modifier radonRequestExists(Witnet.RadonHash _radHash) {
         _require(
             __database().requests[_radHash].aggregateTallyHashes != bytes32(0),
             "unverified data request"
@@ -43,8 +44,8 @@ abstract contract WitOracleRadonRegistryBase
         ); _;
     }
 
-    function _witOracleHash(bytes memory chunk) virtual internal pure returns (bytes32) {
-        return sha256(chunk);
+    function _witOracleHash(bytes memory chunk) virtual internal pure returns (Witnet.RadonHash) {
+        return Witnet.RadonHash.wrap(sha256(chunk));
     }
 
     receive() external payable {
@@ -55,7 +56,7 @@ abstract contract WitOracleRadonRegistryBase
     // ================================================================================================================
     // --- Implementation of 'IWitOracleRadonRegistry' -----------------------------------------------------------------------
 
-    function bytecodeOf(bytes32 _radHash)
+    function bytecodeOf(Witnet.RadonHash _radHash)
         public view override
         radonRequestExists(_radHash)
         returns (bytes memory)
@@ -63,7 +64,7 @@ abstract contract WitOracleRadonRegistryBase
         return __database().radsBytecode[_radHash];
     }
 
-    function bytecodeOf(bytes32 _radHash, Witnet.QuerySLA calldata _sla)
+    function bytecodeOf(Witnet.RadonHash _radHash, Witnet.QuerySLA calldata _sla)
         override external view 
         returns (bytes memory)
     {
@@ -86,7 +87,13 @@ abstract contract WitOracleRadonRegistryBase
         );
     }
 
-    function hashOf(bytes calldata _radBytecode) external pure override returns (bytes32) {
+    function exists(Witnet.RadonHash _radonHash) external view override returns (bool) {
+        return (
+            __database().radsBytecode[_radonHash].length > 0
+        );
+    }
+
+    function hashOf(bytes calldata _radBytecode) external pure override returns (Witnet.RadonHash) {
         // todo?: validate correctness of _radBytecode
         return _witOracleHash(_radBytecode);
     }
@@ -124,7 +131,7 @@ abstract contract WitOracleRadonRegistryBase
         return __database().retrievals[_hash].dataType;
     }
 
-    function lookupRadonRequest(bytes32 _radHash)
+    function lookupRadonRequest(Witnet.RadonHash _radHash)
         override external view
         returns (Witnet.RadonRequest memory)
     {
@@ -135,7 +142,7 @@ abstract contract WitOracleRadonRegistryBase
         });
     }
 
-    function lookupRadonRequestAggregator(bytes32 _radHash)
+    function lookupRadonRequestAggregator(Witnet.RadonHash _radHash)
         override public view
         radonRequestExists(_radHash)
         returns (Witnet.RadonReducer memory)
@@ -147,7 +154,7 @@ abstract contract WitOracleRadonRegistryBase
         }
     }
 
-    function lookupRadonRequestTally(bytes32 _radHash)
+    function lookupRadonRequestTally(Witnet.RadonHash _radHash)
         override public view
         radonRequestExists(_radHash)
         returns (Witnet.RadonReducer memory)
@@ -159,7 +166,7 @@ abstract contract WitOracleRadonRegistryBase
         }
     }
 
-    function lookupRadonRequestResultDataType(bytes32 _radHash)
+    function lookupRadonRequestResultDataType(Witnet.RadonHash _radHash)
         override external view
         radonRequestExists(_radHash)
         returns (Witnet.RadonDataTypes)
@@ -169,7 +176,7 @@ abstract contract WitOracleRadonRegistryBase
         );
     }
 
-    function lookupRadonRequestRetrievalByIndex(bytes32 _radHash, uint256 _index) 
+    function lookupRadonRequestRetrievalByIndex(Witnet.RadonHash _radHash, uint256 _index) 
         override external view 
         radonRequestExists(_radHash)
         returns (Witnet.RadonRetrieval memory)
@@ -180,7 +187,7 @@ abstract contract WitOracleRadonRegistryBase
         ];
     }
 
-    function lookupRadonRequestRetrievals(bytes32 _radHash)
+    function lookupRadonRequestRetrievals(Witnet.RadonHash _radHash)
         override public view 
         radonRequestExists(_radHash)
         returns (Witnet.RadonRetrieval[] memory _retrievals)
@@ -216,7 +223,7 @@ abstract contract WitOracleRadonRegistryBase
             Witnet.RadonReducer calldata _tallyReducer
         ) 
         override external 
-        returns (bytes32 radHash)
+        returns (Witnet.RadonHash radHash)
     {
         return __verifyRadonRequest(
             _retrieveHashes,
@@ -232,7 +239,7 @@ abstract contract WitOracleRadonRegistryBase
             bytes32 _tallyReducerHash
         )
         override external
-        returns (bytes32 radHash)
+        returns (Witnet.RadonHash radHash)
     {
         return __verifyRadonRequest(
             _retrieveHashes,
@@ -249,7 +256,7 @@ abstract contract WitOracleRadonRegistryBase
             Witnet.RadonReducer calldata _tallyReducer
         ) 
         override external 
-        returns (bytes32)
+        returns (Witnet.RadonHash)
     {
         return __verifyRadonRequest(
             _retrieveHashes, 
@@ -266,7 +273,7 @@ abstract contract WitOracleRadonRegistryBase
             bytes32 _tallyReducerHash
         )
         override external
-        returns (bytes32)
+        returns (Witnet.RadonHash)
     {
         return __verifyRadonRequest(
             _retrieveHashes,
@@ -363,7 +370,7 @@ abstract contract WitOracleRadonRegistryBase
 
     function lookupRadonRequestResultMaxSize(bytes32 _radHash) 
         override external view
-        radonRequestExists(_radHash) 
+        radonRequestExists(Witnet.RadonHash.wrap(_radHash)) 
         returns (uint16)
     {
         return 32;
@@ -371,18 +378,18 @@ abstract contract WitOracleRadonRegistryBase
 
     function lookupRadonRequestSources(bytes32 _radHash) 
         override external view 
-        radonRequestExists(_radHash)
+        radonRequestExists(Witnet.RadonHash.wrap(_radHash))
         returns (bytes32[] memory)
     {
-        return __requests(_radHash).retrievals;
+        return __requests(Witnet.RadonHash.wrap(_radHash)).retrievals;
     }
 
     function lookupRadonRequestSourcesCount(bytes32 _radHash)
         override external view 
-        radonRequestExists(_radHash)
+        radonRequestExists(Witnet.RadonHash.wrap(_radHash))
         returns (uint)
     {
-        return __requests(_radHash).retrievals.length;
+        return __requests(Witnet.RadonHash.wrap(_radHash)).retrievals.length;
     }
 
     function verifyRadonRequest(
@@ -395,12 +402,12 @@ abstract contract WitOracleRadonRegistryBase
         virtual override public
         returns (bytes32)
     {
-        return __verifyRadonRequest(
+        return Witnet.RadonHash.unwrap(__verifyRadonRequest(
             _retrieveHashes,
             _retrieveArgsValues,
             lookupRadonReducer(_aggregateReducerHash),
             lookupRadonReducer(_tallyReducerHash)
-        );
+        ));
     }
 
     
@@ -414,7 +421,7 @@ abstract contract WitOracleRadonRegistryBase
             bytes32 _tallyReducerHash
         )
         virtual internal
-        returns (bytes32 _radHash)
+        returns (Witnet.RadonHash _radHash)
     {   
         return __verifyRadonRequest(
             _retrieveHashes,
@@ -431,7 +438,7 @@ abstract contract WitOracleRadonRegistryBase
             Witnet.RadonReducer memory _tallyReducer
         )
         virtual internal
-        returns (bytes32 _radHash)
+        returns (Witnet.RadonHash _radHash)
     {
         // calculate unique hashes:
         bytes32 _aggregateReducerHash = verifyRadonReducer(_aggregateReducer);
@@ -445,7 +452,7 @@ abstract contract WitOracleRadonRegistryBase
         
         // verify, compose and register only if hash is not yet known:
         _radHash = __database().rads[hash];
-        if (__database().rads[hash] == bytes32(0)) {
+        if (__database().rads[hash].isZero()) {
         
             // Check that at least one source is provided;
             _require(
