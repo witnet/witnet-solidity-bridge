@@ -2,13 +2,16 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../interfaces/IWitFeedsAdmin.sol";
-import "../interfaces/IWitPriceFeedsSolver.sol";
+import "../WitOracle.sol";
+
+import "../interfaces/legacy/IWitPriceFeedsLegacy.sol";
+import "../interfaces/legacy/IWitPriceFeedsLegacyAdmin.sol";
+import "../interfaces/legacy/IWitPriceFeedsLegacySolver.sol";
 import "../libs/Slices.sol";
 
 /// @title WitFeeds data model.
 /// @author The Witnet Foundation.
-library WitPriceFeedsDataLib {
+library WitPriceFeedsLegacyDataLib {
 
     using Slices for string;
     using Slices for Slices.Slice;
@@ -111,11 +114,11 @@ library WitPriceFeedsDataLib {
     }
 
     function seekPriceSolver(bytes4 feedId) internal view returns (
-            IWitPriceFeedsSolver _solverAddress,
+            address _solverAddress,
             string[] memory _solverDeps
         )
     {
-        _solverAddress = IWitPriceFeedsSolver(seekRecord(feedId).solver);
+        _solverAddress = seekRecord(feedId).solver;
         bytes4[] memory _deps = depsOf(feedId);
         _solverDeps = new string[](_deps.length);
         for (uint _ix = 0; _ix < _deps.length; _ix ++) {
@@ -138,7 +141,7 @@ library WitPriceFeedsDataLib {
         __ids.pop();
         seekRecord(_lastFeedId).index = _index;
         delete data().records[feedId];
-        emit IWitFeedsAdmin.WitFeedDeleted(caption, feedId);
+        emit IWitPriceFeedsLegacyAdmin.WitFeedDeleted(caption, feedId);
     }
 
     function deleteFeeds() public {
@@ -147,7 +150,7 @@ library WitPriceFeedsDataLib {
             bytes4 _feedId = __ids[_ix - 1];
             string memory _caption = data().records[_feedId].caption;
             delete data().records[_feedId]; __ids.pop();
-            emit IWitFeedsAdmin.WitFeedDeleted(_caption, _feedId);
+            emit IWitPriceFeedsLegacyAdmin.WitFeedDeleted(_caption, _feedId);
         }
     }
 
@@ -156,12 +159,12 @@ library WitPriceFeedsDataLib {
             bytes4 feedId
         ) 
         public view 
-        returns (IWitPriceFeedsSolver.Price memory)
+        returns (IWitPriceFeedsLegacySolver.Price memory)
     {
         Witnet.QueryId _queryId = lastValidQueryId(witOracle, feedId);
         if (!_queryId.isZero()) {
             Witnet.DataResult memory _lastValidResult = witOracle.getQueryResult(_queryId);
-            return IWitPriceFeedsSolver.Price({
+            return IWitPriceFeedsLegacySolver.Price({
                 value: _lastValidResult.fetchUint(),
                 timestamp: _lastValidResult.timestamp,
                 drTxHash: _lastValidResult.drTxHash,
@@ -173,7 +176,7 @@ library WitPriceFeedsDataLib {
             if (_solver != address(0)) {
                 // solhint-disable-next-line avoid-low-level-calls
                 (bool _success, bytes memory _result) = address(this).staticcall(abi.encodeWithSelector(
-                    IWitPriceFeedsSolver.solve.selector,
+                    IWitPriceFeedsLegacySolver.solve.selector,
                     feedId
                 ));
                 if (!_success) {
@@ -182,10 +185,10 @@ library WitPriceFeedsDataLib {
                     }
                     revert(string(abi.decode(_result, (string))));
                 } else {
-                    return abi.decode(_result, (IWitPriceFeedsSolver.Price));
+                    return abi.decode(_result, (IWitPriceFeedsLegacySolver.Price));
                 }
             } else {
-                return IWitPriceFeedsSolver.Price({
+                return IWitPriceFeedsLegacySolver.Price({
                     value: 0,
                     timestamp: Witnet.Timestamp.wrap(0),
                     drTxHash: Witnet.TransactionHash.wrap(0),
@@ -252,7 +255,7 @@ library WitPriceFeedsDataLib {
             _latestQueryId = witOracle.postQuery{
                 value: _evmUsedFunds
             }(
-                __feed.radHash,
+                Witnet.RadonHash.wrap(__feed.radHash),
                 querySLA
             );
             // Update latest query id:
@@ -280,7 +283,7 @@ library WitPriceFeedsDataLib {
             __record.radHash = radHash;
             __record.solver = address(0);
         }
-        emit IWitFeedsAdmin.WitFeedSettled(caption, feedId, radHash);
+        emit IWitPriceFeedsLegacyAdmin.WitFeedSettled(caption, feedId, radHash);
     }
 
     function settleFeedSolver(
@@ -309,7 +312,7 @@ library WitPriceFeedsDataLib {
         {
             // solhint-disable-next-line avoid-low-level-calls
             (bool _success, bytes memory _reason) = solver.delegatecall(abi.encodeWithSelector(
-                IWitPriceFeedsSolver.validate.selector,
+                IWitPriceFeedsLegacySolver.validate.selector,
                 feedId,
                 deps
             ));
@@ -327,7 +330,7 @@ library WitPriceFeedsDataLib {
         {   
             // solhint-disable-next-line avoid-low-level-calls
             (bool _success, bytes memory _reason) = address(this).staticcall(abi.encodeWithSelector(
-                IWitPriceFeedsSolver.solve.selector,
+                IWitPriceFeedsLegacySolver.solve.selector,
                 feedId
             ));
             if (!_success) {
@@ -340,7 +343,7 @@ library WitPriceFeedsDataLib {
                 )));
             }
         }
-        emit IWitFeedsAdmin.WitFeedSolverSettled(caption, feedId, solver);
+        emit IWitPriceFeedsLegacyAdmin.WitFeedSolverSettled(caption, feedId, solver);
     }
 
     function supportedFeeds() public view returns (
@@ -363,7 +366,7 @@ library WitPriceFeedsDataLib {
         }
     }
 
-    // --- IWitPriceFeedsSolver public functions -------------------------------------------------------------
+    // --- IWitPriceFeedsLegacySolver public functions -------------------------------------------------------------
 
     function deployPriceSolver(
             bytes calldata initcode,
@@ -387,7 +390,7 @@ library WitPriceFeedsDataLib {
             // assert(_solver == _createdContract); // fails on TEN chains
             _solver = _createdContract;
             require(
-                IWitPriceFeedsSolver(_solver).specs() == type(IWitPriceFeedsSolver).interfaceId,
+                IWitPriceFeedsLegacySolver(_solver).specs() == type(IWitPriceFeedsLegacySolver).interfaceId,
                 "uncompliant solver implementation"
             );
         }
@@ -440,13 +443,13 @@ library WitPriceFeedsDataLib {
 
     function _intoLatestUpdateStatus(Witnet.ResultStatus _resultStatus)
         private pure 
-        returns (IWitPriceFeedsSolver.LatestUpdateStatus)
+        returns (IWitPriceFeedsLegacySolver.LatestUpdateStatus)
     {
         return (_resultStatus.keepWaiting() 
-            ? IWitPriceFeedsSolver.LatestUpdateStatus.Awaiting
+            ? IWitPriceFeedsLegacySolver.LatestUpdateStatus.Awaiting
             : (_resultStatus.hasErrors()
-                ? IWitPriceFeedsSolver.LatestUpdateStatus.Error
-                : IWitPriceFeedsSolver.LatestUpdateStatus.Ready
+                ? IWitPriceFeedsLegacySolver.LatestUpdateStatus.Error
+                : IWitPriceFeedsLegacySolver.LatestUpdateStatus.Ready
             )
         );
     }

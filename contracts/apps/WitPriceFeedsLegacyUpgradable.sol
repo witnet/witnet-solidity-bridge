@@ -1,23 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitPriceFeeds.sol";
+import "../WitPriceFeedsLegacy.sol";
+
 import "../core/WitnetUpgradableBase.sol";
-
-import "../data/WitPriceFeedsDataLib.sol";
-
-import "../interfaces/IWitFeedsLegacy.sol";
-import "../interfaces/IWitOracleLegacy.sol";
-
+import "../data/WitPriceFeedsLegacyDataLib.sol";
+import "../interfaces/legacy/IWitOracleLegacy.sol";
 import "../patterns/Ownable2Step.sol";
 
-/// @title WitPriceFeeds: Price Feeds live repository reliant on the Wit/Oracle blockchain.
+/// @title WitPriceFeeds: Price Feeds upgradable repository reliant on the Wit/Oracle blockchain.
 /// @author Guillermo Díaz <guillermo@otherplane.com>
 
-contract WitPriceFeedsUpgradable
+contract WitPriceFeedsLegacyUpgradable
     is
-        WitPriceFeeds,
-        IWitFeedsLegacy,
+        WitPriceFeedsLegacy,
         Ownable2Step,
         WitnetUpgradableBase
 {
@@ -28,7 +24,7 @@ contract WitPriceFeedsUpgradable
     using Witnet for Witnet.ResultStatus;
 
     function class() virtual override public view returns (string memory) {
-        return type(WitPriceFeedsUpgradable).name;
+        return type(WitPriceFeedsLegacyUpgradable).name;
     }
 
     WitOracle immutable public override witOracle;
@@ -69,10 +65,10 @@ contract WitPriceFeedsUpgradable
     // solhint-disable-next-line payable-fallback
     fallback() override external {
         if (
-            msg.sig == IWitPriceFeedsSolver.solve.selector
+            msg.sig == IWitPriceFeedsLegacySolver.solve.selector
                 && msg.sender == address(this)
         ) {
-            address _solver = WitPriceFeedsDataLib.seekRecord(bytes4(bytes8(msg.data) << 32)).solver;
+            address _solver = WitPriceFeedsLegacyDataLib.seekRecord(bytes4(bytes8(msg.data) << 32)).solver;
             _require(
                 _solver != address(0),
                 "unsettled solver"
@@ -142,26 +138,22 @@ contract WitPriceFeedsUpgradable
     // ================================================================================================================
     // --- Implements 'IWitFeeds' -------------------------------------------------------------------------------------
 
-    function defaultUpdateSLA()
-        override
-        public view
-        returns (IWitFeeds.UpdateSLA memory)
-    {
-        return IWitFeeds.UpdateSLA({
-            witCommitteeSize: __defaultQuerySLA.witCommitteeSize,
-            witInclusionFees: __defaultQuerySLA.witInclusionFees
-        });
-    }
+    // function defaultUpdateSLA()
+    //     override
+    //     public view
+    //     returns (IWitPriceFeedsLegacy.RadonSLA memory)
+    // {
+    //     return IWitPriceFeedsLegacy.RadonSLA({
+    //         witCommitteeSize: __defaultQuerySLA.witCommitteeSize,
+    //         witInclusionFees: __defaultQuerySLA.witInclusionFees
+    //     });
+    // }
 
     function estimateUpdateBaseFee(uint256 _evmGasPrice) virtual override public view returns (uint256) {
-        return estimateUpdateRequestFee(_evmGasPrice);
+        return _estimateUpdateRequestFee(_evmGasPrice);
     }
     
-    function estimateUpdateRequestFee(uint256 _evmGasPrice)
-        virtual override
-        public view
-        returns (uint)
-    {
+    function _estimateUpdateRequestFee(uint256 _evmGasPrice) internal view returns (uint) {
         return (
             witOracle.estimateBaseFee(_evmGasPrice)
                 * (100 + __baseFeeOverheadPercentage)
@@ -190,7 +182,7 @@ contract WitPriceFeedsUpgradable
         public pure
         returns (bytes4)
     {
-        return WitPriceFeedsDataLib.hash(caption);
+        return WitPriceFeedsLegacyDataLib.hash(caption);
     }
 
     function lookupCaption(bytes4 feedId)
@@ -198,7 +190,7 @@ contract WitPriceFeedsUpgradable
         public view
         returns (string memory)
     {
-        return WitPriceFeedsDataLib.seekRecord(feedId).caption;
+        return WitPriceFeedsLegacyDataLib.seekRecord(feedId).caption;
     }
 
     function supportedFeeds()
@@ -206,7 +198,7 @@ contract WitPriceFeedsUpgradable
         external view
         returns (bytes4[] memory _ids, string[] memory _captions, bytes32[] memory _solvers)
     {
-        return WitPriceFeedsDataLib.supportedFeeds();
+        return WitPriceFeedsLegacyDataLib.supportedFeeds();
     }
     
     function supportsCaption(string calldata caption)
@@ -215,7 +207,7 @@ contract WitPriceFeedsUpgradable
         returns (bool)
     {
         bytes4 feedId = hash(caption);
-        return hash(WitPriceFeedsDataLib.seekRecord(feedId).caption) == feedId;
+        return hash(WitPriceFeedsLegacyDataLib.seekRecord(feedId).caption) == feedId;
     }
     
     function totalFeeds() 
@@ -230,7 +222,7 @@ contract WitPriceFeedsUpgradable
         override public view
         returns (Witnet.QueryId)
     {
-        return WitPriceFeedsDataLib.lastValidQueryId(witOracle, feedId);
+        return WitPriceFeedsLegacyDataLib.lastValidQueryId(witOracle, feedId);
     }
 
     function lastValidQueryResponse(bytes4 feedId)
@@ -238,7 +230,7 @@ contract WitPriceFeedsUpgradable
         returns (Witnet.QueryResponse memory)
     {
         return witOracle.getQueryResponse(
-            WitPriceFeedsDataLib.lastValidQueryId(witOracle, feedId)
+            WitPriceFeedsLegacyDataLib.lastValidQueryId(witOracle, feedId)
         );
     }
 
@@ -246,7 +238,7 @@ contract WitPriceFeedsUpgradable
         override public view
         returns (Witnet.QueryId)
     {
-        return WitPriceFeedsDataLib.seekRecord(feedId).latestUpdateQueryId;
+        return WitPriceFeedsLegacyDataLib.seekRecord(feedId).latestUpdateQueryId;
     }
 
     function latestUpdateQueryRequest(bytes4 feedId)
@@ -256,54 +248,54 @@ contract WitPriceFeedsUpgradable
         return witOracle.getQueryRequest(latestUpdateQueryId(feedId));
     }
 
-    function latestUpdateQueryResult(bytes4 feedId)
-        override external view
-        returns (Witnet.DataResult memory)
-    {
-        return witOracle.getQueryResult(latestUpdateQueryId(feedId));
-    }
+    // function latestUpdateQueryResult(bytes4 feedId)
+    //     override external view
+    //     returns (Witnet.DataResult memory)
+    // {
+    //     return witOracle.getQueryResult(latestUpdateQueryId(feedId));
+    // }
 
-    function latestUpdateQueryResultStatus(bytes4 feedId)
-        override public view
-        returns (Witnet.ResultStatus)
-    {
-        return WitPriceFeedsDataLib.latestUpdateQueryResultStatus(witOracle, feedId);
-    }
+    // function latestUpdateQueryResultStatus(bytes4 feedId)
+    //     override public view
+    //     returns (Witnet.ResultStatus)
+    // {
+    //     return WitPriceFeedsLegacyDataLib.latestUpdateQueryResultStatus(witOracle, feedId);
+    // }
 
-    function latestUpdateQueryResultStatusDescription(bytes4 feedId) 
-        override external view
-        returns (string memory)
-    {
-        return witOracle.getQueryResultStatusDescription(
-            latestUpdateQueryId(feedId)
-        );
-    }
+    // function latestUpdateQueryResultStatusDescription(bytes4 feedId) 
+    //     override external view
+    //     returns (string memory)
+    // {
+    //     return witOracle.getQueryResultStatusDescription(
+    //         latestUpdateQueryId(feedId)
+    //     );
+    // }
 
-    function lookupWitOracleRequestBytecode(bytes4 feedId)
+    function lookupWitnetBytecode(bytes4 feedId)
         override public view
         returns (bytes memory)
     {
-        WitPriceFeedsDataLib.Record storage __record = WitPriceFeedsDataLib.seekRecord(feedId);
+        WitPriceFeedsLegacyDataLib.Record storage __record = WitPriceFeedsLegacyDataLib.seekRecord(feedId);
         _require(
             __record.radHash != 0,
             "no RAD hash"
         );
-        return _registry().bytecodeOf(__record.radHash);
+        return _registry().bytecodeOf(Witnet.RadonHash.wrap(__record.radHash));
     }
 
-    function lookupWitOracleRequestRadHash(bytes4 feedId)
+    function lookupWitnetRadHash(bytes4 feedId)
         override public view
         returns (bytes32)
     {
-        return WitPriceFeedsDataLib.seekRecord(feedId).radHash;
+        return WitPriceFeedsLegacyDataLib.seekRecord(feedId).radHash;
     }
 
-    function lookupWitOracleRadonRetrievals(bytes4 feedId)
+    function lookupWitnetRetrievals(bytes4 feedId)
         override external view
         returns (Witnet.RadonRetrieval[] memory _retrievals)
     {
         return _registry().lookupRadonRequestRetrievals(
-            lookupWitOracleRequestRadHash(feedId)
+            Witnet.RadonHash.wrap(lookupWitnetRadHash(feedId))
         );
     }
 
@@ -315,23 +307,23 @@ contract WitPriceFeedsUpgradable
         return __requestUpdate(feedId, __defaultQuerySLA);
     }
     
-    function requestUpdate(bytes4 feedId, IWitFeeds.UpdateSLA calldata updateSLA)
-        public payable
-        virtual override
-        returns (uint256)
-    {
-        return __requestUpdate(
-            feedId, 
-            _intoQuerySLA(updateSLA)
-        );
-    }
+    // function requestUpdate(bytes4 feedId, IWitPriceFeedsLegacy.RadonSLA calldata updateSLA)
+    //     public payable
+    //     virtual override
+    //     returns (uint256)
+    // {
+    //     return __requestUpdate(
+    //         feedId, 
+    //         _intoQuerySLA(updateSLA)
+    //     );
+    // }
     
 
     /// ===============================================================================================================
     /// --- IWitFeedsLegacy -------------------------------------------------------------------------------------------
     
-    function defaultRadonSLA() override external view returns (IWitFeedsLegacy.RadonSLA memory) {
-        return IWitFeedsLegacy.RadonSLA({
+    function defaultRadonSLA() override external view returns (IWitPriceFeedsLegacy.RadonSLA memory) {
+        return IWitPriceFeedsLegacy.RadonSLA({
             numWitnesses: uint8(__defaultQuerySLA.witCommitteeSize),
             unitaryReward: __defaultQuerySLA.witInclusionFees
         });
@@ -360,25 +352,19 @@ contract WitPriceFeedsUpgradable
         return IWitOracleLegacy(address(witOracle)).getQueryResultError(Witnet.QueryId.unwrap(latestUpdateQueryId(feedId)));
     }
 
-    function lookupWitnetBytecode(bytes4 feedId) 
-        override external view
-        returns (bytes memory)
-    {
-        return lookupWitOracleRequestBytecode(feedId);
-    }
+    // function lookupWitnetBytecode(bytes4 feedId) 
+    //     override external view
+    //     returns (bytes memory)
+    // {
+    //     return lookupWitnetBytecode(feedId);
+    // }
     
-    function requestUpdate(bytes4 feedId, IWitFeedsLegacy.RadonSLA calldata legacySLA)
+    function requestUpdate(bytes4 feedId, IWitPriceFeedsLegacy.RadonSLA calldata legacySLA)
         external payable
         virtual override
         returns (uint256)
     {
-        return __requestUpdate(
-            feedId, 
-            _intoQuerySLA(IWitFeeds.UpdateSLA({
-                witCommitteeSize: legacySLA.numWitnesses,
-                witInclusionFees: legacySLA.unitaryReward * 3
-            }))
-        );
+        return __requestUpdate(feedId, _intoQuerySLA(legacySLA));
     }
 
     function witnet() virtual override external view returns (address) {
@@ -387,10 +373,10 @@ contract WitPriceFeedsUpgradable
 
 
     // ================================================================================================================
-    // --- Implements 'IWitFeedsAdmin' -----------------------------------------------------------------------------
+    // --- Implements 'IWitPriceFeedsLegacyAdmin' -----------------------------------------------------------------------------
 
     function owner()
-        virtual override (IWitFeedsAdmin, Ownable)
+        virtual override (IWitPriceFeedsLegacyAdmin, Ownable)
         public view 
         returns (address)
     {
@@ -398,7 +384,7 @@ contract WitPriceFeedsUpgradable
     }
     
     function acceptOwnership()
-        virtual override (IWitFeedsAdmin, Ownable2Step)
+        virtual override (IWitPriceFeedsLegacyAdmin, Ownable2Step)
         public
     {
         Ownable2Step.acceptOwnership();
@@ -413,7 +399,7 @@ contract WitPriceFeedsUpgradable
     }
 
     function pendingOwner() 
-        virtual override (IWitFeedsAdmin, Ownable2Step)
+        virtual override (IWitPriceFeedsLegacyAdmin, Ownable2Step)
         public view
         returns (address)
     {
@@ -421,7 +407,7 @@ contract WitPriceFeedsUpgradable
     }
     
     function transferOwnership(address _newOwner)
-        virtual override (IWitFeedsAdmin, Ownable2Step)
+        virtual override (IWitPriceFeedsLegacyAdmin, Ownable2Step)
         public 
         onlyOwner
     {
@@ -429,24 +415,24 @@ contract WitPriceFeedsUpgradable
     }
 
     function deleteFeed(string calldata caption) virtual override external onlyOwner {
-        try WitPriceFeedsDataLib.deleteFeed(caption) {
+        try WitPriceFeedsLegacyDataLib.deleteFeed(caption) {
         
         } catch Error(string memory _reason) {
             _revert(_reason);
 
         } catch (bytes memory) {
-            _revertWitPriceFeedsDataLibUnhandledException();
+            _revertWitPriceFeedsLegacyDataLibUnhandledException();
         }
     }
 
     function deleteFeeds() virtual override external onlyOwner {
-        try WitPriceFeedsDataLib.deleteFeeds() {
+        try WitPriceFeedsLegacyDataLib.deleteFeeds() {
         
         } catch Error(string memory _reason) {
             _revert(_reason);
 
         } catch (bytes memory) {
-            _revertWitPriceFeedsDataLibUnhandledException();
+            _revertWitPriceFeedsLegacyDataLibUnhandledException();
         }
     }
 
@@ -475,16 +461,16 @@ contract WitPriceFeedsUpgradable
         onlyOwner
     {
         _require(
-            _registry().lookupRadonRequestResultDataType(radHash) == dataType,
+            _registry().lookupRadonRequestResultDataType(Witnet.RadonHash.wrap(radHash)) == dataType,
             "bad result data type"
         );
-        try WitPriceFeedsDataLib.settleFeedRequest(caption, radHash) {
+        try WitPriceFeedsLegacyDataLib.settleFeedRequest(caption, radHash) {
 
         } catch Error(string memory _reason) {
             _revert(_reason);
         
         } catch (bytes memory) {
-            _revertWitPriceFeedsDataLibUnhandledException();
+            _revertWitPriceFeedsLegacyDataLibUnhandledException();
         }
     }
 
@@ -492,7 +478,7 @@ contract WitPriceFeedsUpgradable
         override external
         onlyOwner
     {
-        settleFeedRequest(caption, request.radHash());
+        settleFeedRequest(caption, Witnet.RadonHash.unwrap(request.radHash()));
     }
 
     function settleFeedRequest(
@@ -503,7 +489,7 @@ contract WitPriceFeedsUpgradable
         override external
         onlyOwner
     {
-        settleFeedRequest(caption, template.verifyRadonRequest(args));
+        settleFeedRequest(caption, Witnet.RadonHash.unwrap(template.verifyRadonRequest(args)));
     }
 
     function settleFeedSolver(
@@ -522,13 +508,13 @@ contract WitPriceFeedsUpgradable
             solver != address(0),
             "no solver address"
         );
-        try WitPriceFeedsDataLib.settleFeedSolver(caption, solver, deps) {
+        try WitPriceFeedsLegacyDataLib.settleFeedSolver(caption, solver, deps) {
         
         } catch Error(string memory _reason) {
             _revert(_reason);
         
         } catch (bytes memory) {
-            _revertWitPriceFeedsDataLibUnhandledException();
+            _revertWitPriceFeedsLegacyDataLibUnhandledException();
         }
     }
 
@@ -541,42 +527,42 @@ contract WitPriceFeedsUpgradable
         external view
         returns (uint8)
     {
-        return WitPriceFeedsDataLib.seekRecord(feedId).decimals;
+        return WitPriceFeedsLegacyDataLib.seekRecord(feedId).decimals;
     }
     
     function lookupPriceSolver(bytes4 feedId)
         override
         external view
-        returns (IWitPriceFeedsSolver _solverAddress, string[] memory _solverDeps)
+        returns (address _solverAddress, string[] memory _solverDeps)
     {
-        return WitPriceFeedsDataLib.seekPriceSolver(feedId);
+        return WitPriceFeedsLegacyDataLib.seekPriceSolver(feedId);
     }
 
     function latestPrice(bytes4 feedId)
         virtual override
         public view
-        returns (IWitPriceFeedsSolver.Price memory)
+        returns (IWitPriceFeedsLegacySolver.Price memory)
     {
-        try WitPriceFeedsDataLib.latestPrice(
+        try WitPriceFeedsLegacyDataLib.latestPrice(
             witOracle, 
             feedId
-        ) returns (IWitPriceFeedsSolver.Price memory _latestPrice) {
+        ) returns (IWitPriceFeedsLegacySolver.Price memory _latestPrice) {
             return _latestPrice;
         
         } catch Error(string memory _reason) {
             _revert(_reason);
         
         } catch (bytes memory) {
-            _revertWitPriceFeedsDataLibUnhandledException();
+            _revertWitPriceFeedsLegacyDataLibUnhandledException();
         }
     }
 
     function latestPrices(bytes4[] calldata feedIds)
         virtual override
         external view
-        returns (IWitPriceFeedsSolver.Price[] memory _prices)
+        returns (IWitPriceFeedsLegacySolver.Price[] memory _prices)
     {
-        _prices = new IWitPriceFeedsSolver.Price[](feedIds.length);
+        _prices = new IWitPriceFeedsLegacySolver.Price[](feedIds.length);
         for (uint _ix = 0; _ix < feedIds.length; _ix ++) {
             _prices[_ix] = latestPrice(feedIds[_ix]);
         }
@@ -584,14 +570,14 @@ contract WitPriceFeedsUpgradable
 
 
     // ================================================================================================================
-    // --- Implements 'IWitPriceFeedsSolverFactory' ---------------------------------------------------------------------
+    // --- Implements 'IWitPriceFeedsLegacySolverFactory' ---------------------------------------------------------------------
 
     function deployPriceSolver(bytes calldata initcode, bytes calldata constructorParams)
         virtual override external
         onlyOwner
         returns (address)
     {
-        try WitPriceFeedsDataLib.deployPriceSolver(
+        try WitPriceFeedsLegacyDataLib.deployPriceSolver(
             initcode, 
             constructorParams
         ) returns (
@@ -608,7 +594,7 @@ contract WitPriceFeedsUpgradable
             _revert(_reason);
 
         } catch (bytes memory) {
-            _revertWitPriceFeedsDataLibUnhandledException();
+            _revertWitPriceFeedsLegacyDataLibUnhandledException();
         }
     }
 
@@ -616,7 +602,7 @@ contract WitPriceFeedsUpgradable
         virtual override public view
         returns (address _address)
     {
-        return WitPriceFeedsDataLib.determinePriceSolverAddress(initcode, constructorParams);
+        return WitPriceFeedsLegacyDataLib.determinePriceSolverAddress(initcode, constructorParams);
     }
 
 
@@ -628,13 +614,13 @@ contract WitPriceFeedsUpgradable
         external view
         returns (int256 _value, uint256 _timestamp, uint256 _status)
     {
-        IWitPriceFeedsSolver.Price memory _latestPrice = latestPrice(bytes4(feedId));
+        IWitPriceFeedsLegacySolver.Price memory _latestPrice = latestPrice(bytes4(feedId));
         return (
             int(uint(_latestPrice.value)),
             Witnet.Timestamp.unwrap(_latestPrice.timestamp),
-            (_latestPrice.latestStatus == IWitPriceFeedsSolver.LatestUpdateStatus.Ready
+            (_latestPrice.latestStatus == IWitPriceFeedsLegacySolver.LatestUpdateStatus.Ready
                 ? 200
-                : (_latestPrice.latestStatus == IWitPriceFeedsSolver.LatestUpdateStatus.Awaiting
+                : (_latestPrice.latestStatus == IWitPriceFeedsLegacySolver.LatestUpdateStatus.Awaiting
                     ? 404 
                     : 400
                 )
@@ -647,21 +633,21 @@ contract WitPriceFeedsUpgradable
     // --- Internal methods -------------------------------------------------------------------------------------------
 
     function _footprintOf(bytes4 _id4) virtual internal view returns (bytes4) {
-        if (WitPriceFeedsDataLib.seekRecord(_id4).radHash != bytes32(0)) {
-            return bytes4(keccak256(abi.encode(_id4, WitPriceFeedsDataLib.seekRecord(_id4).radHash)));
+        if (WitPriceFeedsLegacyDataLib.seekRecord(_id4).radHash != bytes32(0)) {
+            return bytes4(keccak256(abi.encode(_id4, WitPriceFeedsLegacyDataLib.seekRecord(_id4).radHash)));
         } else {
-            return bytes4(keccak256(abi.encode(_id4, WitPriceFeedsDataLib.seekRecord(_id4).solverDepsFlag)));
+            return bytes4(keccak256(abi.encode(_id4, WitPriceFeedsLegacyDataLib.seekRecord(_id4).solverDepsFlag)));
         }
     }
 
-    function _intoQuerySLA(IWitFeeds.UpdateSLA memory _updateSLA) internal view returns (Witnet.QuerySLA memory) {
+    function _intoQuerySLA(IWitPriceFeedsLegacy.RadonSLA memory _updateSLA) internal view returns (Witnet.QuerySLA memory) {
         if (
-            _updateSLA.witCommitteeSize >= __defaultQuerySLA.witCommitteeSize
-                && _updateSLA.witInclusionFees >= __defaultQuerySLA.witInclusionFees
+            _updateSLA.numWitnesses >= __defaultQuerySLA.witCommitteeSize
+                && _updateSLA.unitaryReward * 3 >= __defaultQuerySLA.witInclusionFees
         ) {
             return Witnet.QuerySLA({
-                witCommitteeSize: _updateSLA.witCommitteeSize,
-                witInclusionFees: _updateSLA.witInclusionFees,
+                witCommitteeSize: _updateSLA.numWitnesses,
+                witInclusionFees: _updateSLA.unitaryReward * 3,
                 witResultMaxSize: __defaultQuerySLA.witResultMaxSize
             });
         
@@ -677,29 +663,29 @@ contract WitPriceFeedsUpgradable
             bytes6(bytes(caption)) == bytes6(__prefix),
             "bad caption prefix"
         );
-        try WitPriceFeedsDataLib.validateCaption(caption) returns (uint8 _decimals) {
+        try WitPriceFeedsLegacyDataLib.validateCaption(caption) returns (uint8 _decimals) {
             return _decimals;
         
         } catch Error(string memory _reason) {
             _revert(_reason);
 
         } catch (bytes memory) {
-            _revertWitPriceFeedsDataLibUnhandledException();
+            _revertWitPriceFeedsLegacyDataLibUnhandledException();
         }
     }
 
-    function _revertWitPriceFeedsDataLibUnhandledException() internal view {
-        _revert(_revertWitPriceFeedsDataLibUnhandledExceptionReason());
+    function _revertWitPriceFeedsLegacyDataLibUnhandledException() internal view {
+        _revert(_revertWitPriceFeedsLegacyDataLibUnhandledExceptionReason());
     }
 
-    function _revertWitPriceFeedsDataLibUnhandledExceptionReason() internal pure returns (string memory) {
+    function _revertWitPriceFeedsLegacyDataLibUnhandledExceptionReason() internal pure returns (string memory) {
         return string(abi.encodePacked(
-            type(WitPriceFeedsDataLib).name,
+            type(WitPriceFeedsLegacyDataLib).name,
             ": unhandled assertion"
         ));
     }
 
-    function __requestUpdate(bytes4[] memory _deps, IWitFeeds.UpdateSLA memory sla)
+    function __requestUpdate(bytes4[] memory _deps, IWitPriceFeedsLegacy.RadonSLA memory sla)
         virtual internal
         returns (uint256 _evmUsedFunds)
     {
@@ -721,9 +707,9 @@ contract WitPriceFeedsUpgradable
         virtual internal
         returns (uint256)
     {
-        if (WitPriceFeedsDataLib.seekRecord(feedId).radHash != 0) {
+        if (WitPriceFeedsLegacyDataLib.seekRecord(feedId).radHash != 0) {
             uint256 _evmUpdateRequestFee = msg.value;
-            try WitPriceFeedsDataLib.requestUpdate(
+            try WitPriceFeedsLegacyDataLib.requestUpdate(
                 witOracle,
                 feedId,
                 querySLA,
@@ -746,15 +732,15 @@ contract WitPriceFeedsUpgradable
                 _revert(_reason);
 
             } catch (bytes memory) {
-                _revertWitPriceFeedsDataLibUnhandledException();
+                _revertWitPriceFeedsLegacyDataLibUnhandledException();
             }
         
-        } else if (WitPriceFeedsDataLib.seekRecord(feedId).solver != address(0)) {
+        } else if (WitPriceFeedsLegacyDataLib.seekRecord(feedId).solver != address(0)) {
             return __requestUpdate(
-                WitPriceFeedsDataLib.depsOf(feedId),
-                IWitFeeds.UpdateSLA({
-                    witCommitteeSize: querySLA.witCommitteeSize,
-                    witInclusionFees: querySLA.witInclusionFees
+                WitPriceFeedsLegacyDataLib.depsOf(feedId),
+                IWitPriceFeedsLegacy.RadonSLA({
+                    numWitnesses: uint8(querySLA.witCommitteeSize),
+                    unitaryReward: querySLA.witInclusionFees / 3
                 })
             );
 
@@ -763,7 +749,7 @@ contract WitPriceFeedsUpgradable
         }
     }
 
-    function __storage() internal pure returns (WitPriceFeedsDataLib.Storage storage) {
-        return WitPriceFeedsDataLib.data();
+    function __storage() internal pure returns (WitPriceFeedsLegacyDataLib.Storage storage) {
+        return WitPriceFeedsLegacyDataLib.data();
     }
 }

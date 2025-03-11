@@ -2,32 +2,33 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitOracle.sol";
-import "../WitOracleRadonRegistry.sol";
+import "./IWitOracleLegacy.sol";
+import "./IWitPriceFeedsLegacySolver.sol";
 
-interface IWitFeeds {
+interface IWitPriceFeedsLegacy {   
 
-    struct UpdateSLA {
-        // Max number of eligibile witnesses in the Wit/Oracle blockchain for solving some price update.
-        uint16 witCommitteeSize;
-        // Minimum expenditure in nanoWits for getting the price update solved and reported from the Wit/Oracle.
-        uint64 witInclusionFees;
+    /// A fresh update on the data feed identified as `erc2364Id4` has just been 
+    /// requested and paid for by some `evmSender`, under command of the 
+    /// `evmOrigin` externally owned account. 
+    event PullingUpdate(
+        address evmOrigin,
+        address evmSender,
+        bytes4  erc2362Id4,
+        Witnet.QueryId witOracleQueryId
+    );
+
+    struct RadonSLA {
+        uint8  numWitnesses;
+        uint64 unitaryReward;
     }
 
     /// Primitive data type produced by successful data updates of all supported
     /// feeds (e.g. Witnet.RadonDataTypes.Integer in WitPriceFeeds).
     function dataType() external view returns (Witnet.RadonDataTypes);
-
-    /// ERC-2362 caption prefix shared by all supported feeds (e.g. "Price-" in WitPriceFeeds).
-    function prefix() external view returns (string memory);
     
-    /// Default SLA data security parameters that will be fulfilled on Witnet upon 
-    /// every feed update, if no others are specified by the requester.
-    function defaultUpdateSLA() external view returns (UpdateSLA memory);
+    function defaultRadonSLA() external view returns (RadonSLA memory);
 
-    /// Estimates the minimum EVM fee required to be paid upon requesting a data 
-    /// update with the given the _evmGasPrice value.
-    function estimateUpdateRequestFee(uint256 evmGasPrice) external view returns (uint);
+    function estimateUpdateBaseFee(uint256 evmGasPrice) external view returns (uint);
 
     /// Returns a unique hash determined by the combination of data sources being used by 
     /// supported non-routed price feeds, and dependencies of all supported routed 
@@ -47,6 +48,9 @@ interface IWitFeeds {
     /// successful update for the given data feed.
     function lastValidQueryResponse(bytes4 feedId) external view returns (Witnet.QueryResponse memory);
 
+    function latestPrice(bytes4 feedId) external view returns (IWitPriceFeedsLegacySolver.Price memory);
+    function latestPrices(bytes4[] calldata feedIds)  external view returns (IWitPriceFeedsLegacySolver.Price[] memory);
+
     /// Returns the Witnet query id of the latest update attempt for the given data feed.
     function latestUpdateQueryId(bytes4 feedId) external view returns (Witnet.QueryId);
 
@@ -54,38 +58,30 @@ interface IWitFeeds {
     /// update attempt for the given data feed.
     function latestUpdateQueryRequest(bytes4 feedId) external view returns (Witnet.QueryRequest memory);
 
-    /// Returns the response from the Witnet oracle blockchain to the latest update attempt 
-    /// for the given data feed.
-    function latestUpdateQueryResult(bytes4 feedId) external view returns (Witnet.DataResult memory);
+    function latestUpdateResponse(bytes4 feedId) external view returns (Witnet.QueryResponse memory);
+    function latestUpdateResponseStatus(bytes4 feedId) external view returns (IWitOracleLegacy.QueryResponseStatus);
+    function latestUpdateResultError(bytes4 feedId) external view returns (IWitOracleLegacy.ResultError memory);
 
-    /// Tells the current response status of the latest update attempt for the given data feed.
-    function latestUpdateQueryResultStatus(bytes4 feedId) external view returns (Witnet.ResultStatus);
-
-    /// Describes the error returned from the Witnet oracle blockchain in response to the latest 
-    /// update attempt for the given data feed, if any.
-    function latestUpdateQueryResultStatusDescription(bytes4 feedId) external view returns (string memory);
-    
     /// Returns the ERC-2362 caption of the given feed identifier, if known. 
     function lookupCaption(bytes4) external view returns (string memory);
 
-    /// Returns the Witnet-compliant bytecode of the data retrieving script to be solved by 
-    /// the Witnet oracle blockchain upon every update of the given data feed.
-    function lookupWitOracleRequestBytecode(bytes4 feedId) external view returns (bytes memory);
-
-    /// Returns the RAD hash that uniquely identifies the data retrieving script that gets solved 
-    /// by the Witnet oracle blockchain upon every update of the given data feed.
-    function lookupWitOracleRequestRadHash(bytes4 feedId) external view returns (bytes32);
-
-    /// Returns the list of actual data sources and offchain computations for the given data feed.
-    function lookupWitOracleRadonRetrievals(bytes4 feedId) external view returns (Witnet.RadonRetrieval[] memory);
-
+    function lookupDecimals(bytes4 feedId) external view returns (uint8);    
+    function lookupPriceSolver(bytes4 feedId) external view returns (
+            address solverAddress, 
+            string[] memory solverDeps
+        );
+    
+    function lookupWitnetBytecode(bytes4) external view returns (bytes memory);
+    function lookupWitnetRadHash(bytes4) external view returns (bytes32);
+    function lookupWitnetRetrievals(bytes4) external view returns (Witnet.RadonRetrieval[] memory);
+    
+    /// ERC-2362 caption prefix shared by all supported feeds (e.g. "Price-" in WitPriceFeeds).
+    function prefix() external view returns (string memory);
+    
     /// Triggers a fresh update on the Witnet oracle blockchain for the given data feed, 
     /// using the defaultRadonSLA() security parameters.
     function requestUpdate(bytes4 feedId) external payable returns (uint256 usedFunds);
-
-    /// Triggers a fresh update for the given data feed, requiring also the SLA data security parameters
-    /// that will have to be fulfilled on Witnet. 
-    function requestUpdate(bytes4 feedId, UpdateSLA calldata) external payable returns (uint256 usedFunds);
+    function requestUpdate(bytes4, RadonSLA calldata) external payable returns (uint256 usedFunds);
 
     /// Returns the list of feed ERC-2362 ids, captions and RAD hashes of all currently supported 
     /// data feeds. The RAD hash of a data feed determines in a verifiable way the actual data sources 
@@ -99,4 +95,6 @@ interface IWitFeeds {
 
     /// Total number of data feeds, routed or not, that are currently supported.
     function totalFeeds() external view returns (uint256);
+
+    function witnet() external view returns (address);
 }

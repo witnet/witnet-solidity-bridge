@@ -2,12 +2,12 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../libs/Witnet.sol";
+import "../../libs/Witnet.sol";
 
-import "../WitOracleRequest.sol";
-import "../WitOracleRequestTemplate.sol";
+import "../../WitOracleRequest.sol";
+import "../../WitOracleRequestTemplate.sol";
 
-interface IWitFeedsAdmin {
+interface IWitPriceFeedsLegacyAdmin {
 
     event WitFeedDeleted(string caption, bytes4 feedId);
     event WitFeedSettled(string caption, bytes4 feedId, bytes32 radHash);

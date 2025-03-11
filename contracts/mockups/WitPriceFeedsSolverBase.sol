@@ -2,14 +2,14 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../data/WitPriceFeedsDataLib.sol";
+import "../data/WitPriceFeedsLegacyDataLib.sol";
 
 abstract contract WitPriceFeedsSolverBase
     is
-        IWitPriceFeedsSolver
+        IWitPriceFeedsLegacySolver
 {
     /// ===============================================================================================================
-    /// --- Yet to be implemented IWitPriceFeedsSolver methods --------------------------------------------------------
+    /// --- Yet to be implemented IWitPriceFeedsLegacySolver methods --------------------------------------------------------
     
     function class() virtual external pure returns (string memory);
     function solve(bytes4) virtual external view returns (Price memory);
@@ -33,7 +33,7 @@ abstract contract WitPriceFeedsSolverBase
     }
 
     function specs() external pure returns (bytes4) {
-        return type(IWitPriceFeedsSolver).interfaceId;
+        return type(IWitPriceFeedsLegacySolver).interfaceId;
     }
 
     function validate(bytes4 feedId, string[] calldata deps) virtual override external {
@@ -45,7 +45,7 @@ abstract contract WitPriceFeedsSolverBase
         );
         for (uint _ix = 0; _ix < deps.length; _ix ++) {
             bytes4 _depsId4 = bytes4(keccak256(bytes(deps[_ix])));
-            WitPriceFeedsDataLib.Record storage __depsFeed = WitPriceFeedsDataLib.seekRecord(_depsId4);
+            WitPriceFeedsLegacyDataLib.Record storage __depsFeed = WitPriceFeedsLegacyDataLib.seekRecord(_depsId4);
             require(
                 __depsFeed.index > 0, 
                 string(abi.encodePacked(
@@ -63,7 +63,7 @@ abstract contract WitPriceFeedsSolverBase
             _depsFlag |= (bytes32(_depsId4) >> (32 * _ix));
             _innerDecimals += __depsFeed.decimals;
         }
-        WitPriceFeedsDataLib.Record storage __feed = WitPriceFeedsDataLib.seekRecord(feedId);
+        WitPriceFeedsLegacyDataLib.Record storage __feed = WitPriceFeedsLegacyDataLib.seekRecord(feedId);
         __feed.solverReductor = int(uint(__feed.decimals)) - int(_innerDecimals);
         __feed.solverDepsFlag = _depsFlag;
     }
