@@ -9,7 +9,7 @@ import "../interfaces/legacy/IWitPriceFeedsLegacyAdmin.sol";
 import "../interfaces/legacy/IWitPriceFeedsLegacySolver.sol";
 import "../libs/Slices.sol";
 
-/// @title WitFeeds data model.
+/// @title WitPriceFeedsLegacy data model.
 /// @author The Witnet Foundation.
 library WitPriceFeedsLegacyDataLib {
 

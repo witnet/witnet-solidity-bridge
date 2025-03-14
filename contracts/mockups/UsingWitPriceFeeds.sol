@@ -9,8 +9,7 @@ import "../WitPriceFeeds.sol";
 /// @author The Witnet Foundation.
 abstract contract UsingWitPriceFeeds
     is
-        IWitPythEvents,
-        IWitOracleQueriableEvents
+        IWitPythEvents
 {
     WitPriceFeeds immutable public witPriceFeeds;
     constructor(WitPriceFeeds _witPriceFeeds) {

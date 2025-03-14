@@ -565,45 +565,9 @@ library Witnet {
         return (BlockNumber.unwrap(b) == 0);
     }
 
-    
-    /// =======================================================================
-    /// --- FastForward helper functions --------------------------------------
-
-    function head(FastForward[] calldata rollup)
-        internal pure returns (Beacon calldata)
-    {
-        return rollup[rollup.length - 1].beacon;
-    }
-
 
     /// ===============================================================================================================
-    /// --- Query* helper methods -------------------------------------------------------------------------------------
-
-    function hashify(QueryHash hash) internal pure returns (bytes32) {
-        return keccak256(abi.encode(QueryHash.unwrap(hash)));
-    }
-
-    function hashify(QueryId _queryId, Witnet.RadonHash _radHash, bytes32 _slaHash) internal view returns (Witnet.QueryHash) {
-        return Witnet.QueryHash.wrap(bytes15(
-            keccak256(abi.encode(
-                channel(address(this)), 
-                blockhash(block.number - 1),
-                _queryId, Witnet.RadonHash.unwrap(_radHash), _slaHash
-            ))
-        ));
-    }
-
-    function hashify(QuerySLA memory querySLA) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(
-            querySLA.witResultMaxSize,
-            querySLA.witCommitteeSize,
-            querySLA.witInclusionFees
-        ));
-    }
-
-
-    /// ===============================================================================================================
-    /// --- *Report helper methods ------------------------------------------------------------------------------------
+    /// --- Data*Report helper methods --------------------------------------------------------------------------------
 
     function queryRelayer(DataPullReport calldata self) internal pure returns (address) {
         return recoverAddr(
@@ -795,15 +759,77 @@ library Witnet {
     }
 
 
+    /// =======================================================================
+    /// --- FastForward helper functions --------------------------------------
+
+    function head(FastForward[] calldata rollup)
+        internal pure returns (Beacon calldata)
+    {
+        return rollup[rollup.length - 1].beacon;
+    }
+
+
+    /// ===============================================================================================================
+    /// --- Query* helper methods -------------------------------------------------------------------------------------
+
+    function equalOrGreaterThan(QuerySLA calldata self, QuerySLA storage stored) internal view returns (bool) {
+        return (
+                self.witCommitteeSize >= stored.witCommitteeSize
+                && self.witInclusionFees >= stored.witInclusionFees 
+                && self.witResultMaxSize <= stored.witResultMaxSize
+        );
+    }
+
+    function hashify(QueryHash hash) internal pure returns (bytes32) {
+        return keccak256(abi.encode(QueryHash.unwrap(hash)));
+    }
+
+    function hashify(QueryId _queryId, Witnet.RadonHash _radHash, bytes32 _slaHash) internal view returns (Witnet.QueryHash) {
+        return Witnet.QueryHash.wrap(bytes15(
+            keccak256(abi.encode(
+                channel(address(this)), 
+                blockhash(block.number - 1),
+                _queryId, Witnet.RadonHash.unwrap(_radHash), _slaHash
+            ))
+        ));
+    }
+
+    function hashify(QuerySLA memory querySLA) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(
+            querySLA.witResultMaxSize,
+            querySLA.witCommitteeSize,
+            querySLA.witInclusionFees
+        ));
+    }
+
+    function isValid(QuerySLA memory self) internal pure returns (bool) {
+        return (
+            self.witResultMaxSize > 0
+                && self.witInclusionFees > 0
+                && self.witCommitteeSize > 0
+        );
+    }
+
+    function isZero(QueryId a) internal pure returns (bool) {
+        return (QueryId.unwrap(a) == 0);
+    }
+
+    function toV1(QuerySLA calldata self) internal pure returns (RadonSLAv1 memory) {
+        return RadonSLAv1({
+            numWitnesses: uint8(self.witCommitteeSize),
+            minConsensusPercentage: 51,
+            witnessReward: self.witInclusionFees,
+            witnessCollateral: self.witInclusionFees * 125,
+            minerCommitRevealFee: self.witInclusionFees / (3 * self.witCommitteeSize)
+        });
+    }
+
+
     /// ===============================================================================================================
     /// --- RadonHash helper methods ----------------------------------------------------------------------------------
 
     function isZero(RadonHash h) internal pure returns (bool) {
         return RadonHash.unwrap(h) == bytes32(0);
-    }
-
-    function isZero(Timestamp t) internal pure returns (bool) {
-        return Timestamp.unwrap(t) == 0;
     }
 
     
@@ -854,49 +880,23 @@ library Witnet {
     }
 
 
-    /// =======================================================================
-    /// --- Timestamp helper functions ----------------------------------
+    /// ===============================================================================================================
+    /// --- Timestamp helper methods ----------------------------------------------------------------------------------
 
     function gt(Timestamp a, Timestamp b) internal pure returns (bool) {
         return Timestamp.unwrap(a) > Timestamp.unwrap(b);
     }
 
-    
-    /// ========================================================================================================
-    /// --- 'QueryId' helper methods ---------------------------------------------------------------------------
-
-    function isZero(QueryId a) internal pure returns (bool) {
-        return (QueryId.unwrap(a) == 0);
+    function egt(Timestamp a, Timestamp b) internal pure returns (bool) {
+        return Timestamp.unwrap(a) >= Timestamp.unwrap(b);
     }
 
-
-    /// ========================================================================================================
-    /// --- 'QuerySLA' helper methods --------------------------------------------------------------------------
-
-    function equalOrGreaterThan(QuerySLA calldata self, QuerySLA storage stored) internal view returns (bool) {
-        return (
-                self.witCommitteeSize >= stored.witCommitteeSize
-                && self.witInclusionFees >= stored.witInclusionFees 
-                && self.witResultMaxSize <= stored.witResultMaxSize
-        );
+    function elt(Timestamp a, Timestamp b) internal pure returns (bool) {
+        return Timestamp.unwrap(a) <= Timestamp.unwrap(b);
     }
 
-    function isValid(QuerySLA memory self) internal pure returns (bool) {
-        return (
-            self.witResultMaxSize > 0
-                && self.witInclusionFees > 0
-                && self.witCommitteeSize > 0
-        );
-    }
-
-    function toV1(QuerySLA calldata self) internal pure returns (RadonSLAv1 memory) {
-        return RadonSLAv1({
-            numWitnesses: uint8(self.witCommitteeSize),
-            minConsensusPercentage: 51,
-            witnessReward: self.witInclusionFees,
-            witnessCollateral: self.witInclusionFees * 125,
-            minerCommitRevealFee: self.witInclusionFees / (3 * self.witCommitteeSize)
-        });
+    function isZero(Timestamp t) internal pure returns (bool) {
+        return Timestamp.unwrap(t) == 0;
     }
 
 

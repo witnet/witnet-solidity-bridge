@@ -194,11 +194,10 @@ library WitOracleDataLib {
         return intoDataResult(queryResponse, queryStatus);
     }
 
-    function parseDataReport(bytes calldata _report, bytes calldata _signature)
+    function parseDataReport(Witnet.DataPushReport calldata _dataPushReport, bytes calldata _signature)
         public view
         returns (address _evmReporter, Witnet.DataResult memory _data)
     {
-        Witnet.DataPushReport memory _dataPushReport = abi.decode(_report, (Witnet.DataPushReport));
         _evmReporter = Witnet.recoverAddr(_signature, _dataPushReport.tallyHash());
         require(data().reporters[_evmReporter], "WitOracleDataLib: invalid signature");
         _data = extractDataResult(

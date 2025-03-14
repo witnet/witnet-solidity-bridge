@@ -15,10 +15,10 @@ interface IWitOracle {
 
     /// @notice Verify the data report (as provided by Wit/Kermit API) is well-formed and authentic,
     /// returning the parsed Witnet.DataResult if so, or reverting otherwise.
-    function parseDataReport(bytes calldata report, bytes calldata proof) external view returns (Witnet.DataResult memory);
+    function parseDataReport(Witnet.DataPushReport calldata report, bytes calldata proof) external view returns (Witnet.DataResult memory);
 
     /// @notice Same as `parseDataReport` but on certain implementations it may store roll-up information 
     /// that will contribute to reduce the cost of verifying and/or rolling-up future data reports.
     /// Emits `DataReport` if report is authentic. 
-    function pushDataReport(bytes calldata report, bytes calldata proof) external returns (Witnet.DataResult memory);
+    function pushDataReport(Witnet.DataPushReport calldata report, bytes calldata proof) external returns (Witnet.DataResult memory);
 }

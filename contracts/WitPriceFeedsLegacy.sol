@@ -16,8 +16,7 @@ abstract contract WitPriceFeedsLegacy
         IWitPriceFeedsLegacy,
         IWitPriceFeedsLegacyAdmin,
         IWitPriceFeedsLegacySolverFactory,
-        IWitOracleAppliance,
-        IWitOracleQueriableEvents
+        IWitOracleAppliance
 {
     Witnet.RadonDataTypes immutable public override dataType = Witnet.RadonDataTypes.Integer;
     bytes32 immutable internal __prefix = "Price-";

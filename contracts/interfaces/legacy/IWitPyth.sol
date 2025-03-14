@@ -12,31 +12,32 @@ interface IWitPyth
         IWitPythErrors,
         IWitPythEvents
 {
+    type Id is bytes32;
+
     struct Price {
-        uint8  decimals;
-        uint64 emaPrice;
         uint64 price;
-        Witnet.Timestamp timestamp;
-        Confidence confidence;
+        int8   expo;
+        Witnet.Timestamp publishtime;
+        Witnet.TransactionHash track;
     }
 
-    struct Confidence {
-        Witnet.RadonHash witDrRadonHash;
-        Witnet.QuerySLA witDrRadonParams;
-        Witnet.TransactionHash witDrTxHash;
+    struct PriceFeed {
+        Id id;
+        Price price;
+        Price emaPrice;
     }
 
-    /// @notice Returns the exponentially-weighted moving average price and confidence params.
+    /// @notice Returns the exponentially-weighted moving average price.
     /// @dev Reverts if the EMA price is not available.
-    /// @param id The Price Feed ID of which to fetch the EMA price and confidence params.
-    function getEmaPrice(bytes32 id) external view returns (Price memory);
+    /// @param id The Price Feed ID of which to fetch the EMA price.
+    function getEmaPrice(Id id) external view returns (Price memory);
 
     /// @notice Returns the exponentially-weighted moving average price that is no older than `age` seconds
     /// of the current time.
     /// @dev This function is a sanity-checked version of `getEmaPriceUnsafe` which is useful in
     /// applications that require a sufficiently-recent price. Reverts if the price wasn't updated sufficiently
     /// recently.
-    function getEmaPriceNotOlderThan(bytes32 id, uint64 age) external view returns (Price memory);
+    function getEmaPriceNotOlderThan(Id id, uint64 age) external view returns (Price memory);
 
     /// @notice Returns the exponentially-weighted moving average price of a price feed without any sanity checks.
     /// @dev This function returns the same price as `getEmaPrice` in the case where the price is available.
@@ -48,19 +49,28 @@ interface IWitPyth
     /// Users of this function should check the `timestamp` in the price to ensure that the returned price is
     /// sufficiently recent for their application. If you are considering using this function, it may be
     /// safer / easier to use either `getEmaPrice` or `getEmaPriceNoOlderThan`.
-    function getEmaPriceUnsafe(bytes32 id) external view returns (Price memory);
+    function getEmaPriceUnsafe(Id id) external view returns (Price memory);
+
+    /// @notice Returns the latest known exponentially-weight average price for all required price feeds 
+    /// without any sanity checks. This function is unsafe as the returned price updates may be arbitrarily 
+    /// far in the past.
+    /// 
+    /// Users of this function should check the `timestamp` of each price feed to ensure that the returned values 
+    /// are sufficiently recent for their application. If you need safe access to fresh data, please consider
+    /// using calling to either `getEmaPrice` or `getEmaPriceNoOlderThan` for every individual price feed.
+    function getEmaPricesUnsafe(Id[] calldata ids) external view returns (Price[] memory);
 
     /// @notice Returns the price and confidence interval.
     /// @dev Reverts if the price has not been updated within the last `heartbeatSecs`. 
     /// @param id The Price Feed ID of which to fetch the price.
-    function getPrice(bytes32 id) external view returns (Price memory);
+    function getPrice(Id id) external view returns (Price memory);
 
     /// @notice Returns the price that is no older than `age` seconds of the current time.
     /// @dev This function is a sanity-checked version of `getPriceUnsafe` which is useful in
     /// applications that require a sufficiently-recent price. 
     /// Reverts if the price wasn't updated sufficiently
     /// recently.
-    function getPriceNotOlderThan(bytes32 id, uint64 age) external view returns (Price memory);
+    function getPriceNotOlderThan(Id id, uint64 age) external view returns (Price memory);
 
     /// @notice Returns the price of a price feed without any sanity checks.
     /// @dev This function returns the most recent price update in this contract without any recency checks.
@@ -69,19 +79,31 @@ interface IWitPyth
     /// Users of this function should check the `timestamp` in the price to ensure that the returned price is
     /// sufficiently recent for their application. If you are considering using this function, it may be
     /// safer / easier to use either `getPrice` or `getPriceNoOlderThan`.
-    function getPriceUnsafe(bytes32 id) external view returns (Price memory);
+    function getPriceUnsafe(Id id) external view returns (Price memory);
+
+    /// @notice Returns the latest known update for all required price feeds without any sanity checks.
+    /// This function is unsafe as the returned price updates may be arbitrarily far in the past.
+    /// 
+    /// Users of this function should check the `timestamp` of each price feed to ensure that the returned values 
+    /// are sufficiently recent for their application. If you need safe access to fresh data, please consider
+    /// using calling to either `getPrice` or `getPriceNoOlderThan` for every individual price feed.
+    function getPricesUnsafe(Id[] calldata ids) external view returns (Price[] memory);
     
     /// @notice Legacy-compliant to get the required fee to update an array of price updates, which would be
     /// always 0 if relying on the Wit/Oracle bridging framework. 
     function getUpdateFee(bytes calldata) external view returns (uint256);
     
-    /// @notice Parse `updates` and return price feeds of the given `ids` if they are all published
-    /// within `minTimestamp` and `maxTimestamp`.
+    /// @notice Parse `updates` and return price feeds of the given `ids` if they reported
+    /// timestamps are within specified `minTimestamp` and `maxTimestamp`. Unlike `updatePriceFeeds`, 
+    /// calling this function will NOT update the on-chain price. 
     ///
-    /// You can use this method if you want to use a price updated at a fixed time and not the most recent price on-chain;
-    /// otherwise, please consider using `updatePriceFeeds`. This method may store the price updates on-chain, if they
-    /// happened to be more recent than the currently stored prices.
-    ///
+    /// Use this function if you just want to use reported updates as long as they refer
+    /// a timestamp within the specified range, and not necessarily most recent updates in storage.  
+    /// Otherwise, consider using `updatePriceFeeds` followed by any of `get*Price*` methods.
+   
+    /// If you need to make sure to get the earliest update after `minTimestamp` (ie. the one on-chain 
+    /// or the one being parsed), consider using `parsePriceFeedUpdatesUnique` instead.
+    /// 
     /// @dev Reverts if there is no update for any of the given `ids` within the given time range.
     /// @param updates Array of price update reports.
     /// @param ids Array of price ids.
@@ -90,17 +112,23 @@ interface IWitPyth
     /// @return priceFeeds Array of parsed Prices corresponding to the given `ids` (with the same order).
     function parsePriceFeedUpdates(
             bytes[] calldata updates, 
-            bytes32[] calldata ids, 
+            Id[] calldata ids, 
             uint64 minTimestamp,
             uint64 maxTimestamp
-        ) external returns (Price[] memory);
+        ) external view returns (PriceFeed[] memory);
 
-    /// @notice Similar to `parsePriceFeedUpdates` but ensures the updates returned are
-    /// the first updates published in `minTimestamp`. That is, if there are multiple updates for a given timestamp,
-    /// this method will return the first update. This method may store the price updates on-chain, if they
-    /// are more recent than the current stored prices.
-    ///
-    /// @dev Reverts if there is no update for any of the given `ids` within the given time range and uniqueness condition.
+    /// @notice Similar to `parsePriceFeedUpdates` but ensures the returned prices correspond to
+    /// the earliest update after `minTimestamp`. That is to say, if `prevTs < minTs <= ts <= maxTs`, 
+    /// where `prevTs` is the timestamp of latest on-chain timestamp for each referred price-feed.
+    /// This will guarantee no updates exist for the given `priceIds` earlier than the returned 
+    /// updates and still in the given time range. 
+    
+    /// Use this function is you just want to use reported updates for a fixed time window and 
+    /// not necessarily the most recent update on-chain. Otherwise, consider using
+    /// `updatePriceFeeds` followed by any of the  `get*PriceNoOlderThan` variants.
+    /// 
+    /// @dev Reverts if there is no update for any of the given `ids` within the given time range and 
+    /// uniqueness condition.
     /// @param updates Array of price update reports.
     /// @param ids Array of price ids.
     /// @param minTimestamp minimum acceptable publishTime for the given `ids`.
@@ -108,10 +136,10 @@ interface IWitPyth
     /// @return priceFeeds Array of the Prices corresponding to the given `ids` (with the same order).
     function parsePriceFeedUpdatesUnique(
             bytes[] calldata updates, 
-            bytes32[] calldata ids, 
+            Id[] calldata ids, 
             uint64 minTimestamp,
             uint64 maxTimestamp
-        ) external returns (Price[] memory);
+        ) external view returns (PriceFeed[] memory);
 
     /// @notice Update price feeds with given update reports. Prices will be updated if 
     /// they are more recent than the current stored prices. 
@@ -137,7 +165,7 @@ interface IWitPyth
     /// @param timestamps Array of timestamps: `timestamps[i]` corresponds to known `timestamp` of `ids[i]`
     function updatePriceFeedsIfNecessary(
             bytes[] calldata updates, 
-            bytes32[] calldata ids, 
+            Id[] calldata ids, 
             Witnet.Timestamp[] calldata timestamps
         ) external;
 }

@@ -39,14 +39,14 @@ abstract contract WitOracleBasePushOnlyTrustless
     // ================================================================================================================
     // --- IWitOracle -------------------------------------------------------------------------------------------------
 
-    function parseDataReport(bytes calldata _report, bytes calldata _signature)
+    function parseDataReport(Witnet.DataPushReport calldata _report, bytes calldata _signature)
         virtual override public view
         returns (Witnet.DataResult memory _result)
     {
         (, _result) = WitOracleDataLib.parseDataReport(_report, _signature);
     }
 
-    function pushDataReport(bytes calldata _report, bytes calldata _signature)
+    function pushDataReport(Witnet.DataPushReport calldata _report, bytes calldata _signature)
         virtual override external
         returns (Witnet.DataResult memory)
     {

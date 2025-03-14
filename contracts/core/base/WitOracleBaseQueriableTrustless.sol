@@ -140,12 +140,11 @@ abstract contract WitOracleBaseQueriableTrustless
     // ================================================================================================================
     // --- Overrides IWitOracle (trustlessly) -------------------------------------------------------------------------
 
-    function parseDataReport(bytes calldata _report, bytes calldata _proof)
+    function parseDataReport(Witnet.DataPushReport calldata _dataPushReport, bytes calldata _proof)
         virtual override 
         external view
         returns (Witnet.DataResult memory)
     {
-        Witnet.DataPushReport memory _dataPushReport = abi.decode(_report, (Witnet.DataPushReport));
         (Witnet.FastForward[] memory _rollup, bytes32[] memory _merkle) = abi.decode(
             _proof, 
             (Witnet.FastForward[], bytes32[])
@@ -168,11 +167,10 @@ abstract contract WitOracleBaseQueriableTrustless
         }
     }
 
-    function pushDataReport(bytes calldata _report, bytes calldata _proof)
+    function pushDataReport(Witnet.DataPushReport calldata _dataPushReport, bytes calldata _proof)
         virtual override external
         returns (Witnet.DataResult memory)
     {
-        Witnet.DataPushReport memory _dataPushReport = abi.decode(_report, (Witnet.DataPushReport));
         (Witnet.FastForward[] memory _rollup, bytes32[] memory _merkle) = abi.decode(
             _proof, 
             (Witnet.FastForward[], bytes32[])

@@ -46,6 +46,7 @@ abstract contract UsingWitOracle
             _witOracle.specs() == (
                 type(IWitAppliance).interfaceId
                     ^ type(IWitOracle).interfaceId
+                    ^ type(IWitOracleQueriable).interfaceId
             ), "UsingWitOracle: uncompliant WitOracle"
         );
         __witOracle = _witOracle;

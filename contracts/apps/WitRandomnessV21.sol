@@ -8,7 +8,7 @@ import "../mockups/UsingWitOracle.sol";
 import "../patterns/Ownable2Step.sol";
 
 /// @title WitRandomnessV21: Unmalleable and provably-fair randomness generation based on the Wit/Oracle v2.*.
-/// @author The Witnet Foundation.
+/// @author Guillermo Díaz <guillermo@witnet.io>
 contract WitRandomnessV21
     is
         Ownable2Step,
@@ -96,7 +96,7 @@ contract WitRandomnessV21
 
     
     /// ===============================================================================================================
-    /// --- 'IWitRandomness' implementation ------------------------------------------------------------------------
+    /// --- 'IWitRandomness' implementation ---------------------------------------------------------------------------
 
     /// Returns amount of wei required to be paid as a fee when requesting randomization with a 
     /// transaction gas price as the one given.

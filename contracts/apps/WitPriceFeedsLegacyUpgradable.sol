@@ -9,7 +9,7 @@ import "../interfaces/legacy/IWitOracleLegacy.sol";
 import "../patterns/Ownable2Step.sol";
 
 /// @title WitPriceFeeds: Price Feeds upgradable repository reliant on the Wit/Oracle blockchain.
-/// @author Guillermo Díaz <guillermo@otherplane.com>
+/// @author Guillermo Díaz <guillermo@witnet.io>
 
 contract WitPriceFeedsLegacyUpgradable
     is
