@@ -6,6 +6,6 @@ import "./IChainlinkAggregatorV3.sol";
 import "./IWitPyth.sol";
 
 interface IPythChainlinkAggregatorV3 is IChainlinkAggregatorV3 {
-    function priceId() external view returns (bytes32);
+    function priceId() external view returns (IWitPyth.ID);
     function pyth() external view returns (IWitPyth);
 }

@@ -4,12 +4,21 @@ pragma solidity >=0.8.0 <0.9.0;
 
 interface IWitPythErrors {
 
+    /// @notice Requested price deviated too much after previous update.
+    /// @dev Signature: 0x7b0d2bb5
+    error DeviantPrice();
+
+    // /// @notice Attempting to update a price before cooldown period expires.
+    // /// @dev Signature: 0x0fbbc581
+    // error HotPrice();
+
     /// @notice Function arguments are invalid (e.g., the arguments lengths mismatch)
     /// @dev Signature: 0xa9cb9e0d
     error InvalidArgument();
     
-    /// @notice Either not enough fees were paid to the Wit/Oracle for solving at least one of the updates,
-    /// or not enough number of witnesses were required for solving at least one of the updates. 
+    /// @notice Either the number of witnesses that solved a price update is not within
+    /// the settled range in this contract, or an EMA is being asked for a price feed
+    /// that's not settled for the EMA to be computed. 
     // Signature: 0x63daeb77
     error InvalidGovernanceTarget();
     
