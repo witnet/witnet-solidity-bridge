@@ -252,7 +252,7 @@ library WitPriceFeedsLegacyDataLib {
             }
             // Post update request to the WRB:
             _evmUsedFunds = evmUpdateRequestFee;
-            _latestQueryId = witOracle.postQuery{
+            _latestQueryId = witOracle.queryData{
                 value: _evmUsedFunds
             }(
                 Witnet.RadonHash.wrap(__feed.radHash),

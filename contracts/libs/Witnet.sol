@@ -77,7 +77,7 @@ library Witnet {
         Timestamp       timestamp;
         WitnetCBOR.CBOR value;
     }
-    
+
     struct FastForward {
         Beacon beacon;
         uint256[2] committeeAggSignature;

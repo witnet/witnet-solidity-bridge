@@ -37,7 +37,7 @@ import "../patterns/Ownable2Step.sol";
 ///
 /// > Note [2]: Contracts requiring "synchronous" randomness resolution (e.g. minting NFTs) as to avoid
 /// involving end users in two-phase operations, might rather prefer to inherit from the 
-/// `WitOracleRandomnessConsumer` abstract class instead of relying on this contract. Nevertheless,
+/// `WitOracleQueriableRandomnessConsumer` abstract class instead of relying on this contract. Nevertheless,
 /// they would have to deal themselves with eventual randomness resolution errors.
 ///
 /// @author Guillermo Díaz <guillermo@witnet.io>
@@ -83,7 +83,7 @@ contract WitRandomnessV21
         UsingWitOracle(_witOracle)
     {
         // Build Witnet-compliant randomness request:
-        WitOracleRadonRegistry _registry = witOracle().registry();
+        IWitOracleRadonRegistry _registry = witOracle().registry();
         __witOracleQueryRadonHash = _registry.verifyRadonRequest(
             Witnet.intoMemArray([
                 _registry.verifyRadonRetrieval(
@@ -629,7 +629,7 @@ contract WitRandomnessV21
             _evmUsedFunds = msg.value;
             
             // Post the Witnet Randomness request:
-            _queryId = __witOracle.postQuery{
+            _queryId = __witOracle.queryData{
                 value: msg.value
             }(
                 __witOracleQueryRadonHash,

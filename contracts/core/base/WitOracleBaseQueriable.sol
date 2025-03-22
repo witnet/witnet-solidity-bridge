@@ -3,9 +3,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitOracleBasePushOnly.sol";
+
 import "../../WitOracle.sol";
 import "../../data/WitOracleDataLib.sol";
-import "../../interfaces/IWitOracleConsumer.sol";
+import "../../interfaces/IWitOracleQueriableConsumer.sol";
 import "../../libs/WitOracleResultStatusLib.sol";
 import "../../patterns/Payable.sol";
 
@@ -23,7 +24,7 @@ abstract contract WitOracleBaseQueriable
         return Witnet.channel(address(this));
     }
 
-    WitOracleRadonRegistry public immutable override registry;
+    IWitOracleRadonRegistry public immutable override registry;
 
     uint256 internal immutable __reportResultGasBase;
     uint256 internal immutable __reportResultWithCallbackGasBase;
@@ -33,7 +34,7 @@ abstract contract WitOracleBaseQueriable
     modifier checkQueryCallback(Witnet.QueryCallback memory callback) virtual {
         _require(
             address(callback.consumer).code.length > 0
-                && IWitOracleConsumer(callback.consumer).reportableFrom(address(this))
+                && IWitOracleQueriableConsumer(callback.consumer).reportableFrom(IWitOracleQueriable(address(this)))
                 && callback.gasLimit > 0,
             "invalid callback"
         ); _;
@@ -294,7 +295,7 @@ abstract contract WitOracleBaseQueriable
         return Witnet.QueryId.wrap(__storage().nonce + 1);
     }
 
-    function postQuery(
+    function queryData(
             Witnet.RadonHash _queryRAD, 
             Witnet.QuerySLA memory _querySLA
         )
@@ -307,7 +308,7 @@ abstract contract WitOracleBaseQueriable
         checkQuerySLA(_querySLA)
         returns (Witnet.QueryId _queryId)
     {
-        _queryId = __postQuery(
+        _queryId = __queryData(
             _getMsgSender(), 0,
             uint72(_getMsgValue()),
             _queryRAD,
@@ -325,7 +326,7 @@ abstract contract WitOracleBaseQueriable
         );
     }
    
-    function postQuery(
+    function queryDataWithCallback(
             Witnet.RadonHash _queryRAD, 
             Witnet.QuerySLA memory _querySLA,
             Witnet.QueryCallback memory _queryCallback
@@ -343,7 +344,7 @@ abstract contract WitOracleBaseQueriable
         checkQueryCallback(_queryCallback)
         returns (Witnet.QueryId _queryId)
     {
-        _queryId = __postQuery(
+        _queryId = __queryData(
             _queryCallback.consumer,
             _queryCallback.gasLimit,
             uint72(_getMsgValue()),
@@ -360,7 +361,7 @@ abstract contract WitOracleBaseQueriable
         );
     }
 
-    function postQuery(
+    function queryDataWithCallback(
             bytes calldata _queryRAD,
             Witnet.QuerySLA memory _querySLA,
             Witnet.QueryCallback memory _queryCallback
@@ -378,7 +379,7 @@ abstract contract WitOracleBaseQueriable
         checkQueryCallback(_queryCallback)
         returns (Witnet.QueryId _queryId)
     {
-        _queryId = __postQuery(
+        _queryId = __queryData(
             _queryCallback.consumer,
             _queryCallback.gasLimit,
             uint72(_getMsgValue()),
@@ -421,7 +422,7 @@ abstract contract WitOracleBaseQueriable
     // ================================================================================================================
     // --- Internal functions -----------------------------------------------------------------------------------------
 
-    function __postQuery(
+    function __queryData(
             address _requester,
             uint24  _callbackGas,
             uint72  _evmReward,
@@ -449,7 +450,7 @@ abstract contract WitOracleBaseQueriable
         __query.slaParams = _querySLA;
     }
 
-    function __postQuery(
+    function __queryData(
             address _requester,
             uint24  _callbackGas,
             uint72  _evmReward,

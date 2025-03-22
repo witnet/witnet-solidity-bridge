@@ -2,10 +2,11 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../WitOracleRadonRegistry.sol";
 import "../../WitOracleRequestFactory.sol";
+
 import "../../data/WitOracleRequestFactoryData.sol";
 import "../../interfaces/IWitOracle.sol";
+import "../../interfaces/IWitOracleRadonRegistry.sol";
 import "../../patterns/Clonable.sol";
 
 abstract contract WitOracleRequestFactoryBase
@@ -63,7 +64,7 @@ abstract contract WitOracleRequestFactoryBase
         witOracle = _witOracle;
     }
 
-    function _getWitOracleRadonRegistry() virtual internal view returns (WitOracleRadonRegistry) {
+    function _getWitOracleRadonRegistry() virtual internal view returns (IWitOracleRadonRegistry) {
         return witOracle.registry();
     }
 
@@ -171,7 +172,7 @@ abstract contract WitOracleRequestFactoryBase
         notOnFactory
         returns (Witnet.RadonReducer memory, Witnet.RadonReducer memory)
     {
-        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
+        IWitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
         if (!__witOracleRequest().radHash.isZero()) {
             return (
                 _registry.lookupRadonRequestAggregator(__witOracleRequest().radHash),
@@ -213,7 +214,7 @@ abstract contract WitOracleRequestFactoryBase
         notOnFactory
         returns (Witnet.RadonRetrieval[] memory _retrievals)
     {
-        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
+        IWitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
         if (!__witOracleRequest().radHash.isZero()) {
             return _registry.lookupRadonRequestRetrievals(
                 __witOracleRequest().radHash
@@ -307,7 +308,7 @@ abstract contract WitOracleRequestFactoryBase
         onlyOnFactory
         returns (IWitOracleRequestTemplate)
     {
-        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
+        IWitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
 
         // Check input retrievals:
         _require(
@@ -330,7 +331,7 @@ abstract contract WitOracleRequestFactoryBase
         virtual override external
         returns (IWitOracleRequestTemplate)
     {
-        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
+        IWitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
 
         // spawn retrievals by repeatedly setting different values to the last parameter
         // of given retrieval:
@@ -416,7 +417,7 @@ abstract contract WitOracleRequestFactoryBase
         returns (uint256[] memory _argsCount)
     {
         
-        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
+        IWitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
         _argsCount = new uint256[](__witOracleRequestTemplate().retrieveHashes.length);
         for (uint _ix = 0; _ix < _argsCount.length; _ix ++) {
             _argsCount[_ix] = _registry.lookupRadonRetrievalArgsCount(
@@ -523,7 +524,7 @@ abstract contract WitOracleRequestFactoryBase
         return IWitOracleRequestTemplate(_templateAddr);
     }
  
-    function _checkParameterizedRadonRetrievals(WitOracleRadonRegistry _registry, bytes32[] calldata _retrieveHashes) 
+    function _checkParameterizedRadonRetrievals(IWitOracleRadonRegistry _registry, bytes32[] calldata _retrieveHashes) 
         internal view returns (bool _parameterized)
     {
         Witnet.RadonDataTypes _resultDataType;
@@ -600,7 +601,7 @@ abstract contract WitOracleRequestFactoryBase
         virtual internal
         returns (Witnet.RadonHash)
     {
-        WitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
+        IWitOracleRadonRegistry _registry = _getWitOracleRadonRegistry();
         WitOracleRequestTemplateStorage storage __template = __witOracleRequestTemplate();
         bytes32[] memory _retrieveHashes = new bytes32[](__template.retrieveHashes.length);
         for (uint _ix = 0; _ix < _retrieveHashes.length; _ix ++) {

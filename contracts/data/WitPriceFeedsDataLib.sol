@@ -11,7 +11,6 @@ import "../interfaces/IWitPriceFeedsAdmin.sol";
 import "../interfaces/IWitPriceFeedsMappingSolver.sol";
 
 import "../libs/Slices.sol";
-import "../mockups/WitPriceFeedsChainlinkAggregator.sol";
 
 /// @title WitPriceFeeds data model.
 /// @author The Witnet Foundation.
@@ -103,57 +102,6 @@ library WitPriceFeedsDataLib {
 
     // ================================================================================================================
     // --- Public methods ---------------------------------------------------------------------------------------------
-
-    function fetchChainlinkAggregator(IWitPriceFeeds.ID4 id4) public returns (IWitPythChainlinkAggregator) {
-        bytes memory _initcode = type(WitPriceFeedsChainlinkAggregator).creationCode;
-        bytes memory _params = abi.encodePacked(
-            address(this),
-            id4
-        );
-        address _contract = _determineCreate2Address(_initcode, _params);
-        if (_contract.code.length == 0) {
-            bytes memory _bytecode = _completeInitCode(_initcode, _params);
-            assembly {
-                _contract := create2(
-                    0,
-                    add(_bytecode, 0x20),
-                    mload(_bytecode),
-                    0
-                )
-            }
-        }
-        return IWitPythChainlinkAggregator(_contract);
-    }
-
-    function createPriceFeedSolver(
-            bytes memory initcode,
-            bytes memory params
-        )
-        public
-        returns (IWitPriceFeedsMappingSolver)
-    {
-        address _solver = _determineCreate2Address(initcode, params);
-        if (_solver.code.length == 0) {
-            bytes memory _bytecode = _completeInitCode(initcode, params);
-            assembly {
-                _solver := create2(
-                    0,
-                    add(_bytecode, 0x20),
-                    mload(_bytecode),
-                    0
-                )
-            }
-            require(
-                IWitPriceFeedsMappingSolver(_solver).specs() == type(IWitPriceFeedsMappingSolver).interfaceId,
-                "uncompliant initcode"
-            );
-        }
-        return IWitPriceFeedsMappingSolver(_solver);
-    }
-
-    function determinePriceFeedSolverAddress(bytes calldata initcode, bytes calldata params) public view returns (address) {
-        return _determineCreate2Address(initcode, params);
-    }
 
     function getPrice(
             IWitPriceFeeds.ID4 id, 
@@ -601,16 +549,6 @@ library WitPriceFeedsDataLib {
     // ================================================================================================================
     // --- Private methods --------------------------------------------------------------------------------------------
 
-    function _completeInitCode(bytes memory initcode, bytes memory params)
-        private pure
-        returns (bytes memory)
-    {
-        return abi.encodePacked(
-            initcode,
-            params
-        );
-    }
-
     function _computeDeviation1000(uint64 prevPrice, int deltaPrice) private pure returns (uint) {
         unchecked {
             int nextPrice = int64(prevPrice) + deltaPrice;
@@ -689,25 +627,6 @@ library WitPriceFeedsDataLib {
                 _footprint ^= _footprintOf(_intoID4(data().ids[_ix]));
             }
         }
-    }
-
-    function _determineCreate2Address(
-            bytes memory initcode,
-            bytes memory params
-        )
-        private view
-        returns (address)
-    {
-        return address(
-            uint160(uint(keccak256(
-                abi.encodePacked(
-                    bytes1(0xff),
-                    address(this),
-                    bytes32(0),
-                    keccak256(_completeInitCode(initcode, params))
-                )
-            )))
-        );
     }
 
     function _footprintOf(IWitPriceFeeds.ID4 id4) private view returns (bytes4) {

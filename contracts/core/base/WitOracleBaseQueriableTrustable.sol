@@ -210,7 +210,7 @@ abstract contract WitOracleBaseQueriableTrustable
         returns (uint256)
     {
         return Witnet.QueryId.unwrap(
-            postQuery(
+            queryData(
                 Witnet.RadonHash.wrap(_queryRadHash),
                 Witnet.QuerySLA({
                     witResultMaxSize: 32,
@@ -231,7 +231,7 @@ abstract contract WitOracleBaseQueriableTrustable
         returns (uint256)
     {
         return Witnet.QueryId.unwrap(
-            postQuery(
+            queryDataWithCallback(
                 Witnet.RadonHash.wrap(_queryRadHash),
                 Witnet.QuerySLA({
                     witResultMaxSize: 32,
@@ -256,7 +256,7 @@ abstract contract WitOracleBaseQueriableTrustable
         returns (uint256)
     {
         return Witnet.QueryId.unwrap(
-            postQuery(
+            queryDataWithCallback(
                 _queryRadBytecode,
                 Witnet.QuerySLA({
                     witResultMaxSize: 32,
@@ -461,7 +461,7 @@ abstract contract WitOracleBaseQueriableTrustable
     /// ================================================================================================================
     /// --- Internal methods -------------------------------------------------------------------------------------------
 
-    function __postQuery(
+    function __queryData(
             address _requester,
             uint24  _callbackGas,
             uint72  _evmReward,
@@ -472,7 +472,7 @@ abstract contract WitOracleBaseQueriableTrustable
         internal
         returns (Witnet.QueryId _queryId)
     {
-        _queryId = super.__postQuery(
+        _queryId = super.__queryData(
             _requester,
             _callbackGas,
             _evmReward,
@@ -489,7 +489,7 @@ abstract contract WitOracleBaseQueriableTrustable
         );
     }
 
-    function __postQuery(
+    function __queryData(
             address _requester,
             uint24  _callbackGas,
             uint72  _evmReward,
@@ -500,7 +500,7 @@ abstract contract WitOracleBaseQueriableTrustable
         internal
         returns (Witnet.QueryId _queryId)
     {
-        _queryId = super.__postQuery(
+        _queryId = super.__queryData(
             _requester,
             _callbackGas,
             _evmReward,

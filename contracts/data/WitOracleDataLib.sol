@@ -2,13 +2,14 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../interfaces/IWitOracleConsumer.sol";
+import "../interfaces/IWitOracleQueriableConsumer.sol";
 import "../interfaces/IWitOracleQueriableEvents.sol";
 import "../interfaces/IWitOracleQueriableExperimental.sol";
 import "../interfaces/IWitOracleRadonRegistry.sol";
 import "../interfaces/IWitOracleTrustableAdmin.sol";
 import "../interfaces/IWitOracleTrustableReporter.sol";
 import "../interfaces/IWitOracleTrustlessReporter.sol";
+
 import "../interfaces/legacy/IWitOracleLegacy.sol";
 
 import "../libs/Witnet.sol";
@@ -337,7 +338,7 @@ library WitOracleDataLib {
     /// --- IWitOracleTrustableReporter ------------------------------------------------
 
     function extractRadonRequests(
-            WitOracleRadonRegistry registry, 
+            IWitOracleRadonRegistry registry, 
             Witnet.QueryId[] calldata queryIds
         )
         public view
@@ -375,7 +376,11 @@ library WitOracleDataLib {
 
         // determine whether a callback is required
         if (__query.request.callbackGas > 0) {
-            (uint256 _evmCallbackActualGas, bool _evmCallbackSuccess, string memory _evmCallbackRevertMessage) = __reportResultCallback(
+            (
+                uint256 _evmCallbackActualGas, 
+                bool _evmCallbackSuccess, 
+                string memory _evmCallbackRevertMessage
+            ) = __reportResultCallback(
                 __query.request.requester,
                 __query.request.callbackGas,
                 evmFinalityBlock,
@@ -457,7 +462,7 @@ library WitOracleDataLib {
             }),
             evmFinalityBlock == block.number ? Witnet.QueryStatus.Finalized : Witnet.QueryStatus.Reported
         );
-        try IWitOracleConsumer(requester).reportWitOracleQueryResult{
+        try IWitOracleQueriableConsumer(requester).reportWitOracleQueryResult{
             gas: evmCallbackGasLimit
         } (
             queryId,
@@ -497,7 +502,7 @@ library WitOracleDataLib {
     /// --- IWitOracleQueriableExperimental -----------------------------------
 
     function extractDelegatedDataRequest(
-            WitOracleRadonRegistry registry,
+            IWitOracleRadonRegistry registry,
             Witnet.QueryId queryId
         )
         public view

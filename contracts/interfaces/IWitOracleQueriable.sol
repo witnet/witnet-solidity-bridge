@@ -2,9 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./IWitOracleConsumer.sol";
-
-import "../WitOracleRadonRegistry.sol";
+import "./IWitOracleRadonRegistry.sol";
 
 interface IWitOracleQueriable {
     
@@ -66,7 +64,10 @@ interface IWitOracleQueriable {
     /// @dev - invalid query SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
     /// @param radonHash The unique hash of the Radon Request to be solved by Wit/Oracle sidechain. 
-    function postQuery(Witnet.RadonHash radonHash, Witnet.QuerySLA calldata)
+    function queryData(
+            Witnet.RadonHash radonHash,
+            Witnet.QuerySLA calldata
+        )
         external payable returns (Witnet.QueryId);
 
     /// @notice Request real world data from the Wit/Oracle sidechain. 
@@ -78,9 +79,13 @@ interface IWitOracleQueriable {
     /// @dev - the data request's RAD hash was not previously verified into the Radon Registry;
     /// @dev - invalid query SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
-    /// @dev - passed `consumer` is not a contract implementing the IWitOracleConsumer interface;
+    /// @dev - passed `consumer` is not a contract implementing the IWitOracleQueriableConsumer interface;
     /// @param radonHash The unique hash of the Radon Request to be solved by Wit/Oracle sidechain. 
-    function postQuery(Witnet.RadonHash radonHash, Witnet.QuerySLA calldata, Witnet.QueryCallback calldata)
+    function queryDataWithCallback(
+            Witnet.RadonHash radonHash, 
+            Witnet.QuerySLA calldata, 
+            Witnet.QueryCallback calldata
+        )
         external payable returns (Witnet.QueryId);
 
     /// @notice Request real world data from the Wit/Oracle sidechain. 
@@ -92,15 +97,19 @@ interface IWitOracleQueriable {
     /// @dev - the data request's RAD hash was not previously verified into the Radon Registry;
     /// @dev - invalid query SLA parameters were provided;
     /// @dev - insufficient value is paid as reward.
-    /// @dev - passed `consumer` is not a contract implementing the IWitOracleConsumer interface;
+    /// @dev - passed `consumer` is not a contract implementing the IWitOracleQueriableConsumer interface;
     /// @param radonBytecode The bytecode of the RadonRequest to be solved by Wit/Oracle sidechain. 
-    function postQuery(bytes calldata radonBytecode, Witnet.QuerySLA calldata, Witnet.QueryCallback calldata)
+    function queryDataWithCallback(
+            bytes calldata radonBytecode, 
+            Witnet.QuerySLA calldata, 
+            Witnet.QueryCallback calldata
+        )
         external payable returns (Witnet.QueryId);
 
-    /// @notice Returns the singleton WitOracleRadonRegistry in which all Witnet-compliant data requests 
+    /// @notice Returns the WitOracleRadonRegistry in which all Witnet-compliant Radon requests
     /// @notice and templates must be previously verified so they can be passed as reference when 
-    /// @notice calling postRequest(bytes32,..) methods.
-    function registry() external view returns (WitOracleRadonRegistry);
+    /// @notice calling queryData(Witnet.RadonHash,..) methods.
+    function registry() external view returns (IWitOracleRadonRegistry);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     function upgradeQueryEvmReward(Witnet.QueryId) external payable;

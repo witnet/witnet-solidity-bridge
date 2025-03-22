@@ -2,12 +2,12 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./WitOracleConsumer.sol";
+import "./WitOracleQueriableConsumer.sol";
 import "../WitOracleRequest.sol";
 
-abstract contract WitOracleRandomnessConsumer
+abstract contract WitOracleQueriableRandomnessConsumer
     is
-        WitOracleConsumer
+        WitOracleQueriableConsumer
 {
     using Witnet for bytes;
     using Witnet for bytes32;
@@ -18,18 +18,18 @@ abstract contract WitOracleRandomnessConsumer
 
     /// @param _witOracle Address of the WitOracle contract.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
-    /// @param _callbackGas Maximum gas to be spent by the IWitOracleConsumer's callback methods.
+    /// @param _callbackGas Maximum gas to be spent by the IWitOracleQueriableConsumer's callback methods.
     constructor(
             WitOracle _witOracle, 
             uint16 _baseFeeOverheadPercentage,
             uint24 _callbackGas
         )
         UsingWitOracle(_witOracle)
-        WitOracleConsumer(_callbackGas)
+        WitOracleQueriableConsumer(_callbackGas)
     {
         // On-chain building of the Witnet Randomness Request:
         {
-            WitOracleRadonRegistry _registry = witOracle().registry();
+            IWitOracleRadonRegistry _registry = witOracle().registry();
             // Build own Witnet Randomness Request:
             __witOracleRandomnessRadHash = _registry.verifyRadonRequest(
                 Witnet.intoMemArray([
@@ -101,7 +101,7 @@ abstract contract WitOracleRandomnessConsumer
         )
         virtual internal returns (Witnet.QueryId)
     {
-        return __witOracle.postQuery{
+        return __witOracle.queryDataWithCallback{
             value: _queryEvmReward
         }(
             __witOracleRandomnessRadHash,

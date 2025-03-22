@@ -9,7 +9,7 @@ interface IWitOracleConsumerLegacy {
     /// @notice Method to be called from the WitOracle contract as soon as the given Witnet `queryId`
     /// @notice gets reported, if reported with no errors.
     /// @dev It should revert if called from any other address different to the WitOracle being used
-    /// @dev by the WitOracleConsumer contract. 
+    /// @dev by the data consumer contract. 
     /// @param queryId The unique identifier of the Witnet query being reported.
     /// @param resultDrTxHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
     /// @param resultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
@@ -26,7 +26,7 @@ interface IWitOracleConsumerLegacy {
     /// @notice Method to be called from the WitOracle contract as soon as the given Witnet `queryId`
     /// @notice gets reported, if reported WITH errors.
     /// @dev It should revert if called from any other address different to the WitOracle being used
-    /// @dev by the WitOracleConsumer contract. 
+    /// @dev by the data consumer contract. 
     /// @param queryId The unique identifier of the Witnet query being reported.
     /// @param resultDrTxHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
     /// @param resultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
@@ -44,6 +44,6 @@ interface IWitOracleConsumerLegacy {
 
     /// @notice Determines if Witnet queries can be reported from given address.
     /// @dev In practice, must only be true on the WitOracle address that's being used by
-    /// @dev the WitOracleConsumer to post queries. 
+    /// @dev the data consumer contract to post queries. 
     function reportableFrom(address) external view returns (bool);
 }

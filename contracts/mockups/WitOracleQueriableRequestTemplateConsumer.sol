@@ -3,36 +3,36 @@
 pragma solidity ^0.8.0;
 
 import "./UsingWitOracleRequestTemplate.sol";
-import "./WitOracleConsumer.sol";
+import "./WitOracleQueriableConsumer.sol";
 
-abstract contract WitOracleRequestTemplateConsumer
+abstract contract WitOracleQueriableRequestTemplateConsumer
     is
         UsingWitOracleRequestTemplate,
-        WitOracleConsumer
+        WitOracleQueriableConsumer
 {
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
     
     /// @param _witOracleRequestTemplate Address of the WitOracleRequestTemplate from which actual data requests will get built.
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
-    /// @param _callbackGas Maximum gas to be spent by the IWitOracleConsumer's callback methods.
+    /// @param _callbackGas Maximum gas to be spent by the IWitOracleQueriableConsumer's callback methods.
     constructor(
             WitOracleRequestTemplate _witOracleRequestTemplate, 
             uint16 _baseFeeOverheadPercentage,
             uint24 _callbackGas
         )
         UsingWitOracleRequestTemplate(_witOracleRequestTemplate, _baseFeeOverheadPercentage)
-        WitOracleConsumer(_callbackGas)
+        WitOracleQueriableConsumer(_callbackGas)
     {}
 
     /// @dev Estimate the minimum reward required for posting a data request (based on given gas price and 
     /// @dev immutable `__witOracleCallbackGasLimit`).
     function _witOracleEstimateBaseFee(uint256 _evmGasPrice)
-        virtual override (UsingWitOracle, WitOracleConsumer)
+        virtual override (UsingWitOracle, WitOracleQueriableConsumer)
         internal view 
         returns (uint256)
     {
-        return WitOracleConsumer._witOracleEstimateBaseFee(_evmGasPrice);
+        return WitOracleQueriableConsumer._witOracleEstimateBaseFee(_evmGasPrice);
     }
 
     /// @dev Pulls a fresh update from the Wit/Oracle blockchain based on some data request built out
@@ -43,13 +43,13 @@ abstract contract WitOracleRequestTemplateConsumer
     /// @dev parameterized data sources (i.e. Radon Retrievals). 
     /// @param _witOracleRequestArgs Parameters passed to the `witOracleRequestTemplate` for building a new data request.
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle bridge when pulling the data update.
-    function __witOraclePostQuery(
+    function __witOracleQueryData(
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward
         )
         virtual override internal returns (Witnet.RadonHash, Witnet.QueryId)
     {
-        return __witOraclePostQuery(
+        return __witOracleQueryData(
             _witOracleRequestArgs,
             _queryEvmReward, 
             __witOracleDefaultQueryParams
@@ -65,7 +65,7 @@ abstract contract WitOracleRequestTemplateConsumer
     /// @param _witOracleRequestArgs Parameters passed to the `witOracleRequestTemplate` for building a new data request.
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle bridge when pulling the data update.
     /// @param _querySLA The required SLA data security params for the Wit/Oracle blockchain to accomplish.
-    function __witOraclePostQuery(
+    function __witOracleQueryData(
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward,
             Witnet.QuerySLA memory _querySLA
@@ -77,7 +77,7 @@ abstract contract WitOracleRequestTemplateConsumer
         )
     {
         _queryRadHash = __witOracleVerifyRadonRequest(_witOracleRequestArgs);
-        _queryId = __witOracle.postQuery{
+        _queryId = __witOracle.queryDataWithCallback{
             value: _queryEvmReward
         }(
             _queryRadHash,

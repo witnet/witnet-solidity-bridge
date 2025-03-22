@@ -36,12 +36,12 @@ abstract contract UsingWitOracleRequest
     /// @dev Pulls a data update from the Wit/Oracle blockchain based on the underlying `witOracleRequest`,
     /// @dev and the default `__witOracleDefaultQueryParams` data security parameters. 
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle when pulling the data update.
-    function __witOraclePostQuery(
+    function __witOracleQueryData(
             uint256 _queryEvmReward
         )
         virtual internal returns (Witnet.QueryId)
     {
-        return __witOraclePostQuery(
+        return __witOracleQueryData(
             _queryEvmReward, 
             __witOracleDefaultQueryParams
         );
@@ -51,13 +51,13 @@ abstract contract UsingWitOracleRequest
     /// @dev and the given `_querySLA` data security parameters. 
     /// @param _queryEvmReward The exact EVM reward passed to the WitOracle when pulling the data update.
     /// @param _querySLA The required SLA data security params for the Wit/Oracle blockchain to accomplish.
-    function __witOraclePostQuery(
+    function __witOracleQueryData(
             uint256 _queryEvmReward,
             Witnet.QuerySLA memory _querySLA
         )
         virtual internal returns (Witnet.QueryId)
     {
-        return __witOracle.postQuery{
+        return __witOracle.queryData{
             value: _queryEvmReward
         }(
             __wirOracleRequestHash,

@@ -58,7 +58,7 @@ contract WitPriceFeedsLegacyUpgradable
         witOracle = _witOracle;
     }
 
-    function _registry() virtual internal view returns (WitOracleRadonRegistry) {
+    function _registry() virtual internal view returns (IWitOracleRadonRegistry) {
         return witOracle.registry();
     }
 

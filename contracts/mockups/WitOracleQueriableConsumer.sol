@@ -3,37 +3,37 @@
 pragma solidity ^0.8.0;
 
 import "./UsingWitOracle.sol";
-import "../interfaces/IWitOracleConsumer.sol";
+import "../interfaces/IWitOracleQueriableConsumer.sol";
 
-abstract contract WitOracleConsumer
+abstract contract WitOracleQueriableConsumer
     is
-        IWitOracleConsumer,
+        IWitOracleQueriableConsumer,
         UsingWitOracle
 { 
-    /// @dev Maximum gas to be spent by the IWitOracleConsumer's callback methods.  
+    /// @dev Maximum gas to be spent by the IWitOracleQueriableConsumer's callback methods.  
     uint24 internal immutable __witOracleCallbackGasLimit;
   
     modifier onlyFromWitOracle {
-        require(msg.sender == address(__witOracle), "WitOracleConsumer: unauthorized");
+        require(msg.sender == address(__witOracle), "WitOracleQueriableConsumer: unauthorized");
         _;
     }
 
-    /// @param _callbackGas Maximum gas to be spent by the IWitOracleConsumer's callback methods.
+    /// @param _callbackGas Maximum gas to be spent by the IWitOracleQueriableConsumer's callback methods.
     constructor (uint24 _callbackGas) {
         __witOracleCallbackGasLimit = _callbackGas;
     }
 
     
     /// ===============================================================================================================
-    /// --- Base implementation of IWitOracleConsumer --------------------------------------------------------------------
+    /// --- Base implementation of IWitOracleQueriableConsumer --------------------------------------------------------------------
 
-    function reportableFrom(address _from) virtual override external view returns (bool) {
-        return _from == address(__witOracle);
+    function reportableFrom(IWitOracleQueriable _from) virtual override external view returns (bool) {
+        return address(_from) == address(__witOracle);
     }
 
 
     /// ===============================================================================================================
-    /// --- WitOracleConsumer virtual methods ----------------------------------------------------------------------------
+    /// --- WitOracleQueriableConsumer virtual methods ----------------------------------------------------------------------------
 
     /// @dev Estimate the minimum reward required for posting a data request (based on given gas price and 
     /// @dev immutable `__witOracleCallbackGasLimit`).
