@@ -3,7 +3,6 @@
 pragma solidity ^0.8.0;
 
 import "../WitOracle.sol";
-import "./IWitAppliance.sol";
 
 abstract contract IWitOracleAppliance
     is

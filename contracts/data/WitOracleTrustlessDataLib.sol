@@ -3,14 +3,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitOracleDataLib.sol";
-import "../interfaces/IWitOracleBlocks.sol";
+import "../interfaces/IWitOracleTrustless.sol";
 import "../libs/Witnet.sol";
 import "../patterns/Escrowable.sol";
 
 
 /// @title Trustless Witnet Request Board data library extension
 /// @author The Witnet Foundation.
-library WitOracleBlocksLib {  
+library WitOracleTrustlessDataLib {  
 
     using Witnet for Witnet.Beacon;
     using Witnet for Witnet.BlockNumber;
@@ -102,7 +102,7 @@ library WitOracleBlocksLib {
 
 
     /// =======================================================================
-    /// --- IWitOracleBlocks --------------------------------------------------
+    /// --- IWitOracleTrustless --------------------------------------------------
 
     function getLastKnownBeacon() internal view returns (Witnet.Beacon storage) {
         return data().beacons[data().lastKnownBeaconIndex];
@@ -119,7 +119,7 @@ library WitOracleBlocksLib {
         head = verifyBeacons(rollup);
         data().beacons[head.index] = head;
         data().lastKnownBeaconIndex = head.index;
-        emit IWitOracleBlocks.Rollup(head);
+        emit IWitOracleTrustless.Rollup(head);
     }
 
     function verifyBeacons(Witnet.FastForward[] calldata rollup)

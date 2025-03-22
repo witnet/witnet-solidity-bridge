@@ -26,7 +26,7 @@ abstract contract WitOracleBasePushOnlyUpgradable
     function __initializeUpgradableData(bytes memory _initData) virtual override internal {
         if (__proxiable().codehash == bytes32(0)) {
             // upon first initialization, store genesis beacon
-            WitOracleBlocksLib.data().beacons[
+            WitOracleTrustlessDataLib.data().beacons[
                 Witnet.WIT_2_GENESIS_BEACON_INDEX
             ] = Witnet.Beacon({
                 index: Witnet.WIT_2_GENESIS_BEACON_INDEX,
@@ -45,7 +45,7 @@ abstract contract WitOracleBasePushOnlyUpgradable
             // otherwise, store beacon read from _initData, if any
             if (_initData.length > 0) {
                 Witnet.Beacon memory _initBeacon = abi.decode(_initData, (Witnet.Beacon));
-                WitOracleBlocksLib.data().beacons[_initBeacon.index] = _initBeacon;
+                WitOracleTrustlessDataLib.data().beacons[_initBeacon.index] = _initBeacon;
             }
         }
     }

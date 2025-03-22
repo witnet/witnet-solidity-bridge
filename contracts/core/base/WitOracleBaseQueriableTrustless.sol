@@ -3,8 +3,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitOracleBaseQueriable.sol";
-import "../../data/WitOracleBlocksLib.sol";
-import "../../interfaces/IWitOracleBlocks.sol";
+import "../../data/WitOracleTrustlessDataLib.sol";
+import "../../interfaces/IWitOracleTrustless.sol";
 import "../../interfaces/IWitOracleTrustlessReporter.sol";
 import "../../patterns/Escrowable.sol";
 
@@ -14,11 +14,11 @@ abstract contract WitOracleBaseQueriableTrustless
     is 
         Escrowable,
         WitOracleBaseQueriable,
-        IWitOracleBlocks,
+        IWitOracleTrustless,
         IWitOracleTrustlessReporter
 {
     using Witnet for Witnet.DataPullReport;
-    using WitOracleBlocksLib for Witnet.Query;
+    using WitOracleTrustlessDataLib for Witnet.Query;
 
     /// @notice Number of blocks to await for either a dispute or a proven response to some query.
     uint256 immutable public QUERY_AWAITING_BLOCKS;
@@ -49,7 +49,7 @@ abstract contract WitOracleBaseQueriableTrustless
         QUERY_REPORTING_STAKE = _queryReportingStake;
 
         // store genesis beacon:
-        WitOracleBlocksLib.data().beacons[
+        WitOracleTrustlessDataLib.data().beacons[
             Witnet.WIT_2_GENESIS_BEACON_INDEX
         ] = Witnet.Beacon({
             index: Witnet.WIT_2_GENESIS_BEACON_INDEX,
@@ -78,7 +78,7 @@ abstract contract WitOracleBaseQueriableTrustless
         virtual override
         returns (uint256)
     {
-        return WitOracleBlocksLib.data().escrows[tenant].collateral;
+        return WitOracleTrustlessDataLib.data().escrows[tenant].collateral;
     }
 
     function balanceOf(address tenant)
@@ -86,7 +86,7 @@ abstract contract WitOracleBaseQueriableTrustless
         virtual override
         returns (uint256)
     {
-        return WitOracleBlocksLib.data().escrows[tenant].balance;
+        return WitOracleTrustlessDataLib.data().escrows[tenant].balance;
     }
 
     function withdraw()
@@ -94,7 +94,7 @@ abstract contract WitOracleBaseQueriableTrustless
         virtual override
         returns (uint256 _withdrawn)
     {
-        _withdrawn = WitOracleBlocksLib.withdraw(msg.sender);
+        _withdrawn = WitOracleTrustlessDataLib.withdraw(msg.sender);
         __safeTransferTo(
             payable(msg.sender), 
             _withdrawn
@@ -105,35 +105,35 @@ abstract contract WitOracleBaseQueriableTrustless
         virtual override
         internal
     {
-        WitOracleBlocksLib.burn(from, value);
+        WitOracleTrustlessDataLib.burn(from, value);
     }
 
     function __deposit(address from, uint256 value)
         virtual override
         internal
     {
-        WitOracleBlocksLib.deposit(from, value);
+        WitOracleTrustlessDataLib.deposit(from, value);
     }
 
     function __stake(address from, uint256 value)
         virtual override
         internal
     {
-        WitOracleBlocksLib.stake(from, value);
+        WitOracleTrustlessDataLib.stake(from, value);
     }
 
     function __slash(address from, address to, uint256 value)
         virtual override
         internal
     {
-        WitOracleBlocksLib.slash(from, to, value);
+        WitOracleTrustlessDataLib.slash(from, to, value);
     }
 
     function __unstake(address from, uint256 value)
         virtual override
         internal
     {
-        WitOracleBlocksLib.unstake(from, value);
+        WitOracleTrustlessDataLib.unstake(from, value);
     }
 
 
@@ -149,7 +149,7 @@ abstract contract WitOracleBaseQueriableTrustless
             _proof, 
             (Witnet.FastForward[], bytes32[])
         );
-        try WitOracleBlocksLib.parseDataPushReport(
+        try WitOracleTrustlessDataLib.parseDataPushReport(
             _dataPushReport,
             _rollup,
             _merkle
@@ -175,7 +175,7 @@ abstract contract WitOracleBaseQueriableTrustless
             _proof, 
             (Witnet.FastForward[], bytes32[])
         );
-        try WitOracleBlocksLib.rollupDataPushReport(
+        try WitOracleTrustlessDataLib.rollupDataPushReport(
             _dataPushReport,
             _rollup,
             _merkle
@@ -203,7 +203,7 @@ abstract contract WitOracleBaseQueriableTrustless
         virtual override external
         returns (Witnet.QueryEvmReward)
     {
-        try WitOracleBlocksLib.deleteQueryTrustlessly(
+        try WitOracleTrustlessDataLib.deleteQueryTrustlessly(
             _queryId,
             QUERY_AWAITING_BLOCKS,
             QUERY_REPORTING_STAKE
@@ -241,7 +241,7 @@ abstract contract WitOracleBaseQueriableTrustless
 
     
     // ================================================================================================================
-    // --- IWitOracleBlocks -------------------------------------------------------------------------------------------
+    // --- IWitOracleTrustless -------------------------------------------------------------------------------------------
 
     function determineBeaconIndexFromTimestamp(Witnet.Timestamp timestamp)
         virtual override
@@ -264,7 +264,7 @@ abstract contract WitOracleBaseQueriableTrustless
         public view
         returns (Witnet.Beacon memory)
     {
-        return WitOracleBlocksLib.seekBeacon(index);
+        return WitOracleTrustlessDataLib.seekBeacon(index);
     }
 
     function getGenesisBeacon() 
@@ -292,7 +292,7 @@ abstract contract WitOracleBaseQueriableTrustless
         public view
         returns (Witnet.Beacon memory)
     {
-        return WitOracleBlocksLib.getLastKnownBeacon();
+        return WitOracleTrustlessDataLib.getLastKnownBeacon();
     }
 
     function getLastKnownBeaconIndex()
@@ -300,14 +300,14 @@ abstract contract WitOracleBaseQueriableTrustless
         public view
         returns (uint32)
     {
-        return uint32(WitOracleBlocksLib.getLastKnownBeaconIndex());
+        return uint32(WitOracleTrustlessDataLib.getLastKnownBeaconIndex());
     }
 
     function rollupBeacons(Witnet.FastForward[] calldata _witOracleRollup)
         virtual override public 
         returns (Witnet.Beacon memory)
     {
-        try WitOracleBlocksLib.rollupBeacons(
+        try WitOracleTrustlessDataLib.rollupBeacons(
             _witOracleRollup
         ) returns (
             Witnet.Beacon memory _witOracleHead
@@ -330,7 +330,7 @@ abstract contract WitOracleBaseQueriableTrustless
         virtual override external
         returns (uint256)
     {
-        try WitOracleBlocksLib.claimQueryReward(
+        try WitOracleTrustlessDataLib.claimQueryReward(
             _queryId, 
             QUERY_AWAITING_BLOCKS,
             QUERY_REPORTING_STAKE
@@ -353,7 +353,7 @@ abstract contract WitOracleBaseQueriableTrustless
         returns (uint256 _evmTotalReward)
     {
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
-            try WitOracleBlocksLib.claimQueryReward(
+            try WitOracleTrustlessDataLib.claimQueryReward(
                 _queryIds[_ix],
                 QUERY_AWAITING_BLOCKS,
                 QUERY_REPORTING_STAKE
@@ -380,7 +380,7 @@ abstract contract WitOracleBaseQueriableTrustless
         virtual override external
         returns (uint256)
     {
-        try WitOracleBlocksLib.disputeQueryResponse(
+        try WitOracleTrustlessDataLib.disputeQueryResponse(
             _queryId,
             QUERY_AWAITING_BLOCKS,
             QUERY_REPORTING_STAKE
@@ -399,7 +399,7 @@ abstract contract WitOracleBaseQueriableTrustless
         virtual override public 
         returns (uint256)
     {
-        try WitOracleBlocksLib.reportQueryResponseTrustlessly(
+        try WitOracleTrustlessDataLib.reportQueryResponseTrustlessly(
             _responseReport,
             QUERY_AWAITING_BLOCKS,
             QUERY_REPORTING_STAKE
@@ -448,7 +448,7 @@ abstract contract WitOracleBaseQueriableTrustless
     {
         for (uint _ix = 0; _ix < _responseReports.length; _ix ++) {
             Witnet.DataPullReport calldata _responseReport = _responseReports[_ix];
-            try WitOracleBlocksLib.reportQueryResponseTrustlessly(
+            try WitOracleTrustlessDataLib.reportQueryResponseTrustlessly(
                 _responseReport,
                 QUERY_AWAITING_BLOCKS,
                 QUERY_REPORTING_STAKE
@@ -510,7 +510,7 @@ abstract contract WitOracleBaseQueriableTrustless
         virtual override external
         returns (uint256)
     {
-        try WitOracleBlocksLib.rollupQueryResponseProof(
+        try WitOracleTrustlessDataLib.rollupQueryResponseProof(
             _witOracleRollup,
             _responseReport,
             _queryResponseReportMerkleProof,

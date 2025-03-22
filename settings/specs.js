@@ -23,7 +23,7 @@ module.exports = {
     },
     WitOracleTrustless: {
       baseLibs: [
-        "WitOracleBlocksLib",
+        "WitOracleTrustlessDataLib",
       ],
       immutables: {
         types: ["uint256", "uint256"],

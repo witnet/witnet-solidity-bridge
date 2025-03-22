@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitOracleBasePushOnly.sol";
 
-import "../../data/WitOracleBlocksLib.sol";
+import "../../data/WitOracleTrustlessDataLib.sol";
 import "../../data/WitOracleDataLib.sol";
 
 /// @title Push-only WitOracle "trustless" base implementation.
@@ -12,13 +12,13 @@ import "../../data/WitOracleDataLib.sol";
 abstract contract WitOracleBasePushOnlyTrustless
     is 
         WitOracleBasePushOnly,
-        IWitOracleBlocks
+        IWitOracleTrustless
 {
     using Witnet for Witnet.DataPushReport;
 
     constructor() {
         // store genesis beacon:
-        WitOracleBlocksLib.data().beacons[
+        WitOracleTrustlessDataLib.data().beacons[
             Witnet.WIT_2_GENESIS_BEACON_INDEX
         ] = Witnet.Beacon({
             index: Witnet.WIT_2_GENESIS_BEACON_INDEX,
@@ -57,7 +57,7 @@ abstract contract WitOracleBasePushOnlyTrustless
 
 
     // ================================================================================================================
-    // --- IWitOracleBlocks -------------------------------------------------------------------------------------------
+    // --- IWitOracleTrustless -------------------------------------------------------------------------------------------
 
     function determineBeaconIndexFromTimestamp(Witnet.Timestamp timestamp)
         virtual override
@@ -80,7 +80,7 @@ abstract contract WitOracleBasePushOnlyTrustless
         public view
         returns (Witnet.Beacon memory)
     {
-        return WitOracleBlocksLib.seekBeacon(index);
+        return WitOracleTrustlessDataLib.seekBeacon(index);
     }
 
     function getGenesisBeacon() 
@@ -108,7 +108,7 @@ abstract contract WitOracleBasePushOnlyTrustless
         public view
         returns (Witnet.Beacon memory)
     {
-        return WitOracleBlocksLib.getLastKnownBeacon();
+        return WitOracleTrustlessDataLib.getLastKnownBeacon();
     }
 
     function getLastKnownBeaconIndex()
@@ -116,14 +116,14 @@ abstract contract WitOracleBasePushOnlyTrustless
         public view
         returns (uint32)
     {
-        return uint32(WitOracleBlocksLib.getLastKnownBeaconIndex());
+        return uint32(WitOracleTrustlessDataLib.getLastKnownBeaconIndex());
     }
 
     function rollupBeacons(Witnet.FastForward[] calldata _witOracleRollup)
         virtual override public 
         returns (Witnet.Beacon memory)
     {
-        try WitOracleBlocksLib.rollupBeacons(
+        try WitOracleTrustlessDataLib.rollupBeacons(
             _witOracleRollup
         ) returns (
             Witnet.Beacon memory _witOracleHead
@@ -147,7 +147,7 @@ abstract contract WitOracleBasePushOnlyTrustless
         virtual override internal pure returns (string memory)
     {
         return string(abi.encodePacked(
-            type(WitOracleBlocksLib).name,
+            type(WitOracleTrustlessDataLib).name,
             ": unhandled assertion"
         ));
     }
