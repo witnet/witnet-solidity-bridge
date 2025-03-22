@@ -1,8 +1,8 @@
 const ethUtils = require("ethereumjs-util")
 const fs = require("fs")
 const merge = require("lodash.merge")
-const settings = require("../../settings")
-const utils = require("../../src/utils")
+const settings = require("../../../settings")
+const utils = require("../../../src/utils")
 const version = `${
   require("../../package").version
 }-${
