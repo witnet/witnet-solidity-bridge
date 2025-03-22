@@ -2,14 +2,15 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitOracleRadonRegistry.sol";
-import "../interfaces/IWitOracleTrustableAdmin.sol";
 import "../interfaces/IWitOracleConsumer.sol";
 import "../interfaces/IWitOracleQueriableEvents.sol";
 import "../interfaces/IWitOracleQueriableExperimental.sol";
+import "../interfaces/IWitOracleRadonRegistry.sol";
+import "../interfaces/IWitOracleTrustableAdmin.sol";
 import "../interfaces/IWitOracleTrustableReporter.sol";
 import "../interfaces/IWitOracleTrustlessReporter.sol";
 import "../interfaces/legacy/IWitOracleLegacy.sol";
+
 import "../libs/Witnet.sol";
 
 /// @title Witnet Request Board base data model library
@@ -252,7 +253,10 @@ library WitOracleDataLib {
 
     function getQueryResult(Witnet.QueryId queryId) public view returns (Witnet.DataResult memory _result) {
         Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
-        return intoDataResult(seekQueryResponse(queryId), _queryStatus);
+        return intoDataResult(
+            seekQueryResponse(queryId),
+            _queryStatus
+        );
     }
     
     function getQueryResultStatus(Witnet.QueryId queryId) public view returns (Witnet.ResultStatus) {
@@ -457,7 +461,7 @@ library WitOracleDataLib {
             gas: evmCallbackGasLimit
         } (
             queryId,
-            _result
+            abi.encode(_result)
         ) {
             evmCallbackSuccess = true;
         

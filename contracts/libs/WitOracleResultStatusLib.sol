@@ -18,7 +18,8 @@ library WitOracleResultStatusLib {
     // ================================================================================================================
     // --- Library public methods -------------------------------------------------------------------------------------
 
-    function toString(Witnet.DataResult memory result) public pure returns (string memory) {
+    function toString(bytes calldata _result) public pure returns (string memory) {
+        Witnet.DataResult memory result = abi.decode(_result, (Witnet.DataResult));
         if (result.status == Witnet.ResultStatus.NoErrors) {
             return "No errors.";
         

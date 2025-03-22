@@ -261,7 +261,7 @@ abstract contract WitOracleBaseQueriable
         returns (string memory)
     {
         return WitOracleResultStatusLib.toString(
-            WitOracleDataLib.getQueryResult(_queryId)
+            abi.encode(WitOracleDataLib.getQueryResult(_queryId))
         );
     }
 

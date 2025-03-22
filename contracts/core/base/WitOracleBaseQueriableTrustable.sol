@@ -197,7 +197,7 @@ abstract contract WitOracleBaseQueriableTrustable
         );
         return IWitOracleLegacy.ResultError({
             code: uint8(_result.status),
-            reason: WitOracleResultStatusLib.toString(_result)
+            reason: WitOracleResultStatusLib.toString(abi.encode(_result))
         });
     }
 

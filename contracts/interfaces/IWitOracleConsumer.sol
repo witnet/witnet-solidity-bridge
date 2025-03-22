@@ -11,10 +11,10 @@ interface IWitOracleConsumer {
     /// @dev It should revert if called from any other address different to the WitOracle being used
     /// @dev by the WitOracleConsumer contract. 
     /// @param queryId The unique identifier of the Witnet query being reported.
-    /// @param queryResult Struct contaning a Witnet.DataResult metadata and value.
+    /// @param queryResult Bytes-encoded Witnet.DataResult containing result CBOR value, and metadata.
     function reportWitOracleQueryResult(
-            Witnet.QueryId queryId, 
-            Witnet.DataResult memory queryResult
+            Witnet.QueryId queryId,
+            bytes calldata queryResult
         ) external;
 
     /// @notice Determines if Witnet queries can be reported from given address.
