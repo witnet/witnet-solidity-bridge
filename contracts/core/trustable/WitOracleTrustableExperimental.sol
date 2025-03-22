@@ -5,10 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../base/WitOracleBaseQueriableTrustable.sol";
 import "../../interfaces/IWitOracleQueriableExperimental.sol";
 
-/// @title Witnet Request Board "trustable" implementation contract.
-/// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
-/// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
-/// The result of the requests will be posted back to this contract by the bridge nodes too.
+/// @title WitOracle "experimental" implementation contract.
 /// @author The Witnet Foundation
 contract WitOracleTrustableExperimental
     is 
@@ -46,7 +43,7 @@ contract WitOracleTrustableExperimental
             _queryStatus == Witnet.QueryStatus.Posted
                 || _queryStatus == Witnet.QueryStatus.Delayed
         ) {
-            _dr = WitOracleDataLib.extractDDR(registry, _queryId);
+            _dr = WitOracleDataLib.extractDelegatedDataRequest(registry, _queryId);
         }
     }
 

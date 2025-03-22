@@ -494,9 +494,9 @@ library WitOracleDataLib {
 
 
     /// =======================================================================
-    /// --- IWitOracleQueriableExperimental --------------------------------------------
+    /// --- IWitOracleQueriableExperimental -----------------------------------
 
-    function extractDDR(
+    function extractDelegatedDataRequest(
             WitOracleRadonRegistry registry,
             Witnet.QueryId queryId
         )

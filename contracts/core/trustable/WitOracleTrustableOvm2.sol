@@ -9,10 +9,7 @@ interface OVM_GasPriceOracle {
     function getL1Fee(bytes calldata _data) external view returns (uint256);
 }
 
-/// @title Witnet Request Board "trustable" implementation contract.
-/// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
-/// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
-/// The result of the requests will be posted back to this contract by the bridge nodes too.
+/// @title Queriable WitOracle "trustable" implementation contract for OVM2 chains. 
 /// @author The Witnet Foundation
 contract WitOracleTrustableOvm2
     is 

@@ -7,7 +7,39 @@ import "../interfaces/IWitRandomnessAdmin.sol";
 import "../mockups/UsingWitOracle.sol";
 import "../patterns/Ownable2Step.sol";
 
-/// @title WitRandomnessV21: Unmalleable and provably-fair randomness generation based on the Wit/Oracle v2.*.
+/// @title WitRandomnessV21: Unbiased, EVM-agnostic and provably-fair random seeds from the Wit/Oracle blockchain. 
+/// 
+/// 256-bit random seeds can be permissionless pulled at anytime from smart contracts and externally-owned EVM accounts.
+/// 
+/// Randomness provisioning is securely protected against race-condition and malleability attacks by node validators
+/// on both EVM and Wit/Oracle blockchains. 
+///
+/// This contract acts also as a public-good registry, openly preserving all random seeds generated in the past,
+/// and providing after-the-fact traceability proof to the actual witnessing committees and punishable acts that took
+/// place on the Wit/Oracle blockchain for generating every single one of them.
+///
+/// @dev Protection against race-condition and malleability attacks requires randomness queried to this contract
+/// to be solved is an asynchronous way, meaning that after some randomness is requested, the result provided
+/// from the Wit/Oracle sidechain won't be ready until a certain amount of EVM blocks have elapsed. 
+/// This protection also implies that eventually failing randomness requests on the Wit/Oracle sidechain 
+/// cannot be retried but from this very same contract. Failing randomness requests will get all automatically
+/// and unbiasely solved as soon as some new randomness request gets solved, even if paid by a different requester.
+///
+/// Querying for new randomness requires paying a fee in native EVM gas currency, as to cover the implicit cost of
+/// solving unmalleable randomness on the Wit/Oracle sidechain and report it back to the EVM storage. The actual 
+/// randomize fee depends on the expected gas price to pay for the EVM transaction that would eventually include 
+/// a call to any of the `randomize(..)` methods of this contract. The randomize fee can be computed by passing
+/// the expected gas price value to the `estimateRandomizeFee(uint256)` method.
+///
+/// > Note [1]: On highly volatile gas price markets, especially on some Layer-2 EVM chains, is highly recommended
+/// to estimate the randomize fee before a `randomize()` call, and pass a fresh EVM gas price value. Otherwise
+/// the call to `randomize()` could potentially revert with either "insufficient reward" or "too much reward".
+///
+/// > Note [2]: Contracts requiring "synchronous" randomness resolution (e.g. minting NFTs) as to avoid
+/// involving end users in two-phase operations, might rather prefer to inherit from the 
+/// `WitOracleRandomnessConsumer` abstract class instead of relying on this contract. Nevertheless,
+/// they would have to deal themselves with eventual randomness resolution errors.
+///
 /// @author Guillermo Díaz <guillermo@witnet.io>
 contract WitRandomnessV21
     is

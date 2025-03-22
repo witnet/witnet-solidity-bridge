@@ -4,10 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../base/WitOracleBaseQueriableTrustable.sol";
 
-/// @title Witnet Request Board "trustable" implementation contract.
-/// @notice Contract to bridge requests to Witnet Decentralized Oracle Network.
-/// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
-/// The result of the requests will be posted back to this contract by the bridge nodes too.
+/// @title Queriable WitOracle "trustable" implementation.
 /// @author The Witnet Foundation
 contract WitOracleTrustableDefault
     is 

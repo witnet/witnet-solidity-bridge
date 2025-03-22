@@ -8,7 +8,7 @@ import "./interfaces/legacy/IWitPriceFeedsLegacy.sol";
 import "./interfaces/legacy/IWitPriceFeedsLegacyAdmin.sol";
 import "./interfaces/legacy/IWitPriceFeedsLegacySolverFactory.sol";
 
-/// @title WitPriceFeedsLegacy: Price Feeds live repository reliant on the Wit/Oracle blockchain, up to V2.0. 
+/// @title WitPriceFeedsLegacy: Price Feeds live repository reliant on the Wit/Oracle blockchain. 
 /// @author The Witnet Foundation.
 abstract contract WitPriceFeedsLegacy
     is
