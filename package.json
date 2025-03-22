@@ -28,7 +28,9 @@
   ],
   "scripts": {
     "clean": "pnpm run clean:artifacts && pnpm run clean:build && pnpm run clean:cache && pnpm run clean:flattened",
+    "clean:artifacts": "node ./scripts/clean.js artifacts migrations/zksync/artifacts-zk",
     "clean:build": "node ./scripts/clean.js build",
+    "clean:cache": "node ./scripts/clean.js cache migrations/zksync/cache-zk",
     "clean:flattened": "node ./scripts/clean.js flattened",
     "compile": "npx truffle compile --all",
     "console": "npx truffle console",
@@ -44,25 +46,30 @@
     "fmt!:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" --fix && solhint \"test/**/*.sol\" --fix && solhint \"flattened/**/*.sol\"",
     "fmt!": "pnpm run fmt!:js && pnpm run fmt!:sol",
     "fmt": "pnpm run fmt:js && pnpm run fmt:sol",
-    "migrate": "npx truffle migrate --network",
-    "networks": "node ./scripts/networks.js 2>&1",
+    "deploy": "npx truffle migrate --network",
     "ops:rng:sla": "npx truffle migrate --migrations_directory ./migrations/ops/rng/sla --compile-none --network",
     "ops:drp:pfs": "npx truffle migrate --migrations_directory ./migrations/ops/drp/pfs --compile-none --network",
     "ops:drp:wrb": "npx truffle migrate --migrations_directory ./migrations/ops/drp/wrb --compile-none --network",
     "prepare": "npx truffle compile --all && npx hardhat compile --force && node ./scripts/prepare.js",
     "test": "npx truffle test",
-    "verify": "node ./scripts/verify.js 2>&1"
+    "verify": "node ./scripts/verify.js 2>&1",
+    "zksync:compile": "npx hardhat --config migrations/zksync/hardhat.config.js compile",
+    "zksync:deploy": "npx hardhat --config migrations/zksync/hardhat.config.js deploy-zksync:contract --deployment-type create2 --verify --contract-name",
+    "zksync:verify": "npx hardhat --config migrations/zksync/hardhat.config.js verify"
   },
   "dependencies": {
     "dotenv": "^16.4.4",
-    "lodash.merge": "^4.6.2",
-    "proper-lockfile": "^4.1.2"
+    "lodash.merge": "^4.6.2"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-verify": "^2.0.4",
+    "@matterlabs/hardhat-zksync": "^1.4.0",
+    "@matterlabs/hardhat-zksync-solc": "^1.2.6",
+    "@matterlabs/hardhat-zksync-deploy": "^1.6.0",
+    "@matterlabs/hardhat-zksync-upgradable": "^1.8.2",
+    "@matterlabs/hardhat-zksync-verify": "^1.7.1",
+    "@nomicfoundation/hardhat-verify": "^2.0.13",
     "@openzeppelin/contracts": "^5.0.1",
     "@openzeppelin/contracts-upgradeable": "^5.0.1",
-    "@openzeppelin/test-helpers": "~0.5.16",
     "ado-contracts": "1.0.0",
     "bn.js": "^4.11.0",
     "chai": "^5.1.0",
@@ -74,7 +81,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "eth-gas-reporter": "^0.2.27",
     "eth-helpers": "^1.3.0",
-    "hardhat": "^2.22.2",
+    "hardhat": "^2.22.19",
     "nanoassert": "^2.0.0",
     "sha3-wasm": "^1.0.0",
     "solhint": "^4.1.1",
@@ -82,6 +89,6 @@
     "truffle-assertions": "^0.9.2",
     "truffle-flattener": "^1.6.0",
     "truffle-plugin-verify": "^0.6.7",
-    "witnet-toolkit": "^2.0.1-beta.0"
+    "zksync-ethers": "^6.16.2"
   }
 }

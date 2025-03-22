@@ -1,9 +1,12 @@
 
-artifacts/
+artifacts*/
 build/
-cache/
+cache*/
+deployments*/
 flattened/
 node_modules/
+
+**/missing*.json
 
 .env
 .idea

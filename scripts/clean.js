@@ -7,14 +7,15 @@ if (process.argv.length < 3) {
   process.exit(0)
 }
 
-let target = process.argv[2]
-if (fs.existsSync(target)) {
-  if (os.type() === "Windows_NT") {
-    target = target.replace(/\//g, "\\")
-    exec(`del ${target}\\ /f /q /s`)
-    exec(`rmdir ${target}\\ /q /s`)
-  } else {
-    target = target.replace(/\\/g, "/")
-    exec(`rm -rf ${target}`)
+process.argv.slice(2).forEach(target => {
+  if (fs.existsSync(target)) {
+    if (os.type() === "Windows_NT") {
+      target = target.replace(/\//g, "\\")
+      exec(`del ${target}\\ /f /q /s`)
+      exec(`rmdir ${target}\\ /q /s`)
+    } else {
+      target = target.replace(/\\/g, "/")
+      exec(`rm -rf ${target}`)
+    }
   }
-}
+})
