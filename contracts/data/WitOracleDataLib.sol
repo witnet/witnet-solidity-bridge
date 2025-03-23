@@ -7,8 +7,8 @@ import "../interfaces/IWitOracleQueriableEvents.sol";
 import "../interfaces/IWitOracleQueriableExperimental.sol";
 import "../interfaces/IWitOracleRadonRegistry.sol";
 import "../interfaces/IWitOracleTrustableAdmin.sol";
-import "../interfaces/IWitOracleTrustableReporter.sol";
-import "../interfaces/IWitOracleTrustlessReporter.sol";
+import "../interfaces/IWitOracleQueriableTrustableReporter.sol";
+import "../interfaces/IWitOracleQueriableTrustlessReporter.sol";
 
 import "../interfaces/legacy/IWitOracleLegacy.sol";
 
@@ -335,7 +335,7 @@ library WitOracleDataLib {
 
     
     /// ================================================================================
-    /// --- IWitOracleTrustableReporter ------------------------------------------------
+    /// --- IWitOracleQueriableTrustableReporter ------------------------------------------------
 
     function extractRadonRequests(
             IWitOracleRadonRegistry registry, 

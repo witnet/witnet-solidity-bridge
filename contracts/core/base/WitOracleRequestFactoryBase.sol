@@ -20,7 +20,7 @@ abstract contract WitOracleRequestFactoryBase
     using Witnet for Witnet.RadonHash;
 
     /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
-    WitOracle immutable public override witOracle;
+    address immutable public override witOracle;
 
     modifier notOnFactory virtual {
         _require(
@@ -50,13 +50,13 @@ abstract contract WitOracleRequestFactoryBase
         ); _;
     }
 
-    constructor(WitOracle _witOracle) {
+    constructor(address _witOracle) {
         _require(
-            address(_witOracle).code.length > 0,
+            _witOracle.code.length > 0,
             "inexistent oracle"
         );
         _require(
-            _witOracle.specs() == (
+            IWitAppliance(_witOracle).specs() == (
                 type(IWitAppliance).interfaceId
                     ^ type(IWitOracle).interfaceId
             ), "uncompliant WitOracle"
@@ -65,7 +65,7 @@ abstract contract WitOracleRequestFactoryBase
     }
 
     function _getWitOracleRadonRegistry() virtual internal view returns (IWitOracleRadonRegistry) {
-        return witOracle.registry();
+        return IWitOracle(witOracle).registry();
     }
 
     function initializeWitOracleRequest(Witnet.RadonHash _radHash)

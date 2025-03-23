@@ -22,8 +22,8 @@ library Witnet {
     type Timestamp is uint64;
     type TransactionHash is bytes32;
 
-    uint32 constant internal  WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
-    uint32 constant internal  WIT_1_SECS_PER_EPOCH = 45;
+    uint32  constant internal WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
+    uint32  constant internal WIT_1_SECS_PER_EPOCH = 45;
 
     uint32  constant internal WIT_2_GENESIS_BEACON_INDEX = 0;       // TBD
     uint32  constant internal WIT_2_GENESIS_BEACON_PREV_INDEX = 0;  // TBD

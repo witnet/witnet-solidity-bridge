@@ -12,8 +12,8 @@ abstract contract UsingWitOracle
         IWitOracleQueriableEvents
 {   
     /// @notice Immutable reference to the WitOracle contract.
-    function witOracle() virtual public view returns (WitOracle) {
-        return __witOracle;
+    function witOracle() virtual public view returns (address) {
+        return address(__witOracle);
     }
     WitOracle internal immutable __witOracle;
     
@@ -41,19 +41,19 @@ abstract contract UsingWitOracle
     }
 
     /// @param _witOracle Address of the WitOracle bridging contract.
-    constructor(WitOracle _witOracle) {
+    constructor(address _witOracle) {
         require(
-            _witOracle.specs() == (
+            IWitAppliance(_witOracle).specs() == (
                 type(IWitAppliance).interfaceId
                     ^ type(IWitOracle).interfaceId
                     ^ type(IWitOracleQueriable).interfaceId
             ), "UsingWitOracle: uncompliant WitOracle"
         );
-        __witOracle = _witOracle;
+        __witOracle = WitOracle(_witOracle);
         __witOracleDefaultQueryParams = Witnet.QuerySLA({
             witResultMaxSize: 32, // defaults to 32 bytes
-            witCommitteeSize: 10, // defaults to 10 witnesses
-            witInclusionFees: 2 * 10 ** 8 // defaults to 0.2 witcoins
+            witCommitteeSize: 3,  // defaults to 10 witnesses
+            witInclusionFees: 2 * 10 ** 8 // defaults to 0.2 $WIT
         });
         
         __witOracleBaseFeeOverheadPercentage = 33; // defaults to 33%

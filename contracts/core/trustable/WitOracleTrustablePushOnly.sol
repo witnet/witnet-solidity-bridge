@@ -17,7 +17,11 @@ contract WitOracleTrustablePushOnly
         return type(WitOracleTrustablePushOnly).name;
     }
 
-    constructor(bytes32 _versionTag)
+    constructor(
+            WitOracleRadonRegistry _registry, 
+            bytes32 _versionTag
+        )
+        WitOracleBasePushOnly(_registry)
         WitOracleBasePushOnlyTrustable(_versionTag)
     {}
 }

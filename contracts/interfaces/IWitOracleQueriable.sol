@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./IWitOracleRadonRegistry.sol";
+import "../libs/Witnet.sol";
 
 interface IWitOracleQueriable {
     
@@ -105,11 +105,6 @@ interface IWitOracleQueriable {
             Witnet.QueryCallback calldata
         )
         external payable returns (Witnet.QueryId);
-
-    /// @notice Returns the WitOracleRadonRegistry in which all Witnet-compliant Radon requests
-    /// @notice and templates must be previously verified so they can be passed as reference when 
-    /// @notice calling queryData(Witnet.RadonHash,..) methods.
-    function registry() external view returns (IWitOracleRadonRegistry);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     function upgradeQueryEvmReward(Witnet.QueryId) external payable;

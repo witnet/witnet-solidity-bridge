@@ -13,7 +13,7 @@ contract WitOracleRequestFactoryUpgradableConfluxCore
     }
 
     constructor(
-            WitOracle _witOracle,
+            address _witOracle,
             bytes32 _versionTag,
             bool _upgradable
         )

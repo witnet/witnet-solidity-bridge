@@ -6,7 +6,7 @@ const exec = require("child_process").execSync
 const readline = require("readline")
 const utils = require("../../../../src/utils")
 
-const IWitnetOracleReporter = artifacts.require("IWitOracleTrustableReporter")
+const IWitnetOracleReporter = artifacts.require("IWitOracleQueriableTrustableReporter")
 const IWitFeedLegacy = artifacts.require("IWitFeedsLegacy")
 const WitnetPriceFeeds = artifacts.require("WitPriceFeeds")
 const WitnetOracle = artifacts.require("WitOracle")

@@ -12,7 +12,7 @@ contract WitOracleRequestFactoryDefaultV21
         return type(WitOracleRequestFactoryDefaultV21).name;
     }
 
-    constructor(WitOracle _witOracle)
+    constructor(address _witOracle)
         WitOracleRequestFactoryBase(_witOracle)
     {}
 }

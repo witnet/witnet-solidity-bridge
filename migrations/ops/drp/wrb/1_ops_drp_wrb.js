@@ -1,6 +1,6 @@
 const utils = require("../../../../src/utils")
 
-const IWitnetOracleReporter = artifacts.require("IWitOracleTrustableReporter")
+const IWitnetOracleReporter = artifacts.require("IWitOracleQueriableTrustableReporter")
 const WitOracle = artifacts.require("WitOracle")
 
 module.exports = async function (_deployer, network, [,, from]) {

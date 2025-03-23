@@ -76,14 +76,14 @@ contract WitRandomnessV21
     uint16 internal constant _WIT_QUERY_MAX_RESULT_SIZE = 34;
 
     constructor(
-            WitOracle _witOracle,
+            address _witOracle,
             address _operator
         )
         Ownable(_operator)
         UsingWitOracle(_witOracle)
     {
         // Build Witnet-compliant randomness request:
-        IWitOracleRadonRegistry _registry = witOracle().registry();
+        IWitOracleRadonRegistry _registry = IWitOracle(witOracle()).registry();
         __witOracleQueryRadonHash = _registry.verifyRadonRequest(
             Witnet.intoMemArray([
                 _registry.verifyRadonRetrieval(
@@ -130,7 +130,7 @@ contract WitRandomnessV21
     }
 
     function witOracle() override (IWitOracleAppliance, UsingWitOracle)
-        public view returns (WitOracle)
+        public view returns (address)
     {
         return UsingWitOracle.witOracle();
     }
@@ -289,7 +289,7 @@ contract WitRandomnessV21
     /// @notice Returns the bytecode of the Radon Request used for solving
     /// randomness requests on the Wit/Oracle blockchain.
     function getRandomizeRadonBytecode() virtual override external view returns (bytes memory) {
-        return witOracle().registry().bytecodeOf(getRandomizeRadonHash());
+        return IWitOracle(witOracle()).registry().bytecodeOf(getRandomizeRadonHash());
     }
 
     /// @notice Returns the unique identifier of the Radon Request used for solving 
@@ -301,7 +301,7 @@ contract WitRandomnessV21
     /// @notice Returns the Radon Request used for solving 
     /// request randomness requests on the Wit/Oracle blockchain.
     function getRandomizeRadonRequest() virtual override external view returns (Witnet.RadonRequest memory) {
-        return witOracle().registry().lookupRadonRequest(getRandomizeRadonHash());
+        return IWitOracle(witOracle()).registry().lookupRadonRequest(getRandomizeRadonHash());
     }
 
     /// @notice Returns status of the first non-errored randomize request queried on or after the given block number.

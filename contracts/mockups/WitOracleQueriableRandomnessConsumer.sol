@@ -20,7 +20,7 @@ abstract contract WitOracleQueriableRandomnessConsumer
     /// @param _baseFeeOverheadPercentage Percentage over base fee to pay as on every data request.
     /// @param _callbackGas Maximum gas to be spent by the IWitOracleQueriableConsumer's callback methods.
     constructor(
-            WitOracle _witOracle, 
+            address _witOracle, 
             uint16 _baseFeeOverheadPercentage,
             uint24 _callbackGas
         )
@@ -29,7 +29,7 @@ abstract contract WitOracleQueriableRandomnessConsumer
     {
         // On-chain building of the Witnet Randomness Request:
         {
-            IWitOracleRadonRegistry _registry = witOracle().registry();
+            IWitOracleRadonRegistry _registry = IWitOracle(witOracle()).registry();
             // Build own Witnet Randomness Request:
             __witOracleRandomnessRadHash = _registry.verifyRadonRequest(
                 Witnet.intoMemArray([

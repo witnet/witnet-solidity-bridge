@@ -27,8 +27,8 @@ contract WitPriceFeedsLegacyUpgradable
         return type(WitPriceFeedsLegacyUpgradable).name;
     }
 
-    WitOracle immutable public override witOracle;
-    WitOracleRadonRegistry immutable internal __registry;
+    address immutable public override witOracle;
+    IWitOracleRadonRegistry immutable internal __registry;
 
     Witnet.QuerySLA private __defaultQuerySLA;
     uint16 private __baseFeeOverheadPercentage;
@@ -55,11 +55,11 @@ contract WitPriceFeedsLegacyUpgradable
                     ^ type(IWitOracle).interfaceId
             ), "uncompliant oracle"
         );
-        witOracle = _witOracle;
+        witOracle = address(_witOracle);
     }
 
     function _registry() virtual internal view returns (IWitOracleRadonRegistry) {
-        return witOracle.registry();
+        return IWitOracle(witOracle).registry();
     }
 
     // solhint-disable-next-line payable-fallback
@@ -155,7 +155,7 @@ contract WitPriceFeedsLegacyUpgradable
     
     function _estimateUpdateRequestFee(uint256 _evmGasPrice) internal view returns (uint) {
         return (
-            witOracle.estimateBaseFee(_evmGasPrice)
+            IWitOracleQueriable(witOracle).estimateBaseFee(_evmGasPrice)
                 * (100 + __baseFeeOverheadPercentage)
         ) / 100; 
     }
@@ -222,15 +222,15 @@ contract WitPriceFeedsLegacyUpgradable
         override public view
         returns (Witnet.QueryId)
     {
-        return WitPriceFeedsLegacyDataLib.lastValidQueryId(witOracle, feedId);
+        return WitPriceFeedsLegacyDataLib.lastValidQueryId(IWitOracleQueriable(witOracle), feedId);
     }
 
     function lastValidQueryResponse(bytes4 feedId)
         override public view
         returns (Witnet.QueryResponse memory)
     {
-        return witOracle.getQueryResponse(
-            WitPriceFeedsLegacyDataLib.lastValidQueryId(witOracle, feedId)
+        return IWitOracleQueriable(witOracle).getQueryResponse(
+            WitPriceFeedsLegacyDataLib.lastValidQueryId(IWitOracleQueriable(witOracle), feedId)
         );
     }
 
@@ -245,7 +245,7 @@ contract WitPriceFeedsLegacyUpgradable
         override external view 
         returns (Witnet.QueryRequest memory)
     {
-        return witOracle.getQueryRequest(latestUpdateQueryId(feedId));
+        return IWitOracleQueriable(witOracle).getQueryRequest(latestUpdateQueryId(feedId));
     }
 
     // function latestUpdateQueryResult(bytes4 feedId)
@@ -333,14 +333,14 @@ contract WitPriceFeedsLegacyUpgradable
         override external view 
         returns (Witnet.QueryResponse memory)
     {
-        return witOracle.getQueryResponse(latestUpdateQueryId(feedId));
+        return IWitOracleQueriable(witOracle).getQueryResponse(latestUpdateQueryId(feedId));
     }
 
     function latestUpdateResponseStatus(bytes4 feedId)
         override public view
         returns (IWitOracleLegacy.QueryResponseStatus)
     {
-        return IWitOracleLegacy(address(witOracle)).getQueryResponseStatus(
+        return IWitOracleLegacy(witOracle).getQueryResponseStatus(
             Witnet.QueryId.unwrap(latestUpdateQueryId(feedId))
         );
     }
@@ -349,7 +349,7 @@ contract WitPriceFeedsLegacyUpgradable
         override external view 
         returns (IWitOracleLegacy.ResultError memory)
     {
-        return IWitOracleLegacy(address(witOracle)).getQueryResultError(Witnet.QueryId.unwrap(latestUpdateQueryId(feedId)));
+        return IWitOracleLegacy(witOracle).getQueryResultError(Witnet.QueryId.unwrap(latestUpdateQueryId(feedId)));
     }
 
     // function lookupWitnetBytecode(bytes4 feedId) 
@@ -544,7 +544,7 @@ contract WitPriceFeedsLegacyUpgradable
         returns (IWitPriceFeedsLegacySolver.Price memory)
     {
         try WitPriceFeedsLegacyDataLib.latestPrice(
-            witOracle, 
+            IWitOracleQueriable(witOracle), 
             feedId
         ) returns (IWitPriceFeedsLegacySolver.Price memory _latestPrice) {
             return _latestPrice;
@@ -710,7 +710,7 @@ contract WitPriceFeedsLegacyUpgradable
         if (WitPriceFeedsLegacyDataLib.seekRecord(feedId).radHash != 0) {
             uint256 _evmUpdateRequestFee = msg.value;
             try WitPriceFeedsLegacyDataLib.requestUpdate(
-                witOracle,
+                IWitOracleQueriable(witOracle),
                 feedId,
                 querySLA,
                 _evmUpdateRequestFee

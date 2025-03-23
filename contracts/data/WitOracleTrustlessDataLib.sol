@@ -278,7 +278,7 @@ library WitOracleTrustlessDataLib {
 
 
     /// =======================================================================
-    /// --- IWitOracleTrustlessReporter ---------------------------------------
+    /// --- IWitOracleQueriableTrustlessReporter ---------------------------------------
 
     function claimQueryReward(
             Witnet.QueryId queryId,

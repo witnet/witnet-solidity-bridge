@@ -83,7 +83,7 @@ library WitPriceFeedsLegacyDataLib {
         return bytes4(keccak256(bytes(caption)));
     }
 
-    function lastValidQueryId(WitOracle witOracle, bytes4 feedId)
+    function lastValidQueryId(IWitOracleQueriable witOracle, bytes4 feedId)
         internal view 
         returns (Witnet.QueryId _queryId)
     {
@@ -96,7 +96,7 @@ library WitPriceFeedsLegacyDataLib {
         }
     }
 
-    function latestUpdateQueryResultStatus(WitOracle witOracle, bytes4 feedId)
+    function latestUpdateQueryResultStatus(IWitOracleQueriable witOracle, bytes4 feedId)
         internal view
         returns (Witnet.ResultStatus)
     {
@@ -155,7 +155,7 @@ library WitPriceFeedsLegacyDataLib {
     }
 
     function latestPrice(
-            WitOracle witOracle,
+            IWitOracleQueriable witOracle,
             bytes4 feedId
         ) 
         public view 
@@ -199,7 +199,7 @@ library WitPriceFeedsLegacyDataLib {
     }
 
     function requestUpdate(
-            WitOracle witOracle, 
+            IWitOracleQueriable witOracle, 
             bytes4 feedId, 
             Witnet.QuerySLA memory querySLA,
             uint256 evmUpdateRequestFee

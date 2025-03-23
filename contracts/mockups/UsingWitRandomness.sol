@@ -12,7 +12,7 @@ abstract contract UsingWitRandomness
         IWitOracleQueriableEvents,
         IWitRandomnessEvents
 {
-    WitOracle public immutable witOracle;
+    address public immutable witOracle;
     WitRandomness internal immutable __RNG;
 
     constructor(WitRandomness _witRandomness) {

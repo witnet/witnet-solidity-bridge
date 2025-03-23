@@ -17,7 +17,7 @@ contract WitMockedRequestFactory
 {
     constructor (WitMockedOracle _witOracle)
         WitOracleRequestFactoryUpgradableDefault(
-            WitOracle(address(_witOracle)),
+            address(_witOracle),
             bytes32("mocked"),
             false
         ) 

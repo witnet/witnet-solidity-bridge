@@ -44,13 +44,11 @@ contract WitPriceFeedsUpgradable
 
     constructor(
             address _witOracle, 
-            address _witOracleRadonRegistry,
             bytes32 _versionTag,
             bool    _upgradable
         )
         WitPriceFeedsV21(
             _witOracle, 
-            _witOracleRadonRegistry, 
             msg.sender
         )
         WitnetUpgradableBase(
