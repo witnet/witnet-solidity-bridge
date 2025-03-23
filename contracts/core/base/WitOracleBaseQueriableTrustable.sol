@@ -6,7 +6,7 @@ import "./WitOracleBaseQueriable.sol";
 import "../WitnetUpgradableBase.sol";
 import "../../interfaces/IWitOracleTrustableAdmin.sol";
 import "../../interfaces/IWitOracleQueriable.sol";
-import "../../interfaces/IWitOracleTrustableReporter.sol";
+import "../../interfaces/IWitOracleQueriableTrustableReporter.sol";
 import "../../interfaces/legacy/IWitOracleLegacy.sol";
 
 /// @title Queriable WitOracle "trustable" base implementation.
@@ -17,7 +17,7 @@ abstract contract WitOracleBaseQueriableTrustable
         WitOracleBaseQueriable,
         IWitOracleTrustableAdmin,
         IWitOracleLegacy,
-        IWitOracleTrustableReporter
+        IWitOracleQueriableTrustableReporter
 {
     using Witnet for Witnet.DataPushReport;
     using Witnet for Witnet.QuerySLA;
@@ -273,7 +273,7 @@ abstract contract WitOracleBaseQueriableTrustable
 
 
     // =========================================================================================================================
-    // --- Implements IWitOracleTrustableReporter ------------------------------------------------------------------------------
+    // --- Implements IWitOracleQueriableTrustableReporter ------------------------------------------------------------------------------
 
     /// @notice Estimates the actual earnings (or loss), in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
@@ -409,7 +409,7 @@ abstract contract WitOracleBaseQueriableTrustable
     ///         - timestamp of the solving tally txs in Witnet. If zero is provided, EVM-timestamp will be used instead;
     ///         - hash of the corresponding data request tx at the Witnet side-chain level;
     ///         - data request result in raw bytes.
-    function reportResultBatch(IWitOracleTrustableReporter.BatchResult[] calldata _batchResults)
+    function reportResultBatch(IWitOracleQueriableTrustableReporter.BatchResult[] calldata _batchResults)
         external override
         onlyReporters
         returns (uint256 _batchReward)

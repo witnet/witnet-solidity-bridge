@@ -6,7 +6,7 @@ import "../libs/Witnet.sol";
 
 /// @title The Witnet Request Board Reporter trustless interface.
 /// @author The Witnet Foundation.
-interface IWitOracleTrustlessReporter {
+interface IWitOracleQueriableTrustlessReporter {
     
     event BatchQueryError(Witnet.QueryId queryId, string reason);    
     

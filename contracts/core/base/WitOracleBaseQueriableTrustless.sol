@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import "./WitOracleBaseQueriable.sol";
 import "../../data/WitOracleTrustlessDataLib.sol";
 import "../../interfaces/IWitOracleTrustless.sol";
-import "../../interfaces/IWitOracleTrustlessReporter.sol";
+import "../../interfaces/IWitOracleQueriableTrustlessReporter.sol";
 import "../../patterns/Escrowable.sol";
 
 /// @title Queriable WitOracle "trustless" base implementation.
@@ -15,7 +15,7 @@ abstract contract WitOracleBaseQueriableTrustless
         Escrowable,
         WitOracleBaseQueriable,
         IWitOracleTrustless,
-        IWitOracleTrustlessReporter
+        IWitOracleQueriableTrustlessReporter
 {
     using Witnet for Witnet.DataPullReport;
     using WitOracleTrustlessDataLib for Witnet.Query;
@@ -324,7 +324,7 @@ abstract contract WitOracleBaseQueriableTrustless
 
 
     // ================================================================================================================
-    // --- IWitOracleTrustlessReporter --------------------------------------------------------------------------------
+    // --- IWitOracleQueriableTrustlessReporter --------------------------------------------------------------------------------
 
     function claimQueryReward(Witnet.QueryId _queryId)
         virtual override external

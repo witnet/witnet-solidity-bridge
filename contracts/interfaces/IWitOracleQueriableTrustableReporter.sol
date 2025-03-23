@@ -6,7 +6,7 @@ import "../libs/Witnet.sol";
 
 /// @title The Witnet Request Board Reporter interface.
 /// @author The Witnet Foundation.
-interface IWitOracleTrustableReporter {
+interface IWitOracleQueriableTrustableReporter {
 
     /// @notice Estimates the actual earnings in WEI, that a reporter would get by reporting result to given query,
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
