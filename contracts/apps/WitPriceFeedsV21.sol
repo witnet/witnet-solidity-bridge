@@ -29,13 +29,10 @@ contract WitPriceFeedsV21
 
     constructor(
             address _witOracle, 
-            address _witOracleRadonRegistry,
-            address _operator,
-            WitParams memory _witParams
+            address _operator
         )
         Ownable(_operator != address(0) ? _operator : msg.sender)
     {
-        __storage().requiredWitParams = _witParams;
         _require(
             _witOracle != address(0), 
             "inexistent oracle"
@@ -51,33 +48,23 @@ contract WitPriceFeedsV21
             ),
             "uncompliant wit/oracle"
         );
+        witOracle = IWitOracle(_witOracle);
+        witOracleRadonRegistry = IWitOracleRadonRegistry(IWitOracle(_witOracle).registry());
         _require(
-            _witOracleRadonRegistry == address(0)
-                || IWitAppliance(_witOracleRadonRegistry).specs() == (
+            address(witOracleRadonRegistry) == address(0)
+                || IWitAppliance(address(witOracleRadonRegistry)).specs() == (
                     type(IWitAppliance).interfaceId
                         ^ type(IWitOracleRadonRegistry).interfaceId
                 ), 
             "uncompliant WitOracleRadonRegistry"
         );
-        witOracle = IWitOracle(_witOracle);
-        witOracleRadonRegistry = IWitOracleRadonRegistry(_witOracleRadonRegistry);
+        __storage().requiredWitParams = IWitPriceFeedsAdmin.WitParams({
+            minWitCommitteeSize: 3,
+            maxWitCommitteeSize: 0
+        });
     }
 
-    receive() virtual external payable {
-        _revert("no transfers accepted");
-    }
-
-    fallback() virtual external payable { 
-        _revert(string(abi.encodePacked(
-            "not implemented: 0x",
-            Witnet.toHexString(uint8(bytes1(msg.sig))),
-            Witnet.toHexString(uint8(bytes1(msg.sig << 8))),
-            Witnet.toHexString(uint8(bytes1(msg.sig << 16))),
-            Witnet.toHexString(uint8(bytes1(msg.sig << 24)))
-        )));
-    }
-
-
+    
     /// ===============================================================================================================
     /// --- IERC2362 --------------------------------------------------------------------------------------------------
 
