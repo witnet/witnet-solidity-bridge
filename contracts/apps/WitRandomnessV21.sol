@@ -233,10 +233,10 @@ contract WitRandomnessV21
             EvmBlockNumber _nextRandomizeBlock
         )
     {
-        Randomize storage __randomize = __storage().randomize_[_evmBlockNumber];
-        _queryId = __randomize.queryId;
-        _prevRandomizeBlock = __randomize.prevEvmBlock;
-        _nextRandomizeBlock = __randomize.nextEvmBlock;
+        Randomize memory _randomize = __storage().randomize_[_evmBlockNumber];
+        _queryId = _randomize.queryId;
+        _prevRandomizeBlock = _randomize.prevEvmBlock;
+        _nextRandomizeBlock = _randomize.nextEvmBlock;
     }
 
     /// @notice Returns security and liveness parameters required to the Wit/Oracle blockchain 
@@ -329,7 +329,7 @@ contract WitRandomnessV21
         } else if (_status == Witnet.ResultStatus.BoardFinalizingResult) {
             return RandomizeStatus.Finalizing;
 
-        } else if (_status != Witnet.ResultStatus.NoErrors) {
+        } else if (_status == Witnet.ResultStatus.NoErrors) {
             return RandomizeStatus.Ready;
         
         } else {
@@ -370,7 +370,7 @@ contract WitRandomnessV21
                 Witnet.toString(EvmBlockNumber.unwrap(_evmBlockNumber))
             ));
 
-        } else if (_status != Witnet.ResultStatus.NoErrors) {
+        } else if (_status == Witnet.ResultStatus.NoErrors) {
             return string(abi.encodePacked(
                 "Randomize result ready as for block #",
                 Witnet.toString(EvmBlockNumber.unwrap(_evmBlockNumber))
@@ -624,7 +624,6 @@ contract WitRandomnessV21
     {
         Witnet.QueryId _queryId;
         EvmBlockNumber _evmBlockNumber = EvmBlockNumber.wrap(uint64(block.number));
-        Randomize storage __randomize = __storage().randomize_[_evmBlockNumber];
         if (EvmBlockNumber.unwrap(__storage().lastRandomizeBlock) < EvmBlockNumber.unwrap(_evmBlockNumber)) {
             _evmUsedFunds = msg.value;
             
@@ -637,9 +636,12 @@ contract WitRandomnessV21
             );
 
             // Save Randomize metadata in storage:
-            __randomize.queryId = _queryId;
             EvmBlockNumber _prevBlock = __storage().lastRandomizeBlock;
-            __randomize.prevEvmBlock = _prevBlock;
+            __storage().randomize_[_evmBlockNumber] = Randomize({
+                queryId: _queryId,
+                prevEvmBlock: _prevBlock,
+                nextEvmBlock: EvmBlockNumber.wrap(0)
+            });
             __storage().randomize_[_prevBlock].nextEvmBlock = _evmBlockNumber;
             __storage().lastRandomizeBlock = _evmBlockNumber;
         
