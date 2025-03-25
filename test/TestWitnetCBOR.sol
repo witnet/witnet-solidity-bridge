@@ -306,7 +306,7 @@ contract TestWitnetCBOR {
 
   function testUintArrayDecode() external {
     bytes memory encoded = hex"840102031a002fefd8";
-    uint[] memory decoded = WitnetCBOR.fromBytes(encoded).readUintArray();
+    uint64[] memory decoded = WitnetCBOR.fromBytes(encoded).readUintArray();
     uint[4] memory expected = [
       uint(1),
       uint(2),
@@ -337,7 +337,7 @@ contract TestWitnetCBOR {
 
   function testIntArrayDecode() external {
     bytes memory encoded = hex"840121033a002fefd7";
-    int[] memory decoded = WitnetCBOR.fromBytes(encoded).readIntArray();
+    int64[] memory decoded = WitnetCBOR.fromBytes(encoded).readIntArray();
     int[4] memory expected = [
       int(1),
       int(-2),

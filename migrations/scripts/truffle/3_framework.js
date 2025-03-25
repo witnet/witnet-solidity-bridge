@@ -4,9 +4,9 @@ const merge = require("lodash.merge")
 const settings = require("../../../settings")
 const utils = require("../../../src/utils")
 const version = `${
-  require("../../package").version
+  require("../../../package").version
 }-${
-  require("child_process").execSync("git log -1 --format=%h ../../contracts").toString().trim().substring(0, 7)
+  require("child_process").execSync("git log -1 --format=%h ../../../contracts").toString().trim().substring(0, 7)
 }`
 
 const selection = utils.getWitnetArtifactsFromArgs()
@@ -117,8 +117,11 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
         
         } else {
           // no proxy address in file or no code in it...
+          implArtifact.address = await deployTarget(network, impl, targetSpecs, networkArtifacts)
+          if (implArtifact.address !== targetAddr) {
+            throw `wrong proxy implementation address: ${implArtifact.address} != ${targetAddr}`
+          }
           targetBaseAddr = await deployCoreBase(targetSpecs, targetAddr)
-          implArtifact.address = await deployTarget(network, target, targetSpecs, networkArtifacts)
           proxyImplAddr = implArtifact.address
           // settle new proxy address in file
           addresses = await settleArtifactAddress(addresses, network, domain, base, targetBaseAddr)
@@ -320,10 +323,12 @@ async function deployCoreBase (targetSpecs, targetAddr) {
     // proxify to last deployed implementation, and initialize it:
     utils.traceHeader("Deploying new 'WitnetProxy'...")
     const initdata = proxyInitArgs ? web3.eth.abi.encodeParameters(proxyInitArgs.types, proxyInitArgs.values) : "0x"
+    // console.log(deployer.address, proxySalt, targetAddr, initdata)
     if (initdata.length > 2) {
       console.info("  ", "> initdata types:    \x1b[90m", JSON.stringify(proxyInitArgs.types), "\x1b[0m")
       utils.traceData("   > initdata values:    ", initdata.slice(2), 64, "\x1b[90m")
     }
+    // console.log(await deployer.determineProxyAddr(proxySalt))    
     utils.traceTx(await deployer.proxify(proxySalt, targetAddr, initdata, { from: targetSpecs.from }))
   }
   if ((await web3.eth.getCode(proxyAddr)).length < 3) {
@@ -574,6 +579,6 @@ function getArtifactVersion(target, targetBaseLibs, networkArtifacts) {
 }
 
 function versionTagOf(version) { return version.slice(0, 5) }
-function versionLastCommitOf(version) { return version.length >= 13 ? version.slice(6, 13) : "" }
-function versionCodehashOf(version) { return version.length >= 20 ? version.slice(-7) : "" }
+function versionLastCommitOf(version) { return version?.length >= 13 ? version.slice(6, 13) : "" }
+function versionCodehashOf(version) { return version?.length >= 20 ? version.slice(-7) : "" }
 
