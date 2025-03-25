@@ -15,6 +15,8 @@ contract WitOracleTrustableZkSync
     function class() virtual override public view returns (string memory) {
         return type(WitOracleTrustableZkSync).name;
     }
+
+    uint256 internal immutable __reportResultGasPerPubData = 50000;
     
     constructor(WitOracleRadonRegistry _registry)
         WitOracleBaseQueriable(
@@ -22,7 +24,7 @@ contract WitOracleTrustableZkSync
                 reportResultGasBase: 50000,
                 reportResultWithCallbackGasBase: 60000,
                 reportResultWithCallbackRevertGasBase: 70000, 
-                sstoreFromZeroGas: 20000
+                sstoreFromZeroGas: 22100
             }),
             _registry
         )
@@ -46,23 +48,38 @@ contract WitOracleTrustableZkSync
     // --- Overrides 'IWitOracle' ----------------------------------------------------------------------------
 
     /// @notice Estimate the minimum reward required for posting a data request.
-    /// @dev Underestimates if the size of returned data is greater than `_resultMaxSize`. 
-    /// @param _resultMaxSize Maximum expected size of returned data (in bytes).
-    function estimateBaseFee(uint256, uint16 _resultMaxSize)
+    /// @param _evmGasPrice Expected gas price to pay upon posting the data request.
+    function estimateBaseFee(uint256 _evmGasPrice)
         public view
         virtual override
         returns (uint256)
     {
-        return WitOracleBaseQueriableTrustable.estimateBaseFee(1, _resultMaxSize);
+        return (
+            WitOracleBaseQueriable.estimateBaseFee(_evmGasPrice) + (
+                _evmGasPrice
+                    * __reportResultGasPerPubData * (
+                        4    // heuristic: 1x contracts storage roots get modified
+                        + 8  // heuristic: 1x evm events get emitted
+                    )
+            )
+        );
     }
 
     /// @notice Estimate the minimum reward required for posting a data request with a callback.
     /// @param _callbackGas Maximum gas to be spent when reporting the data request result.
-    function estimateBaseFeeWithCallback(uint256, uint24 _callbackGas)
+    function estimateBaseFeeWithCallback(uint256 _evmGasPrice, uint24 _callbackGas)
         public view
         virtual override
         returns (uint256)
     {
-        return WitOracleBaseQueriable.estimateBaseFeeWithCallback(1, _callbackGas);
+        return (
+            WitOracleBaseQueriable.estimateBaseFeeWithCallback(_evmGasPrice, _callbackGas) + (
+                _evmGasPrice
+                    * __reportResultGasPerPubData * (
+                        8   // heuristic: 2x contracts storage roots get modified
+                        + 8  // heuristic: 1x evm events get emitted
+                    )
+            )
+        );
     }
 }
