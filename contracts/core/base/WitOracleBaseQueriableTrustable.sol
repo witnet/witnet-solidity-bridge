@@ -170,7 +170,10 @@ abstract contract WitOracleBaseQueriableTrustable
         returns (uint256)
     {
         // Check this rad hash is actually verified:
-        registry.lookupRadonRequestResultDataType(Witnet.RadonHash.wrap(radHash));
+        _require(
+            registry.exists(Witnet.RadonHash.wrap(radHash)),
+            "unknown radon hash"
+        );
 
         // Base fee is actually invariant to max result size:
         return estimateBaseFee(gasPrice);

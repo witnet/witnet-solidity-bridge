@@ -8,7 +8,6 @@ import "../interfaces/IWitOracleQueriableExperimental.sol";
 import "../interfaces/IWitOracleRadonRegistry.sol";
 import "../interfaces/IWitOracleTrustableAdmin.sol";
 import "../interfaces/IWitOracleQueriableTrustableReporter.sol";
-import "../interfaces/IWitOracleQueriableTrustlessReporter.sol";
 
 import "../interfaces/legacy/IWitOracleLegacy.sol";
 
@@ -59,7 +58,8 @@ library WitOracleDataLib {
             Witnet.RadonHash radonHash
         ) 
         internal view
-    returns (bytes32) {
+        returns (bytes32)
+    {
         return (
             data().committees[evmRequester][radonHash].hash != bytes32(0)
                 ? querySLA.hashify()
