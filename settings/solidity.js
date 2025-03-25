@@ -6,7 +6,7 @@ module.exports = {
         enabled: true,
         runs: 200,
       },
-      evmVersion: "paris",
+      // evmVersion: "paris",
     },
   },
 }

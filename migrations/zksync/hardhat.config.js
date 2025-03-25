@@ -17,9 +17,6 @@ module.exports = {
         root: "../../",
         artifacts: "./migrations/zksync/artifacts",
         cache: "./migrations/zksync/cache",
-        deployPaths: ["./migrations/zksync/deployments"],
-        deploymentPaths: ["./migrations/zksync/deployments"],
-        deployments: "./migrations/zksync/deployments",
         sources: "./contracts", 
     },
     networks: {
@@ -32,7 +29,6 @@ module.exports = {
             enableVerifyURL: true,
             ethNetwork: 'sepolia',
             url: 'https://sepolia.era.zksync.dev',
-            // verifyURL: 'https://sepolia.explorer.zksync.io/api',
             zksync: true,
         }
     },
@@ -43,13 +39,11 @@ module.exports = {
                 enabled: true,
                 runs: 200,
             },
-            evmVersion: "paris",
             suppressedWarnings: [
-                'AssemblyCreate',
-                'TxOrigin',
+                'txorigin',
             ],
             suppressedErrors: [
-                'SendTransfer'
+                'sendtransfer'
             ],
         },
     },
@@ -57,26 +51,24 @@ module.exports = {
         enabled: true,
     },
     zksolc: {
-        version: "latest",
+        version: "1.5.11",
         settings: {
             codegen: "evmla",
-            deployPaths: ["./migrations/zksync/deployments"],
-            deploymentPaths: ["./migrations/zksync/deployments"],
             enableEraVMExtensions: false, // optional.  Enables Yul instructions available only for ZKsync system contracts and libraries
             forceEVMLA: false, // optional. Falls back to EVM legacy assembly if there is a bug with Yul
             libraries: {
                 "contracts/data/WitOracleDataLib.sol": {
-                    "WitOracleDataLib": "0xC4778500c689fb72339187E2e82D41b967D5AF19"
+                    "WitOracleDataLib": "0xce45D4B8b31a96cF78cd0BF26b601108B8A3f889"
                 },
-                "contracts/libs/WitOracleRadonEncodingLib.sol": {
-                  "WitOracleRadonEncodingLib": "0x2Ef06D1132A9ae147EDc4Dd4EbF99fB872BCA18f"
-                },
+                // "contracts/libs/WitOracleRadonEncodingLib.sol": {
+                //   "WitOracleRadonEncodingLib": "0xe7832c802417076B795E8C3785B610B03A6d50F6"
+                // },
                 "contracts/libs/WitOracleResultStatusLib.sol": {
-                    "WitOracleResultStatusLib": "0x8139eCe42e69817217B7A85a5746C51633343DCF"
+                    "WitOracleResultStatusLib": "0x12717Bdcfd40BD7Fa9216E979AE846f076B38F0a"
                 },
-                "contracts/data/WitPriceFeedsDataLib.sol": {
-                    "WitPriceFeedsDataLib": "0x3976C352e3474e9BF9c1229D1c3aAE8AA7F1c600"
-                },
+                // "contracts/data/WitPriceFeedsDataLib.sol": {
+                //     "WitPriceFeedsDataLib": "0x3976C352e3474e9BF9c1229D1c3aAE8AA7F1c600"
+                // },
             },
             missingLibrariesPath: "./migrations/zksync/missingLibraryDependencies.json", // optional. This path serves as a cache that stores all the libraries that are missing or have dependencies on other libraries. A `hardhat-zksync-deploy` plugin uses this cache later to compile and deploy the libraries, especially when the `deploy-zksync:libraries` task is executed
             optimizer: {
@@ -85,18 +77,17 @@ module.exports = {
                 fallback_to_optimizing_for_size: false, // optional. Try to recompile with optimizer mode "z" if the bytecode is too large
             },
             suppressedWarnings: [
-                // 'AssemblyCreate',
-                'TxOrigin',
+                'txorigin',
             ],
             suppressedErrors: [
-                'SendTransfer'
+                'sendtransfer'
             ],
             contractsToCompile: [
-                "WitnetProxy",
+                // "WitnetProxy",
                 "WitOracleTrustableZkSync",
-                "WitOracleRadonRegistryUpgradableZkSync",
-                // // "WitPriceFeedsUpgradableZkSync",
-                "WitRandomnessV21",
+                // "WitOracleRadonRegistryUpgradableZkSync",
+                // "WitPriceFeedsUpgradableZkSync",
+                // "WitRandomnessV21",
             ],
         },
     }
