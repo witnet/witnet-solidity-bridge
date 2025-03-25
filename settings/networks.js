@@ -502,4 +502,12 @@ module.exports = {
     port: 9516,
     network_id: 1231,
   },
+  "zksync:sepolia": {
+    port: 8499,
+    network_id: 300,
+    verify: {
+      apiUrl: "https://sepolia-era.zksync.network/api",
+      explorerUrl: "https://sepolia-era.zksync.network/",
+    }
+  },
 }
