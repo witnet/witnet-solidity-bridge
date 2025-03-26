@@ -1,3 +1,6 @@
+require("hardhat-gas-reporter");
+require("@nomicfoundation/hardhat-ethers");
+require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-verify")
 
 const settings = require("./settings")
@@ -5,6 +8,10 @@ const utils = require("./src/utils")
 const [, target] = utils.getRealmNetworkFromArgs()
 
 module.exports = {
+  gasReporter: {
+    enabled: true,
+    includeIntrinsicGas: false,
+  },
   paths: {
     sources: "./contracts",
   },

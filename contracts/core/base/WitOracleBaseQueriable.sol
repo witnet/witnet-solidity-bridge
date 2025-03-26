@@ -438,15 +438,12 @@ abstract contract WitOracleBaseQueriable
         __query.hash = Witnet.hashify(
             _queryId, 
             _radonHash, 
-            WitOracleDataLib.hashify(_querySLA, _requester, _radonHash)
+            _querySLA.hashify()
         );
         __query.reward = Witnet.QueryEvmReward.wrap(_evmReward);
-        __query.request = Witnet.QueryRequest({
-            requester: _requester,
-            callbackGas: _callbackGas,
-            radonBytecode: new bytes(0), _0: 0, 
-            radonHash: _radonHash
-        });
+        __query.request.requester = _requester;
+        __query.request.radonHash = _radonHash;
+        if (_callbackGas > 0) __query.request.callbackGas = _callbackGas;
         __query.slaParams = _querySLA;
     }
 
@@ -462,19 +459,15 @@ abstract contract WitOracleBaseQueriable
     {
         _queryId = Witnet.QueryId.wrap(++ __storage().nonce);
         Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
-        Witnet.RadonHash _radonHash = Witnet.radHash(_radonBytecode);
         __query.hash = Witnet.hashify(
             _queryId, 
             _radonHash,
-            WitOracleDataLib.hashify(_querySLA, _requester, _radonHash)
+            _querySLA.hashify()
         );
         __query.reward = Witnet.QueryEvmReward.wrap(_evmReward);
-        __query.request = Witnet.QueryRequest({
-            requester: _requester,
-            callbackGas: _callbackGas,
-            radonBytecode: _radonBytecode,
-            radonHash: Witnet.RadonHash.wrap(0), _0: 0
-        });
+        __query.request.requester = _requester;
+        __query.request.radonBytecode = _radonBytecode;
+        if (_callbackGas > 0) __query.request.callbackGas = _callbackGas;
         __query.slaParams = _querySLA;
     }
 

@@ -637,11 +637,9 @@ contract WitRandomnessV21
 
             // Save Randomize metadata in storage:
             EvmBlockNumber _prevBlock = __storage().lastRandomizeBlock;
-            __storage().randomize_[_evmBlockNumber] = Randomize({
-                queryId: _queryId,
-                prevEvmBlock: _prevBlock,
-                nextEvmBlock: EvmBlockNumber.wrap(0)
-            });
+            Randomize storage __randomize = __storage().randomize_[_evmBlockNumber];
+            __randomize.queryId = _queryId;
+            __randomize.prevEvmBlock = _prevBlock;
             __storage().randomize_[_prevBlock].nextEvmBlock = _evmBlockNumber;
             __storage().lastRandomizeBlock = _evmBlockNumber;
         
