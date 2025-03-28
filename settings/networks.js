@@ -109,8 +109,8 @@ module.exports = {
     port: 8540,
     network_id: 1,
     verify: {
-      apiUrl: "https://api-testnet.confluxscan.io",
-      explorerUrl: "https://testnet.confluxscan.io/",
+      apiUrl: "https://api-testnet.confluxscan.org",
+      explorerUrl: "https://testnet.confluxscan.org/",
     },
   },
   "conflux:core:mainnet": {
@@ -119,8 +119,8 @@ module.exports = {
     gasPrice: 10,
     verify: {
       apiKey: "MY_API_KEY",
-      apiUrl: "https://api.confluxscan.io/",
-      explorerUrl: "https://confluxscan.io/",
+      apiUrl: "https://api.confluxscan.org/",
+      explorerUrl: "https://confluxscan.org/",
     },
   },
   "conflux:espace:testnet": {
@@ -130,8 +130,8 @@ module.exports = {
     gas: 15000000,
     verify: {
       apiKey: "espace",
-      apiUrl: "https://evmapi-testnet.confluxscan.io/api/",
-      explorerUrl: "https://evmtestnet.confluxscan.io/",
+      apiUrl: "https://evmapi-testnet.confluxscan.org/api/",
+      explorerUrl: "https://evmtestnet.confluxscan.org/",
     },
   },
   "conflux:espace:mainnet": {
@@ -141,8 +141,8 @@ module.exports = {
     gas: 15000000,
     verify: {
       apiKey: "espace",
-      apiUrl: "https://evmapi.confluxscan.io/api",
-      explorerUrl: "https://evm.confluxscan.io/address",
+      apiUrl: "https://evmapi.confluxscan.org/api",
+      explorerUrl: "https://evm.confluxscan.org/address",
     },
   },
   "cronos:testnet": {
