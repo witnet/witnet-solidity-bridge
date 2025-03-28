@@ -8,8 +8,9 @@ interface IWitOracleConsumer {
 
     function witOracle() external view returns (IWitOracle);
 
-    /// @notice Same as `parseDataReport` but on certain implementations it may store roll-up information 
-    /// that will contribute to reduce the cost of verifying and/or rolling-up future data reports.
-    /// Emits `DataReport` if report is authentic. 
+    /// @notice Accepts a data report from the Wit/oracle blockchain that ought to be
+    /// verified by the WitOracle contract pointed out by `witOracle()`. 
+    /// @dev The referred `witOracle()` contract emits a `IWitOracle.DataReport` for
+    /// every `Witnet.DataPushReport` proven to be authentic. 
     function pushDataReport(Witnet.DataPushReport calldata report, bytes calldata proof) external;
 }
