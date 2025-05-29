@@ -238,7 +238,9 @@ contract WitPriceFeedsLegacyUpgradable
         override public view
         returns (Witnet.QueryId)
     {
-        return WitPriceFeedsLegacyDataLib.seekRecord(feedId).latestUpdateQueryId;
+        return Witnet.QueryId.wrap(uint64(
+            WitPriceFeedsLegacyDataLib.seekRecord(feedId).latestUpdateQueryId
+        ));
     }
 
     function latestUpdateQueryRequest(bytes4 feedId)
