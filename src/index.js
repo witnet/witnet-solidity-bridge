@@ -10,6 +10,13 @@ module.exports = {
     })
     return res
   },
+  getNetworkConstructorArgs: (network) => {
+    let res = {}
+    utils.getNetworkTagsFromString(network).forEach(net => {
+      res = merge(res, constructorArgs[net])
+    })
+    return res
+  },
   supportedEcosystems: () => {
     const ecosystems = []
     Object.keys(supportedNetworks()).forEach(network => {
