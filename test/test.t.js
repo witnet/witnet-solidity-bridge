@@ -14,12 +14,10 @@ describe("TestWitnet", function () {
 
   it("testNOP()", async function () {
     await witnet.testNOP();
-    // use the deployed contract
   });
 
   it("testSSTORE()", async function () {
     await witnet.testSSTORE();
-    // use the deployed contract
   });
 
   it("testSLOAD()", async function () {
@@ -70,7 +68,7 @@ describe("TestWitnet", function () {
     await witnet.writeQueryUnpacked2();
   })
 
-  it("readQuery()", async function () {
+  it("readQueryPacked()", async function () {
     await witnet.readQuery();
   });
 

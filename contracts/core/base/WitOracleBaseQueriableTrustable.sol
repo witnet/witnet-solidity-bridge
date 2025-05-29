@@ -476,34 +476,6 @@ abstract contract WitOracleBaseQueriableTrustable
         );
     }
 
-    function __queryData(
-            address _requester,
-            uint24  _callbackGas,
-            uint72  _evmReward,
-            bytes calldata _radonRadBytecode,
-            Witnet.QuerySLA memory _querySLA
-        ) 
-        virtual override
-        internal
-        returns (Witnet.QueryId _queryId)
-    {
-        _queryId = super.__queryData(
-            _requester,
-            _callbackGas,
-            _evmReward,
-            _radonRadBytecode,
-            _querySLA
-        );
-        emit IWitOracleLegacy.WitnetQuery(
-            Witnet.QueryId.unwrap(_queryId), 
-            msg.value, 
-            IWitOracleLegacy.RadonSLA({
-                witCommitteeSize: uint8(_querySLA.witCommitteeSize),
-                witUnitaryReward: _querySLA.witInclusionFees / 3
-            })
-        );
-    }
-
     function __reportResult(
             Witnet.QueryId _queryId,
             Witnet.Timestamp  _resultTimestamp,

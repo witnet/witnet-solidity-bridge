@@ -1,7 +1,6 @@
 const execSync = require("child_process").execSync
 const fs = require("fs")
 require("dotenv").config()
-const lockfile = require("proper-lockfile")
 const readline = require("readline")
 
 module.exports = {
@@ -225,17 +224,17 @@ async function prompt (text) {
 }
 
 async function readJsonFromFile (filename) {
-  lockfile.lockSync(filename)
+  // lockfile.lockSync(filename)
   const json = JSON.parse(await fs.readFileSync(filename))
-  lockfile.unlockSync(filename)
+  // lockfile.unlockSync(filename)
   return json || {}
 }
 
 async function overwriteJsonFile (filename, extra) {
-  lockfile.lockSync(filename)
+  // lockfile.lockSync(filename)
   const json = { ...JSON.parse(fs.readFileSync(filename)), ...extra }
   fs.writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" })
-  lockfile.unlockSync(filename)
+  // lockfile.unlockSync(filename)
 }
 
 function traceData (header, data, width, color) {

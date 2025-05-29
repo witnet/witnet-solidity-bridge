@@ -17,24 +17,24 @@ contract WitPriceFeedsChainlinkAggregator is IWitPythChainlinkAggregator {
         pyth = _pyth;
     }
 
-    function getAnswer(uint256) virtual public view returns (int256) {
-        return latestAnswer();
-    }
+    // function getAnswer(uint256) virtual public view returns (int256) {
+    //     return latestAnswer();
+    // }
 
-    function latestAnswer() virtual public view returns (int256) {
-        IWitPyth.Price memory price = IWitPyth(pyth).getPriceUnsafe(IWitPyth.ID.wrap(priceId));
-        return int256(int64(price.price));
-    }
+    // function latestAnswer() virtual public view returns (int256) {
+    //     IWitPyth.Price memory price = IWitPyth(pyth).getPriceUnsafe(IWitPyth.ID.wrap(priceId));
+    //     return int256(int64(price.price));
+    // }
 
-    function latestRound() virtual public view returns (uint256) {
-        // use timestamp as the round id
-        return latestTimestamp();
-    }
+    // function latestRound() virtual public view returns (uint256) {
+    //     // use timestamp as the round id
+    //     return latestTimestamp();
+    // }
 
-    function latestTimestamp() virtual public view returns (uint256) {
-        IWitPyth.Price memory price = IWitPyth(pyth).getPriceUnsafe(IWitPyth.ID.wrap(priceId));
-        return uint(Witnet.Timestamp.unwrap(price.publishTime));
-    }
+    // function latestTimestamp() virtual public view returns (uint256) {
+    //     IWitPyth.Price memory price = IWitPyth(pyth).getPriceUnsafe(IWitPyth.ID.wrap(priceId));
+    // //     return uint(Witnet.Timestamp.unwrap(price.publishTime));
+    // }
 
 
     /// ===============================================================================================================
