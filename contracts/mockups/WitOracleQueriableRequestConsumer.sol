@@ -42,7 +42,7 @@ abstract contract WitOracleQueriableRequestConsumer
     function __witOracleQueryData(
             uint256 _queryEvmReward
         )
-        virtual override internal returns (Witnet.QueryId)
+        virtual override internal returns (uint256)
     {
         return __witOracleQueryData(
             _queryEvmReward,
@@ -58,7 +58,7 @@ abstract contract WitOracleQueriableRequestConsumer
             uint256 _queryEvmReward, 
             Witnet.QuerySLA memory _querySLA
         )
-        virtual override internal returns (Witnet.QueryId)
+        virtual override internal returns (uint256)
     {
         return __witOracle.queryDataWithCallback{
             value: _queryEvmReward

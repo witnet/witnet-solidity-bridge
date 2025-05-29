@@ -9,7 +9,7 @@ interface IWitOracleQueriable {
     /// @notice Removes all query data from storage. Pays back reward on expired queries.
     /// @dev Fails if the query is not in a final status, or not called from the actual requester.
     /// @param queryId The unique query identifier.
-    function deleteQuery(Witnet.QueryId queryId) external returns (Witnet.QueryEvmReward);
+    function deleteQuery(uint256 queryId) external returns (Witnet.QueryEvmReward);
 
     /// @notice Estimate the minimum reward required for posting a data request.
     /// @param evmGasPrice Expected gas price to pay upon posting the data request.
@@ -33,27 +33,27 @@ interface IWitOracleQueriable {
     function getNextQueryId() external view returns (Witnet.QueryId);
 
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
-    function getQuery(Witnet.QueryId queryId) external view returns (Witnet.Query memory);
+    function getQuery(uint256 queryId) external view returns (Witnet.Query memory);
 
     /// @notice Gets the current EVM reward the reporter can claim, if not done yet.
-    function getQueryEvmReward(Witnet.QueryId) external view returns (Witnet.QueryEvmReward);
+    function getQueryEvmReward(uint256) external view returns (Witnet.QueryEvmReward);
 
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
-    function getQueryRequest(Witnet.QueryId) external view returns (Witnet.QueryRequest memory);
+    function getQueryRequest(uint256) external view returns (Witnet.QueryRequest memory);
 
     /// @notice Retrieves the whole `Witnet.QueryResponse` record referred to a previously posted Witnet Data Request.
-    function getQueryResponse(Witnet.QueryId) external view returns (Witnet.QueryResponse memory);
+    function getQueryResponse(uint256) external view returns (Witnet.QueryResponse memory);
 
-    function getQueryResult(Witnet.QueryId) external view returns (Witnet.DataResult memory);
-    function getQueryResultStatus(Witnet.QueryId) external view returns (Witnet.ResultStatus);
-    function getQueryResultStatusDescription(Witnet.QueryId) external view returns (string memory);
+    function getQueryResult(uint256) external view returns (Witnet.DataResult memory);
+    function getQueryResultStatus(uint256) external view returns (Witnet.ResultStatus);
+    function getQueryResultStatusDescription(uint256) external view returns (string memory);
 
     /// @notice Gets current status of given query.
-    function getQueryStatus(Witnet.QueryId) external view returns (Witnet.QueryStatus);
-    function getQueryStatusString(Witnet.QueryId) external view returns (string memory);
+    function getQueryStatus(uint256) external view returns (Witnet.QueryStatus);
+    function getQueryStatusString(uint256) external view returns (string memory);
     
     /// @notice Get current status of all given query ids.
-    function getQueryStatusBatch(Witnet.QueryId[] calldata) external view returns (Witnet.QueryStatus[] memory);
+    function getQueryStatusBatch(uint256[] calldata) external view returns (Witnet.QueryStatus[] memory);
 
     /// @notice Request real world data from the Wit/Oracle sidechain. 
     /// @notice The paid fee is escrowed as a reward for the reporter that eventually relays back 
@@ -68,7 +68,7 @@ interface IWitOracleQueriable {
             Witnet.RadonHash radonHash,
             Witnet.QuerySLA calldata
         )
-        external payable returns (Witnet.QueryId);
+        external payable returns (uint256);
 
     /// @notice Request real world data from the Wit/Oracle sidechain. 
     /// @notice The paid fee is escrowed as a reward for the reporter that eventually relays back 
@@ -86,8 +86,8 @@ interface IWitOracleQueriable {
             Witnet.QuerySLA calldata, 
             Witnet.QueryCallback calldata
         )
-        external payable returns (Witnet.QueryId);
+        external payable returns (uint256);
 
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
-    function upgradeQueryEvmReward(Witnet.QueryId) external payable;
+    function upgradeQueryEvmReward(uint256) external payable;
 }

@@ -196,9 +196,9 @@ contract WitRandomnessV21
             Witnet.Timestamp  _resultTimestamp
         )
     {
-        Witnet.QueryResponse memory _response = __witOracle.getQueryResponse(
+        Witnet.QueryResponse memory _response = __witOracle.getQueryResponse(Witnet.QueryId.unwrap(
             _fetchRandomizeValidResultQueryId(_evmBlockNumber)
-        );
+        ));
         return (
             _response.resultDrTxHash,
             _response.resultTimestamp
@@ -318,8 +318,8 @@ contract WitRandomnessV21
         if (__storage().randomize_[_evmBlockNumber].queryId.isZero()) {
             _evmBlockNumber = getRandomizeNextBlock(_evmBlockNumber);
         }
-        Witnet.QueryId _queryId = __storage().randomize_[_evmBlockNumber].queryId;
-        if (_queryId.isZero()) {
+        uint256 _queryId = Witnet.QueryId.unwrap(__storage().randomize_[_evmBlockNumber].queryId);
+        if (_queryId == 0) {
             return RandomizeStatus.Void;
         }
         Witnet.ResultStatus _status = __witOracle.getQueryResultStatus(_queryId);
@@ -350,8 +350,8 @@ contract WitRandomnessV21
         if (__storage().randomize_[_evmBlockNumber].queryId.isZero()) {
             _evmBlockNumber = getRandomizeNextBlock(_evmBlockNumber);
         }
-        Witnet.QueryId _queryId = __storage().randomize_[_evmBlockNumber].queryId;
-        if (_queryId.isZero()) {
+        uint256 _queryId = Witnet.QueryId.unwrap(__storage().randomize_[_evmBlockNumber].queryId);
+        if (_queryId == 0) {
             return string(abi.encodePacked(
                 "No randomize after block #",
                 Witnet.toString(uint256(EvmBlockNumber.unwrap(_evmBlockNumber)))
@@ -553,9 +553,9 @@ contract WitRandomnessV21
         virtual internal view 
         returns (bytes32)
     {
-        return __witOracle.getQueryResult(
+        return __witOracle.getQueryResult(Witnet.QueryId.unwrap(
             _fetchRandomizeValidResultQueryId(_evmBlockNumber)
-        ).fetchBytes32();
+        )).fetchBytes32();
     }
 
     function _fetchRandomizeValidResultQueryId(EvmBlockNumber _evmBlockNumber)
@@ -570,7 +570,7 @@ contract WitRandomnessV21
         if (_queryId.isZero()) {
             _revert("not randomized");
         } 
-        Witnet.ResultStatus _status  = __witOracle.getQueryResultStatus(_queryId);
+        Witnet.ResultStatus _status  = __witOracle.getQueryResultStatus(Witnet.QueryId.unwrap(_queryId));
         if (_status.keepWaiting()) {
             _revert(string(abi.encodePacked(
                 "pending randomize on block #",
@@ -622,7 +622,7 @@ contract WitRandomnessV21
         internal
         returns (uint256 _evmUsedFunds)
     {
-        Witnet.QueryId _queryId;
+        uint256 _queryId;
         EvmBlockNumber _evmBlockNumber = EvmBlockNumber.wrap(uint64(block.number));
         if (EvmBlockNumber.unwrap(__storage().lastRandomizeBlock) < EvmBlockNumber.unwrap(_evmBlockNumber)) {
             _evmUsedFunds = msg.value;
@@ -638,13 +638,13 @@ contract WitRandomnessV21
             // Save Randomize metadata in storage:
             EvmBlockNumber _prevBlock = __storage().lastRandomizeBlock;
             Randomize storage __randomize = __storage().randomize_[_evmBlockNumber];
-            __randomize.queryId = _queryId;
+            __randomize.queryId = Witnet.QueryId.wrap(uint64(_queryId));
             __randomize.prevEvmBlock = _prevBlock;
             __storage().randomize_[_prevBlock].nextEvmBlock = _evmBlockNumber;
             __storage().lastRandomizeBlock = _evmBlockNumber;
         
         } else {
-            _queryId = __storage().randomize_[_evmBlockNumber].queryId;
+            _queryId = Witnet.QueryId.unwrap(__storage().randomize_[_evmBlockNumber].queryId);
         }
 
         // Transfer back unused funds:
@@ -654,7 +654,7 @@ contract WitRandomnessV21
 
         // Emit event upon every randomize call, even if multiple within same block:
         // solhint-disable-next-line avoid-tx-origin
-        emit Randomizing(tx.origin, _msgSender(), _queryId);
+        emit Randomizing(tx.origin, _msgSender(), Witnet.QueryId.wrap(uint64(_queryId)));
     }
 
     /// @dev Recursively searches for the number of the first block after the given one in which a Witnet 

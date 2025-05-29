@@ -199,7 +199,7 @@ abstract contract WitOracleBaseQueriableTrustless
 
     /// @notice Removes all query data from storage. Pays back reward on expired queries.
     /// @dev Fails if the query is not in a final status, or not called from the actual requester.
-    function deleteQuery(Witnet.QueryId _queryId)
+    function deleteQuery(uint256 _queryId)
         virtual override external
         returns (Witnet.QueryEvmReward)
     {
@@ -229,7 +229,7 @@ abstract contract WitOracleBaseQueriableTrustless
         }
     }
 
-    function getQueryStatus(Witnet.QueryId _queryId)
+    function getQueryStatus(uint256 _queryId)
         virtual override
         public view
         returns (Witnet.QueryStatus)
@@ -331,7 +331,7 @@ abstract contract WitOracleBaseQueriableTrustless
         returns (uint256)
     {
         try WitOracleTrustlessDataLib.claimQueryReward(
-            _queryId, 
+            Witnet.QueryId.unwrap(_queryId), 
             QUERY_AWAITING_BLOCKS,
             QUERY_REPORTING_STAKE
 
@@ -354,7 +354,7 @@ abstract contract WitOracleBaseQueriableTrustless
     {
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
             try WitOracleTrustlessDataLib.claimQueryReward(
-                _queryIds[_ix],
+                Witnet.QueryId.unwrap(_queryIds[_ix]),
                 QUERY_AWAITING_BLOCKS,
                 QUERY_REPORTING_STAKE
                 
@@ -381,7 +381,7 @@ abstract contract WitOracleBaseQueriableTrustless
         returns (uint256)
     {
         try WitOracleTrustlessDataLib.disputeQueryResponse(
-            _queryId,
+            Witnet.QueryId.unwrap(_queryId),
             QUERY_AWAITING_BLOCKS,
             QUERY_REPORTING_STAKE
         ) returns (uint256 _evmPotentialReward) {
@@ -418,7 +418,7 @@ abstract contract WitOracleBaseQueriableTrustless
                     evmReporter,
                     evmGasPrice,
                     evmFinalityBlock,
-                    queryId,
+                    Witnet.QueryId.unwrap(queryId),
                     witDrResultTimestamp,
                     witDrTxHash,
                     witDrResultCborBytes
@@ -465,7 +465,7 @@ abstract contract WitOracleBaseQueriableTrustless
                     evmReporter,
                     evmGasPrice,
                     evmFinalityBlock,
-                    queryId,
+                    Witnet.QueryId.unwrap(queryId),
                     witDrResultTimestamp,
                     witDrTxHash,
                     witDrResultCborBytes

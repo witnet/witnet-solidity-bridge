@@ -30,7 +30,7 @@ abstract contract UsingWitOracle
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
     /// @dev contract until a particular request has been successfully solved and reported from the Wit/Oracle blockchain,
     /// @dev either with an error or successfully.
-    modifier witOracleQuerySolved(Witnet.QueryId _queryId) {
+    modifier witOracleQuerySolved(uint256 _queryId) {
         Witnet.QueryStatus _queryStatus = _witOracleCheckQueryStatus(_queryId);
         require(
             _queryStatus == Witnet.QueryStatus.Finalized
@@ -60,7 +60,7 @@ abstract contract UsingWitOracle
 
     /// @dev Check if given query was already reported back from the Wit/Oracle blockchain.
     /// @param _id The unique identifier of a previously posted data request.
-    function _witOracleCheckQueryStatus(Witnet.QueryId _id)
+    function _witOracleCheckQueryStatus(uint256 _id)
         internal view
         returns (Witnet.QueryStatus)
     {

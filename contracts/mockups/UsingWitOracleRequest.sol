@@ -39,7 +39,7 @@ abstract contract UsingWitOracleRequest
     function __witOracleQueryData(
             uint256 _queryEvmReward
         )
-        virtual internal returns (Witnet.QueryId)
+        virtual internal returns (uint256)
     {
         return __witOracleQueryData(
             _queryEvmReward, 
@@ -55,7 +55,7 @@ abstract contract UsingWitOracleRequest
             uint256 _queryEvmReward,
             Witnet.QuerySLA memory _querySLA
         )
-        virtual internal returns (Witnet.QueryId)
+        virtual internal returns (uint256)
     {
         return __witOracle.queryData{
             value: _queryEvmReward

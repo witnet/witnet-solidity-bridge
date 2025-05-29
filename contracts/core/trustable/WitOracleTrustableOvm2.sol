@@ -132,7 +132,7 @@ contract WitOracleTrustableOvm2
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
     /// @notice queries providing no actual earnings.
     function estimateReportEarnings(
-            Witnet.QueryId[] calldata _queryIds, 
+            uint256[] calldata _queryIds, 
             bytes calldata _evmMsgData,
             uint256 _evmGasPrice, 
             uint256 _evmWitPrice
@@ -142,7 +142,7 @@ contract WitOracleTrustableOvm2
         returns (uint256 _revenues, uint256 _expenses)
     {
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
-            Witnet.QueryId _queryId = _queryIds[_ix];
+            uint256 _queryId = _queryIds[_ix];
             if (
                 getQueryStatus(_queryId) == Witnet.QueryStatus.Posted
             ) {

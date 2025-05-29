@@ -85,14 +85,14 @@ library WitPriceFeedsLegacyDataLib {
 
     function lastValidQueryId(IWitOracleQueriable witOracle, bytes4 feedId)
         internal view 
-        returns (Witnet.QueryId _queryId)
+        returns (uint256 _queryId)
     {
-        _queryId = Witnet.QueryId.wrap(uint64(seekRecord(feedId).latestUpdateQueryId));
+        _queryId = seekRecord(feedId).latestUpdateQueryId;
         if (
-            _queryId.isZero()
+            _queryId == 0
                 || witOracle.getQueryResultStatus(_queryId) != Witnet.ResultStatus.NoErrors
         ) {
-            _queryId = Witnet.QueryId.wrap(uint64(seekRecord(feedId).lastValidQueryId));
+            _queryId = seekRecord(feedId).lastValidQueryId;
         }
     }
 
@@ -100,8 +100,8 @@ library WitPriceFeedsLegacyDataLib {
         internal view
         returns (Witnet.ResultStatus)
     {
-        Witnet.QueryId _queryId = Witnet.QueryId.wrap(uint64(seekRecord(feedId).latestUpdateQueryId));
-        if (!_queryId.isZero()) {
+        uint256 _queryId = seekRecord(feedId).latestUpdateQueryId;
+        if (_queryId != 0) {
             return witOracle.getQueryResultStatus(_queryId);
         } else {
             return Witnet.ResultStatus.NoErrors;
@@ -161,8 +161,8 @@ library WitPriceFeedsLegacyDataLib {
         public view 
         returns (IWitPriceFeedsLegacySolver.Price memory)
     {
-        Witnet.QueryId _queryId = lastValidQueryId(witOracle, feedId);
-        if (!_queryId.isZero()) {
+        uint256 _queryId = lastValidQueryId(witOracle, feedId);
+        if (_queryId != 0) {
             Witnet.DataResult memory _lastValidResult = witOracle.getQueryResult(_queryId);
             return IWitPriceFeedsLegacySolver.Price({
                 value: _lastValidResult.fetchUint(),
@@ -206,12 +206,12 @@ library WitPriceFeedsLegacyDataLib {
         )
         public
         returns (
-            Witnet.QueryId _latestQueryId,
+            uint256 _latestQueryId,
             uint256 _evmUsedFunds
         )
     {
         Record storage __feed = seekRecord(feedId);
-        _latestQueryId = Witnet.QueryId.wrap(uint64(__feed.latestUpdateQueryId));
+        _latestQueryId = __feed.latestUpdateQueryId;
         
         Witnet.ResultStatus _latestStatus = latestUpdateQueryResultStatus(witOracle, feedId);   
         if (_latestStatus.keepWaiting()) {
@@ -238,10 +238,10 @@ library WitPriceFeedsLegacyDataLib {
                 // If so, remove previous last valid query from the WRB:
                 if (__feed.lastValidQueryId != 0) {
                     evmUpdateRequestFee += Witnet.QueryEvmReward.unwrap(
-                        witOracle.deleteQuery(Witnet.QueryId.wrap(uint64(__feed.lastValidQueryId)))
+                        witOracle.deleteQuery(__feed.lastValidQueryId)
                     );                    
                 }
-                __feed.lastValidQueryId = Witnet.QueryId.unwrap(_latestQueryId);
+                __feed.lastValidQueryId = _latestQueryId;
             } else {
                 // Otherwise, try to delete latest query, as it was faulty
                 // and we are about to post a new update request:
@@ -259,7 +259,7 @@ library WitPriceFeedsLegacyDataLib {
                 querySLA
             );
             // Update latest query id:
-            __feed.latestUpdateQueryId = Witnet.QueryId.unwrap(_latestQueryId);
+            __feed.latestUpdateQueryId = _latestQueryId;
         }
     }
 

@@ -14,7 +14,7 @@ interface IWitPriceFeedsLegacy {
         address evmOrigin,
         address evmSender,
         bytes4  erc2362Id4,
-        Witnet.QueryId witOracleQueryId
+        uint256 witOracleQueryId
     );
 
     struct RadonSLA {
@@ -42,7 +42,7 @@ interface IWitPriceFeedsLegacy {
 
     /// Returns the query id (in the context of the WitOracle addressed by witOracle()) 
     /// that solved the most recently updated value for the given feed.
-    function lastValidQueryId(bytes4 feedId) external view returns (Witnet.QueryId);
+    function lastValidQueryId(bytes4 feedId) external view returns (uint256);
 
     /// Returns the actual response from the Witnet oracle blockchain to the last 
     /// successful update for the given data feed.
@@ -52,7 +52,7 @@ interface IWitPriceFeedsLegacy {
     function latestPrices(bytes4[] calldata feedIds)  external view returns (IWitPriceFeedsLegacySolver.Price[] memory);
 
     /// Returns the Witnet query id of the latest update attempt for the given data feed.
-    function latestUpdateQueryId(bytes4 feedId) external view returns (Witnet.QueryId);
+    function latestUpdateQueryId(bytes4 feedId) external view returns (uint256);
 
     /// Returns the actual request queried to the the Witnet oracle blockchain on the latest 
     /// update attempt for the given data feed.

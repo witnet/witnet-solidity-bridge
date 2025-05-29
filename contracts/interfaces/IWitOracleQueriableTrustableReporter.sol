@@ -12,7 +12,7 @@ interface IWitOracleQueriableTrustableReporter {
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
     /// @notice queries providing no actual earnings.
     function estimateReportEarnings(
-            Witnet.QueryId[] calldata queryIds, 
+            uint256[] calldata queryIds, 
             bytes calldata evmReportTxMsgData,
             uint256 evmReportTxGasPrice,
             uint256 witEthPrice9
@@ -21,7 +21,7 @@ interface IWitOracleQueriableTrustableReporter {
     /// @notice Retrieves the Witnet Data Request bytecodes of previously posted queries.
     /// @dev Returns empty buffer if the query does not exist.
     /// @param queryIds Query identifiers.
-    function extractRadonRequests(Witnet.QueryId[] calldata queryIds) 
+    function extractRadonBytecodes(Witnet.QueryId[] calldata queryIds) 
         external view returns (bytes[] memory drBytecodes);
 
     /// @notice Reports the Witnet-provided result to a previously posted request. 

@@ -85,7 +85,7 @@ abstract contract WitOracleBaseQueriableTrustable
 
     /// @notice Removes all query data from storage. Pays back reward on expired queries.
     /// @dev Fails if the query is not in a final status, or not called from the actual requester.
-    function deleteQuery(Witnet.QueryId _queryId)
+    function deleteQuery(uint256 _queryId)
         virtual override public
         returns (Witnet.QueryEvmReward)
     {
@@ -114,7 +114,7 @@ abstract contract WitOracleBaseQueriableTrustable
     }
 
     /// Gets current status of given query.
-    function getQueryStatus(Witnet.QueryId _queryId) 
+    function getQueryStatus(uint256 _queryId) 
         virtual override
         public view
         returns (Witnet.QueryStatus)
@@ -188,25 +188,29 @@ abstract contract WitOracleBaseQueriableTrustable
         return estimateBaseFee(gasPrice);
     }
 
+    function extractWitnetDataRequests(uint256[] calldata queryIds) external view returns (bytes[] memory) {
+        Witnet.QueryId[] memory _ids = new Witnet.QueryId[](queryIds.length);
+        for (uint _ix; _ix < _ids.length; _ix ++) {
+            _ids[_ix] = Witnet.QueryId.wrap(uint64(queryIds[_ix]));
+        }
+        return extractRadonBytecodes(_ids);
+    }
+
     function fetchQueryResponse(uint256 queryId) virtual override external returns (bytes memory) {
-        deleteQuery(Witnet.QueryId.wrap(uint64(queryId)));
+        deleteQuery(queryId);
         return hex"";
     }
 
     function getQueryResponseStatus(uint256 queryId) virtual override public view returns (IWitOracleLegacy.QueryResponseStatus) {
-        return WitOracleDataLib.getQueryResponseStatus(
-            Witnet.QueryId.wrap(uint64(queryId))
-        );
+        return WitOracleDataLib.getQueryResponseStatus(queryId);
     }
 
     function getQueryResultCborBytes(uint256 queryId) virtual override external view returns (bytes memory) {
-        return getQueryResponse(Witnet.QueryId.wrap(uint64(queryId))).resultCborBytes;
+        return getQueryResponse(queryId).resultCborBytes;
     }
 
     function getQueryResultError(uint256 queryId) virtual override external view returns (IWitOracleLegacy.ResultError memory) {
-        Witnet.DataResult memory _result = getQueryResult(
-            Witnet.QueryId.wrap(uint64(queryId))
-        );
+        Witnet.DataResult memory _result = getQueryResult(queryId);
         return IWitOracleLegacy.ResultError({
             code: uint8(_result.status),
             reason: WitOracleResultStatusLib.toString(abi.encode(_result))
@@ -221,15 +225,13 @@ abstract contract WitOracleBaseQueriableTrustable
         external payable
         returns (uint256)
     {
-        return Witnet.QueryId.unwrap(
-            queryData(
-                Witnet.RadonHash.wrap(_queryRadHash),
-                Witnet.QuerySLA({
-                    witResultMaxSize: 32,
-                    witCommitteeSize: _querySLA.witCommitteeSize,
-                    witInclusionFees: _querySLA.witUnitaryReward * 3
-                })
-            )
+        return queryData(
+            Witnet.RadonHash.wrap(_queryRadHash),
+            Witnet.QuerySLA({
+                witResultMaxSize: 32,
+                witCommitteeSize: _querySLA.witCommitteeSize,
+                witInclusionFees: _querySLA.witUnitaryReward * 3
+            })
         );
     }
 
@@ -242,21 +244,71 @@ abstract contract WitOracleBaseQueriableTrustable
         external payable
         returns (uint256)
     {
-        return Witnet.QueryId.unwrap(
-            queryDataWithCallback(
-                Witnet.RadonHash.wrap(_queryRadHash),
-                Witnet.QuerySLA({
-                    witResultMaxSize: 32,
-                    witCommitteeSize: _querySLA.witCommitteeSize,
-                    witInclusionFees: _querySLA.witUnitaryReward * 3
-                }),
-                Witnet.QueryCallback({
-                    consumer: msg.sender,
-                    gasLimit: _queryCallbackGas
-                })
-            )
+        return queryDataWithCallback(
+            Witnet.RadonHash.wrap(_queryRadHash),
+            Witnet.QuerySLA({
+                witResultMaxSize: 32,
+                witCommitteeSize: _querySLA.witCommitteeSize,
+                witInclusionFees: _querySLA.witUnitaryReward * 3
+            }),
+            Witnet.QueryCallback({
+                consumer: msg.sender,
+                gasLimit: _queryCallbackGas
+            })
         );
     }
+
+    function reportResult(
+            uint256 queryId,
+            uint32 drTxTimestamp,
+            bytes32 drTxHash,
+            bytes calldata resultCborBytes
+        )
+        external override
+        onlyReporters
+        returns (uint256)
+    {
+        return reportResult(
+            Witnet.QueryId.wrap(uint64(queryId)),
+            Witnet.Timestamp.wrap(drTxTimestamp),
+            Witnet.TransactionHash.wrap(drTxHash),
+            resultCborBytes
+        );
+    }
+
+    function reportResult(
+            uint256 queryId,
+            bytes32 drTxHash,
+            bytes calldata resultCborBytes
+        )
+        external override
+        onlyReporters
+        returns (uint256)
+    {
+        return reportResult(
+            Witnet.QueryId.wrap(uint64(queryId)),
+            Witnet.TransactionHash.wrap(drTxHash),
+            resultCborBytes
+        );
+    }
+
+    function reportResultBatch(BatchResultLegacy[] calldata results)
+        external override
+        onlyReporters
+        returns (uint256 _batchReward)
+    {
+        IWitOracleQueriableTrustableReporter.BatchResult[] memory _results = new IWitOracleQueriableTrustableReporter.BatchResult[](results.length);
+        for (uint _ix = 0; _ix < results.length; _ix ++) {
+            _results[_ix] = BatchResult({
+                queryId: Witnet.QueryId.wrap(uint64(results[_ix].queryId)),
+                drTxTimestamp: Witnet.Timestamp.wrap(results[_ix].drTxTimestamp),
+                drTxHash: Witnet.TransactionHash.wrap(results[_ix].drTxHash),
+                resultCborBytes: results[_ix].resultCborBytes
+            });
+        }
+        return reportResultBatch(_results);
+    }
+
 
 
     // =========================================================================================================================
@@ -266,7 +318,7 @@ abstract contract WitOracleBaseQueriableTrustable
     /// @notice based on the gas price of the calling transaction. Data requesters should consider upgrading the reward on 
     /// @notice queries providing no actual earnings.
     function estimateReportEarnings(
-            Witnet.QueryId[] calldata _queryIds, 
+            uint256[] calldata _queryIds, 
             bytes calldata,
             uint256 _evmGasPrice,
             uint256 _evmWitPrice
@@ -276,7 +328,7 @@ abstract contract WitOracleBaseQueriableTrustable
         returns (uint256 _revenues, uint256 _expenses)
     {
         for (uint _ix = 0; _ix < _queryIds.length; _ix ++) {
-            Witnet.QueryId _queryId = _queryIds[_ix];
+            uint256 _queryId = _queryIds[_ix];
             if (
                 getQueryStatus(_queryId) == Witnet.QueryStatus.Posted
             ) {
@@ -307,12 +359,12 @@ abstract contract WitOracleBaseQueriableTrustable
     /// @notice Retrieves the Witnet Data Request bytecodes of previously posted queries.
     /// @dev Returns empty buffer if the query does not exist.
     /// @param _queryIds Query identifies.
-    function extractRadonRequests(Witnet.QueryId[] calldata _queryIds)
-        external view 
+    function extractRadonBytecodes(Witnet.QueryId[] memory _queryIds)
+        public view 
         virtual override
         returns (bytes[] memory _bytecodes)
     {
-        return WitOracleDataLib.extractRadonRequests(registry, _queryIds);
+        return WitOracleDataLib.extractRadonBytecodes(registry, _queryIds);
     }
 
     /// Reports the Witnet-provable result to a previously posted request. 
@@ -329,7 +381,7 @@ abstract contract WitOracleBaseQueriableTrustable
             Witnet.TransactionHash _resultTallyHash,
             bytes calldata _resultCborBytes
         )
-        external override
+        public override
         onlyReporters
         returns (uint256)
     {
@@ -341,7 +393,7 @@ abstract contract WitOracleBaseQueriableTrustable
         // do actual report and return reward transfered to the reproter:
         // solhint-disable not-rely-on-time
         return __reportResultAndReward(
-            _queryId,
+            Witnet.QueryId.unwrap(_queryId),
             Witnet.Timestamp.wrap(uint64(block.timestamp)),
             _resultTallyHash,
             _resultCborBytes
@@ -364,7 +416,7 @@ abstract contract WitOracleBaseQueriableTrustable
             Witnet.TransactionHash _resultTallyHash,
             bytes calldata _resultCborBytes
         )
-        external
+        public 
         override
         onlyReporters
         returns (uint256)
@@ -381,7 +433,7 @@ abstract contract WitOracleBaseQueriableTrustable
         );
         // do actual report and return reward transfered to the reproter:
         return  __reportResultAndReward(
-            _queryId,
+            Witnet.QueryId.unwrap(_queryId),
             _resultTimestamp,
             _resultTallyHash,
             _resultCborBytes
@@ -396,13 +448,13 @@ abstract contract WitOracleBaseQueriableTrustable
     ///         - timestamp of the solving tally txs in Witnet. If zero is provided, EVM-timestamp will be used instead;
     ///         - hash of the corresponding data request tx at the Witnet side-chain level;
     ///         - data request result in raw bytes.
-    function reportResultBatch(IWitOracleQueriableTrustableReporter.BatchResult[] calldata _batchResults)
-        external override
+    function reportResultBatch(IWitOracleQueriableTrustableReporter.BatchResult[] memory _batchResults)
+        public override
         onlyReporters
         returns (uint256 _batchReward)
     {
         for (uint _i = 0; _i < _batchResults.length; _i ++) {
-            Witnet.QueryId _queryId = _batchResults[_i].queryId;
+            uint256 _queryId = Witnet.QueryId.unwrap(_batchResults[_i].queryId);
             if (
                 getQueryStatus(_queryId)
                     != Witnet.QueryStatus.Posted
@@ -428,7 +480,7 @@ abstract contract WitOracleBaseQueriableTrustable
                 );
             } else {
                 _batchReward += __reportResult(
-                    _batchResults[_i].queryId,
+                    Witnet.QueryId.unwrap(_batchResults[_i].queryId),
                     _batchResults[_i].drTxTimestamp,
                     _batchResults[_i].drTxHash,
                     _batchResults[_i].resultCborBytes
@@ -457,7 +509,7 @@ abstract contract WitOracleBaseQueriableTrustable
         ) 
         virtual override
         internal
-        returns (Witnet.QueryId _queryId)
+        returns (uint256 _queryId)
     {
         _queryId = super.__queryData(
             _requester,
@@ -466,8 +518,9 @@ abstract contract WitOracleBaseQueriableTrustable
             _radonHash,
             _querySLA
         );
+        // todo: deprecate legacy events
         emit IWitOracleLegacy.WitnetQuery(
-            Witnet.QueryId.unwrap(_queryId), 
+            _queryId, 
             msg.value, 
             IWitOracleLegacy.RadonSLA({
                 witCommitteeSize: uint8(_querySLA.witCommitteeSize),
@@ -477,10 +530,10 @@ abstract contract WitOracleBaseQueriableTrustable
     }
 
     function __reportResult(
-            Witnet.QueryId _queryId,
+            uint256 _queryId,
             Witnet.Timestamp  _resultTimestamp,
             Witnet.TransactionHash _resultTallyHash,
-            bytes calldata _resultCborBytes
+            bytes memory _resultCborBytes
         )
         virtual internal
         returns (uint256)
@@ -501,7 +554,7 @@ abstract contract WitOracleBaseQueriableTrustable
     }
 
     function __reportResultAndReward(
-            Witnet.QueryId _queryId,
+            uint256 _queryId,
             Witnet.Timestamp  _resultTimestamp,
             Witnet.TransactionHash _resultTallyHash,
             bytes calldata _resultCborBytes

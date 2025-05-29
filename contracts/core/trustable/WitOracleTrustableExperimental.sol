@@ -38,7 +38,7 @@ contract WitOracleTrustableExperimental
         virtual override public view
         returns (IWitOracleQueriableExperimental.DDR memory _dr)
     {
-        Witnet.QueryStatus _queryStatus = getQueryStatus(_queryId);
+        Witnet.QueryStatus _queryStatus = getQueryStatus(Witnet.QueryId.unwrap(_queryId));
         if (
             _queryStatus == Witnet.QueryStatus.Posted
                 || _queryStatus == Witnet.QueryStatus.Delayed

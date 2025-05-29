@@ -59,7 +59,7 @@ abstract contract WitOracleBaseQueriable
     }
 
     /// Asserts the given query is currently in the given status.
-    modifier inStatus(Witnet.QueryId _queryId, Witnet.QueryStatus _status) {
+    modifier inStatus(uint256 _queryId, Witnet.QueryStatus _status) {
         if (getQueryStatus(_queryId) != _status) {
             _revert(WitOracleDataLib.notInStatusRevertMessage(_status));
         } else {
@@ -68,7 +68,7 @@ abstract contract WitOracleBaseQueriable
     }
 
     /// Asserts the caller actually posted the referred query.
-    modifier onlyRequester(Witnet.QueryId _queryId) {
+    modifier onlyRequester(uint256 _queryId) {
         _require(
             msg.sender == WitOracleDataLib.seekQueryRequest(_queryId).requester, 
             "not the requester"
@@ -103,7 +103,7 @@ abstract contract WitOracleBaseQueriable
         __sstoreFromZeroGas = _immutables.sstoreFromZeroGas;
     }
 
-    function getQueryStatus(Witnet.QueryId) virtual public view returns (Witnet.QueryStatus);
+    function getQueryStatus(uint256) virtual public view returns (Witnet.QueryStatus);
 
     
     // ================================================================================================================
@@ -205,7 +205,7 @@ abstract contract WitOracleBaseQueriable
     }
 
     /// Gets the whole Query data contents, if any, no matter its current status.
-    function getQuery(Witnet.QueryId _queryId)
+    function getQuery(uint256 _queryId)
       public view
       virtual override
       returns (Witnet.Query memory)
@@ -214,7 +214,7 @@ abstract contract WitOracleBaseQueriable
     }
 
     /// @notice Gets the current EVM reward the report can claim, if not done yet.
-    function getQueryEvmReward(Witnet.QueryId _queryId) 
+    function getQueryEvmReward(uint256 _queryId) 
         external view 
         virtual override
         returns (Witnet.QueryEvmReward)
@@ -224,7 +224,7 @@ abstract contract WitOracleBaseQueriable
 
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     /// @param _queryId The unique query identifier.
-    function getQueryRequest(Witnet.QueryId _queryId)
+    function getQueryRequest(uint256 _queryId)
         external view override
         returns (Witnet.QueryRequest memory)
     {
@@ -234,28 +234,28 @@ abstract contract WitOracleBaseQueriable
     /// Retrieves the Witnet-provable result, and metadata, to a previously posted request.    
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier
-    function getQueryResponse(Witnet.QueryId _queryId)
+    function getQueryResponse(uint256 _queryId)
         virtual override public view
         returns (Witnet.QueryResponse memory)
     {
         return WitOracleDataLib.seekQueryResponse(_queryId);
     }
 
-    function getQueryResult(Witnet.QueryId _queryId)
+    function getQueryResult(uint256 _queryId)
         virtual override public view 
         returns (Witnet.DataResult memory)
     {
         return WitOracleDataLib.getQueryResult(_queryId);
     }
 
-    function getQueryResultStatus(Witnet.QueryId _queryId)
+    function getQueryResultStatus(uint256 _queryId)
         virtual override public view 
         returns (Witnet.ResultStatus)
     {
         return WitOracleDataLib.getQueryResultStatus(_queryId);
     }
 
-    function getQueryResultStatusDescription(Witnet.QueryId _queryId)
+    function getQueryResultStatusDescription(uint256 _queryId)
         virtual override public view
         returns (string memory)
     {
@@ -264,7 +264,7 @@ abstract contract WitOracleBaseQueriable
         );
     }
 
-    function getQueryStatusString(Witnet.QueryId _queryId)
+    function getQueryStatusString(uint256 _queryId)
         virtual override external view 
         returns (string memory)
     {
@@ -273,9 +273,9 @@ abstract contract WitOracleBaseQueriable
         );
     }
 
-    function getQueryStatusBatch(Witnet.QueryId[] calldata _queryIds)
+    function getQueryStatusBatch(uint256[] calldata _queryIds)
         virtual override
-        external view
+        public view
         returns (Witnet.QueryStatus[] memory _status)
     {
         _status = new Witnet.QueryStatus[](_queryIds.length);
@@ -304,21 +304,20 @@ abstract contract WitOracleBaseQueriable
             estimateBaseFee(_getGasPrice())
         )
         checkQuerySLA(_querySLA)
-        returns (Witnet.QueryId _queryId)
+        returns (uint256 _queryId)
     {
         _queryId = __queryData(
             _getMsgSender(), 0,
             uint72(_getMsgValue()),
             _queryRAD,
             _querySLA
-            
         );
         // Let Web3 observers know that a new request has been posted
         emit WitOracleQuery(
             _getMsgSender(),
             _getGasPrice(),
             _getMsgValue(),
-            _queryId, 
+            Witnet.QueryId.wrap(uint64(_queryId)),
             _queryRAD, 
             _querySLA
         );
@@ -340,7 +339,7 @@ abstract contract WitOracleBaseQueriable
         )
         checkQuerySLA(_querySLA)
         checkQueryCallback(_queryCallback)
-        returns (Witnet.QueryId _queryId)
+        returns (uint256 _queryId)
     {
         _queryId = __queryData(
             _queryCallback.consumer,
@@ -353,7 +352,7 @@ abstract contract WitOracleBaseQueriable
             _getMsgSender(),
             _getGasPrice(),
             _getMsgValue(),
-            _queryId, 
+            Witnet.QueryId.wrap(uint64(_queryId)), 
             _queryRAD, 
             _querySLA
         );
@@ -362,7 +361,7 @@ abstract contract WitOracleBaseQueriable
     /// Increments the reward of a previously posted request by adding the transaction value to it.
     /// @dev Fails if the `_queryId` is not in 'Posted' status.
     /// @param _queryId The unique query identifier.
-    function upgradeQueryEvmReward(Witnet.QueryId _queryId)
+    function upgradeQueryEvmReward(uint256 _queryId)
         external payable
         virtual override      
         inStatus(_queryId, Witnet.QueryStatus.Posted)
@@ -374,7 +373,7 @@ abstract contract WitOracleBaseQueriable
         );
         __query.reward = Witnet.QueryEvmReward.wrap(uint72(_newReward));
         emit WitOracleQueryUpgrade(
-            _queryId,
+            Witnet.QueryId.wrap(uint64(_queryId)),
             _getMsgSender(),
             _getGasPrice(),
             _newReward
@@ -393,13 +392,13 @@ abstract contract WitOracleBaseQueriable
             Witnet.QuerySLA memory _querySLA
         )
         virtual internal
-        returns (Witnet.QueryId _queryId)
+        returns (uint256 _queryId)
     {
-        _queryId = Witnet.QueryId.wrap(++ __storage().nonce);
+        _queryId = ++ __storage().nonce;
         Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
         __query.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number));
         __query.hash = Witnet.hashify(
-            _queryId, 
+            Witnet.QueryId.wrap(uint64(_queryId)), 
             _radonHash, 
             _querySLA.hashify()
         );

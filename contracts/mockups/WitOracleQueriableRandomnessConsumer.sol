@@ -84,7 +84,7 @@ abstract contract WitOracleQueriableRandomnessConsumer
     function __witOracleRandomize(
             uint256 _queryEvmReward
         )
-        virtual internal returns (Witnet.QueryId)
+        virtual internal returns (uint256)
     {
         return __witOracleRandomize(
             _queryEvmReward, 
@@ -99,7 +99,7 @@ abstract contract WitOracleQueriableRandomnessConsumer
             uint256 _queryEvmReward,
             Witnet.QuerySLA memory _querySLA
         )
-        virtual internal returns (Witnet.QueryId)
+        virtual internal returns (uint256)
     {
         return __witOracle.queryDataWithCallback{
             value: _queryEvmReward

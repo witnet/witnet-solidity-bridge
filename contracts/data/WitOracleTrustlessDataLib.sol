@@ -142,7 +142,7 @@ library WitOracleTrustlessDataLib {
     /// --- IWitOracle --------------------------------------------------------
 
     function deleteQueryTrustlessly(
-            Witnet.QueryId queryId,
+            uint256 queryId,
             uint256 evmQueryAwaitingBlocks,
             uint256 evmQueryReportingStake
         )
@@ -281,7 +281,7 @@ library WitOracleTrustlessDataLib {
     /// --- IWitOracleQueriableTrustlessReporter ---------------------------------------
 
     function claimQueryReward(
-            Witnet.QueryId queryId,
+            uint256 queryId,
             uint256 evmQueryAwaitingBlocks,
             uint256 evmQueryReportingStake
         ) 
@@ -359,7 +359,7 @@ library WitOracleTrustlessDataLib {
     }
 
     function disputeQueryResponse(
-            Witnet.QueryId queryId,
+            uint256 queryId,
             uint256 evmQueryAwaitingBlocks,
             uint256 evmQueryReportingStake
         )
@@ -379,7 +379,7 @@ library WitOracleTrustlessDataLib {
         self.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number + evmQueryAwaitingBlocks));
         self.response.disputer = msg.sender;
         emit IWitOracleQueriableEvents.WitOracleQueryResponseDispute(
-            queryId,
+            Witnet.QueryId.wrap(uint64(queryId)),
             msg.sender
         );
         return (
@@ -403,7 +403,7 @@ library WitOracleTrustlessDataLib {
             bytes memory _witResultCborBytes
         )
     {
-        Witnet.Query storage self = WitOracleDataLib.seekQuery(responseReport.queryId);
+        Witnet.Query storage self = WitOracleDataLib.seekQuery(Witnet.QueryId.unwrap(responseReport.queryId));
         (bool _isValidReport, string memory _queryResponseReportInvalidError) = _isValidDataPullReport(
             self,
             responseReport
@@ -453,7 +453,7 @@ library WitOracleTrustlessDataLib {
         )
         public returns (uint256 evmTotalReward)
     {
-        Witnet.Query storage self = WitOracleDataLib.seekQuery(responseReport.queryId);
+        Witnet.Query storage self = WitOracleDataLib.seekQuery(Witnet.QueryId.unwrap(responseReport.queryId));
         // validate query response report
         (bool _isValidReport, string memory _queryResponseReportInvalidError) = _isValidDataPullReport(
             self,

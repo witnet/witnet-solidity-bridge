@@ -47,7 +47,7 @@ abstract contract WitOracleQueriableRequestTemplateConsumer
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward
         )
-        virtual override internal returns (Witnet.RadonHash, Witnet.QueryId)
+        virtual override internal returns (Witnet.RadonHash, uint256)
     {
         return __witOracleQueryData(
             _witOracleRequestArgs,
@@ -73,7 +73,7 @@ abstract contract WitOracleQueriableRequestTemplateConsumer
         virtual override internal
         returns (
             Witnet.RadonHash _queryRadHash, 
-            Witnet.QueryId _queryId
+            uint256 _queryId
         )
     {
         _queryRadHash = __witOracleVerifyRadonRequest(_witOracleRequestArgs);

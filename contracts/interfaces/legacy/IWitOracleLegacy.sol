@@ -57,7 +57,18 @@ interface IWitOracleLegacy {
             string reason;
         }
 
+    function extractWitnetDataRequests(uint256[] calldata queryIds) external view returns (bytes[] memory);
     function fetchQueryResponse(uint256 queryId) external returns (bytes memory);
     function postRequest(bytes32, RadonSLA calldata) external payable returns (uint256);
     function postRequestWithCallback(bytes32, RadonSLA calldata, uint24) external payable returns (uint256);
+    function reportResult(uint256, uint32, bytes32, bytes calldata) external returns (uint256);
+    function reportResult(uint256, bytes32, bytes calldata) external returns (uint256);
+
+    struct BatchResultLegacy {
+        uint256 queryId;
+        uint32 drTxTimestamp;
+        bytes32 drTxHash;
+        bytes resultCborBytes;
+    }
+    function reportResultBatch(BatchResultLegacy[] calldata) external returns (uint256);
 }

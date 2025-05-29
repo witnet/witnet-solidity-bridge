@@ -50,7 +50,7 @@ abstract contract UsingWitOracleRequestTemplate
             uint256 _queryEvmReward, 
             Witnet.RadonHash _queryRadHash
         )
-        virtual internal returns (Witnet.QueryId)
+        virtual internal returns (uint256)
     {
         return __witOracleQueryData(
             _queryEvmReward,
@@ -69,7 +69,7 @@ abstract contract UsingWitOracleRequestTemplate
             Witnet.RadonHash _queryRadHash, 
             Witnet.QuerySLA memory _querySLA
         )
-        virtual internal returns (Witnet.QueryId)
+        virtual internal returns (uint256)
     {
         return __witOracle.queryData{
             value: _queryEvmReward
@@ -90,7 +90,7 @@ abstract contract UsingWitOracleRequestTemplate
             string[][] memory _witOracleRequestArgs,
             uint256 _queryEvmReward
         )
-        virtual internal returns (Witnet.RadonHash, Witnet.QueryId)
+        virtual internal returns (Witnet.RadonHash, uint256)
     {
         return __witOracleQueryData(
             _witOracleRequestArgs,
@@ -114,7 +114,7 @@ abstract contract UsingWitOracleRequestTemplate
         )
         virtual internal returns (
             Witnet.RadonHash _queryRadHash,
-            Witnet.QueryId _queryId
+            uint256 _queryId
         )
     {
         _queryRadHash = __witOracleVerifyRadonRequest(_witOracleRequestArgs);
