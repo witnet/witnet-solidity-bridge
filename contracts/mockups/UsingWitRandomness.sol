@@ -19,8 +19,7 @@ abstract contract UsingWitRandomness
         require(
             address(_witRandomness).code.length > 0
                 && _witRandomness.specs() == (
-                    type(IWitOracleAppliance).interfaceId
-                        ^ type(IWitRandomness).interfaceId
+                    type(IWitRandomness).interfaceId
                 ),
             "UsingWitRandomness: uncompliant WitRandomness appliance"
         );

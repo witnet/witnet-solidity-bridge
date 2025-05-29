@@ -92,10 +92,8 @@ abstract contract WitOracleBaseQueriable
             "inexistent registry"
         );
         _require(
-            _registry.specs() == (
-                type(IWitAppliance).interfaceId
-                    ^ type(IWitOracleRadonRegistry).interfaceId
-            ), "uncompliant registry"
+            _registry.specs() == type(IWitOracleRadonRegistry).interfaceId, 
+            "uncompliant registry"
         );
         registry = _registry;
 

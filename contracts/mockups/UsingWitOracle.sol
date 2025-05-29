@@ -44,8 +44,7 @@ abstract contract UsingWitOracle
     constructor(address _witOracle) {
         require(
             IWitAppliance(_witOracle).specs() == (
-                type(IWitAppliance).interfaceId
-                    ^ type(IWitOracle).interfaceId
+                type(IWitOracle).interfaceId
                     ^ type(IWitOracleQueriable).interfaceId
             ), "UsingWitOracle: uncompliant WitOracle"
         );

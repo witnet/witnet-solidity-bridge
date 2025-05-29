@@ -410,10 +410,17 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
     console.info("  ", "> constructor types: \x1b[90m", JSON.stringify(targetSpecs.constructorArgs.types), "\x1b[0m")
     utils.traceData("   > constructor values: ", targetConstructorArgs, 64, "\x1b[90m")
   }
+  console.info("  ", `> tx signer address:  ${targetSpecs.from}`)
   try {
-    utils.traceTx(await deployer.deploy(targetInitCode, targetSalt, { from: targetSpecs.from }))
+    utils.traceTx(
+      await deployer.deploy(
+        targetInitCode, 
+        targetSalt, 
+        { from: targetSpecs.from }
+      )
+    )
   } catch (ex) {
-    panic("Deployment failed", `Expected address: ${targetAddr}`, ex)
+    panic("Deployment failed", `Expected address: ${targetAddr}`)
   }
   if (!constructorArgs[network]) constructorArgs[network] = {}
   constructorArgs[network][target] = targetConstructorArgs
