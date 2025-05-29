@@ -51,7 +51,16 @@ abstract contract WitOracleBasePushOnlyTrustless
         returns (Witnet.DataResult memory)
     {
         (address _evmSigner, Witnet.DataResult memory _result) = WitOracleDataLib.parseDataReport(_report, _signature);
-        emit DataReport(tx.origin, msg.sender, _evmSigner, _result);
+        emit WitOracleReport(
+            tx.origin, 
+            msg.sender, 
+            _evmSigner, 
+            _report.witDrTxHash,
+            _report.witRadonHash,
+            _report.witDrSLA,
+            _report.witResultCborBytes,
+            _result.status
+        );
         return _result;
     }
 

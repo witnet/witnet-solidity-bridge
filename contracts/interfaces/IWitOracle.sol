@@ -6,11 +6,17 @@ import "./IWitOracleRadonRegistry.sol";
 
 interface IWitOracle {
 
-    event DataReport(
-            address evmOrigin, 
-            address evmSender, 
+    error InvalidDataReport();
+    
+    event WitOracleReport(
+            address indexed evmOrigin, 
+            address indexed evmRequester, 
             address evmReporter,
-            Witnet.DataResult data
+            Witnet.TransactionHash witDrTxHash,
+            Witnet.RadonHash witDrTxRadHash,
+            Witnet.QuerySLA witDrTxParams,
+            bytes witResultCborBytes,
+            Witnet.ResultStatus witResultStatus
         );
 
     /// @notice Uniquely identifies the WitOracle instance and the chain on which it's deployed.
@@ -26,7 +32,7 @@ interface IWitOracle {
     function pushDataReport(Witnet.DataPushReport calldata report, bytes calldata proof) external returns (Witnet.DataResult memory);
 
     /// @notice Returns the WitOracleRadonRegistry in which Witnet-compliant Radon requests
-    /// @notice can be formally verified and forever registered as away to let smart contracts
+    /// @notice can be formally verified and forever registered as a away to let smart contracts
     /// and users to track actual data sources and offchain computations applied on data updates
     /// safely reported from the Wit/Oracle blockchain. 
     function registry() external view returns (IWitOracleRadonRegistry);
