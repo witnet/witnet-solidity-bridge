@@ -8,21 +8,11 @@ interface IWitOracleQueriableEvents {
 
     /// Emitted every time a new query containing some verified data request is posted to the WitOracle.
     event WitOracleQuery(
-        address requester,
+        address indexed evmRequester,
         uint256 evmGasPrice,
         uint256 evmReward,
         Witnet.QueryId queryId, 
         Witnet.RadonHash radonHash,
-        Witnet.QuerySLA radonParams
-    );
-
-    /// Emitted every time a new query containing some unverified data request bytecode is posted to the WRB.
-    event WitOracleQuery(
-        address requester,
-        uint256 evmGasPrice,
-        uint256 evmReward,
-        Witnet.QueryId queryId,
-        bytes radonBytecode,
         Witnet.QuerySLA radonParams
     );
 

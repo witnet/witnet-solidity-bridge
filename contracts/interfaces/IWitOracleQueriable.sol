@@ -88,24 +88,6 @@ interface IWitOracleQueriable {
         )
         external payable returns (Witnet.QueryId);
 
-    /// @notice Request real world data from the Wit/Oracle sidechain. 
-    /// @notice The paid fee is escrowed as a reward for the reporter that eventually relays back 
-    /// @notice a valid query result from the Wit/Oracle sidechain.
-    /// @notice The Witnet-provable result will be reported directly to the requesting contract. 
-    /// @notice Query results are CBOR-encoded, and can contain either some data, or an error.
-    /// @dev Reasons to revert:
-    /// @dev - the data request's RAD hash was not previously verified into the Radon Registry;
-    /// @dev - invalid query SLA parameters were provided;
-    /// @dev - insufficient value is paid as reward.
-    /// @dev - passed `consumer` is not a contract implementing the IWitOracleQueriableConsumer interface;
-    /// @param radonBytecode The bytecode of the RadonRequest to be solved by Wit/Oracle sidechain. 
-    function queryDataWithCallback(
-            bytes calldata radonBytecode, 
-            Witnet.QuerySLA calldata, 
-            Witnet.QueryCallback calldata
-        )
-        external payable returns (Witnet.QueryId);
-
     /// @notice Increments the reward of a previously posted request by adding the transaction value to it.
     function upgradeQueryEvmReward(Witnet.QueryId) external payable;
 }
