@@ -14,8 +14,7 @@ abstract contract WitOracleRadonRegistry
 {
     function specs() virtual override external pure returns (bytes4) {
         return (
-            type(IWitAppliance).interfaceId
-                ^ type(IWitOracleRadonRegistry).interfaceId
+            type(IWitOracleRadonRegistry).interfaceId
         );
     }
 }

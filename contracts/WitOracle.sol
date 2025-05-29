@@ -18,8 +18,7 @@ abstract contract WitOracle
 {
     function specs() virtual override external pure returns (bytes4) {
         return (
-            type(IWitAppliance).interfaceId
-                ^ type(IWitOracle).interfaceId
+            type(IWitOracle).interfaceId
                 ^ type(IWitOracleQueriable).interfaceId
         );
     }

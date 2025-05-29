@@ -16,8 +16,7 @@ abstract contract WitRandomness
 {
     function specs() virtual override external pure returns (bytes4) {
         return (
-            type(IWitOracleAppliance).interfaceId
-                ^ type(IWitRandomness).interfaceId
+            type(IWitRandomness).interfaceId
         );
     }
 }

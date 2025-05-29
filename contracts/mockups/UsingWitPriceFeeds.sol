@@ -11,16 +11,12 @@ abstract contract UsingWitPriceFeeds
     is
         IWitPythEvents
 {
-    WitPriceFeeds immutable public witPriceFeeds;
-    constructor(WitPriceFeeds _witPriceFeeds) {
+    IWitPriceFeeds immutable public witPriceFeeds;
+    constructor(IWitPriceFeeds _witPriceFeeds) {
         require(
             address(_witPriceFeeds).code.length > 0
-                && _witPriceFeeds.specs() == (
-                    type(IERC2362).interfaceId
-                        ^ type(IWitPriceFeeds).interfaceId
-                        ^ type(IWitOracleAppliance).interfaceId
-                ),
-            "UsingWitPriceFeeds: uncompliant WitPriceFeeds appliance"
+                && IWitAppliance(address(_witPriceFeeds)).specs() == type(IWitPriceFeeds).interfaceId,
+            "UsingWitPriceFeeds: uncompliant appliance"
         );
         witPriceFeeds = _witPriceFeeds;
     }
