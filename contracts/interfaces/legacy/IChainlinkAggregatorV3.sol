@@ -24,4 +24,6 @@ interface IChainlinkAggregatorV3 {
             uint256 updatedAt, 
             uint80 answeredInRound
         );
+
+    function version() external view returns (uint256);
 }

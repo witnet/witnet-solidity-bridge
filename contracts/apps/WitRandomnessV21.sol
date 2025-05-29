@@ -23,7 +23,7 @@ import "../patterns/Ownable2Step.sol";
 /// from the Wit/Oracle sidechain won't be ready until a certain amount of EVM blocks have elapsed. 
 /// This protection also implies that eventually failing randomness requests on the Wit/Oracle sidechain 
 /// cannot be retried but from this very same contract. Failing randomness requests will get all automatically
-/// and unbiasely solved as soon as some new randomness request gets solved, even if paid by a different requester.
+/// and unbiasedly solved as soon as some new randomness request gets solved, even if paid by a different requester.
 ///
 /// Querying for new randomness requires paying a fee in native EVM gas currency, as to cover the implicit cost of
 /// solving unmalleable randomness on the Wit/Oracle sidechain and report it back to the EVM storage. The actual 

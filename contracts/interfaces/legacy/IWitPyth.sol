@@ -26,7 +26,7 @@ interface IWitPyth
         int32  expo;
         
         /// Unix timestamp of when the last known price was solved on the Wit/Oracle blockchain. 
-        Witnet.Timestamp publishtime;
+        Witnet.Timestamp publishTime;
         
         /// After-the-fact data source traceability proof in the Wit/Oracle blockchain for last known update. 
         Witnet.TransactionHash track;
@@ -98,7 +98,7 @@ interface IWitPyth
     // /// Users of this function should check the `timestamp` of each price feed to ensure that the returned values 
     // /// are sufficiently recent for their application. If you need safe access to fresh data, please consider
     // /// using calling to either `getPrice` or `getPriceNoOlderThan` for every individual price feed.
-    // function getPricesUnsafe(ID[] calldata ids) external view returns (Price[] memory);
+    // function getPriceFeedsLastUpdate(ID[] calldata ids) external view returns (Price[] memory);
     
     /// @notice Legacy-compliant to get the required fee to update an array of price updates, which would be
     /// always 0 if relying on the Wit/Oracle bridging framework. 

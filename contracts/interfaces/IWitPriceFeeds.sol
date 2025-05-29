@@ -10,11 +10,41 @@ interface IWitPriceFeeds is IWitPyth {
 
     type ID4 is bytes4;
 
+    enum Mappers {
+        None,
+        Fallback,
+        Hottest,
+        Product
+    }
+
+    enum Oracles {
+        Witnet,
+        ERC2362,
+        Chainlink,
+        Pyth
+    }
+
     struct Info {
         ID id;
         int8 exponent;
-        Witnet.RadonHash radonHash;
         string symbol;
+        Mapper mapper;
+        Oracle oracle;
+        UpdateConditions updateConditions;
+        Price lastUpdate;
+    }
+
+    struct Mapper {
+        Mappers algo;
+        string  desc;
+        string[] deps;
+    }
+
+    struct Oracle {
+        address addr;
+        string  name;
+        bytes32 dataSources;
+        bytes4  interfaceId;
     }
 
     struct UpdateConditions {
@@ -24,7 +54,7 @@ interface IWitPriceFeeds is IWitPyth {
         uint16 maxDeviation1000;
     }
 
-    function fetchChainlinkAggregator(ID4 id4) external returns (IWitPythChainlinkAggregator);
+    function createChainlinkAggregator(ID4 id4) external returns (IWitPythChainlinkAggregator);
 
     /// Returns a unique hash determined by the combination of data sources being used by 
     /// supported non-routed price feeds, and dependencies of all supported routed 
@@ -74,16 +104,13 @@ interface IWitPriceFeeds is IWitPyth {
     /// @param ema Whether to fetch the computed exponential moving average, or the price as reported from the Wit/Oracle.
     function getPriceUnsafe(ID4 id4, bool ema) external view returns (Price memory);
     
-    /// @notice Returns last known price updates and deviations for all supported price feeds without any sanity checks.
-    function getPricesUnsafe() external view returns (Price[] memory);
-        
-    function lookupPriceFeed(ID4 id4) external view returns (Info memory);
-    function lookupPriceFeedSolver(ID4 id4) external view returns (IWitPriceFeedsMappingSolver, ID4[] memory);
-    function lookupPriceFeedUpdateConditions(ID4 id4) external view returns (UpdateConditions memory);
-    function lookupSymbol(ID4 id4) external view returns (string memory);
+    function lookupPriceFeed(ID4 id4, bool ema) external view returns (Info memory);
+    function lookupPriceFeedCaption(ID4 id4) external view returns (string memory);
+    function lookupPriceFeedExponent(ID4 id4) external view returns (int8);
+    function lookupPriceFeedID(ID4 id4) external view returns (bytes32);
 
-    function supportedPriceFeeds() external view returns (Info[] memory);
-    function supportsPriceFeed(string calldata symbol) external view returns (bool);
-
-    function witOracleRequiredCommitteeSizeRange() external view returns (uint16, uint16);
+    /// @notice Returns last known price updates and deviations for all supported price feeds without any sanity checks.    
+    function lookupPriceFeeds(bool ema) external view returns (Info[] memory);
+    
+    function supportsCaption(string calldata caption) external view returns (bool);
 }
