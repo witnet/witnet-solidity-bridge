@@ -88,8 +88,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       solhint:
-        specifier: ^4.5.4
-        version: 4.5.4(typescript@5.8.2)
+        specifier: ^5.1.0
+        version: 5.1.0(typescript@5.8.2)
       truffle:
         specifier: ^5.11.5
         version: 5.11.5(bufferutil@4.0.7)(utf-8-validate@6.0.3)
@@ -1205,11 +1205,11 @@ packages:
   '@solidity-parser/parser@0.14.5':
     resolution: {integrity: sha512-6dKnHZn7fg/iQATVEzqyUOyEidbn05q7YA2mQ9hC0MMXhhV3/JrsxmFSYZAcr7j1yUP700LLhTruvJ3MiQmjJg==}
 
-  '@solidity-parser/parser@0.18.0':
-    resolution: {integrity: sha512-yfORGUIPgLck41qyN7nbwJRAx17/jAIXCTanHOJZhB6PJ1iAk/84b/xlsVKFSyNyLXIj0dhppoE0+CRws7wlzA==}
-
   '@solidity-parser/parser@0.19.0':
     resolution: {integrity: sha512-RV16k/qIxW/wWc+mLzV3ARyKUaMUTBy9tOLMzFhtNSKYeTAanQ3a5MudJKf/8arIFnA2L27SNjarQKmFg0w/jA==}
+
+  '@solidity-parser/parser@0.20.1':
+    resolution: {integrity: sha512-58I2sRpzaQUN+jJmWbHfbWf9AKfzqCI8JAdFB0vbyY+u8tBRcuTt9LxzasvR0LGQpcRv97eyV7l61FQ3Ib7zVw==}
 
   '@szmarczak/http-timer@4.0.6':
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
@@ -5163,8 +5163,8 @@ packages:
     engines: {node: '>=10.0.0'}
     hasBin: true
 
-  solhint@4.5.4:
-    resolution: {integrity: sha512-Cu1XiJXub2q1eCr9kkJ9VPv1sGcmj3V7Zb76B0CoezDOB9bu3DxKIFFH7ggCl9fWpEPD6xBmRLfZrYijkVmujQ==}
+  solhint@5.1.0:
+    resolution: {integrity: sha512-KWg4gnOnznxHXzH0fUvnhnxnk+1R50GiPChcPeQgA7SKQTSF1LLIEh8R1qbkCEn/fFzz4CfJs+Gh7Rl9uhHy+g==}
     hasBin: true
 
   solidity-ast@0.4.60:
@@ -8041,9 +8041,9 @@ snapshots:
     dependencies:
       antlr4ts: 0.5.0-alpha.4
 
-  '@solidity-parser/parser@0.18.0': {}
-
   '@solidity-parser/parser@0.19.0': {}
+
+  '@solidity-parser/parser@0.20.1': {}
 
   '@szmarczak/http-timer@4.0.6':
     dependencies:
@@ -13024,9 +13024,9 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  solhint@4.5.4(typescript@5.8.2):
+  solhint@5.1.0(typescript@5.8.2):
     dependencies:
-      '@solidity-parser/parser': 0.18.0
+      '@solidity-parser/parser': 0.20.1
       ajv: 6.12.6
       antlr4: 4.13.2
       ast-parents: 0.0.1
