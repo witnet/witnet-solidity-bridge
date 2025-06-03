@@ -34,7 +34,7 @@ module.exports = async function (truffleDeployer, network, [,,, master]) {
     await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
   
   } else {
-    WitnetDeployer.address = addresses[network]?.WitnetDeployer || addresses.default.WitnetDeployer
+    WitnetDeployer.address = deployerAddr
     utils.traceHeader("Deployed 'WitnetDeployer'")
     console.info("  ", "> contract address:  \x1b[95m", WitnetDeployer.address, "\x1b[0m")
     console.info("  ", "> master address:    \x1b[35m", master, "\x1b[0m")

@@ -46,6 +46,7 @@ module.exports = {
     core: { WitOracleRadonRegistry: "WitOracleRadonRegistryUpgradableNoSha256" },
   },
   reef: {
+    WitnetDeployer: "WitnetDeployerDeferred",
     core: { WitOracle: "WitOracleTrustableReef" },
   },
   scroll: {

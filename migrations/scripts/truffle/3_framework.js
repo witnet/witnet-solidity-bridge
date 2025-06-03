@@ -586,6 +586,6 @@ function getArtifactVersion(target, targetBaseLibs, networkArtifacts) {
 }
 
 function versionTagOf(version) { return version.slice(0, 5) }
-function versionLastCommitOf(version) { return version?.length >= 13 ? version.slice(6, 13) : "" }
+function versionLastCommitOf(version) { return version?.length >= 21 ? version.slice(-15, -8) : "" }
 function versionCodehashOf(version) { return version?.length >= 20 ? version.slice(-7) : "" }
 

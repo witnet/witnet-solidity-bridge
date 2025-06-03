@@ -9,12 +9,6 @@
             "WitOracleRadonRegistry": "0x000B61Fe075F545fd37767f40391658275900000",
             "WitOracleRequestFactory": "0x000DB36997AF1F02209A6F995883B9B699900000"
         },
-        "libs": {
-            "WitOracleDataLib": "0xBb0eAbB3f5936DfA8d3d9A59457B73bBce811829",
-            "WitOracleRadonEncodingLib": "0x47730caFE285C32BF369fC76791D0165f810dB5d",
-            "WitOracleResultErrorsLib": "0x50489bD0ad5ab17641A472d007746F07D80D90A4",
-            "WitPriceFeedsLib": "0xA2d9384Cfd3529D1287Bc06e58897EBb8dfF2E94"
-        },
         "WitnetDeployer": "0x03232aBE800D1638B30432FeEF300581De323a4E"
     },
     "conflux:core": {
@@ -93,24 +87,22 @@
         }
     },
     },
-    "reef": {
+    "reef:mainnet": {
+        "WitnetDeployer": "",
         "apps": {
-            "WitPriceFeeds": "0xA9991dCd62a863f0F0aabF95a6a252d132b5c8D4",
-            "WitRandomnessV2": "0x84CD0bde18f78101064A2c8b8BaE5e1fCe1BCc0d"
+            "WitPriceFeeds": "",
+            "WitRandomnessV2": ""
         },
         "core": {
-            "WitOracle": "0x604b98893335CEf7Dc40061731F40aC5C6239907",
-            "WitOracleRadonRegistry": "0xC4b7a5aD8BAF8fea9DbeB18aB6F77cdf54CF297a",
-            "WitOracleRequestFactory": "0xEBa788A5de67E4B11869558a2414247e8Aa62179"
+            "WitOracle": "",
+            "WitOracleRadonRegistry": "",
+            "WitOracleRequestFactory": ""
         },
-        "WitnetDeployer": "0x94d6e5321039343f5e656aa7591dfbdbe81ff78f"
-    },
-    "reef:mainnet": {
         "libs": {
-            "WitOracleDataLib": "0x6F65a0110a2D2Af299a73a4C169CC3d2C41Be505",
-            "WitOracleRadonEncodingLib": "0x416c6e7ff66868375cFF36bA87B8eCBB2CF2Fb08",
-            "WitOracleResultErrorsLib": "0xE2996CE29D5351E22a01E9dD73ADd8A0264E7318",
-            "WitPriceFeedsLib": "0xcaa6dE265EF1545788E9576660Bc6d5ae1Edb0F5"
+            "WitOracleDataLib": "",
+            "WitOracleRadonEncodingLib": "",
+            "WitOracleResultErrorsLib": "",
+            "WitPriceFeedsLib": ""
         }
     },
     "zksync": {
