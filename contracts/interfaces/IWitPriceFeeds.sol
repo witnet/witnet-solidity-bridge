@@ -43,8 +43,9 @@ interface IWitPriceFeeds is IWitPyth {
     struct Oracle {
         address addr;
         string  name;
-        bytes32 dataSources;
         bytes4  interfaceId;
+        bytes32 dataSources;
+        bytes   dataBytecode;
     }
 
     struct UpdateConditions {

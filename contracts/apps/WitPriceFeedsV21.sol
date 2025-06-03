@@ -185,6 +185,7 @@ contract WitPriceFeedsV21
             }
         }
         Oracles _oracle = __record.oracle;
+        bytes32 _oracleSources = __record.oracleSources;
         address _oracleAddress;
         if (_oracle == Oracles.Witnet) {
             _oracleAddress = address(this);
@@ -203,8 +204,13 @@ contract WitPriceFeedsV21
             oracle: Oracle({
                 addr: _oracleAddress,
                 name: _oracle.toString(),
-                dataSources: __record.oracleSources,
-                interfaceId: _oracle.toERC165Id()
+                interfaceId: _oracle.toERC165Id(),
+                dataSources: _oracleSources,
+                dataBytecode: (
+                    _oracle == Oracles.Witnet 
+                        ? (witOracleRadonRegistry.bytecodeOf(Witnet.RadonHash.wrap(_oracleSources)))
+                        : (new bytes(0))
+                )
             }),
             updateConditions: __record.updateConditions.coalesce(),
             lastUpdate: WitPriceFeedsDataLib.getPriceUnsafe(_id4, _ema)
