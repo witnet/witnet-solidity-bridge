@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../patterns/Upgradeable.sol";
 
 /// @title WitnetProxy: upgradable delegate-proxy contract. 
-/// @author Guillermo Díaz <guillermo@otherplane.com>
+/// @author Guillermo Díaz <guillermo@witnet.io>
 contract WitnetProxy {
 
     /// Event emitted every time the implementation gets updated.

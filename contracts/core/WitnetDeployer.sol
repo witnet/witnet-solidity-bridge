@@ -7,7 +7,7 @@ import "../libs/Create3.sol";
 
 /// @notice WitnetDeployer contract used both as CREATE2 (EIP-1014) factory for Witnet artifacts, 
 /// @notice and CREATE3 (EIP-3171) factory for Witnet proxies.
-/// @author Guillermo Díaz <guillermo@otherplane.com>
+/// @author Guillermo Díaz <guillermo@witnet.io>
 
 contract WitnetDeployer {
 

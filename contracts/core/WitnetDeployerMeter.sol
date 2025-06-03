@@ -6,7 +6,7 @@ import "./WitnetDeployer.sol";
 
 /// @notice WitnetDeployerMeter contract used both as CREATE2 factory (EIP-1014) for Witnet artifacts, 
 /// @notice and CREATE3 factory (EIP-3171) for Witnet proxies, on the Meter Ecosystem.
-/// @author Guillermo Díaz <guillermo@otherplane.com>
+/// @author Guillermo Díaz <guillermo@witnet.io>
 
 contract WitnetDeployerMeter is WitnetDeployer {
 

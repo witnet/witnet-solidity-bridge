@@ -11,7 +11,7 @@ import "../patterns/Upgradeable.sol";
 import "./WitnetProxy.sol";
 
 /// @title Witnet Request Board base contract, with an Upgradeable (and Destructible) touch.
-/// @author Guillermo Díaz <guillermo@otherplane.com>
+/// @author Guillermo Díaz <guillermo@witnet.io>
 abstract contract WitnetUpgradableBase
     is
         Ownable2Step,
