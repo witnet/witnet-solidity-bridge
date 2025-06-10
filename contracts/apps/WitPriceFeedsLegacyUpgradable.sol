@@ -280,7 +280,7 @@ contract WitPriceFeedsLegacyUpgradable
             __record.radHash != 0,
             "no RAD hash"
         );
-        return _registry().bytecodeOf(Witnet.RadonHash.wrap(__record.radHash));
+        return _registry().lookupRadonRequestBytecode(Witnet.RadonHash.wrap(__record.radHash));
     }
 
     function lookupWitnetRadHash(bytes4 feedId)

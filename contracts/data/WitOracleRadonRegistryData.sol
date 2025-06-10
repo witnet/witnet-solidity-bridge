@@ -26,7 +26,7 @@ abstract contract WitOracleRadonRegistryData {
         mapping (uint256 => bytes32) endpoints;
     }
 
-    struct RadonRequestPacked {
+    struct RadonRequestLegacyPacked {
         string[][] _args;
         bytes32 aggregateTallyHashes;
         bytes32 _radHash;
@@ -36,15 +36,22 @@ abstract contract WitOracleRadonRegistryData {
         bytes32 legacyTallyHash;
     }
 
+    struct RadonRequestInfo {
+        bytes15 crowdAttestationTallyHash;
+        uint8   dataSourcesCount;
+        bytes15 dataSourcesAggregatorHash;
+        Witnet.RadonDataTypes resultDataType;
+    }
+
     struct Database {
         bytes32 _reservedSlot0;
         bytes32 _reservedSlot1;
-        
         mapping (bytes32 => Witnet.RadonReducer) reducers;
         mapping (bytes32 => Witnet.RadonRetrieval) retrievals;
-        mapping (Witnet.RadonHash => RadonRequestPacked) requests;
+        mapping (Witnet.RadonHash => RadonRequestLegacyPacked) legacyRequests;
         mapping (bytes32 => Witnet.RadonHash) rads;
         mapping (Witnet.RadonHash => bytes) radsBytecode;
+        mapping (Witnet.RadonHash => RadonRequestInfo) radsInfo;
     }
 
     constructor() {
@@ -76,8 +83,8 @@ abstract contract WitOracleRadonRegistryData {
 
     function __requests(Witnet.RadonHash _radHash)
         internal view
-        returns (RadonRequestPacked storage _ptr)
+        returns (RadonRequestLegacyPacked storage _ptr)
     {
-        return __database().requests[_radHash];
+        return __database().legacyRequests[_radHash];
     }
 }

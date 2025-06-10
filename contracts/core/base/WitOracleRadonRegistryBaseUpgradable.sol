@@ -33,6 +33,7 @@ abstract contract WitOracleRadonRegistryBaseUpgradable
 
     function __initializeUpgradableData(bytes memory) virtual override internal {}
 
+    
     // ================================================================================================================
     // --- Overrides 'Ownable2Step' -----------------------------------------------------------------------------------
 

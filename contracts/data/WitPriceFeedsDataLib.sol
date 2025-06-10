@@ -548,7 +548,7 @@ library WitPriceFeedsDataLib {
         IWitPriceFeeds.ID4 id4 = _settlePriceFeedSymbol(symbol);
         PriceFeed storage __record = seekPriceFeed(id4);
         require(address(registry) != address(0), "no radon registry");
-        require(registry.exists(radonHash), "unverified sources");
+        require(registry.isVerifiedRadonRequest(radonHash), "unverified sources");
         __record.settleWitOracle(exponent, radonHash);
         return settlePriceFeedFootprint();
     }

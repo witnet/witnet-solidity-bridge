@@ -4,8 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../../libs/Witnet.sol";
 
-import "../../WitOracleRequest.sol";
-import "../../WitOracleRequestTemplate.sol";
+import "./IWitOracleRequest.sol";
+import "./IWitOracleRequestTemplate.sol";
 
 interface IWitPriceFeedsLegacyAdmin {
 
@@ -22,8 +22,8 @@ interface IWitPriceFeedsLegacyAdmin {
     function settleBaseFeeOverheadPercentage(uint16) external;
     function settleDefaultUpdateSLA(uint16, uint64) external;
     function settleFeedRequest(string calldata caption, bytes32 radHash) external;
-    function settleFeedRequest(string calldata caption, WitOracleRequest request) external;
-    function settleFeedRequest(string calldata caption, WitOracleRequestTemplate template, string[][] calldata) external;
+    function settleFeedRequest(string calldata caption, IWitOracleRequest request) external;
+    function settleFeedRequest(string calldata caption, IWitOracleRequestTemplate template, string[][] calldata) external;
     function settleFeedSolver (string calldata caption, address solver, string[] calldata deps) external;
     function transferOwnership(address) external;
 }

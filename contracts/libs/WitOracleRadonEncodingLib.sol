@@ -201,6 +201,36 @@ library WitOracleRadonEncodingLib {
     }
 
     function encode(
+            Witnet.RadonRetrieval[] memory retrievals,
+            string[] calldata dataProviders,
+            string[] calldata commonRetrieveArgs,
+            bytes memory aggregatorInnerBytecode,
+            bytes memory tallyInnerBytecode
+        )
+        public pure
+        returns (bytes memory)
+    {
+        assert(retrievals.length == dataProviders.length);
+        uint ix;
+        bytes[] memory encodedSources = new bytes[](retrievals.length);
+        string[] memory retrievalArgs = new string[](commonRetrieveArgs.length + 1);
+        for (; ix < commonRetrieveArgs.length; ++ ix) {
+            retrievalArgs[ix + 1] = commonRetrieveArgs[ix];
+        }
+        for (ix = 0; ix < retrievals.length; ++ ix) {
+            retrievalArgs[0] = dataProviders[ix];
+            replaceWildcards(retrievals[ix], retrievalArgs);
+            encodedSources[ix] = encode(retrievals[ix]);
+        }
+        return abi.encodePacked(
+            WitnetBuffer.concat(encodedSources),
+            encode(uint64(aggregatorInnerBytecode.length), bytes1(0x1a)),
+            aggregatorInnerBytecode,
+            encode(uint64(tallyInnerBytecode.length), bytes1(0x22)),
+            tallyInnerBytecode
+        );
+    }
+    function encode(
             Witnet.RadonRetrieval[] memory sources,
             string[][] memory args,
             bytes memory aggregatorInnerBytecode,

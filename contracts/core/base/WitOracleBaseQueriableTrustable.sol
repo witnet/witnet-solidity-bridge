@@ -180,7 +180,7 @@ abstract contract WitOracleBaseQueriableTrustable
     {
         // Check this rad hash is actually verified:
         _require(
-            registry.exists(Witnet.RadonHash.wrap(radHash)),
+            registry.isVerifiedRadonRequest(Witnet.RadonHash.wrap(radHash)),
             "unknown radon hash"
         );
 

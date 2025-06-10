@@ -91,10 +91,6 @@ interface IWitRandomness {
     /// request randomness requests on the Wit/Oracle blockchain.
     function getRandomizeRadonHash() external view returns (Witnet.RadonHash);
 
-    /// @notice Returns the Radon Request used for solving 
-    /// request randomness requests on the Wit/Oracle blockchain.
-    function getRandomizeRadonRequest() external view returns (Witnet.RadonRequest memory);
-
     /// @notice Returns status of the first non-errored randomize request queried on or after the given block number.
     ///  - 0 -> Void: no randomize request was actually queried on or after the given block number.
     ///  - 1 -> Posted: a randomize request was found but it's not yet solved by the Wit/Oracle.
