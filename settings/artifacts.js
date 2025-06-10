@@ -8,7 +8,7 @@ module.exports = {
     core: {
       WitOracle: "WitOracleTrustableDefault",
       WitOracleRadonRegistry: "WitOracleRadonRegistryUpgradableDefault",
-      WitOracleRequestFactory: "WitOracleRequestFactoryUpgradableDefault",
+      WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableDefault",
     },
     libs: {
       WitOracleDataLib: "WitOracleDataLib",
@@ -26,7 +26,7 @@ module.exports = {
   "conflux:core": {
     WitnetDeployer: "WitnetDeployerConfluxCore",
     core: {
-      WitOracleRequestFactory: "WitOracleRequestFactoryUpgradableConfluxCore",
+      WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore",
     },
   },
   mantle: {
@@ -34,7 +34,7 @@ module.exports = {
   },
   meter: {
     WitnetDeployer: "WitnetDeployerMeter",
-    core: { WitOracleRequestFactory: "WitOracleRequestFactoryUpgradableConfluxCore" },
+    core: { WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore" },
   },
   optimism: {
     core: { WitOracle: "WitOracleTrustableOvm2" },

@@ -472,7 +472,7 @@ contract WitPriceFeedsLegacyUpgradable
         }
     }
 
-    function settleFeedRequest(string calldata caption, WitOracleRequest request)
+    function settleFeedRequest(string calldata caption, IWitOracleRequest request)
         override external
         onlyOwner
     {
@@ -481,7 +481,7 @@ contract WitPriceFeedsLegacyUpgradable
 
     function settleFeedRequest(
             string calldata caption,
-            WitOracleRequestTemplate template,
+            IWitOracleRequestTemplate template,
             string[][] calldata args
         )
         override external

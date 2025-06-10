@@ -23,7 +23,10 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
 
   // Settle the order in which (some of the) framework artifacts must be deployed first
   const framework = {
-    core: merge(Object.keys(networkArtifacts.core), ["WitOracleRadonRegistry", "WitOracle"],),
+    core: merge(Object.keys(networkArtifacts.core), [
+      "WitOracleRadonRegistry", 
+      "WitOracle", 
+    ]),
     apps: merge(Object.keys(networkArtifacts.apps), [],),
   }
 
@@ -230,7 +233,7 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
             && process.argv.includes("--compile-none") 
             && !process.argv.includes("--upgrade-all") 
             && !selection.includes(target.impl)
-        ) {
+          ) {
             utils.traceHeader(`Skipped '${target.impl}'`)
             console.info("  ", `> contract address:  ${target.addr}`)
             continue;
