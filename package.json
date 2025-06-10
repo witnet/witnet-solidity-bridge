@@ -1,6 +1,6 @@
 {
   "name": "witnet-solidity-bridge",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Witnet Solidity Bridge contracts for EVM-compatible chains",
   "author": "Witnet Foundation <info@witnet.foundation>",
   "license": "MIT",
@@ -72,6 +72,7 @@
     "@nomicfoundation/hardhat-verify": "^2.0.13",
     "@openzeppelin/contracts": "^5.2.0",
     "@openzeppelin/contracts-upgradeable": "^5.2.0",
+    "@witnet/solidity": "link:..\\witnet-solidity",
     "ado-contracts": "1.0.0",
     "bn.js": "^4.12.1",
     "chai": "^4.5.0",
