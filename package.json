@@ -72,7 +72,6 @@
     "@nomicfoundation/hardhat-verify": "^2.0.13",
     "@openzeppelin/contracts": "^5.2.0",
     "@openzeppelin/contracts-upgradeable": "^5.2.0",
-    "@witnet/solidity": "link:..\\witnet-solidity",
     "ado-contracts": "1.0.0",
     "bn.js": "^4.12.1",
     "chai": "^4.5.0",

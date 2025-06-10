@@ -32,10 +32,10 @@ module.exports = {
   ABIs: {
     WitOracle: require("../artifacts/contracts/WitOracle.sol/WitOracle.json").abi,
     WitOracleConsumer: require("../artifacts/contracts/mockups/WitOracleConsumer.sol/WitOracleConsumer.json").abi,
-    WitOracleRequest: require("../artifacts/contracts/WitOracleRequest.sol/WitOracleRequest.json").abi,
     WitOracleRadonRegistry: require("../artifacts/contracts/WitOracleRadonRegistry.sol/WitOracleRadonRegistry.json").abi,
-    WitOracleRequestFactory: require("../artifacts/contracts/WitOracleRequestFactory.sol/WitOracleRequestFactory.json").abi,
-    WitOracleRequestTemplate: require("../artifacts/contracts/WitOracleRequestTemplate.sol/WitOracleRequestTemplate.json").abi,
+    WitOracleRadonRequestFactory: require("../artifacts/contracts/WitOracleRadonRequestFactory.sol/WitOracleRadonRequestFactory.json").abi,
+    IWitOracleRadonRequestModal: require("../artifacts/contracts/interfaces/IWitOracleRadonRequestModal.sol/IWitOracleRadonRequestModal.json").abi,
+    IWitOracleRadonRequestTemplate: require("../artifacts/contracts/interfaces/IWitOracleRadonRequestTemplate.sol/IWitOracleRadonRequestTemplate.json").abi,
     WitPriceFeeds: require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json").abi,
     WitPriceFeedsLegacy: require("../artifacts/contracts/WitPriceFeedsLegacy.sol/WitPriceFeedsLegacy.json").abi,
     WitRandomness: require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json").abi,
