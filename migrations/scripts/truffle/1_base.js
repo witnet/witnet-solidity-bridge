@@ -14,12 +14,16 @@ module.exports = async function (truffleDeployer, network, [,,, master]) {
     // salted addresses remain as expected no matter if the solc version
     // is changed in migrations/witnet.settings.js
     const impl = settings.getArtifacts(network).WitnetDeployer
-    utils.traceHeader("Defrosted 'WitnetDeployer'")
-    fs.writeFileSync(
-      `build/contracts/${impl}.json`,
-      fs.readFileSync(`migrations/frosts/${impl}.json`),
-      { encoding: "utf8", flag: "w" }
-    )
+    if (fs.existsSync(`migrations/frosts/${impl}.json`)) {
+      utils.traceHeader("Defrosted 'WitnetDeployer'")
+      fs.writeFileSync(
+        `build/contracts/${impl}.json`,
+        fs.readFileSync(`migrations/frosts/${impl}.json`),
+        { encoding: "utf8", flag: "w" }
+      )
+    } else {
+      utils.traceHeader(`Deploying '${impl}' ...`)
+    }
     const WitnetDeployer = artifacts.require(impl)
     const metadata = JSON.parse(WitnetDeployer.metadata)
     console.info("  ", "> compiler:          ", metadata.compiler.version)

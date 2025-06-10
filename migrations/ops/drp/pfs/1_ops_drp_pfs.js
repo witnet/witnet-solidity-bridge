@@ -7,17 +7,17 @@ const readline = require("readline")
 const utils = require("../../../../src/utils")
 
 const IWitnetOracleReporter = artifacts.require("IWitOracleQueriableTrustableReporter")
-const IWitFeedLegacy = artifacts.require("IWitFeedsLegacy")
+const IWitPriceFeedsLegacy = artifacts.require("IWitPriceFeedsLegacy")
 const WitnetPriceFeeds = artifacts.require("WitPriceFeeds")
 const WitnetOracle = artifacts.require("WitOracle")
 
 module.exports = async function (_deployer, _network, [,, from]) {
   const pfs = await WitnetPriceFeeds.deployed()
-  const pfs_legacy = await IWitFeedLegacy.at(pfs.address)
-  const supported = await pfs.supportedFeeds.call()
+  const pfs_legacy = await IWitPriceFeedsLegacy.at(pfs.address)
+  const supported = await pfs_legacy.supportedFeeds.call()
   let prices
   try {
-    prices = await pfs.latestPrices.call(supported[0])
+    prices = await pfs_legacy.latestPrices.call(supported[0])
   } catch {
     prices = "?".repeat(supported[0].length).split("?")
   }
@@ -27,16 +27,15 @@ module.exports = async function (_deployer, _network, [,, from]) {
   for (let ix = 0; ix < supported[0].length; ix++) {
     const id4 = supported[0][ix]
     const caption = supported[1][ix]
-
     const latestStatus = await pfs_legacy.latestUpdateResponseStatus.call(id4)
-    const latestQueryId = await pfs.latestUpdateQueryId.call(id4)
-    const decimals = parseInt((await pfs.lookupDecimals.call(id4)).toString())
+    const latestQueryId = await pfs_legacy.latestUpdateQueryId.call(id4)
+    const decimals = parseInt((await pfs_legacy.lookupDecimals.call(id4)).toString())
     const radhash = supported[2][ix]
     if (radhash.endsWith("000000000000000000000000")) continue
     const lastPriceUpdate = prices[ix]
     const lastPrice = parseInt(lastPriceUpdate.value)
     const bytecode = await pfs_legacy.lookupWitnetBytecode.call(id4)
-    const dryrun = JSON.parse(exec(`npx witnet radon dryrun ${bytecode.slice(2)} --json`).toString())
+    const dryrun = JSON.parse(exec(`npx witnet radon dry-run ${bytecode.slice(2)} --json`).toString())
     const currentPrice = parseInt(dryrun?.RadonInteger)
     const cborBytes = "0x" + cbor.encode(parseInt(currentPrice)).toString("hex")
     const deviation = ((100 * (currentPrice - lastPrice)) / lastPrice)

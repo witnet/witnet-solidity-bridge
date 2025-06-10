@@ -517,19 +517,19 @@ contract("WitOracleRadonRegistry", (accounts) => {
       })
     })
 
-    context("bytecodeOf(..)", async () => {
+    context("lookupRadonRequestBytecode(..)", async () => {
       context("radon requests", async () => {
         it("reverts if trying to get bytecode from unknown radon request", async () => {
           await expectRevert(
-            radonRegistry.bytecodeOf("0x0"),
+            radonRegistry.lookupRadonRequestBytecode("0x0"),
             "unverified"
           )
         })
         it("works if trying to get bytecode onchain from known radon request", async () => {
-          await radonRegistry.bytecodeOf(btcUsdPriceFeedHash)
+          await radonRegistry.lookupRadonRequestBytecode(btcUsdPriceFeedHash)
         })
         it("returns bytecode if getting it offchain from known radon request", async () => {
-          await radonRegistry.bytecodeOf(btcUsdPriceFeedHash)
+          await radonRegistry.lookupRadonRequestBytecode(btcUsdPriceFeedHash)
         })
       })
     })
