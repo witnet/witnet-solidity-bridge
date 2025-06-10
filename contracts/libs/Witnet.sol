@@ -2,13 +2,17 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+import "./Bech32.sol";
 import "./WitnetCBOR.sol";
 
 library Witnet {
 
+    using Bech32 for Witnet.Address;
     using WitnetBuffer for WitnetBuffer.Buffer;
     using WitnetCBOR for WitnetCBOR.CBOR;
     using WitnetCBOR for WitnetCBOR.CBOR[];
+
+    type Address is bytes20;
 
     type BlockNumber is uint64;
     
@@ -509,7 +513,27 @@ library Witnet {
 
 
     /// =======================================================================
-    /// --- Beacon helper functions ------------------------------------
+    /// --- Witnet.Address helper functions -----------------------------------
+
+    function eq(Address a, Address b) internal pure returns (bool) {
+        return Address.unwrap(a) == Address.unwrap(b);
+    }
+
+    function fromBech32(string memory pkh, bool mainnet) internal pure returns (Address) {
+        return Address.wrap(bytes20(Bech32.fromBech32(pkh, mainnet ? "wit" : "twit")));
+    }
+
+    function toBech32(Address witAddress, bool mainnet) internal pure returns (string memory) {
+        return Bech32.toBech32(address(Address.unwrap(witAddress)), mainnet ? "wit" : "twit");
+    }
+
+    function isZero(Address a) internal pure returns (bool) {
+        return Address.unwrap(a) == bytes20(0);
+    }
+
+    
+    /// =======================================================================
+    /// --- Witnet.Beacon helper functions ------------------------------------
 
     function equals(Beacon storage self, Beacon calldata other)
         internal view returns (bool)
