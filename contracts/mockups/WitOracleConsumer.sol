@@ -16,12 +16,13 @@ abstract contract WitOracleConsumer
     IWitOracle public immutable witOracle;
     IWitOracleRadonRegistry public immutable witOracleRadonRegistry;
 
+    error InvalidDataResult();
     error InvalidQueryParams();
     error InvalidRadonHash();
  
-    constructor (IWitOracle _witOracle) {
+    constructor (address _witOracle) {
         require(
-            address(_witOracle).code.length > 0,
+            _witOracle.code.length > 0,
             "inexistent wit/oracle"
         );
         bytes4 _witOracleSpecs = IWitAppliance(address(_witOracle)).specs();
@@ -31,7 +32,7 @@ abstract contract WitOracleConsumer
             "uncompliant wit/oracle"
         );
         witOracle = IWitOracle(_witOracle);
-        witOracleRadonRegistry = IWitOracleRadonRegistry(_witOracle.registry());
+        witOracleRadonRegistry = IWitOracleRadonRegistry(IWitOracle(_witOracle).registry());
         require(
             address(witOracleRadonRegistry) == address(0)
                 || IWitAppliance(address(witOracleRadonRegistry)).specs() == type(IWitOracleRadonRegistry).interfaceId,
@@ -63,11 +64,11 @@ abstract contract WitOracleConsumer
         returns (Witnet.DataResult memory)
     {
         require(_witOracleCheckQueryParams(report.witDrSLA), InvalidQueryParams());
-        require(_witOracleCheckRadonHashIsKnown(report.witRadonHash), InvalidRadonHash());
+        require(_witOracleCheckRadonHashIsValid(report.witRadonHash), InvalidRadonHash());
         return witOracle.pushDataReport(report, proof);
     }
 
     function _witOracleCheckQueryParams(Witnet.QuerySLA calldata) virtual internal view returns (bool);
-    function _witOracleCheckRadonHashIsKnown(Witnet.RadonHash witRadonHash) virtual internal view returns (bool);
+    function _witOracleCheckRadonHashIsValid(Witnet.RadonHash witRadonHash) virtual internal view returns (bool);
     function _witOraclePushDataResult(Witnet.DataResult memory result, Witnet.RadonHash radonHash) virtual internal;
 }

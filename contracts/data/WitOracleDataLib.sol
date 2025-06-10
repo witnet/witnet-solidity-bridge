@@ -517,7 +517,7 @@ library WitOracleDataLib {
             _radonBytecode = __query.request.radonBytecode;
             _radonHash = registry.hashOf(_radonBytecode);
         } else {
-            _radonBytecode = registry.bytecodeOf(_radonHash);
+            _radonBytecode = registry.lookupRadonRequestBytecode(_radonHash);
         }
         
         Witnet.ServiceProvider[] memory _providers = data().committees

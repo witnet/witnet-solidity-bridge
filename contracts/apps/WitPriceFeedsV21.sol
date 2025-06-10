@@ -55,7 +55,7 @@ contract WitPriceFeedsV21
             address _operator
         )
         Ownable(_operator != address(0) ? _operator : msg.sender)
-        WitOracleConsumer(IWitOracle(_witOracle))
+        WitOracleConsumer(_witOracle)
     {
         __storage().requiredWitParams = IWitPriceFeedsAdmin.WitParams({
             minWitCommitteeSize: 3,
@@ -208,7 +208,7 @@ contract WitPriceFeedsV21
                 dataSources: _oracleSources,
                 dataBytecode: (
                     _oracle == Oracles.Witnet 
-                        ? (witOracleRadonRegistry.bytecodeOf(Witnet.RadonHash.wrap(_oracleSources)))
+                        ? (witOracleRadonRegistry.lookupRadonRequestBytecode(Witnet.RadonHash.wrap(_oracleSources)))
                         : (new bytes(0))
                 )
             }),
@@ -684,7 +684,7 @@ contract WitPriceFeedsV21
         );
     }
 
-    function _witOracleCheckRadonHashIsKnown(Witnet.RadonHash radonHash) virtual override internal view returns (bool) {
+    function _witOracleCheckRadonHashIsValid(Witnet.RadonHash radonHash) virtual override internal view returns (bool) {
         return !__storage().reverseIds[radonHash].isZero();
     }
 

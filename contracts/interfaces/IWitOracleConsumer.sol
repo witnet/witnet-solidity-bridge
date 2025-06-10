@@ -6,8 +6,6 @@ import "./IWitOracle.sol";
 
 interface IWitOracleConsumer {
 
-    function witOracle() external view returns (IWitOracle);
-
     /// @notice Accepts a data report from the Wit/oracle blockchain that ought to be
     /// verified by the WitOracle contract pointed out by `witOracle()`. 
     /// @dev The referred `witOracle()` contract emits a `IWitOracle.DataReport` for

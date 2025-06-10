@@ -289,7 +289,7 @@ contract WitRandomnessV21
     /// @notice Returns the bytecode of the Radon Request used for solving
     /// randomness requests on the Wit/Oracle blockchain.
     function getRandomizeRadonBytecode() virtual override external view returns (bytes memory) {
-        return IWitOracle(witOracle()).registry().bytecodeOf(getRandomizeRadonHash());
+        return IWitOracle(witOracle()).registry().lookupRadonRequestBytecode(getRandomizeRadonHash());
     }
 
     /// @notice Returns the unique identifier of the Radon Request used for solving 

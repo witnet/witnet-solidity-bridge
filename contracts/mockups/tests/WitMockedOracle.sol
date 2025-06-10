@@ -4,7 +4,6 @@ pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
 import "./WitMockedRadonRegistry.sol";
-import "./WitMockedRequestFactory.sol";
 import "../../core/trustable/WitOracleTrustableDefault.sol";
 
 import "./WitMockedPriceFeeds.sol";

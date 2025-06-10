@@ -14,7 +14,7 @@ abstract contract WitOracleQueriableConsumer
     uint24 internal immutable __witOracleCallbackGasLimit;
   
     modifier onlyFromWitOracle {
-        require(msg.sender == address(__witOracle), "WitOracleQueriableConsumer: unauthorized");
+        require(msg.sender == address(__witOracle), "WitOracleQueriableConsumer: invalid oracle");
         _;
     }
 

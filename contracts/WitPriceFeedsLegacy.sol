@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "ado-contracts/contracts/interfaces/IERC2362.sol";
 
+import "./interfaces/IWitOracleAppliance.sol";
 import "./interfaces/legacy/IWitPriceFeedsLegacy.sol";
 import "./interfaces/legacy/IWitPriceFeedsLegacyAdmin.sol";
 import "./interfaces/legacy/IWitPriceFeedsLegacySolverFactory.sol";
