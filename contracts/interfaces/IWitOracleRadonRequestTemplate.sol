@@ -27,17 +27,5 @@ interface IWitOracleRadonRequestTemplate {
     /// @dev are intended to be used just once in lifetime.    
     function verifyRadonRequest(string[][] calldata args) external returns (Witnet.RadonHash);
 
-    /// Verifies into the bounded WitOracle's registry the actual bytecode
-    /// and RAD hash of the Witnet-compliant Radon Request that gets provably
-    /// made out as a result of applying the given parameter value to the underlying
-    /// data sources, aggregate and tally reducers that compose this template. 
-    /// While no actual WitOracleRequest instance gets constructed, the returned value
-    /// will be accepted as a valid RAD hash on the bounded WitOracle contract from now on.
-    /// Reverts if any of the underlying data sources requires more than just one parameter.
-    /// @dev This method requires less gas than buildWitOracleRequest(string), and 
-    /// @dev it's usually preferred when data requests built out of this template
-    /// @dev are intended to be used just once in lifetime.
-    // function verifyRadonRequest(string[] calldata args) external returns (Witnet.RadonHash);
-
     function witOracle() external view returns (address);
 }

@@ -17,7 +17,6 @@ interface IWitOracleRadonRequestFactory {
 
     struct DataSourceRequest {
         Witnet.RadonRetrievalMethods method;
-        string url;    
         string body;
         string[2][] headers;
         bytes script;
