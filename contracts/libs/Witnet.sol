@@ -3,6 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "./Bech32.sol";
+import "./Secp256k1.sol";
 import "./WitnetCBOR.sol";
 
 library Witnet {
@@ -594,7 +595,7 @@ library Witnet {
     /// --- Data*Report helper methods --------------------------------------------------------------------------------
 
     function queryRelayer(DataPullReport calldata self) internal pure returns (address) {
-        return recoverAddr(
+        return recoverEvmAddr(
             self.witDrRelayerSignature, 
             hashify(self.queryHash)
         );
@@ -945,7 +946,7 @@ library Witnet {
         return Witnet.RadonHash.wrap(keccak256(bytecode));
     }
 
-    function recoverAddr(bytes memory signature, bytes32 hash_)
+    function recoverEvmAddr(bytes memory signature, bytes32 hash_)
         internal pure 
         returns (address)
     {
@@ -967,6 +968,43 @@ library Witnet {
             return address(0);
         }
         return ecrecover(hash_, v, r, s);
+    }
+
+    function verifyWitAddressOwnership(address evmOwner, bytes memory witSignature, Address witSigner)
+        internal pure
+        returns (bool)
+    {
+        bytes32 _publicKeyX = recoverWitPublicKeyX(keccak256(abi.encodePacked(evmOwner)), witSignature);
+        bytes20 _witSigner = Address.unwrap(witSigner);
+        return (
+            _witSigner == bytes20(sha256(abi.encodePacked(bytes1(0x00), _publicKeyX)))
+                || _witSigner == bytes20(sha256(abi.encodePacked(bytes1(0x01), _publicKeyX)))
+                || _witSigner == bytes20(sha256(abi.encodePacked(bytes1(0x02), _publicKeyX)))
+                || _witSigner == bytes20(sha256(abi.encodePacked(bytes1(0x03), _publicKeyX)))
+        );
+    }
+
+    function recoverWitPublicKeyX(bytes32 evmDigest, bytes memory witSignature)
+        internal pure
+        returns (bytes32 _witPublicKeyX)
+    {
+        if (witSignature.length == 65) {
+            bytes32 r;
+            bytes32 s;
+            uint8 v;
+            assembly {
+                r := mload(add(witSignature, 0x20))
+                s := mload(add(witSignature, 0x40))
+                v := byte(0, mload(add(witSignature, 0x60)))
+            }
+            if (
+                uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
+                    && (v == 27 || v == 28)
+            ) {
+                (uint256 x,) = Secp256k1.recover(uint256(evmDigest), v - 27, uint256(r), uint256(s));
+                _witPublicKeyX = bytes32(x);
+            }
+        }
     }
 
     function toAddress(bytes memory _value) internal pure returns (address) {

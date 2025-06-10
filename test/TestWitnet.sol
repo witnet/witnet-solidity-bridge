@@ -3,7 +3,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../libs/Witnet.sol";
+import "../contracts/libs/Witnet.sol";
 
 contract TestWitnet {
     using Witnet for *;
