@@ -52,7 +52,7 @@ module.exports = {
     },
     WitOracleRadonRequestFactoryTemplates: {
       baseDeps: [ "WitOracle" ],
-      vanity: 749753, // 0xFFc5828c897D4D6Fbb6969F46f744c70adA77CFF
+      vanity: 1150097, // 0xFFA6a989525B6ff0CEAEBAead06d83cAF3C37EFF
     },
     WitPriceFeeds: {
       baseLibs: [
