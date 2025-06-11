@@ -466,7 +466,7 @@ library WitOracleDataLib {
         try IWitOracleQueriableConsumer(requester).reportWitOracleQueryResult{
             gas: evmCallbackGasLimit
         } (
-            queryId,
+            Witnet.QueryId.unwrap(queryId),
             abi.encode(_result)
         ) {
             evmCallbackSuccess = true;

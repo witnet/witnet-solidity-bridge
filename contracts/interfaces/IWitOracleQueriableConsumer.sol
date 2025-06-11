@@ -13,12 +13,12 @@ interface IWitOracleQueriableConsumer {
     /// @param queryId The unique identifier of the Witnet query being reported.
     /// @param queryResult Abi-encoded Witnet.DataResult containing the CBOR-encoded query's result, and metadata.
     function reportWitOracleQueryResult(
-            Witnet.QueryId queryId,
+            uint256 queryId,
             bytes calldata queryResult
         ) external;
 
     /// @notice Determines if Witnet queries can be reported from given address.
     /// @dev In practice, must only be true on the WitOracle address that's being used by
     /// @dev the WitOracleQueriableConsumer to post queries. 
-    function reportableFrom(IWitOracleQueriable) external view returns (bool);
+    function reportableFrom(address) external view returns (bool);
 }

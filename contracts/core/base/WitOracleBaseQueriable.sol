@@ -34,7 +34,7 @@ abstract contract WitOracleBaseQueriable
     modifier checkQueryCallback(Witnet.QueryCallback memory callback) virtual {
         _require(
             address(callback.consumer).code.length > 0
-                && IWitOracleQueriableConsumer(callback.consumer).reportableFrom(IWitOracleQueriable(address(this)))
+                && IWitOracleQueriableConsumer(callback.consumer).reportableFrom(address(this))
                 && callback.gasLimit > 0,
             "invalid callback"
         ); _;
