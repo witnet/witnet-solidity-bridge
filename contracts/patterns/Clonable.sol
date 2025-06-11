@@ -17,6 +17,11 @@ abstract contract Clonable
         _;
     }
 
+    modifier notOnClones virtual {
+        require(address(this) == _SELF, "Clonable: not on clones"); 
+        _;
+    }
+
     modifier wasInitialized {
         require(initialized(), "Clonable: not initialized");
         _;

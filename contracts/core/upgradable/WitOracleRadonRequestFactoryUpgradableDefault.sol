@@ -13,12 +13,14 @@ contract WitOracleRadonRequestFactoryUpgradableDefault
     }
 
     constructor(
-            address _witOracle,
+            address _witOracleRadonRequestModalsBuilder,
+            address _witOracleRadonRequestTemplatesBuilder,
             bytes32 _versionTag,
             bool _upgradable
         )
         WitOracleRadonRequestFactoryBase(
-            _witOracle
+            _witOracleRadonRequestModalsBuilder,
+            _witOracleRadonRequestTemplatesBuilder
         )
         WitOracleRadonRequestFactoryBaseUpgradable(
             _versionTag,

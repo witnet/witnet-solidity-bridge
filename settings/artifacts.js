@@ -9,6 +9,8 @@ module.exports = {
       WitOracle: "WitOracleTrustableDefault",
       WitOracleRadonRegistry: "WitOracleRadonRegistryUpgradableDefault",
       WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableDefault",
+      WitOracleRadonRequestFactoryModals: "WitOracleRadonRequestFactoryModalsV21",
+      WitOracleRadonRequestFactoryTemplates: "WitOracleRadonRequestFactoryTemplatesV21",
     },
     libs: {
       WitOracleDataLib: "WitOracleDataLib",

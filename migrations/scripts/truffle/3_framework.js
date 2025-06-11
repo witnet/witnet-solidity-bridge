@@ -26,6 +26,9 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
     core: merge(Object.keys(networkArtifacts.core), [
       "WitOracleRadonRegistry", 
       "WitOracle", 
+      "WitOracleRadonRequestFactoryModals",
+      "WitOracleRadonRequestFactoryTemplates",
+      "WitOracleRadonRequestFactory",
     ]),
     apps: merge(Object.keys(networkArtifacts.apps), [],),
   }

@@ -13,12 +13,14 @@ contract WitOracleRadonRequestFactoryUpgradableConfluxCore
     }
 
     constructor(
-            address _witOracle,
+            address _witOracleRadonRequestModalsBuilder,
+            address _witOracleRadonRequestTemplatesBuilder,
             bytes32 _versionTag,
             bool _upgradable
         )
         WitOracleRadonRequestFactoryUpgradableDefault(
-            _witOracle,
+            _witOracleRadonRequestModalsBuilder,
+            _witOracleRadonRequestTemplatesBuilder,
             _versionTag,
             _upgradable
         )
