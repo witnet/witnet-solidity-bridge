@@ -853,6 +853,10 @@ library Witnet {
     /// ===============================================================================================================
     /// --- RadonHash helper methods ----------------------------------------------------------------------------------
 
+    function eq(RadonHash a, RadonHash b) internal pure returns (bool) {
+        return RadonHash.unwrap(a) == RadonHash.unwrap(b);
+    }
+    
     function isZero(RadonHash h) internal pure returns (bool) {
         return RadonHash.unwrap(h) == bytes32(0);
     }
