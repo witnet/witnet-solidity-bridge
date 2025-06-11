@@ -82,7 +82,7 @@ function getNetworkBaseImplArtifactAddresses (network, domain, addresses, base, 
           (!exception || impl !== exception) && 
           impl !== base && 
           impl.indexOf(base) == 0 &&
-          addresses[network][domain][impl] &&
+          addresses[network][domain][impl] !== undefined &&
           !entries.map(entry => entry?.impl).includes(impl)
         ) {
           entries.push({ impl, addr: addresses[network][domain][impl] })

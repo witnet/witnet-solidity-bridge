@@ -58,6 +58,9 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
       const base = framework[domain][index]
       const impl = networkArtifacts[domain][base]
 
+      if (!impl) {
+        panic(base, `No implementation artifact declared for "${base}" on settings/artifacts.js`)
+      }
       if (impl.indexOf(base) < 0) {
         panic(impl, `Mismatching inheritance on settings/artifacts.js: "${base}" <! "${impl}"`)
       }
@@ -70,7 +73,7 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
       let targetBaseAddr = utils.getNetworkArtifactAddress(network, domain, addresses, base)
       if (
         domain !== "core" && 
-          !selection.includes(base) && !selection.includes(base) && utils.isUpgradableArtifact(impl) &&
+          !selection.includes(base) && !selection.includes(impl) && utils.isUpgradableArtifact(impl) &&
           (utils.isNullAddress(targetBaseAddr) || (await web3.eth.getCode(targetBaseAddr)).length < 3) &&
           !process.argv.includes(`--${domain}`)
       ) {
@@ -250,8 +253,8 @@ module.exports = async function (_, network, [, from, reporter, curator]) {
           }
           
           if (
-            selection.includes(target.impl) &&
-            (target.impl === impl || utils.isNullAddress(target.addr) || (await web3.eth.getCode(target.addr)).length < 3)
+            (domain === "core" || selection.includes(target.impl)) &&
+            (/*target.impl === impl ||*/ utils.isNullAddress(target.addr) || (await web3.eth.getCode(target.addr)).length < 3)
           ) {
             if (target.impl !== impl) {
               if (!fs.existsSync(`migrations/frosts/${domain}/${target.impl}.json`)) {
