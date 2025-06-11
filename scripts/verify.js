@@ -33,7 +33,7 @@ for (const domain in framework) {
       const addr = utils.getNetworkArtifactAddress(network, domain, addresses, base)
       utils.traceVerify(network, `WitnetProxy@${addr} --custom-proxy WitnetProxy`)
     } 
-    const forceConstructorArgs = constructorArgs[network][impl] || constructorArgs?.default[impl]
+    const forceConstructorArgs = constructorArgs[network][impl]
     if (forceConstructorArgs) {
       utils.traceVerify(network, `${impl} --forceConstructorArgs string:${forceConstructorArgs} --verifiers etherscan,sourcify`)
     } else {
