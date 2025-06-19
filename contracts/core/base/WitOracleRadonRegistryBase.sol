@@ -314,8 +314,8 @@ abstract contract WitOracleRadonRegistryBase
 
             // Compose radon request bytecode:
             bytes memory _radBytecode = _retrievals.encode(
-                commonRetrieveArgs,
                 dataProviders,
+                commonRetrieveArgs,
                 __database().reducers[dataSourcesAggregatorHash].encode(),
                 __database().reducers[crowdAttestationTallyHash].encode()
             );
