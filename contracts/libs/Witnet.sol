@@ -521,6 +521,7 @@ library Witnet {
     }
 
     function fromBech32(string memory pkh, bool mainnet) internal pure returns (Address) {
+        require(bytes(pkh).length == (mainnet ? 42 : 43), "Bech32: invalid length");
         return Address.wrap(bytes20(Bech32.fromBech32(pkh, mainnet ? "wit" : "twit")));
     }
 
