@@ -1073,6 +1073,22 @@ library Witnet {
         }
     }
 
+    
+    /// @notice Converts bytes32 into string.
+    function toString(bytes32 _bytes32)
+        internal pure
+        returns (string memory)
+    {
+        bytes memory _bytes = new bytes(_toStringLength(_bytes32));
+        for (uint _i = 0; _i < _bytes.length;) {
+            _bytes[_i] = _bytes32[_i];
+            unchecked {
+                _i ++;
+            }
+        }
+        return string(_bytes);
+    }
+
 
     /// ===============================================================================================================
     /// --- 'string' helper methods -----------------------------------------------------------------------------------
