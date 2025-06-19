@@ -933,6 +933,38 @@ library Witnet {
     /// ===============================================================================================================
     /// --- 'bytes*' helper methods -----------------------------------------------------------------------------------
 
+    function intoMemArray(bytes32[1] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 1, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[2] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 2, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[3] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 3, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[4] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 4, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[5] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 5, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[6] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 6, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[7] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 7, _values), (bytes32[]));
+    }
+
+    function intoMemArray(bytes32[8] memory _values) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 8, _values), (bytes32[]));
+    }
+    
     function merkleHash(bytes32 a, bytes32 b) internal pure returns (bytes32) {
         return (a < b
             ? _merkleHash(a, b)
@@ -975,11 +1007,15 @@ library Witnet {
         return ecrecover(hash_, v, r, s);
     }
 
-    function verifyWitAddressOwnership(address evmOwner, bytes memory witSignature, Address witSigner)
+    function verifyWitAddressAuthorization(
+            address evmAuthorized, 
+            Address witSigner,
+            bytes memory witSignature
+        )
         internal pure
         returns (bool)
     {
-        bytes32 _publicKeyX = recoverWitPublicKeyX(keccak256(abi.encodePacked(evmOwner)), witSignature);
+        bytes32 _publicKeyX = recoverWitPublicKey(keccak256(abi.encodePacked(evmAuthorized)), witSignature);
         bytes20 _witSigner = Address.unwrap(witSigner);
         return (
             _witSigner == bytes20(sha256(abi.encodePacked(bytes1(0x00), _publicKeyX)))
@@ -989,9 +1025,9 @@ library Witnet {
         );
     }
 
-    function recoverWitPublicKeyX(bytes32 evmDigest, bytes memory witSignature)
+    function recoverWitPublicKey(bytes32 evmDigest, bytes memory witSignature)
         internal pure
-        returns (bytes32 _witPublicKeyX)
+        returns (bytes32 _witPublicKey)
     {
         if (witSignature.length == 65) {
             bytes32 r;
@@ -1007,7 +1043,7 @@ library Witnet {
                     && (v == 27 || v == 28)
             ) {
                 (uint256 x,) = Secp256k1.recover(uint256(evmDigest), v - 27, uint256(r), uint256(s));
-                _witPublicKeyX = bytes32(x);
+                _witPublicKey = bytes32(x);
             }
         }
     }
@@ -1026,38 +1062,6 @@ library Witnet {
     
     function toBytes32(bytes memory _value) internal pure returns (bytes32) {
         return toFixedBytes(_value, 32);
-    }
-
-    function intoMemArray(bytes32[1] memory _values) internal pure returns (bytes32[] memory) {
-        return abi.decode(abi.encode(uint256(32), 1, _values), (bytes32[]));
-    }
-
-    function intoMemArray(bytes32[2] memory _values) internal pure returns (bytes32[] memory) {
-        return abi.decode(abi.encode(uint256(32), 2, _values), (bytes32[]));
-    }
-
-    function intoMemArray(bytes32[3] memory _values) internal pure returns (bytes32[] memory) {
-        return abi.decode(abi.encode(uint256(32), 3, _values), (bytes32[]));
-    }
-
-    function intoMemArray(bytes32[4] memory _values) internal pure returns (bytes32[] memory) {
-        return abi.decode(abi.encode(uint256(32), 4, _values), (bytes32[]));
-    }
-
-    function intoMemArray(bytes32[5] memory _values) internal pure returns (bytes32[] memory) {
-        return abi.decode(abi.encode(uint256(32), 5, _values), (bytes32[]));
-    }
-
-    function intoMemArray(bytes32[6] memory _values) internal pure returns (bytes32[] memory) {
-        return abi.decode(abi.encode(uint256(32), 6, _values), (bytes32[]));
-    }
-
-    function intoMemArray(bytes32[7] memory _values) internal pure returns (bytes32[] memory) {
-        return abi.decode(abi.encode(uint256(32), 7, _values), (bytes32[]));
-    }
-
-    function intoMemArray(bytes32[8] memory _values) internal pure returns (bytes32[] memory) {
-        return abi.decode(abi.encode(uint256(32), 8, _values), (bytes32[]));
     }
 
     function toFixedBytes(bytes memory _value, uint8 _numBytes)
