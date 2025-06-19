@@ -1111,19 +1111,15 @@ library Witnet {
         return string(lowered);
     }
 
-    /// @notice Converts bytes32 into string.
-    function toString(bytes32 _bytes32)
-        internal pure
-        returns (string memory)
-    {
-        bytes memory _bytes = new bytes(_toStringLength(_bytes32));
-        for (uint _i = 0; _i < _bytes.length;) {
-            _bytes[_i] = _bytes32[_i];
-            unchecked {
-                _i ++;
-            }
+    // Function to parse a hex string into a byte array
+    function parseHexString(string memory hexString) internal pure returns (bytes memory) {
+        bytes memory result = new bytes(bytes(hexString).length / 2);
+        for (uint256 i = 0; i < result.length / 2; i++) {
+            uint8 byte1 = _hexCharToByte(uint8(bytes(hexString)[2 * i]));
+            uint8 byte2 = _hexCharToByte(uint8(bytes(hexString)[2 * i + 1]));
+            result[i] = bytes1(byte1 * 16 + byte2); // Combining the two hex digits into one byte
         }
-        return string(_bytes);
+        return result;
     }
 
     function tryUint(string memory str)
@@ -1270,6 +1266,18 @@ library Witnet {
 
     /// ===============================================================================================================
     /// --- Witnet library private methods ----------------------------------------------------------------------------
+
+    function _hexCharToByte(uint8 hexChar) private pure returns (uint8) {
+        if (hexChar >= 0x30 && hexChar <= 0x39) {
+            return hexChar - 0x30; // '0'-'9' to 0-9
+        } else if (hexChar >= 0x41 && hexChar <= 0x46) {
+            return hexChar - 0x41 + 10; // 'A'-'F' to 10-15
+        } else if (hexChar >= 0x61 && hexChar <= 0x66) {
+            return hexChar - 0x61 + 10; // 'a'-'f' to 10-15
+        } else {
+            revert("Invalid hex character");
+        }
+    }
 
     function _merkleHash(bytes32 _a, bytes32 _b) private pure returns (bytes32 _hash) {
         assembly {
