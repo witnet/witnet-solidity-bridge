@@ -8,8 +8,8 @@
             "WitOracle": "0x77703aE126B971c9946d562F41Dd47071dA00777",
             "WitOracleRadonRegistry": "0x000B61Fe075F545fd37767f40391658275900000",
             "WitOracleRadonRequestFactory": "0x00000eBcBDD5B6A1B4f102b165ED2C4d8B6B1000",
-            "WitOracleRadonRequestFactoryModalsV21": "0xFF3771267Cadd197bF842229F4E11E528AD08dFF",
-            "WitOracleRadonRequestFactoryTemplatesV21": "0xFFA6a989525B6ff0CEAEBAead06d83cAF3C37EFF",
+            "WitOracleRadonRequestFactoryModalsV21": "0xFF7c7551738ED9ADdCD347cc87389c9804109EFF",
+            "WitOracleRadonRequestFactoryTemplatesV21": "0xFFD0096feeaD654ceC847C55AB386aC73ee7cdFF",
             "WitOracleRequestFactory": "0x000DB36997AF1F02209A6F995883B9B699900000"
         },
         "WitnetDeployer": "0x03232aBE800D1638B30432FeEF300581De323a4E"

@@ -288,8 +288,8 @@ abstract contract WitOracleRadonRegistryBase
     {
         bytes32 hash = keccak256(abi.encode(
             commonRetrieveHash,
-            commonRetrieveArgs,
             dataProviders,
+            commonRetrieveArgs,
             dataSourcesAggregatorHash,
             crowdAttestationTallyHash
         ));
