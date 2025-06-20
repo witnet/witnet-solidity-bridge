@@ -45,9 +45,6 @@ importers:
       '@openzeppelin/contracts-upgradeable':
         specifier: ^5.2.0
         version: 5.2.0(@openzeppelin/contracts@5.2.0)
-      '@witnet/solidity':
-        specifier: link:..\witnet-solidity
-        version: link:../witnet-solidity
       ado-contracts:
         specifier: 1.0.0
         version: 1.0.0
