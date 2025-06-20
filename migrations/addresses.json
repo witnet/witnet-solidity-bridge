@@ -83,13 +83,10 @@
             "WitRandomnessV21": "0x59E74BB41c3Fccc8406b2ED4D16dd451d39A128a"
         },
         "libs": {
-            "WitOracleDataLib": "0xA61737c7cA9b6683B40A7f026578DA7df7Bb0841",
-            "WitOracleRadonEncodingLib": "0x7a497B1A27EAa9F4BF2D1d109F409B38375708cB",
-            "WitOracleResultStatusLib": "0x31d8d41Cd7d9cB2E76f0dA02Fa67a7E10E8Acc22",
+            "WitOracleDataLib": "0xD151b632c1dB1f8e7b1Fc45b9d45f9F98A77793F",
+            "WitOracleRadonEncodingLib": "0x2a3F74863C4393706BAbf7FF805B1600505d3993",
+            "WitOracleResultStatusLib": "0xe6EEca5Ba79615948973c197E11478A52c5736F4",
             "WitPriceFeedsLegacyDataLib": "0xE677e5dAae233C2f6AeCb770F7b722B580F786Af"
-        },
-        "core": {
-            "WitOracleRadonRequestFactoryTemplatesV21": "0xFFA6a989525B6ff0CEAEBAead06d83cAF3C37EFF"
         }
     },
         "libs": {
