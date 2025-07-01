@@ -237,9 +237,10 @@ library WitPriceFeedsLegacyDataLib {
             if (_latestStatus == Witnet.ResultStatus.NoErrors) {
                 // If so, remove previous last valid query from the WRB:
                 if (__feed.lastValidQueryId != 0) {
-                    evmUpdateRequestFee += Witnet.QueryEvmReward.unwrap(
-                        witOracle.deleteQuery(__feed.lastValidQueryId)
-                    );                    
+                    try witOracle.deleteQuery(__feed.lastValidQueryId) returns (Witnet.QueryEvmReward _unusedReward) {
+                        evmUpdateRequestFee += Witnet.QueryEvmReward.unwrap(_unusedReward);
+
+                    } catch {}
                 }
                 __feed.lastValidQueryId = _latestQueryId;
             } else {
