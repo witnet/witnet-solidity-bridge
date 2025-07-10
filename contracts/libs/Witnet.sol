@@ -612,16 +612,17 @@ library Witnet {
         ));
     }
 
-    function tallyHash(DataPushReport memory self) internal pure returns (bytes32) {
+    function digest(DataPushReport memory self) internal pure returns (bytes32) {
         return keccak256(abi.encode(
             self.witDrTxHash,
             self.queryRadHash,
-            self.queryParams,
+            self.queryParams.witResultMaxSize,
+            self.queryParams.witCommitteeSize,
+            self.queryParams.witInclusionFees,
             self.resultTimestamp,
             self.resultCborBytes
         ));
     }
-
     
     /// ========================================================================================================
     /// --- 'DataResult' helper methods ------------------------------------------------------------------------

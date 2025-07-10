@@ -584,7 +584,7 @@ library WitOracleTrustlessDataLib {
         require(
             _witOracleHead.droTalliesMerkleRoot == Witnet.merkleRoot(
                 droMerkleTrie, 
-                report.tallyHash()
+                report.digest()
             ), "invalid merkle proof"
         );
 
@@ -627,7 +627,7 @@ library WitOracleTrustlessDataLib {
         require(
             _witOracleHead.droTalliesMerkleRoot == Witnet.merkleRoot(
                 droMerkleTrie, 
-                report.tallyHash()
+                report.digest()
             ), "invalid merkle proof"
         );
 

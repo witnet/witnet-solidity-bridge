@@ -200,7 +200,7 @@ library WitOracleDataLib {
         public view
         returns (address _evmReporter, Witnet.DataResult memory _data)
     {
-        _evmReporter = Witnet.recoverEvmAddr(_signature, _dataPushReport.tallyHash());
+        _evmReporter = Witnet.recoverEvmAddr(_signature, _dataPushReport.digest());
         require(data().reporters[_evmReporter], "WitOracleDataLib: invalid signature");
         _data = extractDataResult(
             Witnet.QueryResponse({
