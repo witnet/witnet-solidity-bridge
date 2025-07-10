@@ -15,6 +15,7 @@ interface IWitOracle {
             Witnet.TransactionHash witDrTxHash,
             Witnet.RadonHash witDrTxRadHash,
             Witnet.QuerySLA witDrTxParams,
+            Witnet.Timestamp witResultTimestamp,
             bytes witResultCborBytes,
             Witnet.ResultStatus witResultStatus
         );

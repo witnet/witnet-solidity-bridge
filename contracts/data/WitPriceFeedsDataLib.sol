@@ -329,17 +329,17 @@ library WitPriceFeedsDataLib {
 
                 // check that governance target rules are met:
                 require(
-                    _report.witDrSLA.witCommitteeSize >= _required.minWitCommitteeSize
+                    _report.queryParams.witCommitteeSize >= _required.minWitCommitteeSize
                         && (
                             _required.maxWitCommitteeSize == 0
-                                || _report.witDrSLA.witCommitteeSize <= _required.maxWitCommitteeSize
+                                || _report.queryParams.witCommitteeSize <= _required.maxWitCommitteeSize
                         ),
                     IWitPythErrors.InvalidGovernanceTarget()
                 );
 
                 // revert if any of the allegedly fresh update refers a radonHash 
                 // that's not actually settled on any of the supported price-feeds:
-                IWitPriceFeeds.ID4 _priceId = data().reverseIds[_report.witRadonHash];
+                IWitPriceFeeds.ID4 _priceId = data().reverseIds[_report.queryRadHash];
                 require(
                     IWitPriceFeeds.ID4.unwrap(_priceId) != 0, 
                     IWitPythErrors.InvalidUpdateDataSource()
@@ -395,7 +395,7 @@ library WitPriceFeedsDataLib {
     {
         // revert if any of the allegedly fresh update refers a radonHash 
         // that's not actually settled on any of the supported price-feeds:
-        IWitPriceFeeds.ID4 _id4 = data().reverseIds[report.witRadonHash];
+        IWitPriceFeeds.ID4 _id4 = data().reverseIds[report.queryRadHash];
         require(
             IWitPriceFeeds.ID4.unwrap(_id4) != 0, 
             IWitPythErrors.InvalidUpdateDataSource()

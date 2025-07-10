@@ -27,7 +27,7 @@ abstract contract WitOracleQueriableConsumer
     /// ===============================================================================================================
     /// --- Base implementation of IWitOracleQueriableConsumer --------------------------------------------------------------------
 
-    function reportableFrom(IWitOracleQueriable _from) virtual override external view returns (bool) {
+    function reportableFrom(address _from) virtual override external view returns (bool) {
         return address(_from) == address(__witOracle);
     }
 

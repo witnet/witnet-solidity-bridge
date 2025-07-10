@@ -67,11 +67,11 @@ library Witnet {
     }
 
     struct DataPushReport {
-        RadonHash witRadonHash;
-        QuerySLA  witDrSLA;
-        BlockNumber witDrTxEpoch;
         TransactionHash witDrTxHash;
-        bytes witResultCborBytes;
+        RadonHash queryRadHash;
+        QuerySLA  queryParams;
+        Timestamp resultTimestamp;
+        bytes resultCborBytes;
     }
 
     /// Data struct containing the Witnet-provided result to a Data Request.
@@ -614,11 +614,11 @@ library Witnet {
 
     function tallyHash(DataPushReport memory self) internal pure returns (bytes32) {
         return keccak256(abi.encode(
-            self.witRadonHash,
-            self.witDrSLA,
-            self.witDrTxEpoch,
             self.witDrTxHash,
-            self.witResultCborBytes
+            self.queryRadHash,
+            self.queryParams,
+            self.resultTimestamp,
+            self.resultCborBytes
         ));
     }
 

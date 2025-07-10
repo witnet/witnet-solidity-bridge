@@ -205,9 +205,9 @@ library WitOracleDataLib {
         _data = extractDataResult(
             Witnet.QueryResponse({
                 reporter: address(0), disputer: address(0), _0: 0, 
-                resultCborBytes: _dataPushReport.witResultCborBytes,
+                resultCborBytes: _dataPushReport.resultCborBytes,
                 resultDrTxHash: _dataPushReport.witDrTxHash,
-                resultTimestamp: Witnet.determineTimestampFromEpoch(_dataPushReport.witDrTxEpoch)
+                resultTimestamp: _dataPushReport.resultTimestamp
             }), 
             Witnet.QueryStatus.Finalized
         );

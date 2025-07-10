@@ -565,18 +565,18 @@ library WitOracleTrustlessDataLib {
     {
         // validate query report
         require(
-            Witnet.RadonHash.unwrap(report.witRadonHash) != bytes32(0)
-                && report.witResultCborBytes.length > 0
-                && Witnet.BlockNumber.unwrap(report.witDrTxEpoch) > 0
+            Witnet.RadonHash.unwrap(report.queryRadHash) != bytes32(0)
+                && report.resultCborBytes.length > 0
+                && !report.resultTimestamp.isZero()
                 && Witnet.TransactionHash.unwrap(report.witDrTxHash) != bytes32(0)
-                && report.witDrSLA.isValid()
+                && report.queryParams.isValid()
             , "invalid query report"
         );
 
         // validate rollup proofs
         Witnet.Beacon memory _witOracleHead = verifyBeacons(rollup);
         require(
-            _witOracleHead.index == Witnet.determineBeaconIndexFromEpoch(report.witDrTxEpoch) + 1, 
+            _witOracleHead.index >= Witnet.determineBeaconIndexFromTimestamp(report.resultTimestamp) + 1, 
             "misleading head beacon"
         );
 
@@ -591,9 +591,9 @@ library WitOracleTrustlessDataLib {
         return WitOracleDataLib.intoDataResult(
             Witnet.QueryResponse({
                 reporter: address(0), disputer: address(0), _0: 0,
-                resultCborBytes: report.witResultCborBytes,
+                resultCborBytes: report.resultCborBytes,
                 resultDrTxHash: report.witDrTxHash,
-                resultTimestamp: Witnet.determineTimestampFromEpoch(report.witDrTxEpoch)
+                resultTimestamp: report.resultTimestamp
             }),
             Witnet.QueryStatus.Finalized
         );
@@ -608,18 +608,18 @@ library WitOracleTrustlessDataLib {
     {
         // validate query report
         require(
-            Witnet.RadonHash.unwrap(report.witRadonHash) != bytes32(0)
-                && report.witResultCborBytes.length > 0
-                && Witnet.BlockNumber.unwrap(report.witDrTxEpoch) > 0
+            Witnet.RadonHash.unwrap(report.queryRadHash) != bytes32(0)
+                && report.resultCborBytes.length > 0
+                && !report.resultTimestamp.isZero()
                 && Witnet.TransactionHash.unwrap(report.witDrTxHash) != bytes32(0)
-                && report.witDrSLA.isValid()
+                && report.queryParams.isValid()
             , "invalid query report"
         );
 
         // validate rollup proofs
         Witnet.Beacon memory _witOracleHead = rollupBeacons(rollup);
         require(
-            _witOracleHead.index == Witnet.determineBeaconIndexFromEpoch(report.witDrTxEpoch) + 1, 
+            _witOracleHead.index >= Witnet.determineBeaconIndexFromTimestamp(report.resultTimestamp) + 1, 
             "misleading head beacon"
         );
 
@@ -634,9 +634,9 @@ library WitOracleTrustlessDataLib {
         return WitOracleDataLib.intoDataResult(
             Witnet.QueryResponse({
                 reporter: address(0), disputer: address(0), _0: 0,
-                resultCborBytes: report.witResultCborBytes,
+                resultCborBytes: report.resultCborBytes,
                 resultDrTxHash: report.witDrTxHash,
-                resultTimestamp: Witnet.determineTimestampFromEpoch(report.witDrTxEpoch)
+                resultTimestamp: report.resultTimestamp 
             }),
             Witnet.QueryStatus.Finalized
         );

@@ -52,7 +52,7 @@ abstract contract WitOracleConsumer
                 report,
                 proof
             ),
-            report.witRadonHash
+            report.queryRadHash
         );
     }
 
@@ -63,8 +63,8 @@ abstract contract WitOracleConsumer
         private
         returns (Witnet.DataResult memory)
     {
-        require(_witOracleCheckQueryParams(report.witDrSLA), InvalidQueryParams());
-        require(_witOracleCheckRadonHashIsValid(report.witRadonHash), InvalidRadonHash());
+        require(_witOracleCheckQueryParams(report.queryParams), InvalidQueryParams());
+        require(_witOracleCheckRadonHashIsValid(report.queryRadHash), InvalidRadonHash());
         return witOracle.pushDataReport(report, proof);
     }
 

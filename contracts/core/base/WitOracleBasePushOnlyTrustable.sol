@@ -56,9 +56,10 @@ abstract contract WitOracleBasePushOnlyTrustable
             msg.sender, 
             _evmSigner, 
             _report.witDrTxHash,
-            _report.witRadonHash,
-            _report.witDrSLA,
-            _report.witResultCborBytes,
+            _report.queryRadHash,
+            _report.queryParams,
+            _report.resultTimestamp,
+            _report.resultCborBytes,
             _result.status
         );
         return _result;

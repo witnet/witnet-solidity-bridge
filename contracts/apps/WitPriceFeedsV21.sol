@@ -385,10 +385,10 @@ contract WitPriceFeedsV21
 
             // check that governance target rules are met:
             require(
-                _report.witDrSLA.witCommitteeSize >= _required.minWitCommitteeSize
+                _report.queryParams.witCommitteeSize >= _required.minWitCommitteeSize
                     && (
                         _required.maxWitCommitteeSize == 0
-                            || _report.witDrSLA.witCommitteeSize <= _required.maxWitCommitteeSize
+                            || _report.queryParams.witCommitteeSize <= _required.maxWitCommitteeSize
                     ),
                 IWitPythErrors.InvalidGovernanceTarget()
             );
