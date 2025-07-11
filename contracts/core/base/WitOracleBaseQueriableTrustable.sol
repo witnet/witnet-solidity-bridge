@@ -74,8 +74,7 @@ abstract contract WitOracleBaseQueriableTrustable
             _report.queryRadHash,
             _report.queryParams,
             _report.resultTimestamp,
-            _report.resultCborBytes,
-            _result.status
+            _report.resultCborBytes
         );
         return _result;
     }

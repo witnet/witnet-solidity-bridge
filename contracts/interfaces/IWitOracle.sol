@@ -10,14 +10,13 @@ interface IWitOracle {
     
     event WitOracleReport(
             address indexed evmOrigin, 
-            address indexed evmRequester, 
+            address indexed evmConsumer, 
             address evmReporter,
             Witnet.TransactionHash witDrTxHash,
-            Witnet.RadonHash witDrTxRadHash,
-            Witnet.QuerySLA witDrTxParams,
-            Witnet.Timestamp witResultTimestamp,
-            bytes witResultCborBytes,
-            Witnet.ResultStatus witResultStatus
+            Witnet.RadonHash queryRadHash,
+            Witnet.QuerySLA  queryParams,
+            Witnet.Timestamp resultTimestamp,
+            bytes resultCborBytes
         );
 
     /// @notice Uniquely identifies the WitOracle instance and the chain on which it's deployed.
