@@ -1093,6 +1093,25 @@ library Witnet {
         return string(_bytes);
     }
 
+    function toHexString(bytes32 _bytes32) 
+        internal pure
+        returns (string memory)
+
+    {
+        bytes memory _bytes = new bytes(64);
+        for (uint8 _i = 0; _i < _bytes.length;) {
+            uint8 _f = uint8(_bytes32[_i/2] & 0x0f);
+            uint8 _l = uint8(_bytes32[_i/2] >> 4);
+            _bytes[_i ++] = _toHexChar(_f);
+            _bytes[_i ++] = _toHexChar(_l);
+        }
+        return string(_bytes);
+    }
+
+    function _toHexChar(uint8 _uint8) private pure returns (bytes1) {
+        return _uint8 < 10 ? bytes1(_uint8 + 48) : bytes1(_uint8 + 87);
+    }
+
 
     /// ===============================================================================================================
     /// --- 'string' helper methods -----------------------------------------------------------------------------------
