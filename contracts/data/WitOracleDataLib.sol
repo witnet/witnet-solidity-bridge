@@ -201,10 +201,10 @@ library WitOracleDataLib {
         returns (address _evmReporter, Witnet.DataResult memory _data)
     {
         _evmReporter = Witnet.recoverEvmAddr(_signature, _dataPushReport.digest());
-        require(data().reporters[_evmReporter], "WitOracleDataLib: invalid signature");
+        // require(data().reporters[_evmReporter], "WitOracleDataLib: invalid signature");
         _data = extractDataResult(
             Witnet.QueryResponse({
-                reporter: address(0), disputer: address(0), _0: 0, 
+                reporter: _evmReporter, disputer: address(0), _0: 0, 
                 resultCborBytes: _dataPushReport.resultCborBytes,
                 resultDrTxHash: _dataPushReport.witDrTxHash,
                 resultTimestamp: _dataPushReport.resultTimestamp

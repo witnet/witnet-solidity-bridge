@@ -612,7 +612,7 @@ library Witnet {
         ));
     }
 
-    function digest(DataPushReport memory self) internal pure returns (bytes32) {
+    function digest(DataPushReport calldata self) internal pure returns (bytes32) {
         return keccak256(abi.encode(
             self.witDrTxHash,
             self.queryRadHash,
