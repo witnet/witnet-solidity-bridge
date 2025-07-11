@@ -1077,10 +1077,9 @@ library Witnet {
             }
         }
     }
-
     
     /// @notice Converts bytes32 into string.
-    function toString(bytes32 _bytes32)
+    function asAscii(bytes32 _bytes32)
         internal pure
         returns (string memory)
     {

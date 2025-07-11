@@ -23,7 +23,7 @@ abstract contract WitPriceFeedsLegacy
     bytes32 immutable internal __prefix = "Price-";
 
     function prefix() virtual override external view returns (string memory) {
-        return Witnet.toString(__prefix);
+        return Witnet.asAscii(__prefix);
     }
     
     function specs() virtual override external pure returns (bytes4) {
