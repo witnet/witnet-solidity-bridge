@@ -1099,17 +1099,11 @@ library Witnet {
 
     {
         bytes memory _bytes = new bytes(64);
-        for (uint8 _i = 0; _i < _bytes.length;) {
-            uint8 _f = uint8(_bytes32[_i/2] & 0x0f);
-            uint8 _l = uint8(_bytes32[_i/2] >> 4);
-            _bytes[_i ++] = _toHexChar(_f);
-            _bytes[_i ++] = _toHexChar(_l);
+        for (uint8 _i; _i < _bytes.length;) {
+            _bytes[_i ++] = _toHexChar(uint8(_bytes32[_i / 2] >> 4));
+            _bytes[_i ++] = _toHexChar(uint8(_bytes32[_i / 2] & 0x0f));
         }
         return string(_bytes);
-    }
-
-    function _toHexChar(uint8 _uint8) private pure returns (bytes1) {
-        return _uint8 < 10 ? bytes1(_uint8 + 48) : bytes1(_uint8 + 87);
     }
 
 
@@ -1308,6 +1302,10 @@ library Witnet {
             mstore(0x20, _b)
             _hash := keccak256(0x0, 0x40)
         }
+    }
+
+    function _toHexChar(uint8 _uint8) private pure returns (bytes1) {
+        return _uint8 < 10 ? bytes1(_uint8 + 48) : bytes1(_uint8 + 87);
     }
 
     /// @dev Calculate length of string-equivalent to given bytes32.
