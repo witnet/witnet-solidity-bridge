@@ -260,7 +260,7 @@ abstract contract WitOracleBaseQueriableTrustable
 
     function reportResult(
             uint256 queryId,
-            uint32 drTxTimestamp,
+            uint32 resultTimestamp,
             bytes32 drTxHash,
             bytes calldata resultCborBytes
         )
@@ -270,7 +270,7 @@ abstract contract WitOracleBaseQueriableTrustable
     {
         return reportResult(
             Witnet.QueryId.wrap(uint64(queryId)),
-            Witnet.Timestamp.wrap(drTxTimestamp),
+            Witnet.Timestamp.wrap(resultTimestamp),
             Witnet.TransactionHash.wrap(drTxHash),
             resultCborBytes
         );
@@ -301,7 +301,7 @@ abstract contract WitOracleBaseQueriableTrustable
         for (uint _ix = 0; _ix < results.length; _ix ++) {
             _results[_ix] = BatchResult({
                 queryId: Witnet.QueryId.wrap(uint64(results[_ix].queryId)),
-                drTxTimestamp: Witnet.Timestamp.wrap(results[_ix].drTxTimestamp),
+                resultTimestamp: Witnet.Timestamp.wrap(results[_ix].resultTimestamp),
                 drTxHash: Witnet.TransactionHash.wrap(results[_ix].drTxHash),
                 resultCborBytes: results[_ix].resultCborBytes
             });
@@ -467,8 +467,8 @@ abstract contract WitOracleBaseQueriableTrustable
                     ))
                 );
             } else if (
-                Witnet.Timestamp.unwrap(_batchResults[_i].drTxTimestamp) > uint64(block.timestamp)
-                    || _batchResults[_i].drTxTimestamp.isZero()
+                Witnet.Timestamp.unwrap(_batchResults[_i].resultTimestamp) > uint64(block.timestamp)
+                    || _batchResults[_i].resultTimestamp.isZero()
                     || _batchResults[_i].resultCborBytes.length == 0
             ) {
                 emit BatchReportError(
@@ -481,7 +481,7 @@ abstract contract WitOracleBaseQueriableTrustable
             } else {
                 _batchReward += __reportResult(
                     Witnet.QueryId.unwrap(_batchResults[_i].queryId),
-                    _batchResults[_i].drTxTimestamp,
+                    _batchResults[_i].resultTimestamp,
                     _batchResults[_i].drTxHash,
                     _batchResults[_i].resultCborBytes
                 );

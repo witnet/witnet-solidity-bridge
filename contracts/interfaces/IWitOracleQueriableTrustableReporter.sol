@@ -68,7 +68,7 @@ interface IWitOracleQueriableTrustableReporter {
         
         struct BatchResult {
             Witnet.QueryId queryId;
-            Witnet.Timestamp drTxTimestamp;
+            Witnet.Timestamp resultTimestamp;
             Witnet.TransactionHash drTxHash;
             bytes resultCborBytes;
         }

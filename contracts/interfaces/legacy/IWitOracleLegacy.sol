@@ -66,7 +66,7 @@ interface IWitOracleLegacy {
 
     struct BatchResultLegacy {
         uint256 queryId;
-        uint32 drTxTimestamp;
+        uint32 resultTimestamp;
         bytes32 drTxHash;
         bytes resultCborBytes;
     }
