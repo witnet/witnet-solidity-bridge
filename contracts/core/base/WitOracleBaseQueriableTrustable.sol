@@ -371,14 +371,14 @@ abstract contract WitOracleBaseQueriableTrustable
     /// @dev Will assume `block.timestamp` as the timestamp at which the request was solved.
     /// @dev Fails if:
     /// @dev - the `_queryId` is not in 'Posted' status.
-    /// @dev - provided `_resultTallyHash` is zero;
+    /// @dev - provided `_witDrTxHash` is zero;
     /// @dev - length of provided `_result` is zero.
     /// @param _queryId The unique identifier of the data request.
-    /// @param _resultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param _witDrTxHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
     /// @param _resultCborBytes The result itself as bytes.
     function reportResult(
             Witnet.QueryId _queryId,
-            Witnet.TransactionHash _resultTallyHash,
+            Witnet.TransactionHash _witDrTxHash,
             bytes calldata _resultCborBytes
         )
         public override
@@ -395,7 +395,7 @@ abstract contract WitOracleBaseQueriableTrustable
         return __reportResultAndReward(
             Witnet.QueryId.unwrap(_queryId),
             Witnet.Timestamp.wrap(uint64(block.timestamp)),
-            _resultTallyHash,
+            _witDrTxHash,
             _resultCborBytes
         );
     }
@@ -404,16 +404,16 @@ abstract contract WitOracleBaseQueriableTrustable
     /// @dev Fails if:
     /// @dev - called from unauthorized address;
     /// @dev - the `_queryId` is not in 'Posted' status.
-    /// @dev - provided `_resultTallyHash` is zero;
+    /// @dev - provided `_witDrTxHash` is zero;
     /// @dev - length of provided `_resultCborBytes` is zero.
     /// @param _queryId The unique query identifier
     /// @param _resultTimestamp Timestamp at which the reported value was captured by the Witnet blockchain. 
-    /// @param _resultTallyHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
+    /// @param _witDrTxHash Hash of the commit/reveal witnessing act that took place in the Witnet blockahin.
     /// @param _resultCborBytes The result itself as bytes.
     function reportResult(
             Witnet.QueryId _queryId,
             Witnet.Timestamp  _resultTimestamp,
-            Witnet.TransactionHash _resultTallyHash,
+            Witnet.TransactionHash _witDrTxHash,
             bytes calldata _resultCborBytes
         )
         public 
@@ -435,7 +435,7 @@ abstract contract WitOracleBaseQueriableTrustable
         return  __reportResultAndReward(
             Witnet.QueryId.unwrap(_queryId),
             _resultTimestamp,
-            _resultTallyHash,
+            _witDrTxHash,
             _resultCborBytes
         );
     }
@@ -532,7 +532,7 @@ abstract contract WitOracleBaseQueriableTrustable
     function __reportResult(
             uint256 _queryId,
             Witnet.Timestamp  _resultTimestamp,
-            Witnet.TransactionHash _resultTallyHash,
+            Witnet.TransactionHash _witDrTxHash,
             bytes memory _resultCborBytes
         )
         virtual internal
@@ -548,7 +548,7 @@ abstract contract WitOracleBaseQueriableTrustable
             uint64(block.number),
             _queryId, 
             _resultTimestamp, 
-            _resultTallyHash, 
+            _witDrTxHash, 
             _resultCborBytes
         );
     }
@@ -556,7 +556,7 @@ abstract contract WitOracleBaseQueriableTrustable
     function __reportResultAndReward(
             uint256 _queryId,
             Witnet.Timestamp  _resultTimestamp,
-            Witnet.TransactionHash _resultTallyHash,
+            Witnet.TransactionHash _witDrTxHash,
             bytes calldata _resultCborBytes
         )
         virtual internal
@@ -565,7 +565,7 @@ abstract contract WitOracleBaseQueriableTrustable
         _evmReward = __reportResult(
             _queryId, 
             _resultTimestamp, 
-            _resultTallyHash, 
+            _witDrTxHash, 
             _resultCborBytes
         );
         // transfer reward to reporter

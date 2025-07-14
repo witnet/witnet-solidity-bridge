@@ -31,11 +31,11 @@ interface IWitOracleQueriableTrustableReporter {
     /// @dev - provided `_tallyHash` is zero;
     /// @dev - length of provided `_result` is zero.
     /// @param queryId The unique identifier of the data request.
-    /// @param resultTallyHash The hash of the corresponding data request transaction in Witnet.
+    /// @param witDrTxHash The hash of the corresponding data request transaction in Witnet.
     /// @param resultCborBytes The result itself as bytes.
     function reportResult(
             Witnet.QueryId queryId,
-            Witnet.TransactionHash resultTallyHash,
+            Witnet.TransactionHash witDrTxHash,
             bytes calldata resultCborBytes
         ) external returns (uint256);
 
@@ -47,12 +47,12 @@ interface IWitOracleQueriableTrustableReporter {
     /// @dev - length of provided `_result` is zero.
     /// @param queryId The unique query identifier
     /// @param resultTimestamp The timestamp of the solving tally transaction in Witnet.
-    /// @param resultTallyHash The hash of the corresponding data request transaction in Witnet.
+    /// @param witDrTxHash The hash of the corresponding data request transaction in Witnet.
     /// @param resultCborBytes The result itself as bytes.
     function reportResult(
             Witnet.QueryId queryId,
             Witnet.Timestamp resultTimestamp,
-            Witnet.TransactionHash resultTallyHash,
+            Witnet.TransactionHash witDrTxHash,
             bytes calldata resultCborBytes
         ) external returns (uint256);
 
