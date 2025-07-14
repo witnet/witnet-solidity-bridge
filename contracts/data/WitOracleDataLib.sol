@@ -381,6 +381,7 @@ library WitOracleDataLib {
                 bool _evmCallbackSuccess, 
                 string memory _evmCallbackRevertMessage
             ) = __reportResultCallback(
+                evmReporter,
                 __query.request.requester,
                 __query.request.callbackGas,
                 evmFinalityBlock,
@@ -437,7 +438,8 @@ library WitOracleDataLib {
     }
 
     function __reportResultCallback(
-            address requester,
+            address evmReporter,
+            address evmRequester,
             uint24  evmCallbackGasLimit,
             uint64  evmFinalityBlock,
             Witnet.QueryId queryId,
@@ -454,7 +456,7 @@ library WitOracleDataLib {
         evmCallbackActualGas = gasleft();
         Witnet.DataResult memory _result = intoDataResult(
             Witnet.QueryResponse({
-                reporter: address(0),
+                reporter: evmReporter,
                 resultTimestamp: resultTimestamp,
                 resultDrTxHash: witDrTxHash,
                 resultCborBytes: resultCborBytes,
@@ -462,7 +464,7 @@ library WitOracleDataLib {
             }),
             evmFinalityBlock == block.number ? Witnet.QueryStatus.Finalized : Witnet.QueryStatus.Reported
         );
-        try IWitOracleQueriableConsumer(requester).reportWitOracleQueryResult{
+        try IWitOracleQueriableConsumer(evmRequester).reportWitOracleQueryResult{
             gas: evmCallbackGasLimit
         } (
             Witnet.QueryId.unwrap(queryId),
