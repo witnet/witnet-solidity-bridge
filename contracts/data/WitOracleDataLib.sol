@@ -104,9 +104,8 @@ library WitOracleDataLib {
                         _result.dataType == Witnet.RadonDataTypes.Array
                             && WitnetCBOR.readLength(_result.value.buffer, _result.value.additionalInformation) >= 1
                     ) {
-                        if (Witnet.peekRadonDataType(_result.value) != Witnet.RadonDataTypes.Integer) {
+                        if (Witnet.peekRadonDataType(_result.value) == Witnet.RadonDataTypes.Integer) {
                             _result.status = Witnet.ResultStatus(_result.value.readInt());
-                            _result.dataType = Witnet.peekRadonDataType(_result.value);
                         
                         } else {
                             _result.status = Witnet.ResultStatus.UnhandledIntercept;
