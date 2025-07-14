@@ -460,7 +460,7 @@ abstract contract WitOracleBaseQueriableTrustable
                     != Witnet.QueryStatus.Posted
             ) {
                 emit BatchReportError(
-                    _batchResults[_i].queryId,
+                    Witnet.QueryId.unwrap(_batchResults[_i].queryId),
                     string(abi.encodePacked(
                         class(),
                         ": ", WitOracleDataLib.notInStatusRevertMessage(Witnet.QueryStatus.Posted)
@@ -472,7 +472,7 @@ abstract contract WitOracleBaseQueriableTrustable
                     || _batchResults[_i].resultCborBytes.length == 0
             ) {
                 emit BatchReportError(
-                    _batchResults[_i].queryId, 
+                    Witnet.QueryId.unwrap(_batchResults[_i].queryId), 
                     string(abi.encodePacked(
                         class(),
                         ": invalid report data"

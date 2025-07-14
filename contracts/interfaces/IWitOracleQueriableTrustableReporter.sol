@@ -73,5 +73,5 @@ interface IWitOracleQueriableTrustableReporter {
             bytes resultCborBytes;
         }
 
-        event BatchReportError(Witnet.QueryId queryId, string reason);
+        event BatchReportError(uint256 queryId, string reason);
 }
