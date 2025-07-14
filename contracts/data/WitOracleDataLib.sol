@@ -360,9 +360,9 @@ library WitOracleDataLib {
             uint256 evmGasPrice,
             uint64  evmFinalityBlock,
             uint256 queryId,
-            Witnet.Timestamp witDrTxTimestamp,
+            Witnet.Timestamp resultTimestamp,
             Witnet.TransactionHash witDrTxHash,
-            bytes calldata witDrResultCborBytes
+            bytes calldata resultCborBytes
         )
         public returns (uint256 evmReward)
     {
@@ -386,9 +386,9 @@ library WitOracleDataLib {
                 __query.request.callbackGas,
                 evmFinalityBlock,
                 Witnet.QueryId.wrap(uint64(queryId)),
-                witDrTxTimestamp,
+                resultTimestamp,
                 witDrTxHash,
-                witDrResultCborBytes
+                resultCborBytes
             );
             if (_evmCallbackSuccess) {
                 // => the callback run successfully
@@ -406,7 +406,7 @@ library WitOracleDataLib {
                     bytes(_evmCallbackRevertMessage).length > 0 
                         ? _evmCallbackRevertMessage
                         : "WitOracleDataLib: callback exceeded gas limit",
-                    witDrResultCborBytes
+                    resultCborBytes
                 );
             }
             // upon delivery, successfull or not, the audit trail is saved into storage, 
@@ -415,7 +415,7 @@ library WitOracleDataLib {
                 evmReporter,
                 evmFinalityBlock,
                 queryId,
-                witDrTxTimestamp, 
+                resultTimestamp, 
                 witDrTxHash,
                 hex""
             );
@@ -430,9 +430,9 @@ library WitOracleDataLib {
                 evmReporter,
                 evmFinalityBlock,
                 queryId,
-                witDrTxTimestamp,
+                resultTimestamp,
                 witDrTxHash,
-                witDrResultCborBytes
+                resultCborBytes
             );
         }
     }
@@ -442,9 +442,9 @@ library WitOracleDataLib {
             uint24  evmCallbackGasLimit,
             uint64  evmFinalityBlock,
             Witnet.QueryId queryId,
-            Witnet.Timestamp witDrTxTimestamp,
+            Witnet.Timestamp resultTimestamp,
             Witnet.TransactionHash witDrTxHash,
-            bytes calldata witDrResultCborBytes
+            bytes calldata resultCborBytes
         )
         private returns (
             uint256 evmCallbackActualGas, 
@@ -456,9 +456,9 @@ library WitOracleDataLib {
         Witnet.DataResult memory _result = intoDataResult(
             Witnet.QueryResponse({
                 reporter: address(0),
-                resultTimestamp: witDrTxTimestamp,
+                resultTimestamp: resultTimestamp,
                 resultDrTxHash: witDrTxHash,
-                resultCborBytes: witDrResultCborBytes,
+                resultCborBytes: resultCborBytes,
                 disputer: address(0), _0: 0
             }),
             evmFinalityBlock == block.number ? Witnet.QueryStatus.Finalized : Witnet.QueryStatus.Reported
@@ -485,17 +485,17 @@ library WitOracleDataLib {
             address evmReporter,
             uint64  evmFinalityBlock,
             uint256 queryId,
-            Witnet.Timestamp witDrTxTimestamp,
+            Witnet.Timestamp resultTimestamp,
             Witnet.TransactionHash witDrTxHash,
-            bytes memory witDrResultCborBytes
+            bytes memory resultCborBytes
         ) private
     {
         Witnet.Query storage __query = seekQuery(queryId);
         __query.checkpoint = Witnet.BlockNumber.wrap(evmFinalityBlock);
         __query.response.reporter = evmReporter; 
-        __query.response.resultTimestamp = witDrTxTimestamp;
+        __query.response.resultTimestamp = resultTimestamp;
         __query.response.resultDrTxHash = witDrTxHash;
-        __query.response.resultCborBytes = witDrResultCborBytes;
+        __query.response.resultCborBytes = resultCborBytes;
     }
 
 
