@@ -223,6 +223,7 @@ module.exports = {
     },
   },
   "ethereum:sepolia": {
+    confirmations: 2,
     network_id: 11155111,
     port: 8506,
     verify: {
