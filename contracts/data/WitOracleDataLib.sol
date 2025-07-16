@@ -392,15 +392,17 @@ library WitOracleDataLib {
             );
             if (_evmCallbackSuccess) {
                 // => the callback run successfully
-                emit IWitOracleQueriableEvents.WitOracleQueryReponseDelivered(
+                emit IWitOracleQueriableEvents.WitOracleQueryReportDelivery(
                     Witnet.QueryId.wrap(uint64(queryId)),
+                    __query.request.requester,
                     evmGasPrice,
                     _evmCallbackActualGas
                 );
             } else {
                 // => the callback reverted
-                emit IWitOracleQueriableEvents.WitOracleQueryResponseDeliveryFailed(
+                emit IWitOracleQueriableEvents.WitOracleResportDeliveryFailed(
                     Witnet.QueryId.wrap(uint64(queryId)),
+                    __query.request.requester,
                     evmGasPrice,
                     _evmCallbackActualGas,
                     bytes(_evmCallbackRevertMessage).length > 0 
@@ -421,7 +423,7 @@ library WitOracleDataLib {
             );
         } else {
             // => no callback is involved
-            emit IWitOracleQueriableEvents.WitOracleQueryResponse(
+            emit IWitOracleQueriableEvents.WitOracleQueryReport(
                 Witnet.QueryId.wrap(uint64(queryId)),
                 evmGasPrice
             );

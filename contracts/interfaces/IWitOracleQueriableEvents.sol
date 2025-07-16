@@ -16,11 +16,6 @@ interface IWitOracleQueriableEvents {
         Witnet.QuerySLA radonParams
     );
 
-    event WitOracleQueryResponseDispute(
-        Witnet.QueryId queryId,
-        address evmResponseDisputer
-    );
-
     /// Emitted when the reward of some not-yet reported query gets upgraded.
     event WitOracleQueryUpgrade(
         Witnet.QueryId queryId,
@@ -29,22 +24,30 @@ interface IWitOracleQueriableEvents {
         uint256 evmReward
     );
 
+
     /// Emitted when a query with no callback gets reported into the WRB.
-    event WitOracleQueryResponse(
+    event WitOracleQueryReport(
         Witnet.QueryId queryId, 
         uint256 evmGasPrice
     );
 
+    event WitOracleQueryReportDispute(
+        Witnet.QueryId queryId,
+        address evmDisputer
+    );
+
     /// Emitted when a query with a callback gets successfully reported into the WRB.
-    event WitOracleQueryReponseDelivered(
+    event WitOracleQueryReportDelivery(
         Witnet.QueryId queryId, 
+        address evmConsumer,
         uint256 evmGasPrice, 
         uint256 evmCallbackGas
     );
 
     /// Emitted when a query with a callback cannot get reported into the WRB.
-    event WitOracleQueryResponseDeliveryFailed(
+    event WitOracleResportDeliveryFailed(
         Witnet.QueryId queryId, 
+        address evmConsumer,
         uint256 evmGasPrice, 
         uint256 evmCallbackActualGas, 
         string  evmCallbackRevertReason,

@@ -441,7 +441,7 @@ abstract contract WitOracleBaseQueriableTrustable
     }
 
     /// @notice Reports Witnet-provided results to multiple requests within a single EVM tx.
-    /// @notice Emits either a WitOracleQueryResponse* or a BatchReportError event per batched report.
+    /// @notice Emits either a WitOracleQueryReport* or a BatchReportError event per batched report.
     /// @dev Fails only if called from unauthorized address.
     /// @param _batchResults Array of BatchResult structs, every one containing:
     ///         - unique query identifier;

@@ -378,7 +378,7 @@ library WitOracleTrustlessDataLib {
         );
         self.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number + evmQueryAwaitingBlocks));
         self.response.disputer = msg.sender;
-        emit IWitOracleQueriableEvents.WitOracleQueryResponseDispute(
+        emit IWitOracleQueriableEvents.WitOracleQueryReportDispute(
             Witnet.QueryId.wrap(uint64(queryId)),
             msg.sender
         );
