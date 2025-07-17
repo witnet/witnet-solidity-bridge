@@ -322,10 +322,15 @@ contract WitPriceFeedsLegacyUpgradable
     /// ===============================================================================================================
     /// --- IWitFeedsLegacy -------------------------------------------------------------------------------------------
     
-    function defaultRadonSLA() override external view returns (IWitPriceFeedsLegacy.RadonSLA memory) {
-        return IWitPriceFeedsLegacy.RadonSLA({
-            numWitnesses: uint8(__defaultQuerySLA.witCommitteeSize),
-            unitaryReward: __defaultQuerySLA.witInclusionFees
+    function defaultRadonSLA() override external view returns (IWitPriceFeedsLegacy.RadonSLAv1 memory) {
+        uint8 _numWitnesses = uint8(__defaultQuerySLA.witCommitteeSize);
+        uint64 _unitaryReward = __defaultQuerySLA.witUnitaryReward;
+        return IWitPriceFeedsLegacy.RadonSLAv1({
+            numWitnesses: _numWitnesses,
+            minConsensusPercentage: 51,
+            witnessReward: _unitaryReward,
+            witnessCollateral: _unitaryReward * _numWitnesses,
+            minerCommitRevealFee: _unitaryReward / _numWitnesses
         });
     }
 
