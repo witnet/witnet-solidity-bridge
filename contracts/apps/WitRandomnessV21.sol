@@ -105,7 +105,7 @@ contract WitRandomnessV21
         );
         __witOracleDefaultQueryParams.witResultMaxSize = _WIT_QUERY_MAX_RESULT_SIZE;
         __storage().requiredWitParams = IWitRandomnessAdmin.WitParams({
-            minWitInclusionFees: __witOracleDefaultQueryParams.witInclusionFees,
+            minWitInclusionFees: __witOracleDefaultQueryParams.witUnitaryReward,
             minWitCommitteeSize: __witOracleDefaultQueryParams.witCommitteeSize,
             maxWitCommitteeSize: 0
         });
@@ -253,7 +253,7 @@ contract WitRandomnessV21
     {
         Witnet.QuerySLA memory _defaultQuerySLA = __witOracleDefaultQueryParams;
         _witCommitteeSize = _defaultQuerySLA.witCommitteeSize;
-        _witInclusionFees = _defaultQuerySLA.witInclusionFees;
+        _witInclusionFees = _defaultQuerySLA.witUnitaryReward;
     }
 
     /// @notice Returns the number of the next block in which a randomize request was posted after the given one. 
@@ -531,7 +531,7 @@ contract WitRandomnessV21
         if (_requiredWitParams.minWitCommitteeSize > __witOracleDefaultQueryParams.witCommitteeSize) {
             __witOracleDefaultQueryParams.witCommitteeSize = _requiredWitParams.minWitCommitteeSize;
         }
-        __witOracleDefaultQueryParams.witInclusionFees = _requiredWitParams.minWitInclusionFees;
+        __witOracleDefaultQueryParams.witUnitaryReward = _requiredWitParams.minWitInclusionFees;
     }
 
     /// @notice Admitted ranges when randomizing with specific security and liveness parameters.
@@ -607,7 +607,7 @@ contract WitRandomnessV21
             return Witnet.QuerySLA({
                 witResultMaxSize: _WIT_QUERY_MAX_RESULT_SIZE,
                 witCommitteeSize: _witCommitteeSize,
-                witInclusionFees: _witInclusionFees
+                witUnitaryReward: _witInclusionFees
             });
         }
     }

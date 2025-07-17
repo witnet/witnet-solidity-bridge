@@ -230,7 +230,7 @@ abstract contract WitOracleBaseQueriableTrustable
             Witnet.QuerySLA({
                 witResultMaxSize: 32,
                 witCommitteeSize: _querySLA.witCommitteeSize,
-                witInclusionFees: _querySLA.witUnitaryReward * 3
+                witUnitaryReward: _querySLA.witUnitaryReward
             })
         );
     }
@@ -249,7 +249,7 @@ abstract contract WitOracleBaseQueriableTrustable
             Witnet.QuerySLA({
                 witResultMaxSize: 32,
                 witCommitteeSize: _querySLA.witCommitteeSize,
-                witInclusionFees: _querySLA.witUnitaryReward * 3
+                witUnitaryReward: _querySLA.witUnitaryReward
             }),
             Witnet.QueryCallback({
                 consumer: msg.sender,
@@ -340,7 +340,7 @@ abstract contract WitOracleBaseQueriableTrustable
                                 Witnet.QuerySLA({
                                     witResultMaxSize: uint16(0),
                                     witCommitteeSize: __query.slaParams.witCommitteeSize,
-                                    witInclusionFees: __query.slaParams.witInclusionFees
+                                    witUnitaryReward: __query.slaParams.witUnitaryReward
                                 })
                             )
                     );
@@ -350,7 +350,7 @@ abstract contract WitOracleBaseQueriableTrustable
                             + estimateExtraFee(_evmGasPrice, _evmWitPrice, __query.slaParams)
                     );
                 }
-                _expenses +=  _evmWitPrice * __query.slaParams.witInclusionFees;
+                _expenses +=  _evmWitPrice * __query.slaParams.witUnitaryReward;
                 _revenues += Witnet.QueryEvmReward.unwrap(__query.reward);
             }
         }
@@ -524,7 +524,7 @@ abstract contract WitOracleBaseQueriableTrustable
             msg.value, 
             IWitOracleLegacy.RadonSLA({
                 witCommitteeSize: uint8(_querySLA.witCommitteeSize),
-                witUnitaryReward: _querySLA.witInclusionFees / 3
+                witUnitaryReward: _querySLA.witUnitaryReward
             })
         );
     }

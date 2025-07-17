@@ -155,7 +155,7 @@ contract WitOracleTrustableOvm2
                                 Witnet.QuerySLA({
                                     witResultMaxSize: uint16(0),
                                     witCommitteeSize: __query.slaParams.witCommitteeSize,
-                                    witInclusionFees: __query.slaParams.witInclusionFees
+                                    witUnitaryReward: __query.slaParams.witUnitaryReward
                                 })
                             )
                     );
@@ -168,7 +168,7 @@ contract WitOracleTrustableOvm2
                             )
                     );
                 }
-                _expenses += __query.slaParams.witInclusionFees * _evmWitPrice;
+                _expenses += __query.slaParams.witUnitaryReward * _evmWitPrice;
                 _revenues += Witnet.QueryEvmReward.unwrap(__query.reward);
             }
         }

@@ -196,7 +196,7 @@ abstract contract WitOracleBaseQueriable
         returns (uint256)
     {
         return (
-            _evmWitPrice * _querySLA.witInclusionFees
+            _evmWitPrice * _querySLA.witUnitaryReward
                 + (_querySLA.witResultMaxSize > 32
                     ? _evmGasPrice * __sstoreFromZeroGas * ((_querySLA.witResultMaxSize - 32) / 32)
                     : 0

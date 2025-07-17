@@ -30,6 +30,7 @@ library Witnet {
     uint32  constant internal WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
     uint32  constant internal WIT_1_SECS_PER_EPOCH = 45;
 
+    uint64  constant internal WIT_2_DRT_MIN_COLLATERAL_NANOWITS = 20_000_000_000;
     uint32  constant internal WIT_2_GENESIS_BEACON_INDEX = 0;       // TBD
     uint32  constant internal WIT_2_GENESIS_BEACON_PREV_INDEX = 0;  // TBD
     bytes24 constant internal WIT_2_GENESIS_BEACON_PREV_ROOT = 0;   // TBD
@@ -43,6 +44,7 @@ library Witnet {
     uint32  constant internal WIT_2_GENESIS_TIMESTAMP = 0;  // TBD
     uint32  constant internal WIT_2_SECS_PER_EPOCH = 20;    // TBD
     uint32  constant internal WIT_2_FAST_FORWARD_COMMITTEE_SIZE = 64; // TBD
+
 
     function channel(address wrb) internal view returns (bytes4) {
         return bytes4(keccak256(abi.encode(address(wrb), block.chainid)));
@@ -136,7 +138,7 @@ library Witnet {
     struct QuerySLA {
         uint16  witResultMaxSize; // max size permitted to whatever query result may come from the Wit/Oracle blockchain.
         uint16  witCommitteeSize; // max number of eligibile witnesses in the Wit/Oracle blockchain for solving some query.
-        uint64  witInclusionFees; // min fees in nanowits to be paid for getting the query solved and reported from the Wit/Oracle.
+        uint64  witUnitaryReward; // min fees in nanowits to be paid for getting the query solved and reported from the Wit/Oracle.
     }
 
     enum ResultStatus {
@@ -618,7 +620,7 @@ library Witnet {
             self.queryRadHash,
             self.queryParams.witResultMaxSize,
             self.queryParams.witCommitteeSize,
-            self.queryParams.witInclusionFees,
+            self.queryParams.witUnitaryReward,
             self.resultTimestamp,
             self.resultCborBytes
         ));
@@ -802,7 +804,7 @@ library Witnet {
     function equalOrGreaterThan(QuerySLA calldata self, QuerySLA storage stored) internal view returns (bool) {
         return (
                 self.witCommitteeSize >= stored.witCommitteeSize
-                && self.witInclusionFees >= stored.witInclusionFees 
+                && self.witUnitaryReward >= stored.witUnitaryReward 
                 && self.witResultMaxSize <= stored.witResultMaxSize
         );
     }
@@ -825,15 +827,15 @@ library Witnet {
         return keccak256(abi.encodePacked(
             querySLA.witResultMaxSize,
             querySLA.witCommitteeSize,
-            querySLA.witInclusionFees
+            querySLA.witUnitaryReward
         ));
     }
 
     function isValid(QuerySLA memory self) internal pure returns (bool) {
         return (
-            self.witResultMaxSize > 0
-                && self.witInclusionFees > 0
+            self.witResultMaxSize >= 0
                 && self.witCommitteeSize > 0
+                && self.witUnitaryReward >= WIT_2_DRT_MIN_COLLATERAL_NANOWITS / self.witCommitteeSize
         );
     }
 
@@ -845,9 +847,9 @@ library Witnet {
         return RadonSLAv1({
             numWitnesses: uint8(self.witCommitteeSize),
             minConsensusPercentage: 51,
-            witnessReward: self.witInclusionFees,
-            witnessCollateral: self.witInclusionFees * 125,
-            minerCommitRevealFee: self.witInclusionFees / (3 * self.witCommitteeSize)
+            witnessReward: self.witUnitaryReward,
+            witnessCollateral: self.witUnitaryReward * self.witCommitteeSize,
+            minerCommitRevealFee: self.witUnitaryReward / self.witCommitteeSize
         });
     }
 

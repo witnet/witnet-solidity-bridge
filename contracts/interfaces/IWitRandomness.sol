@@ -66,11 +66,11 @@ interface IWitRandomness {
     /// @notice Returns security and liveness parameters required to the Wit/Oracle blockchain 
     /// when solving randomness requests, if no others are specified.
     /// @param witCommitteeSize Number of Wit/Oracle nodes contributing to unbiased randomness.
-    /// @param witInclusionFees Minimum amount of fees in $nanoWIT to be paid on the Wit/Oracle blockchain
+    /// @param witUnitaryReward Minimum amount of fees in $nanoWIT to be paid on the Wit/Oracle blockchain
     function getRandomizeDefaultParams() 
         external view returns (
             uint16 witCommitteeSize,
-            uint64 witInclusionFees
+            uint64 witUnitaryReward
         );
     
     /// @notice Returns the number of the next block in which a randomize request was posted after the given one. 
@@ -137,8 +137,8 @@ interface IWitRandomness {
     /// with `IWitRandomnessAdmin.witOracleRequiredParams()` limits.
     ///
     /// @param witCommitteeSize The randomness request will have to be solved by this exact number of witnesses.
-    /// @param witInclusionFees Minimum amount of nanoWits to be paid as fees on the Wit/Oracle blockchain.
+    /// @param witUnitaryReward Minimum amount of nanoWits to be paid as fees on the Wit/Oracle blockchain.
     ///
     /// @return Funds actually paid as randomize fee.
-    function randomize(uint16 witCommitteeSize, uint64 witInclusionFees) external payable returns (uint256);
+    function randomize(uint16 witCommitteeSize, uint64 witUnitaryReward) external payable returns (uint256);
 }

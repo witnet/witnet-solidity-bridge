@@ -97,7 +97,7 @@ contract WitPriceFeedsLegacyUpgradable
         if (__proxiable().codehash == bytes32(0)) {
             __defaultQuerySLA = Witnet.QuerySLA({
                 witCommitteeSize: 10,
-                witInclusionFees: 2 * 10 ** 8,
+                witUnitaryReward: 2 * 10 ** 8,
                 witResultMaxSize: 16
             });
             // settle default base fee overhead percentage
@@ -116,7 +116,7 @@ contract WitPriceFeedsLegacyUpgradable
                 // possibly, an upgrade from a previous branch took place:
                 __defaultQuerySLA = Witnet.QuerySLA({
                     witCommitteeSize: 10,
-                    witInclusionFees: 2 * 10 ** 8,
+                    witUnitaryReward: 2_000_000_000, 
                     witResultMaxSize: 16
                 });
             }
@@ -145,7 +145,7 @@ contract WitPriceFeedsLegacyUpgradable
     // {
     //     return IWitPriceFeedsLegacy.RadonSLA({
     //         witCommitteeSize: __defaultQuerySLA.witCommitteeSize,
-    //         witInclusionFees: __defaultQuerySLA.witInclusionFees
+    //         witUnitaryReward: __defaultQuerySLA.witUnitaryReward
     //     });
     // }
 
@@ -357,7 +357,7 @@ contract WitPriceFeedsLegacyUpgradable
     //     return lookupWitnetBytecode(feedId);
     // }
     
-    function requestUpdate(bytes4 feedId, IWitPriceFeedsLegacy.RadonSLA calldata legacySLA)
+    function requestUpdate(bytes4 feedId, IWitPriceFeedsLegacy.RadonSLAv2 calldata legacySLA)
         external payable
         virtual override
         returns (uint256)
@@ -447,7 +447,7 @@ contract WitPriceFeedsLegacyUpgradable
         onlyOwner
     {
         __defaultQuerySLA.witCommitteeSize = _numWitnesses;
-        __defaultQuerySLA.witInclusionFees = _unitaryReward;
+        __defaultQuerySLA.witUnitaryReward = _unitaryReward;
         _require(
             __defaultQuerySLA.isValid(), 
             "invalid update SLA"
@@ -638,14 +638,14 @@ contract WitPriceFeedsLegacyUpgradable
         }
     }
 
-    function _intoQuerySLA(IWitPriceFeedsLegacy.RadonSLA memory _updateSLA) internal view returns (Witnet.QuerySLA memory) {
+    function _intoQuerySLA(IWitPriceFeedsLegacy.RadonSLAv2 memory _updateSLA) internal view returns (Witnet.QuerySLA memory) {
         if (
             _updateSLA.numWitnesses >= __defaultQuerySLA.witCommitteeSize
-                && _updateSLA.unitaryReward * 3 >= __defaultQuerySLA.witInclusionFees
+                && _updateSLA.unitaryReward >= __defaultQuerySLA.witUnitaryReward
         ) {
             return Witnet.QuerySLA({
                 witCommitteeSize: _updateSLA.numWitnesses,
-                witInclusionFees: _updateSLA.unitaryReward * 3,
+                witUnitaryReward: _updateSLA.unitaryReward,
                 witResultMaxSize: __defaultQuerySLA.witResultMaxSize
             });
         
@@ -683,7 +683,7 @@ contract WitPriceFeedsLegacyUpgradable
         ));
     }
 
-    function __requestUpdate(bytes4[] memory _deps, IWitPriceFeedsLegacy.RadonSLA memory sla)
+    function __requestUpdate(bytes4[] memory _deps, IWitPriceFeedsLegacy.RadonSLAv2 memory sla)
         virtual internal
         returns (uint256 _evmUsedFunds)
     {
@@ -736,9 +736,9 @@ contract WitPriceFeedsLegacyUpgradable
         } else if (WitPriceFeedsLegacyDataLib.seekRecord(feedId).solver != address(0)) {
             return __requestUpdate(
                 WitPriceFeedsLegacyDataLib.depsOf(feedId),
-                IWitPriceFeedsLegacy.RadonSLA({
+                IWitPriceFeedsLegacy.RadonSLAv2({
                     numWitnesses: uint8(querySLA.witCommitteeSize),
-                    unitaryReward: querySLA.witInclusionFees / 3
+                    unitaryReward: querySLA.witUnitaryReward
                 })
             );
 

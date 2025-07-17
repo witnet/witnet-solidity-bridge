@@ -21,7 +21,7 @@ interface IWitOracleQueriableExperimental {
     struct QueryParams {
         uint16 witResultMaxSize;
         uint16 witCommitteeSize;
-        uint64 witInclusionFees;
+        uint64 witUnitaryReward;
         Witnet.ServiceProvider[] providers;
     }
 

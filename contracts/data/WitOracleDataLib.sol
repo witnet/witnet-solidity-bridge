@@ -537,7 +537,7 @@ library WitOracleDataLib {
             queryParams: IWitOracleQueriableExperimental.QueryParams({
                 witResultMaxSize: _querySLA.witResultMaxSize,
                 witCommitteeSize: _querySLA.witCommitteeSize,
-                witInclusionFees: _querySLA.witInclusionFees,
+                witUnitaryReward: _querySLA.witUnitaryReward,
                 providers: _providers
             }),
             radonBytecode: _radonBytecode

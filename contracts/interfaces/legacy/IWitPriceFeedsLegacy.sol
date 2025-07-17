@@ -17,7 +17,15 @@ interface IWitPriceFeedsLegacy {
         uint256 witOracleQueryId
     );
 
-    struct RadonSLA {
+    struct RadonSLAv1 {
+        uint8 numWitnesses;
+        uint8 minConsensusPercentage;
+        uint64 witnessReward;
+        uint64 witnessCollateral;
+        uint64 minerCommitRevealFee;
+    }
+
+    struct RadonSLAv2 {
         uint8  numWitnesses;
         uint64 unitaryReward;
     }
@@ -26,7 +34,7 @@ interface IWitPriceFeedsLegacy {
     /// feeds (e.g. Witnet.RadonDataTypes.Integer in WitPriceFeeds).
     function dataType() external view returns (Witnet.RadonDataTypes);
     
-    function defaultRadonSLA() external view returns (RadonSLA memory);
+    function defaultRadonSLA() external view returns (RadonSLAv1 memory);
 
     function estimateUpdateBaseFee(uint256 evmGasPrice) external view returns (uint);
 
@@ -81,7 +89,7 @@ interface IWitPriceFeedsLegacy {
     /// Triggers a fresh update on the Witnet oracle blockchain for the given data feed, 
     /// using the defaultRadonSLA() security parameters.
     function requestUpdate(bytes4 feedId) external payable returns (uint256 usedFunds);
-    function requestUpdate(bytes4, RadonSLA calldata) external payable returns (uint256 usedFunds);
+    function requestUpdate(bytes4, RadonSLAv2 calldata) external payable returns (uint256 usedFunds);
 
     /// Returns the list of feed ERC-2362 ids, captions and RAD hashes of all currently supported 
     /// data feeds. The RAD hash of a data feed determines in a verifiable way the actual data sources 
