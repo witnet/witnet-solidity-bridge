@@ -6,6 +6,7 @@ import "../../libs/Witnet.sol";
 
 import "./IWitOracleRequest.sol";
 import "./IWitOracleRequestTemplate.sol";
+import "./IWitPriceFeedsLegacy.sol";
 
 interface IWitPriceFeedsLegacyAdmin {
 
@@ -20,7 +21,7 @@ interface IWitPriceFeedsLegacyAdmin {
     function owner() external view returns (address);
     function pendingOwner() external returns (address);
     function settleBaseFeeOverheadPercentage(uint16) external;
-    function settleDefaultUpdateSLA(uint16, uint64) external;
+    function settleDefaultRadonSLA(IWitPriceFeedsLegacy.RadonSLAv2 calldata) external;
     function settleFeedRequest(string calldata caption, bytes32 radHash) external;
     function settleFeedRequest(string calldata caption, IWitOracleRequest request) external;
     function settleFeedRequest(string calldata caption, IWitOracleRequestTemplate template, string[][] calldata) external;

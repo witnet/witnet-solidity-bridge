@@ -138,17 +138,6 @@ contract WitPriceFeedsLegacyUpgradable
     // ================================================================================================================
     // --- Implements 'IWitFeeds' -------------------------------------------------------------------------------------
 
-    // function defaultUpdateSLA()
-    //     override
-    //     public view
-    //     returns (IWitPriceFeedsLegacy.RadonSLA memory)
-    // {
-    //     return IWitPriceFeedsLegacy.RadonSLA({
-    //         witCommitteeSize: __defaultQuerySLA.witCommitteeSize,
-    //         witUnitaryReward: __defaultQuerySLA.witUnitaryReward
-    //     });
-    // }
-
     function estimateUpdateBaseFee(uint256 _evmGasPrice) virtual override public view returns (uint256) {
         return _estimateUpdateRequestFee(_evmGasPrice);
     }
@@ -447,12 +436,12 @@ contract WitPriceFeedsLegacyUpgradable
         __baseFeeOverheadPercentage = _baseFeeOverheadPercentage;
     }
 
-    function settleDefaultUpdateSLA(uint16 _numWitnesses, uint64 _unitaryReward)
+    function settleDefaultRadonSLA(RadonSLAv2 calldata radonSLAv2)
         override public
         onlyOwner
     {
-        __defaultQuerySLA.witCommitteeSize = _numWitnesses;
-        __defaultQuerySLA.witUnitaryReward = _unitaryReward;
+        __defaultQuerySLA.witCommitteeSize = radonSLAv2.numWitnesses;
+        __defaultQuerySLA.witUnitaryReward = radonSLAv2.unitaryReward;
         _require(
             __defaultQuerySLA.isValid(), 
             "invalid update SLA"
