@@ -272,14 +272,9 @@ library WitOracleDataLib {
                     } else {
                         return Witnet.ResultStatus(_error[0].readUint());
                     }
-                } else {
-                    return Witnet.ResultStatus.NoErrors;
                 }
-
-            } else {
-                // the result is final but was delivered to some consuming contract:
-                return Witnet.ResultStatus.BoardAlreadyDelivered;
             }
+            return Witnet.ResultStatus.NoErrors;
         
         } else if (_queryStatus == Witnet.QueryStatus.Reported) {
             return Witnet.ResultStatus.BoardFinalizingResult;
