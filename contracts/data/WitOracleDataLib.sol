@@ -118,7 +118,7 @@ library WitOracleDataLib {
                 }
             } else {
                 // the result is final but was delivered to some consuming contract:
-                _result.status = Witnet.ResultStatus.BoardAlreadyDelivered;
+                _result.status = Witnet.ResultStatus.NoErrors;
             }
         
         } else if (queryStatus == Witnet.QueryStatus.Reported) {
