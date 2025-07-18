@@ -30,7 +30,6 @@ library Witnet {
     uint32  constant internal WIT_1_GENESIS_TIMESTAMP = 0; // TBD    
     uint32  constant internal WIT_1_SECS_PER_EPOCH = 45;
 
-    uint64  constant internal WIT_2_DRT_MIN_COLLATERAL_NANOWITS = 20_000_000_000;
     uint32  constant internal WIT_2_GENESIS_BEACON_INDEX = 0;       // TBD
     uint32  constant internal WIT_2_GENESIS_BEACON_PREV_INDEX = 0;  // TBD
     bytes24 constant internal WIT_2_GENESIS_BEACON_PREV_ROOT = 0;   // TBD
@@ -835,7 +834,7 @@ library Witnet {
         return (
             self.witResultMaxSize >= 0
                 && self.witCommitteeSize > 0
-                && self.witUnitaryReward >= WIT_2_DRT_MIN_COLLATERAL_NANOWITS / self.witCommitteeSize
+                && self.witUnitaryReward > 0
         );
     }
 
