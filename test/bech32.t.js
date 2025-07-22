@@ -20,30 +20,40 @@ describe("TestBech32", function () {
   });
 
   it("toBech32Mainnet()", async function () {
-    witMainnetPkh = await bech32.toBech32Mainnet(witBytes20)
+    await bech32.toBech32Mainnet(witBytes20)
+    witMainnetPkh = await bech32.toBech32Mainnet.staticCall(witBytes20)
     console.log(witMainnetPkh)
   })
 
   it("toBech32Testnet()", async function() {
-    witTestnetPkh = await bech32.toBech32Testnet(witBytes20)
+    await bech32.toBech32Testnet(witBytes20)
+    witTestnetPkh = await bech32.toBech32Testnet.staticCall(witBytes20)
     console.log(witTestnetPkh)
   })
 
   it("fromBech32Mainnet(witMainnetPkh)", async function () {
-    console.log(await bech32.fromBech32Mainnet(witMainnetPkh))
+    await bech32.fromBech32Mainnet(witMainnetPkh)
+    console.log(await bech32.fromBech32Mainnet.staticCall(witMainnetPkh))
   })
 
-//   it("fromBech32Mainnet(witTestnetPkh)", async function () {
-//     console.log(await bech32.fromBech32Mainnet(witTestnetPkh))
-//   })
+  // it("fromBech32Mainnet(witTestnetPkh)", async function () {
+  //   await bech32.fromBech32Mainnet(witTestnetPkh)
+  //   console.log(await bech32.fromBech32Mainnet.staticCall(witTestnetPkh))
+  // })
 
   it("fromBech32Testnet(witTestnetPkh)", async function () {
-    console.log(await bech32.fromBech32Testnet(witTestnetPkh))
+    await bech32.fromBech32Testnet(witTestnetPkh)
+    console.log(await bech32.fromBech32Testnet.staticCall(witTestnetPkh))
   })
 
-//   it("fromBech32Testnet(witMainnetPkh)", async function () {
-//     console.log(await bech32.fromBech32Testnet(witMainnetPkh))
-//   })
+  // it("fromBech32Testnet(witMainnetPkh)", async function () {
+  //   await bech32.fromBech32Testnet(witMainnetPkh)
+  //   console.log(await bech32.fromBech32Testnet.staticCall(witMainnetPkh))
+  // })
 
+  it("parseHexAddress(hexAddr)", async function () {
+    await bech32.parseHexAddress("34d903c72fC5A73Ef50817841d98F0e4019AF6B4")
+    console.log(await bech32.parseHexAddress.staticCall("34d903c72fC5A73Ef50817841d98F0e4019AF6B4"))
+  })
 
 })

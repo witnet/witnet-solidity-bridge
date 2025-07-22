@@ -101,7 +101,7 @@ contract TestWitnet {
         Witnet.QuerySLA memory _slaParams = Witnet.QuerySLA({
             witResultMaxSize: 34,
             witCommitteeSize: 16,
-            witInclusionFees: 200000000
+            witUnitaryReward: 200000000
         });
         Witnet.QueryRequest memory _request = Witnet.QueryRequest({
             requester: msg.sender,
@@ -131,7 +131,7 @@ contract TestWitnet {
         Witnet.QuerySLA memory _slaParams = Witnet.QuerySLA({
             witResultMaxSize: 34,
             witCommitteeSize: 16,
-            witInclusionFees: 200000000
+            witUnitaryReward: 200000000
         });
         Witnet.QueryRequest memory _request = Witnet.QueryRequest({
             requester: msg.sender,
@@ -153,7 +153,7 @@ contract TestWitnet {
         query.reward = Witnet.QueryEvmReward.wrap(1234567890123456);
         query.slaParams.witResultMaxSize = 34;
         query.slaParams.witCommitteeSize = 16;
-        query.slaParams.witInclusionFees = 200000000;
+        query.slaParams.witUnitaryReward = 200000000;
         query.request.requester = msg.sender;
         query.request.radonHash = Witnet.RadonHash.wrap(0x4377aca8710933b4b99a728bc566f27402c0339baf0f32960a3c6af720a1b7cc);
     }
