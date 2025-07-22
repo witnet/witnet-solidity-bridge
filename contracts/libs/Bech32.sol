@@ -8,8 +8,46 @@ pragma solidity ^0.8.0;
  */
 library Bech32 {
     bytes constant ALPHABET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+    bytes constant ALPHABET_REV = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0fff0a1115141a1e0705ffffffffffffff1dff180d19090817ff12161f1b13ff010003100b1c0c0e060402ffffffffffff1dff180d19090817ff12161f1b13ff010003100b1c0c0e060402ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
+    // 0f <= 0: 48      | 30
+    // 0a <= 2: 50      | 32
+    // 11 <= 3: 51      | 33
+    // 15 <= 4: 52      | 34
+    // 14 <= 5: 53      | 35
+    // 1a <= 6: 54      | 36
+    // 1e <= 7: 55      | 37
+    // 07 <= 8: 56      | 38
+    // 05 <= 9: 57      | 39
+    
+    // 1d <= a: 97, 65  | 61, 41
+    // 18 <= c: 99, 67  | 63, 43
+    // 0d <= d: 100, 68 | 64, 44
+    // 19 <= e: 101, 69 | 65, 45
+    // 09 <= f: 102, 70 | 66, 46
+    // 08 <= g: 103, 71 | 67, 47
+    // 17 <= h: 104, 72 | 68, 48
+    // 12 <= j: 106, 74 | 6A, 4A
+    // 16 <= k: 107, 75 | 6B, 4B
+    // 1f <= l: 108, 76 | 6C, 4C
+    // 1b <= m: 109, 77 | 6D, 4D
+    // 13 <= n: 110, 78 | 6E, 4E
+    
+    // 01 <= p: 112, 80 | 70, 50
+    // 00 <= q: 113, 81 | 71, 51
+    // 03 <= r: 114, 82 | 72, 52
+    // 10 <= s: 115, 83 | 73, 53
+    // 0b <= t: 116, 84 | 74, 54
+    // 1c <= u: 117, 85 | 75, 55
+    // 0c <= v: 118, 86 | 76, 56
+    // 0e <= w: 119, 87 | 77, 57
+    // 06 <= x: 120, 88 | 78, 58
+    // 04 <= y: 121, 89 | 79, 59
+    // 02 <= z: 122, 90 | 7A, 5A
+    
     uint32 constant ENC_BECH32 = 1;
     uint32 constant ENC_BECH32M = 0x2bc830a3;
+
 
     function toBech32(
         address addr,
@@ -69,7 +107,6 @@ library Bech32 {
             abi.encodePacked(bechAddr),
             ENC_BECH32
         );
-
         _requireHrpMatch(abi.encodePacked(prefix), dHrp);
         bytes memory input = convertBits(data, 5, 8, false);
         return getAddressFromBytes(input);
@@ -84,16 +121,12 @@ library Bech32 {
             abi.encodePacked(bechAddr),
             enc
         );
-
         _requireHrpMatch(abi.encodePacked(prefix), dHrp);
         require(!(data.length < 1 || data[0] > 16), "Bech32: wrong version");
-
         uint8[] memory dataNoV = new uint8[](data.length - 1);
-
         for (uint8 i = 1; i < data.length; ++i) {
             dataNoV[i - 1] = data[i];
         }
-
         bytes memory input = convertBits(dataNoV, 5, 8, false);
         require(
             input.length >= 2 && input.length <= 40,
@@ -103,7 +136,6 @@ library Bech32 {
             !(data[0] == 0 && input.length != 20 && input.length != 32),
             "Bech32: wrong bits length for version"
         );
-
         return (uint8(data[0]), input);
     }
 
@@ -111,14 +143,7 @@ library Bech32 {
         bytes memory hrp1,
         bytes memory hrp2
     ) internal pure {
-        bool ok;
-        for (uint8 i = 0; i < hrp1.length; i++) {
-            if (hrp1[i] != hrp2[i]) {
-                ok = true;
-                break;
-            }
-        }
-        require(!ok, "Bech32: hrp mismatch");
+        require(keccak256(hrp1) == keccak256(hrp2), "Bech32: hrp mismatch");
     }
 
     function getAddressFromBytes(
@@ -163,64 +188,52 @@ library Bech32 {
         }
     }
 
-    function decode(
-        bytes memory bechStr,
-        uint32 enc
-    ) internal pure returns (bytes memory, uint8[] memory) {
-        require(bechStr.length <= 90, "Bech32: invalid bech length");
-
-        bool hasLower;
-        bool hasUpper;
-        bool hasWChar;
-
-        for (uint8 p = 0; p < bechStr.length; ++p) {
-            uint8 charAt = uint8(bechStr[p]);
-            if (charAt < 33 || charAt > 126) {
-                hasWChar = true;
-                break;
+    function decode(bytes memory bechStr, uint32 enc) 
+        internal pure 
+        returns (bytes memory hrp, uint8[] memory data)
+    {
+        unchecked {
+            uint pos;
+            require(
+                bechStr.length <= 90, 
+                "Bech32: invalid string length"
+            );
+            for (uint p = 0; p < bechStr.length; ++ p) {
+                uint8 charAt = uint8(bechStr[p]);
+                require(
+                    charAt >= 33 
+                        && charAt <= 126, 
+                    "Bech32: wrong char"
+                );
+                if (charAt == uint8(bytes1("1"))) {
+                    require(
+                        pos == 0 
+                            && p >= 1 
+                            && p + 7 <= bechStr.length, 
+                        "Bech32: wrong pos of 1"
+                    );
+                    pos = p;
+                }
             }
-
-            if (charAt >= 97 && charAt <= 122) {
-                hasLower = true;
+            hrp = new bytes(pos);
+            for (uint i; i < pos; ++ i) {
+                hrp[i] = bechStr[i]; 
             }
-            if (charAt >= 65 && charAt <= 90) {
-                hasUpper = true;
+            data = new uint8[](bechStr.length - pos - 1);
+            for (uint i; i < data.length; ++ i) {
+                bytes1 charAt = ALPHABET_REV[uint8(bechStr[i + pos + 1])];
+                require(charAt != 0xff, "Bech32: byte not in alphabet");
+                data[i] = uint8(charAt);
+            }
+            require(
+                verifyChecksum(hrp, data, enc), 
+                "Bech32: wrong checksum"
+            );
+            uint dataLength = data.length - 6;
+            assembly {
+                mstore(data, dataLength)
             }
         }
-
-        require(!hasWChar, "Bech32: wrong char");
-        require(!(hasLower && hasUpper), "Bech32: no lower and upper bytes");
-        bytes memory bechStrLower = toLowerCase(bechStr);
-        int8 pos = lastIndexOf(bechStrLower, bytes1("1"));
-
-        require(
-            pos >= 1 && pos + 7 <= int8(uint8(bechStrLower.length)),
-            "Bech32: wrong pos of 1"
-        );
-
-        uint8 upos = uint8(pos);
-
-        bytes memory hrp = new bytes(upos);
-        for (uint8 i = 0; i < upos; ++i) {
-            hrp[i] = bechStrLower[i];
-        }
-
-        uint8[] memory data = new uint8[](bechStrLower.length - upos - 1);
-
-        for (uint8 i = upos + 1; i < bechStrLower.length; ++i) {
-            int8 apos = lastIndexOf(ALPHABET, bechStrLower[i]);
-            require(apos != -1, "Bech32: byte not alphabet");
-            data[i - upos - 1] = uint8(apos);
-        }
-
-        require(verifyChecksum(hrp, data, enc), "Bech32: wrong checksum");
-
-        uint8[] memory dataNoCheck = new uint8[](data.length - 6);
-        for (uint8 i = 0; i < dataNoCheck.length; ++i) {
-            dataNoCheck[i] = data[i];
-        }
-
-        return (hrp, dataNoCheck);
     }
 
     function hrpExpand(
@@ -248,12 +261,14 @@ library Bech32 {
             0x2a1462b3
         ];
 
-        for (uint32 i = 0; i < values.length; ++i) {
-            uint32 top = chk >> 25;
-            chk = (uint32(chk & 0x1ffffff) << 5) ^ uint32(values[i]);
-            for (uint32 j = 0; j < 5; ++j) {
-                if (((top >> j) & 1) == 1) {
-                    chk ^= GEN[j];
+        unchecked {
+            for (uint32 i = 0; i < values.length; ++i) {
+                uint32 top = chk >> 25;
+                chk = (uint32(chk & 0x1ffffff) << 5) ^ uint32(values[i]);
+                for (uint32 j = 0; j < 5; ++j) {
+                    if (((top >> j) & 1) == 1) {
+                        chk ^= GEN[j];
+                    }
                 }
             }
         }
@@ -291,17 +306,18 @@ library Bech32 {
         uint8[] memory data,
         uint32 enc
     ) internal pure returns (bool) {
-        uint8[] memory ehrp = hrpExpand(hrp);
-        uint32[] memory cData = new uint32[](ehrp.length + data.length);
-
-        for (uint8 i = 0; i < ehrp.length; ++i) {
-            cData[i] = uint32(ehrp[i]);
+        unchecked {
+            uint8[] memory ehrp = hrpExpand(hrp);
+            uint32[] memory cData = new uint32[](ehrp.length + data.length);
+            for (uint i; i < cData.length; ++ i) {
+                if (i < ehrp.length) {
+                    cData[i] = uint32(ehrp[i]);
+                } else {
+                    cData[i] = uint32(data[i - ehrp.length]);
+                }
+            }
+            return polymod(cData) == enc;
         }
-        for (uint8 i = 0; i < data.length; ++i) {
-            cData[i + ehrp.length] = uint32(data[i]);
-        }
-
-        return polymod(cData) == enc;
     }
 
     function convertBits(
