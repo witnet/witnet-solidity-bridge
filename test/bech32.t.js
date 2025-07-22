@@ -42,7 +42,7 @@ describe("TestBech32", function () {
   // })
 
   it("fromBech32Testnet(witTestnetPkh)", async function () {
-    await bech32.fromBech32Testnet(witTestnetPkh)
+    await bech32.fromBech32Testnet("twit1yyx8ll4ykyk0fugv3apefzlszlf8a9jxxr398l")//(witTestnetPkh)
     console.log(await bech32.fromBech32Testnet.staticCall(witTestnetPkh))
   })
 

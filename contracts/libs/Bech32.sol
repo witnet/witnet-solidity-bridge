@@ -241,12 +241,9 @@ library Bech32 {
     ) internal pure returns (uint8[] memory ret) {
         unchecked {
             ret = new uint8[](hrp.length + hrp.length + 1);
-            for (uint p; p < ret.length; ++ p) {
-                if (p < hrp.length) {
-                    ret[p] = uint8(hrp[p]) >> 5;
-                } else if (p > hrp.length + 1) {
-                    ret[p] = uint8(hrp[p - hrp.length - 1]) & 31;
-                }
+            for (uint p; p < hrp.length; ++ p) {
+                ret[p] = uint8(hrp[p]) >> 5;
+                ret[p + hrp.length + 1] = uint8(hrp[p]) & 31;
             }
         }
     }
@@ -309,12 +306,11 @@ library Bech32 {
         unchecked {
             uint8[] memory ehrp = hrpExpand(hrp);
             uint32[] memory cData = new uint32[](ehrp.length + data.length);
-            for (uint i; i < cData.length; ++ i) {
-                if (i < ehrp.length) {
-                    cData[i] = uint32(ehrp[i]);
-                } else {
-                    cData[i] = uint32(data[i - ehrp.length]);
-                }
+            for (uint i; i < ehrp.length; ++ i) {
+                cData[i] = uint32(ehrp[i]);
+            }
+            for (uint i; i < data.length; ++ i) {
+                cData[i + ehrp.length] = uint32(data[i]);
             }
             return polymod(cData) == enc;
         }
