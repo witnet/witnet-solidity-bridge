@@ -1097,7 +1097,6 @@ library Witnet {
     function toHexString(bytes32 _bytes32) 
         internal pure
         returns (string memory)
-
     {
         bytes memory _bytes = new bytes(64);
         for (uint8 _i; _i < _bytes.length;) {
@@ -1130,14 +1129,15 @@ library Witnet {
     }
 
     // Function to parse a hex string into a byte array
-    function parseHexString(string memory hexString) internal pure returns (bytes memory) {
-        bytes memory result = new bytes(bytes(hexString).length / 2);
-        for (uint256 i = 0; i < result.length; i++) {
-            uint8 byte1 = _hexCharToByte(uint8(bytes(hexString)[2 * i]));
-            uint8 byte2 = _hexCharToByte(uint8(bytes(hexString)[2 * i + 1]));
-            result[i] = bytes1(byte1 * 16 + byte2); // Combining the two hex digits into one byte
+    function parseHexString(string memory hexString) internal pure returns (bytes memory result) {
+        unchecked {
+            result = new bytes(bytes(hexString).length / 2);
+            for (uint256 i; i < result.length; i ++) {
+                uint8 byte1 = _hexCharToByte(uint8(bytes(hexString)[2 * i]));
+                uint8 byte2 = _hexCharToByte(uint8(bytes(hexString)[2 * i + 1]));
+                result[i] = bytes1(byte1 * 16 + byte2); // Combining the two hex digits into one byte
+            }
         }
-        return result;
     }
 
     function tryUint(string memory str)
