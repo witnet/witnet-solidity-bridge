@@ -138,32 +138,29 @@ library Bech32 {
         bytes memory input,
         uint32 enc
     ) internal pure returns (string memory) {
-        uint8[] memory checksum = createChecksum(hrp, input, enc);
-        uint8[] memory data = new uint8[](input.length + checksum.length);
-        for (uint i = 0; i < input.length; ++i) {
-            data[i] = uint8(input[i]);
-        }
-        for (uint i = 0; i < checksum.length; ++i) {
-            data[input.length + i] = uint8(checksum[i]);
-        }
-
-        bytes memory prefix = new bytes(hrp.length + 1);
-        for (uint256 i = 0; i < hrp.length; ++i) {
-            prefix[i] = hrp[i];
-        }
-        prefix[hrp.length] = bytes1("1");
-
-        bytes memory result = new bytes(data.length + prefix.length);
-        for (uint256 i = 0; i < prefix.length; ++i) {
-            result[i] = prefix[i];
-        }
-        for (uint256 i = 0; i < data.length; ++i) {
-            if (data[i] >= ALPHABET.length) {
-                continue;
+        unchecked {
+            uint8[] memory checksum = createChecksum(hrp, input, enc);
+            bytes memory result = new bytes(hrp.length + input.length + checksum.length + 1);
+            for (uint i; i < hrp.length; ++ i) {
+                result[i] = hrp[i];
             }
-            result[prefix.length + i] = ALPHABET[uint8(data[i])];
+            result[hrp.length] = bytes1("1");
+            uint offset = hrp.length + 1;
+            for (uint i; i < input.length; ++ i) {
+                uint8 _data = uint8(input[i]);
+                if (_data < ALPHABET.length) {
+                    result[i + offset] = ALPHABET[_data];
+                }
+            }
+            offset += input.length;
+            for (uint i; i < checksum.length; ++ i) {
+                uint8 _data = uint8(checksum[i]);
+                if (_data < ALPHABET.length) {
+                    result[i + offset] = ALPHABET[_data];
+                }
+            }
+            return string(result);
         }
-        return string(result);
     }
 
     function decode(
@@ -228,16 +225,17 @@ library Bech32 {
 
     function hrpExpand(
         bytes memory hrp
-    ) internal pure returns (uint8[] memory) {
-        uint8[] memory ret = new uint8[](hrp.length + hrp.length + 1);
-        for (uint8 p = 0; p < hrp.length; ++p) {
-            ret[p] = uint8(hrp[p]) >> 5;
+    ) internal pure returns (uint8[] memory ret) {
+        unchecked {
+            ret = new uint8[](hrp.length + hrp.length + 1);
+            for (uint p; p < ret.length; ++ p) {
+                if (p < hrp.length) {
+                    ret[p] = uint8(hrp[p]) >> 5;
+                } else if (p > hrp.length + 1) {
+                    ret[p] = uint8(hrp[p - hrp.length - 1]) & 31;
+                }
+            }
         }
-        ret[hrp.length] = 0;
-        for (uint8 p = 0; p < hrp.length; ++p) {
-            ret[hrp.length + 1 + p] = uint8(hrp[p]) & 31;
-        }
-        return ret;
     }
 
     function polymod(uint32[] memory values) internal pure returns (uint32) {
@@ -267,23 +265,25 @@ library Bech32 {
         bytes memory hrp,
         bytes memory data,
         uint32 enc
-    ) internal pure returns (uint8[] memory) {
-        uint8[] memory values = hrpExpand(hrp);
-        uint32[] memory comb = new uint32[](values.length + data.length + 6);
+    ) internal pure returns (uint8[] memory res) {
+        unchecked {
+            uint8[] memory values = hrpExpand(hrp);
+            uint32[] memory comb = new uint32[](values.length + data.length + 6);
 
-        for (uint8 i = 0; i < values.length; ++i) {
-            comb[i] = uint32(values[i]);
+            for (uint i; i < values.length + data.length; ++ i) {
+                if (i < values.length) {
+                    comb[i] = uint32(values[i]);
+                } else {
+                    comb[i] = uint32(uint8(data[i - values.length]));
+                }
+            }
+            
+            res = new uint8[](6);
+            uint32 mod = polymod(comb) ^ enc;
+            for (uint p = 0; p < 6; ++ p) {
+                res[p] = uint8((mod >> (5 * (5 - p))) & 31);
+            }
         }
-        for (uint8 i = 0; i < data.length; ++i) {
-            comb[values.length + i] = uint32(uint8(data[i]));
-        }
-
-        uint8[] memory res = new uint8[](6);
-        uint32 mod = polymod(comb) ^ enc;
-        for (uint32 p = 0; p < 6; ++p) {
-            res[p] = uint8((mod >> (5 * (5 - p))) & 31);
-        }
-        return res;
     }
 
     function verifyChecksum(
@@ -333,29 +333,30 @@ library Bech32 {
         uint frombits,
         uint tobits,
         bool pad
-    ) internal pure returns (bytes memory) {
+    ) internal pure returns (bytes memory ret) {
         uint acc = 0;
         uint bits = 0;
-        bytes memory ret;
 
         uint maxv = (1 << tobits) - 1;
 
-        for (uint p = 0; p < dataBits.length; ++p) {
-            uint8 value = dataBits[p];
-            require(
-                value >= 0 && (value >> frombits) == 0,
-                "Bech32: value must be non-negative and fit in frombits"
-            );
-
-            acc = (acc << frombits) | value;
-            bits += frombits;
-
-            while (bits >= tobits) {
-                bits -= tobits;
-                ret = abi.encodePacked(
-                    ret,
-                    bytes1(uint8((acc >> bits) & maxv))
+        unchecked {
+            for (uint p; p < dataBits.length; ++p) {
+                uint8 value = dataBits[p];
+                require(
+                    value >= 0 && (value >> frombits) == 0,
+                    "Bech32: value must be non-negative and fit in frombits"
                 );
+
+                acc = (acc << frombits) | value;
+                bits += frombits;
+
+                while (bits >= tobits) {
+                    bits -= tobits;
+                    ret = abi.encodePacked(
+                        ret,
+                        bytes1(uint8((acc >> bits) & maxv))
+                    );
+                }
             }
         }
 
@@ -372,38 +373,5 @@ library Bech32 {
                 "Bech32: invalid padding or value size"
             );
         }
-
-        return ret;
-    }
-
-    function toLowerCase(
-        bytes memory _input
-    ) internal pure returns (bytes memory) {
-        bytes memory output = new bytes(_input.length);
-
-        for (uint8 i = 0; i < _input.length; i++) {
-            uint8 charAt = uint8(_input[i]);
-            // Check if character is an uppercase letter
-            if (charAt >= 65 && charAt <= 90) {
-                // Convert to lowercase by adding 32 to ASCII value
-                output[i] = bytes1(uint8(_input[i]) + 32);
-            } else {
-                output[i] = _input[i];
-            }
-        }
-
-        return output;
-    }
-
-    function lastIndexOf(
-        bytes memory haystack,
-        bytes1 needle
-    ) internal pure returns (int8) {
-        for (uint8 i = uint8(haystack.length) - 1; i >= 0; i--) {
-            if (haystack[i] == needle) {
-                return int8(i);
-            }
-        }
-        return -1;
     }
 }
