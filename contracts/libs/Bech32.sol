@@ -9,6 +9,7 @@ pragma solidity ^0.8.0;
 library Bech32 {
     bytes constant ALPHABET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
     bytes constant ALPHABET_REV = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0fff0a1115141a1e0705ffffffffffffff1dff180d19090817ff12161f1b13ff010003100b1c0c0e060402ffffffffffff1dff180d19090817ff12161f1b13ff010003100b1c0c0e060402ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+    bytes constant ALPHABET_REV_LOWER_ONLY = hex"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0fff0a1115141a1e0705ffffffffffffff1dff180d19090817ff12161f1b13ff010003100b1c0c0e060402ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
     // 0f <= 0: 48      | 30
     // 0a <= 2: 50      | 32
@@ -221,7 +222,7 @@ library Bech32 {
             }
             data = new uint8[](bechStr.length - pos - 1);
             for (uint i; i < data.length; ++ i) {
-                bytes1 charAt = ALPHABET_REV[uint8(bechStr[i + pos + 1])];
+                bytes1 charAt = ALPHABET_REV_LOWER_ONLY[uint8(bechStr[i + pos + 1])];
                 require(charAt != 0xff, "Bech32: byte not in alphabet");
                 data[i] = uint8(charAt);
             }
