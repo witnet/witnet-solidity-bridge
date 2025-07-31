@@ -240,6 +240,14 @@ module.exports = {
       explorerUrl: "https://explorer.fusespark.io/address",
     },
   },
+  "gnosis:mainnet": {
+    port: 9509,
+    network_id: 100,
+    verify: {
+      apiUrl: "https://api.gnosisscan.io/api",
+      explorerUrl: "https://gnosisscan.io/address",
+    },
+  },
   "gnosis:testnet": {
     port: 8509,
     network_id: 10200,
@@ -248,6 +256,15 @@ module.exports = {
       apiUrl: "https://gnosis-chiado.blockscout.com/api",
       explorerUrl: "https://gnosis-chiado.blockscout.com/address",
     },
+  },
+  "kaia:testnet": {
+    port: 8527,
+    network_id: 1001,
+  },
+  "kaia:mainnet": {
+    mainnet: true,
+    port: 9527,
+    network_id: 8217,
   },
   "kava:testnet": {
     port: 8526,
@@ -284,15 +301,6 @@ module.exports = {
     //   apiUrl: "https://scan.kcc.io/api",
     //   explorerUrl: "https://scan.kcc.io/",
     // },
-  },
-  "klaytn:testnet": {
-    port: 8527,
-    network_id: 1001,
-  },
-  "klaytn:mainnet": {
-    mainnet: true,
-    port: 9527,
-    network_id: 8217,
   },
   "mantle:sepolia": {
     port: 8508,
@@ -428,7 +436,7 @@ module.exports = {
       explorerUrl: "https://polygonscan.com/",
     },
   },
-  "polygon:zkevm:goerli": {
+  "polygon:zkevm:testnet": {
     port: 8512,
     network_id: 1442,
     verify: {
@@ -494,6 +502,15 @@ module.exports = {
     network_id: 443,
     gas: 15000000,
   },
+  "unichain:sepolia": {
+    port: 8500,
+    network_id: 1301,
+    confirmations: 8,
+    verify: {
+      apiUrl: "https://api-sepolia.uniscan.xyz/api",
+      explorerUrl: "https://sepolia.uniscan.xyz/address",
+    },
+  },
   "ultron:testnet": {
     port: 8516,
     network_id: 1230,
@@ -502,6 +519,24 @@ module.exports = {
     mainnet: true,
     port: 9516,
     network_id: 1231,
+  },
+  "worldchain:mainnet": {
+    port: 9501,
+    network_id: 480,
+    verify: {
+      apiKey: "MY_API_KEY",
+      apiUrl: "https://worldchain-mainnet.explorer.alchemy.com/api",
+      explorerUrl: "https://worldchain-mainnet.explorer.alchemy.com/address",
+    },    
+  },
+  "worldchain:sepolia": {
+    port: 8501,
+    network_id: 4801,
+    verify: {
+      apiKey: "MY_API_KEY",
+      apiUrl: "https://worldchain-sepolia.explorer.alchemy.com/api",
+      explorerUrl: "https://worldchain-sepolia.explorer.alchemy.com/address",
+    },    
   },
   "zksync:sepolia": {
     port: 8499,
