@@ -103,13 +103,19 @@
             "WitOracleRadonRequestFactoryTemplatesV21": "0xff36F43ce2401Cf451EFdFA6a0e9c5ffef95E8ff"
         }
     },
+    "polygon:amoy": {
         "libs": {
-            "WitOracleDataLib": "0xF5D4CBbc7c18A614C978cC1eBbc1CB6365f5f62a",
-            "WitOracleRadonEncodingLib": "0x3342560E1feba114f0817Bc9E769a69e78580B48",
-            "WitOracleResultStatusLib": "0x1A40C54464D3fB01a2c161D426D64CaeD3975D94",
-            "WitPriceFeedsLegacyDataLib": "0xC4c00D1F15038f2820FF3D090e878bb562dC2B1F"
+            "WitOracleDataLib": "0x5C787d6DAb26D6c9D0F3f03498138e904b583386",
+            "WitOracleRadonEncodingLib": "0xe3EB2408a637Bb51Feb6e39f1B494cD4973DA402",
+            "WitOracleResultErrorsLib": "0x50489bD0ad5ab17641A472d007746F07D80D90A4",
+            "WitPriceFeedsLib": "0xA2d9384Cfd3529D1287Bc06e58897EBb8dfF2E94",
+            "WitOracleResultStatusLib": "0x1C15Af858B7Af00BAFEAaa267d3059266Efdfa8e",
+            "WitPriceFeedsLegacyDataLib": "0x1949a56d396ba542AA6573b43bE12dCf721adb45"
+        },
+        "core": {
+            "WitOracleRadonRequestFactoryModalsV21": "0xff752C3722EA1A9533ba20794594F2e567ca64ff",
+            "WitOracleRadonRequestFactoryTemplatesV21": "0xFF93344228F706aFFf49A65Ac027A50A97a94eFF"
         }
-    },
     },
     "reef:mainnet": {
         "WitnetDeployer": "",

@@ -14,9 +14,12 @@ const selection = utils.getWitnetArtifactsFromArgs()
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
-module.exports = async function (_, network, [, from, reporter, curator]) {
+let witnetDeployer
+
+module.exports = async function (_, network, [, from, reporter1, curator, reporter2]) {
   
   let addresses = await utils.readJsonFromFile("./migrations/addresses.json")
+  witnetDeployer = await WitnetDeployer.deployed()
 
   const networkArtifacts = settings.getArtifacts(network)
   const networkSpecs = settings.getSpecs(network)
@@ -323,22 +326,19 @@ async function traceDeployedContractInfo(contract, from, targetVersion) {
 }
 
 async function deployCoreBase (targetSpecs, targetAddr) {
-  const deployer = await WitnetDeployer.deployed()
   const proxyInitArgs = targetSpecs.mutables
   const proxySalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
-  const proxyAddr = await deployer.determineProxyAddr.call(proxySalt, { from: targetSpecs.from })
+  const proxyAddr = await witnetDeployer.determineProxyAddr.call(proxySalt, { from: targetSpecs.from })
   if ((await web3.eth.getCode(proxyAddr)).length < 3) {
     // if no contract is yet deployed on the expected address
     // proxify to last deployed implementation, and initialize it:
     utils.traceHeader("Deploying new 'WitnetProxy'...")
     const initdata = proxyInitArgs ? web3.eth.abi.encodeParameters(proxyInitArgs.types, proxyInitArgs.values) : "0x"
-    // console.log(deployer.address, proxySalt, targetAddr, initdata)
     if (initdata.length > 2) {
       console.info("  ", "> initdata types:    \x1b[90m", JSON.stringify(proxyInitArgs.types), "\x1b[0m")
       utils.traceData("   > initdata values:    ", initdata.slice(2), 64, "\x1b[90m")
     }
-    // console.log(await deployer.determineProxyAddr(proxySalt))    
-    utils.traceTx(await deployer.proxify(proxySalt, targetAddr, initdata, { from: targetSpecs.from }))
+    utils.traceTx(await witnetDeployer.proxify(proxySalt, targetAddr, initdata, { from: targetSpecs.from }))
   }
   if ((await web3.eth.getCode(proxyAddr)).length < 3) {
     console.info(`Error: WitnetProxy was not deployed on the expected address: ${proxyAddr}`)
@@ -362,7 +362,6 @@ async function upgradeCoreBase (proxyAddr, targetSpecs, targetAddr) {
 }
 
 async function defrostTarget (network, target, targetSpecs, targetAddr) {
-  const deployer = await WitnetDeployer.deployed()
   utils.traceHeader(`Defrosting '${target}'...`)
   const artifact = artifacts.require(target)
   const defrostCode = artifact.bytecode
@@ -373,7 +372,7 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
   const defrostConstructorArgs = constructorArgs[network][target] || constructorArgs.default[target] || ""
   const defrostInitCode = defrostCode + defrostConstructorArgs
   const defrostSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
-  const defrostAddr = await deployer.determineAddr.call(defrostInitCode, defrostSalt, { from: targetSpecs.from })
+  const defrostAddr = await witnetDeployer.determineAddr.call(defrostInitCode, defrostSalt, { from: targetSpecs.from })
   if (defrostAddr !== targetAddr) {
     panic("Irreproducible address", `\x1b[91m${defrostAddr}\x1b[0m != \x1b[97m${targetAddr}\x1b[0m`)
   } else {1
@@ -390,7 +389,7 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
       console.info("  ", "> constructor types: \x1b[90m", JSON.stringify(targetSpecs.constructorArgs.types), "\x1b[0m")
       utils.traceData("   > constructor values: ", defrostConstructorArgs, 64, "\x1b[90m")  
     }
-    utils.traceTx(await deployer.deploy(defrostInitCode, defrostSalt, { from: targetSpecs.from }))
+    utils.traceTx(await witnetDeployer.deploy(defrostInitCode, defrostSalt, { from: targetSpecs.from }))
   } catch (ex) {
     panic("Deployment failed", null, ex)
   }
@@ -399,11 +398,10 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
 
 async function deployTarget (network, target, targetSpecs, networkArtifacts, legacyVersion) {
   const constructorArgs = await utils.readJsonFromFile("./migrations/constructorArgs.json")
-  const deployer = await WitnetDeployer.deployed()
   const targetInitCode = encodeTargetInitCode(target, targetSpecs, networkArtifacts)
   const targetConstructorArgs = encodeTargetConstructorArgs(targetSpecs).slice(2)
   const targetSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
-  const targetAddr = await deployer.determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
+  const targetAddr = await witnetDeployer.determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
   utils.traceHeader(`Deploying '${target}'...`)
   if (targetSpecs.isUpgradable && versionLastCommitOf(legacyVersion) && legacyVersion.slice(-7) === version.slice(-7)) {
     console.info(   `   > \x1b[91mLatest changes were not previously committed into Github!\x1b[0m`)
@@ -422,7 +420,7 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
   console.info("  ", `> tx signer address:  ${targetSpecs.from}`)
   try {
     utils.traceTx(
-      await deployer.deploy(
+      await witnetDeployer.deploy(
         targetInitCode, 
         targetSalt, 
         { from: targetSpecs.from }
@@ -447,13 +445,12 @@ function panic(header, body, exception) {
 async function determineTargetAddr (target, targetSpecs, networkArtifacts) {
   const targetInitCode = encodeTargetInitCode(target, targetSpecs, networkArtifacts)
   const targetSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
-  return (await WitnetDeployer.deployed()).determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
+  return witnetDeployer.determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
 }
 
 async function determineProxyAddr (from, nonce) {
   const salt = nonce ? "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(nonce), 32).toString("hex") : "0x0"
-  const deployer = await WitnetDeployer.deployed()
-  return await deployer.determineProxyAddr.call(salt, { from })
+  return witnetDeployer.determineProxyAddr.call(salt, { from })
 }
 
 function encodeTargetConstructorArgs (targetSpecs) {
