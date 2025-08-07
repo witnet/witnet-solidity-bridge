@@ -8,9 +8,24 @@
             "WitOracle": "0x77703aE126B971c9946d562F41Dd47071dA00777",
             "WitOracleRadonRegistry": "0x000B61Fe075F545fd37767f40391658275900000",
             "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000",
+            "WitOracleRadonRequestFactoryModalsV21": "0xff752C3722EA1A9533ba20794594F2e567ca64ff",
+            "WitOracleRadonRequestFactoryTemplatesV21": "0xFF93344228F706aFFf49A65Ac027A50A97a94eFF",
             "WitOracleRequestFactory": "0x000DB36997AF1F02209A6F995883B9B699900000"
         },
         "WitnetDeployer": "0x03232aBE800D1638B30432FeEF300581De323a4E"
+    },
+    "base:sepolia": {
+        "libs": {
+            "WitOracleDataLib": "0x5C787d6DAb26D6c9D0F3f03498138e904b583386",
+            "WitOracleRadonEncodingLib": "0xe3EB2408a637Bb51Feb6e39f1B494cD4973DA402",
+            "WitOracleResultStatusLib": "0x1C15Af858B7Af00BAFEAaa267d3059266Efdfa8e",
+            "WitPriceFeedsLegacyDataLib": "0x1949a56d396ba542AA6573b43bE12dCf721adb45"
+        },
+        "core": {
+            "WitOracleRadonRequestFactoryModalsV21": "0xff752C3722EA1A9533ba20794594F2e567ca64ff",
+            "WitOracleRadonRequestFactoryTemplatesV21": "0xFF93344228F706aFFf49A65Ac027A50A97a94eFF",
+            "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000"
+        }
     },
     "conflux:core": {
         "apps": {
