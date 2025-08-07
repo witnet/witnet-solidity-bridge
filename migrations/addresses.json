@@ -40,14 +40,14 @@
     },
     "ethereum:sepolia": {
         "libs": {
-            "WitOracleDataLib": "0x48f32c9E40f6FA53eA3BC354CC3873DCD7E8f814",
-            "WitOracleRadonEncodingLib": "0x23A2331F72f99F39b913b739536B929C70fc2B20",
-            "WitOracleResultStatusLib": "0x16D0046918FbFF703e62Bafc4aF5ACB6820B85fC",
-            "WitPriceFeedsLegacyDataLib": "0x657f9d2bA42312444aF1d6C2e5E258ce8acaDeD7"
+            "WitOracleDataLib": "0x5C787d6DAb26D6c9D0F3f03498138e904b583386",
+            "WitOracleRadonEncodingLib": "0xe3EB2408a637Bb51Feb6e39f1B494cD4973DA402",
+            "WitOracleResultStatusLib": "0x1C15Af858B7Af00BAFEAaa267d3059266Efdfa8e",
+            "WitPriceFeedsLegacyDataLib": "0x1949a56d396ba542AA6573b43bE12dCf721adb45"
         },
         "core": {
-            "WitOracleRadonRequestFactoryModalsV21": "0x8D094b33Aa0ef89Ca0FdCb132A0b9d10d2C91050",
-            "WitOracleRadonRequestFactoryTemplatesV21": "0xD90A30539c0012313A7f26fa36D17Be669D375E5"
+            "WitOracleRadonRequestFactoryModalsV21": "0xff752C3722EA1A9533ba20794594F2e567ca64ff",
+            "WitOracleRadonRequestFactoryTemplatesV21": "0xFF93344228F706aFFf49A65Ac027A50A97a94eFF"
         }
     },
     "meter": {
