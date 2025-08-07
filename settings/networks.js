@@ -508,8 +508,8 @@ module.exports = {
     network_id: 1301,
     confirmations: 8,
     verify: {
-      apiUrl: "https://api-sepolia.uniscan.xyz/api",
-      explorerUrl: "https://sepolia.uniscan.xyz/address",
+      apiUrl: "https://api.etherscan.io/v2/api?chainid=1301",
+      explorerUrl: "https://sepolia.uniscan.xyz",
     },
   },
   "ultron:testnet": {

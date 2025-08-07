@@ -175,6 +175,18 @@
             "WitPriceFeedsLib": ""
         }
     },
+    "unichain:sepolia": {
+        "libs": {
+            "WitOracleDataLib": "0x5C787d6DAb26D6c9D0F3f03498138e904b583386",
+            "WitOracleRadonEncodingLib": "0xe3EB2408a637Bb51Feb6e39f1B494cD4973DA402",
+            "WitOracleResultStatusLib": "0x1C15Af858B7Af00BAFEAaa267d3059266Efdfa8e",
+            "WitPriceFeedsLegacyDataLib": "0x1949a56d396ba542AA6573b43bE12dCf721adb45"
+        },
+        "core": {
+            "WitOracleRadonRequestFactoryModalsV21": "0xff752C3722EA1A9533ba20794594F2e567ca64ff",
+            "WitOracleRadonRequestFactoryTemplatesV21": "0xFF93344228F706aFFf49A65Ac027A50A97a94eFF"
+        }
+    },
     "zksync": {
         "apps": {
             "WitPriceFeeds": "0xc5b27bC02D5579f64E8BeC0DcC8d2a1dc4C0d750",
