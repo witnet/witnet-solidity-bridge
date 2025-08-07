@@ -95,6 +95,7 @@ module.exports = {
     },
   },
   "celo:alfajores": {
+    confirmations: 5,
     network_id: 44787,
     port: 8538,
     verify: {
