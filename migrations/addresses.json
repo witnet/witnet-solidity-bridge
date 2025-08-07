@@ -133,14 +133,14 @@
             "WitRandomnessV21": "0x59E74BB41c3Fccc8406b2ED4D16dd451d39A128a"
         },
         "libs": {
-            "WitOracleDataLib": "0xb920A07680650f3b9c8258669D916638e5929bEA",
-            "WitOracleRadonEncodingLib": "0xb979c5280d25838CC0C6f00F435e00Eb452F8b13",
-            "WitOracleResultStatusLib": "0x686a7689E7eDe9b2e71980e71758f865dA907f82",
-            "WitPriceFeedsLegacyDataLib": "0x455A8dD30760f0bce13Ac5c5cd4B2098e53e2FAd"
+            "WitOracleDataLib": "0x5C787d6DAb26D6c9D0F3f03498138e904b583386",
+            "WitOracleRadonEncodingLib": "0xe3EB2408a637Bb51Feb6e39f1B494cD4973DA402",
+            "WitOracleResultStatusLib": "0x1C15Af858B7Af00BAFEAaa267d3059266Efdfa8e",
+            "WitPriceFeedsLegacyDataLib": "0x1949a56d396ba542AA6573b43bE12dCf721adb45"
         },
         "core": {
-            "WitOracleRadonRequestFactoryModalsV21": "0xFF828b578a6a310F848973e5094198573DB05EFF",
-            "WitOracleRadonRequestFactoryTemplatesV21": "0xff36F43ce2401Cf451EFdFA6a0e9c5ffef95E8ff"
+            "WitOracleRadonRequestFactoryModalsV21": "0xff752C3722EA1A9533ba20794594F2e567ca64ff",
+            "WitOracleRadonRequestFactoryTemplatesV21": "0xFF93344228F706aFFf49A65Ac027A50A97a94eFF"
         }
     },
     "polygon:amoy": {
