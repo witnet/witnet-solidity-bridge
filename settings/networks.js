@@ -24,6 +24,7 @@ module.exports = {
     mainnet: true,
     network_id: 43114,
     port: 9533,
+    symbol: "AVAX",
     verify: {
       apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
       apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan/api",
@@ -33,6 +34,7 @@ module.exports = {
   "avalanche:testnet": {
     network_id: 43113,
     port: 8533,
+    symbol: "AVAX",
     verify: {
       apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
       apiUrl: "https://api.routescan.io/v2/network/testnet/evm/43113/etherscan/api",
@@ -61,6 +63,7 @@ module.exports = {
     network_id: 9728,
     port: 8510,
     confirmations: 4,
+    symbol: "BOBA",
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/testnet/evm/9728/etherscan",
       explorerUrl: "https://boba.testnet.routescan.io/",
@@ -70,6 +73,7 @@ module.exports = {
     mainnet: true,
     network_id: 56288,
     port: 9510,
+    symbol: "BOBA",
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/56288/etherscan",
       explorerUrl: "https://bobascan.com/",
@@ -80,6 +84,7 @@ module.exports = {
     mainnet: true,
     network_id: 288,
     port: 9539,
+    symbol: "BOBA",
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/288/etherscan",
       explorerUrl: "https://bobascan.com/address/",
@@ -89,6 +94,7 @@ module.exports = {
   "boba:eth:goerli": {
     network_id: 2888,
     port: 8515,
+    symbol: "BOBA",
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/testnet/evm/2888/etherscan",
       explorerUrl: "https://boba.testnet.routescan.io/",
@@ -98,6 +104,7 @@ module.exports = {
     confirmations: 5,
     network_id: 44787,
     port: 8538,
+    symbol: "CELO",
     verify: {
       apiUrl: "https://api-alfajores.celoscan.io/api",
       explorerUrl: "https://alfjores.celoscan.io/",
@@ -107,6 +114,7 @@ module.exports = {
     mainnet: true,
     network_id: 42220,
     port: 9538,
+    symbol: "CELO",
     verify: {
       apiUrl: "https://api.celoscan.io/api",
       explorerUrl: "https://celoscan.io/",
@@ -115,6 +123,7 @@ module.exports = {
   "conflux:core:testnet": {
     port: 8540,
     network_id: 1,
+    symbol: "CFX",
     verify: {
       apiUrl: "https://api-testnet.confluxscan.io",
       explorerUrl: "https://testnet.confluxscan.io/",
@@ -125,6 +134,7 @@ module.exports = {
     port: 9540,
     network_id: 1029,
     gasPrice: 10,
+    symbol: "CFX",
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://api.confluxscan.io/",
@@ -136,6 +146,7 @@ module.exports = {
     network_id: 71,
     // networkCheckTimeout: 999999,
     gas: 15000000,
+    symbol: "CFX",
     verify: {
       apiKey: "espace",
       apiUrl: "https://evmapi-testnet.confluxscan.io/api/",
@@ -148,6 +159,7 @@ module.exports = {
     network_id: 1030,
     networkCheckTimeout: 999999,
     gas: 15000000,
+    symbol: "CFX",
     verify: {
       apiKey: "espace",
       apiUrl: "https://evmapi.confluxscan.io/api",
@@ -157,6 +169,7 @@ module.exports = {
   "cronos:testnet": {
     port: 8530,
     network_id: 338,
+    symbol: "CRO",
     verify: {
       apiKey: process.env.ETHERSCAN_CRONOS_API_KEY,
       apiUrl: "https://explorer-api.cronos.org/testnet/api/v1/hardhat/contract?apikey=G99km4eqHKfvEgpk6Lscsg3Y15QVLQLK",
@@ -168,6 +181,7 @@ module.exports = {
     port: 9530,
     network_id: 25,
     confirmations: 2,
+    symbol: "CRO",
     verify: {
       apiUrl: "https://api.cronoscan.com/api",
       explorerUrl: "https://cronoscan.com",
@@ -181,6 +195,7 @@ module.exports = {
     port: 8519,
     network_id: 568,
     gas: 6000000,
+    symbol: "wDOGE",
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "http://explorer-testnet.dogechain.dog/api",
@@ -191,6 +206,7 @@ module.exports = {
     mainnet: true,
     port: 9519,
     network_id: 2000,
+    symbol: "wDOGE",
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "http://explorer.dogechain.dog/api",
@@ -200,6 +216,7 @@ module.exports = {
   "elastos:testnet": {
     port: 8513,
     network_id: 21,
+    symbol: "ELA",
     verify: {
       apiUrl: "https://esc-testnet.elastos.io/api",
       explorerUrl: "https://esc-testnet.elastos.io/address",
@@ -209,6 +226,7 @@ module.exports = {
     mainnet: true,
     port: 9513,
     network_id: 20,
+    symbol: "ELA",
     verify: {
       apiUrl: "https://esc.elastos.io/api",
       explorerUrl: "https://esc.elastos.io/address",
@@ -244,6 +262,7 @@ module.exports = {
   "gnosis:mainnet": {
     port: 9509,
     network_id: 100,
+    symbol: "DAI",
     verify: {
       apiUrl: "https://api.gnosisscan.io/api",
       explorerUrl: "https://gnosisscan.io/address",
@@ -252,6 +271,7 @@ module.exports = {
   "gnosis:testnet": {
     port: 8509,
     network_id: 10200,
+    symbol: "xDAI",
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://gnosis-chiado.blockscout.com/api",
@@ -261,15 +281,18 @@ module.exports = {
   "kaia:testnet": {
     port: 8527,
     network_id: 1001,
+    symbol: "KAIA",
   },
   "kaia:mainnet": {
     mainnet: true,
     port: 9527,
     network_id: 8217,
+    symbol: "KAIA",
   },
   "kava:testnet": {
     port: 8526,
     network_id: 2221,
+    symbol: "KAVA",
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://testnet.explorer.kavalabs.io/api",
@@ -280,6 +303,7 @@ module.exports = {
     mainnet: true,
     port: 9526,
     network_id: 2222,
+    symbol: "KAVA",
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://explorer.kavalabs.io/api",
@@ -289,6 +313,7 @@ module.exports = {
   "kcc:testnet": {
     port: 8537,
     network_id: 322,
+    symbol: "KCS",
     verify: {
       apiUrl: "https://scan-testnet.kcc.network/api",
       explorerUrl: "https://scan-testnet.kcc.network/",
@@ -298,6 +323,7 @@ module.exports = {
     mainnet: true,
     port: 9537,
     network_id: 321,
+    symbol: "KCS",
     // verify: {
     //   apiUrl: "https://scan.kcc.io/api",
     //   explorerUrl: "https://scan.kcc.io/",
@@ -306,6 +332,7 @@ module.exports = {
   "mantle:sepolia": {
     port: 8508,
     network_id: 5003,
+    symbol: "MNT",
     verify: {
       apiUrl: "https://api-sepolia.mantlescan.xyz/api",
       explorerUrl: "https://sepolia.mantlescan.xyz/",
@@ -315,6 +342,7 @@ module.exports = {
     mainnet: true,
     port: 9508,
     network_id: 5000,
+    symbol: "MNT",
     verify: {
       apiUrl: "https://explorer.mantle.xyz/api",
       explorerUrl: "https://explorer.mantle.xyz/",
@@ -324,10 +352,12 @@ module.exports = {
     mainnet: true,
     port: 9536,
     network_id: 1088,
+    symbol: "METIS",
   },
   "metis:sepolia": {
     port: 8536,
     network_id: 59902,
+    symbol: "METIS",
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://sepolia-explorer.metisdevops.link/api",
@@ -338,16 +368,19 @@ module.exports = {
   "meter:testnet": {
     port: 8523,
     network_id: 83,
+    symbol: "MTR",
   },
   "meter:mainnet": {
     mainnet: true,
     port: 9523,
     network_id: 82,
+    symbol: "MTR",
   },
   "moonbeam:mainnet": {
     mainnet: true,
     port: 9531,
     network_id: 1284,
+    symbol: "GLMR",
     verify: {
       apiUrl: "https://api-moonbeam.moonscan.io/api",
       explorerUrl: "https://moonscan.io/",
@@ -357,6 +390,7 @@ module.exports = {
     mainnet: true,
     port: 7531,
     network_id: 1285,
+    symbol: "MOVR",
     verify: {
       apiUrl: "https://api-moonriver.moonscan.io/api",
       explorerUrl: "https://moonriver.moonscan.io/",
@@ -366,6 +400,7 @@ module.exports = {
     port: 8531,
     network_id: 1287,
     gas: 15000000,
+    symbol: "DEV",
     verify: {
       apiUrl: "https://api-moonbase.moonscan.io/api",
       explorerUrl: "https://moonbase.moonscan.io/",
@@ -374,6 +409,7 @@ module.exports = {
   "okx:oktchain:testnet": {
     port: 8528,
     network_id: 65,
+    symbol: "OKT",
     verify: {
       apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api",
       explorerUrl: "https://www.okx.com/explorer/oktc/",
@@ -383,6 +419,7 @@ module.exports = {
     mainnet: true,
     port: 9528,
     network_id: 66,
+    symbol: "OKT",
     verify: {
       apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api/okctest",
       explorerUrl: "https://www.okx.com/explorer/oktc-test/",
@@ -391,6 +428,7 @@ module.exports = {
   "okx:x1:sepolia": {
     port: 8505,
     network_id: 195,
+    symbol: "OKB",
     verify: {
       apiUrl: "https://www.okx.com/explorer/xlayer-test/api",
       explorerUrl: "https://www.okx.com/explorer/xlayer-test",
@@ -421,6 +459,7 @@ module.exports = {
     port: 8535,
     network_id: 80002,
     confirmations: 2,
+    symbol: "POL",
     verify: {
       apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
       apiUrl: "https://api-amoy.polygonscan.com/api",
@@ -431,6 +470,7 @@ module.exports = {
     mainnet: true,
     port: 9535,
     network_id: 137,
+    symbol: "POL",
     verify: {
       apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
       apiUrl: "https://api.polygonscan.com/api",
@@ -457,11 +497,13 @@ module.exports = {
   "reef:testnet": {
     port: 8532,
     network_id: 13939,
+    symbol: "REEF",
   },
   "reef:mainnet": {
     mainnet: true,
     port: 9532,
     network_id: 13939,
+    symbol: "REEF",
   },
   "scroll:sepolia": {
     port: 8514,
@@ -483,15 +525,18 @@ module.exports = {
   "syscoin:testnet": {
     port: 8521,
     network_id: 5700,
+    symbol: "SYS",
   },
   "syscoin:mainnet": {
     mainnet: true,
     port: 9521,
     network_id: 57,
+    symbol: "SYS",
   },
   "syscoin:rollux:testnet": {
     port: 8507,
     network_id: 57000,
+    symbol: "SYS",
     verify: {
       apiKey: "abc",
       apiUrl: "https://rollux.tanenbaum.io/api",
@@ -502,6 +547,7 @@ module.exports = {
     port: 8504,
     network_id: 443,
     gas: 15000000,
+    symbol: "TEN",
   },
   "unichain:sepolia": {
     port: 8500,
@@ -515,11 +561,13 @@ module.exports = {
   "ultron:testnet": {
     port: 8516,
     network_id: 1230,
+    symbol: "ULX",
   },
   "ultron:mainnet": {
     mainnet: true,
     port: 9516,
     network_id: 1231,
+    symbol: "ULX",
   },
   "worldchain:mainnet": {
     port: 9501,
