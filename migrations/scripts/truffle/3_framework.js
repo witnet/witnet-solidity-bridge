@@ -44,7 +44,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
 
   // Settle network-specific initialization params, if any...
   networkSpecs.WitOracle.mutables = merge(networkSpecs.WitOracle?.mutables, {
-    types: ["address[]"], values: [[reporter]],
+    types: ["address[]"], values: [[reporter1, reporter2]],
   })
   networkSpecs.WitRandomness.mutables = merge(networkSpecs.WitRandomness?.mutables, {
     types: ["address"], values: [curator],
