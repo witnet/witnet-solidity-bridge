@@ -6,7 +6,6 @@ import "../libs/Witnet.sol";
 
 interface IWitRandomnessAdmin {
     struct WitParams {
-        uint16 maxWitCommitteeSize;
         uint16 minWitCommitteeSize;
         uint64 minWitInclusionFees;
     }
