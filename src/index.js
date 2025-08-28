@@ -62,6 +62,7 @@ function supportedNetworks (ecosystem) {
           mainnet: networks[network]?.mainnet || false,
           network_id: networks[network].network_id,
           port: networks[network].port,
+          symbol: networks[network]?.symbol || "ETH",
           verified: networks[network]?.verify?.explorerUrl
         }
       ])
