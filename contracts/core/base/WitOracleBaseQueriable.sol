@@ -264,6 +264,23 @@ abstract contract WitOracleBaseQueriable
         );
     }
 
+    /// @notice Gets query's result back tracing trails
+    function getQueryResultTrails(uint256 _queryId) 
+        virtual override
+        external view returns (
+            bytes32 queryUUID,
+            Witnet.TransactionHash resultDrTxHash,
+            Witnet.Timestamp resultTimestamp,
+            uint256 resultFinalityBlock
+        )
+    {
+        Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
+        queryUUID = bytes32(Witnet.QueryHash.unwrap(__query.hash));
+        resultDrTxHash = __query.response.resultDrTxHash;
+        resultTimestamp = __query.response.resultTimestamp;
+        resultFinalityBlock = Witnet.BlockNumber.unwrap(__query.checkpoint);
+    }
+
     function getQueryStatusString(uint256 _queryId)
         virtual override external view 
         returns (string memory)

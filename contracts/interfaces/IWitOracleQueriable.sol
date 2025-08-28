@@ -47,6 +47,15 @@ interface IWitOracleQueriable {
     function getQueryResult(uint256) external view returns (Witnet.DataResult memory);
     function getQueryResultStatus(uint256) external view returns (Witnet.ResultStatus);
     function getQueryResultStatusDescription(uint256) external view returns (string memory);
+    
+    /// @notice Gets query's result back tracing trails
+    function getQueryResultTrails(uint256) 
+        external view returns (
+            bytes32 queryUUID,
+            Witnet.TransactionHash resultDrTxHash,
+            Witnet.Timestamp resultTimestamp,
+            uint256 resultFinalityBlock
+        );
 
     /// @notice Gets current status of given query.
     function getQueryStatus(uint256) external view returns (Witnet.QueryStatus);
