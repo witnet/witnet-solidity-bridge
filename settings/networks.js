@@ -8,7 +8,7 @@ module.exports = {
     port: 8517,
     verify: {
       apiUrl: "https://api-sepolia.arbiscan.io/api",
-      explorerUrl: "https://sepolia.arbiscan.io/",
+      explorerUrl: "https://sepolia.arbiscan.io",
     },
   },
   "arbitrum:one": {
@@ -17,7 +17,7 @@ module.exports = {
     port: 9517,
     verify: {
       apiUrl: "https://api.arbiscan.io/api",
-      explorerUrl: "https://arbiscan.io/",
+      explorerUrl: "https://arbiscan.io",
     },
   },
   "avalanche:mainnet": {
@@ -28,7 +28,7 @@ module.exports = {
     verify: {
       apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
       apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan/api",
-      explorerUrl: "https://snowtrace.io/",
+      explorerUrl: "https://snowtrace.io",
     },
   },
   "avalanche:testnet": {
@@ -38,7 +38,7 @@ module.exports = {
     verify: {
       apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
       apiUrl: "https://api.routescan.io/v2/network/testnet/evm/43113/etherscan/api",
-      explorerUrl: "https://testnet.snowtrace.io/",
+      explorerUrl: "https://testnet.snowtrace.io",
     },
   },
   "base:mainnet": {
@@ -47,7 +47,7 @@ module.exports = {
     port: 9502,
     verify: {
       apiUrl: "https://api.basescan.org/api",
-      explorerUrl: "https://basescan.com/",
+      explorerUrl: "https://basescan.com",
     },
   },
   "base:sepolia": {
@@ -56,7 +56,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://base-sepolia.blockscout.com/api",
-      explorerUrl: "https://base-sepolia.blockscout.com/",
+      explorerUrl: "https://base-sepolia.blockscout.com",
     },
   },
   "boba:bnb:testnet": {
@@ -66,7 +66,7 @@ module.exports = {
     symbol: "BOBA",
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/testnet/evm/9728/etherscan",
-      explorerUrl: "https://boba.testnet.routescan.io/",
+      explorerUrl: "https://boba.testnet.routescan.io",
     },
   },
   "boba:bnb:mainnet": {
@@ -76,7 +76,7 @@ module.exports = {
     symbol: "BOBA",
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/56288/etherscan",
-      explorerUrl: "https://bobascan.com/",
+      explorerUrl: "https://bobascan.com",
       apiKey: "MY_API_KEY",
     },
   },
@@ -87,7 +87,7 @@ module.exports = {
     symbol: "BOBA",
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/288/etherscan",
-      explorerUrl: "https://bobascan.com/address/",
+      explorerUrl: "https://bobascan.com",
       apiKey: "MY_API_KEY",
     },
   },
@@ -97,7 +97,7 @@ module.exports = {
     symbol: "BOBA",
     verify: {
       apiUrl: "https://api.routescan.io/v2/network/testnet/evm/2888/etherscan",
-      explorerUrl: "https://boba.testnet.routescan.io/",
+      explorerUrl: "https://boba.testnet.routescan.io",
     },
   },
   "celo:alfajores": {
@@ -107,7 +107,7 @@ module.exports = {
     symbol: "CELO",
     verify: {
       apiUrl: "https://api-alfajores.celoscan.io/api",
-      explorerUrl: "https://alfjores.celoscan.io/",
+      explorerUrl: "https://alfajores.celoscan.io",
     },
   },
   "celo:mainnet": {
@@ -117,7 +117,7 @@ module.exports = {
     symbol: "CELO",
     verify: {
       apiUrl: "https://api.celoscan.io/api",
-      explorerUrl: "https://celoscan.io/",
+      explorerUrl: "https://celoscan.io",
     },
   },
   "conflux:core:testnet": {
@@ -126,7 +126,7 @@ module.exports = {
     symbol: "CFX",
     verify: {
       apiUrl: "https://api-testnet.confluxscan.io",
-      explorerUrl: "https://testnet.confluxscan.io/",
+      explorerUrl: "https://testnet.confluxscan.io",
     },
   },
   "conflux:core:mainnet": {
@@ -137,8 +137,8 @@ module.exports = {
     symbol: "CFX",
     verify: {
       apiKey: "MY_API_KEY",
-      apiUrl: "https://api.confluxscan.io/",
-      explorerUrl: "https://confluxscan.io/",
+      apiUrl: "https://api.confluxscan.io",
+      explorerUrl: "https://confluxscan.io",
     },
   },
   "conflux:espace:testnet": {
@@ -149,8 +149,8 @@ module.exports = {
     symbol: "CFX",
     verify: {
       apiKey: "espace",
-      apiUrl: "https://evmapi-testnet.confluxscan.io/api/",
-      explorerUrl: "https://evmtestnet.confluxscan.io/",
+      apiUrl: "https://evmapi-testnet.confluxscan.io/api",
+      explorerUrl: "https://evmtestnet.confluxscan.io",
     },
   },
   "conflux:espace:mainnet": {
@@ -163,7 +163,7 @@ module.exports = {
     verify: {
       apiKey: "espace",
       apiUrl: "https://evmapi.confluxscan.io/api",
-      explorerUrl: "https://evm.confluxscan.io/address",
+      explorerUrl: "https://evm.confluxscan.io",
     },
   },
   "cronos:testnet": {
@@ -199,7 +199,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "http://explorer-testnet.dogechain.dog/api",
-      explorerUrl: "https://explorer-testnet.dogechain.dog/",
+      explorerUrl: "https://explorer-testnet.dogechain.dog",
     },
   },
   "dogechain:mainnet": {
@@ -210,7 +210,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "http://explorer.dogechain.dog/api",
-      explorerUrl: "https://explorer.dogechain.dog/",
+      explorerUrl: "https://explorer.dogechain.dog",
     },
   },
   "elastos:testnet": {
@@ -219,7 +219,7 @@ module.exports = {
     symbol: "ELA",
     verify: {
       apiUrl: "https://esc-testnet.elastos.io/api",
-      explorerUrl: "https://esc-testnet.elastos.io/address",
+      explorerUrl: "https://esc-testnet.elastos.io",
     },
   },
   "elastos:mainnet": {
@@ -229,7 +229,7 @@ module.exports = {
     symbol: "ELA",
     verify: {
       apiUrl: "https://esc.elastos.io/api",
-      explorerUrl: "https://esc.elastos.io/address",
+      explorerUrl: "https://esc.elastos.io",
     },
   },
   "ethereum:mainnet": {
@@ -238,7 +238,7 @@ module.exports = {
     port: 9545,
     verify: {
       apiUrl: "https://api.etherscan.io/api",
-      explorerUrl: "https://etherscan.io/",
+      explorerUrl: "https://etherscan.io",
     },
   },
   "ethereum:sepolia": {
@@ -246,8 +246,8 @@ module.exports = {
     network_id: 11155111,
     port: 8506,
     verify: {
-      apiUrl: "https://api-sepolia.etherscan.io/api",
-      explorerUrl: "https://sepolia.etherscan.io/",
+      apiUrl: "https://api.etherscan.io/v2/api?chainId=11155111",
+      explorerUrl: "https://sepolia.etherscan.io",
     },
   },
   "fuse:testnet": {
@@ -256,7 +256,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://explorer.fusespark.io/api",
-      explorerUrl: "https://explorer.fusespark.io/address",
+      explorerUrl: "https://explorer.fusespark.io",
     },
   },
   "gnosis:mainnet": {
@@ -265,7 +265,7 @@ module.exports = {
     symbol: "DAI",
     verify: {
       apiUrl: "https://api.gnosisscan.io/api",
-      explorerUrl: "https://gnosisscan.io/address",
+      explorerUrl: "https://gnosisscan.io",
     },
   },
   "gnosis:testnet": {
@@ -275,7 +275,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://gnosis-chiado.blockscout.com/api",
-      explorerUrl: "https://gnosis-chiado.blockscout.com/address",
+      explorerUrl: "https://gnosis-chiado.blockscout.com",
     },
   },
   "kaia:testnet": {
@@ -296,7 +296,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://testnet.explorer.kavalabs.io/api",
-      explorerUrl: "https://testnet.explorer.kavalabs.io/",
+      explorerUrl: "https://testnet.explorer.kavalabs.io",
     },
   },
   "kava:mainnet": {
@@ -307,7 +307,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://explorer.kavalabs.io/api",
-      explorerUrl: "https://explorer.kavalabs.io/",
+      explorerUrl: "https://explorer.kavalabs.io",
     },
   },
   "kcc:testnet": {
@@ -316,7 +316,7 @@ module.exports = {
     symbol: "KCS",
     verify: {
       apiUrl: "https://scan-testnet.kcc.network/api",
-      explorerUrl: "https://scan-testnet.kcc.network/",
+      explorerUrl: "https://scan-testnet.kcc.network",
     },
   },
   "kcc:mainnet": {
@@ -324,10 +324,6 @@ module.exports = {
     port: 9537,
     network_id: 321,
     symbol: "KCS",
-    // verify: {
-    //   apiUrl: "https://scan.kcc.io/api",
-    //   explorerUrl: "https://scan.kcc.io/",
-    // },
   },
   "mantle:sepolia": {
     port: 8508,
@@ -335,7 +331,7 @@ module.exports = {
     symbol: "MNT",
     verify: {
       apiUrl: "https://api-sepolia.mantlescan.xyz/api",
-      explorerUrl: "https://sepolia.mantlescan.xyz/",
+      explorerUrl: "https://sepolia.mantlescan.xyz",
     },
   },
   "mantle:mainnet": {
@@ -345,7 +341,7 @@ module.exports = {
     symbol: "MNT",
     verify: {
       apiUrl: "https://explorer.mantle.xyz/api",
-      explorerUrl: "https://explorer.mantle.xyz/",
+      explorerUrl: "https://explorer.mantle.xyz",
     },
   },
   "metis:mainnet": {
@@ -361,7 +357,6 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://sepolia-explorer.metisdevops.link/api",
-      // apiUrl: "https://api.routescan.io/v2/network/sepolia/evm/59902/etherscan",
       explorerUrl: "https://sepolia-explorer.metisdevops.link",
     },
   },
@@ -383,7 +378,7 @@ module.exports = {
     symbol: "GLMR",
     verify: {
       apiUrl: "https://api-moonbeam.moonscan.io/api",
-      explorerUrl: "https://moonscan.io/",
+      explorerUrl: "https://moonscan.io",
     },
   },
   "moonbeam:moonriver": {
@@ -393,7 +388,7 @@ module.exports = {
     symbol: "MOVR",
     verify: {
       apiUrl: "https://api-moonriver.moonscan.io/api",
-      explorerUrl: "https://moonriver.moonscan.io/",
+      explorerUrl: "https://moonriver.moonscan.io",
     },
   },
   "moonbeam:moonbase": {
@@ -403,7 +398,7 @@ module.exports = {
     symbol: "DEV",
     verify: {
       apiUrl: "https://api-moonbase.moonscan.io/api",
-      explorerUrl: "https://moonbase.moonscan.io/",
+      explorerUrl: "https://moonbase.moonscan.io",
     },
   },
   "okx:oktchain:testnet": {
@@ -412,7 +407,7 @@ module.exports = {
     symbol: "OKT",
     verify: {
       apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api",
-      explorerUrl: "https://www.okx.com/explorer/oktc/",
+      explorerUrl: "https://www.okx.com/explorer/oktc",
     },
   },
   "okx:oktchain:mainnet": {
@@ -422,7 +417,7 @@ module.exports = {
     symbol: "OKT",
     verify: {
       apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api/okctest",
-      explorerUrl: "https://www.okx.com/explorer/oktc-test/",
+      explorerUrl: "https://www.okx.com/explorer/oktc-test",
     },
   },
   "okx:x1:sepolia": {
@@ -441,7 +436,7 @@ module.exports = {
     verify: {
       apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
       apiUrl: "https://api-sepolia-optimistic.etherscan.io/api",
-      explorerUrl: "https://sepolia-optimism.etherscan.io/address",
+      explorerUrl: "https://sepolia-optimism.etherscan.io",
     },
   },
   "optimism:mainnet": {
@@ -452,7 +447,7 @@ module.exports = {
     verify: {
       apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
       apiUrl: "https://api-optimistic.etherscan.io/api",
-      explorerUrl: "https://optimistic.etherscan.io/",
+      explorerUrl: "https://optimistic.etherscan.io",
     },
   },
   "polygon:amoy": {
@@ -463,7 +458,7 @@ module.exports = {
     verify: {
       apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
       apiUrl: "https://api-amoy.polygonscan.com/api",
-      explorerUrl: "https://amoy.polygonscan.com/",
+      explorerUrl: "https://amoy.polygonscan.com",
     },
   },
   "polygon:mainnet": {
@@ -474,7 +469,7 @@ module.exports = {
     verify: {
       apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
       apiUrl: "https://api.polygonscan.com/api",
-      explorerUrl: "https://polygonscan.com/",
+      explorerUrl: "https://polygonscan.com",
     },
   },
   "polygon:zkevm:testnet": {
@@ -482,7 +477,7 @@ module.exports = {
     network_id: 1442,
     verify: {
       apiUrl: "https://api-testnet-zkevm.polygonscan.com/api",
-      explorerUrl: "https://testnet-zkevm.polygonscan.com/",
+      explorerUrl: "https://testnet-zkevm.polygonscan.com",
     },
   },
   "polygon:zkevm:mainnet": {
@@ -491,7 +486,7 @@ module.exports = {
     network_id: 1101,
     verify: {
       apiUrl: "https://api-zkevm.polygonscan.com/api",
-      explorerUrl: "https://zkevm.polygonscan.com/",
+      explorerUrl: "https://zkevm.polygonscan.com",
     },
   },
   "reef:testnet": {
@@ -510,7 +505,7 @@ module.exports = {
     network_id: 534351,
     verify: {
       apiUrl: "https://api-sepolia.scrollscan.com/api",
-      explorerUrl: "https://sepolia.scrollscan.com/",
+      explorerUrl: "https://sepolia.scrollscan.com",
     },
   },
   "scroll:mainnet": {
@@ -519,7 +514,7 @@ module.exports = {
     network_id: 534352,
     verify: {
       apiUrl: "https://api.scrollscan.com/api",
-      explorerUrl: "https://scrollscan.com/address",
+      explorerUrl: "https://scrollscan.com",
     },
   },
   "syscoin:testnet": {
@@ -575,7 +570,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://worldchain-mainnet.explorer.alchemy.com/api",
-      explorerUrl: "https://worldchain-mainnet.explorer.alchemy.com/address",
+      explorerUrl: "https://worldchain-mainnet.explorer.alchemy.com",
     },    
   },
   "worldchain:sepolia": {
@@ -584,7 +579,7 @@ module.exports = {
     verify: {
       apiKey: "MY_API_KEY",
       apiUrl: "https://worldchain-sepolia.explorer.alchemy.com/api",
-      explorerUrl: "https://worldchain-sepolia.explorer.alchemy.com/address",
+      explorerUrl: "https://worldchain-sepolia.explorer.alchemy.com",
     },    
   },
   "zksync:sepolia": {
@@ -592,7 +587,7 @@ module.exports = {
     network_id: 300,
     verify: {
       apiUrl: "https://sepolia-era.zksync.network/api",
-      explorerUrl: "https://sepolia-era.zksync.network/",
+      explorerUrl: "https://sepolia-era.zksync.network",
     }
   },
 }
