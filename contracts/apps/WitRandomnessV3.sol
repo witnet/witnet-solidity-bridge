@@ -625,6 +625,10 @@ contract WitRandomnessV3
             __randomize.prevEvmBlock = uint96(_prevBlock);
             __storage().randomize_[_prevBlock].nextEvmBlock = uint96(_evmBlockNumber);
             __storage().lastRandomizeBlock = _evmBlockNumber;
+
+            // Emit event only on first successful randomize within one block:
+            // solhint-disable-next-line avoid-tx-origin
+            emit Randomizing(_msgSender(), Witnet.QueryId.wrap(uint64(_queryId)));
         
         } else {
             _queryId = Witnet.QueryId.unwrap(__storage().randomize_[_evmBlockNumber].queryId);
@@ -634,10 +638,6 @@ contract WitRandomnessV3
         if (_evmUsedFunds < msg.value) {
             payable(msg.sender).transfer(msg.value - _evmUsedFunds);
         }
-
-        // Emit event upon every randomize call, even if multiple within same block:
-        // solhint-disable-next-line avoid-tx-origin
-        emit Randomizing(tx.origin, _msgSender(), Witnet.QueryId.wrap(uint64(_queryId)));
     }
 
     /// @dev Recursively searches for the number of the first block after the given one in which a Witnet 

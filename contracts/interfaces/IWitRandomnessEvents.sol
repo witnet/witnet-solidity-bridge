@@ -10,7 +10,6 @@ interface IWitRandomnessEvents {
 
     /// Emitted every time a new randomize is requested.
     event Randomizing(
-        address indexed evmOrigin,
         address indexed evmRequester,
         Witnet.QueryId witOracleQueryId
     );
