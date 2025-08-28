@@ -39,7 +39,7 @@ module.exports = {
     WitPriceFeeds: require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json").abi,
     WitPriceFeedsLegacy: require("../artifacts/contracts/WitPriceFeedsLegacy.sol/WitPriceFeedsLegacy.json").abi,
     WitRandomness: require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json").abi,
-    WitRandomnessV3: require("../migrations/frosts/apps/WitRandomnessV3.json").abi,
+    WitRandomnessV2: require("../migrations/frosts/apps/WitRandomnessV2.json").abi,
     WitnetUpgradableBase: require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json").abi,
   },
   settings: require("../settings"),
