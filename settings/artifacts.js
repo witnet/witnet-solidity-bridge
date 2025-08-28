@@ -3,7 +3,7 @@ module.exports = {
     WitnetDeployer: "WitnetDeployer",
     apps: {
       WitPriceFeeds: "WitPriceFeedsLegacyUpgradable",
-      WitRandomness: "WitRandomnessV21",
+      WitRandomness: "WitRandomnessV3",
     },
     core: {
       WitOracle: "WitOracleTrustableDefault",

@@ -64,8 +64,8 @@ module.exports = {
     WitRandomnessV2: {
       vanity: 1060132513, // 0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB
     },
-    WitRandomnessV21: {
-      vanity: 127210,     // 0xFfd88EFa76a7ee79BAE373798A10AD617dD5eCFf
+    WitRandomnessV3: {
+      vanity: 127210,
     }
   },
   reef: {

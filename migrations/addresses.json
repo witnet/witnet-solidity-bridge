@@ -130,7 +130,7 @@
     },
     "optimism:sepolia": {
         "apps": {
-            "WitRandomnessV21": "0x59E74BB41c3Fccc8406b2ED4D16dd451d39A128a"
+            "WitRandomnessV3": ""
         },
         "libs": {
             "WitOracleDataLib": "0x5C787d6DAb26D6c9D0F3f03498138e904b583386",
@@ -190,7 +190,7 @@
     "zksync": {
         "apps": {
             "WitPriceFeeds": "0xc5b27bC02D5579f64E8BeC0DcC8d2a1dc4C0d750",
-            "WitRandomnessV21": "0x5d626c3D259211a0185a71DCC983975F4ba43d27"
+            "WitRandomnessV3": ""
         },
         "core": {
             "WitOracle": "0x65b652f967DF11b363F5Ee240e9Edf06f8aF2a82",

@@ -7,7 +7,7 @@ import "../interfaces/IWitRandomnessAdmin.sol";
 import "../mockups/UsingWitOracle.sol";
 import "../patterns/Ownable2Step.sol";
 
-/// @title WitRandomnessV21: Unbiased, EVM-agnostic and provably-fair random seeds from the Witnet blockchain. 
+/// @title WitRandomnessV3: Unbiased, EVM-agnostic and provably-fair random seeds from the Witnet blockchain. 
 /// 
 /// 256-bit random seeds can be permissionless pulled at anytime from smart contracts and externally-owned EVM accounts.
 /// 
@@ -41,7 +41,7 @@ import "../patterns/Ownable2Step.sol";
 /// they would have to deal themselves with eventual randomness resolution errors.
 ///
 /// @author Guillermo Díaz <guillermo@witnet.io>
-contract WitRandomnessV21
+contract WitRandomnessV3
     is
         Ownable2Step,
         UsingWitOracle,
@@ -124,7 +124,7 @@ contract WitRandomnessV21
     }
 
     function class() virtual override public pure returns (string memory) {
-        return type(WitRandomnessV21).name;
+        return type(WitRandomnessV3).name;
     }
 
     function witOracle() override (IWitOracleAppliance, UsingWitOracle)

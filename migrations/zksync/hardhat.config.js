@@ -87,7 +87,7 @@ module.exports = {
                 "WitOracleTrustableZkSync",
                 // "WitOracleRadonRegistryUpgradableZkSync",
                 // "WitPriceFeedsUpgradableZkSync",
-                // "WitRandomnessV21",
+                // "WitRandomnessV3",
             ],
         },
     }
