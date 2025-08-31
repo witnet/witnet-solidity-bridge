@@ -275,7 +275,7 @@ abstract contract WitOracleBaseQueriable
         )
     {
         Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
-        queryUUID = bytes32(Witnet.QueryHash.unwrap(__query.hash));
+        queryUUID = bytes32(Witnet.QueryUUID.unwrap(__query.uuid));
         resultDrTxHash = __query.response.resultDrTxHash;
         resultTimestamp = __query.response.resultTimestamp;
         resultFinalityBlock = Witnet.BlockNumber.unwrap(__query.checkpoint);
@@ -414,7 +414,7 @@ abstract contract WitOracleBaseQueriable
         _queryId = ++ __storage().nonce;
         Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
         __query.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number));
-        __query.hash = Witnet.hashify(
+        __query.uuid = Witnet.hashify(
             Witnet.QueryId.wrap(uint64(_queryId)), 
             _radonHash, 
             _querySLA.hashify()

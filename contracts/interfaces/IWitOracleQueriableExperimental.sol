@@ -28,7 +28,7 @@ interface IWitOracleQueriableExperimental {
     /// Delegated Data Requests
     struct DDR {
         Witnet.QueryId queryId;
-        Witnet.QueryHash queryHash;
+        Witnet.QueryUUID queryUUID;
         Witnet.QueryEvmReward queryEvmReward;
         QueryParams queryParams;
         bytes radonBytecode;

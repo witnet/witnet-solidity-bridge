@@ -527,7 +527,7 @@ library WitOracleDataLib {
         
         return IWitOracleQueriableExperimental.DDR({
             queryId: queryId,
-            queryHash: __query.hash,
+            queryUUID: __query.uuid,
             queryEvmReward: __query.reward,
             queryParams: IWitOracleQueriableExperimental.QueryParams({
                 witResultMaxSize: _querySLA.witResultMaxSize,

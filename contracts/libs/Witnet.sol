@@ -18,7 +18,7 @@ library Witnet {
     type BlockNumber is uint64;
     
     type QueryEvmReward is uint72;
-    type QueryHash is bytes15;
+    type QueryUUID is bytes15;
     type QueryId is uint64;
 
     type RadonHash is bytes32;
@@ -60,7 +60,7 @@ library Witnet {
 
     struct DataPullReport {
         QueryId queryId;
-        QueryHash queryHash;           // KECCAK256(channel | blockhash(block.number - 1) | ...)
+        QueryUUID queryHash;           // KECCAK256(channel | blockhash(block.number - 1) | ...)
         bytes witDrRelayerSignature;   // ECDSA.signature(queryHash)
         BlockNumber witDrResultEpoch;
         bytes witDrResultCborBytes;
@@ -95,7 +95,7 @@ library Witnet {
         QueryRequest request;
         QueryResponse response;
         QuerySLA slaParams;      // Minimum Service-Level parameters to be committed by the Witnet blockchain.
-        QueryHash hash;          // Unique query hash determined by payload, WRB instance, chain id and EVM's previous block hash.
+        QueryUUID uuid;          // Universal unique identifier determined by the payload, WRB instance, chain id and EVM's previous block hash.
         QueryEvmReward reward;   // EVM amount in wei eventually to be paid to the legit reporter.
         BlockNumber checkpoint;
     }
@@ -808,12 +808,12 @@ library Witnet {
         );
     }
 
-    function hashify(QueryHash hash) internal pure returns (bytes32) {
-        return keccak256(abi.encode(QueryHash.unwrap(hash)));
+    function hashify(QueryUUID hash) internal pure returns (bytes32) {
+        return keccak256(abi.encode(QueryUUID.unwrap(hash)));
     }
 
-    function hashify(QueryId _queryId, Witnet.RadonHash _radHash, bytes32 _slaHash) internal view returns (Witnet.QueryHash) {
-        return Witnet.QueryHash.wrap(bytes15(
+    function hashify(QueryId _queryId, Witnet.RadonHash _radHash, bytes32 _slaHash) internal view returns (Witnet.QueryUUID) {
+        return Witnet.QueryUUID.wrap(bytes15(
             keccak256(abi.encode(
                 channel(address(this)), 
                 blockhash(block.number - 1),

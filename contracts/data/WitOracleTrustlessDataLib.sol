@@ -661,8 +661,8 @@ library WitOracleTrustlessDataLib {
         returns (bool, string memory)
     {
         if (
-            Witnet.QueryHash.unwrap(report.queryHash)
-                != Witnet.QueryHash.unwrap(self.hash)
+            Witnet.QueryUUID.unwrap(report.queryHash)
+                != Witnet.QueryUUID.unwrap(self.uuid)
         ) {
             return (false, "invalid query hash");
         
