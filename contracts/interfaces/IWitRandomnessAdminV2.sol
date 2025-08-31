@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../libs/Witnet.sol";
 
-interface IWitRandomnessAdmin {
+interface IWitRandomnessAdminV2 {
     struct WitParams {
         uint16 minWitCommitteeSize;
         uint64 minWitInclusionFees;

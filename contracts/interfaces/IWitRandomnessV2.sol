@@ -6,7 +6,22 @@ import "../WitOracle.sol";
 
 /// @title The Wit/Randomness appliance interface.
 /// @author Witnet Foundation.
-interface IWitRandomness {
+interface IWitRandomnessV2 {
+
+    /// Randomization status for some specified block number.
+    enum RandomizeStatus {
+        Void,
+        Awaiting,
+        Ready,
+        Error,
+        Finalizing
+    }
+    
+    /// Emitted every time a new randomize is requested.
+    event Randomizing(
+        address indexed evmRequester,
+        Witnet.QueryId witOracleQueryId
+    );
    
     /// @notice Returns amount of wei required to be paid as a fee when requesting randomization with a 
     /// transaction gas price as the one given.
@@ -22,7 +37,7 @@ interface IWitRandomness {
     ///    iii. all `randomize()` requests that took place on or after the given block were solved with errors.
     ///
     /// @param blockNumber Block number from which the search will start.
-    function fetchRandomnessAfter(uint256 blockNumber) external view returns (bytes32);
+    function fetchRandomnessAfter(uint256 blockNumber) external view returns (uint64);
 
     /// @notice Retrieves the actual random value, unique hash and timestamp of the witnessing commit/reveal act 
     /// that took place in the Witnet blockchain in response to the first non-failing randomize query
@@ -54,9 +69,9 @@ interface IWitRandomness {
     /// @return prevRandomizeBlock Block number in which a randomize request got queried just before this one. 0 if none.
     /// @return nextRandomizeBlock Block number in which a randomize request got queried just after this one, 0 if none.
     function getRandomizeData(uint256 blockNumber) external view returns (
-            uint256 witOracleQueryId,
-            uint256 prevRandomizeBlock,
-            uint256 nextRandomizeBlock
+            uint64 witOracleQueryId,
+            uint64 prevRandomizeBlock,
+            uint64 nextRandomizeBlock
         );
 
     /// @notice Returns security and liveness parameters required to the Witnet blockchain 
@@ -94,13 +109,7 @@ interface IWitRandomness {
     ///  - 3 -> Error: all attempted randomize requests at or after the given block were solved with errors.
     ///  - 4 -> Finalizing: a randomize result was relayed already but cannot yet be considered to be final.
     function getRandomizeStatus(uint256 blockNumber) external view returns (RandomizeStatus);    
-        enum RandomizeStatus {
-            Void,
-            Awaiting,
-            Ready,
-            Error,
-            Finalizing
-        }
+        
     function getRandomizeStatusDescription(uint256 blockNumber) external view returns (string memory);
 
     /// @notice Returns `true` only if a successfull resolution from the Witnet blockchain is found for the 
