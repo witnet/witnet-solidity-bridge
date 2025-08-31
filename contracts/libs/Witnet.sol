@@ -1209,16 +1209,16 @@ library Witnet {
 
     /// Generates a pseudo-random uint32 number uniformly distributed within the range `[0 .. range)`, based on
     /// the given `nonce` and `seed` values. 
-    function randomUniformUint32(uint32 range, uint256 nonce, bytes32 seed)
+    function randomUniformUint64(uint64 range, uint256 nonce, bytes32 seed)
         internal pure 
-        returns (uint32) 
+        returns (uint64) 
     {
         uint256 _number = uint256(
             keccak256(
                 abi.encode(seed, nonce)
             )
-        ) & uint256(2 ** 224 - 1);
-        return uint32((_number * range) >> 224);
+        ) & uint256(2 ** 192 - 1);
+        return uint64((_number * range) >> 192);
     }
 
     /// @notice Convert a `uint8` into a 2 characters long `string` representing its two less significant hexadecimal values.
