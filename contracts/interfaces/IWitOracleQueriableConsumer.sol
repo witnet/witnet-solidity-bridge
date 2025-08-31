@@ -6,10 +6,8 @@ import "./IWitOracleQueriable.sol";
 
 interface IWitOracleQueriableConsumer {
 
-    /// @notice Method to be called from the WitOracle contract as soon as the given Witnet `queryId`
-    /// @notice gets reported.
-    /// @dev It should revert if called from any other address different to the WitOracle being used
-    /// @dev by the WitOracleQueriableConsumer contract. 
+    /// Method to be called from the WitOracle contract as soon as the given Witnet `queryId` gets reported.
+    /// @dev It should revert if called from an address different to the WitOracle instance being used by consumer.
     /// @param queryId The unique identifier of the Witnet query being reported.
     /// @param queryResult Abi-encoded Witnet.DataResult containing the CBOR-encoded query's result, and metadata.
     function reportWitOracleQueryResult(

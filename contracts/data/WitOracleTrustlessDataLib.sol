@@ -595,7 +595,8 @@ library WitOracleTrustlessDataLib {
                 resultDrTxHash: report.witDrTxHash,
                 resultTimestamp: report.resultTimestamp
             }),
-            Witnet.QueryStatus.Finalized
+            Witnet.QueryStatus.Finalized,
+            uint64(block.number)
         );
     }
 
@@ -638,7 +639,8 @@ library WitOracleTrustlessDataLib {
                 resultDrTxHash: report.witDrTxHash,
                 resultTimestamp: report.resultTimestamp 
             }),
-            Witnet.QueryStatus.Finalized
+            Witnet.QueryStatus.Finalized,
+            uint64(block.number)
         );
     }
 
@@ -650,7 +652,11 @@ library WitOracleTrustlessDataLib {
         private view
         returns (Witnet.DataResult memory)
     {
-        return WitOracleDataLib.intoDataResult(self.response, queryStatus);
+        return WitOracleDataLib.intoDataResult(
+            self.response, 
+            queryStatus,
+            Witnet.BlockNumber.unwrap(self.checkpoint)
+        );
     }
 
     function _isValidDataPullReport(

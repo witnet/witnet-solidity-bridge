@@ -86,11 +86,16 @@ library WitOracleDataLib {
         return data().queries[queryId].response;
     }
 
-    function intoDataResult(Witnet.QueryResponse memory queryResponse, Witnet.QueryStatus queryStatus)
+    function intoDataResult(
+            Witnet.QueryResponse memory queryResponse, 
+            Witnet.QueryStatus queryStatus,
+            uint64 finalityBlock
+        )
         internal pure
         returns (Witnet.DataResult memory _result)
     {
         _result.drTxHash = queryResponse.resultDrTxHash;
+        _result.finality = finalityBlock;
         _result.timestamp = queryResponse.resultTimestamp;
         if (queryResponse.resultCborBytes.length > 0) {
             _result.value = WitnetCBOR.fromBytes(queryResponse.resultCborBytes);
@@ -187,12 +192,13 @@ library WitOracleDataLib {
 
     function extractDataResult(
             Witnet.QueryResponse memory queryResponse, 
-            Witnet.QueryStatus queryStatus
+            Witnet.QueryStatus queryStatus,
+            uint64 finalityBlock
         )
         public pure 
         returns (Witnet.DataResult memory)
     {
-        return intoDataResult(queryResponse, queryStatus);
+        return intoDataResult(queryResponse, queryStatus, finalityBlock);
     }
 
     function parseDataReport(Witnet.DataPushReport calldata _dataPushReport, bytes calldata _signature)
@@ -208,7 +214,8 @@ library WitOracleDataLib {
                 resultDrTxHash: _dataPushReport.witDrTxHash,
                 resultTimestamp: _dataPushReport.resultTimestamp
             }), 
-            Witnet.QueryStatus.Finalized
+            Witnet.QueryStatus.Finalized,
+            uint64(block.number)
         );
     }
 
@@ -253,9 +260,11 @@ library WitOracleDataLib {
 
     function getQueryResult(uint256 queryId) public view returns (Witnet.DataResult memory _result) {
         Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
+        Witnet.Query storage __query = seekQuery(queryId);
         return intoDataResult(
-            seekQueryResponse(queryId),
-            _queryStatus
+            __query.response,
+            _queryStatus,
+            Witnet.BlockNumber.unwrap(__query.checkpoint)
         );
     }
     
@@ -459,7 +468,8 @@ library WitOracleDataLib {
                 resultCborBytes: resultCborBytes,
                 disputer: address(0), _0: 0
             }),
-            evmFinalityBlock == block.number ? Witnet.QueryStatus.Finalized : Witnet.QueryStatus.Reported
+            evmFinalityBlock <= block.number ? Witnet.QueryStatus.Finalized : Witnet.QueryStatus.Reported,
+            evmFinalityBlock
         );
         try IWitOracleQueriableConsumer(evmRequester).reportWitOracleQueryResult{
             gas: evmCallbackGasLimit
