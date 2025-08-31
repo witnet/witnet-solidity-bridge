@@ -4,17 +4,17 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./interfaces/IWitOracleAppliance.sol";
 import "./interfaces/IWitOracleQueriableEvents.sol";
-import "./interfaces/IWitRandomnessV2.sol";
+import "./interfaces/legacy/IWitRandomnessLegacy.sol";
 
-abstract contract WitRandomnessLegacyV2
+abstract contract WitRandomnessLegacy
     is
         IWitOracleAppliance,
         IWitOracleQueriableEvents,
-        IWitRandomnessV2
+        IWitRandomnessLegacy
 {
     function specs() virtual override external pure returns (bytes4) {
         return (
-            type(IWitRandomnessV2).interfaceId
+            type(IWitRandomnessLegacy).interfaceId
         );
     }
 }

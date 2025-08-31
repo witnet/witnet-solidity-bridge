@@ -2,11 +2,11 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitOracle.sol";
+import "../../WitOracle.sol";
 
 /// @title The Wit/Randomness appliance interface.
 /// @author Witnet Foundation.
-interface IWitRandomnessV2 {
+interface IWitRandomnessLegacy {
 
     /// Randomization status for some specified block number.
     enum RandomizeStatus {

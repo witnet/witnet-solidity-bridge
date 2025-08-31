@@ -9,7 +9,6 @@ import {
 } from "../WitRandomness.sol";
 
 abstract contract UsingWitRandomness {
-    
     WitRandomness immutable public WIT_RANDOMNESS;
     
     constructor (address randomizer) {
