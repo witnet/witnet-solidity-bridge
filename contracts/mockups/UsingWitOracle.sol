@@ -52,7 +52,7 @@ abstract contract UsingWitOracle
         __witOracleDefaultQueryParams = Witnet.QuerySLA({
             witResultMaxSize: 32, // defaults to 32 bytes
             witCommitteeSize: 3,  // defaults to 10 witnesses
-            witInclusionFees: 2 * 10 ** 8 // defaults to 0.2 $WIT
+            witUnitaryReward: 2 * 10 ** 8 // defaults to 0.2 $WIT
         });
         
         __witOracleBaseFeeOverheadPercentage = 33; // defaults to 33%

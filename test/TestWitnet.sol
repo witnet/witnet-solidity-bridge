@@ -118,7 +118,7 @@ contract TestWitnet {
         });
         query = Witnet.Query({
             checkpoint: Witnet.BlockNumber.wrap(uint64(block.number)),
-            hash: Witnet.QueryHash.wrap(0x010203040506070809101112131415),
+            uuid: Witnet.QueryUUID.wrap(0x010203040506070809101112131415),
             reward: Witnet.QueryEvmReward.wrap(1234567890123456),
             slaParams: _slaParams,
             request: _request,
@@ -140,7 +140,7 @@ contract TestWitnet {
             radonHash: Witnet.RadonHash.wrap(0x4377aca8710933b4b99a728bc566f27402c0339baf0f32960a3c6af720a1b7cc)
         });
         query.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number));
-        query.hash = Witnet.QueryHash.wrap(0x010203040506070809101112131415);
+        query.uuid = Witnet.QueryUUID.wrap(0x010203040506070809101112131415);
         query.reward = Witnet.QueryEvmReward.wrap(1234567890123456);
         query.slaParams = _slaParams;
         query.request = _request;
@@ -149,7 +149,7 @@ contract TestWitnet {
     function writeQueryUnpacked2() external {
         ++ __finalityBlock;
         query.checkpoint = Witnet.BlockNumber.wrap(uint64(block.number));
-        query.hash = Witnet.QueryHash.wrap(0x010203040506070809101112131415);
+        query.uuid = Witnet.QueryUUID.wrap(0x010203040506070809101112131415);
         query.reward = Witnet.QueryEvmReward.wrap(1234567890123456);
         query.slaParams.witResultMaxSize = 34;
         query.slaParams.witCommitteeSize = 16;
