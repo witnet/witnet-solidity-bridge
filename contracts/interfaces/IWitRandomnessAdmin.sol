@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../libs/Witnet.sol";
 
-interface IWitRandomnessAdminV3 {
+interface IWitRandomnessAdmin {
     struct Settings {
         uint16 feeOverheadPercentage;
         uint24 maxCallbackGasLimit;

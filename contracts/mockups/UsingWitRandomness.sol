@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     Witnet, 
     WitRandomness, 
-    IWitRandomnessV3
+    IWitRandomness
 } from "../WitRandomness.sol";
 
 abstract contract UsingWitRandomness {
@@ -14,7 +14,7 @@ abstract contract UsingWitRandomness {
     constructor (address randomizer) {
         assert(
             randomizer.code.length > 0
-                && WitRandomness(randomizer).specs() == type(IWitRandomnessV3).interfaceId
+                && WitRandomness(randomizer).specs() == type(IWitRandomness).interfaceId
         );
         WIT_RANDOMNESS = WitRandomness(randomizer);    
     }

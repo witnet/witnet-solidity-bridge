@@ -6,7 +6,7 @@ import {Witnet} from "../libs/Witnet.sol";
 
 /// @title The Wit/Randomness V3 appliance interface.
 /// @author Witnet Foundation.
-interface IWitRandomnessV3 {
+interface IWitRandomness {
 
     /// Randomization status for some specified block number.
     enum RandomizeStatus {

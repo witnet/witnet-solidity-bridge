@@ -6,7 +6,7 @@ import "../WitRandomness.sol";
 
 import "../interfaces/IWitOracle.sol";
 import "../interfaces/IWitOracleQueriable.sol";
-import "../interfaces/IWitRandomnessAdminV3.sol";
+import "../interfaces/IWitRandomnessAdmin.sol";
 
 import "../patterns/Ownable2Step.sol";
 
@@ -48,7 +48,7 @@ contract WitRandomnessV3
     is
         Ownable2Step,
         WitRandomness,
-        IWitRandomnessAdminV3
+        IWitRandomnessAdmin
 {
     // using Witnet for bytes;
     // using Witnet for uint64;
@@ -143,7 +143,7 @@ contract WitRandomnessV3
 
     
     /// ===============================================================================================================
-    /// --- IWitRandomnessV3 ------------------------------------------------------------------------------------------
+    /// --- IWitRandomness ------------------------------------------------------------------------------------------
 
     /// Returns amount of wei required to be paid as a fee when requesting randomization with a 
     /// transaction gas price as the one given.
@@ -465,17 +465,17 @@ contract WitRandomnessV3
 
 
     /// ===============================================================================================================
-    /// --- IWitRandomnessAdminV3 -------------------------------------------------------------------------------------
+    /// --- IWitRandomnessAdmin -------------------------------------------------------------------------------------
 
     function acceptOwnership()
-        virtual override (IWitRandomnessAdminV3, Ownable2Step)
+        virtual override (IWitRandomnessAdmin, Ownable2Step)
         public
     {
         Ownable2Step.acceptOwnership();
     }
 
     function owner()
-        virtual override (IWitRandomnessAdminV3, Ownable)
+        virtual override (IWitRandomnessAdmin, Ownable)
         public view 
         returns (address)
     {
@@ -483,7 +483,7 @@ contract WitRandomnessV3
     }
 
     function pendingOwner() 
-        virtual override (IWitRandomnessAdminV3, Ownable2Step)
+        virtual override (IWitRandomnessAdmin, Ownable2Step)
         public view
         returns (address)
     {
@@ -491,7 +491,7 @@ contract WitRandomnessV3
     }
     
     function transferOwnership(address _newOwner)
-        virtual override (IWitRandomnessAdminV3, Ownable2Step)
+        virtual override (IWitRandomnessAdmin, Ownable2Step)
         public 
         onlyOwner
     {
@@ -756,8 +756,8 @@ contract WitRandomnessV3
     }
 
     bytes32 private constant _STORAGE_SLOT = 
-        // keccak256("io.witnet.apps.randomness.v3")
-        0x43025ad356942e949bc1eab02ffb42d0642f59c8829febfec0169ebcda390799;
+        // keccak256("io.witnet.apps.randomness.v3") & ~bytes32(uint256(0xff) 
+        0x43025ad356942e949bc1eab02ffb42d0642f59c8829febfec0169ebcda390700;
 
     function __storage() internal pure returns (Storage storage _ptr) {
         assembly {
