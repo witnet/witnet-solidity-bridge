@@ -121,6 +121,15 @@ contract WitRandomnessV3
                 filters: new Witnet.RadonFilter[](0)
             })
         );
+
+        // Initialize settings:
+        __storage().settings = Settings({
+            feeOverheadPercentage: 10,
+            maxCallbackGasLimit: 50000,
+            minWitCommitteeSize: 3,
+            minWitInclusionFees: 166666666,
+            randomizeWaitingBlocks: 256
+        });
     }
 
     receive() virtual external payable {
