@@ -1,75 +1,73 @@
 const { ethers, hre } = require("hardhat")
 
 describe("TestWitnet", function () {
-  
-  let witnet;
+  let witnet
 
   before(async function () {
     witnet = await ethers.deployContract("TestWitnet")
-  });
+  })
 
   beforeEach(async function () {
     await witnet.deleteData()
   })
 
   it("testNOP()", async function () {
-    await witnet.testNOP();
-  });
+    await witnet.testNOP()
+  })
 
   it("testSSTORE()", async function () {
-    await witnet.testSSTORE();
-  });
+    await witnet.testSSTORE()
+  })
 
   it("testSLOAD()", async function () {
-    await witnet.testSLOAD();
-  });
+    await witnet.testSLOAD()
+  })
 
   it("writeRequestWithBytecodePacked()", async function () {
-    await witnet.writeRequestWithBytecodePacked();
-  });
+    await witnet.writeRequestWithBytecodePacked()
+  })
 
   it("writeRequestWithBytecode()", async function () {
-    await witnet.writeRequestWithBytecode();
-  });
+    await witnet.writeRequestWithBytecode()
+  })
 
   it("readRequestWithBytecode()", async function () {
-    await witnet.readRequestWithBytecode();
-  });
+    await witnet.readRequestWithBytecode()
+  })
 
   it("writeRequestWithRadonHashPacked()", async function () {
-    await witnet.writeRequestWithRadonHashPacked();
-  });
+    await witnet.writeRequestWithRadonHashPacked()
+  })
 
   it("writeRequestWithRadonHash()", async function () {
-    await witnet.writeRequestWithRadonHash();
-  });
+    await witnet.writeRequestWithRadonHash()
+  })
 
   it("writeResponsePacked()", async function () {
-    await witnet.writeResponsePacked();
-  });
+    await witnet.writeResponsePacked()
+  })
 
   it("writeResponse()", async function () {
-    await witnet.writeResponse();
-  });
+    await witnet.writeResponse()
+  })
 
   it("readResponse()", async function () {
-    await witnet.readResponse();
-  });
-
-  it("writeQueryPacked()", async function() {
-    await witnet.writeQueryPacked();
+    await witnet.readResponse()
   })
 
-  it("writeQueryUnpacked1()", async function() {
-    await witnet.writeQueryUnpacked1();
+  it("writeQueryPacked()", async function () {
+    await witnet.writeQueryPacked()
   })
 
-  it("writeQueryUnpacked2()", async function() {
-    await witnet.writeQueryUnpacked2();
+  it("writeQueryUnpacked1()", async function () {
+    await witnet.writeQueryUnpacked1()
+  })
+
+  it("writeQueryUnpacked2()", async function () {
+    await witnet.writeQueryUnpacked2()
   })
 
   it("readQueryPacked()", async function () {
-    await witnet.readQuery();
-  });
-
-});
+    await witnet.readQuery()
+  })
+})

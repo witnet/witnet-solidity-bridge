@@ -15,9 +15,9 @@ if (fs.existsSync("./build/contracts")) {
 }
 
 if (fs.existsSync("./migrations/frosts")) {
-  exec(`sed -i -- /\bsourcePath\b/d migrations/frosts/*.json`)
+  exec("sed -i -- /\bsourcePath\b/d migrations/frosts/*.json")
 }
 
 if (fs.existsSync("./migrations/frosts/apps")) {
-  exec(`sed -i -- /\bsourcePath\b/d migrations/frosts/apps/*.json`)
+  exec("sed -i -- /\bsourcePath\b/d migrations/frosts/apps/*.json")
 }

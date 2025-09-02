@@ -47,11 +47,11 @@ module.exports = {
       vanity: 260368098, // 0x000FF9f888B1415Da64cc985f775380a94b40000
     },
     WitOracleRadonRequestFactoryModals: {
-      baseDeps: [ "WitOracle" ],
+      baseDeps: ["WitOracle"],
       vanity: 2595673, // 0xff752C3722EA1A9533ba20794594F2e567ca64ff
     },
     WitOracleRadonRequestFactoryTemplates: {
-      baseDeps: [ "WitOracle" ],
+      baseDeps: ["WitOracle"],
       vanity: 4665235, // 0xFF93344228F706aFFf49A65Ac027A50A97a94eFF
     },
     WitPriceFeeds: {
@@ -66,7 +66,7 @@ module.exports = {
     },
     WitRandomnessV3: {
       vanity: 127210,
-    }
+    },
   },
   reef: {
     WitOracle: {

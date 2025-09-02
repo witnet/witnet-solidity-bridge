@@ -1,6 +1,6 @@
-require("hardhat-gas-reporter");
-require("@nomicfoundation/hardhat-ethers");
-require("@nomicfoundation/hardhat-toolbox");
+require("hardhat-gas-reporter")
+require("@nomicfoundation/hardhat-ethers")
+require("@nomicfoundation/hardhat-toolbox")
 require("@nomicfoundation/hardhat-verify")
 
 const settings = require("./settings")

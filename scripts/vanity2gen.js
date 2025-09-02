@@ -93,7 +93,7 @@ module.exports = async function () {
   }
 }
 
-function exit() {
+function exit () {
   console.info("Usage:\n")
   console.info("  --artifact => Truffle artifact name (mandatory)")
   console.info("  --hexArgs  => Hexified constructor arguments")

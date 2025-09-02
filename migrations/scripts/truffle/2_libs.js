@@ -17,22 +17,22 @@ module.exports = async function (_, network, [, from]) {
     const impl = networkArtifacts.libs[base]
     let libNetworkAddr = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
     if (
-      process.argv.includes("--artifacts") 
-      && process.argv.includes("--compile-none")
-      && !process.argv.includes("--upgrade-all") 
-      && !selection.includes(impl) 
-      && !selection.includes(base)
+      process.argv.includes("--artifacts") &&
+      process.argv.includes("--compile-none") &&
+      !process.argv.includes("--upgrade-all") &&
+      !selection.includes(impl) &&
+      !selection.includes(base)
     ) {
       utils.traceHeader(`Skipped '${impl}`)
       console.info(`   > library address:    \x1b[92m${libNetworkAddr}\x1b[0m`)
-      continue;
+      continue
     }
     const libImplArtifact = artifacts.require(impl)
     const libInitCode = libImplArtifact.toJSON().bytecode
     const libTargetAddr = await deployer.determineAddr.call(libInitCode, "0x0", { from })
     const libTargetCode = await web3.eth.getCode(libTargetAddr)
     if (
-      // lib implementation artifact is listed as --artifacts on CLI 
+      // lib implementation artifact is listed as --artifacts on CLI
       selection.includes(impl) || selection.includes(base) ||
       // or, no address found in addresses file, or no actual code deployed there
       (utils.isNullAddress(libNetworkAddr) || (await web3.eth.getCode(libNetworkAddr)).length < 3) ||

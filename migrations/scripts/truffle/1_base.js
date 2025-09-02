@@ -36,7 +36,6 @@ module.exports = async function (truffleDeployer, network, [,,, master]) {
     })
     addresses[network].WitnetDeployer = WitnetDeployer.address
     await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-  
   } else {
     WitnetDeployer.address = deployerAddr
     utils.traceHeader("Deployed 'WitnetDeployer'")

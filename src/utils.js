@@ -73,15 +73,15 @@ function getNetworkArtifactAddress (network, domain, addresses, artifact) {
 
 function getNetworkBaseImplArtifactAddresses (network, domain, addresses, base, exception) {
   const entries = []
-  const tags = [ "default", ...getNetworkTagsFromString(network)]
+  const tags = ["default", ...getNetworkTagsFromString(network)]
   for (const index in tags) {
     const network = tags[index]
     if (addresses[network] && addresses[network][domain]) {
       Object.keys(addresses[network][domain]).forEach(impl => {
         if (
-          (!exception || impl !== exception) && 
-          impl !== base && 
-          impl.indexOf(base) == 0 &&
+          (!exception || impl !== exception) &&
+          impl !== base &&
+          impl.indexOf(base) === 0 &&
           addresses[network][domain][impl] !== undefined &&
           !entries.map(entry => entry?.impl).includes(impl)
         ) {

@@ -571,7 +571,7 @@ module.exports = {
       apiKey: "MY_API_KEY",
       apiUrl: "https://worldchain-mainnet.explorer.alchemy.com/api",
       explorerUrl: "https://worldchain-mainnet.explorer.alchemy.com",
-    },    
+    },
   },
   "worldchain:sepolia": {
     port: 8501,
@@ -580,7 +580,7 @@ module.exports = {
       apiKey: "MY_API_KEY",
       apiUrl: "https://worldchain-sepolia.explorer.alchemy.com/api",
       explorerUrl: "https://worldchain-sepolia.explorer.alchemy.com",
-    },    
+    },
   },
   "zksync:sepolia": {
     port: 8499,
@@ -588,6 +588,6 @@ module.exports = {
     verify: {
       apiUrl: "https://sepolia-era.zksync.network/api",
       explorerUrl: "https://sepolia-era.zksync.network",
-    }
+    },
   },
 }

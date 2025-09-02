@@ -17,7 +17,6 @@ const WitnetProxy = artifacts.require("WitnetProxy")
 let witnetDeployer
 
 module.exports = async function (_, network, [, from, reporter1, curator, reporter2]) {
-  
   let addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   witnetDeployer = await WitnetDeployer.deployed()
 
@@ -27,8 +26,8 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
   // Settle the order in which (some of the) framework artifacts must be deployed first
   const framework = {
     core: merge(Object.keys(networkArtifacts.core), [
-      "WitOracleRadonRegistry", 
-      "WitOracle", 
+      "WitOracleRadonRegistry",
+      "WitOracle",
       "WitOracleRadonRequestFactoryModals",
       "WitOracleRadonRequestFactoryTemplates",
       "WitOracleRadonRequestFactory",
@@ -51,7 +50,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
   })
 
   // Loop on framework domains ...
-  const palette = [6, 4,]
+  const palette = [6, 4]
   for (const domain in framework) {
     const color = palette[Object.keys(framework).indexOf(domain)]
 
@@ -75,7 +74,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
       //    - ó, --<domain>` está especificado
       let targetBaseAddr = utils.getNetworkArtifactAddress(network, domain, addresses, base)
       if (
-        domain !== "core" && 
+        domain !== "core" &&
           !selection.includes(base) && !selection.includes(impl) && utils.isUpgradableArtifact(impl) &&
           (utils.isNullAddress(targetBaseAddr) || (await web3.eth.getCode(targetBaseAddr)).length < 3) &&
           !process.argv.includes(`--${domain}`)
@@ -93,16 +92,15 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
       const implArtifact = artifacts.require(impl)
 
       if (utils.isUpgradableArtifact(impl)) {
-
         if (
-          process.argv.includes("--artifacts") 
-          && process.argv.includes("--compile-none")
-          && !process.argv.includes("--upgrade-all")
-          && !selection.includes(base)          
+          process.argv.includes("--artifacts") &&
+          process.argv.includes("--compile-none") &&
+          !process.argv.includes("--upgrade-all") &&
+          !selection.includes(base)
         ) {
           utils.traceHeader(`Skipped '${base}'`)
           console.info("  ", `> contract address:   ${targetBaseAddr}`)
-            continue
+          continue
         }
 
         const targetSpecs = await unfoldTargetSpecs(domain, impl, base, from, network, networkArtifacts, networkSpecs)
@@ -110,28 +108,27 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
         const targetCode = await web3.eth.getCode(targetAddr)
         const targetVersion = getArtifactVersion(impl, targetSpecs.baseLibs, networkArtifacts)
 
+        let proxyImplAddr
         if (!utils.isNullAddress(targetBaseAddr) && (await web3.eth.getCode(targetBaseAddr)).length > 3) {
           // a proxy address with actual code is found in the addresses file...
           try {
-            proxyImplAddr = await getProxyImplementation(targetSpecs.from, targetBaseAddr)    
+            proxyImplAddr = await getProxyImplementation(targetSpecs.from, targetBaseAddr)
             if (
               proxyImplAddr === targetAddr ||
               utils.isNullAddress(proxyImplAddr) || selection.includes(base) || process.argv.includes("--upgrade-all")
             ) {
               implArtifact.address = targetAddr
-            
             } else {
               implArtifact.address = proxyImplAddr
             }
           } catch (ex) {
             panic(base, "Trying to upgrade non-upgradable artifact?", ex)
           }
-        
         } else {
           // no proxy address in file or no code in it...
           implArtifact.address = await deployTarget(network, impl, targetSpecs, networkArtifacts)
           if (implArtifact.address !== targetAddr) {
-            throw `wrong proxy implementation address: ${implArtifact.address} != ${targetAddr}`
+            throw new Error(`wrong proxy implementation address: ${implArtifact.address} != ${targetAddr}`)
           }
           targetBaseAddr = await deployCoreBase(targetSpecs, targetAddr)
           proxyImplAddr = implArtifact.address
@@ -150,17 +147,17 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
         // and whether an upgrade should be perform...
         const legacy = await implArtifact.at(proxyImplAddr)
         const legacyVersion = await legacy.version.call({ from: targetSpecs.from })
-        
-        let skipUpgrade = false, upgradeProxy = (
-          targetAddr !== proxyImplAddr 
-            && versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
-        );
+
+        let skipUpgrade = false; let upgradeProxy = (
+          targetAddr !== proxyImplAddr &&
+            versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
+        )
         if (upgradeProxy && !utils.isDryRun(impl)) {
           if (!selection.includes(base) && !process.argv.includes("--upgrade-all")) {
             if (versionLastCommitOf(targetVersion) === versionLastCommitOf(legacyVersion)) {
-              skipUpgrade = true;
+              skipUpgrade = true
             }
-            upgradeProxy = false;
+            upgradeProxy = false
           }
         }
         if (upgradeProxy) {
@@ -170,17 +167,16 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
           utils.traceHeader(`Upgrading '${base}'...`)
           await upgradeCoreBase(baseArtifact.address, targetSpecs, targetAddr)
           implArtifact.address = targetAddr
-        
         } else {
           utils.traceHeader(`Upgradable '${base}'`)
         }
         if (!upgradeProxy && targetVersion.slice(0, 4) !== legacyVersion.slice(0, 4)) {
-          console.info(`   > \x1b[30;43m MAJOR UPGRADE IS REQUIRED \x1b[0m`)
+          console.info("   > \x1b[30;43m MAJOR UPGRADE IS REQUIRED \x1b[0m")
         }
         if (
-          targetAddr !== implArtifact.address 
-          && versionTagOf(targetVersion) === versionTagOf(legacyVersion)
-          && versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
+          targetAddr !== implArtifact.address &&
+          versionTagOf(targetVersion) === versionTagOf(legacyVersion) &&
+          versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
         ) {
           console.info("  ", `> contract address:   \x1b[9${color}m${baseArtifact.address} \x1b[0m`)
           console.info("  ",
@@ -196,21 +192,21 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
         await traceDeployedContractInfo(await implArtifact.at(baseArtifact.address), from, targetVersion)
         if (!upgradeProxy) {
           if (skipUpgrade) {
-            console.info(`   > \x1b[91mPlease, commit your changes before upgrading!\x1b[0m`)  
-          
+            console.info("   > \x1b[91mPlease, commit your changes before upgrading!\x1b[0m")
           } else if (
-            selection.includes(base)
-            && versionCodehashOf(targetVersion) === versionCodehashOf(legacyVersion)
+            selection.includes(base) &&
+            versionCodehashOf(targetVersion) === versionCodehashOf(legacyVersion)
           ) {
-            console.info(`   > \x1b[91mSorry, nothing to upgrade.\x1b[0m`)
-          
+            console.info("   > \x1b[91mSorry, nothing to upgrade.\x1b[0m")
           } else if (
             versionLastCommitOf(targetVersion) !== versionLastCommitOf(legacyVersion) &&
             versionCodehashOf(targetVersion) !== versionCodehashOf(legacyVersion)
           ) {
             if (targetVersion.slice(0, 4) === legacyVersion.slice(0, 4) || process.argv.includes("--changelog")) {
               const changelog = require("child_process").execSync(
-                `git log ${versionLastCommitOf(legacyVersion)}.. --date=short --color --format="%C(yellow)%cd %C(bold)%s%C(dim)" -- contracts/`
+                `git log ${
+                  versionLastCommitOf(legacyVersion)
+                }.. --date=short --color --format="%C(yellow)%cd %C(bold)%s%C(dim)" -- contracts/`
               ).toString()
               const changes = changelog.split("\n").slice(0, -1)
               console.info(`   > contract changelog: ${changes[0]}\x1b[0m`)
@@ -220,50 +216,48 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
             }
             if (versionTagOf(targetVersion) === versionTagOf(legacyVersion)) {
               // both on same release tag
-              console.info(`   > \x1b[90mPlease, consider bumping up the package version.\x1b[0m`)
+              console.info("   > \x1b[90mPlease, consider bumping up the package version.\x1b[0m")
             }
           }
         }
         console.info()
-      
       } else {
-        
         // create an array of implementations, including the one set up for current base,
         // but also all others in this network addresses file that share the same base 
         // and have actual deployed code:
         const targets = [
-          ...utils.getNetworkBaseImplArtifactAddresses(network, domain, addresses, base) 
+          ...utils.getNetworkBaseImplArtifactAddresses(network, domain, addresses, base),
         ]
         for (const ix in targets) {
           const target = targets[ix]
 
           if (
-            process.argv.includes("--artifacts") 
-            && process.argv.includes("--compile-none") 
-            && !process.argv.includes("--upgrade-all") 
-            && !selection.includes(target.impl)
+            process.argv.includes("--artifacts") &&
+            process.argv.includes("--compile-none") &&
+            !process.argv.includes("--upgrade-all") &&
+            !selection.includes(target.impl)
           ) {
             utils.traceHeader(`Skipped '${target.impl}'`)
             console.info("  ", `> contract address:  ${target.addr}`)
-            continue;
+            continue
           }
-          
+
           let targetAddr = target.addr
           target.specs = await unfoldTargetSpecs(domain, impl, base, from, network, networkArtifacts, networkSpecs)
-          
+
           if (target.impl === impl) {
             targetAddr = await determineTargetAddr(impl, target.specs, networkArtifacts)
           }
-          
+
           if (
             (domain === "core" || selection.includes(target.impl)) &&
-            (/*target.impl === impl ||*/ utils.isNullAddress(target.addr) || (await web3.eth.getCode(target.addr)).length < 3)
+            (/* target.impl === impl || */ utils.isNullAddress(target.addr) || (await web3.eth.getCode(target.addr)).length < 3)
           ) {
             if (target.impl !== impl) {
               if (!fs.existsSync(`migrations/frosts/${domain}/${target.impl}.json`)) {
                 utils.traceHeader(`Legacy '${target.impl}'`)
                 console.info("  ", `> \x1b[91mMissing migrations/frosts/${domain}/${target.impl}.json\x1b[0m`)
-                continue;
+                continue
               } else {
                 fs.writeFileSync(
                   `build/contracts/${target.impl}.json`,
@@ -279,11 +273,11 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
             addresses = await settleArtifactAddress(addresses, network, domain, impl, target.addr)
           } else if ((utils.isNullAddress(target.addr) || (await web3.eth.getCode(target.addr)).length < 3)) {
             // skip targets for which no address or code is found
-            continue;
+            continue
           }
           utils.traceHeader(`${impl === target.impl ? `Immutable '${base}'` : `Legacy '${target.impl}'`}`)
           if (target.impl !== impl || target.addr === targetAddr) {
-            console.info("  ", 
+            console.info("  ",
               `> contract address:  \x1b[9${color}m`, target.addr, "\x1b[0m"
             )
           } else {
@@ -304,7 +298,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
   } // for domains
 }
 
-async function traceDeployedContractInfo(contract, from, targetVersion) {
+async function traceDeployedContractInfo (contract, from, targetVersion) {
   try {
     console.info("  ", "> contract oracle:   \x1b[96m", await contract.witOracle.call({ from }), "\x1b[0m")
   } catch {}
@@ -317,7 +311,13 @@ async function traceDeployedContractInfo(contract, from, targetVersion) {
     // if (versionTagOf(deployedVersion) !== versionTagOf(getArtifactVersion(impl))) {
     // if (deployedVersion !== targetVersion) {
     if (targetVersion && versionCodehashOf(deployedVersion) !== versionCodehashOf(targetVersion)) {
-      console.info("  ", `> contract version:   \x1b[1;39m${deployedVersion.slice(0, 5)}\x1b[0m${deployedVersion.slice(5)} !== \x1b[33m${targetVersion}\x1b[0m`)
+      console.info("  ", `> contract version:   \x1b[1;39m${
+        deployedVersion.slice(0, 5)
+      }\x1b[0m${
+        deployedVersion.slice(5)
+      } !== \x1b[33m${
+        targetVersion
+      }\x1b[0m`)
     } else {
       console.info("  ", `> contract version:   \x1b[1;39m${deployedVersion.slice(0, 5)}\x1b[0m${deployedVersion.slice(5)}`)
     }
@@ -375,7 +375,7 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
   const defrostAddr = await witnetDeployer.determineAddr.call(defrostInitCode, defrostSalt, { from: targetSpecs.from })
   if (defrostAddr !== targetAddr) {
     panic("Irreproducible address", `\x1b[91m${defrostAddr}\x1b[0m != \x1b[97m${targetAddr}\x1b[0m`)
-  } else {1
+  } else {
     const metadata = JSON.parse(artifact.metadata)
     console.info("  ", "> compiler:          ", metadata.compiler.version)
     console.info("  ", "> evm version:       ", metadata.settings.evmVersion.toUpperCase())
@@ -387,7 +387,7 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
     utils.traceHeader(`Deploying '${target}'...`)
     if (defrostConstructorArgs.length > 0) {
       console.info("  ", "> constructor types: \x1b[90m", JSON.stringify(targetSpecs.constructorArgs.types), "\x1b[0m")
-      utils.traceData("   > constructor values: ", defrostConstructorArgs, 64, "\x1b[90m")  
+      utils.traceData("   > constructor values: ", defrostConstructorArgs, 64, "\x1b[90m")
     }
     utils.traceTx(await witnetDeployer.deploy(defrostInitCode, defrostSalt, { from: targetSpecs.from }))
   } catch (ex) {
@@ -404,7 +404,7 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
   const targetAddr = await witnetDeployer.determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
   utils.traceHeader(`Deploying '${target}'...`)
   if (targetSpecs.isUpgradable && versionLastCommitOf(legacyVersion) && legacyVersion.slice(-7) === version.slice(-7)) {
-    console.info(   `   > \x1b[91mLatest changes were not previously committed into Github!\x1b[0m`)
+    console.info("   > \x1b[91mLatest changes were not previously committed into Github!\x1b[0m")
   }
   if (targetSpecs?.baseLibs && Array.isArray(targetSpecs.baseLibs)) {
     for (const index in targetSpecs.baseLibs) {
@@ -421,8 +421,8 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
   try {
     utils.traceTx(
       await witnetDeployer.deploy(
-        targetInitCode, 
-        targetSalt, 
+        targetInitCode,
+        targetSalt,
         { from: targetSpecs.from }
       )
     )
@@ -450,7 +450,10 @@ async function determineTargetAddr (target, targetSpecs, networkArtifacts) {
 
 async function determineProxyAddr (from, nonce) {
   const salt = nonce ? "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(nonce), 32).toString("hex") : "0x0"
-  return witnetDeployer.determineProxyAddr.call(salt, { from })
+  return witnetDeployer
+    .determineProxyAddr
+    .call(salt, { from })
+    .catch(err => console.error(err))
 }
 
 function encodeTargetConstructorArgs (targetSpecs) {
@@ -492,7 +495,7 @@ function linkBaseLibs (bytecode, baseLibs, networkArtifacts) {
   return bytecode
 }
 
-async function settleArtifactAddress(addresses, network, domain, artifact, addr) {
+async function settleArtifactAddress (addresses, network, domain, artifact, addr) {
   if (!addresses[network]) addresses[network] = {}
   if (!addresses[network][domain]) addresses[network][domain] = {}
   addresses[network][domain][artifact] = addr
@@ -586,12 +589,11 @@ async function unfoldTargetSpecs (domain, target, targetBase, from, network, net
   return specs
 }
 
-function getArtifactVersion(target, targetBaseLibs, networkArtifacts) {
+function getArtifactVersion (target, targetBaseLibs, networkArtifacts) {
   const bytecode = linkBaseLibs(artifacts.require(target).bytecode, targetBaseLibs, networkArtifacts)
-  return `${version}-${web3.utils.soliditySha3(bytecode).slice(2, 9)}`  
+  return `${version}-${web3.utils.soliditySha3(bytecode).slice(2, 9)}`
 }
 
-function versionTagOf(version) { return version.slice(0, 5) }
-function versionLastCommitOf(version) { return version?.length >= 21 ? version.slice(-15, -8) : "" }
-function versionCodehashOf(version) { return version?.length >= 20 ? version.slice(-7) : "" }
-
+function versionTagOf (version) { return version.slice(0, 5) }
+function versionLastCommitOf (version) { return version?.length >= 21 ? version.slice(-15, -8) : "" }
+function versionCodehashOf (version) { return version?.length >= 20 ? version.slice(-7) : "" }
