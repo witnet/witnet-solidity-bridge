@@ -50,12 +50,7 @@ contract WitRandomnessV3
         WitRandomness,
         IWitRandomnessAdmin
 {
-    // using Witnet for bytes;
-    // using Witnet for uint64;
     using Witnet for Witnet.DataResult;
-    // using Witnet for Witnet.QueryId;
-    // using Witnet for Witnet.QuerySLA;
-    // using Witnet for Witnet.ResultStatus;
 
     struct Randomize {
         uint64 queryId;
