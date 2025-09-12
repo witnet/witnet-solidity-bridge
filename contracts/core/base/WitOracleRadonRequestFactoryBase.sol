@@ -51,7 +51,7 @@ abstract contract WitOracleRadonRequestFactoryBase
     {
         bytes32 _commonRetrievalHash = __witOracleRadonRegistry.verifyRadonRetrieval(
             commonDataRequest.method,
-            "\\0\\",
+            "",
             commonDataRequest.body,
             commonDataRequest.headers,
             commonDataRequest.script

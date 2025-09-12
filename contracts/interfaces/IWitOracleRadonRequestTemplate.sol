@@ -6,11 +6,11 @@ import "../libs/Witnet.sol";
 
 interface IWitOracleRadonRequestTemplate {
 
+    function getArgsCount() external view returns (uint8[] memory);
     function getCrowdAttestationTally() external view returns (Witnet.RadonReducer memory);
     function getDataResultType() external view returns (Witnet.RadonDataTypes); 
     function getDataSources() external view returns (Witnet.RadonRetrieval[] memory);
     function getDataSourcesAggregator() external view returns (Witnet.RadonReducer memory);
-    function getDataSourcesArgsCount() external view returns (uint8[] memory);
     
     /// Verifies into the bounded WitOracle's registry the actual bytecode 
     /// and RAD hash of the Witnet-compliant Radon Request that gets provably 

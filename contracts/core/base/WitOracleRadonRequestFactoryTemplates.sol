@@ -149,6 +149,15 @@ abstract contract WitOracleRadonRequestFactoryTemplates
 
     /// ===============================================================================================================
     /// --- IWitOracleRadonRequestTemplate -------------------------------------------------------------------------------
+
+    function getArgsCount()
+        virtual override
+        external view
+        onlyDelegateCalls
+        returns (uint8[] memory)
+    {
+        return __storage.radonRetrieveArgsCount;
+    }
     
     function getCrowdAttestationTally()
         virtual override
@@ -193,15 +202,6 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         return __witOracleRadonRegistry.lookupRadonReducer(
             __storage.radonAggregateHash
         );
-    }
-
-    function getDataSourcesArgsCount()
-        virtual override
-        external view
-        onlyDelegateCalls
-        returns (uint8[] memory)
-    {
-        return __storage.radonRetrieveArgsCount;
     }
 
     function verifyRadonRequest(string[][] calldata args)

@@ -16,7 +16,6 @@ abstract contract WitOracleRadonRegistryData {
         address base;
         address owner;
         address pendingOwner;
-        
         Database db;
     }
 

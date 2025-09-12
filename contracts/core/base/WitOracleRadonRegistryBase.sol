@@ -277,9 +277,9 @@ abstract contract WitOracleRadonRegistryBase
     }
 
     function verifyRadonRequest(
-            bytes32 commonRetrieveHash,
-            string[] calldata commonRetrieveArgs,
-            string[] calldata dataProviders,
+            bytes32 modalRetrieveHash,
+            string[] calldata modalArgs,
+            string[] calldata modalUrls,
             bytes32 dataSourcesAggregatorHash,
             bytes32 crowdAttestationTallyHash
         )
@@ -287,35 +287,27 @@ abstract contract WitOracleRadonRegistryBase
         returns (Witnet.RadonHash _radHash)
     {
         bytes32 hash = keccak256(abi.encode(
-            commonRetrieveHash,
-            dataProviders,
-            commonRetrieveArgs,
+            modalRetrieveHash,
+            modalUrls,
+            modalArgs,
             dataSourcesAggregatorHash,
             crowdAttestationTallyHash
         ));
         _radHash = __database().rads[hash];
         if (__database().rads[hash].isZero()) {
-            Witnet.RadonRetrieval[] memory _retrievals = new Witnet.RadonRetrieval[](dataProviders.length);
-            for (uint _ix = 0; _ix < dataProviders.length; ++ _ix) {
+            Witnet.RadonRetrieval[] memory _retrievals = new Witnet.RadonRetrieval[](modalUrls.length);
+            for (uint _ix = 0; _ix < modalUrls.length; ++ _ix) {
                 if (_ix == 0) {
-                    _retrievals[0] = lookupRadonRetrieval(commonRetrieveHash);
-                    _require(
-                        _retrievals[0].method != Witnet.RadonRetrievalMethods.Unknown,
-                        "unknown retrieval"
-                    );
-                    _require(
-                        _retrievals[0].argsCount == commonRetrieveArgs.length + 1,
-                        "mismatching args count"
-                    );
+                    _retrievals[0] = lookupRadonRetrieval(modalRetrieveHash);
                 } else {
                     _retrievals[_ix] = _retrievals[0];
                 }
+                _retrievals[_ix].url = modalUrls[_ix];
             }
 
             // Compose radon request bytecode:
             bytes memory _radBytecode = _retrievals.encode(
-                dataProviders,
-                commonRetrieveArgs,
+                modalArgs,
                 __database().reducers[dataSourcesAggregatorHash].encode(),
                 __database().reducers[crowdAttestationTallyHash].encode()
             );
@@ -324,13 +316,14 @@ abstract contract WitOracleRadonRegistryBase
                 "too big request"
             );
             
-            // Compute radhash and add request metadata and rad bytecode to storage:
+            // Compute radhash 
             _radHash = _witOracleHash(_radBytecode);
             __database().rads[hash] = _radHash;
+            // Add request metadata and rad bytecode to storage:
             __database().radsBytecode[_radHash] = _radBytecode;
             __database().radsInfo[_radHash] = RadonRequestInfo({
                 crowdAttestationTallyHash: bytes15(crowdAttestationTallyHash),
-                dataSourcesCount: uint8(dataProviders.length),
+                dataSourcesCount: uint8(modalUrls.length),
                 dataSourcesAggregatorHash: bytes15(dataSourcesAggregatorHash),
                 resultDataType: _retrievals[0].dataType
             });

@@ -146,6 +146,18 @@ abstract contract WitOracleRadonRequestFactoryModals
         );
     }
 
+    function getDataSourceArgsCount(string calldata url)
+        virtual override
+        external view
+        onlyDelegateCalls
+        returns (uint8)
+    {
+        return _max(
+            WitnetBuffer.argsCountOf(abi.encode(url)),
+            __witOracleRadonRegistry.lookupRadonRetrievalArgsCount(__storage.radonRetrieveHash)
+        );
+    }
+
     function getDataSourcesAggregator() 
         virtual override
         external view
@@ -154,17 +166,6 @@ abstract contract WitOracleRadonRequestFactoryModals
     {
         return __witOracleRadonRegistry.lookupRadonReducer(
             __radonAggregateHash
-        );
-    }
-
-    function getDataSourcesArgsCount()
-        virtual override
-        external view
-        onlyDelegateCalls
-        returns (uint8)
-    {
-        return __witOracleRadonRegistry.lookupRadonRetrievalArgsCount(
-            __storage.radonRetrieveHash
         );
     }
 
@@ -180,18 +181,26 @@ abstract contract WitOracleRadonRequestFactoryModals
     }
 
     function verifyRadonRequest(
-            string[] calldata commonRetrievalArgs,
-            string[] calldata dataProviders
+            string[] calldata modalArgs,
+            string[] calldata modalUrls
         ) 
         virtual override
         external 
         onlyDelegateCalls
         returns (Witnet.RadonHash)
     {
+        bytes32 _retrieveHash = __storage.radonRetrieveHash;
+        uint8 _commonRetrieveArgsCount = __witOracleRadonRegistry.lookupRadonRetrievalArgsCount(__storage.radonRetrieveHash);
+        for (uint _ix; _ix < modalUrls.length; _ix ++) {
+            _require(
+                _max(WitnetBuffer.argsCountOf(abi.encode(modalUrls[_ix])), _commonRetrieveArgsCount) == modalArgs.length,
+                "mismatching args"
+            );
+        }
         return __witOracleRadonRegistry.verifyRadonRequest(
-            __storage.radonRetrieveHash,
-            commonRetrievalArgs,
-            dataProviders,
+            _retrieveHash,
+            modalArgs,
+            modalUrls,
             __radonAggregateHash,
             __storage.radonTallyHash
         );
@@ -215,5 +224,9 @@ abstract contract WitOracleRadonRequestFactoryModals
                 _crowdAttestationTally
             )
         );
+    }
+
+    function _max(uint8 a, uint8 b) internal pure returns (uint8) {
+        return (a >= b ? a : b);
     }
 }
