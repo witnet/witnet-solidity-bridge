@@ -6,7 +6,7 @@ import "../base/WitOracleRadonRequestFactoryModals.sol";
 
 /// @title Factory contract for building IWitOracleRadonRequestModal contracts as light-weight proxies.
 /// @author The Witnet Foundation
-contract WitOracleRadonRequestFactoryModalsV21
+contract WitOracleRadonRequestFactoryModalsDefault
     is 
         WitOracleRadonRequestFactoryModals
 {
@@ -14,7 +14,7 @@ contract WitOracleRadonRequestFactoryModalsV21
         return (
             initialized() 
                 ? type(IWitOracleRadonRequestModal).name  
-                : type(WitOracleRadonRequestFactoryModalsV21).name
+                : type(WitOracleRadonRequestFactoryModalsDefault).name
         );
     }
 
