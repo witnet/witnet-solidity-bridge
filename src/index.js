@@ -1,4 +1,5 @@
 const addresses = require("../migrations/addresses.json")
+const artifacts = require("../settings/artifacts")
 const constructorArgs = require("../migrations/constructorArgs.json")
 const merge = require("lodash.merge")
 const utils = require("./utils")
@@ -7,6 +8,13 @@ module.exports = {
     let res = addresses?.default
     utils.getNetworkTagsFromString(network).forEach(net => {
       res = merge(res, addresses[net])
+    })
+    return res
+  },
+  getNetworkArtifacts: (network) => {
+    let res = artifacts?.default
+    utils.getNetworkTagsFromString(network).forEach(net => {
+      res = merge(res, artifacts[net])
     })
     return res
   },
@@ -30,6 +38,8 @@ module.exports = {
   supportedNetworks,
   supportsNetwork,
   ABIs: {
+    WitAppliance:
+      require("../artifacts/contracts/interfaces/IWitAppliance.sol/IWitAppliance.json").abi,
     WitOracle:
       require("../artifacts/contracts/WitOracle.sol/WitOracle.json").abi,
     WitOracleConsumer:
@@ -66,16 +76,18 @@ function supportedNetworks (ecosystem) {
   return Object.fromEntries(
     Object.keys(constructorArgs)
       .sort()
-      .filter(network => network.indexOf(":") >= 0 && (!ecosystem || network.startsWith(ecosystem.toLowerCase())))
-      .map(network => [
-        network,
-        {
-          mainnet: networks[network]?.mainnet || false,
-          network_id: networks[network].network_id,
-          port: networks[network].port,
-          symbol: networks[network]?.symbol || "ETH",
-          verified: networks[network]?.verify?.explorerUrl,
-        },
-      ])
+      .filter(network => network.indexOf(":") >= 0 && (!ecosystem || network.startsWith(ecosystem.toLowerCase()))) 
+      .map(network => {
+        return [
+          network,
+          {
+            mainnet: networks[network]?.mainnet || false,
+            network_id: networks[network].network_id,
+            port: networks[network].port,
+            symbol: networks[network]?.symbol || "ETH",
+            verified: networks[network]?.verify?.explorerUrl,
+          },
+        ]
+      })
   )
 }
