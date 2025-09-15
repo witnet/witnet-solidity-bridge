@@ -253,7 +253,10 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
             (domain === "core" || selection.includes(target.impl)) &&
             (/* target.impl === impl || */ utils.isNullAddress(target.addr) || (await web3.eth.getCode(target.addr)).length < 3)
           ) {
-            if (target.impl !== impl) {
+            if (
+              target.impl !== impl
+                || fs.existsSync(`migrations/frosts/${domain}/${target.impl}.json`)
+            ) {
               if (!fs.existsSync(`migrations/frosts/${domain}/${target.impl}.json`)) {
                 utils.traceHeader(`Legacy '${target.impl}'`)
                 console.info("  ", `> \x1b[91mMissing migrations/frosts/${domain}/${target.impl}.json\x1b[0m`)
