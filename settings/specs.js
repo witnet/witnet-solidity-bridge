@@ -49,10 +49,14 @@ module.exports = {
     WitOracleRadonRequestFactoryModals: {
       baseDeps: ["WitOracle"],
     },
+    WitOracleRadonRequestFactoryModalsDefault: {
+      vanity: 143070, // 0xff7B32870b35259212bc103c79380E03786588ff
     },
     WitOracleRadonRequestFactoryTemplates: {
       baseDeps: ["WitOracle"],
-      vanity: 4665235, // 0xFF93344228F706aFFf49A65Ac027A50A97a94eFF
+    },
+    WitOracleRadonRequestFactoryTemplatesDefault: {
+      vanity: 538561, // 0xFF1f868D74d1b9A434C7bBf2abe470c8F153DDFF
     },
     WitPriceFeeds: {
       baseLibs: [
