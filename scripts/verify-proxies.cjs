@@ -31,13 +31,7 @@ for (const domain in framework) {
     const impl = framework[domain][base]
     if (utils.isUpgradableArtifact(impl)) {
       const addr = utils.getNetworkArtifactAddress(network, domain, addresses, base)
-      utils.traceVerify(network, `WitnetProxy@${addr} --custom-proxy WitnetProxy`)
-    }
-    const forceConstructorArgs = constructorArgs[network][impl]
-    if (forceConstructorArgs !== "") {
-      utils.traceVerify(network, `${impl} --forceConstructorArgs string:${forceConstructorArgs} --verifiers etherscan,sourcify`)
-    } else {
-      utils.traceVerify(network, `${impl} --verifiers etherscan,sourcify`)
+      utils.traceVerifyTruffle(network, `WitnetProxy@${addr} --custom-proxy WitnetProxy`)
     }
   }
 }

@@ -26,7 +26,8 @@ module.exports = {
   traceData,
   traceHeader,
   traceTx,
-  traceVerify,
+  traceVerifyHardhat,
+  traceVerifyTruffle,
 }
 
 function fromAscii (str) {
@@ -271,10 +272,20 @@ function traceTx (tx) {
   }
 }
 
-function traceVerify (network, verifyArgs) {
+function traceVerifyTruffle (network, verifyArgs) {
   console.info(
     execSync(
       `npx truffle run verify --config truffle-config.cjs --network ${network} ${verifyArgs} ${process.argv.slice(3)}`,
+      { stdout: "inherit" }
+    ).toString().split("\n")
+      .join("\n")
+  )
+}
+
+function traceVerifyHardhat (network, verifyArgs) {
+  console.info(
+    execSync(
+      `npx hardhat verify --network ${network} ${verifyArgs} ${process.argv.slice(3)}`,
       { stdout: "inherit" }
     ).toString().split("\n")
       .join("\n")

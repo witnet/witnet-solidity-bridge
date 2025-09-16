@@ -52,7 +52,9 @@
     "ops:drp:wrb": "npx truffle migrate --migrations_directory ./migrations/ops/drp/wrb --compile-none --network",
     "prepare": "npx truffle compile --all && npx hardhat compile --force && node ./scripts/prepare.cjs",
     "test": "npx truffle test",
-    "verify": "node ./scripts/verify.cjs 2>&1",
+    "verify": "npm run verify:hardhat && npm run verify:proxies",
+    "verify:hardhat": "npx hardhat run ./scripts/verify.js 2>&1",
+    "verify:proxies": "node ./scripts/verify-proxies.cjs 2>&1",
     "zksync:compile": "npx hardhat --config migrations/zksync/hardhat.config.js compile",
     "zksync:deploy": "npx hardhat --config migrations/zksync/hardhat.config.js deploy-zksync:contract --deployment-type create2 --verify --contract-name",
     "zksync:verify": "npx hardhat --config migrations/zksync/hardhat.config.js verify"
