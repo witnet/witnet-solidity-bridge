@@ -274,7 +274,7 @@ function traceTx (tx) {
 function traceVerify (network, verifyArgs) {
   console.info(
     execSync(
-      `npx truffle run verify --network ${network} ${verifyArgs} ${process.argv.slice(3)}`,
+      `npx truffle run verify --config truffle-config.cjs --network ${network} ${verifyArgs} ${process.argv.slice(3)}`,
       { stdout: "inherit" }
     ).toString().split("\n")
       .join("\n")

@@ -1,9 +1,10 @@
-const artifacts = require("./artifacts")
 const merge = require("lodash.merge")
-const networks = require("./networks")
-const specs = require("./specs")
-const solidity = require("./solidity")
-const utils = require("../src/utils")
+
+const artifacts = require("./artifacts.cjs")
+const networks = require("./networks.cjs")
+const specs = require("./specs.cjs")
+const solidity = require("./solidity.cjs")
+const utils = require("../src/utils.cjs")
 
 module.exports = {
   getArtifacts: (network) => {

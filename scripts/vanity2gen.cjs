@@ -1,8 +1,9 @@
-const create2 = require("./eth-create2")
 const fs = require("fs")
-const utils = require("../src/utils")
 
-const addresses = require("../migrations/addresses")
+const create2 = require("./eth-create2.cjs")
+const utils = require("../src/utils.cjs")
+
+const addresses = require("../migrations/addresses.json")
 const constructorArgs = require("../migrations/constructorArgs.json")
 
 module.exports = async function () {

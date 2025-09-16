@@ -430,13 +430,13 @@ module.exports = {
     },
   },
   "optimism:sepolia": {
+    chain_type: "op",
     port: 8503,
     network_id: 11155420,
     confirmations: 3,
     verify: {
-      apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
-      apiUrl: "https://api-sepolia-optimistic.etherscan.io/api",
-      explorerUrl: "https://sepolia-optimism.etherscan.io",
+      apiUrl: "https://api.etherscan.io/v2/api?chainid=111554200",
+      explorerUrl: "https://sepolia-optimism.etherscan.io/address",
     },
   },
   "optimism:mainnet": {

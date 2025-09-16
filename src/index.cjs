@@ -1,8 +1,8 @@
 const addresses = require("../migrations/addresses.json")
-const artifacts = require("../settings/artifacts")
+const artifacts = require("../settings/artifacts.cjs")
 const constructorArgs = require("../migrations/constructorArgs.json")
 const merge = require("lodash.merge")
-const utils = require("./utils")
+const utils = require("./utils.cjs")
 module.exports = {
   getNetworkAddresses: (network) => {
     let res = addresses?.default
@@ -63,7 +63,7 @@ module.exports = {
     WitnetUpgradableBase:
       require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json").abi,
   },
-  settings: require("../settings"),
+  settings: require("../settings/index.cjs"),
   utils,
 }
 
@@ -72,7 +72,7 @@ function supportsNetwork (network) {
 }
 
 function supportedNetworks (ecosystem) {
-  const networks = require("../settings/networks")
+  const networks = require("../settings/networks.cjs")
   return Object.fromEntries(
     Object.keys(constructorArgs)
       .sort()

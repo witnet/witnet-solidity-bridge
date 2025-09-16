@@ -1,8 +1,8 @@
 const ethUtils = require("ethereumjs-util")
 const fs = require("fs")
 const merge = require("lodash.merge")
-const settings = require("../../../settings")
-const utils = require("../../../src/utils")
+const settings = require("../../../settings/index.cjs")
+const utils = require("../../../src/utils.cjs")
 const version = `${
   require("../../../package").version
 }-${
@@ -104,7 +104,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
         }
 
         const targetSpecs = await unfoldTargetSpecs(domain, impl, base, from, network, networkArtifacts, networkSpecs)
-        const targetAddr = await determineTargetAddr(impl, targetSpecs, networkArtifacts)        
+        const targetAddr = await determineTargetAddr(impl, targetSpecs, networkArtifacts)
         const targetCode = await web3.eth.getCode(targetAddr)
         const targetVersion = getArtifactVersion(impl, targetSpecs.baseLibs, networkArtifacts)
 
@@ -143,7 +143,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
           implArtifact.link(libArtifact)
         };
 
-        // determine whether a new implementation is available and prepared for upgrade, 
+        // determine whether a new implementation is available and prepared for upgrade,
         // and whether an upgrade should be perform...
         const legacy = await implArtifact.at(proxyImplAddr)
         const legacyVersion = await legacy.version.call({ from: targetSpecs.from })
@@ -223,7 +223,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
         console.info()
       } else {
         // create an array of implementations, including the one set up for current base,
-        // but also all others in this network addresses file that share the same base 
+        // but also all others in this network addresses file that share the same base
         // and have actual deployed code:
         const targets = [
           ...utils.getNetworkBaseImplArtifactAddresses(network, domain, addresses, base),
@@ -271,7 +271,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
               }
             } else {
               target.addr = await deployTarget(network, impl, target.specs, networkArtifacts)
-            }            
+            }
             // settle immutable implementation address in addresses file
             addresses = await settleArtifactAddress(addresses, network, domain, impl, target.addr)
           } else if ((utils.isNullAddress(target.addr) || (await web3.eth.getCode(target.addr)).length < 3)) {
@@ -420,7 +420,7 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
     console.info("  ", "> constructor types: \x1b[90m", JSON.stringify(targetSpecs.constructorArgs.types), "\x1b[0m")
     utils.traceData("   > constructor values: ", targetConstructorArgs, 64, "\x1b[90m")
   }
-  console.info("  ", `> tx signer address:  ${targetSpecs.from}`)
+  // console.info("  ", `> tx signer address:  ${targetSpecs.from}`)
   try {
     utils.traceTx(
       await witnetDeployer.deploy(
@@ -438,7 +438,7 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
   return targetAddr
 }
 
-function panic(header, body, exception) {
+function panic (header, body, exception) {
   console.info("  ", `> \x1b[97;41m ${header} \x1b[0m ${body}`)
   if (exception) console.info(exception)
   console.info()

@@ -27,7 +27,7 @@ module.exports = {
   },
   "conflux:core": {
     WitnetDeployer: "WitnetDeployerConfluxCore",
-    core: {
+    core: { 
       WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore",
     },
   },
@@ -40,6 +40,11 @@ module.exports = {
   },
   optimism: {
     core: { WitOracle: "WitOracleTrustableOvm2" },
+  },
+  "optimism:sepolia": {
+    apps: {
+      WitPriceFeeds: "WitPriceFeedsV3",
+    },
   },
   "okx:x1": {
     core: { WitOracleRadonRegistry: "WitOracleRadonRegistryUpgradableNoSha256" },

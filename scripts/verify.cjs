@@ -2,8 +2,8 @@
 
 const addresses = require("../migrations/addresses.json")
 const constructorArgs = require("../migrations/constructorArgs.json")
-const settings = require("../settings")
-const utils = require("../src/utils")
+const settings = require("../settings/index.cjs")
+const utils = require("../src/utils.cjs")
 
 if (process.argv.length < 3) {
   console.error("\nUsage:\n\n$ node ./scripts/verify-core.js <ecosystem>:<network> ...OPTIONAL_ARGS\n")
@@ -34,7 +34,7 @@ for (const domain in framework) {
       utils.traceVerify(network, `WitnetProxy@${addr} --custom-proxy WitnetProxy`)
     }
     const forceConstructorArgs = constructorArgs[network][impl]
-    if (forceConstructorArgs) {
+    if (forceConstructorArgs !== "") {
       utils.traceVerify(network, `${impl} --forceConstructorArgs string:${forceConstructorArgs} --verifiers etherscan,sourcify`)
     } else {
       utils.traceVerify(network, `${impl} --verifiers etherscan,sourcify`)

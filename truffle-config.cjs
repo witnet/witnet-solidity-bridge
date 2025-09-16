@@ -1,5 +1,5 @@
-const settings = require("./settings")
-const utils = require("./src/utils")
+const settings = require("./settings/index.cjs")
+const utils = require("./src/utils.cjs")
 
 const { ecosystem, network } = utils.getRealmNetworkFromArgs()
 if (ecosystem) {
@@ -39,7 +39,7 @@ module.exports = {
     cronos: process.env.ETHERSCAN_CRONOS_API_KEY,
     cronoscan: process.env.ETHERSCAN_CRONOSCAN_API_KEY,
     elastos: process.env.ETHERSCAN_ELASTOS_API_KEY,
-    etherscan: process.env.ETHERSCAN_API_KEY,
+    etherscan: process.env.ETHERSCAN_API_KEY_V2,
     kcc: process.env.ETHERSCAN_KCC_API_KEY,
     mantle: process.env.ETHERSCAN_MANTLE_API_KEY,
     moonscan: process.env.ETHERSCAN_MOONBEAM_API_KEY,
