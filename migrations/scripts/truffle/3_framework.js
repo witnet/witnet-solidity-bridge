@@ -167,6 +167,9 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
           utils.traceHeader(`Upgrading '${base}'...`)
           await upgradeCoreBase(baseArtifact.address, targetSpecs, targetAddr)
           implArtifact.address = targetAddr
+          // settle new implementation address in addresses file
+          addresses = await settleArtifactAddress(addresses, network, domain, impl, targetAddr)
+
         } else {
           utils.traceHeader(`Upgradable '${base}'`)
         }
