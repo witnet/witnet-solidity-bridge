@@ -8,9 +8,9 @@ interface IWitPythErrors {
     /// @dev Signature: 0x7b0d2bb5
     error DeviantPrice();
 
-    // /// @notice Attempting to update a price before cooldown period expires.
-    // /// @dev Signature: 0x0fbbc581
-    // error HotPrice();
+    /// @notice Attempting to update a price before cooldown period expires.
+    /// @dev Signature: 0x0fbbc581
+    error HotPrice();
 
     /// @notice Function arguments are invalid (e.g., the arguments lengths mismatch)
     /// @dev Signature: 0xa9cb9e0d

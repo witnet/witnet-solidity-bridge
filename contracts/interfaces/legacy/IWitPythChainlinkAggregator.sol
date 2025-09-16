@@ -7,4 +7,5 @@ import "./IPythChainlinkAggregatorV3.sol";
 interface IWitPythChainlinkAggregator is IPythChainlinkAggregatorV3 {
     function id4() external view returns (bytes4);
     function symbol() external view returns (string memory);
+    function witOracle() external view returns (address);
 }

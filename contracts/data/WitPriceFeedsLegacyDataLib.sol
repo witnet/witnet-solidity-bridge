@@ -373,7 +373,7 @@ library WitPriceFeedsLegacyDataLib {
             bytes calldata initcode,
             bytes calldata constructorParams
         )
-        external
+        public
         returns (address _solver)
     {
         _solver = determinePriceSolverAddress(initcode, constructorParams);
