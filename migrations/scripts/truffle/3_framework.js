@@ -372,7 +372,7 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
     panic("Frosted libs not yet supported")
   }
   const constructorArgs = await utils.readJsonFromFile("./migrations/constructorArgs.json")
-  const defrostConstructorArgs = constructorArgs[network][target] || constructorArgs.default[target] || ""
+  const defrostConstructorArgs = encodeTargetConstructorArgs(constructorArgs[network][target] || constructorArgs.default[target] || {})
   const defrostInitCode = defrostCode + defrostConstructorArgs
   const defrostSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
   const defrostAddr = await witnetDeployer.determineAddr.call(defrostInitCode, defrostSalt, { from: targetSpecs.from })
@@ -402,7 +402,7 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
 async function deployTarget (network, target, targetSpecs, networkArtifacts, legacyVersion) {
   const constructorArgs = await utils.readJsonFromFile("./migrations/constructorArgs.json")
   const targetInitCode = encodeTargetInitCode(target, targetSpecs, networkArtifacts)
-  const targetConstructorArgs = encodeTargetConstructorArgs(targetSpecs).slice(2)
+  const targetConstructorArgs = encodeTargetConstructorArgs(targetSpecs.constructorArgs)
   const targetSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
   const targetAddr = await witnetDeployer.determineAddr.call(targetInitCode, targetSalt, { from: targetSpecs.from })
   utils.traceHeader(`Deploying '${target}'...`)
@@ -432,9 +432,12 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
   } catch (ex) {
     panic("Deployment failed", `Expected address: ${targetAddr}`)
   }
-  if (!constructorArgs[network]) constructorArgs[network] = {}
-  constructorArgs[network][target] = targetConstructorArgs
-  await utils.overwriteJsonFile("./migrations/constructorArgs.json", constructorArgs)
+  
+  if (JSON.stringify(targetSpecs.constructorArgs) !== constructorArgs?.default[target]) {
+    if (!constructorArgs[network]) constructorArgs[network] = {}
+    constructorArgs[network][target] = JSON.stringify(targetSpecs.constructorArgs)// targetConstructorArgs
+    await utils.overwriteJsonFile("./migrations/constructorArgs.json", constructorArgs)
+  }
   return targetAddr
 }
 
@@ -459,8 +462,12 @@ async function determineProxyAddr (from, nonce) {
     .catch(err => console.error(err))
 }
 
-function encodeTargetConstructorArgs (targetSpecs) {
-  return web3.eth.abi.encodeParameters(targetSpecs.constructorArgs.types, targetSpecs.constructorArgs.values)
+function encodeTargetConstructorArgs (constructorArgs) {
+  return (
+    constructorArgs?.types && constructorArgs?.values
+      ? web3.eth.abi.encodeParameters(constructorArgs.types, constructorArgs.values).slice(2)
+      : ""
+  )
 }
 
 function encodeTargetInitCode (target, targetSpecs, networkArtifacts) {
@@ -477,8 +484,8 @@ function encodeTargetInitCode (target, targetSpecs, networkArtifacts) {
   if (targetCode.indexOf("__") > -1) {
     panic(target, `Missing library: ${targetCode.substring(targetCode.indexOf("__"), 42)}`)
   }
-  const targetConstructorArgsEncoded = encodeTargetConstructorArgs(targetSpecs)
-  return targetCode + targetConstructorArgsEncoded.slice(2)
+  const targetConstructorArgsEncoded = encodeTargetConstructorArgs(targetSpecs.constructorArgs)
+  return targetCode + targetConstructorArgsEncoded
 }
 
 async function getProxyImplementation (from, proxyAddr) {
