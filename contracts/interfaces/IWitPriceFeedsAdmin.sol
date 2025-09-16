@@ -23,18 +23,17 @@ interface IWitPriceFeedsAdmin {
     
     event PriceFeedRemoved(address indexed from, IWitPriceFeeds.ID4 id4, string symbol);
 
-    struct WitParams {
-        uint16 maxWitCommitteeSize;
-        uint16 minWitCommitteeSize;
-    }
+    event PriceFeedSettled(
+        address indexed from, IWitPriceFeeds.ID4 id4, string symbol,
+        IWitPriceFeeds.UpdateConditions conditions
+    );
     
     function removePriceFeed(string calldata, bool) external returns (bytes4);
+    function settleConsumer(address) external;
     function settleDefaultUpdateConditions(IWitPriceFeeds.UpdateConditions calldata) external;
     function settlePriceFeedMapper(string calldata, int8, IWitPriceFeeds.Mappers, string[] calldata) external returns (bytes4);
     function settlePriceFeedOracle(string calldata, int8, IWitPriceFeeds.Oracles, address, bytes32) external returns (bytes4);
     function settlePriceFeedRadonBytecode(string calldata, int8, bytes calldata) external returns (bytes4);
     function settlePriceFeedRadonHash(string calldata, int8, Witnet.RadonHash) external returns (bytes4);
     function settlePriceFeedUpdateConditions(string calldata, IWitPriceFeeds.UpdateConditions calldata) external;
-    function settleWitOracleRequiredParams(WitParams calldata) external;
-    function witOracleRequiredParams() external view returns (WitParams memory);
 }

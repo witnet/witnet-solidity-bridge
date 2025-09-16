@@ -31,8 +31,8 @@ library WitPriceFeedsDataLib {
     using WitPriceFeedsDataLib for PriceFeed;
     
     bytes32 private constant _WIT_FEEDS_DATA_SLOTHASH =
-        /* keccak256("io.witnet.feeds.data") */
-        0xe36ea87c48340f2c23c9e1c9f72f5c5165184e75683a4d2a19148e5964c1d1ff;
+        /* keccak256("io.witnet.feeds.data.v3") & ~bytes32(uint256(0xff) */
+        0xc5354469a5d32189a18f5e79f9508d828fa089087c317bc89792b1c8dba53900;
 
     struct Storage {
         IWitPyth.ID[] ids;
@@ -40,35 +40,37 @@ library WitPriceFeedsDataLib {
         mapping (IWitPriceFeeds.ID4 => IWitPriceFeeds.ID4[]) reverseDeps;
         mapping (Witnet.RadonHash => IWitPriceFeeds.ID4) reverseIds;
         IWitPriceFeeds.UpdateConditions defaultUpdateConditions;
-        IWitPriceFeedsAdmin.WitParams requiredWitParams;
+        address consumer;
         bytes4  footprint;
-        bytes28 _0;
     }
 
     struct PriceData {
         /// @dev Exponentially moving average proportional to actual time since previous update.
         uint64 emaPrice;
         
-        /// @dev Price attested on the Wit/Oracle blockchain.
+        /// @dev Price attested on the Witnet blockchain.
         uint64 price;
         
         /// @dev How much the price varied since previous update.
-        int56  deltaPrice;
+        int56 deltaPrice;
         
         /// @dev Base-10 exponent to compute actual price.
-        int8   exponent;
+        int8 exponent;
 
-        /// @dev Timestamp at which the price was attested on the Wit/Oracle blockchain.
+        /// @dev Timestamp at which the price was attested on the Witnet blockchain.
         Witnet.Timestamp timestamp;
+
+        /// @dev Auditory trail: price witnessing act on the Witnet blockchain.
+        Witnet.TransactionHash trail;
     }
 
-    struct Price {
-        /// @dev Price data point to be read is just one single SLOAD.
-        PriceData data;
+    // struct Price {
+    //     /// @dev Price data point to be read is just one single SLOAD.
+    //     PriceData data;
         
-        /// @dev Auditory track: attestation transaction hash on the Wit/Oracle blockchain.
-        Witnet.TransactionHash track;
-    }
+    //     /// @dev Auditory trail: price witnessing act on the Witnet blockchain.
+    //     Witnet.TransactionHash trail;
+    // }
 
     struct PriceFeed {
         /// @dev Human-readable symbol for this price feed.
@@ -104,68 +106,62 @@ library WitPriceFeedsDataLib {
         IWitPriceFeeds.UpdateConditions updateConditions;
 
         /// @dev Last valid update data retrieved from the Wit/Oracle, if any.
-        Price lastWitUpdate;
-    }
-
-    struct WitParams {
-        uint16 minWitCommitteeSize;
-        uint16 maxWitCommitteeSize;
+        PriceData lastUpdate;
     }
 
 
     // ================================================================================================================
     // --- Public methods ---------------------------------------------------------------------------------------------
 
-    function fetchLastUpdate(
-            PriceFeed storage self, 
-            IWitPriceFeeds.ID4 id4,
-            bool ema,
-            bool fetchLastTrack,
-            uint24 heartbeatSecs
-        )
+    function fetchLastUpdate(PriceFeed storage self, IWitPriceFeeds.ID4 id4, uint24 heartbeat)
         public view 
-        returns (
-            PriceData memory _lastUpdateData,
-            Witnet.TransactionHash _lastUpdateTrack
-        )
+        returns (PriceData memory _lastUpdate)
     {
         IWitPriceFeeds.Mappers _mapper = self.mapper;
         if (_mapper == IWitPriceFeeds.Mappers.None) {
             
             IWitPriceFeeds.Oracles _oracle = self.oracle;
             if (_oracle == IWitPriceFeeds.Oracles.Witnet) {
-                require(
-                    self.oracleSources != bytes32(0), 
-                    IWitPythErrors.PriceFeedNotFound()
-                );
-                _lastUpdateData = self.lastWitUpdate.data;
-                if (fetchLastTrack) _lastUpdateTrack = self.lastWitUpdate.track;
+                if (self.oracleAddress == address(0) || self.oracleAddress == address(this)) {
+                    return self.lastUpdate;
+                
+                } else {
+                    return (
+                        self.updateConditions.computeEma
+                            ? _intoEmaPriceData(IWitPriceFeeds(self.oracleAddress).getPriceNotOlderThan(
+                                IWitPriceFeeds.ID4.wrap(bytes4(self.oracleSources)), 
+                                heartbeat
+                            ))
+                            : _intoPriceData(IWitPriceFeeds(self.oracleAddress).getPriceNotOlderThan(
+                                IWitPriceFeeds.ID4.wrap(bytes4(self.oracleSources)), 
+                                heartbeat
+                            ))
+                    );
+                }
 
             } else if (_oracle == IWitPriceFeeds.Oracles.ERC2362) {
-                require(!ema, "no EMA on ERC2362's");
                 (int _value, uint _timestamp,) = IERC2362(self.oracleAddress).valueFor(self.oracleSources);
-                _lastUpdateData.price = uint64(int64(_value));
-                _lastUpdateData.timestamp = Witnet.Timestamp.wrap(uint64(_timestamp));
-                _lastUpdateData.exponent = self.exponent;
+                _lastUpdate.price = uint64(int64(_value));
+                _lastUpdate.timestamp = Witnet.Timestamp.wrap(uint64(_timestamp));
+                _lastUpdate.exponent = self.exponent;
 
             } else if (_oracle == IWitPriceFeeds.Oracles.Chainlink) {
-                require(!ema, "no EMA on Chainlink's");
                 (uint80 _timestamp, int _value,,,) = IChainlinkAggregatorV3(self.oracleAddress).latestRoundData();
-                _lastUpdateData.price = uint64(int64(_value));
-                _lastUpdateData.timestamp = Witnet.Timestamp.wrap(uint64(_timestamp));
-                _lastUpdateData.exponent = self.exponent;
+                _lastUpdate.price = uint64(int64(_value));
+                _lastUpdate.timestamp = Witnet.Timestamp.wrap(uint64(_timestamp));
+                _lastUpdate.exponent = self.exponent;
             
             } else if (_oracle == IWitPriceFeeds.Oracles.Pyth) {
-                IWitPyth.Price memory _price;
-                if (ema) {
+                IWitPyth.PythPrice memory _price;
+                if (self.updateConditions.computeEma) {
                     _price = IWitPyth(self.oracleAddress).getEmaPriceUnsafe(IWitPyth.ID.wrap(self.oracleSources));
+                    _lastUpdate.emaPrice = uint64(_price.price);
                 } else {
                     _price = IWitPyth(self.oracleAddress).getPriceUnsafe(IWitPyth.ID.wrap(self.oracleSources));
+                    _lastUpdate.price = uint64(_price.price);
                 }
-                _lastUpdateData.price = _price.price;
-                _lastUpdateData.deltaPrice = int56(uint56((_price.price * _price.conf) / 1000));
-                _lastUpdateData.timestamp = _price.publishTime;
-                _lastUpdateData.exponent = int8(_price.expo);
+                _lastUpdate.timestamp = Witnet.Timestamp.wrap(uint64(_price.publishTime));
+                _lastUpdate.exponent = int8(_price.expo);
 
             } else {
                 revert("unsupported oracle");
@@ -173,13 +169,13 @@ library WitPriceFeedsDataLib {
         
         } else {    
             if (_mapper == IWitPriceFeeds.Mappers.Product) {
-                _lastUpdateData = fetchLastUpdateFromProduct(id4, ema, heartbeatSecs, self.exponent);
+                return fetchLastUpdateFromProduct(id4, heartbeat, self.exponent);
 
             } else if (_mapper == IWitPriceFeeds.Mappers.Hottest) {
-                return fetchLastUpdateFromHottest(id4, ema, heartbeatSecs, fetchLastTrack);
+                return fetchLastUpdateFromHottest(id4, heartbeat);
             
             } else if (_mapper == IWitPriceFeeds.Mappers.Fallback) {
-                return fetchLastUpdateFromFallback(id4, ema, heartbeatSecs, fetchLastTrack);
+                return fetchLastUpdateFromFallback(id4, heartbeat);
             
             } else {
                 revert("unsupported mapper");
@@ -187,226 +183,80 @@ library WitPriceFeedsDataLib {
         }
     }
 
-    function getPrice(
-            IWitPriceFeeds.ID4 id4, 
-            bool ema
-        )
+    function getPrice(IWitPriceFeeds.ID4 id4)
         public view 
-        returns (IWitPyth.Price memory)
+        returns (IWitPriceFeeds.Price memory)
     {
         PriceFeed storage __record = seekPriceFeed(id4);
-        IWitPriceFeeds.UpdateConditions memory _updateConditions = coalesce(__record.updateConditions);
-        (PriceData memory _lastUpdate, Witnet.TransactionHash _lastUpdateTrack) = fetchLastUpdate(
-                __record,
-                id4, 
-                ema,
-                true,
-                _updateConditions.heartbeatSecs
-            );
+        IWitPriceFeeds.UpdateConditions memory _conditions = coalesce(__record.updateConditions);
+
+        PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, _conditions.heartbeatSecs);
         
-        if (!_lastUpdate.timestamp.isZero()) {
-            if (_updateConditions.maxDeviation1000 > 0) {
-                require(
-                    _computeDeviation1000(_lastUpdate.price, _lastUpdate.deltaPrice)
-                        <= _updateConditions.maxDeviation1000,
-                    IWitPythErrors.DeviantPrice()
-                );
-            }
-            if (
-                _updateConditions.heartbeatSecs == 0 
-                    || block.timestamp < Witnet.Timestamp.unwrap(_lastUpdate.timestamp) + _updateConditions.heartbeatSecs
-            ) {
-                if (!ema || _updateConditions.computeEma) {
-                    return IWitPyth.Price({
-                        price: ema ? _lastUpdate.emaPrice : _lastUpdate.price,
-                        conf: uint64(
-                            _lastUpdate.deltaPrice >= 0 
-                                ? int64(_lastUpdate.deltaPrice) 
-                                : int64(-_lastUpdate.deltaPrice)
-                        ),
-                        expo: _lastUpdate.exponent,
-                        publishTime: _lastUpdate.timestamp,
-                        track: _lastUpdateTrack
-                    });
-                } else {
-                    revert IWitPythErrors.InvalidGovernanceTarget();
-                }
-            } else {
-                revert IWitPythErrors.StalePrice();
-            }
-        
-        } else {
-            revert IWitPythErrors.NoFreshUpdate();
-        }
-    }
-
-    function getPriceNotOlderThan(IWitPriceFeeds.ID4 id4, bool ema, uint24 age)
-        public view 
-        returns (IWitPyth.Price memory)
-    {
-        (PriceData memory _lastUpdate, Witnet.TransactionHash _lastUpdateTrack) = fetchLastUpdate(
-            seekPriceFeed(id4),
-            id4, 
-            ema,
-            true,
-            age
-        );
-        
-        if (!_lastUpdate.timestamp.isZero()) {
-            if (
-                block.timestamp < Witnet.Timestamp.unwrap(_lastUpdate.timestamp) + age
-            ) {
-                return IWitPyth.Price({
-                    price: ema ? _lastUpdate.emaPrice : _lastUpdate.price,
-                    conf: uint64(
-                        _lastUpdate.deltaPrice >= 0 
-                            ? int64(_lastUpdate.deltaPrice) 
-                            : int64(-_lastUpdate.deltaPrice)
-                    ),
-                    expo: _lastUpdate.exponent,
-                    publishTime: _lastUpdate.timestamp,
-                    track: _lastUpdateTrack
-                });
-            } else {
-                revert IWitPythErrors.StalePrice();
-            }
-
-        } else {
-            revert IWitPythErrors.NoFreshUpdate();
-        }
-    }
-
-    function getPriceUnsafe(IWitPriceFeeds.ID4 id4, bool ema)
-        public view 
-        returns (IWitPyth.Price memory)
-    {
-        (PriceData memory _lastUpdate, Witnet.TransactionHash _lastUpdateTrack) = fetchLastUpdate(
-            seekPriceFeed(id4),
-            id4, 
-            ema,
-            true,
-            0
-        );
-        
-        if (!_lastUpdate.timestamp.isZero()) {
-            return IWitPyth.Price({
-                price: ema ? _lastUpdate.emaPrice : _lastUpdate.price,
-                conf: uint64(
-                    _lastUpdate.deltaPrice >= 0 
-                        ? int64(_lastUpdate.deltaPrice) 
-                        : int64(-_lastUpdate.deltaPrice)
-                ),
-                expo: _lastUpdate.exponent,
-                publishTime: _lastUpdate.timestamp,
-                track: _lastUpdateTrack
-            });
-
-        } else {
-            revert IWitPythErrors.NoFreshUpdate();
-        }
-    }
-
-    function parsePriceFeedUpdates(
-            IWitOracle witOracle,
-            bytes[] calldata updates,
-            IWitPyth.ID[] calldata ids,
-            Witnet.Timestamp minTimestamp,
-            Witnet.Timestamp maxTimestamp,
-            bool checkUniqueness
-        )
-        public view
-        returns (IWitPyth.PriceFeed[] memory _priceFeeds)
-    {
-        _priceFeeds = new IWitPyth.PriceFeed[](ids.length);
-        unchecked {
-            IWitPriceFeedsAdmin.WitParams memory _required = data().requiredWitParams;
-            for (uint _ix = 0; _ix < updates.length; _ix ++) {
-                // deserialize actual data push report and authenticity proof:
-                (Witnet.DataPushReport memory _report, bytes memory _proof) = abi.decode(
-                    updates[_ix], 
-                    (Witnet.DataPushReport, bytes)
-                );
-
-                // check that governance target rules are met:
-                require(
-                    _report.queryParams.witCommitteeSize >= _required.minWitCommitteeSize
-                        && (
-                            _required.maxWitCommitteeSize == 0
-                                || _report.queryParams.witCommitteeSize <= _required.maxWitCommitteeSize
-                        ),
-                    IWitPythErrors.InvalidGovernanceTarget()
-                );
-
-                // revert if any of the allegedly fresh update refers a radonHash 
-                // that's not actually settled on any of the supported price-feeds:
-                IWitPriceFeeds.ID4 _priceId = data().reverseIds[_report.queryRadHash];
-                require(
-                    IWitPriceFeeds.ID4.unwrap(_priceId) != 0, 
-                    IWitPythErrors.InvalidUpdateDataSource()
-                );
-
-                // revert if order of provided `updates` does not match the order of `ids`
-                require(
-                    IWitPriceFeeds.ID4.unwrap(_priceId) == bytes4(IWitPyth.ID.unwrap(ids[_ix])),
-                    IWitPythErrors.InvalidArgument()
-                );
-
-                // parse and validate autheticity of every update report:
-                Witnet.DataResult memory _data = witOracle.parseDataReport(_report, _proof);
-
-                // determine whether to add update report into output array:
-                PriceFeed storage __record = seekPriceFeed(_priceId);
-                PriceData memory _prevData = __record.lastWitUpdate.data;
-                if (
-                    _data.timestamp.egt(minTimestamp)
-                        && _data.timestamp.elt(maxTimestamp)
-                        && (!checkUniqueness || minTimestamp.gt(_prevData.timestamp))
-                ) {
-                    _priceFeeds[_ix] = _intoWitPythPriceFeed(
-                        _intoWitPythID(_priceId),
-                        _data, 
-                        _prevData,
-                        IWitPriceFeeds.UpdateConditions({
-                            computeEma: true,
-                            cooldownSecs: 0,
-                            heartbeatSecs: 0,
-                            maxDeviation1000: 0
-                        })
-                    );
-                }
-            }
-            // revert in case there was at least one price with no actual update within given range:
-            for (uint _ix = 0; _ix < _priceFeeds.length; _ix ++) {
-                require(
-                    IWitPyth.ID.unwrap(_priceFeeds[_ix].id) != bytes32(0), 
-                    IWitPythErrors.PriceFeedNotFoundWithinRange()
-                );
-            }
-        }
-    }
-
-    function updatePriceFeed(
-            IWitOracle witOracle, 
-            IWitPriceFeeds.UpdateConditions memory defaultUpdateConditions,
-            Witnet.DataPushReport calldata report, 
-            bytes calldata proof
-        )
-        public
-    {
-        // revert if any of the allegedly fresh update refers a radonHash 
-        // that's not actually settled on any of the supported price-feeds:
-        IWitPriceFeeds.ID4 _id4 = data().reverseIds[report.queryRadHash];
         require(
-            IWitPriceFeeds.ID4.unwrap(_id4) != 0, 
-            IWitPythErrors.InvalidUpdateDataSource()
+            !_lastUpdate.timestamp.isZero(), 
+            IWitPythErrors.PriceFeedNotFound()
+        );
+        
+        require(
+            _conditions.heartbeatSecs == 0
+                || block.timestamp <= Witnet.Timestamp.unwrap(_lastUpdate.timestamp) + _conditions.heartbeatSecs,
+            IWitPythErrors.StalePrice()
         );
 
-        // roll-up wit/oracle proof and deserialize price update data,
-        // as long as the update report is proven to be authentic:
-        Witnet.DataResult memory _result = witOracle.pushDataReport(report, proof);
+        return IWitPriceFeeds.Price({
+            exponent: _lastUpdate.exponent,
+            deltaPrice: _lastUpdate.deltaPrice,
+            price: _lastUpdate.emaPrice > 0 ? _lastUpdate.emaPrice : _lastUpdate.price,
+            timestamp: _lastUpdate.timestamp,
+            trail: _lastUpdate.trail
+        });
+    }
 
-        // process price update:
-        return pushDataResult(_result, defaultUpdateConditions, _id4);
+    function getPriceNotOlderThan(IWitPriceFeeds.ID4 id4, uint24 age)
+        public view 
+        returns (IWitPriceFeeds.Price memory)
+    {
+        PriceFeed storage __record = seekPriceFeed(id4);
+        PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, age);
+
+        require(
+            !_lastUpdate.timestamp.isZero(), 
+            IWitPythErrors.PriceFeedNotFound()
+        );
+
+        require(
+            block.timestamp <= Witnet.Timestamp.unwrap(_lastUpdate.timestamp) + age,
+            IWitPythErrors.StalePrice()
+        );
+
+        return IWitPriceFeeds.Price({
+            exponent: _lastUpdate.exponent,
+            deltaPrice: _lastUpdate.deltaPrice,
+            price: _lastUpdate.emaPrice > 0 ? _lastUpdate.emaPrice : _lastUpdate.price,
+            timestamp: _lastUpdate.timestamp,
+            trail: _lastUpdate.trail
+        });
+    }
+
+    function getPriceUnsafe(IWitPriceFeeds.ID4 id4)
+        public view 
+        returns (IWitPriceFeeds.Price memory)
+    {
+        PriceFeed storage __record = seekPriceFeed(id4);
+        PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, 0);
+
+        require(
+            !_lastUpdate.timestamp.isZero(), 
+            IWitPythErrors.PriceFeedNotFound()
+        );
+
+        return IWitPriceFeeds.Price({
+            exponent: _lastUpdate.exponent,
+            deltaPrice: _lastUpdate.deltaPrice,
+            price: _lastUpdate.emaPrice > 0 ? _lastUpdate.emaPrice : _lastUpdate.price,
+            timestamp: _lastUpdate.timestamp,
+            trail: _lastUpdate.trail
+        });
     }
 
     
@@ -449,7 +299,7 @@ library WitPriceFeedsDataLib {
             self.oracleSources = bytes32(0);
         }
         delete self.updateConditions;
-        delete self.lastWitUpdate;
+        delete self.lastUpdate;
     }
 
     function settlePriceFeedFootprint() public returns (bytes4 _footprint) {
@@ -502,8 +352,8 @@ library WitPriceFeedsDataLib {
         returns (bytes4)
     {
         require(
-            uint8(oracle) > uint8(IWitPriceFeeds.Oracles.Witnet)
-                && uint8(oracle) < uint8(IWitPriceFeeds.Oracles.Pyth), 
+            uint8(oracle) >= uint8(IWitPriceFeeds.Oracles.Witnet)
+                && uint8(oracle) <= uint8(IWitPriceFeeds.Oracles.Pyth), 
             "invalid oracle"
         );
         IWitPriceFeeds.ID4 id4 = _settlePriceFeedSymbol(symbol);
@@ -532,7 +382,12 @@ library WitPriceFeedsDataLib {
         PriceFeed storage __record = seekPriceFeed(id4);
         require(address(registry) != address(0), "no radon registry");
         _radonHash = registry.hashOf(radonBytecode);
-        __record.settleWitOracle(exponent, _radonHash);
+        __record.settleOracle(
+            exponent, 
+            IWitPriceFeeds.Oracles.Witnet,
+            address(this),
+            Witnet.RadonHash.unwrap(_radonHash)
+        );
         _footprint = settlePriceFeedFootprint();
     }
 
@@ -549,7 +404,12 @@ library WitPriceFeedsDataLib {
         PriceFeed storage __record = seekPriceFeed(id4);
         require(address(registry) != address(0), "no radon registry");
         require(registry.isVerifiedRadonRequest(radonHash), "unverified sources");
-        __record.settleWitOracle(exponent, radonHash);
+        __record.settleOracle(
+            exponent, 
+            IWitPriceFeeds.Oracles.Witnet,
+            address(this),
+            Witnet.RadonHash.unwrap(radonHash)
+        );
         return settlePriceFeedFootprint();
     }
 
@@ -585,37 +445,34 @@ library WitPriceFeedsDataLib {
 
     function coalesce(IWitPriceFeeds.UpdateConditions storage self) 
         internal view 
-        returns (IWitPriceFeeds.UpdateConditions memory _updateConditions)
+        returns (IWitPriceFeeds.UpdateConditions memory)
     {
-        IWitPriceFeeds.UpdateConditions memory _self = self;
-        if (
-            _self.computeEma
-                && _self.cooldownSecs > 0
-                && _self.heartbeatSecs > 0
-                && _self.maxDeviation1000 > 0
-        ) {
-            return _self;
-        } else {
-            IWitPriceFeeds.UpdateConditions memory _default = data().defaultUpdateConditions;
-            return IWitPriceFeeds.UpdateConditions({
-                computeEma: _self.computeEma || _default.computeEma,
-                cooldownSecs:  _self.cooldownSecs == 0 ? _default.cooldownSecs : _self.cooldownSecs,
-                heartbeatSecs: _self.heartbeatSecs == 0 ? _default.heartbeatSecs : _self.heartbeatSecs,
-                maxDeviation1000: _self.maxDeviation1000 == 0 ? _default.maxDeviation1000 : _self.maxDeviation1000
-            });
-        }
+        IWitPriceFeeds.UpdateConditions storage __default = data().defaultUpdateConditions;
+        return IWitPriceFeeds.UpdateConditions({
+            callbackGas: self.callbackGas == 0 ? __default.callbackGas : self.callbackGas,
+            computeEma: self.computeEma || __default.computeEma,
+            cooldownSecs:  self.cooldownSecs == 0 ? __default.cooldownSecs : self.cooldownSecs,
+            heartbeatSecs: self.heartbeatSecs == 0 ? __default.heartbeatSecs : self.heartbeatSecs,
+            maxDeviation1000: self.maxDeviation1000 == 0 ? __default.maxDeviation1000 : self.maxDeviation1000,
+            minWitnesses: self.minWitnesses == 0 ? __default.minWitnesses : self.minWitnesses                
+        });
     }
 
-    function coalesce(IWitPriceFeeds.UpdateConditions storage self, IWitPriceFeeds.UpdateConditions memory _default) 
+    function coalesce(
+            IWitPriceFeeds.UpdateConditions storage self, 
+            IWitPriceFeeds.UpdateConditions memory _default
+        ) 
         internal pure
-        returns (IWitPriceFeeds.UpdateConditions memory _updateConditions)
+        returns (IWitPriceFeeds.UpdateConditions memory)
     {
         IWitPriceFeeds.UpdateConditions memory _self = self;
         return IWitPriceFeeds.UpdateConditions({
+            callbackGas: _self.callbackGas == 0 ? _default.callbackGas : _self.callbackGas,
             computeEma: _self.computeEma || _default.computeEma,
             cooldownSecs:  _self.cooldownSecs == 0 ? _default.cooldownSecs : _self.cooldownSecs,
             heartbeatSecs: _self.heartbeatSecs == 0 ? _default.heartbeatSecs : _self.heartbeatSecs,
-            maxDeviation1000: _self.maxDeviation1000 == 0 ? _default.maxDeviation1000 : _self.maxDeviation1000
+            maxDeviation1000: _self.maxDeviation1000 == 0 ? _default.maxDeviation1000 : _self.maxDeviation1000,
+            minWitnesses: _self.minWitnesses == 0 ? _default.minWitnesses : _self.minWitnesses
         });
     }
 
@@ -657,17 +514,11 @@ library WitPriceFeedsDataLib {
         );
     }
 
-    function fetchLastUpdateFromProduct(
-            IWitPriceFeeds.ID4 id4,
-            bool ema,
-            uint24 heartbeatSecs,
-            int8 exponent
-        )
+    function fetchLastUpdateFromProduct(IWitPriceFeeds.ID4 id4, uint24 heartbeat, int8 exponent)
         internal view 
-        returns (PriceData memory _lastUpdateData)
+        returns (PriceData memory _lastUpdate)
     {
         IWitPriceFeeds.ID4[] memory _deps = deps(id4);
-        PriceData memory _depLastUpdateData;
         int[4] memory _regs;
         // _regs[0] -> _lastPrice
         // _regs[1] -> _lastEmaPrice
@@ -675,133 +526,89 @@ library WitPriceFeedsDataLib {
         // _regs[3] -> _decimals
         unchecked {
             for (uint _ix; _ix < _deps.length; ++ _ix) {
-                (_depLastUpdateData,) = fetchLastUpdate(
-                    seekPriceFeed(_deps[_ix]), 
-                    _deps[_ix], 
-                    ema,
-                    false,
-                    heartbeatSecs
-                );
+                PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]), _deps[_ix], heartbeat);
                 if (_ix == 0) {
-                    if (ema) {
-                        _regs[1] = int64(_depLastUpdateData.emaPrice);
+                    if (_depLastUpdate.emaPrice > 0) {
+                        _regs[1] = int64(_depLastUpdate.emaPrice);
                     } else {
-                        _regs[0] = int64(_depLastUpdateData.price);
+                        _regs[0] = int64(_depLastUpdate.price);
                     }
-                    _regs[2] = _depLastUpdateData.deltaPrice;
-                    _lastUpdateData.timestamp = _depLastUpdateData.timestamp;
+                    _regs[2] = _depLastUpdate.deltaPrice;
+                    _lastUpdate.timestamp = _depLastUpdate.timestamp;
+                    _lastUpdate.trail = _depLastUpdate.trail;
                     
                 } else {
-                    if (ema) {
-                        _regs[1] *= int64(_depLastUpdateData.emaPrice);
+                    if (_regs[1] > 0) {
+                        _regs[1] *= int64(_depLastUpdate.emaPrice);
                     } else {
-                        _regs[0] *= int64(_depLastUpdateData.price);
+                        _regs[0] *= int64(_depLastUpdate.price);
                     }
-                    _regs[2] *= _depLastUpdateData.deltaPrice;
+                    _regs[2] *= _depLastUpdate.deltaPrice;
 
-                    if (_lastUpdateData.timestamp.gt(_depLastUpdateData.timestamp)) {
+                    if (_lastUpdate.timestamp.gt(_depLastUpdate.timestamp)) {
                         // on Product: timestamp belong to oldest of all deps
-                        _lastUpdateData.timestamp = _depLastUpdateData.timestamp;
+                        _lastUpdate.timestamp = _depLastUpdate.timestamp;
+                        _lastUpdate.trail = _depLastUpdate.trail;
                     }
                 }
-                _regs[3] -= _depLastUpdateData.exponent;
+                _regs[3] -= _depLastUpdate.exponent;
             }
         }
         _regs[3] += exponent;
         if (_regs[3] > 0) {
             uint _divisor = 10 ** uint(_regs[3]);
-            if (ema) {
-                _lastUpdateData.emaPrice = uint64(uint(_regs[1]) / _divisor);
+            if (_regs[1] > 0) {
+                _lastUpdate.emaPrice = uint64(uint(_regs[1]) / _divisor);
             } else {
-                _lastUpdateData.price = uint64(uint(_regs[0]) / _divisor);
+                _lastUpdate.price = uint64(uint(_regs[0]) / _divisor);
             }
-            _lastUpdateData.deltaPrice = int56(_regs[2] / int(_divisor)); // ¿?
+            _lastUpdate.deltaPrice = int56(_regs[2] / int(_divisor)); // ¿?
         
         } else {
             uint _factor = 10 ** uint(-_regs[3]);
-            if (ema) {
-                _lastUpdateData.emaPrice = uint64(uint(_regs[1]) * _factor);
+            if (_regs[1] > 0) {
+                _lastUpdate.emaPrice = uint64(uint(_regs[1]) * _factor);
             } else {
-                _lastUpdateData.price = uint64(uint(_regs[0]) * _factor);
+                _lastUpdate.price = uint64(uint(_regs[0]) * _factor);
             }
-            _lastUpdateData.deltaPrice = int56(_regs[2] * int(_factor));
+            _lastUpdate.deltaPrice = int56(_regs[2] * int(_factor));
         }
-        _lastUpdateData.exponent = exponent;
+        _lastUpdate.exponent = exponent;
     }
 
-    function fetchLastUpdateFromHottest(
-            IWitPriceFeeds.ID4 id4,
-            bool ema,
-            uint24 heartbeatSecs,
-            bool fetchLastTrack
-        )
+    function fetchLastUpdateFromHottest(IWitPriceFeeds.ID4 id4, uint24 heartbeat)
         internal view 
-        returns (
-            PriceData memory _lastUpdateData,
-            Witnet.TransactionHash _lastUpdateTrack
-        )
+        returns (PriceData memory _lastUpdate)
     {
         IWitPriceFeeds.ID4[] memory _deps = deps(id4);
-        PriceData memory _depLastUpdateData;
-        Witnet.TransactionHash _depLastUpdateTrack;
         for (uint _ix; _ix < _deps.length; ++ _ix) {
-            (_depLastUpdateData, _depLastUpdateTrack) = fetchLastUpdate(
-                seekPriceFeed(_deps[_ix]), 
-                _deps[_ix], 
-                ema,
-                fetchLastTrack,
-                heartbeatSecs
-            );
-            if (_ix == 0) {
-                _lastUpdateData = _depLastUpdateData;
-                if (fetchLastTrack) {
-                    _lastUpdateTrack = _depLastUpdateTrack;
-                }
-            } else if (_depLastUpdateData.timestamp.gt(_lastUpdateData.timestamp)) {
-                // on Hottest: copy data from hottest of all deps
-                _lastUpdateData = _depLastUpdateData;
-                if (fetchLastTrack) {
-                    _lastUpdateTrack = _depLastUpdateTrack;
-                }
-            }
-        }
-    }
-
-    function fetchLastUpdateFromFallback(
-            IWitPriceFeeds.ID4 id4,
-            bool ema,
-            uint24 heartbeatSecs,
-            bool fetchLastTrack
-        )
-        internal view 
-        returns (
-            PriceData memory _lastUpdateData,
-            Witnet.TransactionHash _lastUpdateTrack
-        )
-    {
-        IWitPriceFeeds.ID4[] memory _deps = deps(id4);
-        PriceData memory _depLastUpdateData;
-        Witnet.TransactionHash _depLastUpdateTrack;
-        for (uint _ix; _ix < _deps.length; ++ _ix) {
-            (_depLastUpdateData, _depLastUpdateTrack) = fetchLastUpdate(
-                seekPriceFeed(_deps[_ix]), 
-                _deps[_ix], 
-                ema,
-                fetchLastTrack,
-                heartbeatSecs
-            );
+            PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]),  _deps[_ix], heartbeat);
             if (
-                heartbeatSecs == 0 
-                    || Witnet.Timestamp.unwrap(_depLastUpdateData.timestamp) > uint64(block.timestamp - heartbeatSecs)
+                _ix == 0
+                    || _depLastUpdate.timestamp.gt(_lastUpdate.timestamp)
             ) {
-                _lastUpdateData = _depLastUpdateData;
-                if (fetchLastTrack) _lastUpdateTrack = _depLastUpdateTrack;
-                break;
+                _lastUpdate = _depLastUpdate;
             }
         }
     }
 
-    function hash(string calldata symbol) internal pure returns (bytes32) {
+    function fetchLastUpdateFromFallback(IWitPriceFeeds.ID4 id4, uint24 heartbeat)
+        internal view 
+        returns (PriceData memory _lastUpdate)
+    {
+        IWitPriceFeeds.ID4[] memory _deps = deps(id4);
+        for (uint _ix; _ix < _deps.length; ++ _ix) {
+            PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]), _deps[_ix], heartbeat);
+            if (
+                heartbeat == 0
+                    || Witnet.Timestamp.unwrap(_depLastUpdate.timestamp) > uint64(block.timestamp - heartbeat)
+            ) {
+                return _depLastUpdate;
+            }
+        }
+    }
+
+    function hash(string memory symbol) internal pure returns (bytes32) {
         return keccak256(abi.encode(symbol));
     }
 
@@ -809,41 +616,41 @@ library WitPriceFeedsDataLib {
         return IWitPriceFeeds.ID4.unwrap(id4) == 0;
     }
 
-        function pushDataResult(
-            Witnet.DataResult memory result,
-            IWitPriceFeeds.UpdateConditions memory defaultUpdateConditions,
-            IWitPriceFeeds.ID4 id4
-        )
-        internal
-    {
-        PriceFeed storage __record = seekPriceFeed(id4);
-        PriceData memory _lastUpdate = __record.lastWitUpdate.data;
-        IWitPriceFeeds.UpdateConditions memory _updateConditions = coalesce(
-            __record.updateConditions, 
-            defaultUpdateConditions
-        );
+    // function pushDataResult(
+    //         Witnet.DataResult memory result,
+    //         IWitPriceFeeds.UpdateConditions memory defaultUpdateConditions,
+    //         IWitPriceFeeds.ID4 id4
+    //     )
+    //     internal
+    // {
+    //     PriceFeed storage __record = seekPriceFeed(id4);
+    //     PriceData memory _lastUpdate = __record.lastUpdate.data;
+    //     IWitPriceFeeds.UpdateConditions memory _updateConditions = coalesce(
+    //         __record.updateConditions, 
+    //         defaultUpdateConditions
+    //     );
         
-        // consider updating price-feed's last update only if reported value is more recent:
-        if (
-            Witnet.Timestamp.unwrap(_lastUpdate.timestamp) + _updateConditions.cooldownSecs
-                < Witnet.Timestamp.unwrap(result.timestamp)
-        ) {
-            // revert if any of the allegedly fresh updates actually contains 
-            // no integer value:
-            require(
-                result.dataType == Witnet.RadonDataTypes.Integer
-                    && result.status == Witnet.ResultStatus.NoErrors,
-                IWitPythErrors.InvalidUpdateData()
-            );
+    //     // consider updating price-feed's last update only if reported value is more recent:
+    //     if (
+    //         Witnet.Timestamp.unwrap(_lastUpdate.timestamp) + _updateConditions.cooldownSecs
+    //             < Witnet.Timestamp.unwrap(result.timestamp)
+    //     ) {
+    //         // revert if any of the allegedly fresh updates actually contains 
+    //         // no integer value:
+    //         require(
+    //             result.dataType == Witnet.RadonDataTypes.Integer
+    //                 && result.status == Witnet.ResultStatus.NoErrors,
+    //             IWitPythErrors.InvalidUpdateData()
+    //         );
 
-            // compute next data point based on `_result` and `_lastUpdate`
-            __record.lastWitUpdate = _computeNextPrice(
-                result, 
-                _lastUpdate, 
-                _updateConditions
-            );
-        }
-    }
+    //         // compute next data point based on `_result` and `_lastUpdate`
+    //         __record.lastUpdate = _computeNextPrice(
+    //             result, 
+    //             _lastUpdate, 
+    //             _updateConditions
+    //         );
+    //     }
+    // }
 
     function seekPriceFeed(IWitPriceFeeds.ID4 id4) internal view returns (PriceFeed storage) {
         return data().records[id4];
@@ -887,18 +694,20 @@ library WitPriceFeedsDataLib {
         self.oracleSources = oracleSources;
     }
 
-    function settleWitOracle(
-            PriceFeed storage self, 
-            int8 exponent,
-            Witnet.RadonHash radonHash
-        )
-        internal
-    {
-        require(!self.settled(), "already settled");
-        self.oracleSources = Witnet.RadonHash.unwrap(radonHash);
-        self.exponent = exponent;
-        self.lastWitUpdate.data.exponent = exponent;
-    }
+    // function settleWitOracle(
+    //         PriceFeed storage self, 
+    //         int8 exponent,
+    //         Witnet.RadonHash radonHash
+    //     )
+    //     internal
+    // {
+    //     require(!self.settled(), "already settled");
+    //     self.exponent = exponent;
+    //     self.oracle = IWitPriceFeeds.Oracles.Witnet;
+    //     self.oracleAddress = address(this);
+    //     self.oracleSources = Witnet.RadonHash.unwrap(radonHash);
+    //     self.lastUpdate.data.exponent = exponent;
+    // }
 
     function toERC165Id(IWitPriceFeeds.Oracles oracle) public pure returns (bytes4) {
         if (oracle == IWitPriceFeeds.Oracles.Witnet) {
@@ -922,75 +731,75 @@ library WitPriceFeedsDataLib {
     // ================================================================================================================
     // --- Private methods --------------------------------------------------------------------------------------------
 
-    function _computeDeviation1000(uint64 prevPrice, int deltaPrice) private pure returns (uint) {
-        unchecked {
-            int nextPrice = int64(prevPrice) + deltaPrice;
-            return uint(
-                1000 
-                    * uint(deltaPrice >= 0 ? deltaPrice : -deltaPrice)
-                    / uint(nextPrice >= 0 ? nextPrice : -nextPrice)
-            );
-        }
-    }
+    // function _computeDeviation1000(uint64 prevPrice, int deltaPrice) private pure returns (uint) {
+    //     unchecked {
+    //         int nextPrice = int64(prevPrice) + deltaPrice;
+    //         return uint(
+    //             1000 
+    //                 * uint(deltaPrice >= 0 ? deltaPrice : -deltaPrice)
+    //                 / uint(nextPrice >= 0 ? nextPrice : -nextPrice)
+    //         );
+    //     }
+    // }
 
-    function _computeNextPrice(
-            Witnet.DataResult memory result, 
-            PriceData memory prevData,
-            IWitPriceFeeds.UpdateConditions memory updateConditions
-        )
-        private pure 
-        returns (Price memory)
-    {
-        uint64 _nextEmaPrice;
-        uint64 _nextPrice = result.fetchUint();
-        Witnet.Timestamp _nextTimestamp = result.timestamp;
-        uint64 _prevPrice = prevData.price;
-        int256 _deltaPrice;
-        uint64 _deltaSecs;
-        if (
-            !prevData.timestamp.isZero()
-                && _nextTimestamp.gt(prevData.timestamp)
-        ) {
-            // evalute delta price and eventual max deviation threshold condition,
-            // as long as this is not the first price-feed update:
-            _deltaPrice = int(uint(_nextPrice)) - int(uint(_prevPrice)) ;
-            uint _absDeltaPrice = _deltaPrice > 0 ? uint(_deltaPrice) : uint(-_deltaPrice);
-            require(
-                _absDeltaPrice <= (2 ** 55) - 1, 
-                IWitPythErrors.DeviantPrice()
-            );
-            _deltaSecs = Witnet.Timestamp.unwrap(result.timestamp) - Witnet.Timestamp.unwrap(prevData.timestamp);
-            if (
-                updateConditions.maxDeviation1000 > 0
-                    &&  _computeDeviation1000(_prevPrice, _deltaPrice) > updateConditions.maxDeviation1000
-            ) {
-                // avoid updating price values and timestamp if too much deviation is detected,
-                // but still update `deltaPrice` so calls to safe `get*Price*` variants
-                // can revert with `DeviantPrice()`:
-                _nextPrice = _prevPrice;
-                _nextTimestamp = prevData.timestamp;
-                _deltaSecs = 0;
-            }
-        }
-        if (updateConditions.computeEma) {
-            if (_deltaSecs > 0) {
-                // todo: reaching this point, compute exponentially-moving average:
+    // function _computeNextPrice(
+    //         Witnet.DataResult memory result, 
+    //         PriceData memory prevData,
+    //         IWitPriceFeeds.UpdateConditions memory updateConditions
+    //     )
+    //     private pure 
+    //     returns (Price memory)
+    // {
+    //     uint64 _nextEmaPrice;
+    //     uint64 _nextPrice = result.fetchUint();
+    //     Witnet.Timestamp _nextTimestamp = result.timestamp;
+    //     uint64 _prevPrice = prevData.price;
+    //     int256 _deltaPrice;
+    //     uint64 _deltaSecs;
+    //     if (
+    //         !prevData.timestamp.isZero()
+    //             && _nextTimestamp.gt(prevData.timestamp)
+    //     ) {
+    //         // evalute delta price and eventual max deviation threshold condition,
+    //         // as long as this is not the first price-feed update:
+    //         _deltaPrice = int(uint(_nextPrice)) - int(uint(_prevPrice)) ;
+    //         uint _absDeltaPrice = _deltaPrice > 0 ? uint(_deltaPrice) : uint(-_deltaPrice);
+    //         require(
+    //             _absDeltaPrice <= (2 ** 55) - 1, 
+    //             IWitPythErrors.DeviantPrice()
+    //         );
+    //         _deltaSecs = Witnet.Timestamp.unwrap(result.timestamp) - Witnet.Timestamp.unwrap(prevData.timestamp);
+    //         if (
+    //             updateConditions.maxDeviation1000 > 0
+    //                 &&  _computeDeviation1000(_prevPrice, _deltaPrice) > updateConditions.maxDeviation1000
+    //         ) {
+    //             // avoid updating price values and timestamp if too much deviation is detected,
+    //             // but still update `deltaPrice` so calls to safe `get*Price*` variants
+    //             // can revert with `DeviantPrice()`:
+    //             _nextPrice = _prevPrice;
+    //             _nextTimestamp = prevData.timestamp;
+    //             _deltaSecs = 0;
+    //         }
+    //     }
+    //     if (updateConditions.computeEma) {
+    //         if (_deltaSecs > 0) {
+    //             // todo: reaching this point, compute exponentially-moving average:
             
-            } else {
-                _nextEmaPrice = _nextPrice;
-            }
-        }
-        return Price({
-            data: PriceData({
-                emaPrice: _nextEmaPrice, 
-                price: _nextPrice,
-                deltaPrice: int56(_deltaPrice),
-                exponent: prevData.exponent,
-                timestamp: _nextTimestamp
-            }),
-            track: result.drTxHash
-        });
-    }
+    //         } else {
+    //             _nextEmaPrice = _nextPrice;
+    //         }
+    //     }
+    //     return Price({
+    //         data: PriceData({
+    //             emaPrice: _nextEmaPrice, 
+    //             price: _nextPrice,
+    //             deltaPrice: int56(_deltaPrice),
+    //             exponent: prevData.exponent,
+    //             timestamp: _nextTimestamp
+    //         }),
+    //         trail: result.drTxHash
+    //     });
+    // }
 
     function _computePriceFeedsFootprint() private view returns (bytes4 _footprint) {
         uint _totalIds = data().ids.length;
@@ -1033,39 +842,61 @@ library WitPriceFeedsDataLib {
         return data().ids[data().records[id4].index];
     }
 
-    function _intoWitPythPriceFeed(
-            IWitPriceFeeds.ID priceId,
-            Witnet.DataResult memory result,
-            PriceData memory prevData,
-            IWitPriceFeeds.UpdateConditions memory updateConditions
-        )
-        private pure
-        returns (IWitPyth.PriceFeed memory)
-    {
-        Price memory _next = _computeNextPrice(result, prevData, updateConditions);
-        uint64 _nextDeviation1000 = uint64(
-            _next.data.deltaPrice >= 0 
-                ? int64(_next.data.deltaPrice) 
-                : int64(-_next.data.deltaPrice)
-        );
-        return IWitPyth.PriceFeed({
-            id: priceId,
-            price: IWitPyth.Price({
-                price: _next.data.price,
-                conf: _nextDeviation1000,
-                expo: _next.data.exponent,
-                publishTime: _next.data.timestamp,
-                track: _next.track
-            }),
-            emaPrice: IWitPyth.Price({
-                price: _next.data.emaPrice,
-                conf: _nextDeviation1000,
-                expo: _next.data.exponent,
-                publishTime: _next.data.timestamp,
-                track: _next.track
-            })
+        function _intoPriceData(IWitPriceFeeds.Price memory _price) internal pure returns (PriceData memory) {
+        return PriceData({
+            emaPrice: 0,
+            price: _price.price,
+            deltaPrice: _price.deltaPrice,
+            timestamp: _price.timestamp,
+            trail: _price.trail,
+            exponent: _price.exponent
         });
     }
+
+    function _intoEmaPriceData(IWitPriceFeeds.Price memory _price) internal pure returns (PriceData memory) {
+        return PriceData({
+            emaPrice: _price.price,
+            price: 0,
+            deltaPrice: _price.deltaPrice,
+            timestamp: _price.timestamp,
+            trail: _price.trail,
+            exponent: _price.exponent
+        });
+    }
+
+    // function _intoWitPythPriceFeed(
+    //         IWitPriceFeeds.ID priceId,
+    //         Witnet.DataResult memory result,
+    //         PriceData memory prevData,
+    //         IWitPriceFeeds.UpdateConditions memory updateConditions
+    //     )
+    //     private pure
+    //     returns (IWitPyth.PriceFeed memory)
+    // {
+    //     Price memory _next = _computeNextPrice(result, prevData, updateConditions);
+    //     uint64 _nextDeviation1000 = uint64(
+    //         _next.data.deltaPrice >= 0 
+    //             ? int64(_next.data.deltaPrice) 
+    //             : int64(-_next.data.deltaPrice)
+    //     );
+    //     return IWitPyth.PriceFeed({
+    //         id: priceId,
+    //         price: IWitPyth.Price({
+    //             price: _next.data.price,
+    //             conf: _nextDeviation1000,
+    //             expo: _next.data.exponent,
+    //             publishTime: _next.data.timestamp,
+    //             track: _next.trail
+    //         }),
+    //         emaPrice: IWitPyth.Price({
+    //             price: _next.data.emaPrice,
+    //             conf: _nextDeviation1000,
+    //             expo: _next.data.exponent,
+    //             publishTime: _next.data.timestamp,
+    //             track: _next.trail
+    //         })
+    //     });
+    // }
 
     function _settlePriceFeedSymbol(string calldata symbol) private returns (IWitPriceFeeds.ID4 id4) {
         bytes32 _id = hash(symbol);
@@ -1081,7 +912,7 @@ library WitPriceFeedsDataLib {
             );
             __record.symbol = symbol;
             __record.index = uint32(data().ids.length);
-            delete __record.lastWitUpdate;
+            delete __record.lastUpdate;
             data().ids.push(IWitPyth.ID.wrap(_id));
         }
     }
