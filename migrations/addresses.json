@@ -170,12 +170,12 @@
     "ethereum:sepolia": {
         "libs": {
             "WitOracleDataLib": "0xF22fcebC0CaC37CE863a65Ca24ACb4C7b9724bC3",
-            "WitOracleRadonEncodingLib": "0x021C5feda3b8B7029e7E5113ce0C7390C24EEEa6",
+            "WitOracleRadonEncodingLib": "0x7FDb4560EDf7A7340Cf31C8f63Be8D2d667B0f12",
             "WitOracleResultStatusLib": "0x286361C52A5316Ed2CdcC68e10c5f5ce24CD9Ff1",
             "WitPriceFeedsLegacyDataLib": "0xBBB488446c042a961D422993094F6FefB675c073"
         },
         "core": {
-            "WitOracleRadonRegistryUpgradableDefault": "0xf118f1AD931FaD9f84cC130756f7a04b108b93D6",
+            "WitOracleRadonRegistryUpgradableDefault": "0x2a8bf23240dC5DFf2743dA9C8050bADAd70bc799",
             "WitOracleTrustableDefault": "0x643Ec642d3CA43b4f668238dA4DDdB9D1334cd5a",
             "WitOracleRadonRequestFactoryModalsDefault": "0xff7B32870b35259212bc103c79380E03786588ff",
             "WitOracleRadonRequestFactoryTemplatesDefault": "0xFF1f868D74d1b9A434C7bBf2abe470c8F153DDFF",
@@ -318,13 +318,13 @@
             "WitPriceFeedsLegacyUpgradable": "0x28e93D7177202FaD575Aa18b6717370464eEDECF"
         },
         "core": {
-            "WitOracleRadonRegistryUpgradableDefault": "0xc38Eaa8B3055Df71E1154156046E6751876Ad680",
+            "WitOracleRadonRegistryUpgradableDefault": "",
             "WitOracleRadonRequestFactoryUpgradableDefault": "0xbA50a8e0057A605B35365e6a7A1b1671836787a9",
             "WitOracleTrustableOvm2": "0x9094802614F6D1C6B4b5406A3050decc1d13a40a"
         },
         "libs": {
             "WitOracleDataLib": "0x2D59DE3385f80Cd97891F0d1bC942B8eaC05D911",
-            "WitOracleRadonEncodingLib": "0x91F7cc27f2B12CDc2eA02cF1501765335668022d",
+            "WitOracleRadonEncodingLib": "",
             "WitOracleResultStatusLib": "0x3980B56c8e13667Ea5c4EE65dd78371DA67f81c2",
             "WitPriceFeedsLegacyDataLib": "0x4643327A0462496362A3554fD515AAA43F214401"
         }
