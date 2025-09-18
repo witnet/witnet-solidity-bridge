@@ -387,16 +387,15 @@ library WitOracleRadonEncodingLib {
         returns (bytes32)
     {
         if (!(
-            bytes(url).length > 0 
-                && (
-                    method == Witnet.RadonRetrievalMethods.HttpGet 
-                        || method == Witnet.RadonRetrievalMethods.HttpPost
-                        || method == Witnet.RadonRetrievalMethods.HttpHead
-                )
-            || method == Witnet.RadonRetrievalMethods.RNG
+            method == Witnet.RadonRetrievalMethods.HttpPost
+            || (method == Witnet.RadonRetrievalMethods.HttpGet && bytes(body).length == 0)
+            || (method == Witnet.RadonRetrievalMethods.HttpHead && bytes(body).length == 0)
+            || (method == Witnet.RadonRetrievalMethods.RNG
                 && bytes(url).length == 0
+                && bytes(body).length == 0
                 && headers.length == 0
                 && script.length >= 1
+            )
         )) {
             revert UnsupportedDataRequestMethod(
                 uint8(method),
