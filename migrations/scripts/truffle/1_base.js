@@ -1,6 +1,6 @@
 const fs = require("fs")
-const settings = require("../../../settings/index.cjs")
-const utils = require("../../../src/utils.cjs")
+const settings = require("../../../settings/index").default
+const utils = require("../../../src/utils").default
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 

@@ -2,7 +2,6 @@
     "default": {
         "apps": {
             "WitPriceFeeds": "0x1111AbA2164AcdC6D291b08DfB374280035E1111",
-            "WitPriceFeedsLegacy": "0x1111AbA2164AcdC6D291b08DfB374280035E1111",
             "WitRandomnessV2": "0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB",
             "WitRandomnessV3": "0xC0FFee84CC8a7A033B55fFc0cc6Bf3087136d391"
         },
@@ -170,10 +169,21 @@
     },
     "ethereum:sepolia": {
         "libs": {
-            "WitOracleDataLib": "0x5C787d6DAb26D6c9D0F3f03498138e904b583386",
-            "WitOracleRadonEncodingLib": "0xe3EB2408a637Bb51Feb6e39f1B494cD4973DA402",
-            "WitOracleResultStatusLib": "0x1C15Af858B7Af00BAFEAaa267d3059266Efdfa8e",
-            "WitPriceFeedsLegacyDataLib": "0x1949a56d396ba542AA6573b43bE12dCf721adb45"
+            "WitOracleDataLib": "0xF22fcebC0CaC37CE863a65Ca24ACb4C7b9724bC3",
+            "WitOracleRadonEncodingLib": "0x021C5feda3b8B7029e7E5113ce0C7390C24EEEa6",
+            "WitOracleResultStatusLib": "0x286361C52A5316Ed2CdcC68e10c5f5ce24CD9Ff1",
+            "WitPriceFeedsLegacyDataLib": "0xBBB488446c042a961D422993094F6FefB675c073"
+        },
+        "core": {
+            "WitOracleRadonRegistryUpgradableDefault": "0xf118f1AD931FaD9f84cC130756f7a04b108b93D6",
+            "WitOracleTrustableDefault": "0x643Ec642d3CA43b4f668238dA4DDdB9D1334cd5a",
+            "WitOracleRadonRequestFactoryModalsDefault": "0xff7B32870b35259212bc103c79380E03786588ff",
+            "WitOracleRadonRequestFactoryTemplatesDefault": "0xFF1f868D74d1b9A434C7bBf2abe470c8F153DDFF",
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0xf91295D42EACDa8e2A0a03F08b8786f21FA57D34"
+        },
+        "apps": {
+            "WitPriceFeedsLegacyUpgradable": "0x7258A06d0A533f2049C135f2b2eB4E22243fD22F",
+            "WitRandomnessV3": "0xC0FFee84CC8a7A033B55fFc0cc6Bf3087136d391"
         }
     },
     "gnosis:mainnet": {

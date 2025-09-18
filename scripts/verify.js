@@ -9,8 +9,8 @@ const require = createRequire(import.meta.url);
 const addresses = require("../migrations/addresses.json")
 const constructorArgs = require("../migrations/constructorArgs.json")
 
-import { default as settings } from "../settings/index.cjs"
-import { default as utils } from "../src/utils.cjs"
+import { default as settings } from "../settings/index.js"
+import { default as utils } from "../src/utils.js"
 
 const network = spliceFromArgs(process.argv, "--network")
 const networkArtifacts = settings.getArtifacts(network)

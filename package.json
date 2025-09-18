@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/witnet/witnet-solidity-bridge/tree/2.1.x"
+    "url": "https://github.com/witnet/witnet-solidity-bridge"
   },
   "type": "module",
   "keywords": [
@@ -15,13 +15,14 @@
     "ethereum"
   ],
   "exports": {
-    ".": "./src/index.cjs",
-    "./utils": "./src/utils.cjs"
+    ".": "./src/index.js",
+    "./contracts/": "./contracts/",
+    "./utils": "./src/utils.js"
   },
   "files": [
     "artifacts",
     "build/contracts",
-    "contracts",
+    "contracts/",
     "migrations/*.json",
     "settings",
     "src"
@@ -32,8 +33,8 @@
     "clean:build": "node ./scripts/clean.cjs build",
     "clean:cache": "node ./scripts/clean.cjs cache migrations/zksync/cache-zk",
     "clean:flattened": "node ./scripts/clean.cjs flattened",
-    "compile": "npx truffle compile --all",
-    "console": "npx truffle console",
+    "compile": "npx truffle compile --all --config ./truffle-config.cjs",
+    "console": "npx hardhat console",
     "flatten": "node ./scripts/flatten.cjs 2>&1",
     "flatten:all": "pnpm run clean && pnpm run flatten:core && pnpm run flatten:apps && pnpm run flatten:libs && pnpm run flatten:proxy",
     "flatten:apps": "pnpm run flatten contracts/apps/",
@@ -50,7 +51,7 @@
     "ops:rng:sla": "npx truffle migrate --migrations_directory ./migrations/ops/rng/sla --compile-none --network",
     "ops:drp:pfs": "npx truffle migrate --migrations_directory ./migrations/ops/drp/pfs --compile-none --network",
     "ops:drp:wrb": "npx truffle migrate --migrations_directory ./migrations/ops/drp/wrb --compile-none --network",
-    "prepare": "npx truffle compile --all && npx hardhat compile --force && node ./scripts/prepare.cjs",
+    "prepare": "npx truffle compile --all --config ./truffle-config.cjs && npx hardhat compile --force && node ./scripts/prepare.cjs",
     "test": "npx truffle test",
     "verify": "npm run verify:hardhat && npm run verify:proxies",
     "verify:hardhat": "npx hardhat run ./scripts/verify.js 2>&1",

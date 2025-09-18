@@ -1,9 +1,11 @@
-const execSync = require("child_process").execSync
-const fs = require("fs")
-require("dotenv").config()
-const readline = require("readline")
+import { execSync } from "child_process"
+import dotenv from "dotenv" 
+import { readFileSync, writeFileSync } from "fs"
+import { createInterface } from "readline"
 
-module.exports = {
+dotenv.config()
+
+export default {
   fromAscii,
   getNetworkAppsArtifactAddress,
   getNetworkArtifactAddress,
@@ -205,7 +207,7 @@ function padLeft (str, char, size) {
 }
 
 async function prompt (text) {
-  const rl = readline.createInterface({
+  const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
   })
@@ -226,15 +228,15 @@ async function prompt (text) {
 
 async function readJsonFromFile (filename) {
   // lockfile.lockSync(filename)
-  const json = JSON.parse(await fs.readFileSync(filename))
+  const json = JSON.parse(await readFileSync(filename))
   // lockfile.unlockSync(filename)
   return json || {}
 }
 
 async function overwriteJsonFile (filename, extra) {
   // lockfile.lockSync(filename)
-  const json = { ...JSON.parse(fs.readFileSync(filename)), ...extra }
-  fs.writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" })
+  const json = { ...JSON.parse(readFileSync(filename)), ...extra }
+  writeFileSync(filename, JSON.stringify(json, null, 4), { flag: "w+" })
   // lockfile.unlockSync(filename)
 }
 

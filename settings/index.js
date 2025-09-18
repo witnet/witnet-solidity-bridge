@@ -1,12 +1,12 @@
-const merge = require("lodash.merge")
+import merge from "lodash.merge"
 
-const artifacts = require("./artifacts.cjs")
-const networks = require("./networks.cjs")
-const specs = require("./specs.cjs")
-const solidity = require("./solidity.cjs")
-const utils = require("../src/utils.cjs")
+import artifacts from "./artifacts.js"
+import networks from "./networks.js"
+import { default as specs } from "./specs.js"
+import solidity from "./solidity.js"
+import utils from "../src/utils.js"
 
-module.exports = {
+export default {
   getArtifacts: (network) => {
     let res = artifacts.default
     utils.getNetworkTagsFromString(network).forEach(net => {

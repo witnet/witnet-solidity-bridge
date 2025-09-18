@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   default: {
     version: "0.8.30",
     settings: {
@@ -8,4 +8,4 @@ module.exports = {
       },
     },
   },
-}
+};

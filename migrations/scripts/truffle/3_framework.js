@@ -1,8 +1,8 @@
 const ethUtils = require("ethereumjs-util")
 const fs = require("fs")
 const merge = require("lodash.merge")
-const settings = require("../../../settings/index.cjs")
-const utils = require("../../../src/utils.cjs")
+const settings = require("../../../settings/index").default
+const utils = require("../../../src/utils").default
 const version = `${
   require("../../../package").version
 }-${
@@ -40,7 +40,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
     if (!networkSpecs[appliance]) networkSpecs[appliance] = {}
     networkSpecs[appliance].baseDeps = merge([], networkSpecs[appliance]?.baseDeps, ["WitOracle"])
   })
-
+  
   // Settle network-specific initialization params, if any...
   networkSpecs.WitOracle.mutables = merge(networkSpecs.WitOracle?.mutables, {
     types: ["address[]"], values: [[reporter1, reporter2]],
@@ -374,8 +374,9 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
   if (defrostCode.indexOf("__") > -1) {
     panic("Frosted libs not yet supported")
   }
-  const constructorArgs = await utils.readJsonFromFile("./migrations/constructorArgs.json")
-  const defrostConstructorArgs = encodeTargetConstructorArgs(constructorArgs[network][target] || constructorArgs.default[target] || {})
+  let constructorArgs = await utils.readJsonFromFile("./migrations/constructorArgs.json")
+  constructorArgs = JSON.parse(constructorArgs[network][target] || constructorArgs.default[target] || {})
+  const defrostConstructorArgs = encodeTargetConstructorArgs(constructorArgs)
   const defrostInitCode = defrostCode + defrostConstructorArgs
   const defrostSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
   const defrostAddr = await witnetDeployer.determineAddr.call(defrostInitCode, defrostSalt, { from: targetSpecs.from })

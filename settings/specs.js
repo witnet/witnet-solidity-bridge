@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   default: {
     WitOracle: {
       baseDeps: [
@@ -12,10 +12,10 @@ module.exports = {
         types: ["(uint32, uint32, uint32, uint32)"],
         values: [
           [
-            /* _reportResultGasBase */ 58282,
-            /* _reportResultWithCallbackGasBase */ 65273,
-            /* _reportResultWithCallbackRevertGasBase */ 69546,
-            /* _sstoreFromZeroGas */ 20000,
+                    /* _reportResultGasBase */ 58282,
+                    /* _reportResultWithCallbackGasBase */ 65273,
+                    /* _reportResultWithCallbackRevertGasBase */ 69546,
+                    /* _sstoreFromZeroGas */ 20000,
           ],
         ],
       },
@@ -28,8 +28,8 @@ module.exports = {
       immutables: {
         types: ["uint256", "uint256"],
         values: [
-          /* _evmQueryAwaitingBlocks */ 16,
-          /* _evmQueryReportingStake */ "1000000000000000000",
+                /* _evmQueryAwaitingBlocks */ 16,
+                /* _evmQueryReportingStake */ "1000000000000000000",
         ],
       },
     },
@@ -69,16 +69,16 @@ module.exports = {
       vanity: 1060132513, // 0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB
     },
     WitRandomnessV3: {
-      vanity: 132246681,  // 0xC0FFee84CC8a7A033B55fFc0cc6Bf3087136d391
+      vanity: 132246681, // 0xC0FFee84CC8a7A033B55fFc0cc6Bf3087136d391
     },
   },
   reef: {
     WitOracle: {
       immutables: {
         values: [
-          /* _reportResultGasBase */ "0x3100A1CAC7EF19DC",
+                /* _reportResultGasBase */ "0x3100A1CAC7EF19DC",
         ],
       },
     },
-  },
-}
+  }
+};

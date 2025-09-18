@@ -1,5 +1,5 @@
-const settings = require("./settings/index.cjs")
-const utils = require("./src/utils.cjs")
+const settings = require("./settings/index").default
+const utils = require("./src/utils").default
 
 const { ecosystem, network } = utils.getRealmNetworkFromArgs()
 if (ecosystem) {

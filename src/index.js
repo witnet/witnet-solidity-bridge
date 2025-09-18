@@ -1,9 +1,12 @@
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 const addresses = require("../migrations/addresses.json")
-const artifacts = require("../settings/artifacts.cjs")
+const artifacts = require("../settings/artifacts.js").default
 const constructorArgs = require("../migrations/constructorArgs.json")
 const merge = require("lodash.merge")
-const utils = require("./utils.cjs")
-module.exports = {
+const utils = require("./utils.js").default
+
+export default {
   getNetworkAddresses: (network) => {
     let res = addresses?.default
     utils.getNetworkTagsFromString(network).forEach(net => {
@@ -63,7 +66,7 @@ module.exports = {
     WitnetUpgradableBase:
       require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json").abi,
   },
-  settings: require("../settings/index.cjs"),
+  settings: require("../settings/index.js").default,
   utils,
 }
 
@@ -72,7 +75,7 @@ function supportsNetwork (network) {
 }
 
 function supportedNetworks (ecosystem) {
-  const networks = require("../settings/networks.cjs")
+  const networks = require("../settings/networks.js").default
   return Object.fromEntries(
     Object.keys(constructorArgs)
       .sort()
