@@ -49,7 +49,21 @@ export default {
     hardhatVerify,
   ],
   networks,
-  solidity: settings.getCompilers(target),
+  solidity: {
+    compilers: [settings.getCompilers(target)],
+    overrides: {
+      "contracts/core/WitnetProxy.sol": {
+        version: "0.8.25",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+          evmVersion: "paris",
+        },
+      },
+    },
+  },
   verify: {
     blockscout: {
       enabled: true,

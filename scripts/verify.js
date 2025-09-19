@@ -32,7 +32,11 @@ async function main () {
         const address = utils.getNetworkArtifactAddress(network, domain, addresses, base)
         headline = `> Verifying proxy for ${base}...`;
         console.info(`\n${"=".repeat(100)}\n${headline}`)
-        await verifyContract({ address, contract: "contracts/core/WitnetProxy.sol:WitnetProxy" }, hre)
+        try {
+          await verifyContract({ address, contract: "contracts/core/WitnetProxy.sol:WitnetProxy" }, hre)
+        } catch (err) {
+          console.error(err)
+        }
       }
       // verify logic
       const address = utils.getNetworkArtifactAddress(network, domain, addresses, impl)

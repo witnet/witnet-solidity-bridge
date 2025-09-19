@@ -2,8 +2,8 @@
 
 const addresses = require("../migrations/addresses.json")
 const constructorArgs = require("../migrations/constructorArgs.json")
-const settings = require("../settings/index.cjs")
-const utils = require("../src/utils.cjs")
+const settings = require("../settings/index.js").default
+const utils = require("../src/utils.js").default
 
 if (process.argv.length < 3) {
   console.error("\nUsage:\n\n$ node ./scripts/verify-core.js <ecosystem>:<network> ...OPTIONAL_ARGS\n")
@@ -13,7 +13,7 @@ if (process.argv.length < 3) {
 const network = process.argv[2].toLowerCase().replaceAll(".", ":")
 const networkArtifacts = settings.getArtifacts(network)
 
-utils.traceVerify(network, `${networkArtifacts?.WitnetDeployer} --forceConstructorArgs string: --verifiers etherscan,sourcify`)
+utils.traceVerifyTruffle(network, `${networkArtifacts?.WitnetDeployer} --forceConstructorArgs string: --verifiers etherscan,sourcify`)
 
 const framework = {
   libs: networkArtifacts.libs,
