@@ -33,24 +33,22 @@ async function main () {
         headline = `> Verifying proxy for ${base}...`;
         console.info(`\n${"=".repeat(100)}\n${headline}`)
         await verifyContract({ address, contract: "contracts/core/WitnetProxy.sol:WitnetProxy" }, hre)
+      }
+      // verify logic
+      const address = utils.getNetworkArtifactAddress(network, domain, addresses, impl)
+      if (!address) {
+        headline = `> SKIPPED: ${impl}`
+        console.info(`\n${"=".repeat(100)}\n${headline}`)
+        continue;
       } else {
-        // verify logic
-        const address = utils.getNetworkArtifactAddress(network, domain, addresses, impl)
-        let headline
-        if (!address) {
-          headline = `> SKIPPED: ${impl}`
-          console.info(`\n${"=".repeat(100)}\n${headline}`)
-          continue;
-        } else {
-          headline = `> Verifying ${impl}...`;
-          console.info(`\n${"=".repeat(100)}\n${headline}`)
-          const args = (
-            constructorArgs[network][impl] || constructorArgs.default[impl] 
-            ? merge(JSON.parse(constructorArgs[network][impl] || "[]"), JSON.parse(constructorArgs.default[impl] || "[]"))
-            : undefined
-          )?.values
-          await verifyContract({ address, constructorArgs: args }, hre)
-        }
+        headline = `> Verifying ${impl}...`;
+        console.info(`\n${"=".repeat(100)}\n${headline}`)
+        const args = (
+          constructorArgs[network][impl] || constructorArgs.default[impl] 
+          ? merge(JSON.parse(constructorArgs[network][impl] || "[]"), JSON.parse(constructorArgs.default[impl] || "[]"))
+          : undefined
+        )?.values
+        await verifyContract({ address, constructorArgs: args }, hre)
       }
     }
   }

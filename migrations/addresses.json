@@ -318,13 +318,13 @@
             "WitPriceFeedsLegacyUpgradable": "0x28e93D7177202FaD575Aa18b6717370464eEDECF"
         },
         "core": {
-            "WitOracleRadonRegistryUpgradableDefault": "",
+            "WitOracleRadonRegistryUpgradableDefault": "0x17746A5948A7878Eb36e26699375ca3526981099",
             "WitOracleRadonRequestFactoryUpgradableDefault": "0xbA50a8e0057A605B35365e6a7A1b1671836787a9",
             "WitOracleTrustableOvm2": "0x9094802614F6D1C6B4b5406A3050decc1d13a40a"
         },
         "libs": {
             "WitOracleDataLib": "0x2D59DE3385f80Cd97891F0d1bC942B8eaC05D911",
-            "WitOracleRadonEncodingLib": "",
+            "WitOracleRadonEncodingLib": "0x131F2eb6214e92fFB3921ff582e7A9E703aDA6c4",
             "WitOracleResultStatusLib": "0x3980B56c8e13667Ea5c4EE65dd78371DA67f81c2",
             "WitPriceFeedsLegacyDataLib": "0x4643327A0462496362A3554fD515AAA43F214401"
         }
