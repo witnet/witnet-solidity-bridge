@@ -1,6 +1,7 @@
-const create3 = require("./eth-create3")
 const fs = require("fs")
-const utils = require("../src/utils")
+
+const create3 = require("./eth-create3.cjs")
+const utils = require("../src/utils.js").default
 
 const addresses = require("../migrations/addresses")
 
