@@ -4,6 +4,7 @@ export default {
     apps: {
       WitPriceFeeds: "WitPriceFeedsLegacyUpgradable",
       WitRandomness: "WitRandomnessV3",
+      WitRandomnessLegacy: "WitRandomnessV2",
     },
     core: {
       WitOracle: "WitOracleTrustableDefault",

@@ -190,8 +190,7 @@
             "WitOracleRadonRequestFactoryUpgradableDefault": "0xf91295D42EACDa8e2A0a03F08b8786f21FA57D34"
         },
         "apps": {
-            "WitPriceFeedsLegacyUpgradable": "0x7258A06d0A533f2049C135f2b2eB4E22243fD22F",
-            "WitRandomnessV3": "0xC0FFee84CC8a7A033B55fFc0cc6Bf3087136d391"
+            "WitPriceFeedsLegacyUpgradable": "0x7258A06d0A533f2049C135f2b2eB4E22243fD22F"
         }
     },
     "gnosis:mainnet": {
