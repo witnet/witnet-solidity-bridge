@@ -28,6 +28,7 @@ interface IWitPriceFeedsAdmin {
         IWitPriceFeeds.UpdateConditions conditions
     );
     
+    function defaultUpdateConditions() external view returns (IWitPriceFeeds.UpdateConditions calldata);
     function removePriceFeed(string calldata, bool) external returns (bytes4);
     function settleConsumer(address) external;
     function settleDefaultUpdateConditions(IWitPriceFeeds.UpdateConditions calldata) external;

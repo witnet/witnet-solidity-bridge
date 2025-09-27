@@ -438,6 +438,13 @@ contract WitPriceFeedsV3
     /// ===============================================================================================================
     /// --- IWitPriceFeedsAdmin ---------------------------------------------------------------------------------------
 
+    function defaultUpdateConditions()
+        external view override
+        returns (IWitPriceFeeds.UpdateConditions memory)
+    {
+        return __storage().defaultUpdateConditions;
+    }
+
     function removePriceFeed(string calldata _symbol, bool _recursively) 
         external override
         onlyOwner
@@ -590,7 +597,7 @@ contract WitPriceFeedsV3
             );
             return _footprint;
         }
-         catch Error(string memory _reason) { 
+        catch Error(string memory _reason) { 
             _revert(_reason); 
         
         } catch (bytes memory) {
