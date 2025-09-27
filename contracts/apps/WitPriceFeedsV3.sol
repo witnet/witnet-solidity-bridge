@@ -36,8 +36,7 @@ contract WitPriceFeedsV3
     is
         Clonable,
         Ownable2Step,
-        WitPriceFeeds,
-        IWitPriceFeedsAdmin
+        WitPriceFeeds
 {
     using Witnet for Witnet.DataResult;
     using Witnet for Witnet.RadonHash;
