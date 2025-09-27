@@ -60,10 +60,22 @@ export default {
     },
     WitPriceFeeds: {
       baseLibs: [
-        "WitPriceFeedsLegacyDataLib",
+        "WitPriceFeedsDataLib",
       ],
       from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",
+    },
+    WitPriceFeedsLegacy: {
+      baseLibs: [
+        "WitPriceFeedsLegacyDataLib",
+      ],
       vanity: 1865150170, // 0x1111AbA2164AcdC6D291b08DfB374280035E1111
+    },
+    WitPriceFeedsV3: {
+      mutables: {
+        types: ["address"],
+        values: ["0xF121b71715E71DDeD592F1125a06D4ED06F0694D"]
+      },
+      // vanity: 0, //
     },
     WitRandomnessV2: {
       vanity: 1060132513, // 0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB

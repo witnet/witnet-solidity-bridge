@@ -59,10 +59,10 @@ export default {
       require("../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json").abi,
     WitPriceFeedsLegacy:
       require("../artifacts/contracts/WitPriceFeedsLegacy.sol/WitPriceFeedsLegacy.json").abi,
-    WitRandomness:
-      require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json").abi,
-    WitRandomnessLegacy:
+    WitRandomnessV2:
       require("../artifacts/contracts/WitRandomnessLegacy.sol/WitRandomnessLegacy.json").abi,
+    WitRandomnessV3:
+      require("../artifacts/contracts/WitRandomness.sol/WitRandomness.json").abi,
     WitnetUpgradableBase:
       require("../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json").abi,
   },

@@ -4,7 +4,6 @@ export default {
     apps: {
       WitPriceFeeds: "WitPriceFeedsLegacyUpgradable",
       WitRandomness: "WitRandomnessV3",
-      WitRandomnessLegacy: "WitRandomnessV2",
     },
     core: {
       WitOracle: "WitOracleTrustableDefault",
@@ -17,6 +16,7 @@ export default {
       WitOracleDataLib: "WitOracleDataLib",
       WitOracleRadonEncodingLib: "WitOracleRadonEncodingLib",
       WitOracleResultStatusLib: "WitOracleResultStatusLib",
+      WitPriceFeedsDataLib: "WitPriceFeedsDataLib",
       WitPriceFeedsLegacyDataLib: "WitPriceFeedsLegacyDataLib",
     },
   },
@@ -30,6 +30,12 @@ export default {
     WitnetDeployer: "WitnetDeployerConfluxCore",
     core: { 
       WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore",
+    },
+  },
+  "ethereum:sepolia": {
+    apps: {
+      WitPriceFeeds: "WitPriceFeedsV3",
+      WitPriceFeedsLegacy: "WitPriceFeedsLegacyUpgradable"
     },
   },
   mantle: {
