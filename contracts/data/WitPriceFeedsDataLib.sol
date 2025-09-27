@@ -245,11 +245,6 @@ library WitPriceFeedsDataLib {
         PriceFeed storage __record = seekPriceFeed(id4);
         PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, 0);
 
-        require(
-            !_lastUpdate.timestamp.isZero(), 
-            IWitPythErrors.PriceFeedNotFound()
-        );
-
         return IWitPriceFeeds.Price({
             exponent: _lastUpdate.exponent,
             deltaPrice: _lastUpdate.deltaPrice,
