@@ -52,16 +52,14 @@ interface IWitPriceFeeds {
     }
 
     struct Mapper {
-        Mappers algo;
-        string  desc;
+        Mappers class;
         string[] deps;
     }
 
     struct Oracle {
-        address addr;
         Oracles class;
-        string  name;
-        bytes32 dataSources;
+        address target;
+        bytes32 sources;
     }
 
     struct UpdateConditions {

@@ -98,8 +98,8 @@ contract WitPriceFeedsV3
                 _pfs[_ix].symbol,
                 _pfs[_ix].exponent,
                 _pfs[_ix].oracle.class,
-                _pfs[_ix].oracle.addr,
-                _pfs[_ix].oracle.dataSources
+                _pfs[_ix].oracle.target,
+                _pfs[_ix].oracle.sources
             );
         }
         return address(this);
@@ -264,7 +264,7 @@ contract WitPriceFeedsV3
         Info[] memory _pfs = new Info[](_id4s.length);
         for (uint _ix = 0; _ix < _pfs.length; _ix ++) {
             _pfs[_ix] = lookupPriceFeed(_id4s[_ix]);
-            require(_pfs[_ix].mapper.algo == Mappers.None, "mapped price feed");
+            require(_pfs[_ix].mapper.class == Mappers.None, "mapped price feed");
         }
         return WitPriceFeedsV3(_cloneDeterministic(_salt))
             .initializeClone(abi.encode(
@@ -387,21 +387,13 @@ contract WitPriceFeedsV3
             exponent: __record.exponent,
             symbol: __record.symbol,
             mapper: Mapper({
-                algo: _mapper,
-                desc: _mapper.toString(),
+                class: _mapper,
                 deps: _mapperDeps
             }),
             oracle: Oracle({
-                addr: _oracleAddress,
                 class: _oracle,
-                name: _oracle.toString(),
-                // interfaceId: _oracle.toERC165Id(),
-                dataSources: _oracleSources
-                // dataBytecode: (
-                //     _oracle == Oracles.Witnet 
-                //         ? (IWitOracle(witOracle).registry().lookupRadonRequestBytecode(Witnet.RadonHash.wrap(_oracleSources)))
-                //         : (new bytes(0))
-                // )
+                target: _oracleAddress,
+                sources: _oracleSources
             }),
             updateConditions: __record.updateConditions.coalesce(),
             lastUpdate: WitPriceFeedsDataLib.getPriceUnsafe(_id4)
@@ -420,7 +412,6 @@ contract WitPriceFeedsV3
         return IWitPyth.ID.unwrap(_intoID(_id4));
     }
     
-
     function lookupPriceFeeds() external override view returns (Info[] memory _infos) {
         ID[] storage __ids = __storage().ids;
         _infos = new Info[](__ids.length);
