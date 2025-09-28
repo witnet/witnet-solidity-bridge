@@ -429,11 +429,42 @@ contract WitPriceFeedsV3
     /// ===============================================================================================================
     /// --- IWitPriceFeedsAdmin ---------------------------------------------------------------------------------------
 
+    function acceptOwnership()
+        virtual override (IWitPriceFeedsAdmin, Ownable2Step)
+        public
+    {
+        Ownable2Step.acceptOwnership();
+    }
+
     function defaultUpdateConditions()
         external view override
         returns (IWitPriceFeeds.UpdateConditions memory)
     {
         return __storage().defaultUpdateConditions;
+    }
+
+    function owner()
+        virtual override (IWitPriceFeedsAdmin, Ownable)
+        public view 
+        returns (address)
+    {
+        return Ownable.owner();
+    }
+
+    function pendingOwner() 
+        virtual override (IWitPriceFeedsAdmin, Ownable2Step)
+        public view
+        returns (address)
+    {
+        return Ownable2Step.pendingOwner();
+    }
+    
+    function transferOwnership(address _newOwner)
+        virtual override (IWitPriceFeedsAdmin, Ownable2Step)
+        public 
+        onlyOwner
+    {
+        Ownable.transferOwnership(_newOwner);
     }
 
     function removePriceFeed(string calldata _symbol, bool _recursively) 

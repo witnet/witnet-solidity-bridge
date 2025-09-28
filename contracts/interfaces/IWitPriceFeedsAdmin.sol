@@ -28,7 +28,10 @@ interface IWitPriceFeedsAdmin {
         IWitPriceFeeds.UpdateConditions conditions
     );
     
+    function acceptOwnership() external;
     function defaultUpdateConditions() external view returns (IWitPriceFeeds.UpdateConditions calldata);
+    function owner() external view returns (address);
+    function pendingOwner() external returns (address);
     function removePriceFeed(string calldata, bool) external returns (bytes4);
     function settleConsumer(address) external;
     function settleDefaultUpdateConditions(IWitPriceFeeds.UpdateConditions calldata) external;
@@ -37,4 +40,5 @@ interface IWitPriceFeedsAdmin {
     function settlePriceFeedRadonBytecode(string calldata, int8, bytes calldata) external returns (bytes4);
     function settlePriceFeedRadonHash(string calldata, int8, Witnet.RadonHash) external returns (bytes4);
     function settlePriceFeedUpdateConditions(string calldata, IWitPriceFeeds.UpdateConditions calldata) external;
+    function transferOwnership(address) external;
 }
