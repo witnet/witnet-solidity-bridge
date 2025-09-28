@@ -920,6 +920,9 @@ library WitPriceFeedsDataLib {
             __record.symbol = symbol;
             __record.index = uint32(data().ids.length);
             delete __record.lastUpdate;
+        }
+        if (!__record.settled()) {
+            // add id to the list of supported price feeds, if not currently settled
             data().ids.push(IWitPyth.ID.wrap(_id));
         }
     }
