@@ -321,10 +321,12 @@ library WitPriceFeedsDataLib {
         require(!__record.settled(), "already settled");
         bytes32 _mapperDeps;
         for (uint _ix; _ix < mapperDeps.length; _ix ++) {
-            bytes4 _id4 = bytes4(keccak256(bytes(mapperDeps[_ix])));
+            bytes4 _id4 = bytes4(hash(mapperDeps[_ix]));
             PriceFeed storage __depsFeed = seekPriceFeed(IWitPriceFeeds.ID4.wrap(_id4));
-            require(__depsFeed.settled(), "unsupported dependency");
-            require(IWitPriceFeeds.ID4.unwrap(id4) != _id4, "dependency loop");
+            require(__depsFeed.settled(), string(abi.encodePacked(
+                "unsupported dependency: ",
+                mapperDeps[_ix]
+            )));
             _mapperDeps |= (bytes32(_id4) >> (32 * _ix));
             data().reverseDeps[IWitPriceFeeds.ID4.wrap(_id4)].push(id4);
         }
@@ -333,6 +335,11 @@ library WitPriceFeedsDataLib {
             mapper, 
             _mapperDeps
         );
+        
+        // smoke test: force the transaction to revert, should there be any dependency loopback:
+        getPriceUnsafe(id4);
+
+        // recompute and return the new price feeds footprint:
         return settlePriceFeedFootprint();
     }
 
@@ -361,6 +368,11 @@ library WitPriceFeedsDataLib {
             oracleAddress,
             oracleSources
         );
+
+        // smoke test: force the transaction to revert, if providing bad sources or target address
+        getPriceUnsafe(id4);
+
+        // recompute and return the new price feeds footprint:
         return settlePriceFeedFootprint();
     }
 
