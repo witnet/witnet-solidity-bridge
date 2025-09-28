@@ -274,6 +274,14 @@ contract WitPriceFeedsV3
             ));
     }
 
+    ///Address of contract from which this one was cloned.
+    function master() 
+        virtual override
+        public view 
+        returns (address)
+    {
+        return cloned() ? self() : address(0);
+    }
 
     /// Returns the soul-bounded address where all price updates will be reported to.
     /// @dev If zero, price updates will not be reported to any other external address.

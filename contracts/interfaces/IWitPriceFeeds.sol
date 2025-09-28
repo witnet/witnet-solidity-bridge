@@ -147,5 +147,9 @@ interface IWitPriceFeeds {
     /// @notice Returns last known price updates and deviations for all supported price feeds without any sanity checks.    
     function lookupPriceFeeds() external view returns (Info[] memory);
     
+    /// Address of contract from which this one was cloned.
+    function master() external view returns (address);
+    
+    /// Tells whether there is a price feed settled with the specified caption.
     function supportsCaption(string calldata caption) external view returns (bool);
 }
