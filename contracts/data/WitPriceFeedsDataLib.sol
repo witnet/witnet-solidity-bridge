@@ -260,41 +260,41 @@ library WitPriceFeedsDataLib {
 
     function removePriceFeed(IWitPriceFeeds.ID4 id4, bool recursively) public {
         PriceFeed storage self = seekPriceFeed(id4);
-        require(self.settled(), "unknown price feed");
+        if (self.settled()) {
+            IWitPriceFeeds.ID4[] memory _reverseDeps = data().reverseDeps[id4];
+            require(
+                recursively
+                    || _reverseDeps.length == 0,
+                "cannot remove if mapped from others"  
+            );
 
-        IWitPriceFeeds.ID4[] memory _reverseDeps = data().reverseDeps[id4];
-        require(
-            recursively
-                || _reverseDeps.length == 0,
-            "cannot remove if mapped from others"  
-        );
-
-        // recursively remove reverse dependencies, if any
-        // (i.e. other price feeds that rely directly or indirectly on this one)
-        for (uint _ix; _ix < _reverseDeps.length; ++ _ix) {
-            removePriceFeed(_reverseDeps[_ix], recursively);
-        }
-        delete data().reverseDeps[id4];
-
-        // remove from array of supported price feeds
-        data().ids[self.index] = data().ids[data().ids.length - 1];
-        data().ids.pop();
-
-        // reset all metadata, but the symbol
-        self.exponent = 0;
-        self.mapper = IWitPriceFeeds.Mappers.None;
-        self.mapperDeps = bytes32(0);
-        self.oracle = IWitPriceFeeds.Oracles.Witnet;
-        self.oracleAddress = address(0); 
-        Witnet.RadonHash _radonHash = Witnet.RadonHash.wrap(self.oracleSources);       
-        if (!_radonHash.isZero()) {
-            if (id4.equals(data().reverseIds[_radonHash])) {
-                data().reverseIds[_radonHash] = IWitPriceFeeds.ID4.wrap(0);
+            // recursively remove reverse dependencies, if any
+            // (i.e. other price feeds that rely directly or indirectly on this one)
+            for (uint _ix; _ix < _reverseDeps.length; ++ _ix) {
+                removePriceFeed(_reverseDeps[_ix], recursively);
             }
-            self.oracleSources = bytes32(0);
+            delete data().reverseDeps[id4];
+
+            // remove from array of supported price feeds
+            data().ids[self.index] = data().ids[data().ids.length - 1];
+            data().ids.pop();
+
+            // reset all metadata, but the symbol
+            self.exponent = 0;
+            self.mapper = IWitPriceFeeds.Mappers.None;
+            self.mapperDeps = bytes32(0);
+            self.oracle = IWitPriceFeeds.Oracles.Witnet;
+            self.oracleAddress = address(0); 
+            Witnet.RadonHash _radonHash = Witnet.RadonHash.wrap(self.oracleSources);       
+            if (!_radonHash.isZero()) {
+                if (id4.equals(data().reverseIds[_radonHash])) {
+                    data().reverseIds[_radonHash] = IWitPriceFeeds.ID4.wrap(0);
+                }
+                self.oracleSources = bytes32(0);
+            }
+            delete self.updateConditions;
+            delete self.lastUpdate;
         }
-        delete self.updateConditions;
-        delete self.lastUpdate;
     }
 
     function settlePriceFeedFootprint() public returns (bytes4 _footprint) {
