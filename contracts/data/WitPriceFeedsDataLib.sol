@@ -276,7 +276,13 @@ library WitPriceFeedsDataLib {
             delete data().reverseDeps[id4];
 
             // remove from array of supported price feeds
-            data().ids[self.index] = data().ids[data().ids.length - 1];
+            uint _popIndex = data().ids.length - 1;
+            if (self.index < _popIndex) {
+                IWitPyth.ID _popID = data().ids[_popIndex];
+                PriceFeed storage __last = seekPriceFeed(_intoID4(_popID));
+                __last.index = self.index;
+                data().ids[self.index] = _popID;
+            }
             data().ids.pop();
 
             // reset all metadata, but the symbol
