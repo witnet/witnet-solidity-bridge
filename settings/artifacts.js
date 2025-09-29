@@ -2,7 +2,8 @@ export default {
   default: {
     WitnetDeployer: "WitnetDeployer",
     apps: {
-      WitPriceFeeds: "WitPriceFeedsLegacyUpgradable",
+      WitPriceFeeds: "WitPriceFeedsV3",
+      WitPriceFeedsLegacy: "WitPriceFeedsLegacyUpgradable",
       WitRandomness: "WitRandomnessV3",
     },
     core: {

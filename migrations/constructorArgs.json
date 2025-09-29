@@ -239,9 +239,10 @@
     },
     "optimism:sepolia": {
         "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xff7b32870b35259212bc103c79380e03786588ff\",\"0xff1f868d74d1b9a434c7bbf2abe470c8f153ddff\",\"0x322e322e312d626437363334382d303565333662620000000000000000000000\",true]}",
-        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x322e322e312d316339313030352d316631346331330000000000000000000000\",true]}",
-        "WitOracleTrustableOvm2": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x322e322e312d316339313030352d663637306233370000000000000000000000\"]}",
-        "WitPriceFeedsLegacyUpgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x322e322e312d316339313030352d393061646130360000000000000000000000\",true]}"
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x322e322e322d316533333635322d333264306364360000000000000000000000\",true]}",
+        "WitOracleTrustableOvm2": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x322e322e322d316533333635322d653135343535660000000000000000000000\"]}",
+        "WitPriceFeedsLegacyUpgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x322e322e322d316533333635322d393663643631620000000000000000000000\",true]}",
+        "WitPriceFeedsV3": "{\"types\":[\"address\",\"address\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0xF121b71715E71DDeD592F1125a06D4ED06F0694D\"]}"
     },
     "polygon:amoy": {
         "WitOracleRadonRegistryUpgradableDefault": "322e312e31302d646337396135362d61363862653464000000000000000000000000000000000000000000000000000000000000000000000000000000000001",

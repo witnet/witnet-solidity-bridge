@@ -324,18 +324,20 @@
     },
     "optimism:sepolia": {
         "apps": {
-            "WitPriceFeedsLegacyUpgradable": "0x28e93D7177202FaD575Aa18b6717370464eEDECF"
+            "WitPriceFeedsLegacyUpgradable": "0x23b3BABb466E25C3AB9611cAe59c511B80c6FEC1",
+            "WitPriceFeedsV3": "0xC5e4b549A8218960c8961b0429f205C6C7072426"
         },
         "core": {
-            "WitOracleRadonRegistryUpgradableDefault": "0x17746A5948A7878Eb36e26699375ca3526981099",
+            "WitOracleRadonRegistryUpgradableDefault": "0x87A6836439C2e82ef21568aadC2E8c0162780f54",
             "WitOracleRadonRequestFactoryUpgradableDefault": "0xbA50a8e0057A605B35365e6a7A1b1671836787a9",
-            "WitOracleTrustableOvm2": "0x9094802614F6D1C6B4b5406A3050decc1d13a40a"
+            "WitOracleTrustableOvm2": "0x693e0e9b9858420372876a78bA5f69c87e873d64"
         },
         "libs": {
-            "WitOracleDataLib": "0x2D59DE3385f80Cd97891F0d1bC942B8eaC05D911",
-            "WitOracleRadonEncodingLib": "0x131F2eb6214e92fFB3921ff582e7A9E703aDA6c4",
-            "WitOracleResultStatusLib": "0x3980B56c8e13667Ea5c4EE65dd78371DA67f81c2",
-            "WitPriceFeedsLegacyDataLib": "0x4643327A0462496362A3554fD515AAA43F214401"
+            "WitOracleDataLib": "0x1747C9A3e6d7C5b6B188F1C94b12C2fb263e558A",
+            "WitOracleRadonEncodingLib": "0x72202A5d3628fB57a7b7789c861A83405ebc49FE",
+            "WitOracleResultStatusLib": "0xbf330bDDBA6D04da1D0A6671A4f8EC352B39FC61",
+            "WitPriceFeedsLegacyDataLib": "0x86CAe8eD8cc27A4069E7FAAEe031b9cA75A8F7d7",
+            "WitPriceFeedsDataLib": "0xAC2b6752DDba0Ca723075EacC4cCF57d674dBB0e"
         }
     },
     "polygon:amoy": {
