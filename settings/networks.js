@@ -260,6 +260,7 @@ export default {
     },
   },
   "gnosis:mainnet": {
+    mainnet: true,
     port: 9509,
     network_id: 100,
     symbol: "DAI",
