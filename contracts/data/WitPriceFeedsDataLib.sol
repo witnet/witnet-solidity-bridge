@@ -146,7 +146,7 @@ library WitPriceFeedsDataLib {
                 _lastUpdate.exponent = self.exponent;
 
             } else if (_oracle == IWitPriceFeeds.Oracles.Chainlink) {
-                (uint80 _timestamp, int _value,,,) = IChainlinkAggregatorV3(self.oracleAddress).latestRoundData();
+                (, int _value,, uint _timestamp,) = IChainlinkAggregatorV3(self.oracleAddress).latestRoundData();
                 _lastUpdate.price = uint64(int64(_value));
                 _lastUpdate.timestamp = Witnet.Timestamp.wrap(uint64(_timestamp));
                 _lastUpdate.exponent = self.exponent;
