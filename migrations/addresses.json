@@ -1,7 +1,7 @@
 {
     "default": {
         "apps": {
-            "WitPriceFeeds": "0x1111AbA2164AcdC6D291b08DfB374280035E1111",
+            "WitPriceFeedsLegacy": "0x1111AbA2164AcdC6D291b08DfB374280035E1111",
             "WitRandomnessV2": "0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB",
             "WitRandomnessV3": "0xC0FFee84CC8a7A033B55fFc0cc6Bf3087136d391"
         },
@@ -180,7 +180,8 @@
             "WitOracleDataLib": "0xF22fcebC0CaC37CE863a65Ca24ACb4C7b9724bC3",
             "WitOracleRadonEncodingLib": "0x7FDb4560EDf7A7340Cf31C8f63Be8D2d667B0f12",
             "WitOracleResultStatusLib": "0x286361C52A5316Ed2CdcC68e10c5f5ce24CD9Ff1",
-            "WitPriceFeedsLegacyDataLib": "0xBBB488446c042a961D422993094F6FefB675c073"
+            "WitPriceFeedsLegacyDataLib": "0xBBB488446c042a961D422993094F6FefB675c073",
+            "WitPriceFeedsDataLib": "0x1d482a5741eD35700a046B5D09E2888f60D75edF"
         },
         "core": {
             "WitOracleRadonRegistryUpgradableDefault": "0x2a8bf23240dC5DFf2743dA9C8050bADAd70bc799",
@@ -190,7 +191,8 @@
             "WitOracleRadonRequestFactoryUpgradableDefault": "0xf91295D42EACDa8e2A0a03F08b8786f21FA57D34"
         },
         "apps": {
-            "WitPriceFeedsLegacyUpgradable": "0x7258A06d0A533f2049C135f2b2eB4E22243fD22F"
+            "WitPriceFeedsLegacyUpgradable": "0x7258A06d0A533f2049C135f2b2eB4E22243fD22F",
+            "WitPriceFeedsV3": "0x5c15E589948b45fcB289a366048aEA8fBDC5135b"
         }
     },
     "gnosis:mainnet": {

@@ -52,7 +52,14 @@ async function main () {
           ? merge(JSON.parse(constructorArgs[network][impl] || "[]"), JSON.parse(constructorArgs.default[impl] || "[]"))
           : undefined
         )?.values
-        await verifyContract({ address, constructorArgs: args }, hre)
+        if (args) {
+          console.info(`  Constructor args: ${JSON.stringify(args)}`)
+        }
+        try {
+          await verifyContract({ address, constructorArgs: args }, hre)
+        } catch (err) {
+          console.error(err)
+        }
       }
     }
   }
