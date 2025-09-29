@@ -168,15 +168,22 @@ library WitPriceFeedsDataLib {
             }
         
         } else {    
-            if (_mapper == IWitPriceFeeds.Mappers.Product) {
-                return fetchLastUpdateFromProduct(id4, heartbeat, self.exponent);
+            if (
+                _mapper == IWitPriceFeeds.Mappers.Product 
+                    || _mapper == IWitPriceFeeds.Mappers.Inverse
+            ) {
+                return fetchLastUpdateFromProduct(
+                    id4, heartbeat, 
+                    self.exponent, 
+                    _mapper == IWitPriceFees.Mappers.Inverse
+                );
 
             } else if (_mapper == IWitPriceFeeds.Mappers.Hottest) {
                 return fetchLastUpdateFromHottest(id4, heartbeat);
             
             } else if (_mapper == IWitPriceFeeds.Mappers.Fallback) {
                 return fetchLastUpdateFromFallback(id4, heartbeat);
-            
+
             } else {
                 revert("unsupported mapper");
             }
@@ -527,7 +534,12 @@ library WitPriceFeedsDataLib {
         );
     }
 
-    function fetchLastUpdateFromProduct(IWitPriceFeeds.ID4 id4, uint24 heartbeat, int8 exponent)
+    function fetchLastUpdateFromProduct(
+            IWitPriceFeeds.ID4 id4, 
+            uint24 heartbeat, 
+            int8 exponent, 
+            bool inverse
+        )
         internal view 
         returns (PriceData memory _lastUpdate)
     {
@@ -564,7 +576,7 @@ library WitPriceFeedsDataLib {
                         _lastUpdate.trail = _depLastUpdate.trail;
                     }
                 }
-                _regs[3] -= _depLastUpdate.exponent;
+                _regs[3] += inverse ? _depLastUpdate.exponent : - _depLastUpdate.exponent;
             }
         }
         _regs[3] += exponent;
