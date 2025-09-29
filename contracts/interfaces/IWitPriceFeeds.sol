@@ -15,7 +15,7 @@ interface IWitPriceFeeds {
         Fallback,
         Hottest,
         Product,
-        Inverse,
+        Inverse
     }
 
     enum Oracles {

@@ -175,7 +175,7 @@ library WitPriceFeedsDataLib {
                 return fetchLastUpdateFromProduct(
                     id4, heartbeat, 
                     self.exponent, 
-                    _mapper == IWitPriceFees.Mappers.Inverse
+                    _mapper == IWitPriceFeeds.Mappers.Inverse
                 );
 
             } else if (_mapper == IWitPriceFeeds.Mappers.Hottest) {
@@ -326,7 +326,7 @@ library WitPriceFeedsDataLib {
     {
         require(
             uint8(mapper) > uint8(IWitPriceFeeds.Mappers.None)
-                && uint8(mapper) <= uint8(IWitPriceFeeds.Mappers.Product), 
+                && uint8(mapper) <= uint8(IWitPriceFeeds.Mappers.Inverse), 
             "invalid mapper"
         );
         IWitPriceFeeds.ID4 id4 = _settlePriceFeedSymbol(symbol);
