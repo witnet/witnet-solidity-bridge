@@ -55,8 +55,8 @@ export default {
     port: 8502,
     verify: {
       apiKey: "MY_API_KEY",
-      apiUrl: "https://base-sepolia.blockscout.com/api",
-      explorerUrl: "https://base-sepolia.blockscout.com",
+      apiUrl: "https://api.etherscan.io/v2/api?chainid=84532",
+      explorerUrl: "https://sepolia.basescan.org",
     },
   },
   "boba:bnb:testnet": {
