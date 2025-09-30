@@ -292,21 +292,14 @@ library WitPriceFeedsDataLib {
             }
             data().ids.pop();
 
-            // reset all metadata, but the symbol
-            self.exponent = 0;
-            self.mapper = IWitPriceFeeds.Mappers.None;
-            self.mapperDeps = bytes32(0);
-            self.oracle = IWitPriceFeeds.Oracles.Witnet;
-            self.oracleAddress = address(0); 
+            // delete all metadata, but updateConditions and lastUpdate
             Witnet.RadonHash _radonHash = Witnet.RadonHash.wrap(self.oracleSources);       
             if (!_radonHash.isZero()) {
                 if (id4.equals(data().reverseIds[_radonHash])) {
                     data().reverseIds[_radonHash] = IWitPriceFeeds.ID4.wrap(0);
                 }
-                self.oracleSources = bytes32(0);
             }
-            delete self.updateConditions;
-            delete self.lastUpdate;
+            delete data().records[id4];
         }
     }
 
@@ -684,7 +677,7 @@ library WitPriceFeedsDataLib {
     function settled(PriceFeed storage self) internal view returns (bool) {
         return(
             self.oracleSources != bytes32(0)
-                || self.mapper != IWitPriceFeeds.Mappers.None
+                || uint8(self.mapper) != 0
                 || self.oracleAddress != address(0)
         );
     }

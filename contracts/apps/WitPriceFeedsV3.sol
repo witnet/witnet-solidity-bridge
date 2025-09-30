@@ -384,12 +384,8 @@ contract WitPriceFeedsV3
         }
         Oracles _oracle = __record.oracle;
         bytes32 _oracleSources = __record.oracleSources;
-        address _oracleAddress;
-        if (_oracle == Oracles.Witnet) {
-            _oracleAddress = address(this);
-        } else {
-            _oracleAddress = __record.oracleAddress;
-        }
+        address _oracleAddress = __record.oracleAddress;
+
         return Info({
             id: _intoID(_id4),
             exponent: __record.exponent,
