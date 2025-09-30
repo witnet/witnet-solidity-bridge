@@ -52,7 +52,7 @@
             "WitOracleRadonEncodingLib": "0x98DbB216138aA6a0b3ff2ae9bBdeC254398E5B2E",
             "WitOracleResultStatusLib": "0x6395d83C9Aa803498980A5ab78217785d4db7bE7",
             "WitPriceFeedsLegacyDataLib": "0x9d39313F5D9c7575EeDA9ACdE6a91BBCc4D6D2B2",
-            "WitPriceFeedsDataLib": "0xFB36b14df6D319A5A7F418C80b0700664A4f9e6a"
+            "WitPriceFeedsDataLib": ""
         },
         "core": {
             "WitOracleRadonRegistryUpgradableDefault": "0xe52b43F67ACa856CF28516606949c4E696762aCA",
@@ -61,7 +61,7 @@
         },
         "apps": {
             "WitPriceFeedsLegacyUpgradable": "0xCF9f2727b04FF2D0AD526f2704aa833aE26a024e",
-            "WitPriceFeedsV3": "0xF20d7be44d3f90a3A75359838eC3173c657097f1"
+            "WitPriceFeedsV3": ""
         }
     },
     "boba:bnb:mainnet": {
@@ -183,7 +183,7 @@
             "WitOracleRadonEncodingLib": "0x7FDb4560EDf7A7340Cf31C8f63Be8D2d667B0f12",
             "WitOracleResultStatusLib": "0x286361C52A5316Ed2CdcC68e10c5f5ce24CD9Ff1",
             "WitPriceFeedsLegacyDataLib": "0xBBB488446c042a961D422993094F6FefB675c073",
-            "WitPriceFeedsDataLib": "0x1d482a5741eD35700a046B5D09E2888f60D75edF"
+            "WitPriceFeedsDataLib": ""
         },
         "core": {
             "WitOracleRadonRegistryUpgradableDefault": "0x2a8bf23240dC5DFf2743dA9C8050bADAd70bc799",
@@ -194,7 +194,7 @@
         },
         "apps": {
             "WitPriceFeedsLegacyUpgradable": "0x7258A06d0A533f2049C135f2b2eB4E22243fD22F",
-            "WitPriceFeedsV3": "0x5c15E589948b45fcB289a366048aEA8fBDC5135b"
+            "WitPriceFeedsV3": ""
         }
     },
     "gnosis:mainnet": {
@@ -327,7 +327,7 @@
     "optimism:sepolia": {
         "apps": {
             "WitPriceFeedsLegacyUpgradable": "0x23b3BABb466E25C3AB9611cAe59c511B80c6FEC1",
-            "WitPriceFeedsV3": "0xC5e4b549A8218960c8961b0429f205C6C7072426"
+            "WitPriceFeedsV3": ""
         },
         "core": {
             "WitOracleRadonRegistryUpgradableDefault": "0x87A6836439C2e82ef21568aadC2E8c0162780f54",
@@ -339,7 +339,7 @@
             "WitOracleRadonEncodingLib": "0x72202A5d3628fB57a7b7789c861A83405ebc49FE",
             "WitOracleResultStatusLib": "0xbf330bDDBA6D04da1D0A6671A4f8EC352B39FC61",
             "WitPriceFeedsLegacyDataLib": "0x86CAe8eD8cc27A4069E7FAAEe031b9cA75A8F7d7",
-            "WitPriceFeedsDataLib": "0xAC2b6752DDba0Ca723075EacC4cCF57d674dBB0e"
+            "WitPriceFeedsDataLib": ""
         }
     },
     "polygon:amoy": {

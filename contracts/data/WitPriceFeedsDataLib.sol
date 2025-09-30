@@ -292,13 +292,14 @@ library WitPriceFeedsDataLib {
             }
             data().ids.pop();
 
-            // delete all metadata, but updateConditions and lastUpdate
+            // delete all metadata, but the update conditions
             Witnet.RadonHash _radonHash = Witnet.RadonHash.wrap(self.oracleSources);       
             if (!_radonHash.isZero()) {
                 if (id4.equals(data().reverseIds[_radonHash])) {
                     data().reverseIds[_radonHash] = IWitPriceFeeds.ID4.wrap(0);
                 }
             }
+            delete data().records[id4].lastUpdate;
             delete data().records[id4];
         }
     }
@@ -537,11 +538,10 @@ library WitPriceFeedsDataLib {
         returns (PriceData memory _lastUpdate)
     {
         IWitPriceFeeds.ID4[] memory _deps = deps(id4);
-        int[4] memory _regs;
+        int[3] memory _regs;
         // _regs[0] -> _lastPrice
         // _regs[1] -> _lastEmaPrice
-        // _regs[2] -> _lastDeltaPrice
-        // _regs[3] -> _decimals
+        // _regs[2] -> _decimals
         unchecked {
             for (uint _ix; _ix < _deps.length; ++ _ix) {
                 PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]), _deps[_ix], heartbeat);
@@ -551,7 +551,6 @@ library WitPriceFeedsDataLib {
                     } else {
                         _regs[0] = int64(_depLastUpdate.price);
                     }
-                    _regs[2] = _depLastUpdate.deltaPrice;
                     _lastUpdate.timestamp = _depLastUpdate.timestamp;
                     _lastUpdate.trail = _depLastUpdate.trail;
                     
@@ -561,35 +560,41 @@ library WitPriceFeedsDataLib {
                     } else {
                         _regs[0] *= int64(_depLastUpdate.price);
                     }
-                    _regs[2] *= _depLastUpdate.deltaPrice;
-
                     if (_lastUpdate.timestamp.gt(_depLastUpdate.timestamp)) {
                         // on Product: timestamp belong to oldest of all deps
                         _lastUpdate.timestamp = _depLastUpdate.timestamp;
                         _lastUpdate.trail = _depLastUpdate.trail;
                     }
                 }
-                _regs[3] += inverse ? _depLastUpdate.exponent : - _depLastUpdate.exponent;
+                _regs[2] += inverse ? _depLastUpdate.exponent : - _depLastUpdate.exponent;
             }
         }
-        _regs[3] += exponent;
-        if (_regs[3] > 0) {
-            uint _divisor = 10 ** uint(_regs[3]);
-            if (_regs[1] > 0) {
-                _lastUpdate.emaPrice = uint64(uint(_regs[1]) / _divisor);
+        _regs[2] += exponent;
+        if (_regs[2] >= 0) {
+            if (inverse) {
+                uint _factor = 10 ** uint(_regs[2]);
+                if (_regs[1] > 0) {
+                    _lastUpdate.emaPrice = uint64(_factor / uint(_regs[1]));
+                } else if (_regs[0] > 0) {
+                    _lastUpdate.price = uint64(_factor / uint(_regs[0]));
+                } else {
+                    _lastUpdate.price = 0; // avoid unhandled reverts
+                }
             } else {
-                _lastUpdate.price = uint64(uint(_regs[0]) / _divisor);
+                uint _divisor = 10 ** uint(_regs[2]);
+                if (_regs[1] > 0) {
+                    _lastUpdate.emaPrice = uint64(uint(_regs[1]) / _divisor);
+                } else {
+                    _lastUpdate.price = uint64(uint(_regs[0]) / _divisor);
+                }
             }
-            _lastUpdate.deltaPrice = int56(_regs[2] / int(_divisor)); // ¿?
-        
         } else {
-            uint _factor = 10 ** uint(-_regs[3]);
+            uint _factor = 10 ** uint(-_regs[2]);
             if (_regs[1] > 0) {
                 _lastUpdate.emaPrice = uint64(uint(_regs[1]) * _factor);
             } else {
                 _lastUpdate.price = uint64(uint(_regs[0]) * _factor);
             }
-            _lastUpdate.deltaPrice = int56(_regs[2] * int(_factor));
         }
         _lastUpdate.exponent = exponent;
     }
