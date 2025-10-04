@@ -63,6 +63,7 @@ export default {
         "WitPriceFeedsDataLib",
       ],
       from: "0xF121b71715E71DDeD592F1125a06D4ED06F0694D",
+      vanity: 627172870, // 0x3210564CFC8855cAD45D6d963118058fe2B80123
     },
     WitPriceFeedsLegacy: {
       baseLibs: [

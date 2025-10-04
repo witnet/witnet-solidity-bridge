@@ -7,7 +7,7 @@ import "../interfaces/IWitOracleQueriable.sol";
 import "../interfaces/IWitPriceFeedsAdmin.sol";
 import "../interfaces/IWitPriceFeedsConsumer.sol";
 import "../mockups/WitPythChainlinkAggregator.sol";
-import "../patterns/Clonable.sol";
+import "../patterns/Clonable2.sol";
 import "../patterns/Ownable2Step.sol";
 
 /// @title WitPriceFeedsV3: On-demand Price Feeds registry for EVM-compatible L1/L2 chains, 
@@ -34,7 +34,7 @@ import "../patterns/Ownable2Step.sol";
 
 contract WitPriceFeedsV3
     is
-        Clonable,
+        Clonable2,
         Ownable2Step,
         WitPriceFeeds
 {
@@ -81,39 +81,26 @@ contract WitPriceFeedsV3
         });
     }
 
-    function initializeClone(bytes calldata initdata) 
+    function initializeClone(
+            address _master, 
+            address _curator, 
+            UpdateConditions calldata _defaultUpdateConditions
+        )
         external
-        initializer
-        onlyDelegateCalls
         returns (address)
     {
-        (address _operator, UpdateConditions memory _defaultConditions, Info[] memory _pfs) = abi.decode(
-            initdata, 
-            (address, UpdateConditions, Info[])
-        );
-        _transferOwnership(_operator);
-        __storage().defaultUpdateConditions = _defaultConditions;
-        for (uint _ix = 0; _ix < _pfs.length; _ix ++) {
-            __settlePriceFeedOracle(
-                _pfs[_ix].symbol,
-                _pfs[_ix].exponent,
-                _pfs[_ix].oracle.class,
-                _pfs[_ix].oracle.target,
-                _pfs[_ix].oracle.sources
-            );
-        }
+        _transferOwnership(_curator);
+        __storage().defaultUpdateConditions = _defaultUpdateConditions;
+        __initializeClone(_master);
         return address(this);
     }
 
     
     /// ===============================================================================================================
-    /// --- Clonable --------------------------------------------------------------------------------------------------
+    /// --- Clonable2 -------------------------------------------------------------------------------------------------
 
     function initialized() virtual override public view returns (bool) {
-        return(
-            address(this) == _SELF
-                || __storage().defaultUpdateConditions.minWitnesses > 0
-        );
+        return __storage().defaultUpdateConditions.minWitnesses > 0;
     }
     
     
@@ -244,52 +231,30 @@ contract WitPriceFeedsV3
     /// ===============================================================================================================
     /// --- IWitPriceFeeds --------------------------------------------------------------------------------------------
 
+    /// --- permissionless state-modifying methods --------------------------------------------------------------------
+
     /// Creates a light-proxy clone to the underlying logic contract, owned by the specified `operator` address. 
     /// Operators of cloned contracts can optionally settle one single price feed `IWitPriceFeedConsumer` contract. 
     /// The consumer contract, if settled, will be immediately reported upon every verified price update pushed 
     /// into `WitPriceFeeds`. Either way, price feeds data will be stored in the `WitPriceFeeds` storage. 
     /// @dev Reverts if the salt has already been used, or trying to inherit mapped price feeds.
     /// @param _salt Salt that will determine the address of the new light-proxy clone.
-    /// @param _operator Address that will have rights to manage price feeds on the new light-proxy clone.
-    /// @param _id4s Array of price feeds to inherit from the instance being cloned.
+    /// @param _curator Address that will have rights to manage price feeds on the new light-proxy clone.
     function clone(
             bytes32 _salt,
-            address _operator, 
-            ID4[] calldata _id4s
+            address _curator
         ) 
         virtual override
         external
+        notOnClones
         returns (address)
     {
-        Info[] memory _pfs = new Info[](_id4s.length);
-        for (uint _ix = 0; _ix < _pfs.length; _ix ++) {
-            _pfs[_ix] = lookupPriceFeed(_id4s[_ix]);
-            require(_pfs[_ix].mapper.class == Mappers.None, "mapped price feed");
-        }
-        return WitPriceFeedsV3(_cloneDeterministic(_salt))
-            .initializeClone(abi.encode(
-                _operator,
-                __storage().defaultUpdateConditions,
-                _pfs
-            ));
-    }
-
-    ///Address of contract from which this one was cloned.
-    function master() 
-        virtual override
-        public view 
-        returns (address)
-    {
-        return cloned() ? self() : address(0);
-    }
-
-    /// Returns the soul-bounded address where all price updates will be reported to.
-    /// @dev If zero, price updates will not be reported to any other external address.
-    /// @dev It can only be settled or changed by cloning the contract.
-    /// @dev Price feeds metadata and update information will be stored in this contract,
-    /// @dev even if there's a soulbound address settled.
-    function consumer() override external view returns (address) {
-        return __storage().consumer;
+        return WitPriceFeedsV3(__cloneDeterministic(_salt))
+            .initializeClone(
+                target(),
+                _curator,
+                __storage().defaultUpdateConditions
+            );
     }
 
     /// Creates a Chainlink Aggregator proxy to the specified symbol.
@@ -316,6 +281,51 @@ contract WitPriceFeedsV3
         return IWitPythChainlinkAggregator(_aggregator);
     }
 
+
+    /// --- governance related read-only methods ----------------------------------------------------------------------
+
+    /// Returns the soul-bounded address where all price updates will be reported to.
+    /// @dev If zero, price updates will not be reported to any other external address.
+    /// @dev It can only be settled or changed by cloning the contract.
+    /// @dev Price feeds metadata and update information will be stored in this contract,
+    /// @dev even if there's a soulbound address settled.
+    function consumer() override external view returns (address) {
+        return __storage().consumer;
+    }
+
+    /// Returns a unique hash determined by the combination of data sources being used by 
+    /// supported non-routed price feeds, and dependencies of all supported routed 
+    /// price feeds. The footprint changes if any price feed is modified, added, removed 
+    /// or if the dependency tree of any routed price feed is altered.
+    function footprint() external override view returns (bytes4 _footprint) {
+        return __storage().footprint;
+    }
+    
+    /// Determines unique ID for specified `symbol` string.
+    function hash(string memory _symbol) public pure returns (ID) {
+        return ID.wrap(WitPriceFeedsDataLib.hash(_symbol));
+    }
+
+    /// @notice Master address from which this contract was cloned.
+    function master() 
+        virtual override (Clonable2, IWitPriceFeeds)
+        public view 
+        returns (address)
+    {
+        return cloned() ? super.master() : address(0);
+    }
+
+    function target()
+        virtual override (Clonable2, IWitPriceFeeds)
+        public view
+        returns (address)
+    {
+        return super.target();
+    }
+
+
+    /// --- price feed updates related read-only methods --------------------------------------------------------------
+    
     /// @notice Returns last update price for the specified ID4 price feed.
     /// Note: This function is sanity-checked version of `getPriceUnsafe` which is useful in applications and
     /// smart contracts that require recentl updated price, and no hint of market deviation being currently excessive. 
@@ -352,19 +362,6 @@ contract WitPriceFeedsV3
     /// @param _id4 Unique ID4 identifier of a price feed supported by this contract.
     function getPriceUnsafe(ID4 _id4) external view override returns (Price memory) {
         return WitPriceFeedsDataLib.getPriceUnsafe(_id4);
-    }
-
-    /// Returns a unique hash determined by the combination of data sources being used by 
-    /// supported non-routed price feeds, and dependencies of all supported routed 
-    /// price feeds. The footprint changes if any price feed is modified, added, removed 
-    /// or if the dependency tree of any routed price feed is altered.
-    function footprint() external override view returns (bytes4 _footprint) {
-        return __storage().footprint;
-    }
-    
-    /// Determines unique ID for specified `symbol` string.
-    function hash(string memory _symbol) public pure returns (ID) {
-        return ID.wrap(WitPriceFeedsDataLib.hash(_symbol));
     }
     
     function lookupPriceFeed(ID4 _id4)
@@ -488,12 +485,14 @@ contract WitPriceFeedsV3
 
     function settleConsumer(address _consumer)
         external override
-        onlyDelegateCalls
+        onlyOnClones
         onlyOwner
     {
         _require(
             _consumer != address(this)
-                && _consumer != _SELF
+                && _consumer != __SELF
+                && _consumer != target() 
+                && _consumer != master()
                 && _consumer.code.length > 0 // must be a contract
                 && IWitPriceFeedsConsumer(_consumer).witPriceFeeds() == address(this) 
                 && IWitPriceFeedsConsumer(_consumer).witOracle() == witOracle,
@@ -506,6 +505,7 @@ contract WitPriceFeedsV3
         external override
         onlyOwner
     {
+        _require(_validateUpdateConditions(_conditions), "invalid conditions");
         __storage().defaultUpdateConditions = _conditions;
     }
 
@@ -638,6 +638,7 @@ contract WitPriceFeedsV3
         external override
         onlyOwner
     {
+        _require(_validateUpdateConditions(_conditions), "invalid conditions");
         __settlePriceFeedUpdateConditions(_symbol, _conditions);
     }
 
@@ -783,6 +784,17 @@ contract WitPriceFeedsV3
 
     function _revertUnhandled() internal view {
         _revert("unhandled revert");
+    }
+
+    function _validateUpdateConditions(IWitPriceFeeds.UpdateConditions memory _conditions)
+        internal pure
+        returns (bool)
+    {
+        return (
+            _conditions.callbackGas > 0
+                && _conditions.heartbeatSecs > 0
+                && _conditions.minWitnesses > 0
+        );
     }
 
     function __seekPriceFeed(ID4 _id4) internal view returns (WitPriceFeedsDataLib.PriceFeed storage) {

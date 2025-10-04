@@ -1,6 +1,7 @@
 {
     "default": {
         "apps": {
+            "WitPriceFeeds": "0x3210564CFC8855cAD45D6d963118058fe2B80123",
             "WitPriceFeedsLegacy": "0x1111AbA2164AcdC6D291b08DfB374280035E1111",
             "WitRandomnessV2": "0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB",
             "WitRandomnessV3": "0xC0FFee84CC8a7A033B55fFc0cc6Bf3087136d391"

@@ -72,28 +72,19 @@ interface IWitPriceFeeds {
         uint16 minWitnesses;
     }
 
-    /// Creates a light-proxy clone to the underlying logic contract, owned by the specified `operator` address. 
+    /// Creates a light-proxy clone to the underlying logic contract, owned by the specified `curator` address. 
     /// Operators of cloned contracts can optionally settle one single price feed `IWitPriceFeedConsumer` contract. 
     /// The consumer contract, if settled, will be immediately reported upon every verified price update pushed 
     /// into `WitPriceFeeds`. Either way, price feeds data will be stored in the `WitPriceFeeds` storage. 
     /// @dev Reverts if the salt has already been used, or trying to inherit mapped price feeds.
     /// @param salt Salt that will determine the address of the new light-proxy clone.
-    /// @param operator Address that will have rights to manage price feeds on the new light-proxy clone.
-    /// @param id4s Array of price feeds to inherit from the instance being cloned.
-    function clone(
-            bytes32 salt,
-            address operator, 
-            ID4[] calldata id4s
-        ) external returns (address);
+    /// @param curator Address that will have rights to manage price feeds on the new light-proxy clone.
+    function clone(bytes32 salt, address curator) external returns (address);
 
     /// Returns the consumer address where all price updates will be reported to.
     /// @dev If zero, price updates will not be reported to any other external address.
-    /// @dev It can only be settled or an operator on a customized instance.
+    /// @dev It can only be settled or an curator on a customized instance.
     function consumer() external view returns (address);
-
-    /// Creates a Chainlink Aggregator proxy to the specified symbol.
-    /// @dev Reverts if symbol is not supported.
-    function createChainlinkAggregator(string calldata symbol) external returns (IWitPythChainlinkAggregator);
 
     /// Returns a unique hash determined by the combination of data sources being used by 
     /// supported non-routed price feeds, and dependencies of all supported routed 
@@ -103,6 +94,12 @@ interface IWitPriceFeeds {
 
     /// Determines unique ID for the specified symbol.
     function hash(string calldata symbol) external pure returns (IWitPyth.ID);
+
+    /// @notice Master address from which this contract was cloned.
+    function master() external view returns (address);
+
+    /// @notice Contract address to which clones will be re-directed.
+    function target() external view returns (address);
 
     /// @notice Returns last update price for the specified ID4 price feed.
     /// Note: This function is sanity-checked version of `getPriceUnsafe` which is useful in applications and
@@ -148,9 +145,10 @@ interface IWitPriceFeeds {
     /// @notice Returns last known price updates and deviations for all supported price feeds without any sanity checks.    
     function lookupPriceFeeds() external view returns (Info[] memory);
     
-    /// Address of contract from which this one was cloned.
-    function master() external view returns (address);
-    
     /// Tells whether there is a price feed settled with the specified caption.
     function supportsCaption(string calldata caption) external view returns (bool);
+
+    /// Creates a Chainlink Aggregator proxy to the specified symbol.
+    /// @dev Reverts if symbol is not supported.
+    function createChainlinkAggregator(string calldata symbol) external returns (IWitPythChainlinkAggregator);
 }
