@@ -113,17 +113,21 @@ contract WitPriceFeedsUpgradableV3
             // only owner can initialize an existing proxy:
             require(msg.sender == _owner, "not the owner");
         }
-        __initializeUpgradableData(_initData);
         if (
             __proxiable().codehash != bytes32(0)
                 && __proxiable().codehash == codehash()
         ) {
-            revert("already initialized codehash");
+            revert("already initialized");
+        }
+        if (__proxiable().proxy == address(0)) {
+            // a proxy is being initialized for the first time...
+            __proxiable().proxy = address(this);   
         }
         __proxiable().codehash = codehash();
+        __proxiable().implementation = base();
+        __initializeUpgradableData(_initData);
         emit Upgraded(owner(), base(), codehash(), version());
     }
-
 
     /// Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address _from) 
