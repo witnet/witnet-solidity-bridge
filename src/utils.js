@@ -21,7 +21,7 @@ export default {
   isDryRun,
   isNullAddress,
   isUpgradableArtifact,
-  padLeft,
+  padLeft, padRight,
   prompt,
   readJsonFromFile,
   overwriteJsonFile,
@@ -201,6 +201,14 @@ function isUpgradableArtifact (impl) {
 function padLeft (str, char, size) {
   if (str.length < size) {
     return char.repeat((size - str.length) / char.length) + str
+  } else {
+    return str
+  }
+}
+
+function padRight (str, char, size) {
+  if (str.length < size) {
+    return str + char.repeat((size - str.length) / char.length)
   } else {
     return str
   }
