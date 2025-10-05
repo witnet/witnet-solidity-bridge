@@ -237,29 +237,6 @@ contract WitPriceFeedsLegacyUpgradable
         return IWitOracleQueriable(witOracle).getQueryRequest(latestUpdateQueryId(feedId));
     }
 
-    // function latestUpdateQueryResult(bytes4 feedId)
-    //     override external view
-    //     returns (Witnet.DataResult memory)
-    // {
-    //     return witOracle.getQueryResult(latestUpdateQueryId(feedId));
-    // }
-
-    // function latestUpdateQueryResultStatus(bytes4 feedId)
-    //     override public view
-    //     returns (Witnet.ResultStatus)
-    // {
-    //     return WitPriceFeedsLegacyDataLib.latestUpdateQueryResultStatus(witOracle, feedId);
-    // }
-
-    // function latestUpdateQueryResultStatusDescription(bytes4 feedId) 
-    //     override external view
-    //     returns (string memory)
-    // {
-    //     return witOracle.getQueryResultStatusDescription(
-    //         latestUpdateQueryId(feedId)
-    //     );
-    // }
-
     function lookupWitnetBytecode(bytes4 feedId)
         override public view
         returns (bytes memory)
@@ -295,17 +272,6 @@ contract WitPriceFeedsLegacyUpgradable
     {
         return __requestUpdate(feedId, __defaultQuerySLA);
     }
-    
-    // function requestUpdate(bytes4 feedId, IWitPriceFeedsLegacy.RadonSLA calldata updateSLA)
-    //     public payable
-    //     virtual override
-    //     returns (uint256)
-    // {
-    //     return __requestUpdate(
-    //         feedId, 
-    //         _intoQuerySLA(updateSLA)
-    //     );
-    // }
     
 
     /// ===============================================================================================================
@@ -343,13 +309,6 @@ contract WitPriceFeedsLegacyUpgradable
     {
         return IWitOracleLegacy(witOracle).getQueryResultError(latestUpdateQueryId(feedId));
     }
-
-    // function lookupWitnetBytecode(bytes4 feedId) 
-    //     override external view
-    //     returns (bytes memory)
-    // {
-    //     return lookupWitnetBytecode(feedId);
-    // }
     
     function requestUpdate(bytes4 feedId, IWitPriceFeedsLegacy.RadonSLAv2 calldata legacySLA)
         external payable

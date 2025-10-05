@@ -86,6 +86,9 @@ interface IWitPriceFeeds {
     /// @dev It can only be settled or an curator on a customized instance.
     function consumer() external view returns (address);
 
+    /// Default update conditions that apply to brand new price feeds.
+    function defaultUpdateConditions() external view returns (IWitPriceFeeds.UpdateConditions calldata);
+
     /// Returns a unique hash determined by the combination of data sources being used by 
     /// supported non-routed price feeds, and dependencies of all supported routed 
     /// price feeds. The footprint changes if any price feed is modified, added, removed 
@@ -150,5 +153,4 @@ interface IWitPriceFeeds {
 
     /// Creates a Chainlink Aggregator proxy to the specified symbol.
     /// @dev Reverts if symbol is not supported.
-    function createChainlinkAggregator(string calldata symbol) external returns (IWitPythChainlinkAggregator);
-}
+    function createChainlinkAggregator(string calldata symbol) external returns (IWitPythChainlinkAggregator);}

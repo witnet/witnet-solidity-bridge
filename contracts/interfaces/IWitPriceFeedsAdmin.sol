@@ -29,7 +29,6 @@ interface IWitPriceFeedsAdmin {
     );
     
     function acceptOwnership() external;
-    function defaultUpdateConditions() external view returns (IWitPriceFeeds.UpdateConditions calldata);
     function owner() external view returns (address);
     function pendingOwner() external returns (address);
     function removePriceFeed(string calldata, bool) external returns (bytes4);
