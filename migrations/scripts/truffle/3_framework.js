@@ -582,7 +582,7 @@ async function unfoldTargetSpecs (domain, target, targetBase, from, network, net
     // Add version tag to intrinsical constructor args if target artifact is expected to be upgradable
     specs.intrinsics.types.push("bytes32")
     specs.intrinsics.values.push(
-      "0x" + utils.padRight(utils.fromAscii(getArtifactVersion(target, specs.baseLibs, networkArtifacts)), "0", 32)
+      "0x" + utils.padRight(utils.fromAscii(getArtifactVersion(target, specs.baseLibs, networkArtifacts)), "0", 64)
     );
     if (target.indexOf("Trustable") < 0) {
       // Add _upgradable constructor args on non-trustable (ergo trustless) but yet upgradable targets
