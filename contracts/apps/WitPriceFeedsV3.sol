@@ -233,24 +233,21 @@ contract WitPriceFeedsV3
 
     /// --- permissionless state-modifying methods --------------------------------------------------------------------
 
-    /// Creates a light-proxy clone to the underlying logic contract, owned by the specified `operator` address. 
-    /// Operators of cloned contracts can optionally settle one single price feed `IWitPriceFeedConsumer` contract. 
-    /// The consumer contract, if settled, will be immediately reported upon every verified price update pushed 
+    /// Creates a light-proxy clone to the `target()` contract address, to be owned by the specified `_curator` address. 
+    /// Operators of cloned contracts can optionally settle one single `IWitPriceFeedConsumer` consuming contract. 
+    /// The consuming contract, if settled, will be immediately reported upon every verified price update pushed 
     /// into `WitPriceFeeds`. Either way, price feeds data will be stored in the `WitPriceFeeds` storage. 
-    /// @dev Reverts if the salt has already been used, or trying to inherit mapped price feeds.
-    /// @param _salt Salt that will determine the address of the new light-proxy clone.
     /// @param _curator Address that will have rights to manage price feeds on the new light-proxy clone.
-    function clone(
-            bytes32 _salt,
-            address _curator
-        ) 
+    function clone(address _curator) 
         virtual override
         external
         notOnClones
         returns (address)
     {
-        return WitPriceFeedsV3(__cloneDeterministic(_salt))
-            .initializeClone(
+        _require(_curator != address(0), "zero curator");
+        address _clone = __clone();
+        emit Clonable2.Cloned(msg.sender, target(), _clone);
+        return WitPriceFeedsV3(_clone).initializeClone(
                 target(),
                 _curator,
                 __storage().defaultUpdateConditions
@@ -494,8 +491,7 @@ contract WitPriceFeedsV3
                 && _consumer != target() 
                 && _consumer != master()
                 && _consumer.code.length > 0 // must be a contract
-                && IWitPriceFeedsConsumer(_consumer).witPriceFeeds() == address(this) 
-                && IWitPriceFeedsConsumer(_consumer).witOracle() == witOracle,
+                && IWitPriceFeedsConsumer(_consumer).witPriceFeeds() == address(this),
             "invalid consumer"
         );
         __storage().consumer = _consumer;

@@ -72,14 +72,13 @@ interface IWitPriceFeeds {
         uint16 minWitnesses;
     }
 
-    /// Creates a light-proxy clone to the underlying logic contract, owned by the specified `curator` address. 
-    /// Operators of cloned contracts can optionally settle one single price feed `IWitPriceFeedConsumer` contract. 
-    /// The consumer contract, if settled, will be immediately reported upon every verified price update pushed 
+    /// Creates a light-proxy clone to the `target()` contract address, to be owned by the specified `curator` address. 
+    /// Operators of cloned contracts can optionally settle one single `IWitPriceFeedConsumer` consuming contract. 
+    /// The consuming contract, if settled, will be immediately reported upon every verified price update pushed 
     /// into `WitPriceFeeds`. Either way, price feeds data will be stored in the `WitPriceFeeds` storage. 
     /// @dev Reverts if the salt has already been used, or trying to inherit mapped price feeds.
-    /// @param salt Salt that will determine the address of the new light-proxy clone.
     /// @param curator Address that will have rights to manage price feeds on the new light-proxy clone.
-    function clone(bytes32 salt, address curator) external returns (address);
+    function clone(address curator) external returns (address);
 
     /// Returns the consumer address where all price updates will be reported to.
     /// @dev If zero, price updates will not be reported to any other external address.
