@@ -71,7 +71,7 @@ contract WitPriceFeedsUpgradableV3
         returns (bool)
     {
         return (
-            !super.cloned()
+            address(this) != __SELF
                 && address(this) != __proxiable().proxy
         );
     }

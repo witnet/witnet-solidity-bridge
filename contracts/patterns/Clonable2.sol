@@ -33,10 +33,7 @@ abstract contract Clonable2
         public view
         returns (bool)
     {
-        return (
-            address(this) != __SELF
-                && address(this) != __clonable().master
-        );
+        return address(this) != __SELF;
     }
 
     /// @notice Tells whether this instance has been initialized.
