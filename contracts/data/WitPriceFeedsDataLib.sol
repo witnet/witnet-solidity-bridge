@@ -541,7 +541,7 @@ library WitPriceFeedsDataLib {
         int[3] memory _regs;
         // _regs[0] -> _lastPrice
         // _regs[1] -> _lastEmaPrice
-        // _regs[2] -> _decimals
+        // _regs[2] -> _exponent
         unchecked {
             for (uint _ix; _ix < _deps.length; ++ _ix) {
                 PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]), _deps[_ix], heartbeat);
@@ -570,9 +570,9 @@ library WitPriceFeedsDataLib {
             }
         }
         _regs[2] += exponent;
-        if (_regs[2] >= 0) {
+        if (_regs[2] <= 0) {
             if (inverse) {
-                uint _factor = 10 ** uint(_regs[2]);
+                uint _factor = 10 ** uint(-_regs[2]);
                 if (_regs[1] > 0) {
                     _lastUpdate.emaPrice = uint64(_factor / uint(_regs[1]));
                 } else if (_regs[0] > 0) {
@@ -581,7 +581,7 @@ library WitPriceFeedsDataLib {
                     _lastUpdate.price = 0; // avoid unhandled reverts
                 }
             } else {
-                uint _divisor = 10 ** uint(_regs[2]);
+                uint _divisor = 10 ** uint(-_regs[2]);
                 if (_regs[1] > 0) {
                     _lastUpdate.emaPrice = uint64(uint(_regs[1]) / _divisor);
                 } else {
@@ -589,7 +589,7 @@ library WitPriceFeedsDataLib {
                 }
             }
         } else {
-            uint _factor = 10 ** uint(-_regs[2]);
+            uint _factor = 10 ** uint(_regs[2]);
             if (_regs[1] > 0) {
                 _lastUpdate.emaPrice = uint64(uint(_regs[1]) * _factor);
             } else {
