@@ -1,6 +1,6 @@
 {
   "name": "witnet-solidity-bridge",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Witnet Solidity Bridge contracts for EVM-compatible chains",
   "author": "Witnet Foundation <info@witnet.foundation>",
   "license": "MIT",
@@ -93,6 +93,7 @@
     "truffle-assertions": "^0.9.2",
     "truffle-flattener": "^1.6.0",
     "truffle-plugin-verify": "^0.6.7",
+    "web3": "^4.16.0",
     "zksync-ethers": "^6.20.1"
   }
 }
