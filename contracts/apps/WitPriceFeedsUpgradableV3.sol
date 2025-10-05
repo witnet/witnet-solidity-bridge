@@ -52,13 +52,7 @@ contract WitPriceFeedsUpgradableV3
     /// @dev Reverts if proxy delegatecalls to unexistent method.
     /* solhint-disable no-complex-fallback */
     fallback() virtual external { 
-        _revert(string(abi.encodePacked(
-            "not implemented: 0x",
-            _toHexString(uint8(bytes1(msg.sig))),
-            _toHexString(uint8(bytes1(msg.sig << 8))),
-            _toHexString(uint8(bytes1(msg.sig << 16))),
-            _toHexString(uint8(bytes1(msg.sig << 24)))
-        )));
+        _revert("unsupported method");
     }
 
 
@@ -183,21 +177,6 @@ contract WitPriceFeedsUpgradableV3
         }
     }
 
-    function _toHexString(uint8 _u)
-        private pure
-        returns (string memory)
-    {
-        bytes memory b2 = new bytes(2);
-        uint8 d0 = uint8(_u / 16) + 48;
-        uint8 d1 = uint8(_u % 16) + 48;
-        if (d0 > 57)
-            d0 += 7;
-        if (d1 > 57)
-            d1 += 7;
-        b2[0] = bytes1(d0);
-        b2[1] = bytes1(d1);
-        return string(b2);
-    }
     
     /// Converts bytes32 into string.
     function _toString(bytes32 _bytes32)
