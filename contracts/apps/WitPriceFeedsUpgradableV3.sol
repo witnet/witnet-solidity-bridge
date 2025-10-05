@@ -65,6 +65,19 @@ contract WitPriceFeedsUpgradableV3
     /// ===============================================================================================================
     /// --- Clonable2 -------------------------------------------------------------------------------------------------
 
+    function base() 
+        virtual override (Clonable2, Upgradeable)
+        public view 
+        returns (address)
+    {
+        if (cloned()) {
+            return Clonable2(master()).base();
+        } else {
+            return super.base();
+        }
+    }
+
+
     function cloned() 
         virtual override 
         public view 

@@ -248,10 +248,10 @@ contract WitPriceFeedsV3
         address _clone = __clone();
         emit Clonable2.Cloned(msg.sender, target(), _clone);
         return WitPriceFeedsV3(_clone).initializeClone(
-                target(),
-                _curator,
-                __storage().defaultUpdateConditions
-            );
+            target(),
+            _curator,
+            __storage().defaultUpdateConditions
+        );
     }
 
     /// Creates a Chainlink Aggregator proxy to the specified symbol.

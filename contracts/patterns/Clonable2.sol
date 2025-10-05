@@ -27,6 +27,10 @@ abstract contract Clonable2
         _;
     }
 
+    function base() virtual public view returns (address) {
+        return __SELF;
+    }
+
     /// @notice Tells whether this contract is a clone of `self()`
     function cloned()
         virtual 

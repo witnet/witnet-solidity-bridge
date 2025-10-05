@@ -42,7 +42,7 @@ abstract contract Upgradeable is Initializable, Proxiable {
     }
 
     /// @dev Retrieves base contract. Differs from address(this) when called via delegate-proxy pattern.
-    function base() public view returns (address) {
+    function base() virtual public view returns (address) {
         return _BASE;
     }
 
