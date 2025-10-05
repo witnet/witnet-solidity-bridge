@@ -76,7 +76,7 @@ contract WitPriceFeedsV3
             computeEma: false,
             cooldownSecs: 15 minutes,
             heartbeatSecs: 1 days,
-            maxDeviation1000: 250, // 25.0 %
+            maxDeviation1000: 0, // oo
             minWitnesses: 3
         });
     }
@@ -694,7 +694,7 @@ contract WitPriceFeedsV3
         );
         
         require(
-            _deviation1000 <= _updateConditions.maxDeviation1000,
+            _updateConditions.maxDeviation1000 == 0 || _deviation1000 <= _updateConditions.maxDeviation1000,
             DeviantPrice()
         );
 

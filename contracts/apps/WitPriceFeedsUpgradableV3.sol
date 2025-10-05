@@ -164,7 +164,7 @@ contract WitPriceFeedsUpgradableV3
                 computeEma: false,
                 cooldownSecs: 15 minutes,
                 heartbeatSecs: 1 days,
-                maxDeviation1000: 250, // 25.0 %
+                maxDeviation1000: 0, // oo
                 minWitnesses: 3
             });
         }
