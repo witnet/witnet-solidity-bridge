@@ -184,7 +184,7 @@
             "WitOracleRadonEncodingLib": "0x7FDb4560EDf7A7340Cf31C8f63Be8D2d667B0f12",
             "WitOracleResultStatusLib": "0x286361C52A5316Ed2CdcC68e10c5f5ce24CD9Ff1",
             "WitPriceFeedsLegacyDataLib": "0xBBB488446c042a961D422993094F6FefB675c073",
-            "WitPriceFeedsDataLib": "0x1a50d6bc99f9a79e8aECFdE71c5A597ef9012C39"
+            "WitPriceFeedsDataLib": ""
         },
         "core": {
             "WitOracleTrustableDefault": "0x643Ec642d3CA43b4f668238dA4DDdB9D1334cd5a",

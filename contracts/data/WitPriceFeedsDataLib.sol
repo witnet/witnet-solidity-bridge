@@ -173,16 +173,25 @@ library WitPriceFeedsDataLib {
                     || _mapper == IWitPriceFeeds.Mappers.Inverse
             ) {
                 return fetchLastUpdateFromProduct(
-                    id4, heartbeat, 
+                    id4, 
+                    heartbeat, 
                     self.exponent, 
                     _mapper == IWitPriceFeeds.Mappers.Inverse
                 );
 
             } else if (_mapper == IWitPriceFeeds.Mappers.Hottest) {
-                return fetchLastUpdateFromHottest(id4, heartbeat);
+                return fetchLastUpdateFromHottest(
+                    id4, 
+                    heartbeat,
+                    self.exponent
+                );
             
             } else if (_mapper == IWitPriceFeeds.Mappers.Fallback) {
-                return fetchLastUpdateFromFallback(id4, heartbeat);
+                return fetchLastUpdateFromFallback(
+                    id4, 
+                    heartbeat,
+                    self.exponent
+                );
 
             } else {
                 revert("unsupported mapper");
@@ -599,7 +608,7 @@ library WitPriceFeedsDataLib {
         _lastUpdate.exponent = exponent;
     }
 
-    function fetchLastUpdateFromHottest(IWitPriceFeeds.ID4 id4, uint24 heartbeat)
+    function fetchLastUpdateFromHottest(IWitPriceFeeds.ID4 id4, uint24 heartbeat, int8 exponent)
         internal view 
         returns (PriceData memory _lastUpdate)
     {
@@ -613,9 +622,16 @@ library WitPriceFeedsDataLib {
                 _lastUpdate = _depLastUpdate;
             }
         }
+        if (exponent < _lastUpdate.exponent) {
+            _lastUpdate.price *= uint64(10 ** uint8(_lastUpdate.exponent - exponent));
+            _lastUpdate.exponent = exponent;
+        } else if (exponent > _lastUpdate.exponent) {
+            _lastUpdate.price /= uint64(10 ** uint8(exponent - _lastUpdate.exponent));
+            _lastUpdate.exponent = exponent;
+        }
     }
 
-    function fetchLastUpdateFromFallback(IWitPriceFeeds.ID4 id4, uint24 heartbeat)
+    function fetchLastUpdateFromFallback(IWitPriceFeeds.ID4 id4, uint24 heartbeat, int8 exponent)
         internal view 
         returns (PriceData memory _lastUpdate)
     {
@@ -628,6 +644,13 @@ library WitPriceFeedsDataLib {
             ) {
                 return _depLastUpdate;
             }
+        }
+        if (exponent < _lastUpdate.exponent) {
+            _lastUpdate.price *= uint64(10 ** uint8(_lastUpdate.exponent - exponent));
+            _lastUpdate.exponent = exponent;
+        } else if (exponent > _lastUpdate.exponent) {
+            _lastUpdate.price /= uint64(10 ** uint8(exponent - _lastUpdate.exponent));
+            _lastUpdate.exponent = exponent;
         }
     }
 
