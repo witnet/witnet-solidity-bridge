@@ -139,6 +139,8 @@ contract WitPriceFeedsUpgradableV3
         return (
             // false if the WRB is intrinsically not upgradable, or `_from` is no owner
             isUpgradable()
+                && address(this) != __SELF
+                && master() == address(0)
                 && owner() == _from
         );
     }
