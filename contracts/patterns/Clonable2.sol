@@ -69,6 +69,7 @@ abstract contract Clonable2
     /// @dev See https://blog.openzeppelin.com/deep-dive-into-the-minimal-proxy-contract/.
     function __clone()
         internal
+        notOnClones
         returns (address _instance)
     {
         bytes memory ptr = _cloneBytecodePtr();
@@ -89,6 +90,7 @@ abstract contract Clonable2
     /// @dev See https://blog.openzeppelin.com/deep-dive-into-the-minimal-proxy-contract/.
     function __cloneDeterministic(bytes32 _salt)
         internal
+        notOnClones
         returns (address _instance)
     {
         bytes memory ptr = _cloneBytecodePtr();
