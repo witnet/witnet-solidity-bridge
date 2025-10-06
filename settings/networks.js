@@ -122,7 +122,7 @@ export default {
   },
   "conflux:core:testnet": {
     port: 8540,
-    network_id: 1,
+    network_id: 70,
     symbol: "CFX",
     verify: {
       apiUrl: "https://api-testnet.confluxscan.io",
