@@ -60,27 +60,26 @@ contract WitPriceFeedsUpgradableV3
     /// --- Clonable2 -------------------------------------------------------------------------------------------------
 
     function base() 
-        virtual override (Clonable2, Upgradeable)
+        virtual override (WitPriceFeedsV3, Upgradeable)
         public view 
         returns (address)
     {
         if (cloned()) {
-            return Clonable2(master()).base();
-        } else {
-            return super.base();
+            address _implementation = __proxiable().implementation;
+            if (_implementation != address(0)) {
+                // if cloned to a proxy, read clone's proxiable's implementation address
+                return _implementation;
+            }
         }
+        return super.base();
     }
-
 
     function cloned() 
         virtual override 
         public view 
         returns (bool)
     {
-        return (
-            address(this) != __SELF
-                && address(this) != __proxiable().proxy
-        );
+        return (__clonable2().master != address(0));
     }
 
     function target()
@@ -88,11 +87,26 @@ contract WitPriceFeedsUpgradableV3
         public view
         returns (address)
     {
-        return (__proxiable().proxy != address(0)
+        return cloned() ? address(0) : (__proxiable().proxy != address(0)
             ? __proxiable().proxy 
             : __SELF
         );
     }
+
+    function __initializeClone(address _master) virtual override internal {
+        __clonable2().master = _master;
+        (bool _ok, bytes memory _result) = _master.call(abi.encodeWithSignature("implementation()"));
+        if (_ok) {
+            // to proxy's current implementation, so all calls to the clone get
+            // actually delegated to the proxy's implementation address.
+            // The clone won't be affected by upgrades on the proxy, until someone
+            // (i.e. the clone's curator) updates the clone's proxiable's implementation.
+            __proxiable().implementation = abi.decode(_result, (address));
+            __proxiable().proxy = address(this);
+        }
+    }
+
+    
 
 
     // ================================================================================================================
