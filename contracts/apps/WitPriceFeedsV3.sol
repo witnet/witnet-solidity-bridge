@@ -87,11 +87,19 @@ contract WitPriceFeedsV3
             UpdateConditions calldata _defaultUpdateConditions
         )
         external
+        onlyOnClones
+        initializer
         returns (address)
     {
-        _transferOwnership(_curator);
-        __storage().defaultUpdateConditions = _defaultUpdateConditions;
+        _require(_master != address(0), "zero master");
         __initializeClone(_master);
+
+        _require(_curator != address(0), "zero curator");
+        _transferOwnership(_curator);
+        
+        _require(_validateUpdateConditions(_defaultUpdateConditions), "invalid conditions");
+        __storage().defaultUpdateConditions = _defaultUpdateConditions;
+
         return address(this);
     }
 

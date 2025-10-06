@@ -33,8 +33,7 @@ abstract contract Clonable2
 
     /// @notice Tells whether this contract is a clone of `self()`
     function cloned()
-        virtual 
-        public view
+        virtual public view
         returns (bool)
     {
         return address(this) != __SELF;
@@ -45,7 +44,7 @@ abstract contract Clonable2
 
     /// @notice Master address from which this contract was cloned.
     function master() virtual public view returns (address) {
-        return __clonable().master;
+        return __clonable2().master;
     }
 
     /// @notice Contract address to which clones will be re-directed.
@@ -54,12 +53,8 @@ abstract contract Clonable2
     }
 
     /// Virtual method to be called upon new cloned instances.
-    function __initializeClone(address _master) 
-        virtual internal 
-        initializer
-        onlyOnClones
-    {
-        __clonable().master = _master; 
+    function __initializeClone(address _master) virtual internal {
+        __clonable2().master = _master; 
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
@@ -70,7 +65,6 @@ abstract contract Clonable2
     /// @dev See https://blog.openzeppelin.com/deep-dive-into-the-minimal-proxy-contract/.
     function __clone()
         internal
-        notOnClones
         returns (address _instance)
     {
         bytes memory ptr = _cloneBytecodePtr();
@@ -137,7 +131,7 @@ abstract contract Clonable2
         address master;
     }
 
-    function __clonable() private pure returns (Storage storage clonable) {
+    function __clonable2() internal pure returns (Storage storage clonable) {
         assembly {
             // bytes32(uint256(keccak256('eip1967.clonable.master')) & ~bytes32(uint256(0xff)
             clonable.slot := 0x033dcaf396f361642869bf1bdf9c3454888f3e9bbf7939acdd2e40c3833fef00
