@@ -95,7 +95,7 @@
     },
     "conflux:core": {
         "apps": {
-            "WitPriceFeeds": "0x8ba3C59e1029cd90010e8C731461ddFC5f49091b",
+            "WitPriceFeedsLegacy": "0x8ba3C59e1029cd90010e8C731461ddFC5f49091b",
             "WitRandomnessV2": "0x897832C89ec306A74f9eC29abfFcaDBfCb11A13B"
         },
         "core": {
@@ -283,7 +283,7 @@
     },
     "meter:mainnet": {
         "apps": {
-            "WitPriceFeeds": "0x27EF7A3e155F96e68A9988EAdBF8bd3eFdba1438",
+            "WitPriceFeedsLegacy": "0x27EF7A3e155F96e68A9988EAdBF8bd3eFdba1438",
             "WitRandomnessV2": "0x4d239f070e475E454148093781211c9eE34f476C"
         },
         "core": {
@@ -301,7 +301,7 @@
     "meter:testnet": {
         "WitnetDeployer": "0xE9D654A97eC431C4f1faba550d0a26399f6fEc80",
         "apps": {
-            "WitPriceFeeds": "0xD9f5Af15288294678B0863A20F4B83eeeEAa775C",
+            "WitPriceFeedsLegacy": "0xD9f5Af15288294678B0863A20F4B83eeeEAa775C",
             "WitRandomnessV2": "0x2dE368AFC80b13E4a42990004ebC74ce125486F9"
         },
         "core": {
@@ -390,7 +390,7 @@
     "worldchain:sepolia": {},
     "zksync": {
         "apps": {
-            "WitPriceFeeds": "0xc5b27bC02D5579f64E8BeC0DcC8d2a1dc4C0d750",
+            "WitPriceFeedsLegacy": "0xc5b27bC02D5579f64E8BeC0DcC8d2a1dc4C0d750",
             "WitRandomnessV3": ""
         },
         "core": {
