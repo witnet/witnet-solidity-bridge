@@ -254,7 +254,6 @@ contract WitPriceFeedsV3
     {
         _require(_curator != address(0), "zero curator");
         address _clone = __clone();
-        emit Clonable2.Cloned(msg.sender, target(), _clone);
         return WitPriceFeedsV3(_clone).initializeClone(
             target(),
             _curator,
@@ -289,6 +288,10 @@ contract WitPriceFeedsV3
 
     /// --- governance related read-only methods ----------------------------------------------------------------------
 
+    function base() virtual override (Clonable2, IWitPriceFeeds) public view returns (address) {
+        return super.base();
+    }
+
     /// Returns the soul-bounded address where all price updates will be reported to.
     /// @dev If zero, price updates will not be reported to any other external address.
     /// @dev It can only be settled or changed by cloning the contract.
@@ -317,7 +320,7 @@ contract WitPriceFeedsV3
         public view 
         returns (address)
     {
-        return cloned() ? super.master() : address(0);
+        return super.master();
     }
 
     function target()
@@ -325,7 +328,7 @@ contract WitPriceFeedsV3
         public view
         returns (address)
     {
-        return super.target();
+        return cloned() ? address(0) : base();
     }
 
 

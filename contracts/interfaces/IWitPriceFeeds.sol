@@ -72,6 +72,9 @@ interface IWitPriceFeeds {
         uint16 minWitnesses;
     }
 
+    /// Address of the underlying logic contract.
+    function base() external view returns (address);
+
     /// Creates a light-proxy clone to the `target()` contract address, to be owned by the specified `curator` address. 
     /// Operators of cloned contracts can optionally settle one single `IWitPriceFeedConsumer` consuming contract. 
     /// The consuming contract, if settled, will be immediately reported upon every verified price update pushed 
