@@ -730,6 +730,7 @@ contract WitRandomnessV3
             // solhint-disable-next-line avoid-tx-origin
             emit Randomizing(
                 _msgSender(), 
+                block.number,
                 Witnet.QueryId.wrap(uint64(_queryId))
             );
         
