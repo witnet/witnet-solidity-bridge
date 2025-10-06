@@ -55,7 +55,6 @@ contract WitPriceFeedsUpgradableV3
         _revert("unsupported method");
     }
 
-
     /// ===============================================================================================================
     /// --- Clonable2 -------------------------------------------------------------------------------------------------
 
@@ -64,14 +63,7 @@ contract WitPriceFeedsUpgradableV3
         public view 
         returns (address)
     {
-        if (cloned()) {
-            address _implementation = __proxiable().implementation;
-            if (_implementation != address(0)) {
-                // if cloned to a proxy, read clone's proxiable's implementation address
-                return _implementation;
-            }
-        }
-        return super.base();
+        return __SELF;
     }
 
     function cloned() 
@@ -79,34 +71,11 @@ contract WitPriceFeedsUpgradableV3
         public view 
         returns (bool)
     {
-        return (__clonable2().master != address(0));
-    }
-
-    function target()
-        virtual override
-        public view
-        returns (address)
-    {
-        return cloned() ? address(0) : (__proxiable().proxy != address(0)
-            ? __proxiable().proxy 
-            : __SELF
+        return (
+            address(this) != __proxiable().proxy
+                && address(this) != __SELF
         );
     }
-
-    function __initializeClone(address _master) virtual override internal {
-        __clonable2().master = _master;
-        (bool _ok, bytes memory _result) = _master.call(abi.encodeWithSignature("implementation()"));
-        if (_ok) {
-            // to proxy's current implementation, so all calls to the clone get
-            // actually delegated to the proxy's implementation address.
-            // The clone won't be affected by upgrades on the proxy, until someone
-            // (i.e. the clone's curator) updates the clone's proxiable's implementation.
-            __proxiable().implementation = abi.decode(_result, (address));
-            __proxiable().proxy = address(this);
-        }
-    }
-
-    
 
 
     // ================================================================================================================
@@ -123,7 +92,11 @@ contract WitPriceFeedsUpgradableV3
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     /// @dev Must fail when trying to upgrade to same logic contract more than once.
-    function initialize(bytes memory _initData) virtual override public {
+    function initialize(bytes memory _initData) 
+        virtual override 
+        public 
+        notOnClones
+    {
         address _owner = owner();
         if (_owner == address(0)) {
             // upon first upgrade, extract decode owner address from _intidata
@@ -154,14 +127,11 @@ contract WitPriceFeedsUpgradableV3
     function isUpgradableFrom(address _from) 
         virtual override
         external view  
-        notOnClones 
         returns (bool)
     {
         return (
-            // false if the WRB is intrinsically not upgradable, or `_from` is no owner
+            // false if the contract is not upgradable, or `_from` is no owner
             isUpgradable()
-                && address(this) != __SELF
-                && master() == address(0)
                 && owner() == _from
         );
     }
@@ -173,7 +143,6 @@ contract WitPriceFeedsUpgradableV3
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     function __initializeUpgradableData(bytes memory)
         virtual override 
-        notOnClones
         internal
     {
         if (

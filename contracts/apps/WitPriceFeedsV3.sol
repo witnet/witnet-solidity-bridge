@@ -249,12 +249,9 @@ contract WitPriceFeedsV3
     function clone(address _curator) 
         virtual override
         external
-        notOnClones
         returns (address)
     {
-        _require(_curator != address(0), "zero curator");
-        address _clone = __clone();
-        return WitPriceFeedsV3(_clone).initializeClone(
+        return WitPriceFeedsV3(__clone()).initializeClone(
             target(),
             _curator,
             __storage().defaultUpdateConditions
@@ -328,7 +325,7 @@ contract WitPriceFeedsV3
         public view
         returns (address)
     {
-        return cloned() ? address(0) : base();
+        return __SELF;
     }
 
 
