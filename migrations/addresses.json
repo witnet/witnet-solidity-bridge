@@ -180,22 +180,22 @@
     },
     "ethereum:sepolia": {
         "libs": {
-            "WitOracleDataLib": "0xF22fcebC0CaC37CE863a65Ca24ACb4C7b9724bC3",
-            "WitOracleRadonEncodingLib": "0x7FDb4560EDf7A7340Cf31C8f63Be8D2d667B0f12",
-            "WitOracleResultStatusLib": "0x286361C52A5316Ed2CdcC68e10c5f5ce24CD9Ff1",
-            "WitPriceFeedsLegacyDataLib": "0xBBB488446c042a961D422993094F6FefB675c073",
-            "WitPriceFeedsDataLib": "0x4A9359F0f434A8DC27DeBe6B13AfF857924Ed749"
+            "WitOracleDataLib": "0x298e9b7c9CF2f6D6B17804A8b8Ed2ab747aa634f",
+            "WitOracleRadonEncodingLib": "0xFf66F442a1F9449579B181b9D7e0A90022275235",
+            "WitOracleResultStatusLib": "0xc1D68961298c5F72c672A1519A42Edd1a9598c5c",
+            "WitPriceFeedsLegacyDataLib": "0x9e1c82ab0809A4996C36ef3dc646B07089F0B903",
+            "WitPriceFeedsDataLib": "0x9C3b7240ed85b3B88952D1e1d4DD108F85756E8d"
         },
         "core": {
-            "WitOracleTrustableDefault": "0x643Ec642d3CA43b4f668238dA4DDdB9D1334cd5a",
-            "WitOracleRadonRegistryUpgradableDefault": "0x2a8bf23240dC5DFf2743dA9C8050bADAd70bc799",
+            "WitOracleTrustableDefault": "0xF1a3c1eBa31C770686aD0233202F4104C0a92fb6",
+            "WitOracleRadonRegistryUpgradableDefault": "0x56B9E2fEb99f6CfE8928b6095E2646bF69B7CcaD",
             "WitOracleRadonRequestFactoryModalsDefault": "0xff7B32870b35259212bc103c79380E03786588ff",
             "WitOracleRadonRequestFactoryTemplatesDefault": "0xFF1f868D74d1b9A434C7bBf2abe470c8F153DDFF",
-            "WitOracleRadonRequestFactoryUpgradableDefault": "0xf91295D42EACDa8e2A0a03F08b8786f21FA57D34"
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0xd139b27DB481D5E035E973464a0Bd1f8a20f8C26"
         },
         "apps": {
-            "WitPriceFeedsLegacyUpgradable": "0x69323eE985E7703e153caAc5aA3fe303e6c5D7E5",
-            "WitPriceFeedsUpgradableV3": "0xf40Cc27E23b03a27aFd5d95f4511fC7280cDe38B"
+            "WitPriceFeedsLegacyUpgradable": "0x1F6118b04e0a5aD944CDfDBa3Ee91cA6D68FFf5e",
+            "WitPriceFeedsUpgradableV3": "0xc360A5a046532Efa0C5Ea8418998E9389c3f81DE"
         }
     },
     "gnosis:mainnet": {
