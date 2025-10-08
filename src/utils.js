@@ -266,19 +266,21 @@ function traceHeader (header) {
 }
 
 function traceTx (tx) {
-  console.info("  ", "> EVM tx sender:     \x1b[93m", tx.receipt.from, "\x1b[0m")
-  console.info("  ", "> EVM tx hash:       \x1b[33m", tx.receipt.transactionHash.slice(2), "\x1b[0m")
-  console.info("  ", "> EVM tx gas used:   ",
-    `\x1b[33m${tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}\x1b[0m`
-  )
-  if (tx.receipt?.effectiveGasPrice) {
-    console.info("  ", "> EVM tx gas price:  ", `\x1b[33m${tx.receipt.effectiveGasPrice / 10 ** 9}`, "gwei\x1b[0m")
-    console.info("  ", "> EVM tx total cost: ", `\x1b[33m${parseFloat(
-      (BigInt(tx.receipt.gasUsed) * BigInt(tx.receipt.effectiveGasPrice)) /
-        BigInt(10 ** 18)
-    ).toString()}`,
-    "ETH\x1b[0m"
+  if (tx?.receipt) {
+    console.info("  ", "> EVM tx sender:     \x1b[93m", tx.receipt.from, "\x1b[0m")
+    console.info("  ", "> EVM tx hash:       \x1b[33m", tx.receipt.transactionHash?.slice(2), "\x1b[0m")
+    console.info("  ", "> EVM tx gas used:   ",
+      `\x1b[33m${tx.receipt.gasUsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}\x1b[0m`
     )
+    if (tx.receipt?.effectiveGasPrice) {
+      console.info("  ", "> EVM tx gas price:  ", `\x1b[33m${tx.receipt.effectiveGasPrice / 10 ** 9}`, "gwei\x1b[0m")
+      console.info("  ", "> EVM tx total cost: ", `\x1b[33m${parseFloat(
+        (BigInt(tx.receipt.gasUsed) * BigInt(tx.receipt.effectiveGasPrice)) /
+          BigInt(10 ** 18)
+      ).toString()}`,
+      "ETH\x1b[0m"
+      )
+    }  
   }
 }
 

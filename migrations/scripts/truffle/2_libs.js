@@ -1,14 +1,11 @@
 const settings = require("../../../settings/index").default
 const utils = require("../../../src/utils").default
 
-const WitnetDeployer = artifacts.require("WitnetDeployer")
-
-module.exports = async function (_deployer, network, [, from]) {
+module.exports = async function (deployer, network, [, from]) {
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {}
   if (!addresses[network]?.libs) addresses[network].libs = {}
 
-  const deployer = await WitnetDeployer.deployed()
   const networkArtifacts = settings.getArtifacts(network)
   const selection = utils.getWitnetArtifactsFromArgs()
 
@@ -16,6 +13,7 @@ module.exports = async function (_deployer, network, [, from]) {
     const base = networkArtifacts.libs[index]
     const impl = networkArtifacts.libs[base]
     let libNetworkAddr = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
+
     if (
       process.argv.includes("--artifacts") 
       && process.argv.includes("--compile-none")
@@ -27,43 +25,45 @@ module.exports = async function (_deployer, network, [, from]) {
       console.info(`   > library address:    \x1b[92m${libNetworkAddr}\x1b[0m`)
       continue;
     }
+    
     const libImplArtifact = artifacts.require(impl)
-    const libInitCode = libImplArtifact.toJSON().bytecode
-    const libTargetAddr = await deployer.determineAddr.call(libInitCode, "0x0", { from })
-    const libTargetCode = await web3.eth.getCode(libTargetAddr)
+    let bytecodeChanged = false
+    try {
+      const networkCode = (await web3.eth.getCode(libNetworkAddr)).slice(0, -86)
+      let targetCode = libImplArtifact.toJSON().deployedBytecode
+      targetCode = targetCode.slice(0,4) + libNetworkAddr.slice(2).toLowerCase() + targetCode.slice(44, -86)
+      if (targetCode !== networkCode) {
+        bytecodeChanged = true
+      }
+    } catch (err) {
+      console.error(`Cannot get code from ${libNetworkAddr}: ${err}`)
+    }
+    
     if (
       // lib implementation artifact is listed as --artifacts on CLI 
       selection.includes(impl) || selection.includes(base) ||
       // or, no address found in addresses file, or no actual code deployed there
-      (utils.isNullAddress(libNetworkAddr) || (await web3.eth.getCode(libNetworkAddr)).length < 3) ||
+      utils.isNullAddress(libNetworkAddr) || 
       // or. --libs specified on CLI
-      (libTargetAddr !== libNetworkAddr && process.argv.includes("--upgrade-all"))
+      (process.argv.includes("--upgrade-all") /*&& libTargetAddr !== libNetworkAddr*/)
     ) {
-      if (libTargetCode.length < 3) {
-        if (utils.isNullAddress(libNetworkAddr)) {
-          utils.traceHeader(`Deploying '${impl}'...`)
-        } else {
-          utils.traceHeader(`Upgrading '${impl}'...`)
-        }
-        utils.traceTx(await deployer.deploy(libInitCode, "0x0", { from }))
-        if ((await web3.eth.getCode(libTargetAddr)).length < 3) {
-          console.info(`Error: Library was not deployed on expected address: ${libTargetAddr}`)
-          process.exit(1)
-        }
+      if (utils.isNullAddress(libNetworkAddr) || bytecodeChanged) {
+        await deployer.deploy(libImplArtifact, { from })      
+        addresses[network].libs[impl] = libImplArtifact.address
+        libNetworkAddr = libTargetAddr
+        await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
       } else {
-        utils.traceHeader(`Recovered '${impl}'`)
+        utils.traceHeader(`Skipping '${impl}': no changes in deployed bytecode.`)
       }
-      addresses[network].libs[impl] = libTargetAddr
-      libNetworkAddr = libTargetAddr
-      // if (!utils.isDryRun(network)) {
-      await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-      // }
     } else {
       utils.traceHeader(`Deployed '${impl}'`)
     }
+    
+    // settle Truffle artifact address to the one found in file:
     libImplArtifact.address = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
-    if (libTargetAddr !== libNetworkAddr) {
-      console.info("   > library address:   \x1b[92m", libImplArtifact.address, `\x1b[0m!== \x1b[30;42m${libTargetAddr}\x1b[0m`)
+    
+    if (bytecodeChanged) {
+      console.info(`   > library address:   \x1b[30;43m${libImplArtifact.address}\x1b[0m`)
     } else {
       console.info("   > library address:   \x1b[92m", libImplArtifact.address, "\x1b[0m")
     }
