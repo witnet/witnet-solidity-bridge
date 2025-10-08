@@ -387,7 +387,34 @@
     },
     "ten:testnet": {},
     "worldchain:mainnet": {},
-    "worldchain:sepolia": {},
+    "worldchain:sepolia": {
+        "apps": {
+            "WitnetPriceFeedsDefault": "0x63F52294041D48B299F0e91b807DF972A4DF9254",
+            "WitPriceFeedsLegacyUpgradable": "0x96Ca0F26672B8a6C27E3d412104d55B6d3Ca3868"
+        },
+        "core": {
+            "WitnetRequestBytecodesDefault": "0x19B3092a3B40938590D423d3a7a897d8634111d7",
+            "WitnetRequestFactoryDefault": "0x21C8dB6Bc5014979EC23048f77C69D68AE832f41",
+            "WitnetOracleTrustableOvm2": "0x9dB290bF22266896096F0343DbB26008e7f1eF3F",
+            "WitOracleRadonRequestFactoryModalsDefault": "0xff7B32870b35259212bc103c79380E03786588ff",
+            "WitOracleRadonRequestFactoryTemplatesDefault": "0xFF1f868D74d1b9A434C7bBf2abe470c8F153DDFF",
+            "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000",
+            "WitOracleRadonRegistryUpgradableDefault": "0xe441EcC7Ca33341244910Ca95Ea13F82c0267b73",
+            "WitOracleTrustableDefault": "0x5b230E07C4A48Cdf2e3CBD4572dAb6Ec715c5Fdf",
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0x381bE5f825483C148ec76546c3326727e8e09B19"
+        },
+        "libs": {
+            "WitnetErrorsLib": "0x3b7AD1402C243Ba59D45a0364B17A31e260A4301",
+            "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
+            "WitnetPriceFeedsLib": "0x751F77190Ce6212899D5848334838D56CF7eEe91",
+            "WitnetOracleDataLib": "0xE89dc301AEe78917018039FEBE72f9FE5aB730D9",
+            "WitOracleDataLib": "0x7de5fE2458b198A0Fe9B557bC485825A10978cf9",
+            "WitOracleRadonEncodingLib": "0x65772461641A4A6E8B10c81bae1a132E04e77262",
+            "WitOracleResultStatusLib": "0x7A6C2Aad6b4b08De09477D0F663b8f90b0db9662",
+            "WitPriceFeedsDataLib": "0xe04408124498F5812Ad341Df6038f11f18dC538e",
+            "WitPriceFeedsLegacyDataLib": "0xBfFA2ec6225390C517A1bEB83b27a171C6734294"
+        }
+    },
     "zksync": {
         "apps": {
             "WitPriceFeedsLegacy": "0xc5b27bC02D5579f64E8BeC0DcC8d2a1dc4C0d750",

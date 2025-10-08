@@ -50,7 +50,7 @@ module.exports = async function (deployer, network, [, from]) {
       if (utils.isNullAddress(libNetworkAddr) || bytecodeChanged) {
         await deployer.deploy(libImplArtifact, { from })      
         addresses[network].libs[impl] = libImplArtifact.address
-        libNetworkAddr = libTargetAddr
+        libNetworkAddr = libImplArtifact.address
         await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
       } else {
         utils.traceHeader(`Skipping '${impl}': no changes in deployed bytecode.`)
@@ -63,9 +63,9 @@ module.exports = async function (deployer, network, [, from]) {
     libImplArtifact.address = utils.getNetworkLibsArtifactAddress(network, addresses, impl)
     
     if (bytecodeChanged) {
-      console.info(`   > library address:   \x1b[30;43m${libImplArtifact.address}\x1b[0m`)
+      console.info(`   > library address:  \x1b[30;43m${libImplArtifact.address}\x1b[0m`)
     } else {
-      console.info("   > library address:   \x1b[92m", libImplArtifact.address, "\x1b[0m")
+      console.info("   > library address:  \x1b[92m", libImplArtifact.address, "\x1b[0m")
     }
     console.info()
   }

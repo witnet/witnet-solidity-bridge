@@ -578,9 +578,8 @@ export default {
     port: 8501,
     network_id: 4801,
     verify: {
-      apiKey: "MY_API_KEY",
-      apiUrl: "https://worldchain-sepolia.explorer.alchemy.com/api",
-      explorerUrl: "https://worldchain-sepolia.explorer.alchemy.com",
+      apiUrl: "https://api.etherscan.io/v2/api?chainid=4801",
+      explorerUrl: "https://sepolia.worldscan.org/",
     },
   },
   "zksync:sepolia": {
