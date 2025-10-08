@@ -201,12 +201,57 @@ abstract contract WitOracleBaseQueriableTrustable
         return hex"";
     }
 
+    function getQuery(uint256 queryId) 
+        virtual override 
+        external view 
+        returns (IWitOracleLegacy.Query memory)
+    {
+        return IWitOracleLegacy.Query({
+            request: getQueryRequest(queryId),
+            response: getQueryResponse(queryId)
+        });
+    }
+
+    function getQueryRequest(uint256 queryId)
+        virtual override
+        public view
+        returns (IWitOracleLegacy.QueryRequest memory)
+    {
+        Witnet.Query memory _query = getQuery(Witnet.QueryId.wrap(uint64(queryId)));
+        return IWitOracleLegacy.QueryRequest({
+            requester: _query.request.requester,
+            gasCallback: _query.request.callbackGas,
+            evmReward: Witnet.QueryEvmReward.unwrap(_query.reward),
+            witnetBytecode: _query.request.radonBytecode,
+            witnetRAD: Witnet.RadonHash.unwrap(_query.request.radonHash),
+            witnetSLA: IWitOracleLegacy.RadonSLA({
+                witCommitteeSize: uint8(_query.slaParams.witCommitteeSize),
+                witUnitaryReward: _query.slaParams.witUnitaryReward
+            })
+        });
+    }
+
+    function getQueryResponse(uint256 queryId)
+        virtual override
+        public view
+        returns (IWitOracleLegacy.QueryResponse memory)
+    {
+        Witnet.Query memory _query = getQuery(Witnet.QueryId.wrap(uint64(queryId)));
+        return IWitOracleLegacy.QueryResponse({
+            reporter: _query.response.reporter,
+            finality: Witnet.BlockNumber.unwrap(_query.checkpoint),
+            resultTimestamp: uint32(Witnet.Timestamp.unwrap(_query.response.resultTimestamp)),
+            resultTallyHash: Witnet.TransactionHash.unwrap(_query.response.resultDrTxHash),
+            resultCborBytes: _query.response.resultCborBytes
+        });
+    }
+
     function getQueryResponseStatus(uint256 queryId) virtual override public view returns (IWitOracleLegacy.QueryResponseStatus) {
         return WitOracleDataLib.getQueryResponseStatus(queryId);
     }
 
     function getQueryResultCborBytes(uint256 queryId) virtual override external view returns (bytes memory) {
-        return getQueryResponse(queryId).resultCborBytes;
+        return getQueryResponse(Witnet.QueryId.wrap(uint64(queryId))).resultCborBytes;
     }
 
     function getQueryResultError(uint256 queryId) virtual override external view returns (IWitOracleLegacy.ResultError memory) {

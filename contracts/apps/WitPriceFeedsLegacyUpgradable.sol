@@ -218,9 +218,9 @@ contract WitPriceFeedsLegacyUpgradable
         override public view
         returns (Witnet.QueryResponse memory)
     {
-        return IWitOracleQueriable(witOracle).getQueryResponse(
+        return IWitOracleQueriable(witOracle).getQueryResponse(Witnet.QueryId.wrap(uint64(
             WitPriceFeedsLegacyDataLib.lastValidQueryId(IWitOracleQueriable(witOracle), feedId)
-        );
+        )));
     }
 
     function latestUpdateQueryId(bytes4 feedId)
@@ -234,7 +234,9 @@ contract WitPriceFeedsLegacyUpgradable
         override external view 
         returns (Witnet.QueryRequest memory)
     {
-        return IWitOracleQueriable(witOracle).getQueryRequest(latestUpdateQueryId(feedId));
+        return IWitOracleQueriable(witOracle).getQueryRequest(Witnet.QueryId.wrap(uint64(
+            latestUpdateQueryId(feedId)
+        )));
     }
 
     function lookupWitnetBytecode(bytes4 feedId)
@@ -293,7 +295,9 @@ contract WitPriceFeedsLegacyUpgradable
         override external view 
         returns (Witnet.QueryResponse memory)
     {
-        return IWitOracleQueriable(witOracle).getQueryResponse(latestUpdateQueryId(feedId));
+        return IWitOracleQueriable(witOracle).getQueryResponse(Witnet.QueryId.wrap(uint64(
+            latestUpdateQueryId(feedId)
+        )));
     }
 
     function latestUpdateResponseStatus(bytes4 feedId)

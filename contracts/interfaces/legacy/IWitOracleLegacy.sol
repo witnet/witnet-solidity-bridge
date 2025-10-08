@@ -6,6 +6,28 @@ import "../IWitOracleRadonRegistry.sol";
 
 interface IWitOracleLegacy {
 
+    struct Query {
+        QueryRequest request;
+        QueryResponse response;
+    }
+
+    struct QueryRequest {
+        address requester; 
+        uint24  gasCallback;
+        uint72  evmReward;
+        bytes   witnetBytecode;
+        bytes32 witnetRAD;
+        RadonSLA witnetSLA;
+    }
+
+    struct QueryResponse {
+        address reporter;
+        uint64  finality;
+        uint32  resultTimestamp;
+        bytes32 resultTallyHash;
+        bytes   resultCborBytes;
+    }
+
     struct RadonSLA {
         uint8  witCommitteeSize;
         uint64 witUnitaryReward;
@@ -24,6 +46,10 @@ interface IWitOracleLegacy {
     /// @param gasPrice Expected gas price to pay upon posting the data request.
     /// @param radHash The RAD hash of the data request to be solved by Witnet.
     function estimateBaseFee(uint256 gasPrice, bytes32 radHash) external view returns (uint256);
+
+    function getQuery(uint256) external view returns (Query memory);
+    function getQueryRequest(uint256) external view returns (QueryRequest memory);
+    function getQueryResponse(uint256) external view returns (QueryResponse memory);
 
     /// @notice Returns query's result current status from a requester's point of view:
     /// @notice   - 0 => Void: the query is either non-existent or deleted;

@@ -33,16 +33,16 @@ interface IWitOracleQueriable {
     function getNextQueryId() external view returns (Witnet.QueryId);
 
     /// @notice Gets the whole Query data contents, if any, no matter its current status.
-    function getQuery(uint256 queryId) external view returns (Witnet.Query memory);
+    function getQuery(Witnet.QueryId queryId) external view returns (Witnet.Query memory);
 
     /// @notice Gets the current EVM reward the reporter can claim, if not done yet.
     function getQueryEvmReward(uint256) external view returns (Witnet.QueryEvmReward);
 
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
-    function getQueryRequest(uint256) external view returns (Witnet.QueryRequest memory);
+    function getQueryRequest(Witnet.QueryId) external view returns (Witnet.QueryRequest memory);
 
     /// @notice Retrieves the whole `Witnet.QueryResponse` record referred to a previously posted Witnet Data Request.
-    function getQueryResponse(uint256) external view returns (Witnet.QueryResponse memory);
+    function getQueryResponse(Witnet.QueryId) external view returns (Witnet.QueryResponse memory);
 
     function getQueryResult(uint256) external view returns (Witnet.DataResult memory);
     function getQueryResultStatus(uint256) external view returns (Witnet.ResultStatus);

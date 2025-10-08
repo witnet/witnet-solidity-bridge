@@ -122,7 +122,7 @@ library Witnet {
         address   requester;              // EVM address from which the request was posted.
         uint24    callbackGas; uint72 _0; // Max callback gas limit upon response, if a callback is required.
         bytes     radonBytecode;          // Optional: Witnet Data Request bytecode to be solved by the Witnet blockchain.
-        RadonHash radonHash;           // Optional: Previously verified hash of the Witnet Data Request to be solved.
+        RadonHash radonHash; uint256 _1;  // Optional: Previously verified hash of the Witnet Data Request to be solved.
     }
 
     /// QueryResponse metadata and result as resolved by the Witnet blockchain.
@@ -835,6 +835,7 @@ library Witnet {
         return (
             self.witResultMaxSize >= 0
                 && self.witCommitteeSize > 0
+                && self.witCommitteeSize <= 127
                 && self.witUnitaryReward > 0
         );
     }

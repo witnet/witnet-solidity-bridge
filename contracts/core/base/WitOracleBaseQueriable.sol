@@ -205,12 +205,12 @@ abstract contract WitOracleBaseQueriable
     }
 
     /// Gets the whole Query data contents, if any, no matter its current status.
-    function getQuery(uint256 _queryId)
+    function getQuery(Witnet.QueryId _queryId)
       public view
       virtual override
       returns (Witnet.Query memory)
     {
-        return __storage().queries[_queryId];
+        return __storage().queries[Witnet.QueryId.unwrap(_queryId)];
     }
 
     /// @notice Gets the current EVM reward the report can claim, if not done yet.
@@ -224,21 +224,21 @@ abstract contract WitOracleBaseQueriable
 
     /// @notice Retrieves the RAD hash and SLA parameters of the given query.
     /// @param _queryId The unique query identifier.
-    function getQueryRequest(uint256 _queryId)
+    function getQueryRequest(Witnet.QueryId _queryId)
         external view override
         returns (Witnet.QueryRequest memory)
     {
-        return WitOracleDataLib.seekQueryRequest(_queryId);
+        return WitOracleDataLib.seekQueryRequest(Witnet.QueryId.unwrap(_queryId));
     }
 
     /// Retrieves the Witnet-provable result, and metadata, to a previously posted request.    
     /// @dev Fails if the `_queryId` is not in 'Reported' status.
     /// @param _queryId The unique query identifier
-    function getQueryResponse(uint256 _queryId)
+    function getQueryResponse(Witnet.QueryId _queryId)
         virtual override public view
         returns (Witnet.QueryResponse memory)
     {
-        return WitOracleDataLib.seekQueryResponse(_queryId);
+        return WitOracleDataLib.seekQueryResponse(Witnet.QueryId.unwrap(_queryId));
     }
 
     function getQueryResult(uint256 _queryId)
