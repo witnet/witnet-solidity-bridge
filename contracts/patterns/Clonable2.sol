@@ -42,16 +42,6 @@ abstract contract Clonable2
     /// @notice Tells whether this instance has been initialized.
     function initialized() virtual public view returns (bool);
 
-    /// @notice Master address from which this contract was cloned.
-    function master() virtual public view returns (address) {
-        return __clonable2().master;
-    }
-
-    /// @notice Contract address to which clones will be re-directed.
-    function target() virtual public view returns (address) {
-        return cloned() ? address(0) : __SELF;
-    }
-
     /// Virtual method to be called upon new cloned instances.
     function __initializeClone(address _master) virtual internal {
         __clonable2().master = _master; 
@@ -73,7 +63,7 @@ abstract contract Clonable2
             _instance := create(0, ptr, 0x37)
         }        
         require(_instance != address(0), "Clonable2: CREATE failed");
-        emit Cloned(msg.sender, target(), _instance);
+        emit Cloned(msg.sender, base(), _instance);
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract 
@@ -94,7 +84,7 @@ abstract contract Clonable2
             _instance := create2(0, ptr, 0x37, _salt)
         }
         require(_instance != address(0), "Clonable2: CREATE2 failed");
-        emit Cloned(msg.sender, target(), _instance);
+        emit Cloned(msg.sender, base(), _instance);
     }
 
     /// @notice Returns minimal proxy's deploy bytecode.
@@ -104,7 +94,7 @@ abstract contract Clonable2
     {
         return abi.encodePacked(
             hex"3d602d80600a3d3981f3363d3d373d3d3d363d73",
-            bytes20(target()),
+            bytes20(base()),
             hex"5af43d82803e903d91602b57fd5bf3"
         );
     }
@@ -114,24 +104,24 @@ abstract contract Clonable2
         private view
         returns (bytes memory ptr)
     {
-        address _target = target();
+        address _base = base();
         assembly {
             // ptr to free mem:
             ptr := mload(0x40)
             // begin minimal proxy construction bytecode:
             mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
             // make minimal proxy delegate all calls to `target()`:
-            mstore(add(ptr, 0x14), shl(0x60, _target))
+            mstore(add(ptr, 0x14), shl(0x60, _base))
             // end minimal proxy construction bytecode:
             mstore(add(ptr, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
         }
     }
 
-    struct Storage {
+    struct __Clonable2Storage {
         address master;
     }
 
-    function __clonable2() internal pure returns (Storage storage clonable) {
+    function __clonable2() internal pure returns (__Clonable2Storage storage clonable) {
         assembly {
             // bytes32(uint256(keccak256('eip1967.clonable.master')) & ~bytes32(uint256(0xff)
             clonable.slot := 0x033dcaf396f361642869bf1bdf9c3454888f3e9bbf7939acdd2e40c3833fef00

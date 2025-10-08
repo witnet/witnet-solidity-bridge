@@ -2,22 +2,19 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../libs/Witnet.sol";
+import "./IWitRandomnessTypes.sol";
 
 interface IWitRandomnessAdmin {
-    struct Settings {
-        uint16 feeOverheadPercentage;
-        uint24 maxCallbackGasLimit;
-        uint16 minWitCommitteeSize;
-        uint64 minWitInclusionFees;
-        uint16 randomizeWaitingBlocks;
-    }
     function acceptOwnership() external;
     function owner() external view returns (address);
     function pendingOwner() external returns (address);
-    function settings() external view returns (Settings memory);
-    function settleFeeOverheadPercentage(uint16) external;
-    function settleQueryDefaultParams(uint16, uint64, uint24) external;
+    function settleConsumer(address consumer, uint24 maxCallbackGasLimit) external;
+    function settleQueryParams(
+            uint24 callbackGasLimit,
+            uint16 extraFeePercentage, 
+            uint16 minWitnesses, 
+            uint64 minInclusionFees
+        ) external;
     function settleRandomizeWaitingBlocks(uint16) external;
     function transferOwnership(address) external;
 }

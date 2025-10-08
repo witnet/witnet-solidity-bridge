@@ -2,35 +2,37 @@
 
 pragma solidity >=0.8.17 <0.9.0;
 
-import {Witnet} from "../libs/Witnet.sol";
+import {IWitRandomnessAdmin} from "./IWitRandomnessAdmin.sol";
+import {IWitRandomnessConsumer} from "./IWitRandomnessConsumer.sol";
+import {IWitRandomnessEvents} from "./IWitRandomnessEvents.sol";
+import {IWitRandomnessTypes, Witnet} from "./IWitRandomnessTypes.sol";
 
 /// @title The Wit/Randomness V3 appliance interface.
 /// @author Witnet Foundation.
-interface IWitRandomness {
+interface IWitRandomness
+    is 
+        IWitRandomnessAdmin,
+        IWitRandomnessEvents, 
+        IWitRandomnessTypes        
+{
+    /// Address of the underlying logic contract.
+    function base() external view returns (address);
 
-    /// Randomization status for some specified block number.
-    enum RandomizeStatus {
-        Void,
-        Awaiting,
-        Ready,
-        Error,
-        Finalizing
-    }
+    /// Creates a light-proxy clone to the `base()` logic address, to be owned by the specified `curator`address.
+    /// Curators of cloned instances can optionally settle one single `IWitRandomnessConsumer` consuming contract.
+    /// The consuming contract, if settled, will be immediately reported every time a new `randomize()` request
+    /// gets solved and bridged back from Witnet. Either way, randomness resolutions will be reamin stored in the 
+    /// `WitRandomness` storage, as for future reference. 
+    /// @param curator Address that will have authoritative access to `IWitRandomnessAdmin` methods.
+    function clone(address curator) external returns (IWitRandomness);
 
-    /// Emitted every time a new randomize is requested.
-    event Randomizing(
-        address indexed evmRequester,
-        uint256 randomizeBlock, 
-        Witnet.QueryId witOracleQueryId
-    );
+    /// Returns the consumer address where all valid randomize results will be reported to.
+    /// @dev If zero, generated randomness will not be reported to any other external address. 
+    /// @dev The consumer contract must implement the `IWitRandomnessConsumer` interface, 
+    /// @dev and accept this instance as source of entropy.
+    /// @dev It can only be settled by a curator on cloned instances.
+    function consumer() external view returns (IWitRandomnessConsumer);
 
-    /// Emitted every time some new randomness is delivered.
-    event Randomized(
-        uint256 randomizeBlock,
-        uint256 finalityBlock,
-        bytes32 randomness
-    );
-   
     /// Returns amount of wei required to be paid as a fee when requesting randomization with a 
     /// transaction gas price as the one given.
     function estimateRandomizeFee(uint256 evmGasPrice) external view returns (uint256);
@@ -67,7 +69,6 @@ interface IWitRandomness {
             Witnet.TransactionHash witnetDrTxHash,
             uint256 evmFinalityBlock
         );
-
     
     /// Returns last block number on which a randomize was queried.
     function getLastRandomizeBlock() external view returns (uint256);
@@ -85,18 +86,6 @@ interface IWitRandomness {
             Witnet.QueryId witOracleQueryId,
             uint256 prevRandomizeBlock,
             uint256 nextRandomizeBlock
-        );
-
-    /// Returns security and liveness parameters required to the Witnet blockchain 
-    /// when solving randomness requests, if no others are specified.
-    /// @return witCommitteeSize Number of Witnet witnessing nodes required to generate unbiased randomness.
-    /// @return witInclusionFees Minimum amount of fees in $nanoWIT to be paid on the Witnet blockchain.
-    /// @return callbackGasLimit Max. expendable gas upon randomness delivery (applies only on soulbound clones).
-    function getRandomizeDefaultParams() 
-        external view returns (
-            uint16 witCommitteeSize,
-            uint64 witInclusionFees,
-            uint24 callbackGasLimit
         );
     
     /// Returns the number of the next block in which a randomize request was posted after the given one. 
@@ -118,6 +107,20 @@ interface IWitRandomness {
     /// Explains why the last attempt of generating randomness for the specified block number failed.
     function getRandomizeQueryErrorDescription(uint256 blockNumber) external view returns (string memory);
 
+    /// Returns security and liveness parameters required to the Witnet blockchain 
+    /// when solving randomness requests, if no others are specified.
+    /// @return callbackGasLimit Max. expendable gas upon randomness delivery.
+    /// @return extraFeePercentage Overhead percentage applied when estimating the randomize request fee. 
+    /// @return witCommitteeSize Number of Witnet witnessing nodes required to generate unbiased randomness.
+    /// @return witInclusionFees Minimum amount of fees in $nanoWIT to be paid on the Witnet blockchain.
+    function getRandomizeQueryParams()
+        external view returns (
+            uint24 callbackGasLimit,
+            uint16 extraFeePercentage,
+            uint16 witCommitteeSize,
+            uint64 witInclusionFees
+        );
+
     /// Returns the immutable bytecode of the Radon Request that's being used 
     /// for solving randomness requests on the Witnet blockchain.
     function getRandomizeRadonBytecode() external view returns (bytes memory);
@@ -134,6 +137,12 @@ interface IWitRandomness {
     ///  - 4 -> Finalizing: a randomize result was relayed already but cannot yet be considered to be final.
     function getRandomizeStatus(uint256 blockNumber) external view returns (RandomizeStatus);    
 
+    /// Return the number of EVM blocks after a randomize requests that have to elapse before
+    /// considering such request to be delayed. Results to delayed requests can potentially be
+    /// provided by later requests, if solved earlier. A value of zero means that randomize 
+    /// requests will never expire. 
+    function getRandomizeWaitingBlocks() external view returns (uint16);
+
     /// Returns `true` only if a successfull resolution from the Witnet blockchain is found for the 
     /// first non-failing randomize request posted on or after the given block number.
     function isRandomized(uint256 blockNumber) external view returns (bool);
@@ -143,15 +152,10 @@ interface IWitRandomness {
     /// @return EVM funds actually paid as randomize fee.
     function randomize() external payable returns (uint256);
 
-    /// Requests the Witnet blockchain to generate an unbiased 256-bit random seed, complying with 
-    /// the given SLA parameters.
-    /// @dev Only one randomize request per block will get ultimately relayed to Witnet. Reverts if the
-    /// given parameters do not comply with the limits settled in `IWitRandomnessAdmin.settings()`.
-    /// @param witnetCommitteeSize Number of witnesses that will contribute to generate unbiased randomness.
-    /// @return Funds actually paid as randomize fee.
-    function randomize(uint16 witnetCommitteeSize) external payable returns (uint256);
-
     /// Verifies that the specified randomness seed was actually generated on the Witnet blockchain
     /// and used for producing the randomness value returned by `fetchRandomnessAfter(blockNumber)`.
     function verifyRandomnessAfter(uint256 blockNumber, bytes32 witnetRandomness) external view returns (bool);
+
+    /// The Wit/Oracle core address accepted as source of entropy.
+    function witOracle() external view returns (address);
 }
