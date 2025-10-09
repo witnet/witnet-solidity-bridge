@@ -14,10 +14,10 @@ const selection = utils.getWitnetArtifactsFromArgs()
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
-let witnetDeployer
+let addresses, witnetDeployer
 
 module.exports = async function (_, network, [, from, reporter1, curator, reporter2]) {
-  let addresses = await utils.readJsonFromFile("./migrations/addresses.json")
+  addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   witnetDeployer = await WitnetDeployer.deployed()
 
   const networkArtifacts = settings.getArtifacts(network)
@@ -573,7 +573,10 @@ async function unfoldTargetSpecs (domain, target, targetBase, from, network, net
           domain, depsImpl, depsBase, specs.from, network, networkArtifacts, networkSpecs,
           [...ancestors, targetBase]
         )
-        const depsImplAddr = await determineTargetAddr(depsImpl, depsImplSpecs, networkArtifacts)
+        let depsImplAddr = utils.getNetworkArtifactAddress(network, domain, addresses, depsImpl)
+        if (utils.isNullAddress(depsImplAddr) || (await web3.eth.getCode(depsImplAddr).length < 3)) {
+          depsImplAddr = await determineTargetAddr(depsImpl, depsImplSpecs, networkArtifacts)
+        }
         specs.intrinsics.values.push(depsImplAddr)
       }
     }
