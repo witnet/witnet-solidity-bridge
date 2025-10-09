@@ -63,7 +63,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         returns (IWitOracleRadonRequestTemplate)
     {
         return WitOracleRadonRequestFactoryTemplates(
-            _cloneDeterministic(_determineSaltAndPepper(
+            __cloneDeterministic(_determineSaltAndPepper(
                 _dataRetrieveHashes,
                 _dataSourcesAggregatorHash,
                 _crowdAttestationTallyHash
@@ -153,7 +153,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
     function getArgsCount()
         virtual override
         external view
-        onlyDelegateCalls
+        onlyOnClones
         returns (uint8[] memory)
     {
         return __storage.radonRetrieveArgsCount;
@@ -162,7 +162,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
     function getCrowdAttestationTally()
         virtual override
         external view 
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonReducer memory)
     {
         return __witOracleRadonRegistry.lookupRadonReducer(
@@ -173,7 +173,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
     function getDataResultType()
         virtual override
         external view 
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonDataTypes)
     {
         return __storage.resultDataType;
@@ -182,7 +182,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
     function getDataSources()
         virtual override
         external view
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonRetrieval[] memory _dataSources)
     {
         _dataSources = new Witnet.RadonRetrieval[](__storage.radonRetrieveHashes.length);
@@ -196,7 +196,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
     function getDataSourcesAggregator() 
         virtual override
         external view
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonReducer memory)
     {
         return __witOracleRadonRegistry.lookupRadonReducer(
@@ -207,7 +207,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
     function verifyRadonRequest(string[][] calldata args)
         virtual override
         external 
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonHash)
     {
         return __witOracleRadonRegistry.verifyRadonRequest(
@@ -232,7 +232,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
     {
         return keccak256(
             abi.encodePacked(
-                _SELF,
+                __SELF,
                 _dataRetrieveHashes,
                 _dataSourcesAggregatorHash,
                 _crowdAttestationTallyHash

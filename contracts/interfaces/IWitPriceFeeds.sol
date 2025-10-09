@@ -2,7 +2,6 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./IWitPriceFeedsMappingSolver.sol";
 import "./legacy/IWitPyth.sol";
 import "./legacy/IWitPythChainlinkAggregator.sol";
 
@@ -75,17 +74,18 @@ interface IWitPriceFeeds {
     /// Address of the underlying logic contract.
     function base() external view returns (address);
 
-    /// Creates a light-proxy clone to the `target()` contract address, to be owned by the specified `curator` address. 
-    /// Operators of cloned contracts can optionally settle one single `IWitPriceFeedConsumer` consuming contract. 
-    /// The consuming contract, if settled, will be immediately reported upon every verified price update pushed 
-    /// into `WitPriceFeeds`. Either way, price feeds data will be stored in the `WitPriceFeeds` storage. 
-    /// @dev Reverts if the salt has already been used, or trying to inherit mapped price feeds.
+    /// Creates a light-proxy clone to the `base()` contract address, to be owned by the specified `curator` address. 
+    /// Curators of cloned contracts can optionally settle one single `IWitPriceFeedConsumer` consuming contract. 
+    /// The consuming contract, if settled, will be immediately reported every time a new Witnet-certified price update
+    /// gets pushed into the cloned instance. Either way, price feeds data will be stored in the `WitPriceFeeds` storage. 
     /// @param curator Address that will have rights to manage price feeds on the new light-proxy clone.
     function clone(address curator) external returns (address);
 
     /// Returns the consumer address where all price updates will be reported to.
-    /// @dev If zero, price updates will not be reported to any other external address.
-    /// @dev It can only be settled or an curator on a customized instance.
+    /// @dev If zero, new price updates will not be reported to any other external address.
+    /// @dev The consumer contract must implement the `IWitPriceFeedsConsumer` interface, 
+    /// @dev and accept this instance as source of truth.
+    /// @dev It can only be settled by a curator on cloned instances.
     function consumer() external view returns (address);
 
     /// Default update conditions that apply to brand new price feeds.
@@ -99,12 +99,6 @@ interface IWitPriceFeeds {
 
     /// Determines unique ID for the specified symbol.
     function hash(string calldata symbol) external pure returns (IWitPyth.ID);
-
-    /// @notice Master address from which this contract was cloned.
-    function master() external view returns (address);
-
-    /// @notice Contract address to which clones will be re-directed.
-    function target() external view returns (address);
 
     /// @notice Returns last update price for the specified ID4 price feed.
     /// Note: This function is sanity-checked version of `getPriceUnsafe` which is useful in applications and

@@ -59,7 +59,7 @@ abstract contract WitOracleRadonRequestFactoryModals
         returns (IWitOracleRadonRequestModal)
     {
         return WitOracleRadonRequestFactoryModals(
-            _cloneDeterministic(_determineSaltAndPepper(
+            __cloneDeterministic(_determineSaltAndPepper(
                 _commonRetrievalHash,
                 _crowdAttestationTallyHash
             ))
@@ -127,7 +127,7 @@ abstract contract WitOracleRadonRequestFactoryModals
     function getCrowdAttestationTally()
         virtual override
         external view 
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonReducer memory)
     {
         return __witOracleRadonRegistry.lookupRadonReducer(
@@ -138,7 +138,7 @@ abstract contract WitOracleRadonRequestFactoryModals
     function getDataResultType()
         virtual override
         external view 
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonDataTypes)
     {
         return __witOracleRadonRegistry.lookupRadonRetrievalResultDataType(
@@ -149,7 +149,7 @@ abstract contract WitOracleRadonRequestFactoryModals
     function getDataSourceArgsCount(string calldata url)
         virtual override
         external view
-        onlyDelegateCalls
+        onlyOnClones
         returns (uint8)
     {
         return _max(
@@ -161,7 +161,7 @@ abstract contract WitOracleRadonRequestFactoryModals
     function getDataSourcesAggregator() 
         virtual override
         external view
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonReducer memory)
     {
         return __witOracleRadonRegistry.lookupRadonReducer(
@@ -172,7 +172,7 @@ abstract contract WitOracleRadonRequestFactoryModals
     function getRadonModalRetrieval() 
         virtual override
         external view 
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonRetrieval memory)
     {
         return __witOracleRadonRegistry.lookupRadonRetrieval(
@@ -186,7 +186,7 @@ abstract contract WitOracleRadonRequestFactoryModals
         ) 
         virtual override
         external 
-        onlyDelegateCalls
+        onlyOnClones
         returns (Witnet.RadonHash)
     {
         bytes32 _retrieveHash = __storage.radonRetrieveHash;
@@ -219,7 +219,7 @@ abstract contract WitOracleRadonRequestFactoryModals
     {
         return keccak256(
             abi.encodePacked(
-                _SELF,
+                __SELF,
                 _commonRetrievalHash,
                 _crowdAttestationTally
             )

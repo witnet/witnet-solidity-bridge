@@ -7,7 +7,7 @@ import "../interfaces/IWitOracleQueriable.sol";
 import "../interfaces/IWitPriceFeedsAdmin.sol";
 import "../interfaces/IWitPriceFeedsConsumer.sol";
 import "../mockups/WitPythChainlinkAggregator.sol";
-import "../patterns/Clonable2.sol";
+import "../patterns/Clonable.sol";
 import "../patterns/Ownable2Step.sol";
 
 /// @title WitPriceFeedsV3: On-demand Price Feeds registry for EVM-compatible L1/L2 chains, 
@@ -34,7 +34,7 @@ import "../patterns/Ownable2Step.sol";
 
 contract WitPriceFeedsV3
     is
-        Clonable2,
+        Clonable,
         Ownable2Step,
         WitPriceFeeds
 {
@@ -82,7 +82,6 @@ contract WitPriceFeedsV3
     }
 
     function initializeClone(
-            address _master, 
             address _curator, 
             UpdateConditions calldata _defaultUpdateConditions
         )
@@ -91,9 +90,6 @@ contract WitPriceFeedsV3
         initializer
         returns (address)
     {
-        _require(_master != address(0), "zero master");
-        __initializeClone(_master);
-
         _require(_curator != address(0), "zero curator");
         _transferOwnership(_curator);
         
@@ -105,7 +101,7 @@ contract WitPriceFeedsV3
 
     
     /// ===============================================================================================================
-    /// --- Clonable2 -------------------------------------------------------------------------------------------------
+    /// --- Clonable --------------------------------------------------------------------------------------------------
 
     function initialized() virtual override public view returns (bool) {
         return __storage().defaultUpdateConditions.minWitnesses > 0;
@@ -241,10 +237,10 @@ contract WitPriceFeedsV3
 
     /// --- permissionless state-modifying methods --------------------------------------------------------------------
 
-    /// Creates a light-proxy clone to the `target()` contract address, to be owned by the specified `_curator` address. 
-    /// Operators of cloned contracts can optionally settle one single `IWitPriceFeedConsumer` consuming contract. 
-    /// The consuming contract, if settled, will be immediately reported upon every verified price update pushed 
-    /// into `WitPriceFeeds`. Either way, price feeds data will be stored in the `WitPriceFeeds` storage. 
+    /// Creates a light-proxy clone to the `base()` contract address, to be owned by the specified `curator` address. 
+    /// Curators of cloned contracts can optionally settle one single `IWitPriceFeedConsumer` consuming contract. 
+    /// The consuming contract, if settled, will be immediately reported every time a new Witnet-certified price update
+    /// gets pushed into the cloned instance. Either way, price feeds data will be stored in the `WitPriceFeeds` storage. 
     /// @param _curator Address that will have rights to manage price feeds on the new light-proxy clone.
     function clone(address _curator) 
         virtual override
@@ -252,7 +248,6 @@ contract WitPriceFeedsV3
         returns (address)
     {
         return WitPriceFeedsV3(__clone()).initializeClone(
-            target(),
             _curator,
             __storage().defaultUpdateConditions
         );
@@ -283,17 +278,18 @@ contract WitPriceFeedsV3
     }
 
 
-    /// --- governance related read-only methods ----------------------------------------------------------------------
+    /// --- read-only methods -----------------------------------------------------------------------------------------
 
-    function base() virtual override (Clonable2, IWitPriceFeeds) public view returns (address) {
+    function base() virtual override (Clonable, IWitPriceFeeds) public view returns (address) {
         return super.base();
     }
 
-    /// Returns the soul-bounded address where all price updates will be reported to.
-    /// @dev If zero, price updates will not be reported to any other external address.
-    /// @dev It can only be settled or changed by cloning the contract.
-    /// @dev Price feeds metadata and update information will be stored in this contract,
-    /// @dev even if there's a soulbound address settled.
+    /// Returns the consumer address where all price updates will be reported to.
+    /// @dev If zero, new price updates will not be reported to any other external address.
+    /// @dev The consumer contract must implement the `IWitPriceFeedsConsumer` interface, 
+    /// @dev and accept this instance as source of truth.
+    /// @dev It can only be settled by a curator on cloned instances.
+    /// @dev It can only be settled by a curator, only on cloned instances.
     function consumer() override external view returns (address) {
         return __storage().consumer;
     }
@@ -310,26 +306,6 @@ contract WitPriceFeedsV3
     function hash(string memory _symbol) public pure returns (ID) {
         return ID.wrap(WitPriceFeedsDataLib.hash(_symbol));
     }
-
-    /// @notice Master address from which this contract was cloned.
-    function master() 
-        virtual override (Clonable2, IWitPriceFeeds)
-        public view 
-        returns (address)
-    {
-        return super.master();
-    }
-
-    function target()
-        virtual override (Clonable2, IWitPriceFeeds)
-        public view
-        returns (address)
-    {
-        return __SELF;
-    }
-
-
-    /// --- price feed updates related read-only methods --------------------------------------------------------------
     
     /// @notice Returns last update price for the specified ID4 price feed.
     /// Note: This function is sanity-checked version of `getPriceUnsafe` which is useful in applications and
@@ -495,9 +471,7 @@ contract WitPriceFeedsV3
     {
         _require(
             _consumer != address(this)
-                && _consumer != __SELF
-                && _consumer != target() 
-                && _consumer != master()
+                && _consumer != base()
                 && _consumer.code.length > 0 // must be a contract
                 && IWitPriceFeedsConsumer(_consumer).witPriceFeeds() == address(this),
             "invalid consumer"

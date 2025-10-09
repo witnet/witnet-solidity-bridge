@@ -17,7 +17,7 @@ import {
     WitRandomness
 } from "../WitRandomness.sol";
 
-import "../patterns/Clonable2.sol";
+import "../patterns/Clonable.sol";
 import "../patterns/Ownable2Step.sol";
 
 /// @title WitRandomnessV3: Unbiased, EVM-agnostic and provably-fair random seeds from the Witnet blockchain. 
@@ -56,7 +56,7 @@ import "../patterns/Ownable2Step.sol";
 /// @author The Witnet Foundation.
 contract WitRandomnessV3
     is
-        Clonable2,
+        Clonable,
         Ownable2Step,
         WitRandomness
 {
@@ -208,7 +208,7 @@ contract WitRandomnessV3
     }
 
     /// ===============================================================================================================
-    /// --- Clonable2 -------------------------------------------------------------------------------------------------
+    /// --- Clonable --------------------------------------------------------------------------------------------------
 
     function initialized() virtual override public view returns (bool) {
         return __storage().witCommitteeSize > 0;
@@ -219,7 +219,7 @@ contract WitRandomnessV3
     /// --- IWitRandomness --------------------------------------------------------------------------------------------
 
     /// Address of the underlying logic contract that can be potentially cloned.
-    function base() virtual override (Clonable2, IWitRandomness) public view returns (address) {
+    function base() virtual override (Clonable, IWitRandomness) public view returns (address) {
         return super.base();
     }
 

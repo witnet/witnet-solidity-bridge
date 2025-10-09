@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.9.0;
+pragma solidity >=0.8.20 <0.9.0;
 
 import "./Initializable.sol";
 
@@ -8,17 +8,17 @@ abstract contract Clonable
     is
         Initializable
 {
-    address immutable internal _SELF = address(this);
+    address immutable internal __SELF = address(this);
 
-    event Cloned(address indexed by, address indexed self, address indexed clone);
+    event Cloned(address indexed by, address indexed master, address indexed clone);
 
-    modifier onlyDelegateCalls virtual {
-        require(address(this) != _SELF, "Clonable: not a delegate call");
+    modifier onlyOnClones virtual {
+        require(cloned(), "Clonable: only on clones");
         _;
     }
 
     modifier notOnClones virtual {
-        require(address(this) == _SELF, "Clonable: not on clones"); 
+        require(!cloned(), "Clonable: not on clones"); 
         _;
     }
 
@@ -27,23 +27,20 @@ abstract contract Clonable
         _;
     }
 
+    function base() virtual public view returns (address) {
+        return __SELF;
+    }
+
     /// @notice Tells whether this contract is a clone of `self()`
     function cloned()
-        public view
+        virtual public view
         returns (bool)
     {
-        return (
-            address(this) != self()
-        );
+        return address(this) != __SELF;
     }
 
     /// @notice Tells whether this instance has been initialized.
     function initialized() virtual public view returns (bool);
-
-    /// @notice Contract address to which clones will be re-directed.
-    function self() virtual public view returns (address) {
-        return _SELF;
-    }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract
     /// behaviour while using its own EVM storage.
@@ -51,7 +48,7 @@ abstract contract Clonable
     /// @dev is actually called from the same `msg.sender`.
     /// @dev See https://eips.ethereum.org/EIPS/eip-1167.
     /// @dev See https://blog.openzeppelin.com/deep-dive-into-the-minimal-proxy-contract/.
-    function _clone()
+    function __clone()
         internal
         returns (address _instance)
     {
@@ -61,37 +58,7 @@ abstract contract Clonable
             _instance := create(0, ptr, 0x37)
         }        
         require(_instance != address(0), "Clonable: CREATE failed");
-        emit Cloned(msg.sender, self(), _instance);
-    }
-
-    /// @notice Returns minimal proxy's deploy bytecode.
-    function _cloneBytecode()
-        virtual internal view
-        returns (bytes memory)
-    {
-        return abi.encodePacked(
-            hex"3d602d80600a3d3981f3363d3d373d3d3d363d73",
-            bytes20(self()),
-            hex"5af43d82803e903d91602b57fd5bf3"
-        );
-    }
-
-    /// @notice Returns mem pointer to minimal proxy's deploy bytecode.
-    function _cloneBytecodePtr()
-        virtual internal view
-        returns (bytes memory ptr)
-    {
-        address _base = self();
-        assembly {
-            // ptr to free mem:
-            ptr := mload(0x40)
-            // begin minimal proxy construction bytecode:
-            mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
-            // make minimal proxy delegate all calls to `self()`:
-            mstore(add(ptr, 0x14), shl(0x60, _base))
-            // end minimal proxy construction bytecode:
-            mstore(add(ptr, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
-        }
+        emit Cloned(msg.sender, base(), _instance);
     }
 
     /// Deploys and returns the address of a minimal proxy clone that replicates contract 
@@ -101,8 +68,9 @@ abstract contract Clonable
     /// @dev no contract can be deployed more than once at the same address.
     /// @dev See https://eips.ethereum.org/EIPS/eip-1167.
     /// @dev See https://blog.openzeppelin.com/deep-dive-into-the-minimal-proxy-contract/.
-    function _cloneDeterministic(bytes32 _salt)
-        virtual internal
+    function __cloneDeterministic(bytes32 _salt)
+        internal
+        notOnClones
         returns (address _instance)
     {
         bytes memory ptr = _cloneBytecodePtr();
@@ -111,6 +79,36 @@ abstract contract Clonable
             _instance := create2(0, ptr, 0x37, _salt)
         }
         require(_instance != address(0), "Clonable: CREATE2 failed");
-        emit Cloned(msg.sender, self(), _instance);
+        emit Cloned(msg.sender, base(), _instance);
+    }
+
+    /// @notice Returns minimal proxy's deploy bytecode.
+    function _cloneBytecode()
+        internal view
+        returns (bytes memory)
+    {
+        return abi.encodePacked(
+            hex"3d602d80600a3d3981f3363d3d373d3d3d363d73",
+            bytes20(base()),
+            hex"5af43d82803e903d91602b57fd5bf3"
+        );
+    }
+
+    /// @notice Returns mem pointer to minimal proxy's deploy bytecode.
+    function _cloneBytecodePtr()
+        private view
+        returns (bytes memory ptr)
+    {
+        address _base = base();
+        assembly {
+            // ptr to free mem:
+            ptr := mload(0x40)
+            // begin minimal proxy construction bytecode:
+            mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+            // make minimal proxy delegate all calls to `target()`:
+            mstore(add(ptr, 0x14), shl(0x60, _base))
+            // end minimal proxy construction bytecode:
+            mstore(add(ptr, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+        }
     }
 }
