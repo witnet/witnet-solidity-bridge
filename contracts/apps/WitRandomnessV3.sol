@@ -17,8 +17,8 @@ import {
     WitRandomness
 } from "../WitRandomness.sol";
 
-import "../patterns/Clonable.sol";
-import "../patterns/Ownable2Step.sol";
+import {Clonable} from "../patterns/Clonable.sol";
+import {Ownable, Ownable2Step} from "../patterns/Ownable2Step.sol";
 
 /// @title WitRandomnessV3: Unbiased, EVM-agnostic and provably-fair random seeds from the Witnet blockchain. 
 /// 

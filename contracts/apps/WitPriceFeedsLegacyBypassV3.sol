@@ -1,16 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitPriceFeedsLegacy.sol";
+import {IWitOracle, IWitOracleRadonRegistry, Witnet} from "../interfaces/IWitOracle.sol";
 
-import "../core/WitnetUpgradableBase.sol";
-import "../data/WitPriceFeedsLegacyDataLib.sol";
-import "../interfaces/IWitOracle.sol";
-import "../interfaces/IWitOracleAppliance.sol";
-import "../interfaces/IWitPriceFeeds.sol";
-import "../interfaces/legacy/IWitOracleLegacy.sol";
-import "../libs/Slices.sol";
-import "../patterns/Ownable2Step.sol";
+import {IWitOracleLegacy} from "../interfaces/legacy/IWitOracleLegacy.sol";
+import {IWitPriceFeeds, IWitPriceFeedsTypes, IWitPyth} from "../interfaces/IWitPriceFeeds.sol";
+import {
+    IWitPriceFeedsLegacy, 
+    IWitPriceFeedsLegacySolver,
+    IWitOracleRequest, 
+    IWitOracleRequestTemplate
+} from "../interfaces/legacy/IWitPriceFeedsLegacy.sol";
+
+import {Slices} from "../libs/Slices.sol";
+import {Ownable, Ownable2Step} from "../patterns/Ownable2Step.sol";
+import {WitnetUpgradableBase} from "../core/WitnetUpgradableBase.sol";
+import {WitPriceFeedsLegacyDataLib} from "../data/WitPriceFeedsLegacyDataLib.sol";
+import {WitPriceFeedsLegacy, IWitOracleAppliance} from "../WitPriceFeedsLegacy.sol";
+
 
 /// @title WitPriceFeeds: Price Feeds upgradable repository reliant on the Wit/Oracle blockchain.
 /// @author Guillermo Díaz <guillermo@witnet.io>
@@ -27,8 +34,8 @@ contract WitPriceFeedsLegacyBypassV3
     IWitOracleRadonRegistry immutable public registry;
 
     struct BypassV2V3 {
-        mapping (IWitPriceFeeds.ID4 => bytes4) v2Ids;
-        mapping (bytes4 => IWitPriceFeeds.ID4) v3Ids;
+        mapping (IWitPriceFeedsTypes.ID4 => bytes4) v2Ids;
+        mapping (bytes4 => IWitPriceFeedsTypes.ID4) v3Ids;
     }
 
     function class() public pure returns (string memory) {
@@ -60,30 +67,6 @@ contract WitPriceFeedsLegacyBypassV3
         );
     }
 
-    // // solhint-disable-next-line payable-fallback
-    // fallback() virtual override external { /* solhint-disable no-complex-fallback */
-    //     address _surrogate = address(surrogate);
-    //     assembly { /* solhint-disable avoid-low-level-calls */
-    //         // Gas optimized surrogate call to the 'surrogate' immutable contract.
-    //         // Note: `msg.data`, `msg.sender` and `msg.value` will be passed over 
-    //         //       to actual implementation of `msg.sig` within `implementation` contract.
-    //         let ptr := mload(0x40)
-    //         calldatacopy(ptr, 0, calldatasize())
-    //         let result := call(gas(), _surrogate, 0, ptr, calldatasize(), 0, 0)
-    //         let size := returndatasize()
-    //         returndatacopy(ptr, 0, size)
-    //         switch result
-    //             case 0  { 
-    //                 // pass back revert message:
-    //                 revert(ptr, size) 
-    //             }
-    //             default {
-    //               // pass back same data as returned by 'implementation' contract:
-    //               return(ptr, size) 
-    //             }
-    //     }
-    // }
-
 
     // ================================================================================================================
     // --- Overrides 'Upgradeable' ------------------------------------------------------------------------------------
@@ -108,7 +91,7 @@ contract WitPriceFeedsLegacyBypassV3
                     _parts[_px]
                 ));
             }
-            IWitPriceFeeds.ID4 _v3Id = IWitPriceFeeds.ID4.wrap(bytes4(keccak256(bytes(_captionV3))));
+            IWitPriceFeedsTypes.ID4 _v3Id = IWitPriceFeedsTypes.ID4.wrap(bytes4(keccak256(bytes(_captionV3))));
             __bypass().v2Ids[_v3Id] = _v2Id;
             __bypass().v3Ids[_v2Id] = _v3Id;
         }
@@ -144,7 +127,7 @@ contract WitPriceFeedsLegacyBypassV3
         public view
         returns (string memory _caption)
     {
-        _caption = surrogate.lookupPriceFeedCaption(IWitPriceFeeds.ID4.wrap(feedId));
+        _caption = surrogate.lookupPriceFeedCaption(IWitPriceFeedsTypes.ID4.wrap(feedId));
         if (bytes(_caption).length == 0) {
             return __legacy().records[feedId].caption;
         }
@@ -159,10 +142,10 @@ contract WitPriceFeedsLegacyBypassV3
         _captions = new string[](_pfs.length);
         _solvers = new bytes32[](_pfs.length);
         for (uint _ix; _ix < _pfs.length; ++ _ix) {
-            IWitPriceFeeds.ID4 _v3Id = IWitPriceFeeds.ID4.wrap(bytes4((IWitPyth.ID.unwrap(_pfs[_ix].id))));
-            _ids[_ix] = (__bypass().v2Ids[_v3Id] == bytes4(0) ? IWitPriceFeeds.ID4.unwrap(_v3Id) : __bypass().v2Ids[_v3Id]);
+            IWitPriceFeedsTypes.ID4 _v3Id = IWitPriceFeedsTypes.ID4.wrap(bytes4((IWitPyth.ID.unwrap(_pfs[_ix].id))));
+            _ids[_ix] = (__bypass().v2Ids[_v3Id] == bytes4(0) ? IWitPriceFeedsTypes.ID4.unwrap(_v3Id) : __bypass().v2Ids[_v3Id]);
             _captions[_ix] = _pfs[_ix].symbol;
-            if (_pfs[_ix].mapper.class != IWitPriceFeeds.Mappers.None) {
+            if (_pfs[_ix].mapper.class != IWitPriceFeedsTypes.Mappers.None) {
                 _solvers[_ix] = (_pfs[_ix].oracle.sources != bytes32(0)
                     ? _pfs[_ix].oracle.sources
                     : bytes32(bytes20(_pfs[_ix].oracle.target))
@@ -210,8 +193,8 @@ contract WitPriceFeedsLegacyBypassV3
         external view
         returns (bytes memory)
     {
-        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeeds.ID4.wrap(feedId));
-        if (_info.oracle.class == IWitPriceFeeds.Oracles.Witnet) {
+        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
+        if (_info.oracle.class == IWitPriceFeedsTypes.Oracles.Witnet) {
             Witnet.RadonHash _radHash = Witnet.RadonHash.wrap(_info.oracle.sources);
             return registry.lookupRadonRequestBytecode(_radHash);
         } else {
@@ -223,8 +206,8 @@ contract WitPriceFeedsLegacyBypassV3
         external view
         returns (bytes32 _void)
     {
-        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeeds.ID4.wrap(feedId));
-        if (_info.oracle.class == IWitPriceFeeds.Oracles.Witnet) {
+        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
+        if (_info.oracle.class == IWitPriceFeedsTypes.Oracles.Witnet) {
             return _info.oracle.sources;
         } else {
             return bytes32(0);
@@ -235,8 +218,8 @@ contract WitPriceFeedsLegacyBypassV3
         external view
         returns (Witnet.RadonRetrieval[] memory _void)
     {
-        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeeds.ID4.wrap(feedId));
-        if (_info.oracle.class == IWitPriceFeeds.Oracles.Witnet) {
+        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
+        if (_info.oracle.class == IWitPriceFeedsTypes.Oracles.Witnet) {
             Witnet.RadonHash _radHash = Witnet.RadonHash.wrap(_info.oracle.sources);
             return registry.lookupRadonRequestRetrievals(_radHash);
         } else {
@@ -386,7 +369,7 @@ contract WitPriceFeedsLegacyBypassV3
         external view
         returns (uint8)
     {
-        int8 _exponent = surrogate.lookupPriceFeedExponent(IWitPriceFeeds.ID4.wrap(feedId));
+        int8 _exponent = surrogate.lookupPriceFeedExponent(IWitPriceFeedsTypes.ID4.wrap(feedId));
         _require(_exponent <= 0, "uncompliant exponent");
         return uint8(-_exponent);
     }
@@ -395,8 +378,8 @@ contract WitPriceFeedsLegacyBypassV3
         external view
         returns (address _solverAddress, string[] memory _solverDeps)
     {
-        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeeds.ID4.wrap(feedId));
-        if (_info.mapper.class != IWitPriceFeeds.Mappers.None) {
+        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
+        if (_info.mapper.class != IWitPriceFeedsTypes.Mappers.None) {
             _solverAddress = address(surrogate);
             _solverDeps = _info.mapper.deps;
         }
@@ -406,10 +389,10 @@ contract WitPriceFeedsLegacyBypassV3
         public view
         returns (IWitPriceFeedsLegacySolver.Price memory)
     {
-        IWitPriceFeeds.ID4 _v3Id = (
-            IWitPriceFeeds.ID4.unwrap(__bypass().v3Ids[feedId]) != bytes4(0) 
+        IWitPriceFeedsTypes.ID4 _v3Id = (
+            IWitPriceFeedsTypes.ID4.unwrap(__bypass().v3Ids[feedId]) != bytes4(0) 
                 ? __bypass().v3Ids[feedId]
-                : IWitPriceFeeds.ID4.wrap(feedId)
+                : IWitPriceFeedsTypes.ID4.wrap(feedId)
         );
         IWitPriceFeeds.Price memory _lastUpdate = surrogate.getPriceUnsafe(_v3Id);
         return IWitPriceFeedsLegacySolver.Price({
@@ -439,10 +422,10 @@ contract WitPriceFeedsLegacyBypassV3
         returns (int256, uint256, uint256)
     {
         bytes4 _v2Id = bytes4(feedId);
-        IWitPriceFeeds.ID4 _v3Id = (
-            IWitPriceFeeds.ID4.unwrap(__bypass().v3Ids[_v2Id]) != bytes4(0) 
+        IWitPriceFeedsTypes.ID4 _v3Id = (
+            IWitPriceFeedsTypes.ID4.unwrap(__bypass().v3Ids[_v2Id]) != bytes4(0) 
                 ? __bypass().v3Ids[_v2Id]
-                : IWitPriceFeeds.ID4.wrap(_v2Id)
+                : IWitPriceFeedsTypes.ID4.wrap(_v2Id)
         );
         IWitPriceFeeds.Price memory _lastUpdate = surrogate.getPriceUnsafe(_v3Id);
         uint256 _timestamp = uint(Witnet.Timestamp.unwrap(_lastUpdate.timestamp));

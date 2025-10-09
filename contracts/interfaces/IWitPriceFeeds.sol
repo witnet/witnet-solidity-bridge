@@ -2,75 +2,19 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./legacy/IWitPyth.sol";
-import "./legacy/IWitPythChainlinkAggregator.sol";
+import {IWitPriceFeedsAdmin} from "./IWitPriceFeedsAdmin.sol";
+import {IWitPriceFeedsConsumer} from "./IWitPriceFeedsConsumer.sol";
+import {IWitPriceFeedsEvents} from "./IWitPriceFeedsEvents.sol";
+import {IWitPriceFeedsTypes} from "./IWitPriceFeedsTypes.sol";
+import {IWitPyth} from "./legacy/IWitPyth.sol";
 
-interface IWitPriceFeeds {
-
-    type ID4 is bytes4;
-
-    enum Mappers {
-        None,
-        Fallback,
-        Hottest,
-        Product,
-        Inverse
-    }
-
-    enum Oracles {
-        Witnet,
-        ERC2362,
-        Chainlink,
-        Pyth
-    }
-
-    event PriceFeedUpdate(
-        ID4 indexed ID4,
-        Witnet.Timestamp timestamp, 
-        Witnet.TransactionHash trail,
-        uint64 price,
-        int56 deltaPrice,
-        int8 exponent
-    );
-
-    struct Price {
-        int8 exponent;
-        uint64 price;
-        int56  deltaPrice;
-        Witnet.Timestamp timestamp;
-        Witnet.TransactionHash trail;
-    }
-
-    struct Info {
-        IWitPyth.ID id;
-        int8 exponent;
-        string symbol;
-        Mapper mapper;
-        Oracle oracle;
-        UpdateConditions updateConditions;
-        Price lastUpdate;
-    }
-
-    struct Mapper {
-        Mappers class;
-        string[] deps;
-    }
-
-    struct Oracle {
-        Oracles class;
-        address target;
-        bytes32 sources;
-    }
-
-    struct UpdateConditions {
-        uint24 callbackGas;
-        bool   computeEma;
-        uint24 cooldownSecs;
-        uint24 heartbeatSecs;
-        uint16 maxDeviation1000;
-        uint16 minWitnesses;
-    }
-
+interface IWitPriceFeeds
+    is
+        IWitPriceFeedsAdmin,
+        IWitPriceFeedsEvents, 
+        IWitPriceFeedsTypes,
+        IWitPyth
+{
     /// Address of the underlying logic contract.
     function base() external view returns (address);
 
@@ -86,10 +30,14 @@ interface IWitPriceFeeds {
     /// @dev The consumer contract must implement the `IWitPriceFeedsConsumer` interface, 
     /// @dev and accept this instance as source of truth.
     /// @dev It can only be settled by a curator on cloned instances.
-    function consumer() external view returns (address);
+    function consumer() external view returns (IWitPriceFeedsConsumer);
+
+    /// Creates a Chainlink Aggregator proxy to the specified symbol.
+    /// @dev Reverts if symbol is not supported.
+    function createChainlinkAggregator(string calldata symbol) external returns (address);
 
     /// Default update conditions that apply to brand new price feeds.
-    function defaultUpdateConditions() external view returns (IWitPriceFeeds.UpdateConditions calldata);
+    function defaultUpdateConditions() external view returns (UpdateConditions calldata);
 
     /// Returns a unique hash determined by the combination of data sources being used by 
     /// supported non-routed price feeds, and dependencies of all supported routed 
@@ -98,7 +46,7 @@ interface IWitPriceFeeds {
     function footprint() external view returns (bytes4);
 
     /// Determines unique ID for the specified symbol.
-    function hash(string calldata symbol) external pure returns (IWitPyth.ID);
+    function hash(string calldata symbol) external pure returns (ID);
 
     /// @notice Returns last update price for the specified ID4 price feed.
     /// Note: This function is sanity-checked version of `getPriceUnsafe` which is useful in applications and
@@ -147,6 +95,6 @@ interface IWitPriceFeeds {
     /// Tells whether there is a price feed settled with the specified caption.
     function supportsCaption(string calldata caption) external view returns (bool);
 
-    /// Creates a Chainlink Aggregator proxy to the specified symbol.
-    /// @dev Reverts if symbol is not supported.
-    function createChainlinkAggregator(string calldata symbol) external returns (IWitPythChainlinkAggregator);}
+    /// The Wit/Oracle core address accepted as source of truth.
+    function witOracle() external view returns (address);
+}

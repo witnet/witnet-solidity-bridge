@@ -2,11 +2,15 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../interfaces/IWitPriceFeeds.sol";
-import "../interfaces/legacy/IWitPythChainlinkAggregator.sol";
+import {IWitPriceFeeds, IWitPriceFeedsTypes} from "../interfaces/IWitPriceFeeds.sol";
+import {IWitPythChainlinkAggregator} from "../interfaces/legacy/IWitPythChainlinkAggregator.sol";
+import {Witnet} from "../libs/Witnet.sol";
 
-contract WitPythChainlinkAggregator is IWitPythChainlinkAggregator {
-
+contract WitPythChainlinkAggregator
+    is
+        IWitPythChainlinkAggregator, 
+        IWitPriceFeedsTypes
+{
     bytes4  immutable public override id4;
     bytes32 immutable public override priceId;
     address immutable public override pyth;
@@ -14,7 +18,7 @@ contract WitPythChainlinkAggregator is IWitPythChainlinkAggregator {
     
     constructor(address _witOracle, bytes4 _id4) {
         id4 = _id4;
-        priceId = IWitPriceFeeds(address(_witOracle)).lookupPriceFeedID(IWitPriceFeeds.ID4.wrap(id4));
+        priceId = IWitPriceFeeds(address(_witOracle)).lookupPriceFeedID(ID4.wrap(id4));
         pyth = _witOracle;
         witOracle = _witOracle;
     }
@@ -24,7 +28,7 @@ contract WitPythChainlinkAggregator is IWitPythChainlinkAggregator {
     }
 
     function latestAnswer() virtual public view returns (int256) {
-        IWitPriceFeeds.Price memory price = IWitPriceFeeds(witOracle).getPriceUnsafe(IWitPriceFeeds.ID4.wrap(id4));
+        IWitPriceFeeds.Price memory price = IWitPriceFeeds(witOracle).getPriceUnsafe(ID4.wrap(id4));
         return int256(int64(price.price));
     }
 
@@ -34,7 +38,7 @@ contract WitPythChainlinkAggregator is IWitPythChainlinkAggregator {
     }
 
     function latestTimestamp() virtual public view returns (uint256) {
-        IWitPriceFeeds.Price memory price = IWitPriceFeeds(witOracle).getPriceUnsafe(IWitPriceFeeds.ID4.wrap(id4));
+        IWitPriceFeeds.Price memory price = IWitPriceFeeds(witOracle).getPriceUnsafe(ID4.wrap(id4));
         return uint(Witnet.Timestamp.unwrap(price.timestamp));
     }
 
@@ -43,7 +47,7 @@ contract WitPythChainlinkAggregator is IWitPythChainlinkAggregator {
     /// --- IWitPythChainlinkAggregator -------------------------------------------------------------------------------
 
     function decimals() virtual override public view returns (uint8) {
-        int8 _exponent = IWitPriceFeeds(msg.sender).lookupPriceFeedExponent(IWitPriceFeeds.ID4.wrap(id4));
+        int8 _exponent = IWitPriceFeeds(msg.sender).lookupPriceFeedExponent(ID4.wrap(id4));
         return (_exponent < 0 ? uint8(-_exponent) : uint8(_exponent));
     }
 
@@ -56,7 +60,7 @@ contract WitPythChainlinkAggregator is IWitPythChainlinkAggregator {
         external view
         returns (uint80, int256, uint256, uint256, uint80)
     {
-        IWitPriceFeeds.Price memory price = IWitPriceFeeds(witOracle).getPriceUnsafe(IWitPriceFeeds.ID4.wrap(id4));
+        IWitPriceFeeds.Price memory price = IWitPriceFeeds(witOracle).getPriceUnsafe(ID4.wrap(id4));
         uint _timestamp = uint(Witnet.Timestamp.unwrap(price.timestamp));
         return (
             _roundId,
@@ -72,7 +76,7 @@ contract WitPythChainlinkAggregator is IWitPythChainlinkAggregator {
         external view
         returns (uint80, int256, uint256, uint256, uint80)
     {
-        IWitPriceFeeds.Price memory price = IWitPriceFeeds(witOracle).getPriceUnsafe(IWitPriceFeeds.ID4.wrap(id4));
+        IWitPriceFeeds.Price memory price = IWitPriceFeeds(witOracle).getPriceUnsafe(ID4.wrap(id4));
         uint80 _roundId = uint80(Witnet.Timestamp.unwrap(price.timestamp));
         uint _timestamp = uint(Witnet.Timestamp.unwrap(price.timestamp));
         return (
@@ -85,7 +89,7 @@ contract WitPythChainlinkAggregator is IWitPythChainlinkAggregator {
     }
 
     function symbol() override public view returns (string memory) {
-        return IWitPriceFeeds(address(witOracle)).lookupPriceFeedCaption(IWitPriceFeeds.ID4.wrap(id4));
+        return IWitPriceFeeds(address(witOracle)).lookupPriceFeedCaption(ID4.wrap(id4));
     }
 
     function version() virtual override external pure returns (uint256) {

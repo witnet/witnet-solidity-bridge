@@ -2,8 +2,6 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./IWitRandomnessTypes.sol";
-
 interface IWitRandomnessAdmin {
     function acceptOwnership() external;
     function owner() external view returns (address);

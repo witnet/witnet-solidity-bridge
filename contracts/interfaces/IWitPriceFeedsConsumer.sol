@@ -2,13 +2,15 @@
 
 pragma solidity ^0.8.0;
 
-import "./IWitPriceFeeds.sol";
+import {IWitPriceFeeds} from "./IWitPriceFeeds.sol";
+import {IWitPriceFeedsTypes} from "./IWitPriceFeedsTypes.sol";
+import {Witnet} from "../libs/Witnet.sol";
 
 interface IWitPriceFeedsConsumer {
     /// Reports a Witnet-verified price feed update.
     /// @dev It should revert if called from an address other than `witPriceFeeds()`.
     function reportUpdate(
-            IWitPriceFeeds.ID4 id4, 
+            IWitPriceFeedsTypes.ID4 id4, 
             Witnet.Timestamp timestamp,
             Witnet.TransactionHash trail,
             uint64 price, 
@@ -19,5 +21,5 @@ interface IWitPriceFeedsConsumer {
 
     /// Returns the address of the one and only `IWitPriceFeeds` 
     /// instance that can provide price feed updates.
-    function witPriceFeeds() external view returns (address);
+    function witPriceFeeds() external view returns (IWitPriceFeeds);
 }

@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./IWitOracleRadonRegistry.sol";
+import {IWitOracleRadonRegistry, Witnet} from "./IWitOracleRadonRegistry.sol";
 
 interface IWitOracle {
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./WitPriceFeedsV3.sol";
-import "../patterns/Upgradeable.sol";
+import {WitPriceFeedsV3} from "./WitPriceFeedsV3.sol";
+import {Upgradeable} from "../patterns/Upgradeable.sol";
 
 /// @title WitPriceFeedsUpgradableV3: On-demand Price Feeds registry for EVM-compatible L1/L2 chains, 
 /// natively powered by the Wit/Oracle blockchain, but yet capable of aggregating price 
@@ -20,7 +20,7 @@ import "../patterns/Upgradeable.sol";
 /// (where multiple oracles could be used as backup when preferred ones don't manage to provide 
 /// fresh enough updates for whatever reason).
 ///
-/// Last but not least, this contract allows simple plug-and-play integration from 
+/// Also, this contract allows simple plug-and-play integration from 
 /// smart contracts, dapps and DeFi projects currently adapted to operate with
 /// other price feed solutions, like Chainlink, or Pyth. 
 ///
@@ -149,7 +149,7 @@ contract WitPriceFeedsUpgradableV3
             __proxiable().codehash == bytes32(0)
                 || !_validateUpdateConditions(__storage().defaultUpdateConditions)
         ) {
-            __storage().defaultUpdateConditions = IWitPriceFeeds.UpdateConditions({
+            __storage().defaultUpdateConditions = UpdateConditions({
                 callbackGas: 1_000_000,
                 computeEma: false,
                 cooldownSecs: 15 minutes,

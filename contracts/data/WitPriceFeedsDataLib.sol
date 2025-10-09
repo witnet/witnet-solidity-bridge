@@ -2,15 +2,16 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "ado-contracts/contracts/interfaces/IERC2362.sol";
+import {IChainlinkAggregatorV3} from "../interfaces/legacy/IChainlinkAggregatorV3.sol";
+import {IERC2362} from "ado-contracts/contracts/interfaces/IERC2362.sol";
+import {IWitPriceFeeds, IWitPriceFeedsTypes, IWitPyth} from "../interfaces/IWitPriceFeeds.sol";
+import {IWitPythErrors} from "../interfaces/legacy/IWitPythErrors.sol";
 
-import "../libs/Witnet.sol";
-
-import "../interfaces/IWitOracle.sol";
-import "../interfaces/IWitOracleRadonRegistry.sol";
-import "../interfaces/IWitPriceFeeds.sol";
-import "../interfaces/IWitPriceFeedsAdmin.sol";
-import "../interfaces/IWitPriceFeedsMappingSolver.sol";
+import {
+    IWitOracle,
+    IWitOracleRadonRegistry,
+    Witnet
+} from "../WitOracle.sol";
 
 import "../libs/Slices.sol";
 
@@ -27,7 +28,7 @@ library WitPriceFeedsDataLib {
     using Witnet for Witnet.ResultStatus;
     using Witnet for Witnet.Timestamp;
 
-    using WitPriceFeedsDataLib for IWitPriceFeeds.ID4;
+    using WitPriceFeedsDataLib for IWitPriceFeedsTypes.ID4;
     using WitPriceFeedsDataLib for PriceFeed;
     
     bytes32 private constant _WIT_FEEDS_DATA_SLOTHASH =
@@ -36,10 +37,10 @@ library WitPriceFeedsDataLib {
 
     struct Storage {
         IWitPyth.ID[] ids;
-        mapping (IWitPriceFeeds.ID4 => PriceFeed) records;
-        mapping (IWitPriceFeeds.ID4 => IWitPriceFeeds.ID4[]) reverseDeps;
-        mapping (Witnet.RadonHash => IWitPriceFeeds.ID4) reverseIds;
-        IWitPriceFeeds.UpdateConditions defaultUpdateConditions;
+        mapping (IWitPriceFeedsTypes.ID4 => PriceFeed) records;
+        mapping (IWitPriceFeedsTypes.ID4 => IWitPriceFeedsTypes.ID4[]) reverseDeps;
+        mapping (Witnet.RadonHash => IWitPriceFeedsTypes.ID4) reverseIds;
+        IWitPriceFeedsTypes.UpdateConditions defaultUpdateConditions;
         address consumer;
         bytes4  footprint;
     }
@@ -86,10 +87,10 @@ library WitPriceFeedsDataLib {
         int40 _reserved;
         
         /// @dev Price feed's mapping algorithm, if any.        
-        IWitPriceFeeds.Mappers mapper;
+        IWitPriceFeedsTypes.Mappers mapper;
 
         /// @dev Price feed's aggregator oracle type, if other than the Wit/Oracle.
-        IWitPriceFeeds.Oracles oracle;
+        IWitPriceFeedsTypes.Oracles oracle;
 
         /// @dev Price feed's aggregator oracle address, if other than the Wit/Oracle.
         address oracleAddress;
@@ -103,7 +104,7 @@ library WitPriceFeedsDataLib {
         bytes32 mapperDeps;
 
         /// @dev Price-feed specific update conditions, if other than defaults.
-        IWitPriceFeeds.UpdateConditions updateConditions;
+        IWitPriceFeedsTypes.UpdateConditions updateConditions;
 
         /// @dev Last valid update data retrieved from the Wit/Oracle, if any.
         PriceData lastUpdate;
@@ -113,15 +114,15 @@ library WitPriceFeedsDataLib {
     // ================================================================================================================
     // --- Public methods ---------------------------------------------------------------------------------------------
 
-    function fetchLastUpdate(PriceFeed storage self, IWitPriceFeeds.ID4 id4, uint24 heartbeat)
+    function fetchLastUpdate(PriceFeed storage self, IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat)
         public view 
         returns (PriceData memory _lastUpdate)
     {
-        IWitPriceFeeds.Mappers _mapper = self.mapper;
-        if (_mapper == IWitPriceFeeds.Mappers.None) {
+        IWitPriceFeedsTypes.Mappers _mapper = self.mapper;
+        if (_mapper == IWitPriceFeedsTypes.Mappers.None) {
             
-            IWitPriceFeeds.Oracles _oracle = self.oracle;
-            if (_oracle == IWitPriceFeeds.Oracles.Witnet) {
+            IWitPriceFeedsTypes.Oracles _oracle = self.oracle;
+            if (_oracle == IWitPriceFeedsTypes.Oracles.Witnet) {
                 if (self.oracleAddress == address(0) || self.oracleAddress == address(this)) {
                     return self.lastUpdate;
                 
@@ -129,29 +130,29 @@ library WitPriceFeedsDataLib {
                     return (
                         self.updateConditions.computeEma
                             ? _intoEmaPriceData(IWitPriceFeeds(self.oracleAddress).getPriceNotOlderThan(
-                                IWitPriceFeeds.ID4.wrap(bytes4(self.oracleSources)), 
+                                IWitPriceFeedsTypes.ID4.wrap(bytes4(self.oracleSources)), 
                                 heartbeat
                             ))
                             : _intoPriceData(IWitPriceFeeds(self.oracleAddress).getPriceNotOlderThan(
-                                IWitPriceFeeds.ID4.wrap(bytes4(self.oracleSources)), 
+                                IWitPriceFeedsTypes.ID4.wrap(bytes4(self.oracleSources)), 
                                 heartbeat
                             ))
                     );
                 }
 
-            } else if (_oracle == IWitPriceFeeds.Oracles.ERC2362) {
+            } else if (_oracle == IWitPriceFeedsTypes.Oracles.ERC2362) {
                 (int _value, uint _timestamp,) = IERC2362(self.oracleAddress).valueFor(self.oracleSources);
                 _lastUpdate.price = uint64(int64(_value));
                 _lastUpdate.timestamp = Witnet.Timestamp.wrap(uint64(_timestamp));
                 _lastUpdate.exponent = self.exponent;
 
-            } else if (_oracle == IWitPriceFeeds.Oracles.Chainlink) {
+            } else if (_oracle == IWitPriceFeedsTypes.Oracles.Chainlink) {
                 (, int _value,, uint _timestamp,) = IChainlinkAggregatorV3(self.oracleAddress).latestRoundData();
                 _lastUpdate.price = uint64(int64(_value));
                 _lastUpdate.timestamp = Witnet.Timestamp.wrap(uint64(_timestamp));
                 _lastUpdate.exponent = self.exponent;
             
-            } else if (_oracle == IWitPriceFeeds.Oracles.Pyth) {
+            } else if (_oracle == IWitPriceFeedsTypes.Oracles.Pyth) {
                 IWitPyth.PythPrice memory _price;
                 if (self.updateConditions.computeEma) {
                     _price = IWitPyth(self.oracleAddress).getEmaPriceUnsafe(IWitPyth.ID.wrap(self.oracleSources));
@@ -169,24 +170,24 @@ library WitPriceFeedsDataLib {
         
         } else {    
             if (
-                _mapper == IWitPriceFeeds.Mappers.Product 
-                    || _mapper == IWitPriceFeeds.Mappers.Inverse
+                _mapper == IWitPriceFeedsTypes.Mappers.Product 
+                    || _mapper == IWitPriceFeedsTypes.Mappers.Inverse
             ) {
                 return fetchLastUpdateFromProduct(
                     id4, 
                     heartbeat, 
                     self.exponent, 
-                    _mapper == IWitPriceFeeds.Mappers.Inverse
+                    _mapper == IWitPriceFeedsTypes.Mappers.Inverse
                 );
 
-            } else if (_mapper == IWitPriceFeeds.Mappers.Hottest) {
+            } else if (_mapper == IWitPriceFeedsTypes.Mappers.Hottest) {
                 return fetchLastUpdateFromHottest(
                     id4, 
                     heartbeat,
                     self.exponent
                 );
             
-            } else if (_mapper == IWitPriceFeeds.Mappers.Fallback) {
+            } else if (_mapper == IWitPriceFeedsTypes.Mappers.Fallback) {
                 return fetchLastUpdateFromFallback(
                     id4, 
                     heartbeat,
@@ -199,12 +200,12 @@ library WitPriceFeedsDataLib {
         }
     }
 
-    function getPrice(IWitPriceFeeds.ID4 id4)
+    function getPrice(IWitPriceFeedsTypes.ID4 id4)
         public view 
-        returns (IWitPriceFeeds.Price memory)
+        returns (IWitPriceFeedsTypes.Price memory)
     {
         PriceFeed storage __record = seekPriceFeed(id4);
-        IWitPriceFeeds.UpdateConditions memory _conditions = coalesce(__record.updateConditions);
+        IWitPriceFeedsTypes.UpdateConditions memory _conditions = coalesce(__record.updateConditions);
 
         PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, _conditions.heartbeatSecs);
         
@@ -219,7 +220,7 @@ library WitPriceFeedsDataLib {
             IWitPythErrors.StalePrice()
         );
 
-        return IWitPriceFeeds.Price({
+        return IWitPriceFeedsTypes.Price({
             exponent: _lastUpdate.exponent,
             deltaPrice: _lastUpdate.deltaPrice,
             price: _lastUpdate.emaPrice > 0 ? _lastUpdate.emaPrice : _lastUpdate.price,
@@ -228,9 +229,9 @@ library WitPriceFeedsDataLib {
         });
     }
 
-    function getPriceNotOlderThan(IWitPriceFeeds.ID4 id4, uint24 age)
+    function getPriceNotOlderThan(IWitPriceFeedsTypes.ID4 id4, uint24 age)
         public view 
-        returns (IWitPriceFeeds.Price memory)
+        returns (IWitPriceFeedsTypes.Price memory)
     {
         PriceFeed storage __record = seekPriceFeed(id4);
         PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, age);
@@ -245,7 +246,7 @@ library WitPriceFeedsDataLib {
             IWitPythErrors.StalePrice()
         );
 
-        return IWitPriceFeeds.Price({
+        return IWitPriceFeedsTypes.Price({
             exponent: _lastUpdate.exponent,
             deltaPrice: _lastUpdate.deltaPrice,
             price: _lastUpdate.emaPrice > 0 ? _lastUpdate.emaPrice : _lastUpdate.price,
@@ -254,14 +255,14 @@ library WitPriceFeedsDataLib {
         });
     }
 
-    function getPriceUnsafe(IWitPriceFeeds.ID4 id4)
+    function getPriceUnsafe(IWitPriceFeedsTypes.ID4 id4)
         public view 
-        returns (IWitPriceFeeds.Price memory)
+        returns (IWitPriceFeedsTypes.Price memory)
     {
         PriceFeed storage __record = seekPriceFeed(id4);
         PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, 0);
 
-        return IWitPriceFeeds.Price({
+        return IWitPriceFeedsTypes.Price({
             exponent: _lastUpdate.exponent,
             deltaPrice: _lastUpdate.deltaPrice,
             price: _lastUpdate.emaPrice > 0 ? _lastUpdate.emaPrice : _lastUpdate.price,
@@ -274,10 +275,10 @@ library WitPriceFeedsDataLib {
     // ================================================================================================================
     // --- Price-feed admin methods -----------------------------------------------------------------------------------
 
-    function removePriceFeed(IWitPriceFeeds.ID4 id4, bool recursively) public {
+    function removePriceFeed(IWitPriceFeedsTypes.ID4 id4, bool recursively) public {
         PriceFeed storage self = seekPriceFeed(id4);
         if (self.settled()) {
-            IWitPriceFeeds.ID4[] memory _reverseDeps = data().reverseDeps[id4];
+            IWitPriceFeedsTypes.ID4[] memory _reverseDeps = data().reverseDeps[id4];
             require(
                 recursively
                     || _reverseDeps.length == 0,
@@ -305,7 +306,7 @@ library WitPriceFeedsDataLib {
             Witnet.RadonHash _radonHash = Witnet.RadonHash.wrap(self.oracleSources);       
             if (!_radonHash.isZero()) {
                 if (id4.equals(data().reverseIds[_radonHash])) {
-                    data().reverseIds[_radonHash] = IWitPriceFeeds.ID4.wrap(0);
+                    data().reverseIds[_radonHash] = IWitPriceFeedsTypes.ID4.wrap(0);
                 }
             }
             delete data().records[id4].lastUpdate;
@@ -321,30 +322,30 @@ library WitPriceFeedsDataLib {
     function settlePriceFeedMapper(
             string calldata symbol,
             int8 exponent,
-            IWitPriceFeeds.Mappers mapper,
+            IWitPriceFeedsTypes.Mappers mapper,
             string[] calldata mapperDeps
         )
         public
         returns (bytes4)
     {
         require(
-            uint8(mapper) > uint8(IWitPriceFeeds.Mappers.None)
-                && uint8(mapper) <= uint8(IWitPriceFeeds.Mappers.Inverse), 
+            uint8(mapper) > uint8(IWitPriceFeedsTypes.Mappers.None)
+                && uint8(mapper) <= uint8(IWitPriceFeedsTypes.Mappers.Inverse), 
             "invalid mapper"
         );
-        IWitPriceFeeds.ID4 id4 = _settlePriceFeedSymbol(symbol);
+        IWitPriceFeedsTypes.ID4 id4 = _settlePriceFeedSymbol(symbol);
         PriceFeed storage __record = seekPriceFeed(id4);
         require(!__record.settled(), "already settled");
         bytes32 _mapperDeps;
         for (uint _ix; _ix < mapperDeps.length; _ix ++) {
             bytes4 _id4 = bytes4(hash(mapperDeps[_ix]));
-            PriceFeed storage __depsFeed = seekPriceFeed(IWitPriceFeeds.ID4.wrap(_id4));
+            PriceFeed storage __depsFeed = seekPriceFeed(IWitPriceFeedsTypes.ID4.wrap(_id4));
             require(__depsFeed.settled(), string(abi.encodePacked(
                 "unsupported dependency: ",
                 mapperDeps[_ix]
             )));
             _mapperDeps |= (bytes32(_id4) >> (32 * _ix));
-            data().reverseDeps[IWitPriceFeeds.ID4.wrap(_id4)].push(id4);
+            data().reverseDeps[IWitPriceFeedsTypes.ID4.wrap(_id4)].push(id4);
         }
         __record.settleMapper(
             exponent, 
@@ -362,7 +363,7 @@ library WitPriceFeedsDataLib {
     function settlePriceFeedOracle(
             string calldata symbol,
             int8 exponent,
-            IWitPriceFeeds.Oracles oracle,
+            IWitPriceFeedsTypes.Oracles oracle,
             address oracleAddress,
             bytes32 oracleSources
         )
@@ -370,11 +371,11 @@ library WitPriceFeedsDataLib {
         returns (bytes4)
     {
         require(
-            uint8(oracle) >= uint8(IWitPriceFeeds.Oracles.Witnet)
-                && uint8(oracle) <= uint8(IWitPriceFeeds.Oracles.Pyth), 
+            uint8(oracle) >= uint8(IWitPriceFeedsTypes.Oracles.Witnet)
+                && uint8(oracle) <= uint8(IWitPriceFeedsTypes.Oracles.Pyth), 
             "invalid oracle"
         );
-        IWitPriceFeeds.ID4 id4 = _settlePriceFeedSymbol(symbol);
+        IWitPriceFeedsTypes.ID4 id4 = _settlePriceFeedSymbol(symbol);
         PriceFeed storage __record = seekPriceFeed(id4);
         require(!__record.settled(), "already settled");
         require(oracleAddress.code.length > 0, "inexistent oracle");
@@ -401,13 +402,13 @@ library WitPriceFeedsDataLib {
         public
         returns (bytes4 _footprint, Witnet.RadonHash _radonHash)
     {
-        IWitPriceFeeds.ID4 id4 = _settlePriceFeedSymbol(symbol);
+        IWitPriceFeedsTypes.ID4 id4 = _settlePriceFeedSymbol(symbol);
         PriceFeed storage __record = seekPriceFeed(id4);
         require(address(registry) != address(0), "no radon registry");
         _radonHash = registry.hashOf(radonBytecode);
         __record.settleOracle(
             exponent, 
-            IWitPriceFeeds.Oracles.Witnet,
+            IWitPriceFeedsTypes.Oracles.Witnet,
             address(this),
             Witnet.RadonHash.unwrap(_radonHash)
         );
@@ -423,40 +424,40 @@ library WitPriceFeedsDataLib {
         public
         returns (bytes4)
     {
-        IWitPriceFeeds.ID4 id4 = _settlePriceFeedSymbol(symbol);
+        IWitPriceFeedsTypes.ID4 id4 = _settlePriceFeedSymbol(symbol);
         PriceFeed storage __record = seekPriceFeed(id4);
         require(address(registry) != address(0), "no radon registry");
         require(registry.isVerifiedRadonRequest(radonHash), "unverified sources");
         __record.settleOracle(
             exponent, 
-            IWitPriceFeeds.Oracles.Witnet,
+            IWitPriceFeedsTypes.Oracles.Witnet,
             address(this),
             Witnet.RadonHash.unwrap(radonHash)
         );
         return settlePriceFeedFootprint();
     }
 
-    function toString(IWitPriceFeeds.Mappers mapper) public pure returns (string memory) {
-        if (mapper == IWitPriceFeeds.Mappers.None) {
+    function toString(IWitPriceFeedsTypes.Mappers mapper) public pure returns (string memory) {
+        if (mapper == IWitPriceFeedsTypes.Mappers.None) {
             return "None";
-        } else if (mapper == IWitPriceFeeds.Mappers.Product) {
+        } else if (mapper == IWitPriceFeedsTypes.Mappers.Product) {
             return "Product";
-        } else if (mapper == IWitPriceFeeds.Mappers.Fallback) {
+        } else if (mapper == IWitPriceFeedsTypes.Mappers.Fallback) {
             return "Fallback";
-        } else if (mapper == IWitPriceFeeds.Mappers.Hottest) {
+        } else if (mapper == IWitPriceFeedsTypes.Mappers.Hottest) {
             return "Hottest";
         } 
         revert("unsupported mapper");
     }
 
-    function toString(IWitPriceFeeds.Oracles oracle) public pure returns (string memory) {
-        if (oracle == IWitPriceFeeds.Oracles.Witnet) {
+    function toString(IWitPriceFeedsTypes.Oracles oracle) public pure returns (string memory) {
+        if (oracle == IWitPriceFeedsTypes.Oracles.Witnet) {
             return "Wit/Oracle";
-        } else if (oracle == IWitPriceFeeds.Oracles.ERC2362) {
+        } else if (oracle == IWitPriceFeedsTypes.Oracles.ERC2362) {
             return "ADO/ERC2362";
-        } else if (oracle == IWitPriceFeeds.Oracles.Chainlink) {
+        } else if (oracle == IWitPriceFeedsTypes.Oracles.Chainlink) {
             return "ChainlinkAggregatorV3";
-        } else if (oracle == IWitPriceFeeds.Oracles.Pyth) {
+        } else if (oracle == IWitPriceFeedsTypes.Oracles.Pyth) {
             return "IPyth";
         }
         revert("unsupported oracle");
@@ -466,12 +467,12 @@ library WitPriceFeedsDataLib {
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
 
-    function coalesce(IWitPriceFeeds.UpdateConditions storage self) 
+    function coalesce(IWitPriceFeedsTypes.UpdateConditions storage self) 
         internal view 
-        returns (IWitPriceFeeds.UpdateConditions memory)
+        returns (IWitPriceFeedsTypes.UpdateConditions memory)
     {
-        IWitPriceFeeds.UpdateConditions storage __default = data().defaultUpdateConditions;
-        return IWitPriceFeeds.UpdateConditions({
+        IWitPriceFeedsTypes.UpdateConditions storage __default = data().defaultUpdateConditions;
+        return IWitPriceFeedsTypes.UpdateConditions({
             callbackGas: self.callbackGas == 0 ? __default.callbackGas : self.callbackGas,
             computeEma: self.computeEma || __default.computeEma,
             cooldownSecs:  self.cooldownSecs == 0 ? __default.cooldownSecs : self.cooldownSecs,
@@ -482,14 +483,14 @@ library WitPriceFeedsDataLib {
     }
 
     function coalesce(
-            IWitPriceFeeds.UpdateConditions storage self, 
-            IWitPriceFeeds.UpdateConditions memory _default
+            IWitPriceFeedsTypes.UpdateConditions storage self, 
+            IWitPriceFeedsTypes.UpdateConditions memory _default
         ) 
         internal pure
-        returns (IWitPriceFeeds.UpdateConditions memory)
+        returns (IWitPriceFeedsTypes.UpdateConditions memory)
     {
-        IWitPriceFeeds.UpdateConditions memory _self = self;
-        return IWitPriceFeeds.UpdateConditions({
+        IWitPriceFeedsTypes.UpdateConditions memory _self = self;
+        return IWitPriceFeedsTypes.UpdateConditions({
             callbackGas: _self.callbackGas == 0 ? _default.callbackGas : _self.callbackGas,
             computeEma: _self.computeEma || _default.computeEma,
             cooldownSecs:  _self.cooldownSecs == 0 ? _default.cooldownSecs : _self.cooldownSecs,
@@ -511,16 +512,16 @@ library WitPriceFeedsDataLib {
     /// @dev The maximum number of dependencies is hard-limited to 8, as to limit number
     /// @dev of SSTORE operations (`__storage().records[feedId].solverDepsFlag`), 
     /// @dev no matter the actual number of depending feeds involved.
-    function deps(IWitPriceFeeds.ID4 self) internal view returns (IWitPriceFeeds.ID4[] memory _deps) {
+    function deps(IWitPriceFeedsTypes.ID4 self) internal view returns (IWitPriceFeedsTypes.ID4[] memory _deps) {
         bytes32 _solverDepsFlag = data().records[self].mapperDeps;
-        _deps = new IWitPriceFeeds.ID4[](8);
+        _deps = new IWitPriceFeedsTypes.ID4[](8);
         uint _len;
         for (_len; _len < 8; ++ _len) {
             bytes4 _id4 = bytes4(_solverDepsFlag);
             if (_id4 == 0) {
                 break;
             } else {
-                _deps[_len] = IWitPriceFeeds.ID4.wrap(_id4);
+                _deps[_len] = IWitPriceFeedsTypes.ID4.wrap(_id4);
                 _solverDepsFlag <<= 32;
             }
         }
@@ -530,15 +531,15 @@ library WitPriceFeedsDataLib {
         }
     }
 
-    function equals(IWitPriceFeeds.ID4 a, IWitPriceFeeds.ID4 b) internal pure returns (bool) {
+    function equals(IWitPriceFeedsTypes.ID4 a, IWitPriceFeedsTypes.ID4 b) internal pure returns (bool) {
         return (
-            IWitPriceFeeds.ID4.unwrap(a)
-                == IWitPriceFeeds.ID4.unwrap(b)
+            IWitPriceFeedsTypes.ID4.unwrap(a)
+                == IWitPriceFeedsTypes.ID4.unwrap(b)
         );
     }
 
     function fetchLastUpdateFromProduct(
-            IWitPriceFeeds.ID4 id4, 
+            IWitPriceFeedsTypes.ID4 id4, 
             uint24 heartbeat, 
             int8 exponent, 
             bool inverse
@@ -546,7 +547,7 @@ library WitPriceFeedsDataLib {
         internal view 
         returns (PriceData memory _lastUpdate)
     {
-        IWitPriceFeeds.ID4[] memory _deps = deps(id4);
+        IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
         int[3] memory _regs;
         // _regs[0] -> _lastPrice
         // _regs[1] -> _lastEmaPrice
@@ -608,11 +609,11 @@ library WitPriceFeedsDataLib {
         _lastUpdate.exponent = exponent;
     }
 
-    function fetchLastUpdateFromHottest(IWitPriceFeeds.ID4 id4, uint24 heartbeat, int8 exponent)
+    function fetchLastUpdateFromHottest(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
         internal view 
         returns (PriceData memory _lastUpdate)
     {
-        IWitPriceFeeds.ID4[] memory _deps = deps(id4);
+        IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
         for (uint _ix; _ix < _deps.length; ++ _ix) {
             PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]),  _deps[_ix], heartbeat);
             if (
@@ -631,11 +632,11 @@ library WitPriceFeedsDataLib {
         }
     }
 
-    function fetchLastUpdateFromFallback(IWitPriceFeeds.ID4 id4, uint24 heartbeat, int8 exponent)
+    function fetchLastUpdateFromFallback(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
         internal view 
         returns (PriceData memory _lastUpdate)
     {
-        IWitPriceFeeds.ID4[] memory _deps = deps(id4);
+        IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
         for (uint _ix; _ix < _deps.length; ++ _ix) {
             PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]), _deps[_ix], heartbeat);
             if (
@@ -658,20 +659,20 @@ library WitPriceFeedsDataLib {
         return keccak256(abi.encode(symbol));
     }
 
-    function isZero(IWitPriceFeeds.ID4 id4) internal pure returns (bool) {
-        return IWitPriceFeeds.ID4.unwrap(id4) == 0;
+    function isZero(IWitPriceFeedsTypes.ID4 id4) internal pure returns (bool) {
+        return IWitPriceFeedsTypes.ID4.unwrap(id4) == 0;
     }
 
     // function pushDataResult(
     //         Witnet.DataResult memory result,
-    //         IWitPriceFeeds.UpdateConditions memory defaultUpdateConditions,
-    //         IWitPriceFeeds.ID4 id4
+    //         IWitPriceFeedsTypes.UpdateConditions memory defaultUpdateConditions,
+    //         IWitPriceFeedsTypes.ID4 id4
     //     )
     //     internal
     // {
     //     PriceFeed storage __record = seekPriceFeed(id4);
     //     PriceData memory _lastUpdate = __record.lastUpdate.data;
-    //     IWitPriceFeeds.UpdateConditions memory _updateConditions = coalesce(
+    //     IWitPriceFeedsTypes.UpdateConditions memory _updateConditions = coalesce(
     //         __record.updateConditions, 
     //         defaultUpdateConditions
     //     );
@@ -698,7 +699,7 @@ library WitPriceFeedsDataLib {
     //     }
     // }
 
-    function seekPriceFeed(IWitPriceFeeds.ID4 id4) internal view returns (PriceFeed storage) {
+    function seekPriceFeed(IWitPriceFeedsTypes.ID4 id4) internal view returns (PriceFeed storage) {
         return data().records[id4];
     }
 
@@ -713,7 +714,7 @@ library WitPriceFeedsDataLib {
     function settleMapper(
             PriceFeed storage self, 
             int8 exponent,
-            IWitPriceFeeds.Mappers mapper, 
+            IWitPriceFeedsTypes.Mappers mapper, 
             bytes32 mapperDeps
         )
         internal
@@ -727,7 +728,7 @@ library WitPriceFeedsDataLib {
     function settleOracle(
             PriceFeed storage self,
             int8 exponent,
-            IWitPriceFeeds.Oracles oracle,
+            IWitPriceFeedsTypes.Oracles oracle,
             address oracleAddress,
             bytes32 oracleSources
         )
@@ -749,23 +750,23 @@ library WitPriceFeedsDataLib {
     // {
     //     require(!self.settled(), "already settled");
     //     self.exponent = exponent;
-    //     self.oracle = IWitPriceFeeds.Oracles.Witnet;
+    //     self.oracle = IWitPriceFeedsTypes.Oracles.Witnet;
     //     self.oracleAddress = address(this);
     //     self.oracleSources = Witnet.RadonHash.unwrap(radonHash);
     //     self.lastUpdate.data.exponent = exponent;
     // }
 
-    function toERC165Id(IWitPriceFeeds.Oracles oracle) public pure returns (bytes4) {
-        if (oracle == IWitPriceFeeds.Oracles.Witnet) {
+    function toERC165Id(IWitPriceFeedsTypes.Oracles oracle) public pure returns (bytes4) {
+        if (oracle == IWitPriceFeedsTypes.Oracles.Witnet) {
             return type(IWitOracle).interfaceId;
         
-        } else if (oracle == IWitPriceFeeds.Oracles.ERC2362) {
+        } else if (oracle == IWitPriceFeedsTypes.Oracles.ERC2362) {
             return type(IERC2362).interfaceId;
         
-        } else if (oracle == IWitPriceFeeds.Oracles.Chainlink) {
+        } else if (oracle == IWitPriceFeedsTypes.Oracles.Chainlink) {
             return type(IChainlinkAggregatorV3).interfaceId;
         
-        } else if (oracle == IWitPriceFeeds.Oracles.Pyth) {
+        } else if (oracle == IWitPriceFeedsTypes.Oracles.Pyth) {
             return type(IWitPyth).interfaceId;
         
         } else {
@@ -787,38 +788,38 @@ library WitPriceFeedsDataLib {
         }
     }
 
-    function _footprintOf(IWitPriceFeeds.ID4 id4) private view returns (bytes4) {
+    function _footprintOf(IWitPriceFeedsTypes.ID4 id4) private view returns (bytes4) {
         WitPriceFeedsDataLib.PriceFeed storage self = seekPriceFeed(id4);
         if (self.oracleSources == bytes32(0)) {
-            return self.mapper != IWitPriceFeeds.Mappers.None ? (
+            return self.mapper != IWitPriceFeedsTypes.Mappers.None ? (
                 bytes4(keccak256(abi.encodePacked(
-                    IWitPriceFeeds.ID4.unwrap(id4), 
+                    IWitPriceFeedsTypes.ID4.unwrap(id4), 
                     self.mapperDeps
                 )))
             ) : (
                 bytes4(keccak256(abi.encodePacked(
-                    IWitPriceFeeds.ID4.unwrap(id4), 
+                    IWitPriceFeedsTypes.ID4.unwrap(id4), 
                     self.oracleAddress
                 )))
             );
 
         } else {
             return bytes4(keccak256(abi.encodePacked(
-                IWitPriceFeeds.ID4.unwrap(id4), 
+                IWitPriceFeedsTypes.ID4.unwrap(id4), 
                 self.oracleSources
             )));
         }
     }
 
-    function _intoID4(IWitPyth.ID id) private pure returns (IWitPriceFeeds.ID4) {
-        return IWitPriceFeeds.ID4.wrap(bytes4(IWitPyth.ID.unwrap(id)));
+    function _intoID4(IWitPyth.ID id) private pure returns (IWitPriceFeedsTypes.ID4) {
+        return IWitPriceFeedsTypes.ID4.wrap(bytes4(IWitPyth.ID.unwrap(id)));
     }
 
-    function _intoWitPythID(IWitPriceFeeds.ID4 id4) private view returns (IWitPyth.ID) {
+    function _intoWitPythID(IWitPriceFeedsTypes.ID4 id4) private view returns (IWitPyth.ID) {
         return data().ids[data().records[id4].index];
     }
 
-        function _intoPriceData(IWitPriceFeeds.Price memory _price) internal pure returns (PriceData memory) {
+        function _intoPriceData(IWitPriceFeedsTypes.Price memory _price) internal pure returns (PriceData memory) {
         return PriceData({
             emaPrice: 0,
             price: _price.price,
@@ -829,7 +830,7 @@ library WitPriceFeedsDataLib {
         });
     }
 
-    function _intoEmaPriceData(IWitPriceFeeds.Price memory _price) internal pure returns (PriceData memory) {
+    function _intoEmaPriceData(IWitPriceFeedsTypes.Price memory _price) internal pure returns (PriceData memory) {
         return PriceData({
             emaPrice: _price.price,
             price: 0,
@@ -844,7 +845,7 @@ library WitPriceFeedsDataLib {
     //         IWitPriceFeeds.ID priceId,
     //         Witnet.DataResult memory result,
     //         PriceData memory prevData,
-    //         IWitPriceFeeds.UpdateConditions memory updateConditions
+    //         IWitPriceFeedsTypes.UpdateConditions memory updateConditions
     //     )
     //     private pure
     //     returns (IWitPyth.PriceFeed memory)
@@ -874,9 +875,9 @@ library WitPriceFeedsDataLib {
     //     });
     // }
 
-    function _settlePriceFeedSymbol(string calldata symbol) private returns (IWitPriceFeeds.ID4 id4) {
+    function _settlePriceFeedSymbol(string calldata symbol) private returns (IWitPriceFeedsTypes.ID4 id4) {
         bytes32 _id = hash(symbol);
-        id4 = IWitPriceFeeds.ID4.wrap(bytes4(_id));
+        id4 = IWitPriceFeedsTypes.ID4.wrap(bytes4(_id));
         PriceFeed storage __record = seekPriceFeed(id4);
         if (
             keccak256(abi.encode(symbol))

@@ -1,14 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitPriceFeeds.sol";
-import "../data/WitPriceFeedsDataLib.sol";
-import "../interfaces/IWitOracleQueriable.sol";
-import "../interfaces/IWitPriceFeedsAdmin.sol";
-import "../interfaces/IWitPriceFeedsConsumer.sol";
-import "../mockups/WitPythChainlinkAggregator.sol";
-import "../patterns/Clonable.sol";
-import "../patterns/Ownable2Step.sol";
+import {
+    IWitAppliance,
+    IWitOracle,
+    IWitOracleAppliance,
+    IWitOracleQueriable,
+    IWitOracleRadonRegistry,
+    Witnet
+} from "../WitOracle.sol";
+
+import {
+    IWitPriceFeeds,
+    IWitPriceFeedsAdmin,
+    IWitPriceFeedsConsumer,
+    WitPriceFeeds
+} from "../WitPriceFeeds.sol";
+
+import {WitPriceFeedsDataLib} from "../data/WitPriceFeedsDataLib.sol";
+import {WitPythChainlinkAggregator} from "../mockups/WitPythChainlinkAggregator.sol";
+
+import {Clonable} from "../patterns/Clonable.sol";
+import {Ownable, Ownable2Step} from "../patterns/Ownable2Step.sol";
 
 /// @title WitPriceFeedsV3: On-demand Price Feeds registry for EVM-compatible L1/L2 chains, 
 /// natively powered by the Wit/Oracle blockchain, but yet capable of aggregating price 
@@ -26,7 +39,7 @@ import "../patterns/Ownable2Step.sol";
 /// (where multiple oracles could be used as backup when preferred ones don't manage to provide 
 /// fresh enough updates for whatever reason).
 ///
-/// Last but not least, this contract allows simple plug-and-play integration from 
+/// Also, this contract allows simple plug-and-play integration from 
 /// smart contracts, dapps and DeFi projects currently adapted to operate with
 /// other price feed solutions, like Chainlink, or Pyth. 
 ///
@@ -71,7 +84,7 @@ contract WitPriceFeedsV3
             "uncompliant wit/oracle"
         );
         witOracle = _witOracle;
-        __storage().defaultUpdateConditions = IWitPriceFeeds.UpdateConditions({
+        __storage().defaultUpdateConditions = UpdateConditions({
             callbackGas: 1_000_000,
             computeEma: false,
             cooldownSecs: 15 minutes,
@@ -257,7 +270,7 @@ contract WitPriceFeedsV3
     /// @dev Reverts if symbol is not supported.
     function createChainlinkAggregator(string calldata symbol)
         virtual override external
-        returns (IWitPythChainlinkAggregator)
+        returns (address)
     {
         require(supportsCaption(symbol), PriceFeedNotFound());
         bytes memory _initcode = type(WitPythChainlinkAggregator).creationCode;
@@ -274,7 +287,7 @@ contract WitPriceFeedsV3
                 )
             }
         }
-        return IWitPythChainlinkAggregator(_aggregator);
+        return _aggregator;
     }
 
 
@@ -290,8 +303,8 @@ contract WitPriceFeedsV3
     /// @dev and accept this instance as source of truth.
     /// @dev It can only be settled by a curator on cloned instances.
     /// @dev It can only be settled by a curator, only on cloned instances.
-    function consumer() override external view returns (address) {
-        return __storage().consumer;
+    function consumer() override external view returns (IWitPriceFeedsConsumer) {
+        return IWitPriceFeedsConsumer(__storage().consumer);
     }
 
     /// Returns a unique hash determined by the combination of data sources being used by 
@@ -391,7 +404,7 @@ contract WitPriceFeedsV3
     }
 
     function lookupPriceFeedID(ID4 _id4) override public view returns (bytes32) {
-        return IWitPyth.ID.unwrap(_intoID(_id4));
+        return ID.unwrap(_intoID(_id4));
     }
     
     function lookupPriceFeeds() external override view returns (Info[] memory _infos) {
@@ -420,7 +433,7 @@ contract WitPriceFeedsV3
 
     function defaultUpdateConditions()
         external view override
-        returns (IWitPriceFeeds.UpdateConditions memory)
+        returns (UpdateConditions memory)
     {
         return __storage().defaultUpdateConditions;
     }
@@ -454,9 +467,9 @@ contract WitPriceFeedsV3
         onlyOwner
         returns (bytes4 _footprint)
     {
-        IWitPriceFeeds.ID4 _id4 = _intoID4(hash(_symbol));
+        ID4 _id4 = _intoID4(hash(_symbol));
         WitPriceFeedsDataLib.removePriceFeed(_id4, _recursively);
-        emit IWitPriceFeedsAdmin.PriceFeedRemoved(
+        emit PriceFeedRemoved(
             msg.sender, 
             _id4, 
             _symbol
@@ -473,13 +486,13 @@ contract WitPriceFeedsV3
             _consumer != address(this)
                 && _consumer != base()
                 && _consumer.code.length > 0 // must be a contract
-                && IWitPriceFeedsConsumer(_consumer).witPriceFeeds() == address(this),
+                && address(IWitPriceFeedsConsumer(_consumer).witPriceFeeds()) == address(this),
             "invalid consumer"
         );
         __storage().consumer = _consumer;
     }
 
-    function settleDefaultUpdateConditions(IWitPriceFeeds.UpdateConditions calldata _conditions)
+    function settleDefaultUpdateConditions(UpdateConditions calldata _conditions)
         external override
         onlyOwner
     {
@@ -559,7 +572,7 @@ contract WitPriceFeedsV3
                 _intoID4(hash(_symbol)),
                 _symbol,
                 _exponent,
-                IWitPriceFeeds.Oracles.Witnet,
+                Oracles.Witnet,
                 address(this),
                 Witnet.RadonHash.unwrap(_radonHash)
             );
@@ -611,7 +624,7 @@ contract WitPriceFeedsV3
 
     function settlePriceFeedUpdateConditions(
             string calldata _symbol, 
-            IWitPriceFeeds.UpdateConditions calldata _conditions
+            UpdateConditions calldata _conditions
         )
         external override
         onlyOwner
@@ -692,7 +705,7 @@ contract WitPriceFeedsV3
         }
         
         if (__storage().consumer == address(0)) {
-            emit IWitPriceFeeds.PriceFeedUpdate(
+            emit PriceFeedUpdate(
                 _id4,
                 _dataResult.timestamp,
                 _dataResult.drTxHash,
@@ -764,7 +777,7 @@ contract WitPriceFeedsV3
         _revert("unhandled revert");
     }
 
-    function _validateUpdateConditions(IWitPriceFeeds.UpdateConditions memory _conditions)
+    function _validateUpdateConditions(UpdateConditions memory _conditions)
         internal pure
         returns (bool)
     {
@@ -819,7 +832,7 @@ contract WitPriceFeedsV3
 
     function __settlePriceFeedUpdateConditions(
             string memory _symbol,
-            IWitPriceFeeds.UpdateConditions memory _conditions
+            UpdateConditions memory _conditions
         )
         virtual internal 
     {
@@ -829,7 +842,7 @@ contract WitPriceFeedsV3
         if (!_conditions.computeEma) {
             __pf.lastUpdate.emaPrice = 0;
         }
-        emit PriceFeedSettled(
+        emit PriceFeedUpdateConditions(
             _msgSender(),
             _id4,
             _symbol,
