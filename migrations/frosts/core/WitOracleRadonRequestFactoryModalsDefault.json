@@ -1,5 +1,7 @@
 {
+  "_format": "hh3-artifact-1",
   "contractName": "WitOracleRadonRequestFactoryModalsDefault",
+  "sourceName": "contracts/core/trustless/WitOracleRadonRequestFactoryModalsDefault.sol",
   "abi": [
     {
       "inputs": [
@@ -34,7 +36,7 @@
         {
           "indexed": true,
           "internalType": "address",
-          "name": "self",
+          "name": "master",
           "type": "address"
         },
         {
@@ -61,6 +63,19 @@
       "type": "event"
     },
     {
+      "inputs": [],
+      "name": "base",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "bytes32",
@@ -82,6 +97,19 @@
         }
       ],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "class",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -316,19 +344,6 @@
     },
     {
       "inputs": [],
-      "name": "self",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "specs",
       "outputs": [
         {
@@ -376,19 +391,6 @@
       ],
       "stateMutability": "view",
       "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "class",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.30+commit.73712a01\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_witOracle\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"by\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"self\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"clone\",\"type\":\"address\"}],\"name\":\"Cloned\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_commonRetrievalHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes15\",\"name\":\"_crowdAttestationTallyHash\",\"type\":\"bytes15\"}],\"name\":\"buildRadonRequestModal\",\"outputs\":[{\"internalType\":\"contract IWitOracleRadonRequestModal\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"class\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"cloned\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_commonRetrievalHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes15\",\"name\":\"_crowdAttestationTallyHash\",\"type\":\"bytes15\"}],\"name\":\"determineAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getCrowdAttestationTally\",\"outputs\":[{\"components\":[{\"internalType\":\"enum Witnet.RadonReduceOpcodes\",\"name\":\"opcode\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"enum Witnet.RadonFilterOpcodes\",\"name\":\"opcode\",\"type\":\"uint8\"},{\"internalType\":\"bytes\",\"name\":\"cborArgs\",\"type\":\"bytes\"}],\"internalType\":\"struct Witnet.RadonFilter[]\",\"name\":\"filters\",\"type\":\"tuple[]\"}],\"internalType\":\"struct Witnet.RadonReducer\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDataResultType\",\"outputs\":[{\"internalType\":\"enum Witnet.RadonDataTypes\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"url\",\"type\":\"string\"}],\"name\":\"getDataSourceArgsCount\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDataSourcesAggregator\",\"outputs\":[{\"components\":[{\"internalType\":\"enum Witnet.RadonReduceOpcodes\",\"name\":\"opcode\",\"type\":\"uint8\"},{\"components\":[{\"internalType\":\"enum Witnet.RadonFilterOpcodes\",\"name\":\"opcode\",\"type\":\"uint8\"},{\"internalType\":\"bytes\",\"name\":\"cborArgs\",\"type\":\"bytes\"}],\"internalType\":\"struct Witnet.RadonFilter[]\",\"name\":\"filters\",\"type\":\"tuple[]\"}],\"internalType\":\"struct Witnet.RadonReducer\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRadonModalRetrieval\",\"outputs\":[{\"components\":[{\"internalType\":\"uint8\",\"name\":\"argsCount\",\"type\":\"uint8\"},{\"internalType\":\"enum Witnet.RadonRetrievalMethods\",\"name\":\"method\",\"type\":\"uint8\"},{\"internalType\":\"enum Witnet.RadonDataTypes\",\"name\":\"dataType\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"url\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"body\",\"type\":\"string\"},{\"internalType\":\"string[2][]\",\"name\":\"headers\",\"type\":\"string[2][]\"},{\"internalType\":\"bytes\",\"name\":\"radonScript\",\"type\":\"bytes\"}],\"internalType\":\"struct Witnet.RadonRetrieval\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_commonRetrievalHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes15\",\"name\":\"_crowdAttestationTallyHash\",\"type\":\"bytes15\"}],\"name\":\"initialize\",\"outputs\":[{\"internalType\":\"contract IWitOracleRadonRequestModal\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialized\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"self\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"specs\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string[]\",\"name\":\"modalArgs\",\"type\":\"string[]\"},{\"internalType\":\"string[]\",\"name\":\"modalUrls\",\"type\":\"string[]\"}],\"name\":\"verifyRadonRequest\",\"outputs\":[{\"internalType\":\"Witnet.RadonHash\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"witOracle\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"The Witnet Foundation\",\"errors\":{\"InvalidInitialization()\":[{\"details\":\"The contract is already initialized.\"}],\"NotInitializing()\":[{\"details\":\"The contract is not initializing.\"}]},\"events\":{\"Initialized(uint64)\":{\"details\":\"Triggered when the contract has been initialized or reinitialized.\"}},\"kind\":\"dev\",\"methods\":{},\"title\":\"Factory contract for building IWitOracleRadonRequestModal contracts as light-weight proxies.\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"class()\":{\"notice\":\"Returns the name of the actual contract implementing the logic of this Witnet appliance.\"},\"cloned()\":{\"notice\":\"Tells whether this contract is a clone of `self()`\"},\"getCrowdAttestationTally()\":{\"notice\":\"=============================================================================================================== --- IWitOracleRadonRequestModal -------------------------------------------------------------------------------\"},\"initialized()\":{\"notice\":\"Tells whether a WitOracleRequest or a WitOracleRequestTemplate has been properly initialized.\"},\"self()\":{\"notice\":\"Contract address to which clones will be re-directed.\"},\"specs()\":{\"notice\":\"Returns the ERC-165 id of the minimal functionality expected for this appliance.\"},\"witOracle()\":{\"notice\":\"Reference to the Witnet Request Board that all templates built out from this factory will refer to.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/core/trustless/WitOracleRadonRequestFactoryModalsDefault.sol\":\"WitOracleRadonRequestFactoryModalsDefault\"},\"evmVersion\":\"prague\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\":{\"keccak256\":\"0xdb4d24ee2c087c391d587cd17adfe5b3f9d93b3110b1388c2ab6c7c0ad1dcd05\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ab7b6d5b9e2b88176312967fe0f0e78f3d9a1422fa5e4b64e2440c35869b5d08\",\"dweb:/ipfs/QmXKYWWyzcLg1B2k7Sb1qkEXgLCYfXecR9wYW5obRzWP1Q\"]},\"project:/contracts/core/base/WitOracleRadonRequestFactoryModals.sol\":{\"keccak256\":\"0x90efb5cfb4193ab859158ae4a0e20973bed6a803996edc42d9239a94762dc9b6\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://569af9f077e1ff9056e4b5dea9a397d04248e1f81276d65cecdb0ada3a059d6a\",\"dweb:/ipfs/Qmaw7VmmiPwr8teUQaHTKZSB5aZJ1WDSBLhjVRFTSmuNMf\"]},\"project:/contracts/core/trustless/WitOracleRadonRequestFactoryModalsDefault.sol\":{\"keccak256\":\"0x3bc024a86bdb85f6dd9eb1666ad7b7aec089f3dad3ff9367daff1b3e1ace023a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://663a70d496177736259b5cb39b8ade4fc9067258c7556b55af346e2a0b068dc0\",\"dweb:/ipfs/QmP2W5HQeDqmWbtmCYaYFMoHvayw2EoEjYvVFaVRpoiEXZ\"]},\"project:/contracts/interfaces/IWitAppliance.sol\":{\"keccak256\":\"0xd207ca54a1049445a3d99eea497d9b34c6dbdd44d771eee825e4c031bd2f447e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://f81de32d868ff2881ed6fe97cc897e40b4b11d23cbe53a0e23cf3e68f9c0f0a3\",\"dweb:/ipfs/QmeeXmzmK5MAzt7Hf5DB2L81efKtTzZg9VbQ8sUiTqEk5c\"]},\"project:/contracts/interfaces/IWitOracle.sol\":{\"keccak256\":\"0xd9f1a62989dbd33e486beb27362340565f899b143d1c4a1b022c6116b0ec317b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://00fa3a545ba871732ce1bd13241dcd24ad8c31908e764bb7e8ac1d96cb534e7f\",\"dweb:/ipfs/QmQvGiyxaULT6wu3RfvpnRrKdP8X2mbCDgQYyW9CQkH73f\"]},\"project:/contracts/interfaces/IWitOracleAppliance.sol\":{\"keccak256\":\"0xcd8e57eca7f8042c85a83264e2ff6d1cd7a9f1521831736d7f57bcc7800642e6\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5c639668e9439d60770b5df77436088ae7bd0aeb1d1be446552a98b6c29138f0\",\"dweb:/ipfs/QmbN3f5YuKMSd2j9tjay3VEkiYibGWpbfbwRNyrxA8k4o4\"]},\"project:/contracts/interfaces/IWitOracleRadonRegistry.sol\":{\"keccak256\":\"0x437bbb89129311bd1cc8f6becd333df46109ec53b24d3159be942b225614071f\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ef9bcdf4a73cb126885478c994821b7fe2b87d9221b767b4c9342b89b0d6550a\",\"dweb:/ipfs/QmXzZXPMxjSiFpcEnhg6CjLFNxGCpDZt22xpUh7VHxNTGd\"]},\"project:/contracts/interfaces/IWitOracleRadonRequestModal.sol\":{\"keccak256\":\"0x60b777e63700ed42d7e4b88c8e12db4b5220adb10d2ecc618c8c2a99a09eccee\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://1b70b584cba3caa113e95aef31dbf5d5ae78042907c159e3ca25e3420d3b5b3f\",\"dweb:/ipfs/QmRThmU5vd8aVX2iK33pfmp6SKgfqgnC9VpT6Ruk1EwyVB\"]},\"project:/contracts/libs/Bech32.sol\":{\"keccak256\":\"0x14618323a0efe7586c20906a2e9cee7ad63baa976ff231c57f7f2d7d3707fb8b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://a19f05fe84047a7a6d3d6fc39972b432e6e536aa70472386a9d7a6d9aab64a64\",\"dweb:/ipfs/QmcHwUY66yjiotRH4Q3kbRvSzcHyLQ1yHL3KbtQKiMhtZE\"]},\"project:/contracts/libs/Secp256k1.sol\":{\"keccak256\":\"0xbe686002da5004ff39dd70709f3820eba2afe9323ae9cb894009c161e4b1a666\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://18fab91775216de0707cea9ad285b10be09127461a13432fea358bf9cb2a0c2e\",\"dweb:/ipfs/QmeRUGsgstnM4hxM9hpkBf3L6cE5btirEaowcMxmuw3utj\"]},\"project:/contracts/libs/Witnet.sol\":{\"keccak256\":\"0x1d446c3e534e40e676d1763bfb2897fadfac8afed904ab757843d7d6770b0a6c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://338fb1073f17d64e8d31bfe492d9475ce906788ee08e6489ce30413f91dc1328\",\"dweb:/ipfs/QmPe5QX2AGTnQFjse1Xttq4ZYWwYAiXoySb5VUui3PqPhk\"]},\"project:/contracts/libs/WitnetBuffer.sol\":{\"keccak256\":\"0x8e07aebe2954ab3e6f2d8eceedb12db7cf915c1f3e8630f4fa9999cecb1c78ec\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ed6c54cc901183d61546e8fd15bd5ea8ef238ebc915642946071d435dd7481ea\",\"dweb:/ipfs/Qmcaqta7YjUSBbBUGqoh44bsCS6UqqoyHjBuz4qnKBShXM\"]},\"project:/contracts/libs/WitnetCBOR.sol\":{\"keccak256\":\"0xd99308373575cc10fb7f2ceb0f6a8625f3911275c1fa27811fae498d98d03d97\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b4909a999d7b660a2dc54ca957b6eccfa523e2765fc4d6a2574dee7d5cd67b43\",\"dweb:/ipfs/QmWGQT4KDcfSFe1hcHVoWx6E4PhYMaod5iLpJCWBEeShzh\"]},\"project:/contracts/patterns/Clonable.sol\":{\"keccak256\":\"0xabd3559d8a20a48891184e4ce88f64e8761950dbfd73f4580e28ff7d81b3492c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://4339be70a3c81357db436c2a81d60c77e5e9da598e1f01f5bcc6d1db737f610b\",\"dweb:/ipfs/QmYqpJ7sfafi4aK63cC6uzpcH9VzTFELXKRi6sZBRBXp9F\"]},\"project:/contracts/patterns/Initializable.sol\":{\"keccak256\":\"0xaac470e87f361cf15d68d1618d6eb7d4913885d33ccc39c797841a9591d44296\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ef3760b2039feda8715d4bd9f8de8e3885f25573d12ba92f52d626ba880a08bf\",\"dweb:/ipfs/QmP2mfHPBKkjTAKft95sPDb4PBsjfmAwc47Kdcv3xYSf3g\"]}},\"version\":1}",
@@ -404,107 +406,75 @@
     "15654": [
       {
         "length": 32,
-        "start": 804
+        "start": 726
       },
       {
         "length": 32,
-        "start": 1100
+        "start": 986
       },
       {
         "length": 32,
-        "start": 1341
+        "start": 1227
       },
       {
         "length": 32,
-        "start": 1502
+        "start": 1388
       },
       {
         "length": 32,
-        "start": 1887
+        "start": 1737
       },
       {
         "length": 32,
-        "start": 2174
+        "start": 1988
       },
       {
         "length": 32,
-        "start": 2387
+        "start": 2165
       },
       {
         "length": 32,
-        "start": 3352
+        "start": 2988
       },
       {
         "length": 32,
-        "start": 3631
+        "start": 3267
       }
     ],
     "15656": [
       {
         "length": 32,
-        "start": 1061
+        "start": 947
       },
       {
         "length": 32,
-        "start": 3686
+        "start": 3322
       }
     ],
     "44625": [
       {
         "length": 32,
-        "start": 424
+        "start": 387
       },
       {
         "length": 32,
-        "start": 504
+        "start": 2289
       },
       {
         "length": 32,
-        "start": 707
+        "start": 2419
       },
       {
         "length": 32,
-        "start": 975
+        "start": 3892
       },
       {
         "length": 32,
-        "start": 1755
+        "start": 4063
       },
       {
         "length": 32,
-        "start": 2087
-      },
-      {
-        "length": 32,
-        "start": 2300
-      },
-      {
-        "length": 32,
-        "start": 2512
-      },
-      {
-        "length": 32,
-        "start": 2670
-      },
-      {
-        "length": 32,
-        "start": 3008
-      },
-      {
-        "length": 32,
-        "start": 3262
-      },
-      {
-        "length": 32,
-        "start": 4256
-      },
-      {
-        "length": 32,
-        "start": 4390
-      },
-      {
-        "length": 32,
-        "start": 4564
+        "start": 4237
       }
     ]
   },

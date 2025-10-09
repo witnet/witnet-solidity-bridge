@@ -407,7 +407,7 @@
     "reef:mainnet": {
         "WitnetDeployer": "",
         "apps": {
-            "WitPriceFeeds": "",
+            "WitPriceFeedsLegacy": "",
             "WitRandomnessV2": ""
         },
         "core": {
