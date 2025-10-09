@@ -96,8 +96,8 @@ contract WitPriceFeedsLegacyUpgradable
     function __initializeUpgradableData(bytes memory _initData) virtual override internal {
         if (__proxiable().codehash == bytes32(0)) {
             __defaultQuerySLA = Witnet.QuerySLA({
-                witCommitteeSize: 10,
-                witUnitaryReward: 2 * 10 ** 8,
+                witCommitteeSize: 3,
+                witUnitaryReward: 200_000_000, 
                 witResultMaxSize: 16
             });
             // settle default base fee overhead percentage
@@ -115,14 +115,13 @@ contract WitPriceFeedsLegacyUpgradable
             } else if (!__defaultQuerySLA.isValid()) {
                 // possibly, an upgrade from a previous branch took place:
                 __defaultQuerySLA = Witnet.QuerySLA({
-                    witCommitteeSize: 10,
-                    witUnitaryReward: 2_000_000_000, 
+                    witCommitteeSize: 3,
+                    witUnitaryReward: 200_000_000, 
                     witResultMaxSize: 16
                 });
             }
         }
     }
-
 
     /// Tells whether provided address could eventually upgrade the contract.
     function isUpgradableFrom(address _from) external view override returns (bool) {
