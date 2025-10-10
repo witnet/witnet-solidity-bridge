@@ -12,25 +12,25 @@ interface IWitOracleLegacy {
     }
 
     struct QueryRequest {
-        address requester; 
-        uint24  gasCallback;
+        address requester;
+        uint24  callbackGas;
         uint72  evmReward;
-        bytes   witnetBytecode;
-        bytes32 witnetRAD;
-        RadonSLA witnetSLA;
+        bytes   radonBytecode;
+        bytes32 radonHash;
+        RadonSLA radonParams;
     }
 
     struct QueryResponse {
         address reporter;
-        uint64  finality;
-        uint32  resultTimestamp;
-        bytes32 resultTallyHash;
-        bytes   resultCborBytes;
+        uint64 finality;
+        uint32 timestamp;
+        bytes32 trail;
+        bytes cborBytes;
     }
 
     struct RadonSLA {
-        uint8  witCommitteeSize;
-        uint64 witUnitaryReward;
+        uint8 numWitnesses;
+        uint64 witnessReward;
     }
 
     event WitnetQuery(uint256 id, uint256 evmReward, RadonSLA witnetSLA);

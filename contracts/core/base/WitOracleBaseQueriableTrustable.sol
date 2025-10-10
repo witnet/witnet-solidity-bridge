@@ -217,18 +217,48 @@ abstract contract WitOracleBaseQueriableTrustable
         public view
         returns (IWitOracleLegacy.QueryRequest memory)
     {
-        Witnet.Query memory _query = getQuery(Witnet.QueryId.wrap(uint64(queryId)));
-        return IWitOracleLegacy.QueryRequest({
-            requester: _query.request.requester,
-            gasCallback: _query.request.callbackGas,
-            evmReward: Witnet.QueryEvmReward.unwrap(_query.reward),
-            witnetBytecode: _query.request.radonBytecode,
-            witnetRAD: Witnet.RadonHash.unwrap(_query.request.radonHash),
-            witnetSLA: IWitOracleLegacy.RadonSLA({
-                witCommitteeSize: uint8(_query.slaParams.witCommitteeSize),
-                witUnitaryReward: _query.slaParams.witUnitaryReward
-            })
-        });
+        WitOracleDataLib.Query storage __query = __storage().queries[queryId];
+        if (__query.request.radonBytecode.length > 65535) {
+            // read from v1 layout
+            return IWitOracleLegacy.QueryRequest({
+                requester: address(0),
+                callbackGas: 0,
+                evmReward: 0,
+                radonBytecode: hex"",
+                radonHash: __query.request.radonHash,
+                radonParams: IWitOracleLegacy.RadonSLA({
+                    numWitnesses: 0,
+                    witnessReward: 0
+                })
+            });
+
+        } else if (__query.request._1 > 0) {
+            // read from v2 layout
+            return IWitOracleLegacy.QueryRequest({
+                requester: __query.request.requester,
+                callbackGas: __query.request.callbackGas,
+                evmReward: __query.request._0,
+                radonBytecode: __query.request.radonBytecode,
+                radonHash: __query.request.radonHash,
+                radonParams: IWitOracleLegacy.RadonSLA({
+                    numWitnesses: uint8(__query.slaParams.witCommitteeSize),
+                    witnessReward: __query.slaParams.witUnitaryReward
+                })
+            });
+        } else {
+            // read from v3 layout
+            return IWitOracleLegacy.QueryRequest({
+                requester: __query.request.requester,
+                callbackGas: __query.request.callbackGas,
+                evmReward: Witnet.QueryEvmReward.unwrap(__query.reward),
+                radonBytecode: __query.request.radonBytecode,
+                radonHash: __query.request.radonHash,
+                radonParams: IWitOracleLegacy.RadonSLA({
+                    numWitnesses: uint8(__query.slaParams.witCommitteeSize),
+                    witnessReward: __query.slaParams.witUnitaryReward
+                })
+            });
+        }
     }
 
     function getQueryResponse(uint256 queryId)
@@ -236,14 +266,37 @@ abstract contract WitOracleBaseQueriableTrustable
         public view
         returns (IWitOracleLegacy.QueryResponse memory)
     {
-        Witnet.Query memory _query = getQuery(Witnet.QueryId.wrap(uint64(queryId)));
-        return IWitOracleLegacy.QueryResponse({
-            reporter: _query.response.reporter,
-            finality: Witnet.BlockNumber.unwrap(_query.checkpoint),
-            resultTimestamp: uint32(Witnet.Timestamp.unwrap(_query.response.resultTimestamp)),
-            resultTallyHash: Witnet.TransactionHash.unwrap(_query.response.resultDrTxHash),
-            resultCborBytes: _query.response.resultCborBytes
-        });
+        WitOracleDataLib.Query storage __query = __storage().queries[queryId];
+        if (__query.request.radonBytecode.length > 65535) {
+            // read from v1 layout
+            return IWitOracleLegacy.QueryResponse({
+                reporter: address(0),
+                finality: uint64(0),
+                timestamp: uint32(0),
+                trail: bytes32(0),
+                cborBytes: new bytes(0)
+            });
+
+        } else if (__query.request._1 > 0) {
+            // read from v2 layout
+            return IWitOracleLegacy.QueryResponse({
+                reporter: __query.response.reporter,
+                finality: uint64(__query.response._0),
+                timestamp: uint32(__query.response.resultTimestamp >> 32),
+                trail: __query.response.resultDrTxHash,
+                cborBytes: __query.response.resultCborBytes
+            });
+
+        } else {
+            // read from v3 layout
+            return IWitOracleLegacy.QueryResponse({
+                reporter: __query.response.reporter,
+                finality: Witnet.BlockNumber.unwrap(__query.checkpoint),
+                timestamp: uint32(__query.response.resultTimestamp),
+                trail: __query.response.resultDrTxHash,
+                cborBytes: __query.response.resultCborBytes
+            });
+        }
     }
 
     function getQueryResponseStatus(uint256 queryId) 
