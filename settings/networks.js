@@ -398,7 +398,7 @@ export default {
     gas: 15000000,
     symbol: "DEV",
     verify: {
-      apiUrl: "https://api-moonbase.moonscan.io/api",
+      apiUrl: "https://api.etherscan.io/v2/api?chainid=1287",
       explorerUrl: "https://moonbase.moonscan.io",
     },
   },

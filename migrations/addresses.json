@@ -319,7 +319,25 @@
     "metis:mainnet": {},
     "metis:sepolia": {},
     "moonbeam:mainnet": {},
-    "moonbeam:moonbase": {},
+    "moonbeam:moonbase": {
+        "libs": {
+            "WitOracleDataLib": "0x2340dC2C938f765144be51b85Ac920B74F40a307",
+            "WitOracleRadonEncodingLib": "0xb5aff00A290D7c9bd8dD7f984f3d2b31e1BCD63e",
+            "WitOracleResultStatusLib": "0x7Cee33697F8579aD806e43528d3aafc924726b5D",
+            "WitPriceFeedsDataLib": "0xAb72a4B22404CE09A29E8A97D828317885Bb83B7",
+            "WitPriceFeedsLegacyDataLib": "0x7Bd6FdaEf3e6773d1580590d913cF4dB0CD88829"
+        },
+        "core": {
+            "WitOracleRadonRegistryUpgradableDefault": "0x5faf757A0960a5A7c0dfACb6585E9e2CDd0C8DFf",
+            "WitOracleTrustableDefault": "0x8F7752e9E826f89C81071E2084125E1f8f07dB3e",
+            "WitOracleRadonRequestFactoryModalsDefault": "0xD28237c5d7C8C386377A13e6661642294657F35e",
+            "WitOracleRadonRequestFactoryTemplatesDefault": "0x300c8ccc9526495BB7e5911105f0663Cb4c3a137",
+            "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000"
+        },
+        "apps": {
+            "WitPriceFeedsLegacyUpgradable": "0xF784FB888Af690e82779d4Dbce57cb692507e372"
+        }
+    },
     "moonbeam:moonriver": {},
     "okx:xlayer:sepolia": {},
     "optimism:mainnet": {
