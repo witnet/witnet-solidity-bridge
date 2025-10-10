@@ -273,7 +273,84 @@ library WitOracleDataLib {
         }
         _evmPayback = __query.reward;
         delete data().queries[queryId];
-    }   
+    }
+
+    function getQuery(Witnet.QueryId queryId) public view returns (Witnet.Query memory) {
+        WitOracleDataLib.Query storage __query = data().queries[Witnet.QueryId.unwrap(queryId)];
+        Witnet.QueryUUID _uuid;
+        Witnet.QueryEvmReward _reward;
+        Witnet.BlockNumber _checkpoint;
+        if (__query.request._1 > 0) {
+            // read from v2 layout
+            _checkpoint = Witnet.BlockNumber.wrap(__query.response._0);
+            _reward = Witnet.QueryEvmReward.wrap(__query.request._0);
+
+        } else if (__query.request.radonBytecode.length <= 65535) {
+            // read from v3 layout
+            _checkpoint = __query.checkpoint;
+            _reward = __query.reward;
+            _uuid = __query.uuid;
+        }
+        return Witnet.Query({
+            request: getQueryRequest(queryId),
+            response: getQueryResponse(queryId),
+            slaParams: __query.slaParams,
+            uuid: __query.uuid,
+            reward: __query.reward,
+            checkpoint: __query.checkpoint
+        });
+    }
+
+    function getQueryRequest(Witnet.QueryId queryId) public view returns (Witnet.QueryRequest memory) {
+        WitOracleDataLib.Query storage __query = data().queries[Witnet.QueryId.unwrap(queryId)];
+        if (__query.request.radonBytecode.length > 65535) {
+            // read from v1 layout
+            return Witnet.QueryRequest({
+                requester: address(0),
+                callbackGas: 0,
+                radonBytecode: hex"",
+                radonHash: Witnet.RadonHash.wrap(__query.request.radonHash)
+            });
+        } else {
+            return Witnet.QueryRequest({
+                requester: __query.request.requester,
+                callbackGas: __query.request.callbackGas,
+                radonBytecode: __query.request.radonBytecode,
+                radonHash: Witnet.RadonHash.wrap(__query.request.radonHash)
+            });
+        }
+    }
+
+    function getQueryResponse(Witnet.QueryId queryId) public view returns (Witnet.QueryResponse memory) {
+        WitOracleDataLib.Query storage __query = data().queries[Witnet.QueryId.unwrap(queryId)];
+        if (__query.request.radonBytecode.length > 65535) {
+            // read from v1 layout
+            return Witnet.QueryResponse({
+                reporter: address(0),
+                resultTimestamp: Witnet.Timestamp.wrap(0),
+                resultDrTxHash: Witnet.TransactionHash.wrap(0),
+                resultCborBytes: __query.response.resultCborBytes,
+                disputer: address(0)
+            });
+        } else if (__query.request._1 > 0) {
+            // read from v2 layout
+            return Witnet.QueryResponse({
+                reporter: __query.response.reporter,
+                resultTimestamp: Witnet.Timestamp.wrap(__query.response.resultTimestamp >> 32),
+                resultDrTxHash: Witnet.TransactionHash.wrap(__query.response.resultDrTxHash),
+                resultCborBytes: __query.response.resultCborBytes,
+                disputer: address(0)
+            });
+        } else {
+            return Witnet.QueryResponse({
+                reporter: __query.response.reporter,
+                resultTimestamp: Witnet.Timestamp.wrap(__query.response.resultTimestamp),
+                resultDrTxHash: Witnet.TransactionHash.wrap(__query.response.resultDrTxHash),
+                resultCborBytes: __query.response.resultCborBytes,
+                disputer: __query.response.disputer
+            });
+        }
+    }
 
     function getQueryStatus(uint256 queryId) public view returns (Witnet.QueryStatus) {
         WitOracleDataLib.Query storage __query = seekQuery(queryId);

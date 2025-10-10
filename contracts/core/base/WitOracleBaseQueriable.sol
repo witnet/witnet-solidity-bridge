@@ -210,26 +210,7 @@ abstract contract WitOracleBaseQueriable
       virtual override
       returns (Witnet.Query memory)
     {
-        WitOracleDataLib.Query storage __query = __storage().queries[Witnet.QueryId.unwrap(_queryId)];
-        return Witnet.Query({
-            request: Witnet.QueryRequest({
-                requester: __query.request.requester,
-                callbackGas: __query.request.callbackGas,
-                radonBytecode: __query.request.radonBytecode,
-                radonHash: Witnet.RadonHash.wrap(__query.request.radonHash)
-            }),
-            response: Witnet.QueryResponse({
-                reporter: __query.response.reporter,
-                resultTimestamp: Witnet.Timestamp.wrap(__query.response.resultTimestamp),
-                resultDrTxHash: Witnet.TransactionHash.wrap(__query.response.resultDrTxHash),
-                resultCborBytes: __query.response.resultCborBytes,
-                disputer: __query.response.disputer
-            }),
-            slaParams: __query.slaParams,
-            uuid: __query.uuid,
-            reward: __query.reward,
-            checkpoint: __query.checkpoint
-        });
+        return WitOracleDataLib.getQuery(_queryId);
     }
 
     /// @notice Gets the current EVM reward the report can claim, if not done yet.
@@ -247,13 +228,7 @@ abstract contract WitOracleBaseQueriable
         external view override
         returns (Witnet.QueryRequest memory)
     {
-        WitOracleDataLib.QueryRequest storage __request = WitOracleDataLib.seekQueryRequest(Witnet.QueryId.unwrap(_queryId));
-        return Witnet.QueryRequest({
-            requester: __request.requester,
-            callbackGas: __request.callbackGas,
-            radonBytecode: __request.radonBytecode,
-            radonHash: Witnet.RadonHash.wrap(__request.radonHash)
-        });
+        return WitOracleDataLib.getQueryRequest(_queryId);
     }
 
     /// Retrieves the Witnet-provable result, and metadata, to a previously posted request.    
@@ -263,14 +238,7 @@ abstract contract WitOracleBaseQueriable
         virtual override public view
         returns (Witnet.QueryResponse memory)
     {
-        WitOracleDataLib.QueryResponse storage __response = WitOracleDataLib.seekQueryResponse(Witnet.QueryId.unwrap(_queryId));
-        return Witnet.QueryResponse({
-            reporter: __response.reporter,
-            resultTimestamp: Witnet.Timestamp.wrap(__response.resultTimestamp),
-            resultDrTxHash: Witnet.TransactionHash.wrap(__response.resultDrTxHash),
-            resultCborBytes: __response.resultCborBytes,
-            disputer: __response.disputer
-        });
+        return WitOracleDataLib.getQueryResponse(_queryId);
     }
 
     function getQueryResult(uint256 _queryId)
