@@ -380,7 +380,7 @@ async function defrostTarget (network, target, targetSpecs, targetAddr) {
   const defrostInitCode = defrostCode + defrostConstructorArgs
   const defrostSalt = "0x" + ethUtils.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32).toString("hex")
   const defrostAddr = await witnetDeployer.determineAddr.call(defrostInitCode, defrostSalt, { from: targetSpecs.from })
-  if (defrostAddr !== targetAddr) {
+  if (!utils.isNullAddress(targetAddr) && defrostAddr !== targetAddr) {
     panic("Irreproducible address", `\x1b[91m${defrostAddr}\x1b[0m != \x1b[97m${targetAddr}\x1b[0m`)
   } else {
     const metadata = JSON.parse(artifact.metadata)

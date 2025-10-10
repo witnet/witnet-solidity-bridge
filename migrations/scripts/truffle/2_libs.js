@@ -52,6 +52,7 @@ module.exports = async function (deployer, network, [, from]) {
         addresses[network].libs[impl] = libImplArtifact.address
         libNetworkAddr = libImplArtifact.address
         await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
+        bytecodeChanged = false
       } else {
         utils.traceHeader(`Skipping '${impl}': no changes in deployed bytecode.`)
       }

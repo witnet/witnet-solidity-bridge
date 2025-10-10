@@ -237,7 +237,7 @@ export default {
     network_id: 1,
     port: 9545,
     verify: {
-      apiUrl: "https://api.etherscan.io/api",
+      apiUrl: "https://api.etherscan.io/v2/api?chainId=1",
       explorerUrl: "https://etherscan.io",
     },
   },
