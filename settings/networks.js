@@ -388,7 +388,7 @@ export default {
     network_id: 1285,
     symbol: "MOVR",
     verify: {
-      apiUrl: "https://api-moonriver.moonscan.io/api",
+      apiUrl: "https://api.etherscan.io/v2/api?chainid=1285",
       explorerUrl: "https://moonriver.moonscan.io",
     },
   },
