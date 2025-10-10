@@ -302,10 +302,10 @@
         "WitRandomnessV2": "00000000000000000000000077703ae126b971c9946d562f41dd47071da00777000000000000000000000000f121b71715e71dded592f1125a06d4ed06f0694d"
     },
     "worldchain:sepolia": {
-        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xff7B32870b35259212bc103c79380E03786588ff\",\"0xFF1f868D74d1b9A434C7bBf2abe470c8F153DDFF\",\"0x322e322e382d383536353039352d623336306638330000000000000000000000\",true]}",
-        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x322e322e382d383536353039352d306234646134360000000000000000000000\",true]}",
-        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x322e322e382d383536353039352d613563633331650000000000000000000000\"]}",
-        "WitPriceFeedsLegacyUpgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x322e322e382d383536353039352d303733323433340000000000000000000000\",true]}"
+        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xff7B32870b35259212bc103c79380E03786588ff\",\"0xFF1f868D74d1b9A434C7bBf2abe470c8F153DDFF\",\"0x322e322e382d666462376631652d643235663063620000000000000000000000\",true]}",
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x322e322e382d666462376631652d333964323732380000000000000000000000\",true]}",
+        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x322e322e382d386137306264362d383637306132630000000000000000000000\"]}",
+        "WitPriceFeedsLegacyUpgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x322e322e382d666462376631652d623239643930350000000000000000000000\",true]}"
     },
     "zksync:sepolia": {
         "WitOracle": "",
