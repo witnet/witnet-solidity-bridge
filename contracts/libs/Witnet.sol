@@ -119,15 +119,15 @@ library Witnet {
 
     /// Data kept in EVM-storage for every Request posted to the Witnet Request Board.
     struct QueryRequest {
-        address   requester;              // EVM address from which the request was posted.
-        uint24    callbackGas; uint72 _0; // Max callback gas limit upon response, if a callback is required.
-        bytes     radonBytecode;          // Optional: Witnet Data Request bytecode to be solved by the Witnet blockchain.
-        RadonHash radonHash; uint256 _1;  // Optional: Previously verified hash of the Witnet Data Request to be solved.
+        address   requester;     // EVM address from which the request was posted.
+        uint24    callbackGas;   // Max callback gas limit upon response, if a callback is required.
+        bytes     radonBytecode; // Optional: Witnet Data Request bytecode to be solved by the Witnet blockchain.
+        RadonHash radonHash;     // Optional: Previously verified hash of the Witnet Data Request to be solved.
     }
 
     /// QueryResponse metadata and result as resolved by the Witnet blockchain.
     struct QueryResponse {
-        address reporter; uint32 _0;    // EVM address from which the Data Request result was reported.
+        address reporter;               // EVM address from which the Data Request result was reported.
         Timestamp resultTimestamp;      // Unix timestamp (seconds) at which the data request was resolved in the Witnet blockchain.
         TransactionHash resultDrTxHash; // Unique hash of the commit/reveal act in the Witnet blockchain that resolved the data request.
         bytes resultCborBytes;          // CBOR-encode result to the request, as resolved in the Witnet blockchain.

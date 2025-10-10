@@ -246,7 +246,11 @@ abstract contract WitOracleBaseQueriableTrustable
         });
     }
 
-    function getQueryResponseStatus(uint256 queryId) virtual override public view returns (IWitOracleLegacy.QueryResponseStatus) {
+    function getQueryResponseStatus(uint256 queryId) 
+        virtual override 
+        public view 
+        returns (IWitOracleLegacy.QueryResponseStatus)
+    {
         return WitOracleDataLib.getQueryResponseStatus(queryId);
     }
 
@@ -274,8 +278,8 @@ abstract contract WitOracleBaseQueriableTrustable
             Witnet.RadonHash.wrap(_queryRadHash),
             Witnet.QuerySLA({
                 witResultMaxSize: 32,
-                witCommitteeSize: _querySLA.witCommitteeSize,
-                witUnitaryReward: _querySLA.witUnitaryReward
+                witCommitteeSize: _querySLA.numWitnesses,
+                witUnitaryReward: _querySLA.witnessReward
             })
         );
     }
@@ -293,8 +297,8 @@ abstract contract WitOracleBaseQueriableTrustable
             Witnet.RadonHash.wrap(_queryRadHash),
             Witnet.QuerySLA({
                 witResultMaxSize: 32,
-                witCommitteeSize: _querySLA.witCommitteeSize,
-                witUnitaryReward: _querySLA.witUnitaryReward
+                witCommitteeSize: _querySLA.numWitnesses,
+                witUnitaryReward: _querySLA.witnessReward
             }),
             Witnet.QueryCallback({
                 consumer: msg.sender,
@@ -377,7 +381,7 @@ abstract contract WitOracleBaseQueriableTrustable
             if (
                 getQueryStatus(_queryId) == Witnet.QueryStatus.Posted
             ) {
-                Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
+                WitOracleDataLib.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
                 if (__query.request.callbackGas > 0) {
                     _expenses += (
                         estimateBaseFeeWithCallback(_evmGasPrice, __query.request.callbackGas)

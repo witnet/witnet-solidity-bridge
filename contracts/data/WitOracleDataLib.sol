@@ -30,9 +30,32 @@ library WitOracleDataLib {
 
     struct Storage {
         uint64 nonce;
-        mapping (uint256 => Witnet.Query) queries;
+        mapping (uint256 => Query) queries;
         mapping (address => bool) reporters;
         mapping (address => mapping (Witnet.RadonHash => Committee)) committees;
+    }
+
+    struct Query {
+        QueryRequest request;
+        QueryResponse response;
+        Witnet.QuerySLA slaParams;
+        Witnet.QueryUUID uuid;
+        Witnet.QueryEvmReward reward;
+        Witnet.BlockNumber checkpoint;
+    }
+
+    struct QueryRequest {
+        address requester; uint24 callbackGas; uint72 _0;
+        bytes radonBytecode;
+        bytes32 radonHash; 
+        uint256 _1;
+    }
+
+    struct QueryResponse {
+        address reporter; uint32 _0; uint64 resultTimestamp;
+        bytes32 resultDrTxHash;
+        bytes resultCborBytes;
+        address disputer;
     }
 
     struct Committee {
@@ -72,31 +95,31 @@ library WitOracleDataLib {
     }
 
     /// Gets query storage by query id.
-    function seekQuery(uint256 queryId) internal view returns (Witnet.Query storage) {
+    function seekQuery(uint256 queryId) internal view returns (Query storage) {
       return data().queries[queryId];
     }
 
     /// Gets the Witnet.QueryRequest part of a given query.
-    function seekQueryRequest(uint256 queryId) internal view returns (Witnet.QueryRequest storage) {
+    function seekQueryRequest(uint256 queryId) internal view returns (QueryRequest storage) {
         return data().queries[queryId].request;
     }   
 
     /// Gets the Witnet.Result part of a given query.
-    function seekQueryResponse(uint256 queryId) internal view returns (Witnet.QueryResponse storage) {
+    function seekQueryResponse(uint256 queryId) internal view returns (QueryResponse storage) {
         return data().queries[queryId].response;
     }
 
     function intoDataResult(
-            Witnet.QueryResponse memory queryResponse, 
+            QueryResponse memory queryResponse, 
             Witnet.QueryStatus queryStatus,
             uint64 finalityBlock
         )
         internal pure
         returns (Witnet.DataResult memory _result)
     {
-        _result.drTxHash = queryResponse.resultDrTxHash;
+        _result.drTxHash = Witnet.TransactionHash.wrap(queryResponse.resultDrTxHash);
         _result.finality = finalityBlock;
-        _result.timestamp = queryResponse.resultTimestamp;
+        _result.timestamp = Witnet.Timestamp.wrap(queryResponse.resultTimestamp);
         if (queryResponse.resultCborBytes.length > 0) {
             _result.value = WitnetCBOR.fromBytes(queryResponse.resultCborBytes);
             _result.dataType = Witnet.peekRadonDataType(_result.value);
@@ -191,7 +214,7 @@ library WitOracleDataLib {
     /// --- IWitOracle --------------------------------------------------------
 
     function extractDataResult(
-            Witnet.QueryResponse memory queryResponse, 
+            QueryResponse memory queryResponse, 
             Witnet.QueryStatus queryStatus,
             uint64 finalityBlock
         )
@@ -201,18 +224,25 @@ library WitOracleDataLib {
         return intoDataResult(queryResponse, queryStatus, finalityBlock);
     }
 
-    function parseDataReport(Witnet.DataPushReport calldata _dataPushReport, bytes calldata _signature)
+    function parseDataReport(
+            Witnet.DataPushReport calldata _dataPushReport, 
+            bytes calldata _signature
+        )
         public view
-        returns (address _evmReporter, Witnet.DataResult memory _data)
+        returns (
+            address _evmReporter, 
+            Witnet.DataResult memory _data
+        )
     {
         _evmReporter = Witnet.recoverEvmAddr(_signature, _dataPushReport.digest());
         require(data().reporters[_evmReporter], "WitOracleDataLib: invalid signature");
         _data = extractDataResult(
-            Witnet.QueryResponse({
-                reporter: _evmReporter, disputer: address(0), _0: 0, 
+            QueryResponse({
+                reporter: _evmReporter, 
                 resultCborBytes: _dataPushReport.resultCborBytes,
-                resultDrTxHash: _dataPushReport.witDrTxHash,
-                resultTimestamp: _dataPushReport.resultTimestamp
+                resultDrTxHash: Witnet.TransactionHash.unwrap(_dataPushReport.witDrTxHash),
+                resultTimestamp: Witnet.Timestamp.unwrap(_dataPushReport.resultTimestamp),
+                disputer: address(0), _0: 0
             }), 
             Witnet.QueryStatus.Finalized,
             uint64(block.number)
@@ -226,7 +256,7 @@ library WitOracleDataLib {
         public 
         returns (Witnet.QueryEvmReward _evmPayback) 
     {
-        Witnet.Query storage __query = seekQuery(queryId);
+        WitOracleDataLib.Query storage __query = seekQuery(queryId);
         require(
             msg.sender == __query.request.requester,
             "not the requester"
@@ -246,8 +276,8 @@ library WitOracleDataLib {
     }   
 
     function getQueryStatus(uint256 queryId) public view returns (Witnet.QueryStatus) {
-        Witnet.Query storage __query = seekQuery(queryId);
-        if (!__query.response.resultTimestamp.isZero()) {
+        WitOracleDataLib.Query storage __query = seekQuery(queryId);
+        if (__query.response.resultTimestamp != 0) {
             return Witnet.QueryStatus.Finalized;
             
         } else if (__query.request.requester != address(0)) {
@@ -260,7 +290,7 @@ library WitOracleDataLib {
 
     function getQueryResult(uint256 queryId) public view returns (Witnet.DataResult memory _result) {
         Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
-        Witnet.Query storage __query = seekQuery(queryId);
+        WitOracleDataLib.Query storage __query = seekQuery(queryId);
         return intoDataResult(
             __query.response,
             _queryStatus,
@@ -270,7 +300,7 @@ library WitOracleDataLib {
     
     function getQueryResultStatus(uint256 queryId) public view returns (Witnet.ResultStatus) {
         Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
-        Witnet.QueryResponse storage __response = seekQueryResponse(queryId);
+        QueryResponse storage __response = seekQueryResponse(queryId);
         if (_queryStatus == Witnet.QueryStatus.Finalized) {
             if (__response.resultCborBytes.length > 0) {
                 // determine whether stored result is an error by peeking the first byte
@@ -310,7 +340,6 @@ library WitOracleDataLib {
         returns (IWitOracleLegacy.QueryResponseStatus)
     {
         Witnet.QueryStatus _queryStatus = getQueryStatus(queryId);
-        
         if (_queryStatus == Witnet.QueryStatus.Finalized) {
             bytes storage __cborValues = WitOracleDataLib.seekQueryResponse(queryId).resultCborBytes;
             if (__cborValues.length > 0) {
@@ -350,9 +379,9 @@ library WitOracleDataLib {
         bytecodes = new bytes[](queryIds.length);
         for (uint _ix = 0; _ix < queryIds.length; _ix ++) {
             uint256 _queryId = Witnet.QueryId.unwrap(queryIds[_ix]);
-            Witnet.Query storage __query = seekQuery(_queryId);
-            bytecodes[_ix] = (!__query.request.radonHash.isZero()
-                ? registry.bytecodeOf(__query.request.radonHash, __query.slaParams)
+            WitOracleDataLib.Query storage __query = seekQuery(_queryId);
+            bytecodes[_ix] = (__query.request.radonHash != bytes32(0)
+                ? registry.bytecodeOf(Witnet.RadonHash.wrap(__query.request.radonHash), __query.slaParams)
                 : registry.bytecodeOf(__query.request.radonBytecode, __query.slaParams)
             );
         }
@@ -370,7 +399,7 @@ library WitOracleDataLib {
         public returns (uint256 evmReward)
     {
         // read requester address and whether a callback was requested:
-        Witnet.Query storage __query = seekQuery(queryId);
+        WitOracleDataLib.Query storage __query = seekQuery(queryId);
 
         // read query EVM reward:
         evmReward = Witnet.QueryEvmReward.unwrap(__query.reward);
@@ -461,10 +490,10 @@ library WitOracleDataLib {
     {
         evmCallbackActualGas = gasleft();
         Witnet.DataResult memory _result = intoDataResult(
-            Witnet.QueryResponse({
+            QueryResponse({
                 reporter: evmReporter,
-                resultTimestamp: resultTimestamp,
-                resultDrTxHash: witDrTxHash,
+                resultTimestamp: Witnet.Timestamp.unwrap(resultTimestamp),
+                resultDrTxHash: Witnet.TransactionHash.unwrap(witDrTxHash),
                 resultCborBytes: resultCborBytes,
                 disputer: address(0), _0: 0
             }),
@@ -498,11 +527,11 @@ library WitOracleDataLib {
             bytes memory resultCborBytes
         ) private
     {
-        Witnet.Query storage __query = seekQuery(queryId);
+        WitOracleDataLib.Query storage __query = seekQuery(queryId);
         __query.checkpoint = Witnet.BlockNumber.wrap(evmFinalityBlock);
         __query.response.reporter = evmReporter; 
-        __query.response.resultTimestamp = resultTimestamp;
-        __query.response.resultDrTxHash = witDrTxHash;
+        __query.response.resultTimestamp = Witnet.Timestamp.unwrap(resultTimestamp);
+        __query.response.resultDrTxHash = Witnet.TransactionHash.unwrap(witDrTxHash);
         __query.response.resultCborBytes = resultCborBytes;
     }
 
@@ -517,10 +546,10 @@ library WitOracleDataLib {
         public view
         returns (IWitOracleQueriableExperimental.DDR memory)
     {
-        Witnet.Query storage __query = seekQuery(Witnet.QueryId.unwrap(queryId));
+        WitOracleDataLib.Query storage __query = seekQuery(Witnet.QueryId.unwrap(queryId));
         
         bytes memory _radonBytecode;
-        Witnet.RadonHash _radonHash = __query.request.radonHash;
+        Witnet.RadonHash _radonHash = Witnet.RadonHash.wrap(__query.request.radonHash);
         if (_radonHash.isZero()) {
             _radonBytecode = __query.request.radonBytecode;
             _radonHash = registry.hashOf(_radonBytecode);

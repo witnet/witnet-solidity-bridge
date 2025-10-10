@@ -146,7 +146,7 @@ contract WitOracleTrustableOvm2
             if (
                 getQueryStatus(_queryId) == Witnet.QueryStatus.Posted
             ) {
-                Witnet.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
+                WitOracleDataLib.Query storage __query = WitOracleDataLib.seekQuery(_queryId);
                 if (__query.request.callbackGas > 0) {
                     _expenses += (
                         WitOracleBaseQueriable.estimateBaseFeeWithCallback(_evmGasPrice, __query.request.callbackGas)

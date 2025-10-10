@@ -20,8 +20,8 @@ library WitOracleTrustlessDataLib {
     using Witnet for Witnet.Timestamp;
 
     bytes32 internal constant _WIT_ORACLE_BLOCKS_SLOTHASH =
-        /* keccak256("io.witnet.boards.blocks") */
-        0xf595240b351bc8f951c2f53b26f4e78c32cb62122cf76c19b7fdda7d4968e183;
+        /* keccak256("io.witnet.boards.blocks") & ~bytes32(uint256(0xff) */
+        0xf595240b351bc8f951c2f53b26f4e78c32cb62122cf76c19b7fdda7d4968e100;
 
     struct Storage {
         uint256 lastKnownBeaconIndex;
@@ -148,7 +148,7 @@ library WitOracleTrustlessDataLib {
         )
         public returns (Witnet.QueryEvmReward _evmPayback)
     {
-        Witnet.Query storage self = WitOracleDataLib.seekQuery(queryId);
+        WitOracleDataLib.Query storage self = WitOracleDataLib.seekQuery(queryId);
         require(
             msg.sender == self.request.requester,
             "not the requester"
@@ -186,7 +186,7 @@ library WitOracleTrustlessDataLib {
     }
 
     function getQueryResponseStatusTrustlessly(
-            Witnet.Query storage self,
+            WitOracleDataLib.Query storage self,
             uint256 evmQueryAwaitingBlocks
         )
         public view returns (IWitOracleLegacy.QueryResponseStatus)
@@ -229,7 +229,7 @@ library WitOracleTrustlessDataLib {
     }
 
     function getQueryResultTrustlessly(
-            Witnet.Query storage self,
+            WitOracleDataLib.Query storage self,
             uint256 evmQueryAwaitingBlocks
         ) 
         public view 
@@ -243,12 +243,12 @@ library WitOracleTrustlessDataLib {
     }
 
     function getQueryStatusTrustlessly(
-            Witnet.Query storage self,
+            WitOracleDataLib.Query storage self,
             uint256 evmQueryAwaitingBlocks
         )
         public view returns (Witnet.QueryStatus)
     {
-        if (!self.response.resultTimestamp.isZero()) {
+        if (self.response.resultTimestamp != 0) {
             if (block.number >= Witnet.BlockNumber.unwrap(self.checkpoint)) {
                 if (self.response.disputer != address(0)) {
                     return Witnet.QueryStatus.Disputed;
@@ -287,7 +287,7 @@ library WitOracleTrustlessDataLib {
         ) 
         public returns (uint256 _evmReward)
     {    
-        Witnet.Query storage self = WitOracleDataLib.seekQuery(queryId);
+        WitOracleDataLib.Query storage self = WitOracleDataLib.seekQuery(queryId);
         
         _evmReward = Witnet.QueryEvmReward.unwrap(self.reward);
         self.reward = Witnet.QueryEvmReward.wrap(0);
@@ -365,7 +365,7 @@ library WitOracleTrustlessDataLib {
         )
         public returns (uint256 evmPotentialReward) 
     {
-        Witnet.Query storage self = WitOracleDataLib.seekQuery(queryId);
+        WitOracleDataLib.Query storage self = WitOracleDataLib.seekQuery(queryId);
         require(
             getQueryStatusTrustlessly(
                 self,
@@ -403,7 +403,7 @@ library WitOracleTrustlessDataLib {
             bytes memory _witResultCborBytes
         )
     {
-        Witnet.Query storage self = WitOracleDataLib.seekQuery(Witnet.QueryId.unwrap(responseReport.queryId));
+        WitOracleDataLib.Query storage self = WitOracleDataLib.seekQuery(Witnet.QueryId.unwrap(responseReport.queryId));
         (bool _isValidReport, string memory _queryResponseReportInvalidError) = _isValidDataPullReport(
             self,
             responseReport
@@ -453,7 +453,7 @@ library WitOracleTrustlessDataLib {
         )
         public returns (uint256 evmTotalReward)
     {
-        Witnet.Query storage self = WitOracleDataLib.seekQuery(Witnet.QueryId.unwrap(responseReport.queryId));
+        WitOracleDataLib.Query storage self = WitOracleDataLib.seekQuery(Witnet.QueryId.unwrap(responseReport.queryId));
         // validate query response report
         (bool _isValidReport, string memory _queryResponseReportInvalidError) = _isValidDataPullReport(
             self,
@@ -492,7 +492,7 @@ library WitOracleTrustlessDataLib {
                         responseReport.witDrResultCborBytes
                     )) != keccak256(abi.encode(
                         self.response.resultDrTxHash,
-                        Witnet.determineEpochFromTimestamp(self.response.resultTimestamp),
+                        Witnet.determineEpochFromTimestamp(Witnet.Timestamp.wrap(self.response.resultTimestamp)),
                         self.response.resultCborBytes
                     )),
                     "proving no fake report"
@@ -511,8 +511,8 @@ library WitOracleTrustlessDataLib {
                 // update query's response data into storage:
                 self.response.reporter = msg.sender;
                 self.response.resultCborBytes = responseReport.witDrResultCborBytes;
-                self.response.resultDrTxHash = responseReport.witDrTxHash;
-                self.response.resultTimestamp = Witnet.determineTimestampFromEpoch(responseReport.witDrResultEpoch);
+                self.response.resultDrTxHash = Witnet.TransactionHash.unwrap(responseReport.witDrTxHash);
+                self.response.resultTimestamp = Witnet.Timestamp.unwrap(Witnet.determineTimestampFromEpoch(responseReport.witDrResultEpoch));
         
             } else if (_queryStatus == Witnet.QueryStatus.Disputed) {
                 // check that proven report actually matches what was formerly reported
@@ -523,7 +523,7 @@ library WitOracleTrustlessDataLib {
                         responseReport.witDrResultCborBytes
                     )) == keccak256(abi.encode(
                         self.response.resultDrTxHash,
-                        Witnet.determineEpochFromTimestamp(self.response.resultTimestamp),
+                        Witnet.determineEpochFromTimestamp(Witnet.Timestamp.wrap(self.response.resultTimestamp)),
                         self.response.resultCborBytes
                     )),
                     "proving disputed fake report"
@@ -589,11 +589,11 @@ library WitOracleTrustlessDataLib {
         );
 
         return WitOracleDataLib.intoDataResult(
-            Witnet.QueryResponse({
+            WitOracleDataLib.QueryResponse({
                 reporter: address(0), disputer: address(0), _0: 0,
                 resultCborBytes: report.resultCborBytes,
-                resultDrTxHash: report.witDrTxHash,
-                resultTimestamp: report.resultTimestamp
+                resultDrTxHash: Witnet.TransactionHash.unwrap(report.witDrTxHash),
+                resultTimestamp: Witnet.Timestamp.unwrap(report.resultTimestamp)
             }),
             Witnet.QueryStatus.Finalized,
             uint64(block.number)
@@ -633,11 +633,11 @@ library WitOracleTrustlessDataLib {
         );
 
         return WitOracleDataLib.intoDataResult(
-            Witnet.QueryResponse({
+            WitOracleDataLib.QueryResponse({
                 reporter: address(0), disputer: address(0), _0: 0,
                 resultCborBytes: report.resultCborBytes,
-                resultDrTxHash: report.witDrTxHash,
-                resultTimestamp: report.resultTimestamp 
+                resultDrTxHash: Witnet.TransactionHash.unwrap(report.witDrTxHash),
+                resultTimestamp: Witnet.Timestamp.unwrap(report.resultTimestamp)
             }),
             Witnet.QueryStatus.Finalized,
             uint64(block.number)
@@ -648,7 +648,7 @@ library WitOracleTrustlessDataLib {
     /// =======================================================================
     /// --- Private library methods -------------------------------------------
 
-    function _getQueryResult(Witnet.Query storage self, Witnet.QueryStatus queryStatus)
+    function _getQueryResult(WitOracleDataLib.Query storage self, Witnet.QueryStatus queryStatus)
         private view
         returns (Witnet.DataResult memory)
     {
@@ -660,7 +660,7 @@ library WitOracleTrustlessDataLib {
     }
 
     function _isValidDataPullReport(
-            Witnet.Query storage self,
+            WitOracleDataLib.Query storage self,
             Witnet.DataPullReport calldata report
         )
         private view

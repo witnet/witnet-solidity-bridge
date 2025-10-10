@@ -18,7 +18,7 @@ abstract contract WitOracleBaseQueriableTrustless
         IWitOracleQueriableTrustlessReporter
 {
     using Witnet for Witnet.DataPullReport;
-    using WitOracleTrustlessDataLib for Witnet.Query;
+    using WitOracleTrustlessDataLib for WitOracleDataLib.Query;
 
     /// @notice Number of blocks to await for either a dispute or a proven response to some query.
     uint256 immutable public QUERY_AWAITING_BLOCKS;
