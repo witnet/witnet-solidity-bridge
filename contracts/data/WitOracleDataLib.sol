@@ -118,8 +118,17 @@ library WitOracleDataLib {
         returns (Witnet.DataResult memory _result)
     {
         _result.drTxHash = Witnet.TransactionHash.wrap(queryResponse.resultDrTxHash);
-        _result.finality = finalityBlock;
-        _result.timestamp = Witnet.Timestamp.wrap(queryResponse.resultTimestamp);
+        if (queryResponse._0 > 0) {
+            _result.finality = (
+                queryResponse._0 | uint64(
+                    (queryResponse.resultTimestamp & 0xffffffff) << 32
+                )
+            );
+            _result.timestamp = Witnet.Timestamp.wrap(queryResponse.resultTimestamp >> 32);
+        } else {
+            _result.finality = finalityBlock;
+            _result.timestamp = Witnet.Timestamp.wrap(queryResponse.resultTimestamp);
+        }
         if (queryResponse.resultCborBytes.length > 0) {
             _result.value = WitnetCBOR.fromBytes(queryResponse.resultCborBytes);
             _result.dataType = Witnet.peekRadonDataType(_result.value);
