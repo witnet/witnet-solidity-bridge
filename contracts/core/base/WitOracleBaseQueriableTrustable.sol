@@ -625,8 +625,8 @@ abstract contract WitOracleBaseQueriableTrustable
             _queryId, 
             msg.value, 
             IWitOracleLegacy.RadonSLA({
-                witCommitteeSize: uint8(_querySLA.witCommitteeSize),
-                witUnitaryReward: _querySLA.witUnitaryReward
+                numWitnesses: uint8(_querySLA.witCommitteeSize),
+                witnessReward: _querySLA.witUnitaryReward
             })
         );
     }
