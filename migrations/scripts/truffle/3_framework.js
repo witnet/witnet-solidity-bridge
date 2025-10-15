@@ -130,6 +130,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
           if (implArtifact.address !== targetAddr) {
             throw new Error(`wrong proxy implementation address: ${implArtifact.address} != ${targetAddr}`)
           }
+          addresses = await settleArtifactAddress(addresses, network, domain, base, targetBaseAddr)
           targetBaseAddr = await deployCoreBase(targetSpecs, targetAddr)
           proxyImplAddr = implArtifact.address
           // settle new proxy address in file
@@ -424,7 +425,8 @@ async function deployTarget (network, target, targetSpecs, networkArtifacts, leg
     console.info("  ", "> constructor types: \x1b[90m", JSON.stringify(targetSpecs.constructorArgs.types), "\x1b[0m")
     utils.traceData("   > constructor values: ", targetConstructorArgs, 64, "\x1b[90m")
   }
-  // console.info("  ", `> tx signer address:  ${targetSpecs.from}`)
+  console.info("  ", `> tx signer address:  ${targetSpecs.from}`)
+  console.info("  ", `> tx target address:  ${targetAddr}`)
   try {
     utils.traceTx(
       await witnetDeployer.deploy(

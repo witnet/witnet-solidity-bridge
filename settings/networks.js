@@ -100,14 +100,14 @@ export default {
       explorerUrl: "https://boba.testnet.routescan.io",
     },
   },
-  "celo:alfajores": {
+  "celo:sepolia": {
     confirmations: 5,
-    network_id: 44787,
+    network_id: 11142220,
     port: 8538,
     symbol: "CELO",
     verify: {
-      apiUrl: "https://api-alfajores.celoscan.io/api",
-      explorerUrl: "https://alfajores.celoscan.io",
+      apiUrl: "https://api.etherscan.io/v2/api?chainId=11142220",
+      explorerUrl: "https://sepolia.celoscan.io/",
     },
   },
   "celo:mainnet": {
