@@ -1,6 +1,6 @@
 {
   "name": "@witnet/solidity",
-  "version": "2.2.8",
+  "version": "2.2.10",
   "description": "Wit/Oracle (aka Witnet) contracts and tooling for EVM-compatible chains",
   "author": "Witnet Foundation <info@witnet.foundation>",
   "license": "MIT",
