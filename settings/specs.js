@@ -50,13 +50,13 @@ export default {
       baseDeps: ["WitOracle"],
     },
     WitOracleRadonRequestFactoryModalsDefault: {
-      vanity: 496369, // 0xff6Cf77dA52BcaC140C8777c39dB0E4A0c4D49ff
+      vanity: 525250, // 0xffC4147d7b973B1766FB335bC847C7288c4365ff
     },
     WitOracleRadonRequestFactoryTemplates: {
       baseDeps: ["WitOracle"],
     },
     WitOracleRadonRequestFactoryTemplatesDefault: {
-      vanity: 166332, // 0xFFcB363e96F9cb61438ECFBb735634fef2FE43FF
+      vanity: 692892, // 0xFF5ad05D038fcc04354B2fca1fb657eA345594FF
     },
     WitPriceFeeds: {
       baseLibs: [
@@ -83,7 +83,7 @@ export default {
       vanity: 1060132513, // 0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB
     },
     WitRandomnessV3: {
-      vanity: 132246681, // 0xC0FFee84CC8a7A033B55fFc0cc6Bf3087136d391
+      vanity: 2000244871103, // 0xC0FFEE00B76e0E48b967f2963ae6190dA32a536C
     },
   },
   reef: {
