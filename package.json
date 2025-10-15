@@ -1,7 +1,7 @@
 {
-  "name": "witnet-solidity-bridge",
-  "version": "3.0.0",
-  "description": "Witnet Solidity Bridge contracts for EVM-compatible chains",
+  "name": "@witnet/solidity",
+  "version": "3.0.1",
+  "description": "Wit/Oracle Solidity Framework for EVM-compatible chains",
   "author": "Witnet Foundation <info@witnet.foundation>",
   "license": "MIT",
   "repository": {
@@ -22,7 +22,7 @@
   "files": [
     "artifacts",
     "build/contracts",
-    "contracts/",
+    "contracts",
     "migrations/*.json",
     "settings",
     "src"
