@@ -64,7 +64,8 @@
     "celo:sepolia": {
         "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e302e302d623732326130642d306165633239340000000000000000000000\",true]}",
         "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e302e302d623732326130642d666361393961640000000000000000000000\"]}",
-        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xffC4147d7b973B1766FB335bC847C7288c4365ff\",\"0xFF5ad05D038fcc04354B2fca1fb657eA345594FF\",\"0x332e302e302d623732326130642d373634376432370000000000000000000000\",true]}"
+        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xffC4147d7b973B1766FB335bC847C7288c4365ff\",\"0xFF5ad05D038fcc04354B2fca1fb657eA345594FF\",\"0x332e302e302d623732326130642d373634376432370000000000000000000000\",true]}",
+        "WitPriceFeedsUpgradableV3": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e302e302d623732326130642d623535363662390000000000000000000000\",true]}"
     },
     "celo:mainnet": {
         "WitOracle": "",
@@ -130,11 +131,11 @@
         "WitPriceFeedsLegacyUpgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x322e322e382d346262313232312d376261626265610000000000000000000000\",true]}"
     },
     "ethereum:sepolia": {
-        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x322e322e352d313731653761322d613134333361660000000000000000000000\",true]}",
-        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xff7B32870b35259212bc103c79380E03786588ff\",\"0xFF1f868D74d1b9A434C7bBf2abe470c8F153DDFF\",\"0x322e322e352d313731653761322d373735323762320000000000000000000000\",true]}",
-        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x322e322e352d313731653761322d386534376133640000000000000000000000\"]}",
-        "WitPriceFeedsLegacyUpgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x322e322e352d313731653761322d666330376331390000000000000000000000\",true]}",
-        "WitPriceFeedsUpgradableV3": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x322e322e372d343632316237312d343438323936300000000000000000000000\",true]}",
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x322e322e382d346262313232312d323134333632630000000000000000000000\",true]}",
+        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xD28237c5d7C8C386377A13e6661642294657F35e\",\"0x300c8ccc9526495BB7e5911105f0663Cb4c3a137\",\"0x322e322e382d346262313232312d643235663063620000000000000000000000\",true]}",
+        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x322e322e382d346262313232312d326636613035350000000000000000000000\"]}",
+        "WitPriceFeedsLegacyUpgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x322e322e382d346262313232312d346138613839330000000000000000000000\",true]}",
+        "WitPriceFeedsUpgradableV3": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x322e322e382d346262313232312d336435333762630000000000000000000000\",true]}",
         "WitRandomnessV3": "{\"types\":[\"address\",\"address\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0xF121b71715E71DDeD592F1125a06D4ED06F0694D\"]}"
     },
     "gnosis:mainnet": {

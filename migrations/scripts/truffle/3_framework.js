@@ -133,8 +133,10 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
           addresses = await settleArtifactAddress(addresses, network, domain, base, targetBaseAddr)
           targetBaseAddr = await deployCoreBase(targetSpecs, targetAddr)
           proxyImplAddr = implArtifact.address
-          // settle new proxy address in file
-          addresses = await settleArtifactAddress(addresses, network, domain, base, targetBaseAddr)
+          if (addresses.default[domain][base] !== proxyImplAddr) {
+            // settle new proxy address in file
+            addresses = await settleArtifactAddress(addresses, network, domain, base, targetBaseAddr)
+          }
         }
         baseArtifact.address = targetBaseAddr
 
@@ -276,8 +278,10 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
             } else {
               target.addr = await deployTarget(network, impl, target.specs, networkArtifacts)
             }
-            // settle immutable implementation address in addresses file
-            addresses = await settleArtifactAddress(addresses, network, domain, impl, target.addr)
+            if (addresses.default[domain][impl] !== target.addr) {
+              // settle immutable implementation address in addresses file
+              addresses = await settleArtifactAddress(addresses, network, domain, impl, target.addr)
+            }
           } else if ((utils.isNullAddress(target.addr) || (await web3.eth.getCode(target.addr)).length < 3)) {
             // skip targets for which no address or code is found
             continue

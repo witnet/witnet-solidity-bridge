@@ -72,8 +72,8 @@ contract WitPriceFeedsUpgradableV3
         returns (bool)
     {
         return (
-            address(this) != __proxiable().proxy
-                && address(this) != __SELF
+            address(this) != __proxiable().proxy // => not an initialized WitnetProxy
+                && address(this) != __SELF       // => a proxy to __SELF
         );
     }
 
@@ -95,8 +95,9 @@ contract WitPriceFeedsUpgradableV3
     function initialize(bytes memory _initData) 
         virtual override 
         public 
-        notOnClones
     {
+        _require(!initialized() || !cloned(), "not on clones");
+        
         address _owner = owner();
         if (_owner == address(0)) {
             // upon first upgrade, extract decode owner address from _intidata
