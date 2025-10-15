@@ -26,6 +26,8 @@ jobs:
         uses: pnpm/action-setup@v3
         with:
           version: latest
+          run_install:
+            args: --no-git-checks
 
       - name: Install Dependencies
         run: pnpm install
