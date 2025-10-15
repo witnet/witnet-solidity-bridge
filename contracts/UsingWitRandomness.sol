@@ -6,7 +6,7 @@ import {
     Witnet, 
     WitRandomness, 
     IWitRandomness
-} from "../WitRandomness.sol";
+} from "./WitRandomness.sol";
 
 abstract contract UsingWitRandomness {
     WitRandomness immutable public WIT_RANDOMNESS;

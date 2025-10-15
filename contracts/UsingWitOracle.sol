@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitOracle.sol";
+import "./WitOracle.sol";
 
 /// @title The UsingWitOracle contract
 /// @dev Witnet-aware contracts can inherit from this contract in order to interact with Witnet.

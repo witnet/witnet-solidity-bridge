@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../WitPriceFeeds.sol";
+import "./WitPriceFeeds.sol";
 
 /// @title The UsingWitPriceFeeds contract
 /// @dev Contracts willing to interact with a WitPriceFeeds appliance, freshly updated by a third-party.
