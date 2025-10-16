@@ -443,7 +443,19 @@
             "WitPriceFeedsLegacyDataLib": "0x1949a56d396ba542AA6573b43bE12dCf721adb45"
         }
     },
-    "ten:testnet": {},
+    "ten:testnet": {
+        "libs": {
+            "WitOracleDataLib": "0xf6d52770453166de85B6B6260Cf22196bC460E88",
+            "WitOracleRadonEncodingLib": "0xB5447342cA17A40e59d410b340ba412E22e36201",
+            "WitOracleResultStatusLib": "0xc71A87657b13A370594967A04b4301a3AcEAF007",
+            "WitPriceFeedsDataLib": "0x705E076F3387cFd59708D8D8508CECe3e1C65C87",
+            "WitPriceFeedsLegacyDataLib": "0xa45206cC3Ae76630Cc4D47A730590Ff9B6d8Ee54"
+        },
+        "apps": {
+            "WitPriceFeedsLegacyUpgradable": "0x5493D785EcF171B59eF042649c2D71ec62D40D67",
+            "WitPriceFeedsUpgradableV3": "0xd13c3F2FE72C2A742044699F95be69B9c7b2ad70"
+        }
+    },
     "worldchain:mainnet": {},
     "worldchain:sepolia": {
         "apps": {

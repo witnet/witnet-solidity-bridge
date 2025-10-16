@@ -273,10 +273,11 @@
         "WitRandomnessV2": "00000000000000000000000077703ae126b971c9946d562f41dd47071da00777000000000000000000000000f121b71715e71dded592f1125a06d4ed06f0694d"
     },
     "ten:testnet": {
-        "WitOracle": "",
-        "WitOracleRadonRegistry": "",
-        "WitOracleRequestFactory": "",
-        "WitPriceFeeds": ""
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e302e322d316538353338302d306165633239340000000000000000000000\",true]}",
+        "WitOracleTrustableObscuro": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e302e322d316538353338302d353734656438620000000000000000000000\"]}",
+        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xffC4147d7b973B1766FB335bC847C7288c4365ff\",\"0xFF5ad05D038fcc04354B2fca1fb657eA345594FF\",\"0x332e302e322d316538353338302d373634376432370000000000000000000000\",true]}",
+        "WitPriceFeedsUpgradableV3": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e302e322d316538353338302d623535363662390000000000000000000000\",true]}",
+        "WitPriceFeedsLegacyUpgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e302e322d316538353338302d323738363436620000000000000000000000\",true]}"
     },
     "ultron:mainnet": {
         "WitOracle": "",

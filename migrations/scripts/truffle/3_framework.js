@@ -10,18 +10,18 @@ const version = `${
 }`
 
 const selection = utils.getWitnetArtifactsFromArgs()
-
-const WitnetDeployer = artifacts.require("WitnetDeployer")
 const WitnetProxy = artifacts.require("WitnetProxy")
 
 let addresses, witnetDeployer
 
 module.exports = async function (_, network, [, from, reporter1, curator, reporter2]) {
   addresses = await utils.readJsonFromFile("./migrations/addresses.json")
-  witnetDeployer = await WitnetDeployer.deployed()
-
+  
   const networkArtifacts = settings.getArtifacts(network)
   const networkSpecs = settings.getSpecs(network)
+  
+  const WitnetDeployer = artifacts.require(networkArtifacts.WitnetDeployer)
+  witnetDeployer = await WitnetDeployer.deployed()
 
   // Settle the order in which (some of the) framework artifacts must be deployed first
   const framework = {

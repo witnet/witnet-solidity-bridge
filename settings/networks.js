@@ -541,9 +541,9 @@ export default {
   },
   "ten:testnet": {
     port: 8504,
-    network_id: 443,
+    network_id: 8443,
     gas: 15000000,
-    symbol: "TEN",
+    symbol: "ETH",
   },
   "unichain:sepolia": {
     port: 8500,

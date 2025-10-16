@@ -4,7 +4,7 @@ export default {
     apps: {
       WitPriceFeeds: "WitPriceFeedsUpgradableV3",
       WitPriceFeedsLegacy: "WitPriceFeedsLegacyUpgradable",
-      WitRandomness: "WitRandomnessV3",
+      WitRandomness: "WitRandomnessV3"
     },
     core: {
       WitOracle: "WitOracleTrustableDefault",
@@ -60,6 +60,7 @@ export default {
     core: { WitOracle: "WitOracleTrustableOvm2" },
   },
   ten: {
+    WitnetDeployer: "WitnetDeployerDeferred",
     core: { WitOracle: "WitOracleTrustableObscuro" },
   },
 }
