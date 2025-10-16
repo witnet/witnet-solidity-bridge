@@ -1,6 +1,6 @@
 {
   "name": "@witnet/solidity",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Wit/Oracle Solidity Framework for EVM-compatible chains",
   "author": "Witnet Foundation <info@witnet.foundation>",
   "license": "MIT",
@@ -16,7 +16,7 @@
   ],
   "exports": {
     ".": "./src/index.js",
-    "./contracts/": "./contracts/",
+    "./contracts/*": "./contracts/",
     "./utils": "./src/utils.js"
   },
   "files": [
