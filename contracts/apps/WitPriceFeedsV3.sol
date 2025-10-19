@@ -14,6 +14,7 @@ import {
     IWitPriceFeeds,
     IWitPriceFeedsAdmin,
     IWitPriceFeedsConsumer,
+    IWitOracleConsumer,
     WitPriceFeeds
 } from "../WitPriceFeeds.sol";
 
@@ -61,10 +62,14 @@ contract WitPriceFeedsV3
     using WitPriceFeedsDataLib for UpdateConditions;
     using WitPriceFeedsDataLib for WitPriceFeedsDataLib.PriceFeed;
 
-    address immutable public override witOracle;
+    address immutable public __WIT_ORACLE;
 
     function class() virtual override public pure returns (string memory) {
         return type(WitPriceFeedsV3).name;
+    }
+
+    function witOracle() virtual override external view returns (address) {
+        return __WIT_ORACLE;
     }
 
     constructor(
@@ -83,7 +88,7 @@ contract WitPriceFeedsV3
                 || _witOracleSpecs == type(IWitOracle).interfaceId ^ type(IWitOracleQueriable).interfaceId,
             "uncompliant wit/oracle"
         );
-        witOracle = _witOracle;
+        __WIT_ORACLE = _witOracle;
         __storage().defaultUpdateConditions = UpdateConditions({
             callbackGas: 1_000_000,
             computeEma: false,
@@ -564,7 +569,7 @@ contract WitPriceFeedsV3
                 _symbol,
                 _radonBytecode,
                 _exponent,
-                IWitOracle(witOracle).registry()
+                IWitOracle(__WIT_ORACLE).registry()
             )
         returns (bytes4 _footprint, Witnet.RadonHash _radonHash) {
             emit PriceFeedOracle(
@@ -600,7 +605,7 @@ contract WitPriceFeedsV3
                 _symbol,
                 _radonHash,
                 _exponent,
-                IWitOracle(witOracle).registry()
+                IWitOracle(__WIT_ORACLE).registry()
             )
         returns (bytes4 _footprint) {
             emit PriceFeedOracle(
@@ -655,7 +660,7 @@ contract WitPriceFeedsV3
             report.queryParams.witCommitteeSize >= _updateConditions.minWitnesses,
             InvalidGovernanceTarget()
         );
-        Witnet.DataResult memory _dataResult = IWitOracle(witOracle).pushDataReport(
+        Witnet.DataResult memory _dataResult = IWitOracle(__WIT_ORACLE).pushDataReport(
             report,
             proof
         );

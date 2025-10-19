@@ -23,4 +23,6 @@ abstract contract WitPriceFeeds
             type(IWitPriceFeeds).interfaceId
         );
     }
+
+    function witOracle() virtual override (IWitOracleConsumer, IWitPriceFeeds) external view returns (address);
 }

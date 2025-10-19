@@ -11,4 +11,7 @@ interface IWitOracleConsumer {
     /// @dev The referred `witOracle()` contract emits a `IWitOracle.DataReport` for
     /// every `Witnet.DataPushReport` proven to be authentic. 
     function pushDataReport(Witnet.DataPushReport calldata report, bytes calldata proof) external;
+
+    /// Returns the address of the Wit/Oracle bridge that will be used to verify pushed data reprots.
+    function witOracle() external view returns (address);
 }
