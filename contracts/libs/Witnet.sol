@@ -772,17 +772,15 @@ library Witnet {
     bytes7 private constant _CBOR_MAJOR_TYPE_TO_RADON_DATA_TYPES_MAP = 0x04040307010600;
     function peekRadonDataType(WitnetCBOR.CBOR memory cbor) internal pure returns (RadonDataTypes _type) {
         _type = RadonDataTypes.Any;
-        if (!cbor.eof()) {
-            if (cbor.majorType <= 6) {
-                return RadonDataTypes(uint8(bytes1(_CBOR_MAJOR_TYPE_TO_RADON_DATA_TYPES_MAP[cbor.majorType])));
+        if (cbor.majorType <= 6) {
+            return RadonDataTypes(uint8(bytes1(_CBOR_MAJOR_TYPE_TO_RADON_DATA_TYPES_MAP[cbor.majorType])));
+        
+        } else if (cbor.majorType == 7) {
+            if (cbor.additionalInformation == 20 || cbor.additionalInformation == 21) {
+                return RadonDataTypes.Bool;
             
-            } else if (cbor.majorType == 7) {
-                if (cbor.additionalInformation == 20 || cbor.additionalInformation == 21) {
-                    return RadonDataTypes.Bool;
-                
-                } else if (cbor.additionalInformation >= 25 && cbor.additionalInformation <= 27) {
-                    return RadonDataTypes.Float;
-                }
+            } else if (cbor.additionalInformation >= 25 && cbor.additionalInformation <= 27) {
+                return RadonDataTypes.Float;
             }
         }
     }
