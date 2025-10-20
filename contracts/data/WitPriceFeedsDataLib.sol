@@ -412,6 +412,11 @@ library WitPriceFeedsDataLib {
             address(this),
             Witnet.RadonHash.unwrap(_radonHash)
         );
+        require(
+            IWitPriceFeedsTypes.ID4.unwrap(data().reverseIds[_radonHash]) == bytes4(0), 
+            "repeated rad hash"
+        );
+        data().reverseIds[_radonHash] = id4;
         _footprint = settlePriceFeedFootprint();
     }
 
@@ -434,6 +439,11 @@ library WitPriceFeedsDataLib {
             address(this),
             Witnet.RadonHash.unwrap(radonHash)
         );
+        require(
+            IWitPriceFeedsTypes.ID4. unwrap(data().reverseIds[radonHash]) == bytes4(0), 
+            "repeated rad hash"
+        );
+        data().reverseIds[radonHash] = id4;
         return settlePriceFeedFootprint();
     }
 
