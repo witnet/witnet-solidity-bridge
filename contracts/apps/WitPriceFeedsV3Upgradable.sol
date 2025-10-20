@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {WitPriceFeedsV3} from "./WitPriceFeedsV3.sol";
 import {Upgradeable} from "../patterns/Upgradeable.sol";
 
-/// @title WitPriceFeedsUpgradableV3: On-demand Price Feeds registry for EVM-compatible L1/L2 chains, 
+/// @title WitPriceFeedsV3Upgradable: On-demand Price Feeds registry for EVM-compatible L1/L2 chains, 
 /// natively powered by the Wit/Oracle blockchain, but yet capable of aggregating price 
 /// updates from other on-chain price-feed oracles too, if required.
 /// 
@@ -26,7 +26,7 @@ import {Upgradeable} from "../patterns/Upgradeable.sol";
 ///
 /// @author Guillermo Díaz <guillermo@witnet.io>
 
-contract WitPriceFeedsUpgradableV3
+contract WitPriceFeedsV3Upgradable
     is
         Upgradeable,
         WitPriceFeedsV3
@@ -34,7 +34,7 @@ contract WitPriceFeedsUpgradableV3
     bytes32 internal immutable __VERSION;
 
     function class() virtual override public pure returns (string memory) {
-        return type(WitPriceFeedsUpgradableV3).name;
+        return type(WitPriceFeedsV3Upgradable).name;
     }
 
     constructor(

@@ -22,7 +22,7 @@ import {WitPriceFeedsLegacy, IWitOracleAppliance} from "../WitPriceFeedsLegacy.s
 /// @title WitPriceFeeds: Price Feeds upgradable repository reliant on the Wit/Oracle blockchain.
 /// @author Guillermo Díaz <guillermo@witnet.io>
 
-contract WitPriceFeedsLegacyBypassV3
+contract WitPriceFeedsLegacyUpgradableBypass
     is
         Ownable2Step,
         WitnetUpgradableBase
@@ -39,7 +39,7 @@ contract WitPriceFeedsLegacyBypassV3
     }
 
     function class() public pure returns (string memory) {
-        return type(WitPriceFeedsLegacyBypassV3).name;
+        return type(WitPriceFeedsLegacyUpgradableBypass).name;
     }
     
     constructor(
@@ -54,11 +54,11 @@ contract WitPriceFeedsLegacyBypassV3
             "io.witnet.proxiable.feeds.price"
         )
     {
-        _require(
-            _surrogate != address(0)
-                && _surrogate.code.length > 0,
-            "invalid surrogate"
-        );
+        // _require(
+        //     _surrogate != address(0)
+        //         && _surrogate.code.length > 0,
+        //     "invalid surrogate"
+        // );
         surrogate = IWitPriceFeeds(_surrogate);
         registry = IWitOracleRadonRegistry(
             IWitOracle(

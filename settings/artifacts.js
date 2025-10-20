@@ -2,7 +2,7 @@ export default {
   default: {
     WitnetDeployer: "WitnetDeployer",
     apps: {
-      WitPriceFeeds: "WitPriceFeedsUpgradableV3",
+      WitPriceFeeds: "WitPriceFeedsV3Upgradable",
       WitPriceFeedsLegacy: "WitPriceFeedsLegacyUpgradable",
       WitRandomness: "WitRandomnessV3"
     },
@@ -32,6 +32,11 @@ export default {
     core: { 
       WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore",
     },
+  },
+  "ethereum:sepolia": {
+    apps: {
+      WitPriceFeedsLegacy: "WitPriceFeedsLegacyUpgradableBypass",
+    }
   },
   mantle: {
     core: { WitOracle: "WitOracleTrustableOvm2" },

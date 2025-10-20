@@ -326,8 +326,8 @@ async function traceDeployedContractInfo (contract, from, targetVersion) {
     } else {
       console.info("  ", `> contract version:   \x1b[1;39m${deployedVersion.slice(0, 5)}\x1b[0m${deployedVersion.slice(5)}`)
     }
+    console.info("  ", "> contract specs:    ", await contract.specs.call({ from }), "\x1b[0m")
   } catch {}
-  console.info("  ", "> contract specs:    ", await contract.specs.call({ from }), "\x1b[0m")
 }
 
 async function deployCoreBase (targetSpecs, targetAddr) {
@@ -560,7 +560,7 @@ async function unfoldTargetSpecs (domain, target, targetBase, from, network, net
     specs.intrinsics.types.push(...new Array(specs.baseDeps.length).fill("address"))
     for (const index in specs.baseDeps) {
       const depsBase = specs.baseDeps[index]
-      const depsImpl = networkArtifacts.core[depsBase]
+      const depsImpl = networkArtifacts.core[depsBase] || networkArtifacts.apps[depsBase]
       if (utils.isUpgradableArtifact(depsImpl)) {
         const depsVanity = networkSpecs[depsBase]?.vanity || Object.keys(networkArtifacts[domain]).indexOf(depsBase)
         const depsProxySalt = (depsVanity
