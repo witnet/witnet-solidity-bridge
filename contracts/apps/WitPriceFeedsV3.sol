@@ -679,15 +679,16 @@ contract WitPriceFeedsV3
             HotPrice()
         );
         
-        int8 _exponent = __record.lastUpdate.exponent;
-        uint64 _deltaSecs = uint24(
-            Witnet.Timestamp.unwrap(__record.lastUpdate.timestamp)
-                - Witnet.Timestamp.unwrap(_dataResult.timestamp)
+        int8 _exponent = __record.exponent;
+        Witnet.Timestamp _lastTimestamp = __record.lastUpdate.timestamp;
+        uint64 _deltaSecs = _lastTimestamp.isZero() ? 0 : uint24(
+            Witnet.Timestamp.unwrap(_dataResult.timestamp)
+                - Witnet.Timestamp.unwrap(_lastTimestamp)
         );
         uint64 _lastPrice = __record.lastUpdate.price;
         uint64 _nextPrice = _dataResult.fetchUint();
-        int56 _deltaPrice = int56(int64(_nextPrice) - int64(_lastPrice));
-        uint64 _deviation1000 = (
+        int56 _deltaPrice = _lastPrice == 0 ? int56(0) : int56(int64(_nextPrice) - int64(_lastPrice));
+        uint64 _deviation1000 = _lastPrice == 0 ? uint64(0) : (
             _deltaPrice >= 0
                 ? uint56(_deltaPrice * 1000) / _lastPrice
                 : uint56(-_deltaPrice * 1000) / _lastPrice
@@ -699,6 +700,7 @@ contract WitPriceFeedsV3
         );
 
         __record.lastUpdate.deltaPrice = _deltaPrice;
+        __record.lastUpdate.exponent = _exponent;
         __record.lastUpdate.price = _nextPrice;
         __record.lastUpdate.timestamp = _dataResult.timestamp;
         __record.lastUpdate.trail = _dataResult.drTxHash;
