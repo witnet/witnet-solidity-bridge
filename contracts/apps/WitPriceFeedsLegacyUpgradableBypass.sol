@@ -16,7 +16,12 @@ import {Slices} from "../libs/Slices.sol";
 import {Ownable, Ownable2Step} from "../patterns/Ownable2Step.sol";
 import {WitnetUpgradableBase} from "../core/WitnetUpgradableBase.sol";
 import {WitPriceFeedsLegacyDataLib} from "../data/WitPriceFeedsLegacyDataLib.sol";
-import {WitPriceFeedsLegacy, IWitOracleAppliance} from "../WitPriceFeedsLegacy.sol";
+import {
+    IERC2362, 
+    IWitOracleAppliance, 
+    IWitPriceFeedsLegacyAdmin, 
+    IWitPriceFeedsLegacySolverFactory
+} from "../WitPriceFeedsLegacy.sol";
 
 
 /// @title WitPriceFeeds: Price Feeds upgradable repository reliant on the Wit/Oracle blockchain.
@@ -30,8 +35,8 @@ contract WitPriceFeedsLegacyUpgradableBypass
     using Slices for string;
     using Slices for Slices.Slice;
 
-    IWitPriceFeeds immutable public surrogate;
     IWitOracleRadonRegistry immutable public registry;
+    IWitPriceFeeds immutable public surrogate;
 
     struct BypassV2V3 {
         mapping (IWitPriceFeedsTypes.ID4 => bytes4) v2Ids;
@@ -40,6 +45,16 @@ contract WitPriceFeedsLegacyUpgradableBypass
 
     function class() public pure returns (string memory) {
         return type(WitPriceFeedsLegacyUpgradableBypass).name;
+    }
+
+    function specs() public pure returns (bytes4) {
+        return (
+            type(IERC2362).interfaceId
+                ^ type(IWitOracleAppliance).interfaceId
+                ^ type(IWitPriceFeedsLegacy).interfaceId
+                ^ type(IWitPriceFeedsLegacyAdmin).interfaceId
+                ^ type(IWitPriceFeedsLegacySolverFactory).interfaceId   
+        );
     }
     
     constructor(
@@ -54,11 +69,6 @@ contract WitPriceFeedsLegacyUpgradableBypass
             "io.witnet.proxiable.feeds.price"
         )
     {
-        // _require(
-        //     _surrogate != address(0)
-        //         && _surrogate.code.length > 0,
-        //     "invalid surrogate"
-        // );
         surrogate = IWitPriceFeeds(_surrogate);
         registry = IWitOracleRadonRegistry(
             IWitOracle(
@@ -284,6 +294,13 @@ contract WitPriceFeedsLegacyUpgradableBypass
 
     function witnet()
         external view 
+        returns (address)
+    {
+        return IWitOracleAppliance(address(surrogate)).witOracle();
+    }
+
+    function witOracle()
+        external view
         returns (address)
     {
         return IWitOracleAppliance(address(surrogate)).witOracle();

@@ -82,7 +82,7 @@
     },
     "celo:sepolia": {
         "apps": {
-            "WitPriceFeedsUpgradableV3": "0x5484018D12F7d726df439Ae66B72b9BD0e143E6d"
+            "WitPriceFeedsV3Upgradable": "0x5484018D12F7d726df439Ae66B72b9BD0e143E6d"
         },
         "core": {
             "WitOracleRadonRegistryUpgradableDefault": "0x6e5Fe5e728139E44B07618C0feDb6ECdF619289B",
@@ -202,22 +202,23 @@
     },
     "ethereum:sepolia": {
         "libs": {
-            "WitOracleDataLib": "0x47ddB2e37A9f352a6dC2c4fEa348E272fd69d7E4",
-            "WitOracleRadonEncodingLib": "0xFf66F442a1F9449579B181b9D7e0A90022275235",
-            "WitOracleResultStatusLib": "0xc1D68961298c5F72c672A1519A42Edd1a9598c5c",
-            "WitPriceFeedsLegacyDataLib": "0x9e1c82ab0809A4996C36ef3dc646B07089F0B903",
-            "WitPriceFeedsDataLib": "0x9C3b7240ed85b3B88952D1e1d4DD108F85756E8d"
+            "WitOracleDataLib": "0xfC62b6B0ec3eCF1Fa031B31b468be51E025a36f1",
+            "WitOracleRadonEncodingLib": "0x12143b6c8E483c9ED438AB934c476432c684cF0F",
+            "WitOracleResultStatusLib": "0xd5Ef8E34a8e459110373eF2f8f141893921d367A",
+            "WitPriceFeedsLegacyDataLib": "0xA7389B84D6ABC46b40e88aAD2bbDAf9921649E9E",
+            "WitPriceFeedsDataLib": "0x58e5A7dbc8001d9400556163B02f08556ed9D2A2"
         },
         "core": {
-            "WitOracleTrustableDefault": "0x1C3E70e1dC654A2c62f2b2cEBc1E4A461c6AF231",
-            "WitOracleRadonRegistryUpgradableDefault": "0xE57814c74bb2419d23230DdB7573c7ab4f4d81B8",
+            "WitOracleTrustableDefault": "0x329f2A734fF246215922DB1dD6a7061Bc91D400E",
+            "WitOracleRadonRegistryUpgradableDefault": "0x471c2b44f96Ab95B7688FAaD6fC081f6f464cd93",
             "WitOracleRadonRequestFactoryModalsDefault": "0xD28237c5d7C8C386377A13e6661642294657F35e",
             "WitOracleRadonRequestFactoryTemplatesDefault": "0x300c8ccc9526495BB7e5911105f0663Cb4c3a137",
-            "WitOracleRadonRequestFactoryUpgradableDefault": "0xFf8c37Aa98736341bf392e867214661f4fdd0f02"
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0x622400544d827043B9B064f29305f129C8c7ABA6"
         },
         "apps": {
-            "WitPriceFeedsLegacyUpgradable": "0x7c0e1686E88238e07cCda502320058480341Dc83",
-            "WitPriceFeedsUpgradableV3": "0xA4b96ef00244a99661851594Bd672B5D343c2Da4"
+            "WitPriceFeedsLegacyUpgradable": "0xb8776103adBfe48366E4B632d9b8cb322E3D524F",
+            "WitPriceFeedsV3Upgradable": "0xaa2A45356198A4B2f2fedABe60492C549EAFbCde",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x53D8311197aF484aE65A8D81ba2bbE3A388FE779"
         }
     },
     "gnosis:mainnet": {
