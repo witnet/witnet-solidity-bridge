@@ -227,6 +227,7 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
           }
         }
         console.info()
+      
       } else {
         // create an array of implementations, including the one set up for current base,
         // but also all others in this network addresses file that share the same base
@@ -287,16 +288,9 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
             continue
           }
           utils.traceHeader(`${impl === target.impl ? `Immutable '${base}'` : `Legacy '${target.impl}'`}`)
-          if (target.impl !== impl || target.addr === targetAddr) {
-            console.info("  ",
-              `> contract address:  \x1b[9${color}m`, target.addr, "\x1b[0m"
-            )
-          } else {
-            console.info("  ",
-              `> contract address:  \x1b[9${color}m ${target.addr}\x1b[0m !==`,
-              `\x1b[41m${targetAddr}\x1b[0m`
-            )
-          }
+          console.info("  ",
+            `> contract address:  \x1b[9${color}m`, target.addr, "\x1b[0m"
+          )
           if (target.impl === impl) {
             baseArtifact.address = target.addr
             implArtifact.address = target.addr
