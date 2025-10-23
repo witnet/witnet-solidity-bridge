@@ -1,6 +1,6 @@
 {
   "name": "@witnet/solidity",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "description": "Wit/Oracle Solidity Framework for EVM-compatible chains",
   "author": "Witnet Foundation <info@witnet.foundation>",
   "license": "MIT",
@@ -10,37 +10,50 @@
   },
   "type": "module",
   "keywords": [
-    "bridge",
     "witnet",
-    "ethereum"
+    "wit/oracle",
+    "ethereum",
+    "solidity",
+    "oracle",
+    "bridge",
+    "web3"
   ],
+  "bin": {
+    "witeth": "src/bin/solidity.cjs",
+    "witnet-solidity": "src/bin/solidity.cs"
+  },
   "exports": {
-    ".": "./src/index.js",
+    ".": {
+      "default": "./dist/src/index.js",
+      "require": "./dist/src/index.js",
+      "types": "./dist/src/*.d.ts"
+    },
     "./contracts/*": "./contracts/",
-    "./utils": "./src/utils.js"
+    "./utils": {
+      "default": "./dist/src/lib/utils.js",
+      "require": "./dist/src/lib/utils.js",
+      "types": "./dist/src/lib/*.d.ts"
+    }
   },
   "files": [
     "artifacts",
     "build/contracts",
+    "dist",
     "contracts",
     "migrations/*.json",
-    "settings",
-    "src"
+    "migrations/settings",
+    "src/bin"
   ],
   "scripts": {
-    "clean": "pnpm run clean:artifacts && pnpm run clean:build && pnpm run clean:cache && pnpm run clean:flattened",
-    "clean:artifacts": "node ./scripts/clean.cjs artifacts migrations/zksync/artifacts-zk",
+    "build": "tsc -p tsconfig.json",
+    "clean": "npm run clean:artifacts && npm run clean:build && npm run clean:cache && npm run clean:dist && npm run clean:zksync",
+    "clean:artifacts": "node ./scripts/clean.cjs artifacts",
     "clean:build": "node ./scripts/clean.cjs build",
-    "clean:cache": "node ./scripts/clean.cjs cache migrations/zksync/cache-zk",
-    "clean:flattened": "node ./scripts/clean.cjs flattened",
+    "clean:cache": "node ./scripts/clean.cjs cache",
+    "clean:dist": "node ./scripts/clean.cjs dist",
+    "clean:zksync": "node ./scripts/clean.cjs deployments-zk migrations/zksync/artifacts-zk migrations/zksync/cache-zk",
     "compile": "npx truffle compile --all --config ./truffle-config.cjs",
-    "console": "npx hardhat console",
-    "flatten": "node ./scripts/flatten.cjs 2>&1",
-    "flatten:all": "pnpm run clean && pnpm run flatten:core && pnpm run flatten:apps && pnpm run flatten:libs && pnpm run flatten:proxy",
-    "flatten:apps": "pnpm run flatten contracts/apps/",
-    "flatten:core": "pnpm run flatten contracts/core/",
-    "flatten:libs": "pnpm run flatten contracts/libs/WitOracleResultErrorsLib.sol && pnpm run flatten contracts/libs/WitOracleRadonEncodingLib.sol && pnpm run flatten contracts/libs/WitPriceFeedsLegacyDataLib.sol",
-    "flatten:proxy": "pnpm run flatten contracts/core/WitnetProxy.sol",
+    "console": "npx truffle console",
     "fmt:js": "eslint \"**/*.cjs\"",
     "fmt:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "fmt!:js": "eslint \"**/*.cjs\" --fix",
@@ -48,12 +61,10 @@
     "fmt!": "pnpm run fmt!:js && pnpm run fmt!:sol",
     "fmt": "pnpm run fmt:js && pnpm run fmt:sol",
     "deploy": "npx truffle migrate --config ./truffle-config.cjs",
-    "ops:rng:sla": "npx truffle migrate --migrations_directory ./migrations/ops/rng/sla --compile-none --network",
-    "ops:drp:pfs": "npx truffle migrate --migrations_directory ./migrations/ops/drp/pfs --compile-none --network",
-    "ops:drp:wrb": "npx truffle migrate --migrations_directory ./migrations/ops/drp/wrb --compile-none --network",
-    "prepare": "npx truffle compile --all --config ./truffle-config.cjs && npx hardhat compile --force && node ./scripts/prepare.cjs",
-    "test": "npx truffle test",
+    "postinstall": "node ./scripts/postinstall.cjs",
+    "prepare": "npx truffle compile --all --config ./truffle-config.cjs && npx hardhat compile --force && npm run build && node ./scripts/prepare.cjs",
     "verify": "npx hardhat run ./scripts/verify.js 2>&1",
+    "witeth": "cross-env-shell WITNET_SDK_RADON_ASSETS_PATH='../..' node ./src/bin/index.cjs",
     "zksync:compile": "npx hardhat --config migrations/zksync/hardhat.config.js compile",
     "zksync:deploy": "npx hardhat --config migrations/zksync/hardhat.config.js deploy-zksync:contract --deployment-type create2 --verify --contract-name",
     "zksync:verify": "npx hardhat --config migrations/zksync/hardhat.config.js verify"

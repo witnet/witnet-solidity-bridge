@@ -3,6 +3,7 @@ artifacts*/
 build/
 cache*/
 deployments*/
+dist/
 flattened/
 node_modules/
 
