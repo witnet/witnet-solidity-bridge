@@ -1,7 +1,7 @@
 import hardhatVerify from "@nomicfoundation/hardhat-verify";
 
-import settings from "./settings/index"
-import utils from "./src/utils"
+import settings from "./migrations/settings/index"
+import utils from "./migrations/scripts/utils"
 
 const [, target] = utils.getRealmNetworkFromArgs()
 

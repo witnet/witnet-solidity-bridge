@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true, /* Parse in strict mode and emit "use strict" for each source file. */
+    "declaration": true, /* Generates corresponding '.d.ts' file. */
+    "declarationMap": true, /* Generates a sourcemap for each corresponding '.d.ts' file. */
+    "downlevelIteration": true, /* Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'. */
+    "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
+    "incremental": false, /* Enable incremental compilation */
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "lib": [
+      "es2020",
+      "DOM",
+      "ES2021.String"
+    ],
+    "module": "nodenext", 
+    "moduleResolution": "nodenext",
+    "noImplicitThis": true, /* Raise error on 'this' expressions with an implied 'any' type. */
+    "noUnusedLocals": true, /* Report errors on unused locals. */
+    "noUnusedParameters": true, /* Report errors on unused parameters. */
+    "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
+    "outDir": "./dist", /* Redirect output structure to the directory. */
+    "resolveJsonModule": true,
+    "rootDir": "./",
+    "skipLibCheck": true,
+    "strict": true, /* Enable all strict type-checking options. */
+    "strictNullChecks": true, /* Enable strict null checks. */
+    "strictFunctionTypes": true, /* Enable strict checking of function types. */
+    "strictPropertyInitialization": true, /* Enable strict checking of property initialization in classes. */
+    "target": "esnext", 
+    "typeRoots": [
+      "./node_modules/@types",
+      "@types"
+    ], /* List of folders to include type definitions from. */
+  },
+  "files": [
+    "src/index.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts",
+    "types", 
+  ]
+}

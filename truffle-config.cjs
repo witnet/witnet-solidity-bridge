@@ -1,5 +1,5 @@
-const settings = require("./settings/index").default
-const utils = require("./src/utils").default
+const settings = require("./migrations/settings/index").default
+const utils = require("./migrations/scripts/utils.js").default
 
 const { ecosystem, network } = utils.getRealmNetworkFromArgs()
 if (ecosystem) {
