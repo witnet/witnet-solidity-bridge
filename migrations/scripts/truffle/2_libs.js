@@ -1,5 +1,5 @@
-const settings = require("../../../settings/index").default
-const utils = require("../../../src/utils").default
+const settings = require("../../settings/index").default
+const utils = require("../utils").default
 
 module.exports = async function (deployer, network, [, from]) {
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")

@@ -1,9 +1,9 @@
+import { config as dotenv } from "dotenv" 
 import { execSync } from "child_process"
-import dotenv from "dotenv" 
 import { readFileSync, writeFileSync } from "fs"
 import { createInterface } from "readline"
 
-dotenv.config()
+dotenv({ quiet: true })
 
 export default {
   fromAscii,

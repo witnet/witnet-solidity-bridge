@@ -4,7 +4,7 @@ import artifacts from "./artifacts.js"
 import networks from "./networks.js"
 import { default as specs } from "./specs.js"
 import solidity from "./solidity.js"
-import utils from "../src/utils.js"
+import utils from "../scripts/utils.js"
 
 export default {
   getArtifacts: (network) => {
