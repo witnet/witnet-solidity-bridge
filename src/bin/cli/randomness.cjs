@@ -1,9 +1,9 @@
-const ethers = require("ethers")
 const helpers = require("../helpers.cjs")
+const ethers = require("ethers")
 const moment = require("moment")
 const prompt = require("inquirer").createPromptModule()
 
-const { utils, WitOracle } = require("../../../dist/src/lib")
+const { utils, WitOracle } = require("../../../dist/src")
 const { colors, DEFAULT_LIMIT, DEFAULT_SINCE } = helpers
 
 module.exports = async function (options = {}, args = []) {

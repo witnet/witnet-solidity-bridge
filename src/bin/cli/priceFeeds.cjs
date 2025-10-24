@@ -1,8 +1,9 @@
-const { Witnet } = require("@witnet/sdk")
+const helpers = require("../helpers.cjs")
 const moment = require("moment")
 const prompt = require("inquirer").createPromptModule()
-const { utils, WitOracle } = require("../../../dist/src/lib")
-const helpers = require("../helpers.cjs")
+
+const { Witnet } = require("@witnet/sdk")
+const { utils, WitOracle } = require("../../../dist/src")
 
 module.exports = async function (options = {}, args = []) {
   [args] = helpers.deleteExtraFlags(args)

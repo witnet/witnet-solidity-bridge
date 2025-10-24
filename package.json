@@ -19,8 +19,9 @@
     "web3"
   ],
   "bin": {
-    "witeth": "src/bin/solidity.cjs",
-    "witnet-solidity": "src/bin/solidity.cs"
+    "witeth": "src/bin/index.cjs",
+    "witnet-ethers": "src/bin/index.cjs",
+    "witnet-solidity": "src/bin/index.cjs"
   },
   "exports": {
     ".": {
@@ -40,8 +41,6 @@
     "build/contracts",
     "dist",
     "contracts",
-    "migrations/*.json",
-    "migrations/settings",
     "src/bin"
   ],
   "scripts": {

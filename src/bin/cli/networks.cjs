@@ -1,5 +1,5 @@
 const { JsonRpcProvider } = require("ethers")
-const { utils } = require("../../../dist/src/lib")
+const { utils } = require("../../../dist/src")
 const helpers = require("../helpers.cjs")
 
 module.exports = async function (flags = {}, [ecosystem]) {

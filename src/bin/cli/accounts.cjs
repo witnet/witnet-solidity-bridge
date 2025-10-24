@@ -1,5 +1,5 @@
 const helpers = require("../helpers.cjs")
-const { WitOracle } = require("../../../dist/src/lib")
+const { WitOracle } = require("../../../dist/src")
 
 module.exports = async function (flags = {}) {
   const witOracle = await WitOracle.fromJsonRpcUrl(

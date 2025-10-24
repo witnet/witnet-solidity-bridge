@@ -1,5 +1,5 @@
 const helpers = require("../helpers.cjs")
-const { WitOracle } = require("../../../dist/src/lib")
+const { WitOracle } = require("../../../dist/src")
 const { Witnet } = require("@witnet/sdk")
 
 const { execSync } = require("node:child_process")
@@ -37,6 +37,7 @@ module.exports = async function (flags = {}, params = []) {
   const selection = (
     await selectWitnetArtifacts(registry, assets, args, "  ", !flags?.all)
   ).sort(([a], [b]) => (a > b) - (a < b))
+
 
   if (selection.length > 0) {
     for (const index in selection) {

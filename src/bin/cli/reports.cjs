@@ -1,8 +1,9 @@
-const { Witnet } = require("@witnet/sdk")
+const helpers = require("../helpers.cjs")
 const moment = require("moment")
 const prompt = require("inquirer").createPromptModule()
-const { utils, KermitClient, WitOracle } = require("../../../dist/src/lib")
-const helpers = require("../helpers.cjs")
+
+const { Witnet } = require("@witnet/sdk")
+const { utils, WitOracle } = require("../../../dist/src")
 
 const { DEFAULT_LIMIT, DEFAULT_SINCE } = helpers
 
@@ -35,7 +36,7 @@ module.exports = async function (options = {}, args = []) {
     console.info(helpers.colors.lwhite("\n  Fetching result to Wit/Oracle query:"))
 
     const consumer = await witOracle.getWitOracleConsumerAt(options.into)
-    const kermit = await KermitClient.fromEnv(options?.kermit)
+    const kermit = await Witnet.KermitClient.fromEnv(options?.kermit)
     console.info(`  > Wit/Kermit provider: ${kermit.url}`)
     const report = await kermit.getDataPushReport(drTxHash, network)
 

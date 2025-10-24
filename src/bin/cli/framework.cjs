@@ -1,5 +1,5 @@
 const helpers = require("../helpers.cjs")
-const { utils } = require("../../../dist/src/lib")
+const { utils } = require("../../../dist/src")
 const { JsonRpcProvider } = require("ethers")
 
 const deployables = helpers.readWitnetJsonFiles("templates", "modals")

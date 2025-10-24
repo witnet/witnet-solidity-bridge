@@ -10,7 +10,7 @@ const DEFAULT_LIMIT = 64
 const DEFAULT_SINCE = -5000
 const WITNET_SDK_RADON_ASSETS_PATH = process.env.WITNET_SDK_RADON_ASSETS_PATH || "../../../../witnet/assets"
 
-const isModuleInitialized = fs.existsSync("./witnet/assets/index.js")
+const isModuleInitialized = fs.existsSync("./witnet/assets/index.cjs")
 
 function* chunks(arr, n) {
   for (let i = 0; i < arr.length; i += n) {
@@ -160,8 +160,8 @@ function getNetworkTagsFromString(network) {
 
 function importRadonAssets(options) {
   const { assets } = options?.legacy ? {} : require("@witnet/sdk")
-  return isModuleInitialized && fs.existsSync(`${WITNET_SDK_RADON_ASSETS_PATH}`)
-    ? merge(assets, require(`${WITNET_SDK_RADON_ASSETS_PATH}`))
+  return isModuleInitialized && fs.existsSync(`${WITNET_SDK_RADON_ASSETS_PATH}/index.cjs`)
+    ? merge(assets, require(`${WITNET_SDK_RADON_ASSETS_PATH}/index.cjs`))
     : assets
 }
 
@@ -345,7 +345,7 @@ module.exports = {
   orderKeys,
   traceData,
   traceHeader,
-  getNetworkAddresses, getNetworkArtifacts, getNetworkConstructorArgs,
+  getNetworkAddresses, getNetworkArtifacts, getNetworkConstructorArgs, getNetworkTagsFromString,
   supportedNetworks, supportsNetwork,
   importRadonAssets,
   readWitnetJsonFiles,

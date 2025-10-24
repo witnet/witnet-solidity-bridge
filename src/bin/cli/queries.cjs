@@ -1,6 +1,7 @@
-const moment = require("moment")
-const { utils, WitOracle } = require("../../../dist/src/lib")
 const helpers = require("../helpers.cjs")
+const moment = require("moment")
+
+const { utils, WitOracle } = require("../../../dist/src")
 
 const { DEFAULT_BATCH_SIZE, DEFAULT_LIMIT, DEFAULT_SINCE } = helpers
 

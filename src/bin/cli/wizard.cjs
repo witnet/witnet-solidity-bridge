@@ -1,10 +1,9 @@
+const helpers = require("../helpers.js")
 const fs = require("fs")
 const inquirer = require("inquirer")
 const path = require("path")
 
 const { supportsNetwork, supportedEcosystems, supportedNetworks } = require("@witnet/solidity").default
-
-const helpers = require("../helpers.js")
 
 const MODULE_WITNET_PATH = process.env.WITNET_SOLIDITY_MODULE_PATH || "node_modules/witnet-solidity/witnet"
 
