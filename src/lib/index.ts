@@ -1,4 +1,3 @@
-export * from "./kermit.js"
 export * from "./types.js"
 export * from "./wrappers.js"
 

@@ -1,7 +1,7 @@
 import { Witnet } from "@witnet/sdk"
 import { ContractWrapper } from "./wrappers/ContractWrapper.js"
 
-export type DataPushReport = Witnet.GetDataRequestEtherealReport & { evm_proof?: Witnet.HexString }
+export type DataPushReport = Witnet.DataPushReport
 
 export type PriceFeed = {
     id?: string,

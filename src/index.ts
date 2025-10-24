@@ -1,4 +1,3 @@
-export * from "./lib/kermit.js"
 export * from "./lib/types.js"
 export * from "./lib/wrappers.js"
 
@@ -35,4 +34,3 @@ export const ABIs: any = {
     WitnetUpgradableBase:
         require("../../artifacts/contracts/core/WitnetUpgradableBase.sol/WitnetUpgradableBase.json").abi,
 }
-

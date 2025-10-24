@@ -69,7 +69,7 @@
     "zksync:verify": "npx hardhat --config migrations/zksync/hardhat.config.js verify"
   },
   "dependencies": {
-    "@witnet/sdk": "^1.1.3",
+    "@witnet/sdk": "^1.2.0",
     "axios": "^1.12.2",
     "cbor": "^10.0.11",
     "cross-env": "^10.1.0",

@@ -16,7 +16,6 @@ import {
 import { default as helpers } from "../bin/helpers.cjs"
 
 import { 
-    DataPushReport, 
     PriceFeedUpdateConditions, 
     WitOracleArtifact, 
     WitOracleQueryParams, 
@@ -26,6 +25,10 @@ import {
 import { ABIs } from "../index.js"
 
 export * from "@witnet/sdk/utils"
+
+export function getNetworkTagsFromString(network: string) {
+    return helpers.getNetworkTagsFromString(network)
+}
 
 export async function fetchWitOracleFramework(provider: JsonRpcProvider): Promise<{ [key: string]: WitOracleArtifact }> {
     return provider
@@ -217,7 +220,7 @@ type _DataPushReportSolidity = {
     resultCborBytes: Witnet.HexString,
 }
 
-function _intoDataPushReportSolidity(report: DataPushReport): _DataPushReportSolidity {
+function _intoDataPushReportSolidity(report: Witnet.DataPushReport): _DataPushReportSolidity {
     return {
         drTxHash: `0x${report.hash}`,
         queryParams: {
@@ -231,7 +234,7 @@ function _intoDataPushReportSolidity(report: DataPushReport): _DataPushReportSol
     }
 }
 
-export function abiEncodeDataPushReport(report: DataPushReport): any {
+export function abiEncodeDataPushReport(report: Witnet.DataPushReport): any {
     const internal = _intoDataPushReportSolidity(report)
     return [
         internal.drTxHash,
@@ -242,14 +245,14 @@ export function abiEncodeDataPushReport(report: DataPushReport): any {
     ]
 }
 
-export function abiEncodeDataPushReportMessage(report: DataPushReport): Witnet.HexString {
+export function abiEncodeDataPushReportMessage(report: Witnet.DataPushReport): Witnet.HexString {
     return AbiCoder.defaultAbiCoder().encode(
         ["bytes32", "bytes32", "(uint16, uint16, uint64)", "uint64", "bytes"],
         abiEncodeDataPushReport(report)
     )
 }
 
-export function abiEncodeDataPushReportDigest(report: DataPushReport): Witnet.HexString {
+export function abiEncodeDataPushReportDigest(report: Witnet.DataPushReport): Witnet.HexString {
     return solidityPackedKeccak256(
         ["bytes"],
         [abiEncodeDataPushReportMessage(report)],
