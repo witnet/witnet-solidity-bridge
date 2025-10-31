@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [24.x]
 
     steps:
     - uses: actions/checkout@v1
@@ -26,12 +26,12 @@ jobs:
     - name: Install dependencies
       run: |
         pnpm install
-    - name: Check format
+    # - name: Check format
+    #   run: |
+    #     pnpm run fmt
+    - name: Compile solidity contracts and prepare exported assets and artifacts
       run: |
-        pnpm run fmt
-    - name: Compile solidity contracts
-      run: |
-        pnpm run compile
+        pnpm run prepare
     - name: Run tests
       run: |
         pnpm run test

@@ -9,7 +9,7 @@ node_modules/
 
 **/missing*.json
 
-.env
+**/.env
 .idea
 .vscode
 
