@@ -77,9 +77,9 @@
     "clean:zksync": "node ./scripts/clean.cjs deployments-zk migrations/zksync/artifacts-zk migrations/zksync/cache-zk",
     "compile": "npx truffle compile --all --config ./truffle-config.cjs",
     "console": "npx truffle console",
-    "fmt:js": "eslint \"**/*.cjs\"",
+    "fmt:js": "npx biome check",
     "fmt:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\"",
-    "fmt!:js": "eslint \"**/*.cjs\" --fix",
+    "fmt!:js": "npx biome check --write",
     "fmt!:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" --fix",
     "fmt!": "pnpm run fmt!:js && pnpm run fmt!:sol",
     "fmt": "pnpm run fmt:js && pnpm run fmt:sol",
@@ -108,6 +108,7 @@
     "promise-poller": "^1.9.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.2.6",
     "@matterlabs/hardhat-zksync": "^1.6.2",
     "@matterlabs/hardhat-zksync-deploy": "^1.8.0",
     "@matterlabs/hardhat-zksync-solc": "^1.5.1",
