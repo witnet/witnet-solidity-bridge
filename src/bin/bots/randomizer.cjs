@@ -20,7 +20,8 @@ const MAX_GAS_PRICE_GWEI = process.env.RANDOMIZER_MAX_GAS_PRICE_GWEI
 const MIN_BALANCE = process.env.RANDOMIZER_MIN_BALANCE || 0
 const NODE_CRON_OVERLAP = process.env.RANDOMIZER_CRON_OVERLAP || true
 const NODE_CRON_SCHEDULE = process.env.RANDOMIZER_CRON_SCHEDULE || "0 0 9 * * 6" // default: every Saturday at 9.00 am
-const NODE_CRON_TIMEZONE = process.env.RANDOMIZER_CRON_TIMEZONE || "Europe/Madrid" // see: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+const NODE_CRON_TIMEZONE =
+	process.env.RANDOMIZER_CRON_TIMEZONE || "Europe/Madrid" // see: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 const NETWORK =
 	_spliceFromArgs(process.argv, `--network`) || process.env.RANDOMIZER_NETWORK
 const POLLING_MSECS = process.env.RANDOMIZER_POLLING_MSECS || 15000
@@ -69,7 +70,9 @@ async function main() {
 	const symbol = utils.getEvmNetworkSymbol(network)
 	const version = await randomizer.getEvmImplVersion()
 
-	console.info(`> ${artifact}:${" ".repeat(Math.max(0, 16 - artifact.length))} ${TARGET} [${version}]`)
+	console.info(
+		`> ${artifact}:${" ".repeat(Math.max(0, 16 - artifact.length))} ${TARGET} [${version}]`,
+	)
 
 	let randomizeWaitBlocks
 	if (artifact === "WitRandomnessV3") {
@@ -103,15 +106,13 @@ async function main() {
 		)
 		process.exit(1)
 	} else {
-		console.info(`> Randomizing schedule: "${NODE_CRON_SCHEDULE}" at ${NODE_CRON_TIMEZONE}`)
-		cron.schedule(
-			NODE_CRON_SCHEDULE, 
-			async () => randomize(),
-			{ 
-				noOverlap: !NODE_CRON_OVERLAP,
-				timezone: NODE_CRON_TIMEZONE 
-			}
-		);	
+		console.info(
+			`> Randomizing schedule: "${NODE_CRON_SCHEDULE}" at ${NODE_CRON_TIMEZONE}`,
+		)
+		cron.schedule(NODE_CRON_SCHEDULE, async () => randomize(), {
+			noOverlap: !NODE_CRON_OVERLAP,
+			timezone: NODE_CRON_TIMEZONE,
+		})
 	}
 
 	// check balance periodically
@@ -119,7 +120,7 @@ async function main() {
 		`> Checking balance every ${CHECK_BALANCE_SECS || 900} seconds ...`,
 	)
 	setInterval(checkBalance, (CHECK_BALANCE_SECS || 900) * 1000)
-	
+
 	async function checkBalance() {
 		return provider
 			.getBalance(signer)
@@ -181,13 +182,16 @@ async function main() {
 					fromBlock: receipt.blockNumber,
 					toBlock: receipt.blockNumber,
 				})
-				let randomizeBlock = Number(tx.blockNumber)			
+				let randomizeBlock = Number(tx.blockNumber)
 				if (logs && logs[0]) {
-					if (logs[0].topics[0] === "0x8cb766b09215126141c41df86fd488fe4745f22f3c995c3ad9aaf4c07195b946") {
+					if (
+						logs[0].topics[0] ===
+						"0x8cb766b09215126141c41df86fd488fe4745f22f3c995c3ad9aaf4c07195b946"
+					) {
 						randomizeBlock = Number(logs[0].data.slice(0, 66))
 					}
 				}
-				
+
 				return promisePoller({
 					interval: POLLING_MSECS,
 					taskFn: () =>
@@ -201,28 +205,25 @@ async function main() {
 					shouldContinue: (err, result) => {
 						if (err) {
 							console.info(err)
-						
 						} else if (result && !result?.isRandomized) {
 							const { blockNumber, randomizeBlock } = result
 							const plus = Number(blockNumber) - Number(tx.blockNumber)
 							if (randomizeWaitBlocks && plus > randomizeWaitBlocks) {
 								return false
-							
 							} else {
 								console.info(
 									`> Awaiting randomness for block ${commas(randomizeBlock)} ... T + ${commas(plus)}`,
 								)
 							}
 						}
-						return !result || !result.isRandomized;
+						return !result || !result.isRandomized
 					},
 				}).then(async (result) => {
 					if (result.isRandomized) {
 						isRandomized = true
 						console.info(`> Randomized block ${commas(randomizeBlock)}:`)
-						const trails = await randomizer.fetchRandomnessAfterProof(
-							randomizeBlock
-						)
+						const trails =
+							await randomizer.fetchRandomnessAfterProof(randomizeBlock)
 						console.info(`  - Finality block:   ${commas(trails.finality)}`)
 						console.info(`  - Witnet DRT hash:  ${trails.trail?.slice(2)}`)
 						if (artifact === "WitRandomnessV3") {
@@ -233,16 +234,22 @@ async function main() {
 						} else {
 							console.info(`  - Witnet result:    ${trails.uuid?.slice(2)}`)
 						}
-						console.info(`  - Witnet timestamp: ${moment.unix(trails.timestamp)}`)
+						console.info(
+							`  - Witnet timestamp: ${moment.unix(trails.timestamp)}`,
+						)
 					}
 					return result
 				})
 			})
 			.then((result) => {
 				if (result.isRandomized) {
-					console.info(`> Next randomizing schedule: "${NODE_CRON_SCHEDULE}" at ${NODE_CRON_TIMEZONE}`)
+					console.info(
+						`> Next randomizing schedule: "${NODE_CRON_SCHEDULE}" at ${NODE_CRON_TIMEZONE}`,
+					)
 				} else {
-					console.info(`> Randomizing block ${commas(result.randomizeBlock)} is taking too long !!!`)
+					console.info(
+						`> Randomizing block ${commas(result.randomizeBlock)} is taking too long !!!`,
+					)
 					// retry immediately a new randomize request
 					setTimeout(randomize, 0)
 				}
@@ -250,7 +257,9 @@ async function main() {
 			.catch((err) => {
 				console.error(err)
 				if (isRandomized) {
-					console.info(`> Next randomizing schedule: "${NODE_CRON_SCHEDULE}" at ${NODE_CRON_TIMEZONE}`)
+					console.info(
+						`> Next randomizing schedule: "${NODE_CRON_SCHEDULE}" at ${NODE_CRON_TIMEZONE}`,
+					)
 				} else {
 					console.info(
 						`> Retrying in ${Math.floor(POLLING_MSECS / 1000)} seconds before next randomize ...`,

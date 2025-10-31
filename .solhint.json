@@ -1,33 +1,30 @@
 {
-  "extends": "solhint:recommended",
-  "rules": {
-    "avoid-tx-origin": "off",
-    "compiler-version": [
-      "error",
-      ">=0.6.0 <0.9.0"
-    ],
-    "constructor-syntax": "warn",
-    "explicit-types": "off",
-    "func-param-name-mixedcase": "warn",
-    "func-visibility": [
-      "warn",
-      {
-        "ignoreConstructors": true
-      }
-    ],
-    "gas-custom-errors": "off",
-    "immutable-vars-naming": "off",
-    "modifier-name-mixedcase": "warn",
-    "no-empty-blocks": "off",
-    "no-inline-assembly": "off",
-    "no-global-import": "off",
-    "var-name-mixedcase": "off",
-    
-    "reason-string": [
-      "warn",
-      {
-        "maxLength": 128
-      }
-    ]
-  }
+	"extends": "solhint:recommended",
+	"rules": {
+		"avoid-tx-origin": "off",
+		"compiler-version": ["error", ">=0.6.0 <0.9.0"],
+		"constructor-syntax": "warn",
+		"explicit-types": "off",
+		"func-param-name-mixedcase": "warn",
+		"func-visibility": [
+			"warn",
+			{
+				"ignoreConstructors": true
+			}
+		],
+		"gas-custom-errors": "off",
+		"immutable-vars-naming": "off",
+		"modifier-name-mixedcase": "warn",
+		"no-empty-blocks": "off",
+		"no-inline-assembly": "off",
+		"no-global-import": "off",
+		"var-name-mixedcase": "off",
+
+		"reason-string": [
+			"warn",
+			{
+				"maxLength": 128
+			}
+		]
+	}
 }

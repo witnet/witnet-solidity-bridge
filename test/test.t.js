@@ -1,73 +1,73 @@
 const { ethers, hre } = require("hardhat")
 
-describe("TestWitnet", function () {
-  let witnet
+describe("TestWitnet", () => {
+	let witnet
 
-  before(async function () {
-    witnet = await ethers.deployContract("TestWitnet")
-  })
+	before(async () => {
+		witnet = await ethers.deployContract("TestWitnet")
+	})
 
-  beforeEach(async function () {
-    await witnet.deleteData()
-  })
+	beforeEach(async () => {
+		await witnet.deleteData()
+	})
 
-  it("testNOP()", async function () {
-    await witnet.testNOP()
-  })
+	it("testNOP()", async () => {
+		await witnet.testNOP()
+	})
 
-  it("testSSTORE()", async function () {
-    await witnet.testSSTORE()
-  })
+	it("testSSTORE()", async () => {
+		await witnet.testSSTORE()
+	})
 
-  it("testSLOAD()", async function () {
-    await witnet.testSLOAD()
-  })
+	it("testSLOAD()", async () => {
+		await witnet.testSLOAD()
+	})
 
-  it("writeRequestWithBytecodePacked()", async function () {
-    await witnet.writeRequestWithBytecodePacked()
-  })
+	it("writeRequestWithBytecodePacked()", async () => {
+		await witnet.writeRequestWithBytecodePacked()
+	})
 
-  it("writeRequestWithBytecode()", async function () {
-    await witnet.writeRequestWithBytecode()
-  })
+	it("writeRequestWithBytecode()", async () => {
+		await witnet.writeRequestWithBytecode()
+	})
 
-  it("readRequestWithBytecode()", async function () {
-    await witnet.readRequestWithBytecode()
-  })
+	it("readRequestWithBytecode()", async () => {
+		await witnet.readRequestWithBytecode()
+	})
 
-  it("writeRequestWithRadonHashPacked()", async function () {
-    await witnet.writeRequestWithRadonHashPacked()
-  })
+	it("writeRequestWithRadonHashPacked()", async () => {
+		await witnet.writeRequestWithRadonHashPacked()
+	})
 
-  it("writeRequestWithRadonHash()", async function () {
-    await witnet.writeRequestWithRadonHash()
-  })
+	it("writeRequestWithRadonHash()", async () => {
+		await witnet.writeRequestWithRadonHash()
+	})
 
-  it("writeResponsePacked()", async function () {
-    await witnet.writeResponsePacked()
-  })
+	it("writeResponsePacked()", async () => {
+		await witnet.writeResponsePacked()
+	})
 
-  it("writeResponse()", async function () {
-    await witnet.writeResponse()
-  })
+	it("writeResponse()", async () => {
+		await witnet.writeResponse()
+	})
 
-  it("readResponse()", async function () {
-    await witnet.readResponse()
-  })
+	it("readResponse()", async () => {
+		await witnet.readResponse()
+	})
 
-  it("writeQueryPacked()", async function () {
-    await witnet.writeQueryPacked()
-  })
+	it("writeQueryPacked()", async () => {
+		await witnet.writeQueryPacked()
+	})
 
-  it("writeQueryUnpacked1()", async function () {
-    await witnet.writeQueryUnpacked1()
-  })
+	it("writeQueryUnpacked1()", async () => {
+		await witnet.writeQueryUnpacked1()
+	})
 
-  it("writeQueryUnpacked2()", async function () {
-    await witnet.writeQueryUnpacked2()
-  })
+	it("writeQueryUnpacked2()", async () => {
+		await witnet.writeQueryUnpacked2()
+	})
 
-  it("readQueryPacked()", async function () {
-    await witnet.readQuery()
-  })
+	it("readQueryPacked()", async () => {
+		await witnet.readQuery()
+	})
 })

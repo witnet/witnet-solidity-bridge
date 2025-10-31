@@ -1,80 +1,79 @@
-import hardhatVerify from "@nomicfoundation/hardhat-verify";
-
-import settings from "./migrations/settings/index"
+import hardhatVerify from "@nomicfoundation/hardhat-verify"
 import utils from "./migrations/scripts/utils"
+import settings from "./migrations/settings/index"
 
 const [, target] = utils.getRealmNetworkFromArgs()
 
 const networks = Object.fromEntries(
-  Object.entries(settings.getNetworks())
-    .map(([network, config]) => {
-      return [network, {
-        chainId: config.network_id,
-        chainType: config?.chain_type || "generic",
-        gas: config?.gas,
-        gasPrice: config?.gasPrice,
-        type: "http",
-        url: `http://${config?.host || "localhost"}:${config?.port || 8545}`,
-      }]
-    })
+	Object.entries(settings.getNetworks()).map(([network, config]) => {
+		return [
+			network,
+			{
+				chainId: config.network_id,
+				chainType: config?.chain_type || "generic",
+				gas: config?.gas,
+				gasPrice: config?.gasPrice,
+				type: "http",
+				url: `http://${config?.host || "localhost"}:${config?.port || 8545}`,
+			},
+		]
+	}),
 )
 
 const chainDescriptors = Object.fromEntries(
-  Object.entries(settings.getNetworks())
-    .filter(([, config]) => config?.verify !== undefined)
-    .map(([network, config]) => { 
-      return [
-        config.network_id,
-        {
-          name: network,
-          blockExplorers: {
-            etherscan: {
-              apiUrl: config?.verify.apiUrl,
-              url: config?.verify.explorerUrl,
-            }
-          }
-        }
-      ]
-    })
+	Object.entries(settings.getNetworks())
+		.filter(([, config]) => config?.verify !== undefined)
+		.map(([network, config]) => {
+			return [
+				config.network_id,
+				{
+					name: network,
+					blockExplorers: {
+						etherscan: {
+							apiUrl: config?.verify.apiUrl,
+							url: config?.verify.explorerUrl,
+						},
+					},
+				},
+			]
+		}),
 )
 
 export default {
-  chainDescriptors,
-  paths: {
-    sources: "./contracts",
-    cache: "./cache",
-    artifacts: "./artifacts",
-  },
-  plugins: [
-    hardhatVerify,
-  ],
-  networks,
-  solidity: {
-    compilers: [settings.getCompilers(target)],
-    overrides: {
-      "contracts/core/WitnetProxy.sol": {
-        version: "0.8.25",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          evmVersion: "paris",
-        },
-      },
-    },
-  },
-  verify: {
-    blockscout: {
-      enabled: true,
-    },
-    etherscan: {
-      apiKey: process.env.ETHERSCAN_API_KEY_V2,
-    },
-    sourcify: {
-      enabled: false,
-      apiUrl: "https://sourcify.dev/server",
-      browserUrl: "https://repo.sourcify.dev",
-    },
-  },
+	chainDescriptors,
+	paths: {
+		sources: "./contracts",
+		cache: "./cache",
+		artifacts: "./artifacts",
+	},
+	plugins: [hardhatVerify],
+	networks,
+	solidity: {
+		compilers: [settings.getCompilers(target)],
+		overrides: {
+			"contracts/core/WitnetProxy.sol": {
+				version: "0.8.25",
+				settings: {
+					optimizer: {
+						enabled: true,
+						runs: 200,
+					},
+					evmVersion: "paris",
+				},
+			},
+		},
+	},
+	verify: {
+		blockscout: {
+			enabled: true,
+		},
+		etherscan: {
+			apiKey: process.env.ETHERSCAN_API_KEY_V2,
+		},
+		sourcify: {
+			enabled: false,
+			apiUrl: "https://sourcify.dev/server",
+			browserUrl: "https://repo.sourcify.dev",
+		},
+	},
 }
