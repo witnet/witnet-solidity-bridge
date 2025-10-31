@@ -69,12 +69,11 @@
 	],
 	"scripts": {
 		"build": "tsc -p tsconfig.json",
-		"clean": "npm run clean:artifacts && npm run clean:build && npm run clean:cache && npm run clean:dist && npm run clean:zksync",
+		"clean": "npm run clean:artifacts && npm run clean:build && npm run clean:cache && npm run clean:dist",
 		"clean:artifacts": "node ./scripts/clean.cjs artifacts",
 		"clean:build": "node ./scripts/clean.cjs build",
 		"clean:cache": "node ./scripts/clean.cjs cache",
 		"clean:dist": "node ./scripts/clean.cjs dist",
-		"clean:zksync": "node ./scripts/clean.cjs deployments-zk migrations/zksync/artifacts-zk migrations/zksync/cache-zk",
 		"compile": "npx truffle compile --all --config ./truffle-config.cjs",
 		"console": "npx truffle console",
 		"fmt:js": "npx biome check",
@@ -87,10 +86,7 @@
 		"postinstall": "node ./scripts/postinstall.cjs",
 		"prepare": "npx truffle compile --all --config ./truffle-config.cjs && npx hardhat compile --force && npm run build && node ./scripts/prepare.cjs",
 		"verify": "npx hardhat run ./scripts/verify.js 2>&1",
-		"witeth": "cross-env-shell WITNET_SDK_RADON_ASSETS_PATH='../..' node ./src/bin/index.cjs",
-		"zksync:compile": "npx hardhat --config migrations/zksync/hardhat.config.js compile",
-		"zksync:deploy": "npx hardhat --config migrations/zksync/hardhat.config.js deploy-zksync:contract --deployment-type create2 --verify --contract-name",
-		"zksync:verify": "npx hardhat --config migrations/zksync/hardhat.config.js verify"
+		"witeth": "cross-env-shell WITNET_SDK_RADON_ASSETS_PATH='../..' node ./src/bin/index.cjs"
 	},
 	"dependencies": {
 		"@witnet/sdk": "../witnet-toolkit",
@@ -109,11 +105,6 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.6",
-		"@matterlabs/hardhat-zksync": "^1.6.2",
-		"@matterlabs/hardhat-zksync-deploy": "^1.8.0",
-		"@matterlabs/hardhat-zksync-solc": "^1.5.1",
-		"@matterlabs/hardhat-zksync-upgradable": "^1.10.0",
-		"@matterlabs/hardhat-zksync-verify": "^1.9.0",
 		"@nomicfoundation/hardhat-ethers": "^4.0.1",
 		"@nomicfoundation/hardhat-toolbox": "^6.1.0",
 		"@nomicfoundation/hardhat-verify": "^3.0.2",
@@ -137,8 +128,6 @@
 		"truffle-flattener": "^1.6.0",
 		"truffle-plugin-verify": "^0.6.7",
 		"typescript": "^5.9.3",
-		"utf-8-validate": "^5.0.2",
-		"web3": "^4.16.0",
-		"zksync-ethers": "^6.20.1"
+		"web3": "^4.16.0"
 	}
 }
