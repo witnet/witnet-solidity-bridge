@@ -159,7 +159,7 @@ function getNetworkTagsFromString(network) {
 }
 
 function importRadonAssets(options) {
-  const { assets } = options?.legacy ? {} : require("@witnet/sdk")
+  const assets = options?.legacy ? {} : require("@witnet/sdk/assets")
   return isModuleInitialized && fs.existsSync(`${WITNET_SDK_RADON_ASSETS_PATH}/index.cjs`)
     ? merge(assets, require(`${WITNET_SDK_RADON_ASSETS_PATH}/index.cjs`))
     : assets

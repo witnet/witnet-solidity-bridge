@@ -27,7 +27,7 @@ module.exports = async function (flags = {}, params = []) {
 
   if (!flags?.force) helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan)
 
-  let assets = flags?.module ? require(flags.module) : helpers.importRadonAssets(flags)
+  let assets = flags?.module ? require(`${flags.module}/assets`) : helpers.importRadonAssets(flags)
   if (!assets || Object.keys(assets).length === 0) {
     throw new Error("No Radon assets declared just yet in witnet/assets.")
   } else {

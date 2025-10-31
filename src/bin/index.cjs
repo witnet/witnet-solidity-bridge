@@ -263,7 +263,7 @@ async function main () {
       queries: require("./cli/queries.cjs"),
       randomness: require("./cli/randomness.cjs"),
       reports: require("./cli/reports.cjs"),
-      // wizard: require("./cli/wizard.js"),
+      // wizard: require("./cli/wizard.cjs"),
     },
   }
 

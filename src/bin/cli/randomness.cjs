@@ -38,7 +38,6 @@ module.exports = async function (options = {}, args = []) {
   }
   const randomizer = await witOracle.getWitRandomnessAt(target)
   const symbol = utils.getEvmNetworkSymbol(network)
-
   const [artifact, version, base, consumer ] = await Promise.all([
     await randomizer.getEvmImplClass(),
     await randomizer.getEvmImplVersion(),

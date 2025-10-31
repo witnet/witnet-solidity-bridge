@@ -1,7 +1,6 @@
 export * from "./lib/types.js"
 export * from "./lib/wrappers.js"
 
-export { assets } from "@witnet/sdk"
 export * as ethers from "ethers"
 export * as utils from "./lib/utils.js"
 
