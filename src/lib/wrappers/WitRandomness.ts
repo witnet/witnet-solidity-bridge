@@ -45,10 +45,6 @@ export class WitRandomness extends WitAppliance {
         return randomizer
     }
 
-    public async class(): Promise<string> {
-        return this.contract.class.staticCall()
-    }
-
     public async clone(curator: string, options?: {
         evmConfirmations?: number,
         evmGasPrice?: bigint,
@@ -141,12 +137,18 @@ export class WitRandomness extends WitAppliance {
         return this.contract
             .base
             .staticCall()
+            .catch(_ => {
+                return this._address
+            })
     }
 
     public async getEvmConsumer(): Promise<Witnet.HexString> {
         return this.contract
             .consumer
             .staticCall()
+            .catch(_ => {
+                return this._address
+            })
     }
 
     public async getEvmCurator(): Promise<Witnet.HexString> {
