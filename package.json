@@ -48,11 +48,6 @@
 			"require": "./dist/src/index.js",
 			"types": "./dist/src/*.d.ts"
 		},
-		"./assets": {
-			"default": "./dist/src/assets.js",
-			"require": "./dist/src/assets.js",
-			"types": "./dist/src/assets.d.ts"
-		},
 		"./contracts/*": "./contracts/",
 		"./utils": {
 			"default": "./dist/src/lib/utils.js",
