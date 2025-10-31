@@ -133,7 +133,6 @@ export default {
     mainnet: true,
     port: 9540,
     network_id: 1029,
-    gasPrice: 10,
     symbol: "CFX",
     verify: {
       apiKey: "MY_API_KEY",
@@ -347,7 +346,7 @@ export default {
   },
   "metis:mainnet": {
     mainnet: true,
-    port: 9536,
+    port: 7536,
     network_id: 1088,
     symbol: "METIS",
   },

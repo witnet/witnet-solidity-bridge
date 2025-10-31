@@ -14,7 +14,7 @@ const WitnetProxy = artifacts.require("WitnetProxy")
 
 let addresses, witnetDeployer
 
-module.exports = async function (_, network, [, from, reporter1, curator, reporter2]) {
+module.exports = async function (_, network, [,, coreCurator, appsCurator, reporter]) {
   addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   
   const networkArtifacts = settings.getArtifacts(network)
@@ -43,15 +43,19 @@ module.exports = async function (_, network, [, from, reporter1, curator, report
   
   // Settle network-specific initialization params, if any...
   networkSpecs.WitOracle.mutables = merge(networkSpecs.WitOracle?.mutables, {
-    types: ["address[]"], values: [[reporter1, reporter2]],
+    types: ["address[]"], values: [[reporter]],
   })
   networkSpecs.WitRandomness.mutables = merge(networkSpecs.WitRandomness?.mutables, {
-    types: ["address"], values: [curator],
+    types: ["address"], values: [appsCurator],
+  })
+  networkSpecs.WitPriceFeeds.mutables = merge(networkSpecs.WitPriceFeeds?.mutables, {
+    types: ["address"], values: [appsCurator],
   })
 
   // Loop on framework domains ...
   const palette = [6, 4]
   for (const domain in framework) {
+    const from = domain === "core" ? coreCurator : appsCurator
     const color = palette[Object.keys(framework).indexOf(domain)]
 
     let first = true

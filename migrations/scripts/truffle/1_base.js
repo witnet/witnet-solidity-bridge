@@ -4,7 +4,7 @@ const utils = require("../utils").default
 
 const WitnetDeployer = artifacts.require("WitnetDeployer")
 
-module.exports = async function (truffleDeployer, network, [,,, master]) {
+module.exports = async function (truffleDeployer, network, [, master]) {
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {}
 

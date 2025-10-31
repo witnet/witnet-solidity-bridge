@@ -1,7 +1,7 @@
 const settings = require("../../settings/index").default
 const utils = require("../utils").default
 
-module.exports = async function (deployer, network, [, from]) {
+module.exports = async function (deployer, network, [,, from]) {
   const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
   if (!addresses[network]) addresses[network] = {}
   if (!addresses[network]?.libs) addresses[network].libs = {}
