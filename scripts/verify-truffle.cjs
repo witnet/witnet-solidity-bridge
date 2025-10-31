@@ -29,7 +29,7 @@ const framework = {
 }
 
 for (const domain in framework) {
-	const header = network.toUpperCase() + " " + domain.toUpperCase()
+	const header = `${network.toUpperCase()} ${domain.toUpperCase()}`
 	console.info()
 	console.info(header)
 	console.info("=".repeat(header.length))

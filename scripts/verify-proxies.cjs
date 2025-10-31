@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const addresses = require("../migrations/addresses.json")
-const constructorArgs = require("../migrations/constructorArgs.json")
+const _constructorArgs = require("../migrations/constructorArgs.json")
 const settings = require("../settings/index.js").default
 const utils = require("../src/utils.js").default
 
@@ -27,7 +27,7 @@ const framework = {
 }
 
 for (const domain in framework) {
-	const header = network.toUpperCase() + " " + domain.toUpperCase()
+	const header = `${network.toUpperCase()} ${domain.toUpperCase()}`
 	console.info()
 	console.info(header)
 	console.info("=".repeat(header.length))

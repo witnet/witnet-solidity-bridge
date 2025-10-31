@@ -18,7 +18,7 @@ export class WitRandomness extends WitAppliance {
 
 	protected constructor(witOracle: WitOracle, at: string) {
 		super(witOracle, "WitRandomnessV3", at)
-		this._legacy = new Contract(at, ABIs["WitRandomnessV2"], this.signer)
+		this._legacy = new Contract(at, ABIs.WitRandomnessV2, this.signer)
 	}
 
 	static async at(

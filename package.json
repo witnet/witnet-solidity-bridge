@@ -79,7 +79,7 @@
 		"console": "npx truffle console",
 		"fmt:js": "npx biome check",
 		"fmt:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\"",
-		"fmt!:js": "npx biome check --write",
+		"fmt!:js": "npx biome check --write --unsafe",
 		"fmt!:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\" --fix",
 		"fmt!": "pnpm run fmt!:js && pnpm run fmt!:sol",
 		"fmt": "pnpm run fmt:js && pnpm run fmt:sol",

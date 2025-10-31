@@ -1,7 +1,7 @@
 const helpers = require("../helpers.cjs")
-const fs = require("fs")
+const fs = require("node:fs")
 const inquirer = require("inquirer")
-const path = require("path")
+const path = require("node:path")
 
 const { supportsNetwork, supportedEcosystems, supportedNetworks } =
 	require("@witnet/solidity").default
@@ -159,6 +159,7 @@ module.exports = async (flags = {}) => {
 						default: 250000,
 					})
 				).callbackGasLimit,
+				10,
 			)
 		} while (!callbackGasLimit)
 		answers = { callbackGasLimit, ...answers }

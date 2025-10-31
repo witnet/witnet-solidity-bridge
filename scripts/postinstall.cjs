@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const fs = require("fs")
+const fs = require("node:fs")
 if (
 	!fs.existsSync(".no-postinstall") &&
 	!fs.existsSync(`${process.env.INIT_CWD}/.env_witnet`)

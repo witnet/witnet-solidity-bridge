@@ -246,7 +246,14 @@ module.exports = async (options = {}, args = []) => {
 						"T.T.R.",
 						"EVM DATA REPORTING TRANSACTION HASH",
 					],
-					humanizers: [helpers.commas, , , , , ,],
+					humanizers: [
+						helpers.commas,
+						undefined,
+						undefined,
+						undefined,
+						undefined,
+						undefined,
+					],
 				},
 			)
 		}

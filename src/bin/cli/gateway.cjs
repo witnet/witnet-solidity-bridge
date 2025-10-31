@@ -1,7 +1,7 @@
 const helpers = require("../helpers.cjs")
 
 const { spawn } = require("node:child_process")
-const os = require("os")
+const os = require("node:os")
 
 module.exports = async (flags = {}, args = []) => {
 	;[args] = helpers.deleteExtraFlags(args)

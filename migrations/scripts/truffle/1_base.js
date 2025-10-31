@@ -1,4 +1,4 @@
-const fs = require("fs")
+const fs = require("node:fs")
 const settings = require("../../settings/index").default
 const utils = require("../utils").default
 

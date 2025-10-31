@@ -82,7 +82,7 @@ async function main() {
 	}
 
 	// set start clock
-	let lastClock = Date.now()
+	let _lastClock = Date.now()
 
 	// check initial balance
 	const balance = await checkBalance()
@@ -142,7 +142,7 @@ async function main() {
 	}
 
 	async function randomize() {
-		lastClock = Date.now()
+		_lastClock = Date.now()
 
 		let isRandomized = false
 		const feeData = await randomizer.provider.getFeeData()
@@ -183,7 +183,7 @@ async function main() {
 					toBlock: receipt.blockNumber,
 				})
 				let randomizeBlock = Number(tx.blockNumber)
-				if (logs && logs[0]) {
+				if (logs?.[0]) {
 					if (
 						logs[0].topics[0] ===
 						"0x8cb766b09215126141c41df86fd488fe4745f22f3c995c3ad9aaf4c07195b946"

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
+import { createRequire } from "node:module"
 import { verifyContract } from "@nomicfoundation/hardhat-verify/verify"
 import hre from "hardhat"
 import merge from "lodash.merge"
-import { createRequire } from "module"
 
 const require = createRequire(import.meta.url)
 const addresses = require("../migrations/addresses.json")
@@ -23,7 +23,7 @@ async function main() {
 	}
 
 	for (const domain in framework) {
-		const header = network.toUpperCase() + " " + domain.toUpperCase()
+		const _header = `${network.toUpperCase()} ${domain.toUpperCase()}`
 		for (const base in framework[domain]) {
 			const impl = framework[domain][base]
 			let headline

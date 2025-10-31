@@ -32,7 +32,7 @@ module.exports = async (options = {}, args = []) => {
 		} else {
 			const selection = await prompt([
 				{
-					choices: artifacts.map(([key, artifact]) => artifact.address),
+					choices: artifacts.map(([_key, artifact]) => artifact.address),
 					message: "Randomness contract:",
 					name: "target",
 					type: "rawlist",
@@ -56,7 +56,7 @@ module.exports = async (options = {}, args = []) => {
 	console.info(
 		`> ${helpers.colors.lwhite(artifact)}:${" ".repeat(
 			maxWidth - artifact.length,
-		)}${chosen ? "" : helpers.colors.lblue(target) + " "}${helpers.colors.blue(
+		)}${chosen ? "" : `${helpers.colors.lblue(target)} `}${helpers.colors.blue(
 			`[ ${version} ]`,
 		)}`,
 	)
@@ -105,7 +105,7 @@ module.exports = async (options = {}, args = []) => {
 				randomizer.clone.bind(randomizer),
 				answer.curator,
 			)
-			if (logs && logs[0]) {
+			if (logs?.[0]) {
 				const cloned = logs[0].address
 				console.info(`  > Cloned address: ${colors.mblue(cloned)}`)
 				randomizer.attach(cloned)
@@ -277,11 +277,13 @@ module.exports = async (options = {}, args = []) => {
 					log.randomizeBlock,
 					moment.unix(log.blockTimestamp),
 					log.origin, // `${log.origin?.slice(0, 8)}..${log.origin?.slice(-4)}`,
-					(Number(log.gasPrice) / 10 ** 9 < 1.0
-						? Number(Number(log.gasPrice) / 10 ** 9).toFixed(6)
-						: helpers.commas(
-								Number(Number(log.gasPrice) / 10 ** 9).toFixed(1),
-							)) + " gwei",
+					`${
+						Number(log.gasPrice) / 10 ** 9 < 1.0
+							? Number(Number(log.gasPrice) / 10 ** 9).toFixed(6)
+							: helpers.commas(
+									Number(Number(log.gasPrice) / 10 ** 9).toFixed(1),
+								)
+					} gwei`,
 					Number(Number(log.cost) / 10 ** 18).toFixed(9),
 					log.ttr,
 					log.status === "Error"
@@ -297,7 +299,7 @@ module.exports = async (options = {}, args = []) => {
 						helpers.colors.mblue,
 						helpers.colors.blue,
 						helpers.colors.gray,
-						,
+						undefined,
 						helpers.colors.magenta,
 					],
 					headlines: [
@@ -309,7 +311,7 @@ module.exports = async (options = {}, args = []) => {
 						"T.T.R.",
 						":STATUS",
 					],
-					humanizers: [helpers.commas, , , helpers.commas],
+					humanizers: [helpers.commas, undefined, undefined, helpers.commas],
 				},
 			)
 		}

@@ -1,7 +1,7 @@
-import { execSync } from "child_process"
+import { execSync } from "node:child_process"
+import { readFileSync, writeFileSync } from "node:fs"
+import { createInterface } from "node:readline"
 import { config as dotenv } from "dotenv"
-import { readFileSync, writeFileSync } from "fs"
-import { createInterface } from "readline"
 
 dotenv({ quiet: true })
 
@@ -46,11 +46,7 @@ function getNetworkAppsArtifactAddress(network, addresses, artifact) {
 	const tags = getNetworkTagsFromString(network)
 	for (const index in tags) {
 		const network = tags[index]
-		if (
-			addresses[network] &&
-			addresses[network]?.apps &&
-			addresses[network].apps[artifact]
-		) {
+		if (addresses[network]?.apps?.[artifact]) {
 			return addresses[network].apps[artifact]
 		}
 	}
@@ -61,7 +57,7 @@ function getNetworkBaseArtifactAddress(network, addresses, artifact) {
 	const tags = getNetworkTagsFromString(network)
 	for (const index in tags) {
 		const network = tags[index]
-		if (addresses[network] && addresses[network][artifact]) {
+		if (addresses[network]?.[artifact]) {
 			return addresses[network][artifact]
 		}
 	}
@@ -72,11 +68,7 @@ function getNetworkArtifactAddress(network, domain, addresses, artifact) {
 	const tags = getNetworkTagsFromString(network)
 	for (const index in tags) {
 		const network = tags[index]
-		if (
-			addresses[network] &&
-			addresses[network][domain] &&
-			addresses[network][domain][artifact]
-		) {
+		if (addresses[network]?.[domain]?.[artifact]) {
 			return addresses[network][domain][artifact]
 		}
 	}
@@ -94,7 +86,7 @@ function getNetworkBaseImplArtifactAddresses(
 	const tags = ["default", ...getNetworkTagsFromString(network)]
 	for (const index in tags) {
 		const network = tags[index]
-		if (addresses[network] && addresses[network][domain]) {
+		if (addresses[network]?.[domain]) {
 			Object.keys(addresses[network][domain]).forEach((impl) => {
 				if (
 					(!exception || impl !== exception) &&
@@ -115,11 +107,7 @@ function getNetworkCoreArtifactAddress(network, addresses, artifact) {
 	const tags = getNetworkTagsFromString(network)
 	for (const index in tags) {
 		const network = tags[index]
-		if (
-			addresses[network] &&
-			addresses[network]?.core &&
-			addresses[network].core[artifact]
-		) {
+		if (addresses[network]?.core?.[artifact]) {
 			return addresses[network].core[artifact]
 		}
 	}
@@ -130,11 +118,7 @@ function getNetworkLibsArtifactAddress(network, addresses, artifact) {
 	const tags = getNetworkTagsFromString(network)
 	for (const index in tags) {
 		const network = tags[index]
-		if (
-			addresses[network] &&
-			addresses[network]?.libs &&
-			addresses[network].libs[artifact]
-		) {
+		if (addresses[network]?.libs?.[artifact]) {
 			return addresses[network].libs[artifact]
 		}
 	}

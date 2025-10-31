@@ -103,7 +103,7 @@ module.exports = async (flags = {}, params = []) => {
 				}
 				if (flags?.decode || flags["dry-run"]) {
 					// todo: parse radon modal from evm contract
-					if (deployables.modals[network] && deployables.modals[network][key]) {
+					if (deployables.modals[network]?.[key]) {
 						console.info()
 						// if deployed, decode deployed bytecode
 						execSync(
@@ -204,10 +204,7 @@ module.exports = async (flags = {}, params = []) => {
 					}
 				}
 				if (flags?.decode || flags["dry-run"]) {
-					if (
-						deployables.templates[network] &&
-						deployables.templates[network][key]
-					) {
+					if (deployables.templates[network]?.[key]) {
 						// todo: parse radon template from evm contract
 						console.info()
 						// if deployed, decode deployed bytecode
@@ -379,7 +376,7 @@ async function selectWitnetArtifacts(
 	for (const index in Object.keys(assets)) {
 		const key = Object.keys(assets)[index]
 		const asset = assets[key]
-		const isLast = parseInt(index) === Object.keys(assets).length - 1
+		const isLast = parseInt(index, 10) === Object.keys(assets).length - 1
 		const found = args.find(
 			(arg) => key.toLowerCase().indexOf(arg.toLowerCase()) >= 0,
 		)

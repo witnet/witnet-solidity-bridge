@@ -1,4 +1,4 @@
-const fs = require("fs")
+const fs = require("node:fs")
 
 const create3 = require("./eth-create3.cjs")
 const utils = require("../src/utils.js").default
@@ -15,7 +15,7 @@ module.exports = async () => {
 	let suffix = "0x00"
 	process.argv.map((argv, index, args) => {
 		if (argv === "--offset") {
-			offset = parseInt(args[index + 1])
+			offset = parseInt(args[index + 1], 10)
 		} else if (argv === "--prefix") {
 			prefix = args[index + 1].toLowerCase()
 			if (!web3.utils.isHexStrict(prefix)) {
@@ -27,7 +27,7 @@ module.exports = async () => {
 				throw Error("--suffix: invalid hex string")
 			}
 		} else if (argv === "--hits") {
-			hits = parseInt(args[index + 1])
+			hits = parseInt(args[index + 1], 10)
 		} else if (argv === "--network") {
 			;[, network] = utils.getRealmNetworkFromString(
 				args[index + 1].toLowerCase(),
@@ -68,14 +68,14 @@ module.exports = async () => {
 	console.log("=".repeat(55))
 	suffix = suffix.slice(2)
 	while (count < hits) {
-		const salt = "0x" + utils.padLeft(offset.toString(16), "0", 32)
+		const salt = `0x${utils.padLeft(offset.toString(16), "0", 32)}`
 		const addr = create3(from, salt).toLowerCase()
 		if (addr.startsWith(prefix) && addr.endsWith(suffix)) {
 			const found = `${offset} => ${web3.utils.toChecksumAddress(addr)}`
 			console.log(found)
 			fs.appendFileSync(
 				`./migrations/salts/create3$${from.toLowerCase()}.tmp`,
-				found + "\n",
+				`${found}\n`,
 			)
 			count++
 		}

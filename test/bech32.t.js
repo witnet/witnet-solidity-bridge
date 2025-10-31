@@ -5,8 +5,8 @@ describe("TestBech32", () => {
 
 	const witBytes20 = "0x28e6c01c921ec3dd2e4dedf0ba85b52dfb4fed86"
 
-	const expectedWitMainnetPkh = "wit19rnvq8yjrmpa6tjdahct4pd49ha5lmvxuvddhv"
-	const expectedWitTestnetPkh = "twit19rnvq8yjrmpa6tjdahct4pd49ha5lmvxjeyfha"
+	const _expectedWitMainnetPkh = "wit19rnvq8yjrmpa6tjdahct4pd49ha5lmvxuvddhv"
+	const _expectedWitTestnetPkh = "twit19rnvq8yjrmpa6tjdahct4pd49ha5lmvxjeyfha"
 
 	// bytes20 public witBytes20 = hex"28e6c01c921ec3dd2e4dedf0ba85b52dfb4fed86";
 	// bytes public witSignature = hex"";

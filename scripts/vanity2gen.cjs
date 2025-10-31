@@ -1,4 +1,4 @@
-const fs = require("fs")
+const fs = require("node:fs")
 
 const create2 = require("./eth-create2.cjs")
 const utils = require("../src/utils.js").default
@@ -18,7 +18,7 @@ module.exports = async () => {
 	let hexArgs = ""
 	process.argv.map((argv, index, args) => {
 		if (argv === "--offset") {
-			offset = parseInt(args[index + 1])
+			offset = parseInt(args[index + 1], 10)
 		} else if (argv === "--artifact") {
 			artifactName = args[index + 1]
 		} else if (argv === "--prefix") {
@@ -32,7 +32,7 @@ module.exports = async () => {
 				throw new Error("--suffix: invalid hex string")
 			}
 		} else if (argv === "--hits") {
-			hits = parseInt(args[index + 1])
+			hits = parseInt(args[index + 1], 10)
 		} else if (argv === "--network") {
 			;[, network] = utils.getRealmNetworkFromString(
 				args[index + 1].toLowerCase(),
@@ -40,7 +40,7 @@ module.exports = async () => {
 		} else if (argv === "--hexArgs") {
 			hexArgs = args[index + 1].toLowerCase()
 			if (hexArgs.startsWith("0x")) hexArgs = hexArgs.slice(2)
-			if (!web3.utils.isHexStrict("0x" + hexArgs)) {
+			if (!web3.utils.isHexStrict(`0x${hexArgs}`)) {
 				throw new Error("--hexArgs: invalid hex string")
 			}
 		} else if (argv === "--from") {
@@ -91,14 +91,14 @@ module.exports = async () => {
 	console.log("=".repeat(55))
 	suffix = suffix.slice(2)
 	while (count < hits) {
-		const salt = "0x" + utils.padLeft(offset.toString(16), "0", 32)
+		const salt = `0x${utils.padLeft(offset.toString(16), "0", 32)}`
 		const addr = create2(from, salt, initCode).toLowerCase()
 		if (addr.startsWith(prefix) && addr.endsWith(suffix)) {
 			const found = `${offset} => ${web3.utils.toChecksumAddress(addr)}`
 			console.log(found)
 			fs.appendFileSync(
 				`./migrations/salts/${artifact?.contractName}$${from.toLowerCase()}.tmp`,
-				found + "\n",
+				`${found}\n`,
 			)
 			count++
 		}

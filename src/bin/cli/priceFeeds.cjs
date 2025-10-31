@@ -56,7 +56,7 @@ module.exports = async (options = {}, args = []) => {
 	console.info(
 		`> ${helpers.colors.lwhite(artifact)}:${" ".repeat(
 			maxWidth - artifact.length,
-		)}${chosen ? "" : helpers.colors.lblue(target) + " "}${helpers.colors.blue(
+		)}${chosen ? "" : `${helpers.colors.lblue(target)} `}${helpers.colors.blue(
 			`[ ${version} ]`,
 		)}`,
 	)
@@ -90,7 +90,7 @@ module.exports = async (options = {}, args = []) => {
 								.sort((a, b) =>
 									helpers.colorstrip(a).localeCompare(helpers.colorstrip(b)),
 								)
-						} catch (err) {
+						} catch (_err) {
 							providers = request.sources
 								.map((source) => {
 									const authority = source.authority.split(".").slice(-2)[0]
@@ -143,7 +143,7 @@ module.exports = async (options = {}, args = []) => {
 								? helpers.colors.mmagenta(pf.lastUpdate.trail.slice(2))
 								: "",
 						]
-					: [pf?.providers && pf.providers.join(" ")]),
+					: [pf?.providers?.join(" ")]),
 			]),
 			{
 				colors: [
@@ -151,7 +151,7 @@ module.exports = async (options = {}, args = []) => {
 					helpers.colors.mgreen,
 					helpers.colors.mcyan,
 					helpers.colors.yellow,
-					,
+					undefined,
 				],
 				headlines: [
 					":ID4",

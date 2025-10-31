@@ -133,7 +133,7 @@ main()
 async function main() {
 	let ethRpcPort = 8545
 	if (process.argv.indexOf("--port") >= 0) {
-		ethRpcPort = parseInt(process.argv[process.argv.indexOf("--port") + 1])
+		ethRpcPort = parseInt(process.argv[process.argv.indexOf("--port") + 1], 10)
 	}
 	let ethRpcProvider, ethRpcNetwork
 	try {
@@ -141,7 +141,7 @@ async function main() {
 		const network = await ethRpcProvider.getNetwork()
 		const chainId = Number(network.chainId)
 		ethRpcNetwork = utils.getEvmNetworkByChainId(chainId)
-	} catch (err) {}
+	} catch (_err) {}
 
 	const router = {
 		...(ethRpcNetwork
@@ -359,9 +359,9 @@ function showUsageHeadline(router, cmd, specs) {
 						? `[<${str.slice(1, -1)}>]`
 						: `<${str}>`
 			if (Array.isArray(specs?.params)) {
-				params = specs.params.map((param) => optionalize(param)).join(" ") + " "
+				params = `${specs.params.map((param) => optionalize(param)).join(" ")} `
 			} else {
-				params = optionalize(specs?.params) + " "
+				params = `${optionalize(specs?.params)} `
 			}
 			console.info(
 				`   ${lwhite(`npx witeth ${cmd}`)} ${params ? green(params) : ""}${flags}${options}`,

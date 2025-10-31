@@ -1,6 +1,6 @@
-const exec = require("child_process").execSync
-const os = require("os")
-const fs = require("fs")
+const exec = require("node:child_process").execSync
+const os = require("node:os")
+const fs = require("node:fs")
 
 if (process.argv.length < 3) {
 	console.log(`Usage: ${0} ${1} /path/to/be/cleaned`)

@@ -40,8 +40,8 @@ module.exports = async (flags = {}) => {
 				"EVM SIGNER ADDRESSES",
 				`$${helpers.colors.lwhite("ETH")} BALANCE`,
 			],
-			humanizers: [helpers.commas, ,],
-			colors: [, helpers.colors.mblue],
+			humanizers: [helpers.commas, undefined],
+			colors: [undefined, helpers.colors.mblue],
 		},
 	)
 }

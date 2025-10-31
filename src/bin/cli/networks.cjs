@@ -9,7 +9,7 @@ module.exports = async (flags = {}, [ecosystem]) => {
 			provider = new JsonRpcProvider(`http://127.0.0.1:${flags?.port || 8545}`)
 			const chainId = (await provider.getNetwork()).chainId
 			ecosystem = utils.getEvmNetworkByChainId(chainId)
-		} catch (err) {}
+		} catch (_err) {}
 	}
 	const networks = Object.fromEntries(
 		Object.entries(helpers.supportedNetworks())

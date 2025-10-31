@@ -1,11 +1,11 @@
 const ethUtils = require("ethereumjs-util")
-const fs = require("fs")
+const fs = require("node:fs")
 const merge = require("lodash.merge")
 const settings = require("../../settings/index").default
 const utils = require("../utils").default
 const version = `${
 	require("../../../package").version
-}-${require("child_process")
+}-${require("node:child_process")
 	.execSync("git log -1 --format=%h ../../../contracts")
 	.toString()
 	.trim()
@@ -339,7 +339,7 @@ module.exports = async (
 							targetVersion.slice(0, 4) === legacyVersion.slice(0, 4) ||
 							process.argv.includes("--changelog")
 						) {
-							const changelog = require("child_process")
+							const changelog = require("node:child_process")
 								.execSync(
 									`git log ${versionLastCommitOf(
 										legacyVersion,
@@ -387,7 +387,7 @@ module.exports = async (
 						continue
 					}
 
-					let targetAddr = target.addr
+					let _targetAddr = target.addr
 					target.specs = await unfoldTargetSpecs(
 						domain,
 						impl,
@@ -399,7 +399,7 @@ module.exports = async (
 					)
 
 					if (target.impl === impl) {
-						targetAddr = await determineTargetAddr(
+						_targetAddr = await determineTargetAddr(
 							impl,
 							target.specs,
 							networkArtifacts,
@@ -770,7 +770,7 @@ async function deployTarget(
 				from: targetSpecs.from,
 			}),
 		)
-	} catch (ex) {
+	} catch (_ex) {
 		panic("Deployment failed", `Expected address: ${targetAddr}`)
 	}
 

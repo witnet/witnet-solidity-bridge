@@ -1,6 +1,6 @@
-const exec = require("child_process").execSync
-const os = require("os")
-const fs = require("fs")
+const exec = require("node:child_process").execSync
+const os = require("node:os")
+const fs = require("node:fs")
 
 if (fs.existsSync("./artifacts")) {
 	if (os.type() === "Windows_NT") {

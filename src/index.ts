@@ -3,7 +3,7 @@ export * from "./lib/types.js"
 export * as utils from "./lib/utils.js"
 export * from "./lib/wrappers.js"
 
-import { createRequire } from "module"
+import { createRequire } from "node:module"
 
 const require = createRequire(import.meta.url)
 

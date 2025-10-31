@@ -1,4 +1,4 @@
-const fs = require("fs")
+const fs = require("node:fs")
 const merge = require("lodash.merge")
 
 const addresses = require("../../migrations/addresses.json")
@@ -114,7 +114,7 @@ function flattenObject(ob) {
 			const flatObject = flattenObject(ob[i])
 			for (const x in flatObject) {
 				if (!Object.hasOwn(flatObject, x)) continue
-				toReturn[i + "." + x] = flatObject[x]
+				toReturn[`${i}.${x}`] = flatObject[x]
 			}
 		} else {
 			toReturn[i] = ob[i]
@@ -265,7 +265,7 @@ function traceHeader(header, color = colors.white, indent = "") {
 
 function traceTable(records, options) {
 	const stringify = (data, humanizers, index) =>
-		humanizers && humanizers[index]
+		humanizers?.[index]
 			? humanizers[index](data).toString()
 			: (data?.toString() ?? "")
 	const reduceMax = (numbers) =>
@@ -284,7 +284,7 @@ function traceTable(records, options) {
 						colorstrip(stringify(field, options?.humanizers, index)).length,
 				),
 			)
-			if (options?.headlines && options.headlines[index]) {
+			if (options?.headlines?.[index]) {
 				maxWidth = Math.max(
 					maxWidth,
 					colorstrip(options.headlines[index].replaceAll(":", "")).length,
@@ -309,7 +309,7 @@ function traceTable(records, options) {
 		for (let j = 0; j < numColumns; j++) {
 			let data = table[j][i]
 			let color
-			if (options?.colors && options.colors[j]) {
+			if (options?.colors?.[j]) {
 				color = options.colors[j]
 			} else {
 				color =

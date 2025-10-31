@@ -242,7 +242,7 @@ export class WitOracleRadonRequestModal extends WitAppliance {
 		},
 	): Promise<Witnet.Hash> {
 		const argsCount = await this.getDataSourcesArgsCount()
-		if (argsCount != 1 + (commonRetrievalArgs?.length || 0)) {
+		if (argsCount !== 1 + (commonRetrievalArgs?.length || 0)) {
 			throw TypeError(
 				`${this.constructor.name}@${this.address}: unmatching args count != ${argsCount - 1}.`,
 			)
