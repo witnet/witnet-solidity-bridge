@@ -60,6 +60,7 @@
 		"build/contracts",
 		"dist",
 		"contracts",
+		"scripts",
 		"src/bin"
 	],
 	"scripts": {
