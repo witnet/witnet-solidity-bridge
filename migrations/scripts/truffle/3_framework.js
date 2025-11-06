@@ -387,7 +387,6 @@ module.exports = async (
 						continue
 					}
 
-					let _targetAddr = target.addr
 					target.specs = await unfoldTargetSpecs(
 						domain,
 						impl,
@@ -399,7 +398,7 @@ module.exports = async (
 					)
 
 					if (target.impl === impl) {
-						_targetAddr = await determineTargetAddr(
+						await determineTargetAddr(
 							impl,
 							target.specs,
 							networkArtifacts,

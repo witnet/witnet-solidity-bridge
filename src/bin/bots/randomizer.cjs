@@ -168,7 +168,7 @@ async function main() {
 				console.info(`  - Transaction:   ${receipt.hash}`)
 				console.info(
 					`  - Tx. gas price: ${
-						receipt.gasPrice < 10 ** 9
+						receipt.gasPrice < BigInt(10 ** 9)
 							? Number(Number(receipt.gasPrice) / 10 ** 9).toFixed(9)
 							: commas(Number(Number(receipt.gasPrice) / 10 ** 9).toFixed(1))
 					} gwei`,
