@@ -42,7 +42,7 @@ const chainDescriptors = Object.fromEntries(
 export default {
 	chainDescriptors,
 	paths: {
-		sources: "./contracts",
+		sources: ["./contracts"],
 		cache: "./cache",
 		artifacts: "./artifacts",
 	},

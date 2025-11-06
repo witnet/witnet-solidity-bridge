@@ -79,7 +79,7 @@
 		"fmt": "pnpm run fmt:js && pnpm run fmt:sol",
 		"deploy": "npx truffle migrate --config ./truffle-config.cjs",
 		"postinstall": "node ./scripts/postinstall.cjs",
-		"prepare": "npx truffle compile --all --config ./truffle-config.cjs && npx hardhat compile --force && npm run build && node ./scripts/prepare.cjs",
+		"prepare": "npx truffle compile --all --config ./truffle-config.cjs && npx hardhat compile --no-tests --force && npm run build && node ./scripts/prepare.cjs",
 		"verify": "npx hardhat run ./scripts/verify.js 2>&1",
 		"witeth": "cross-env-shell WITNET_SDK_RADON_ASSETS_PATH='../..' node ./src/bin/index.cjs"
 	},
