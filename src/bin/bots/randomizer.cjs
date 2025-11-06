@@ -14,30 +14,30 @@ const commas = (number) => {
 	return result
 }
 
-const CHECK_BALANCE_SECS = process.env.RANDOMIZER_CHECK_BALANCE_SECS
-const CONFIRMATIONS = process.env.RANDOMIZER_CONFIRMATIONS || 2
-const MAX_GAS_PRICE_GWEI = process.env.RANDOMIZER_MAX_GAS_PRICE_GWEI
-const MIN_BALANCE = process.env.RANDOMIZER_MIN_BALANCE || 0
-const NODE_CRON_OVERLAP = process.env.RANDOMIZER_CRON_OVERLAP || true
-const NODE_CRON_SCHEDULE = process.env.RANDOMIZER_CRON_SCHEDULE || "0 0 9 * * 6" // default: every Saturday at 9.00 am
+const CHECK_BALANCE_SECS = process.env.WITNET_SOLIDITY_RANDOMIZER_CHECK_BALANCE_SECS
+const CONFIRMATIONS = process.env.WITNET_SOLIDITY_RANDOMIZER_CONFIRMATIONS || 2
+const MAX_GAS_PRICE_GWEI = process.env.WITNET_SOLIDITY_RANDOMIZER_MAX_GAS_PRICE_GWEI
+const MIN_BALANCE = process.env.WITNET_SOLIDITY_RANDOMIZER_MIN_BALANCE || 0
+const NODE_CRON_OVERLAP = process.env.WITNET_SOLIDITY_RANDOMIZER_CRON_OVERLAP || true
+const NODE_CRON_SCHEDULE = process.env.WITNET_SOLIDITY_RANDOMIZER_CRON_SCHEDULE || "0 0 9 * * 6" // default: every Saturday at 9.00 am
 const NODE_CRON_TIMEZONE =
-	process.env.RANDOMIZER_CRON_TIMEZONE || "Europe/Madrid" // see: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+	process.env.WITNET_SOLIDITY_RANDOMIZER_CRON_TIMEZONE || "Europe/Madrid" // see: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 const NETWORK =
-	_spliceFromArgs(process.argv, `--network`) || process.env.RANDOMIZER_NETWORK
-const POLLING_MSECS = process.env.RANDOMIZER_POLLING_MSECS || 15000
+	_spliceFromArgs(process.argv, `--network`) || process.env.WITNET_SOLIDITY_RANDOMIZER_NETWORK
+const POLLING_MSECS = process.env.WITNET_SOLIDITY_RANDOMIZER_POLLING_MSECS || 15000
 const GATEWAY_HOST = (
 	_spliceFromArgs(process.argv, `--host`) ||
-	process.env.RANDOMIZER_GATEWAY_HOST ||
+	process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_HOST ||
 	"http://127.0.0.1"
 ).replace(/\/$/, "")
 const GATEWAY_PORT =
 	_parseIntFromArgs(process.argv, `--port`) ||
-	process.env.RANDOMIZER_GATEWAY_PORT
+	process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_PORT
 const SIGNER =
-	_spliceFromArgs(process.argv, `--signer`) || process.env.RANDOMIZER_SIGNER
+	_spliceFromArgs(process.argv, `--signer`) || process.env.WITNET_SOLIDITY_RANDOMIZER_SIGNER
 const TARGET =
 	_spliceFromArgs(process.argv, `--target`) ||
-	process.env.RANDOMIZER_TARGET ||
+	process.env.WITNET_SOLIDITY_RANDOMIZER_TARGET ||
 	undefined
 
 main()
