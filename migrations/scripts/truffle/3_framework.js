@@ -398,11 +398,7 @@ module.exports = async (
 					)
 
 					if (target.impl === impl) {
-						await determineTargetAddr(
-							impl,
-							target.specs,
-							networkArtifacts,
-						)
+						await determineTargetAddr(impl, target.specs, networkArtifacts)
 					}
 
 					if (

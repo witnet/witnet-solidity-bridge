@@ -1,12 +1,12 @@
-const { Command } = require("commander");
+const { Command } = require("commander")
 require("dotenv").config({ quiet: true })
 
 const cron = require("node-cron")
 const moment = require("moment")
-const program = new Command();
+const program = new Command()
 const promisePoller = require("promise-poller").default
 
-const { ethers, utils, WitOracle } = require("../../../dist/src");
+const { ethers, utils, WitOracle } = require("../../../dist/src")
 const { colors, traceHeader } = require("../helpers.cjs")
 
 const commas = (number) => {
@@ -18,17 +18,20 @@ const commas = (number) => {
 	return result
 }
 
-const CHECK_BALANCE_SECS = process.env.WITNET_SOLIDITY_RANDOMIZER_CHECK_BALANCE_SECS || 900
+const CHECK_BALANCE_SECS =
+	process.env.WITNET_SOLIDITY_RANDOMIZER_CHECK_BALANCE_SECS || 900
 const CONFIRMATIONS = process.env.WITNET_SOLIDITY_RANDOMIZER_CONFIRMATIONS || 2
-const POLLING_MSECS = process.env.WITNET_SOLIDITY_RANDOMIZER_POLLING_MSECS || 15000
+const POLLING_MSECS =
+	process.env.WITNET_SOLIDITY_RANDOMIZER_POLLING_MSECS || 15000
 
 main()
 
 async function main() {
-	
 	program
 		.name("npx --package @witnet/solidity randomizer")
-		.description("Bot that pays for randomize requests in the specified network under the specified schedule.")
+		.description(
+			"Bot that pays for randomize requests in the specified network under the specified schedule.",
+		)
 
 	program
 		.option(
@@ -40,52 +43,51 @@ async function main() {
 			"--host <host>",
 			"Host name or IP address where the signing ETH/RPC gateway is expected to be running.",
 			(host) => host.replace(/\/$/, ""),
-			process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_HOST || "http://127.0.0.1"
+			process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_HOST || "http://127.0.0.1",
 		)
 		.option(
 			"--max-gas-price <gwei>",
 			"Max. EVM gas price to pay when trying to request a new randomize (in gwei units).",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_MAX_GAS_PRICE_GWEI || undefined
+			process.env.WITNET_SOLIDITY_RANDOMIZER_MAX_GAS_PRICE_GWEI || undefined,
 		)
 		.option(
 			"--min-balance <eth>",
 			"Signer's min. balance required to start running (in gas token units).",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_MIN_BALANCE || 0.01
+			process.env.WITNET_SOLIDITY_RANDOMIZER_MIN_BALANCE || 0.01,
 		)
 		.option(
 			"--patron <evm_addr>",
 			"Signer address that will pay for every randomize request, other than the gateway's default.",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_SIGNER || undefined
+			process.env.WITNET_SOLIDITY_RANDOMIZER_SIGNER || undefined,
 		)
 		.option(
 			"--port <port>",
 			"HTTP port where the signing ETH/RPC gateway is expected to be listening.",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_PORT || 8545
+			process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_PORT || 8545,
 		)
 		.option(
 			"--schedule <schedule>",
 			"Randomizing schedule (see ).",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE || 
-				"0 9 * * 6" // Every Saturday, at 9.00 am 
+			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE || "0 9 * * 6", // Every Saturday, at 9.00 am
 		)
 		.option(
 			"--schedule-overlap <bool>",
 			"Whether multiple randomize requests can concurr upon tight schedules.",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE_OVERLAP || true
+			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE_OVERLAP || true,
 		)
 		.option(
 			"--schedule-timezone <timezone>",
 			"Randomizing time sonze (see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE_TIMEZONE || 
-				"Europe/Madrid"
+			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE_TIMEZONE ||
+				"Europe/Madrid",
 		)
 		.requiredOption(
 			"--target <evm_addr>",
 			"Address of the WitRandomness contract to be randomized.",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_TARGET || undefined
-		);
+			process.env.WITNET_SOLIDITY_RANDOMIZER_TARGET || undefined,
+		)
 
-	program.parse();
+	program.parse()
 
 	const {
 		chain,
@@ -98,10 +100,13 @@ async function main() {
 		scheduleOverlap,
 		scheduleTimezone,
 		target,
-	} = program.opts();
+	} = program.opts()
 
-	traceHeader(`@WITNET/SOLIDITY RANDOMIZER BOT v${require("../../../package.json").version}`, colors.white)
-		
+	traceHeader(
+		`@WITNET/SOLIDITY RANDOMIZER BOT v${require("../../../package.json").version}`,
+		colors.white,
+	)
+
 	console.info(`> ETH/RPC gateway:  ${host}:${port}`)
 
 	const witOracle = patron
@@ -150,14 +155,10 @@ async function main() {
 
 	// validate schedule plan
 	if (!cron.validate(schedule)) {
-		console.error(
-			`> Fatal: invalid randomizing schedule: "${schedule}"`,
-		)
+		console.error(`> Fatal: invalid randomizing schedule: "${schedule}"`)
 		process.exit(1)
 	} else {
-		console.info(
-			`> Randomizing schedule: "${schedule}" at ${scheduleTimezone}`,
-		)
+		console.info(`> Randomizing schedule: "${schedule}" at ${scheduleTimezone}`)
 		cron.schedule(schedule, async () => randomize(), {
 			noOverlap: !scheduleOverlap,
 			timezone: scheduleTimezone,
