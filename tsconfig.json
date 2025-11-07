@@ -32,5 +32,5 @@
 		] /* List of folders to include type definitions from. */
 	},
 	"files": ["src/index.ts"],
-	"include": ["migrations/*.json", "src/**/*.d.ts", "types"]
+	"include": ["src/**/*.d.ts", "types"]
 }

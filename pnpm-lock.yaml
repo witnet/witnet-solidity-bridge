@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@witnet/sdk':
-        specifier: ^1.2.4
-        version: 1.2.4(@types/node@24.10.0)(bufferutil@4.0.7)(typescript@5.9.3)(utf-8-validate@5.0.10)
+        specifier: ^1.2.6
+        version: 1.2.6(@types/node@24.10.0)(bufferutil@4.0.7)(typescript@5.9.3)(utf-8-validate@5.0.10)
       cbor:
         specifier: ^10.0.11
         version: 10.0.11
@@ -745,10 +745,6 @@ packages:
     resolution: {integrity: sha512-vnI7V6lFNe0tLAuJMu+2sX+FcL14TaCWy1qiczg1VwRmPrpQCdq5ESXQMqUc2tluRNf6irBXrWbl1mGN8uaU/g==}
     engines: {node: ^14.21.3 || >=16}
 
-  '@noble/curves@1.9.7':
-    resolution: {integrity: sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==}
-    engines: {node: ^14.21.3 || >=16}
-
   '@noble/hashes@1.2.0':
     resolution: {integrity: sha512-FZfhjEDbT5GRswV3C6uvLPHMiVD6lQBmpoX5+eSiPaMTXte/IKqI5dykDxzZB/WBeK/CDuQRBWarPdi3FNY2zQ==}
 
@@ -1225,8 +1221,8 @@ packages:
   '@types/ws@8.5.3':
     resolution: {integrity: sha512-6YOoWjruKj1uLf3INHH7D3qTXwFfEsg1kf3c0uDdSBJwfa/llkwIjrAGV7j7mVgGNbzTQ3HiHKKDXl6bJPD97w==}
 
-  '@witnet/sdk@1.2.4':
-    resolution: {integrity: sha512-1qCMD6CNq/mwiV/PMIiEyZeIKYYynztwV4GeB8m4dcuube33mNBMlYbyPmgMnWpVOYlYB3RHWIeT/M6bk1pNNg==}
+  '@witnet/sdk@1.2.6':
+    resolution: {integrity: sha512-7ZLBFTZZtuYz4h/Nyvj0UsE88LG7JiTY03GQfct8AZOSHXdOeLdKZsc/FRD+hz0uPsnuWRN8q2Re2cfS7SQcsg==}
     hasBin: true
 
   abi-to-sol@0.7.1:
@@ -5205,7 +5201,7 @@ snapshots:
 
   '@bitcoinerlab/secp256k1@1.2.0':
     dependencies:
-      '@noble/curves': 1.9.7
+      '@noble/curves': 1.8.2
 
   '@colors/colors@1.6.0': {}
 
@@ -5691,7 +5687,7 @@ snapshots:
   '@graphql-tools/utils@8.9.0(graphql@15.10.1)':
     dependencies:
       graphql: 15.10.1
-      tslib: 2.4.1
+      tslib: 2.8.1
     optional: true
 
   '@graphql-tools/utils@9.2.1(graphql@15.10.1)':
@@ -5851,10 +5847,6 @@ snapshots:
   '@noble/curves@1.8.2':
     dependencies:
       '@noble/hashes': 1.7.2
-
-  '@noble/curves@1.9.7':
-    dependencies:
-      '@noble/hashes': 1.8.0
 
   '@noble/hashes@1.2.0': {}
 
@@ -6547,7 +6539,7 @@ snapshots:
     dependencies:
       '@types/node': 24.10.0
 
-  '@witnet/sdk@1.2.4(@types/node@24.10.0)(bufferutil@4.0.7)(typescript@5.9.3)(utf-8-validate@5.0.10)':
+  '@witnet/sdk@1.2.6(@types/node@24.10.0)(bufferutil@4.0.7)(typescript@5.9.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@bitcoinerlab/secp256k1': 1.2.0
       axios: 1.13.2
