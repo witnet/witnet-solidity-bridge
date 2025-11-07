@@ -1,9 +1,13 @@
-const cron = require("node-cron")
+const { Command } = require("commander");
 require("dotenv").config({ quiet: true })
+
+const cron = require("node-cron")
 const moment = require("moment")
+const program = new Command();
 const promisePoller = require("promise-poller").default
 
-const { ethers, utils, WitOracle } = require("../../../dist/src")
+const { ethers, utils, WitOracle } = require("../../../dist/src");
+const { colors, traceHeader } = require("../helpers.cjs")
 
 const commas = (number) => {
 	const parts = number.toString().split(".")
@@ -14,64 +18,112 @@ const commas = (number) => {
 	return result
 }
 
-const CHECK_BALANCE_SECS = process.env.WITNET_SOLIDITY_RANDOMIZER_CHECK_BALANCE_SECS
+const CHECK_BALANCE_SECS = process.env.WITNET_SOLIDITY_RANDOMIZER_CHECK_BALANCE_SECS || 900
 const CONFIRMATIONS = process.env.WITNET_SOLIDITY_RANDOMIZER_CONFIRMATIONS || 2
-const MAX_GAS_PRICE_GWEI = process.env.WITNET_SOLIDITY_RANDOMIZER_MAX_GAS_PRICE_GWEI
-const MIN_BALANCE = process.env.WITNET_SOLIDITY_RANDOMIZER_MIN_BALANCE || 0
-const NODE_CRON_OVERLAP = process.env.WITNET_SOLIDITY_RANDOMIZER_CRON_OVERLAP || true
-const NODE_CRON_SCHEDULE = process.env.WITNET_SOLIDITY_RANDOMIZER_CRON_SCHEDULE || "0 0 9 * * 6" // default: every Saturday at 9.00 am
-const NODE_CRON_TIMEZONE =
-	process.env.WITNET_SOLIDITY_RANDOMIZER_CRON_TIMEZONE || "Europe/Madrid" // see: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-const NETWORK =
-	_spliceFromArgs(process.argv, `--network`) || process.env.WITNET_SOLIDITY_RANDOMIZER_NETWORK
 const POLLING_MSECS = process.env.WITNET_SOLIDITY_RANDOMIZER_POLLING_MSECS || 15000
-const GATEWAY_HOST = (
-	_spliceFromArgs(process.argv, `--host`) ||
-	process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_HOST ||
-	"http://127.0.0.1"
-).replace(/\/$/, "")
-const GATEWAY_PORT =
-	_parseIntFromArgs(process.argv, `--port`) ||
-	process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_PORT
-const SIGNER =
-	_spliceFromArgs(process.argv, `--signer`) || process.env.WITNET_SOLIDITY_RANDOMIZER_SIGNER
-const TARGET =
-	_spliceFromArgs(process.argv, `--target`) ||
-	process.env.WITNET_SOLIDITY_RANDOMIZER_TARGET ||
-	undefined
 
 main()
 
 async function main() {
-	const headline = `@WITNET/SOLIDITY RANDOMIZER v${require("../../../package.json").version}`
-	console.info("=".repeat(120))
-	console.info(headline)
+	
+	program
+		.name("npx --package @witnet/solidity randomizer")
+		.description("Bot that pays for randomize requests in the specified network under the specified schedule.")
 
-	if (!GATEWAY_PORT) throw new Error(`Fatal: no PORT was specified.`)
-	else if (!TARGET) throw new Error(`Fatal: no TARGET was specified.`)
+	program
+		.option(
+			"--chain <ecosystem:network>",
+			"Make sure the randomizer bot connects to this EVM chain.",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_NETWORK || undefined,
+		)
+		.option(
+			"--host <host>",
+			"Host name or IP address where the signing ETH/RPC gateway is expected to be running.",
+			(host) => host.replace(/\/$/, ""),
+			process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_HOST || "http://127.0.0.1"
+		)
+		.option(
+			"--max-gas-price <gwei>",
+			"Max. EVM gas price to pay when trying to request a new randomize (in gwei units).",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_MAX_GAS_PRICE_GWEI || undefined
+		)
+		.option(
+			"--min-balance <eth>",
+			"Signer's min. balance required to start running (in gas token units).",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_MIN_BALANCE || 0.01
+		)
+		.option(
+			"--patron <evm_addr>",
+			"Signer address that will pay for every randomize request, other than the gateway's default.",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_SIGNER || undefined
+		)
+		.option(
+			"--port <port>",
+			"HTTP port where the signing ETH/RPC gateway is expected to be listening.",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_GATEWAY_PORT || 8545
+		)
+		.option(
+			"--schedule <schedule>",
+			"Randomizing schedule (see ).",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE || 
+				"0 9 * * 6" // Every Saturday, at 9.00 am 
+		)
+		.option(
+			"--schedule-overlap <bool>",
+			"Whether multiple randomize requests can concurr upon tight schedules.",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE_OVERLAP || true
+		)
+		.option(
+			"--schedule-timezone <timezone>",
+			"Randomizing time sonze (see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE_TIMEZONE || 
+				"Europe/Madrid"
+		)
+		.requiredOption(
+			"--target <evm_addr>",
+			"Address of the WitRandomness contract to be randomized.",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_TARGET || undefined
+		);
 
-	console.info(`> Ethereum gateway: ${GATEWAY_HOST}:${GATEWAY_PORT}`)
+	program.parse();
 
-	const witOracle = SIGNER
-		? await WitOracle.fromJsonRpcUrl(`${GATEWAY_HOST}:${GATEWAY_PORT}`, SIGNER)
-		: await WitOracle.fromJsonRpcUrl(`${GATEWAY_HOST}:${GATEWAY_PORT}`)
+	const {
+		chain,
+		host,
+		maxGasPrice,
+		minBalance,
+		patron,
+		port,
+		schedule,
+		scheduleOverlap,
+		scheduleTimezone,
+		target,
+	} = program.opts();
+
+	traceHeader(`@WITNET/SOLIDITY RANDOMIZER BOT v${require("../../../package.json").version}`, colors.white)
+		
+	console.info(`> ETH/RPC gateway:  ${host}:${port}`)
+
+	const witOracle = patron
+		? await WitOracle.fromJsonRpcUrl(`${host}:${port}`, patron)
+		: await WitOracle.fromJsonRpcUrl(`${host}:${port}`)
 	const { network, provider, signer } = witOracle
 
-	if (NETWORK && network !== NETWORK) {
+	if (chain && network !== chain) {
 		throw new Error(
 			`Fatal: connected to wrong network: ${network.toUpperCase()}`,
 		)
 	}
 
-	console.info(`> Ethereum network: ${network}`)
+	console.info(`> ETH/RPC network:  ${network}`)
 
-	const randomizer = await witOracle.getWitRandomnessAt(TARGET)
+	const randomizer = await witOracle.getWitRandomnessAt(target)
 	const artifact = await randomizer.getEvmImplClass()
 	const symbol = utils.getEvmNetworkSymbol(network)
 	const version = await randomizer.getEvmImplVersion()
 
 	console.info(
-		`> ${artifact}:${" ".repeat(Math.max(0, 16 - artifact.length))} ${TARGET} [${version}]`,
+		`> ${artifact}:${" ".repeat(Math.max(0, 16 - artifact.length))} ${target} [${version}]`,
 	)
 
 	let randomizeWaitBlocks
@@ -81,37 +133,34 @@ async function main() {
 		randomizeWaitBlocks = settings.randomizeWaitBlocks
 	}
 
-	// set start clock
-	let _lastClock = Date.now()
-
 	// check initial balance
 	const balance = await checkBalance()
-	if (Number(ethers.formatEther(balance)) < MIN_BALANCE) {
+	if (Number(ethers.formatEther(balance)) < minBalance) {
 		console.error(
-			`> Fatal: insufficient balance: ${ethers.formatEther(balance)} < ${MIN_BALANCE} ${symbol}`,
+			`> Fatal: insufficient balance: ${ethers.formatEther(balance)} < ${minBalance} ${symbol}`,
 		)
 		process.exit(1)
 	}
 	console.info(`> Signer address: ${signer.address}`)
 
 	// max acceptable gas price
-	if (MAX_GAS_PRICE_GWEI) {
-		console.info(`> Max gas price:  ${commas(MAX_GAS_PRICE_GWEI)} gwei`)
+	if (maxGasPrice) {
+		console.info(`> Max gas price:  ${commas(maxGasPrice)} gwei`)
 	}
 
 	// validate schedule plan
-	if (!cron.validate(NODE_CRON_SCHEDULE)) {
+	if (!cron.validate(schedule)) {
 		console.error(
-			`> Fatal: invalid randomizing schedule: "${NODE_CRON_SCHEDULE}"`,
+			`> Fatal: invalid randomizing schedule: "${schedule}"`,
 		)
 		process.exit(1)
 	} else {
 		console.info(
-			`> Randomizing schedule: "${NODE_CRON_SCHEDULE}" at ${NODE_CRON_TIMEZONE}`,
+			`> Randomizing schedule: "${schedule}" at ${scheduleTimezone}`,
 		)
-		cron.schedule(NODE_CRON_SCHEDULE, async () => randomize(), {
-			noOverlap: !NODE_CRON_OVERLAP,
-			timezone: NODE_CRON_TIMEZONE,
+		cron.schedule(schedule, async () => randomize(), {
+			noOverlap: !scheduleOverlap,
+			timezone: scheduleTimezone,
 		})
 	}
 
@@ -125,7 +174,7 @@ async function main() {
 		return provider
 			.getBalance(signer)
 			.then((balance) => {
-				if (Number(ethers.formatEther(balance)) < MIN_BALANCE) {
+				if (Number(ethers.formatEther(balance)) < minBalance) {
 					console.info(
 						`> Low balance !!! ${ethers.formatEther(balance)} ${symbol} (${signer.address})`,
 					)
@@ -146,11 +195,11 @@ async function main() {
 
 		let isRandomized = false
 		const feeData = await randomizer.provider.getFeeData()
-		if (Number(feeData.gasPrice) / 10 ** 9 > MAX_GAS_PRICE_GWEI) {
+		if (Number(feeData.gasPrice) / 10 ** 9 > maxGasPrice) {
 			console.info(
 				`> Postponing randomize as current network gas price is too high: ${commas(
 					Number(feeData.gasPrice) / 10 ** 9,
-				)} gwei > ${commas(MAX_GAS_PRICE_GWEI)} gwei`,
+				)} gwei > ${commas(maxGasPrice)} gwei`,
 			)
 			setTimeout(randomize, POLLING_MSECS)
 			return
@@ -244,7 +293,7 @@ async function main() {
 			.then((result) => {
 				if (result.isRandomized) {
 					console.info(
-						`> Next randomizing schedule: "${NODE_CRON_SCHEDULE}" at ${NODE_CRON_TIMEZONE}`,
+						`> Next randomizing schedule: "${schedule}" at ${scheduleTimezone}`,
 					)
 				} else {
 					console.info(
@@ -258,7 +307,7 @@ async function main() {
 				console.error(err)
 				if (isRandomized) {
 					console.info(
-						`> Next randomizing schedule: "${NODE_CRON_SCHEDULE}" at ${NODE_CRON_TIMEZONE}`,
+						`> Next randomizing schedule: "${schedule}" at ${scheduleTimezone}`,
 					)
 				} else {
 					console.info(
@@ -268,23 +317,5 @@ async function main() {
 					setTimeout(randomize, POLLING_MSECS)
 				}
 			})
-	}
-}
-
-function _parseIntFromArgs(args, flag) {
-	const argIndex = args.indexOf(flag)
-	if (argIndex >= 0 && args.length > argIndex + 1) {
-		const value = parseInt(args[argIndex + 1], 10)
-		args.splice(argIndex, 2)
-		return value
-	}
-}
-
-function _spliceFromArgs(args, flag) {
-	const argIndex = args.indexOf(flag)
-	if (argIndex >= 0 && args.length > argIndex + 1) {
-		const value = args[argIndex + 1]
-		args.splice(argIndex, 2)
-		return value
 	}
 }

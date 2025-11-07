@@ -82,11 +82,13 @@
 		"postinstall": "node ./scripts/postinstall.cjs",
 		"prepare": "npx truffle compile --all --config ./truffle-config.cjs && npx hardhat compile --no-tests --force && npm run build && node ./scripts/prepare.cjs",
 		"verify": "npx hardhat run ./scripts/verify.js 2>&1",
+		"randomizer": "node ./src/bin/bots/randomizer.cjs",
 		"witeth": "cross-env-shell WITNET_SDK_RADON_ASSETS_PATH='../..' node ./src/bin/index.cjs"
 	},
 	"dependencies": {
 		"@witnet/sdk": "^1.2.2",
 		"cbor": "^10.0.11",
+		"commander": "^14.0.2",
 		"cross-env": "^10.1.0",
 		"dotenv": "^17.2.3",
 		"ethers": "^6.15.0",
