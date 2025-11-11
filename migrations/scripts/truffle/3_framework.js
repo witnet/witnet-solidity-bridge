@@ -624,6 +624,7 @@ async function defrostTarget(network, target, targetSpecs, targetAddr) {
 	let constructorArgs = await utils.readJsonFromFile(
 		"./migrations/constructorArgs.json",
 	)
+	if (!constructorArgs[network]) constructorArgs[network] = {};
 	constructorArgs = JSON.parse(
 		constructorArgs[network][target] || constructorArgs.default[target] || {},
 	)
@@ -634,6 +635,7 @@ async function defrostTarget(network, target, targetSpecs, targetAddr) {
 		ethUtils
 			.setLengthLeft(ethUtils.toBuffer(targetSpecs.vanity), 32)
 			.toString("hex")
+	console.log(constructorArgs, defrostSalt, targetSpecs.from)
 	const defrostAddr = await witnetDeployer.determineAddr.call(
 		defrostInitCode,
 		defrostSalt,
