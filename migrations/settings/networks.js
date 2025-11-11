@@ -509,7 +509,7 @@ export default {
 		port: 8514,
 		network_id: 534351,
 		verify: {
-			apiUrl: "https://api-sepolia.scrollscan.com/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainId=534351",
 			explorerUrl: "https://sepolia.scrollscan.com",
 		},
 	},

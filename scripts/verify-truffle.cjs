@@ -2,8 +2,8 @@
 
 const addresses = require("../migrations/addresses.json")
 const constructorArgs = require("../migrations/constructorArgs.json")
-const settings = require("../settings/index.js").default
-const utils = require("../src/utils.js").default
+const settings = require("../migrations/settings/index.js").default
+const utils = require("../migrations/scripts/utils.js").default
 
 const web3 = require("web3")
 
