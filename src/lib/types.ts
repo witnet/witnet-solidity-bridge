@@ -37,7 +37,7 @@ export enum PriceFeedOracles {
 	Witnet,
 	Erc2362,
 	Chainlink,
-	// Pyth,
+	Pyth,
 	// Redstone,
 }
 
