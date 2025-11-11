@@ -57,9 +57,10 @@
 	},
 	"files": [
 		"artifacts",
-		"build/contracts",
 		"dist",
 		"contracts",
+		"migrations/*.json",
+		"migrations/settings/artifacts.js",
 		"scripts",
 		"src/bin"
 	],
