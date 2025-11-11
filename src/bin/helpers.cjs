@@ -1,9 +1,9 @@
 const fs = require("node:fs")
 const merge = require("lodash.merge")
 
-const addresses = require("../../dist/migrations/addresses.json")
-const artifacts = require("../../dist/migrations/settings/artifacts.js").default
-const constructorArgs = require("../../dist/migrations/constructorArgs.json")
+const addresses = require("../../migrations/addresses.json")
+const artifacts = require("../../migrations/settings/artifacts.js").default
+const constructorArgs = require("../../migrations/constructorArgs.json")
 
 const DEFAULT_BATCH_SIZE = 64
 const DEFAULT_LIMIT = 64
