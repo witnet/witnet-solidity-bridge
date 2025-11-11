@@ -304,10 +304,8 @@ library WitPriceFeedsDataLib {
 
             // delete all metadata, but the update conditions
             Witnet.RadonHash _radonHash = Witnet.RadonHash.wrap(self.oracleSources);       
-            if (!_radonHash.isZero()) {
-                if (id4.equals(data().reverseIds[_radonHash])) {
-                    data().reverseIds[_radonHash] = IWitPriceFeedsTypes.ID4.wrap(0);
-                }
+            if (!_radonHash.isZero() && self.oracle == IWitPriceFeedsTypes.Oracles.Witnet) {
+                data().reverseIds[_radonHash] = IWitPriceFeedsTypes.ID4.wrap(0);
             }
             delete data().records[id4].lastUpdate;
             delete data().records[id4];
