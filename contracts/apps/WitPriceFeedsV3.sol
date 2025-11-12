@@ -62,7 +62,7 @@ contract WitPriceFeedsV3
     using WitPriceFeedsDataLib for UpdateConditions;
     using WitPriceFeedsDataLib for WitPriceFeedsDataLib.PriceFeed;
 
-    address immutable public __WIT_ORACLE;
+    address immutable internal __WIT_ORACLE;
 
     function class() virtual override public pure returns (string memory) {
         return type(WitPriceFeedsV3).name;
