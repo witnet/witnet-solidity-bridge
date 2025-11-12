@@ -1,6 +1,7 @@
 import { Witnet } from "@witnet/sdk"
 
-import * as cbor from "cbor"
+import { default as cbor } from "cbor"
+
 import {
 	AbiCoder,
 	Contract,

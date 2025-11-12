@@ -105,6 +105,7 @@
 		"@nomicfoundation/hardhat-verify": "^3.0.6",
 		"@openzeppelin/contracts": "^5.4.0",
 		"@openzeppelin/contracts-upgradeable": "^5.4.0",
+		"@types/cbor": "^5.0.1",
 		"@types/lodash.merge": "^4.6.9",
 		"@types/node": "^24.10.0",
 		"ado-contracts": "1.0.0",
