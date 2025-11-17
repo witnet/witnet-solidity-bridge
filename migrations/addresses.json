@@ -210,14 +210,14 @@
         },
         "core": {
             "WitOracleTrustableDefault": "0x329f2A734fF246215922DB1dD6a7061Bc91D400E",
-            "WitOracleRadonRegistryUpgradableDefault": "0x471c2b44f96Ab95B7688FAaD6fC081f6f464cd93",
+            "WitOracleRadonRegistryUpgradableDefault": "0x9eb578297AB4379402159f69C8A4942a9ECd9621",
             "WitOracleRadonRequestFactoryModalsDefault": "0xD28237c5d7C8C386377A13e6661642294657F35e",
             "WitOracleRadonRequestFactoryTemplatesDefault": "0x300c8ccc9526495BB7e5911105f0663Cb4c3a137",
             "WitOracleRadonRequestFactoryUpgradableDefault": "0x622400544d827043B9B064f29305f129C8c7ABA6"
         },
         "apps": {
             "WitPriceFeedsLegacyUpgradable": "0xb8776103adBfe48366E4B632d9b8cb322E3D524F",
-            "WitPriceFeedsV3Upgradable": "0xA24bf4A5c325f4E64f0f91b077A650A7f26dbB80",
+            "WitPriceFeedsV3Upgradable": "0xb9a77D2EAe20c5fB53cb8645Bef095F97e90c305",
             "WitPriceFeedsLegacyUpgradableBypass": "0x53D8311197aF484aE65A8D81ba2bbE3A388FE779"
         }
     },
