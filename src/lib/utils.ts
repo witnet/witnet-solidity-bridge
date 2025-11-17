@@ -221,6 +221,14 @@ export function getEvmNetworkByChainId(chainId: number): string | undefined {
 	else return undefined
 }
 
+export function getEvmNetworkId(network: string): number | undefined {
+	const found = Object.entries(helpers.supportedNetworks()).find(
+		([key]: [string, any]) => key.toLowerCase() === network.toLowerCase(),
+	)
+	if (found) return (found[1] as any)?.network_id;
+	else return undefined;
+}
+
 export function getEvmNetworkSymbol(network: string): string {
 	const found = Object.entries(helpers.supportedNetworks()).find(
 		([key]: [string, any]) => key.toLowerCase() === network.toLowerCase(),
