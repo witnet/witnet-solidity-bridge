@@ -1,6 +1,6 @@
 {
 	"name": "@witnet/solidity",
-	"version": "3.0.11",
+	"version": "3.0.12",
 	"description": "Wit/Oracle Solidity Framework for EVM-compatible chains",
 	"author": "Witnet Foundation <info@witnet.foundation>",
 	"license": "MIT",
@@ -62,7 +62,8 @@
 		"migrations/*.json",
 		"migrations/settings/artifacts.js",
 		"scripts",
-		"src/bin"
+		"src/bin",
+		".env_witnet"
 	],
 	"scripts": {
 		"build": "tsc -p tsconfig.json",
@@ -87,7 +88,7 @@
 		"witeth": "cross-env-shell WITNET_SDK_RADON_ASSETS_PATH='../..' node ./src/bin/index.cjs"
 	},
 	"dependencies": {
-		"@witnet/sdk": "^1.2.6",
+		"@witnet/sdk": "^1.2.7",
 		"cbor": "^10.0.11",
 		"commander": "^14.0.2",
 		"cross-env": "^10.1.0",
