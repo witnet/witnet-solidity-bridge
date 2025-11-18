@@ -1,12 +1,11 @@
 name: "Publish Randomizer bot in Docker"
 
 on:
-  push:
-    workflow_dispatch:
-      inputs:
-        version:
-          description: "The version tag to publish (as settled in package.json)"
-          required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version tag to publish (as settled in package.json)"
+        required: true
 
 jobs:
   build:
