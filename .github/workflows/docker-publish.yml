@@ -42,4 +42,4 @@ jobs:
           context: ./docker/randomizer
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ env.IMAGE_NAME }}:$${{ inputs.version }}
+          tags: ${{ env.IMAGE_NAME }}:${{ inputs.version }}

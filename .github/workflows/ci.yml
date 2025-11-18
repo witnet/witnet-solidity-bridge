@@ -1,4 +1,4 @@
-name: "CI/CD workflow"
+name: "CI workflow"
 
 on: 
   push:
@@ -17,7 +17,11 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Install dependencies
+      - name: Install pnpm
+        shell: bash
+        run: npm install -g pnpm 
+      
+      - name: Install package dependencies
         run: pnpm install
 
       - name: Check source code format
