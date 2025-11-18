@@ -1,4 +1,4 @@
-name: "Publish EVM-Randomizer bot in Docker"
+name: "Dockerize EVM-Randomizer bot"
 
 on:
   workflow_dispatch:
