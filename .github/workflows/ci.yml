@@ -1,0 +1,28 @@
+name: "CI/CD workflow"
+
+on: 
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check source code format
+        run: pnpm run fmt
+
+      - name: Compile Solidity contracts
+        run: npx hardhat compile
+
