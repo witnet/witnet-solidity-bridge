@@ -1,21 +1,20 @@
-const fs = require("node:fs")
-const merge = require("lodash.merge")
+const fs = require("node:fs");
+const merge = require("lodash.merge");
 
-const addresses = require("../../migrations/addresses.json")
-const artifacts = require("../../migrations/settings/artifacts.js").default
-const constructorArgs = require("../../migrations/constructorArgs.json")
+const addresses = require("../../migrations/addresses.json");
+const artifacts = require("../../migrations/settings/artifacts.js").default;
+const constructorArgs = require("../../migrations/constructorArgs.json");
 
-const DEFAULT_BATCH_SIZE = 64
-const DEFAULT_LIMIT = 64
-const DEFAULT_SINCE = -5000
-const WITNET_SDK_RADON_ASSETS_PATH =
-	process.env.WITNET_SDK_RADON_ASSETS_PATH || "../../../../witnet/assets"
+const DEFAULT_BATCH_SIZE = 64;
+const DEFAULT_LIMIT = 64;
+const DEFAULT_SINCE = -5000;
+const WITNET_SDK_RADON_ASSETS_PATH = process.env.WITNET_SDK_RADON_ASSETS_PATH || "../../../../witnet/assets";
 
-const isModuleInitialized = fs.existsSync("./witnet/assets/index.cjs")
+const isModuleInitialized = fs.existsSync("./witnet/assets/index.cjs");
 
 function* chunks(arr, n) {
 	for (let i = 0; i < arr.length; i += n) {
-		yield arr.slice(i, i + n)
+		yield arr.slice(i, i + n);
 	}
 }
 
@@ -40,204 +39,191 @@ const colors = {
 	mmagenta: (str) => `\x1b[0;95m${str}\x1b[0m`,
 	mred: (str) => `\x1b[91m${str}\x1b[0m`,
 	myellow: (str) => `\x1b[93m${str}\x1b[0m`,
-}
+};
 
 const colorstrip = (str) =>
-	str.replace(
-		/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-		"",
-	)
+	str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "");
 
 const commas = (number) => {
-	const parts = number?.toString().split(".") || [""]
+	const parts = number?.toString().split(".") || [""];
 	const result =
 		parts.length <= 1
 			? `${parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-			: `${parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${parts[1]}`
-	return result
-}
+			: `${parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${parts[1]}`;
+	return result;
+};
 
 function deleteExtraFlags(args) {
-	const deleted = []
+	const deleted = [];
 	return [
 		args?.filter((arg) => {
 			if (arg.startsWith("--")) {
-				deleted.push(arg.slice(2))
-				return false
+				deleted.push(arg.slice(2));
+				return false;
 			} else {
-				return true
+				return true;
 			}
 		}),
 		deleted,
-	]
+	];
 }
 
 function extractFlagsFromArgs(args, flags) {
-	const curated = {}
+	const curated = {};
 	if (args && Array.isArray(args) && flags) {
 		flags.forEach((flag) => {
-			const index = args.indexOf(`--${flag}`)
+			const index = args.indexOf(`--${flag}`);
 			if (index >= 0) {
-				curated[flag] = true
-				args.splice(index, 1)
+				curated[flag] = true;
+				args.splice(index, 1);
 			}
-		})
+		});
 	}
-	return [args || [], curated]
+	return [args || [], curated];
 }
 
 function extractOptionsFromArgs(args, options) {
-	const curated = {}
+	const curated = {};
 	if (args && Array.isArray(args) && options) {
 		options.forEach((option) => {
-			const index = args.indexOf(`--${option}`)
+			const index = args.indexOf(`--${option}`);
 			if (index >= 0) {
-				curated[option] = args[index]
+				curated[option] = args[index];
 				if (!args[index + 1] || args[index + 1].startsWith("--")) {
-					args.splice(index, 1)
-					curated[option] = undefined
+					args.splice(index, 1);
+					curated[option] = undefined;
 				} else {
-					curated[option] = args[index + 1]
-					args.splice(index, 2)
+					curated[option] = args[index + 1];
+					args.splice(index, 2);
 				}
 			}
-		})
+		});
 	}
-	return [args || [], curated]
+	return [args || [], curated];
 }
 
 function flattenObject(ob) {
-	const toReturn = {}
+	const toReturn = {};
 	for (const i in ob) {
-		if (!Object.hasOwn(ob, i)) continue
+		if (!Object.hasOwn(ob, i)) continue;
 		if (typeof ob[i] === "object" && ob[i] !== null) {
-			const flatObject = flattenObject(ob[i])
+			const flatObject = flattenObject(ob[i]);
 			for (const x in flatObject) {
-				if (!Object.hasOwn(flatObject, x)) continue
-				toReturn[`${i}.${x}`] = flatObject[x]
+				if (!Object.hasOwn(flatObject, x)) continue;
+				toReturn[`${i}.${x}`] = flatObject[x];
 			}
 		} else {
-			toReturn[i] = ob[i]
+			toReturn[i] = ob[i];
 		}
 	}
-	return toReturn
+	return toReturn;
 }
 
 function getNetworkAddresses(network) {
-	let res = addresses?.default
+	let res = addresses?.default;
 	getNetworkTagsFromString(network).forEach((net) => {
-		res = merge(res, addresses[net])
-	})
+		res = merge(res, addresses[net]);
+	});
 	return merge(
 		res,
 		fs.existsSync(`${WITNET_SDK_RADON_ASSETS_PATH}/../addresses.json`)
-			? require(`${WITNET_SDK_RADON_ASSETS_PATH}/../addresses.json`)[
-					network.toLowerCase()
-				]
+			? require(`${WITNET_SDK_RADON_ASSETS_PATH}/../addresses.json`)[network.toLowerCase()]
 			: {},
-	)
+	);
 }
 
 function getNetworkArtifacts(network) {
-	let res = artifacts?.default
+	let res = artifacts?.default;
 	getNetworkTagsFromString(network).forEach((net) => {
-		res = merge(res, artifacts[net])
-	})
-	return res
+		res = merge(res, artifacts[net]);
+	});
+	return res;
 }
 
 function getNetworkConstructorArgs(network) {
-	let res = {}
+	let res = {};
 	getNetworkTagsFromString(network).forEach((net) => {
-		res = merge(res, constructorArgs[net])
-	})
-	return res
+		res = merge(res, constructorArgs[net]);
+	});
+	return res;
 }
 
 function getNetworkTagsFromString(network) {
-	network = network ? network.toLowerCase() : "development"
-	const tags = []
-	const parts = network.split(":")
+	network = network ? network.toLowerCase() : "development";
+	const tags = [];
+	const parts = network.split(":");
 	for (let ix = 0; ix < parts.length; ix++) {
-		tags.push(parts.slice(0, ix + 1).join(":"))
+		tags.push(parts.slice(0, ix + 1).join(":"));
 	}
-	return tags
+	return tags;
 }
 
 function importRadonAssets(options) {
-	const assets = options?.legacy ? {} : require("@witnet/sdk/assets")
-	return isModuleInitialized &&
-		fs.existsSync(`${WITNET_SDK_RADON_ASSETS_PATH}/index.cjs`)
+	const assets = options?.legacy ? {} : require("@witnet/sdk/assets");
+	return isModuleInitialized && fs.existsSync(`${WITNET_SDK_RADON_ASSETS_PATH}/index.cjs`)
 		? merge(assets, require(`${WITNET_SDK_RADON_ASSETS_PATH}/index.cjs`))
-		: assets
+		: assets;
 }
 
 function orderKeys(obj) {
 	const keys = Object.keys(obj).sort(function keyOrder(k1, k2) {
-		if (k1 < k2) return -1
-		else if (k1 > k2) return +1
-		else return 0
-	})
-	let i
-	const after = {}
+		if (k1 < k2) return -1;
+		else if (k1 > k2) return +1;
+		else return 0;
+	});
+	let i;
+	const after = {};
 	for (i = 0; i < keys.length; i++) {
-		after[keys[i]] = obj[keys[i]]
-		delete obj[keys[i]]
+		after[keys[i]] = obj[keys[i]];
+		delete obj[keys[i]];
 	}
 	for (i = 0; i < keys.length; i++) {
-		obj[keys[i]] = after[keys[i]]
+		obj[keys[i]] = after[keys[i]];
 	}
-	return obj
+	return obj;
 }
 
 function prompter(promise) {
 	const loading = (() => {
-		const h = ["|", "/", "-", "\\"]
-		let i = 0
+		const h = ["|", "/", "-", "\\"];
+		let i = 0;
 		return setInterval(() => {
-			i = i > 3 ? 0 : i
-			process.stdout.write(`\b\b${h[i]} `)
-			i++
-		}, 50)
-	})()
+			i = i > 3 ? 0 : i;
+			process.stdout.write(`\b\b${h[i]} `);
+			i++;
+		}, 50);
+	})();
 	return promise.then((result) => {
-		clearInterval(loading)
-		process.stdout.write("\b\b")
-		return result
-	})
+		clearInterval(loading);
+		process.stdout.write("\b\b");
+		return result;
+	});
 }
 
 function readWitnetJsonFiles(...filenames) {
 	return Object.fromEntries(
 		filenames.map((key) => {
-			const filepath = `./witnet/${key}.json`
-			return [
-				key,
-				fs.existsSync(filepath) ? JSON.parse(fs.readFileSync(filepath)) : {},
-			]
+			const filepath = `./witnet/${key}.json`;
+			return [key, fs.existsSync(filepath) ? JSON.parse(fs.readFileSync(filepath)) : {}];
 		}),
-	)
+	);
 }
 
 function saveWitnetJsonFiles(data) {
 	Object.entries(data).forEach(([key, obj]) => {
-		const filepath = `./witnet/${key}.json`
-		if (!fs.existsSync(filepath)) fs.writeFileSync(filepath, "{}")
-		const json = merge(JSON.parse(fs.readFileSync(filepath)), obj)
-		fs.writeFileSync(filepath, JSON.stringify(json, null, 4), { flag: "w+" })
-	})
+		const filepath = `./witnet/${key}.json`;
+		if (!fs.existsSync(filepath)) fs.writeFileSync(filepath, "{}");
+		const json = merge(JSON.parse(fs.readFileSync(filepath)), obj);
+		fs.writeFileSync(filepath, JSON.stringify(json, null, 4), { flag: "w+" });
+	});
 }
 
 function supportedNetworks(ecosystem) {
-	const networks = require("../../migrations/settings/networks.js").default
+	const networks = require("../../migrations/settings/networks.js").default;
 	return Object.fromEntries(
 		Object.keys(constructorArgs)
 			.sort()
-			.filter(
-				(network) =>
-					network.indexOf(":") >= 0 &&
-					(!ecosystem || network.startsWith(ecosystem.toLowerCase())),
-			)
+			.filter((network) => network.indexOf(":") >= 0 && (!ecosystem || network.startsWith(ecosystem.toLowerCase())))
 			.map((network) => {
 				return [
 					network,
@@ -248,115 +234,104 @@ function supportedNetworks(ecosystem) {
 						symbol: networks[network]?.symbol || "ETH",
 						verified: networks[network]?.verify?.explorerUrl,
 					},
-				]
+				];
 			}),
-	)
+	);
 }
 
 function supportsNetwork(network) {
-	return network && Object.keys(constructorArgs).includes(network.toLowerCase())
+	return network && Object.keys(constructorArgs).includes(network.toLowerCase());
 }
 
 function traceHeader(header, color = colors.white, indent = "") {
-	console.info(`${indent}┌─${"─".repeat(header.length)}─┐`)
-	console.info(`${indent}│ ${color(header)} │`)
-	console.info(`${indent}└─${"─".repeat(header.length)}─┘`)
+	console.info(`${indent}┌─${"─".repeat(header.length)}─┐`);
+	console.info(`${indent}│ ${color(header)} │`);
+	console.info(`${indent}└─${"─".repeat(header.length)}─┘`);
 }
 
 function traceTable(records, options) {
 	const stringify = (data, humanizers, index) =>
-		humanizers?.[index]
-			? humanizers[index](data).toString()
-			: (data?.toString() ?? "")
-	const reduceMax = (numbers) =>
-		numbers.reduce((curr, prev) => Math.max(curr, prev), 0)
-	if (!options) options = {}
-	const indent = options?.indent || ""
-	const numColumns = reduceMax(records.map((record) => record?.length || 1))
-	const maxColumnWidth = options?.maxColumnWidth || 80
-	const table = transpose(records, numColumns)
+		humanizers?.[index] ? humanizers[index](data).toString() : (data?.toString() ?? "");
+	const reduceMax = (numbers) => numbers.reduce((curr, prev) => Math.max(curr, prev), 0);
+	if (!options) options = {};
+	const indent = options?.indent || "";
+	const numColumns = reduceMax(records.map((record) => record?.length || 1));
+	const maxColumnWidth = options?.maxColumnWidth || 80;
+	const table = transpose(records, numColumns);
 	options.widths =
 		options?.widths ||
 		table.map((column, index) => {
-			let maxWidth = reduceMax(
-				column.map(
-					(field) =>
-						colorstrip(stringify(field, options?.humanizers, index)).length,
-				),
-			)
+			let maxWidth = reduceMax(column.map((field) => colorstrip(stringify(field, options?.humanizers, index)).length));
 			if (options?.headlines?.[index]) {
-				maxWidth = Math.max(
-					maxWidth,
-					colorstrip(options.headlines[index].replaceAll(":", "")).length,
-				)
+				maxWidth = Math.max(maxWidth, colorstrip(options.headlines[index].replaceAll(":", "")).length);
 			}
-			return Math.min(maxWidth, maxColumnWidth)
-		})
-	let headline = options.widths.map((maxWidth) => "─".repeat(maxWidth))
-	console.info(`${indent}┌─${headline.join("─┬─")}─┐`)
+			return Math.min(maxWidth, maxColumnWidth);
+		});
+	let headline = options.widths.map((maxWidth) => "─".repeat(maxWidth));
+	console.info(`${indent}┌─${headline.join("─┬─")}─┐`);
 	if (options?.headlines) {
 		headline = options.widths.map((maxWidth, index) => {
-			const caption = options.headlines[index].replaceAll(":", "")
-			const captionLength = colorstrip(caption).length
-			return `${colors.white(caption)}${" ".repeat(maxWidth - captionLength)}`
-		})
-		console.info(`${indent}│ ${headline.join(" │ ")} │`)
-		headline = options.widths.map((maxWidth) => "─".repeat(maxWidth))
-		console.info(`${indent}├─${headline.join("─┼─")}─┤`)
+			const caption = options.headlines[index].replaceAll(":", "");
+			const captionLength = colorstrip(caption).length;
+			return `${colors.white(caption)}${" ".repeat(maxWidth - captionLength)}`;
+		});
+		console.info(`${indent}│ ${headline.join(" │ ")} │`);
+		headline = options.widths.map((maxWidth) => "─".repeat(maxWidth));
+		console.info(`${indent}├─${headline.join("─┼─")}─┤`);
 	}
 	for (let i = 0; i < records.length; i++) {
-		let line = ""
+		let line = "";
 		for (let j = 0; j < numColumns; j++) {
-			let data = table[j][i]
-			let color
+			let data = table[j][i];
+			let color;
 			if (options?.colors?.[j]) {
-				color = options.colors[j]
+				color = options.colors[j];
 			} else {
 				color =
 					typeof data === "string"
 						? colors.green
 						: Number(data) === data && data % 1 !== 0 // is float number?
 							? colors.yellow
-							: (x) => x
+							: (x) => x;
 			}
-			data = stringify(data, options?.humanizers, j)
+			data = stringify(data, options?.humanizers, j);
 			if (colorstrip(data).length > maxColumnWidth) {
 				while (colorstrip(data).length > maxColumnWidth - 3) {
-					data = data.slice(0, -1)
+					data = data.slice(0, -1);
 				}
-				data += "..."
+				data += "...";
 			}
-			const dataLength = colorstrip(data).length
+			const dataLength = colorstrip(data).length;
 			if (options?.headlines && options.headlines[j][0] === ":") {
-				data = `${color(data)}${" ".repeat(options.widths[j] - dataLength)}`
+				data = `${color(data)}${" ".repeat(options.widths[j] - dataLength)}`;
 			} else {
-				data = `${" ".repeat(options.widths[j] - dataLength)}${color(data)}`
+				data = `${" ".repeat(options.widths[j] - dataLength)}${color(data)}`;
 			}
-			line += `│ ${data} `
+			line += `│ ${data} `;
 		}
-		console.info(`${indent}${line}│`)
+		console.info(`${indent}${line}│`);
 	}
-	headline = options.widths.map((maxWidth) => "─".repeat(maxWidth))
-	console.info(`${indent}└─${headline.join("─┴─")}─┘`)
+	headline = options.widths.map((maxWidth) => "─".repeat(maxWidth));
+	console.info(`${indent}└─${headline.join("─┴─")}─┘`);
 }
 
 function transpose(records, numColumns) {
-	const columns = []
+	const columns = [];
 	for (let index = 0; index < numColumns; index++) {
-		columns.push(records.map((row) => row[index]))
+		columns.push(records.map((row) => row[index]));
 	}
-	return columns
+	return columns;
 }
 
 function traceData(header, data, width, color) {
-	process.stdout.write(header)
-	if (color) process.stdout.write(color)
+	process.stdout.write(header);
+	if (color) process.stdout.write(color);
 	for (let ix = 0; ix < data.length / width; ix++) {
-		if (ix > 0) process.stdout.write(" ".repeat(header.length))
-		process.stdout.write(data.slice(width * ix, width * (ix + 1)))
-		process.stdout.write("\n")
+		if (ix > 0) process.stdout.write(" ".repeat(header.length));
+		process.stdout.write(data.slice(width * ix, width * (ix + 1)));
+		process.stdout.write("\n");
 	}
-	if (color) process.stdout.write("\x1b[0m")
+	if (color) process.stdout.write("\x1b[0m");
 }
 
 module.exports = {
@@ -385,4 +360,4 @@ module.exports = {
 	commas,
 	colorstrip,
 	prompter,
-}
+};

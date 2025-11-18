@@ -1,84 +1,68 @@
-const fs = require("node:fs")
+const fs = require("node:fs");
 
-const create3 = require("./eth-create3.cjs")
-const utils = require("../src/utils.js").default
+const create3 = require("./eth-create3.cjs");
+const utils = require("../src/utils.js").default;
 
-const addresses = require("../migrations/addresses")
+const addresses = require("../migrations/addresses");
 
 module.exports = async () => {
-	let count = 0
-	let from
-	let hits = 10
-	let offset = 0
-	let network = "default"
-	let prefix = "0x00"
-	let suffix = "0x00"
+	let count = 0;
+	let from;
+	let hits = 10;
+	let offset = 0;
+	let network = "default";
+	let prefix = "0x00";
+	let suffix = "0x00";
 	process.argv.map((argv, index, args) => {
 		if (argv === "--offset") {
-			offset = parseInt(args[index + 1], 10)
+			offset = parseInt(args[index + 1], 10);
 		} else if (argv === "--prefix") {
-			prefix = args[index + 1].toLowerCase()
+			prefix = args[index + 1].toLowerCase();
 			if (!web3.utils.isHexStrict(prefix)) {
-				throw Error("--prefix: invalid hex string")
+				throw Error("--prefix: invalid hex string");
 			}
 		} else if (argv === "--suffix") {
-			suffix = args[index + 1].toLowerCase()
+			suffix = args[index + 1].toLowerCase();
 			if (!web3.utils.isHexStrict(suffix)) {
-				throw Error("--suffix: invalid hex string")
+				throw Error("--suffix: invalid hex string");
 			}
 		} else if (argv === "--hits") {
-			hits = parseInt(args[index + 1], 10)
+			hits = parseInt(args[index + 1], 10);
 		} else if (argv === "--network") {
-			;[, network] = utils.getRealmNetworkFromString(
-				args[index + 1].toLowerCase(),
-			)
+			[, network] = utils.getRealmNetworkFromString(args[index + 1].toLowerCase());
 		} else if (argv === "--from") {
-			from = args[index + 1]
+			from = args[index + 1];
 		}
-		return argv
-	})
+		return argv;
+	});
 	try {
-		from =
-			from ||
-			addresses[network]?.WitnetDeployer ||
-			addresses.default.WitnetDeployer
+		from = from || addresses[network]?.WitnetDeployer || addresses.default.WitnetDeployer;
 	} catch {
-		console.error(
-			`WitnetDeployer must have been previously deployed on network '${network}'.\n`,
-		)
-		console.info("Usage:\n")
-		console.info(
-			"  --hits     => Number of vanity hits to look for (default: 10)",
-		)
-		console.info("  --network  => Network name")
-		console.info("  --offset   => Salt starting value minus 1 (default: 0)")
-		console.info(
-			"  --prefix   => Prefix hex string to look for (default: 0x00)",
-		)
-		console.info(
-			"  --suffix   => suffix hex string to look for (default: 0x00)",
-		)
-		process.exit(1)
+		console.error(`WitnetDeployer must have been previously deployed on network '${network}'.\n`);
+		console.info("Usage:\n");
+		console.info("  --hits     => Number of vanity hits to look for (default: 10)");
+		console.info("  --network  => Network name");
+		console.info("  --offset   => Salt starting value minus 1 (default: 0)");
+		console.info("  --prefix   => Prefix hex string to look for (default: 0x00)");
+		console.info("  --suffix   => suffix hex string to look for (default: 0x00)");
+		process.exit(1);
 	}
-	console.log("From:      ", from)
-	console.log("Hits:      ", hits)
-	console.log("Offset:    ", offset)
-	console.log("Prefix:    ", prefix)
-	console.log("Suffix:    ", suffix)
-	console.log("=".repeat(55))
-	suffix = suffix.slice(2)
+	console.log("From:      ", from);
+	console.log("Hits:      ", hits);
+	console.log("Offset:    ", offset);
+	console.log("Prefix:    ", prefix);
+	console.log("Suffix:    ", suffix);
+	console.log("=".repeat(55));
+	suffix = suffix.slice(2);
 	while (count < hits) {
-		const salt = `0x${utils.padLeft(offset.toString(16), "0", 32)}`
-		const addr = create3(from, salt).toLowerCase()
+		const salt = `0x${utils.padLeft(offset.toString(16), "0", 32)}`;
+		const addr = create3(from, salt).toLowerCase();
 		if (addr.startsWith(prefix) && addr.endsWith(suffix)) {
-			const found = `${offset} => ${web3.utils.toChecksumAddress(addr)}`
-			console.log(found)
-			fs.appendFileSync(
-				`./migrations/salts/create3$${from.toLowerCase()}.tmp`,
-				`${found}\n`,
-			)
-			count++
+			const found = `${offset} => ${web3.utils.toChecksumAddress(addr)}`;
+			console.log(found);
+			fs.appendFileSync(`./migrations/salts/create3$${from.toLowerCase()}.tmp`, `${found}\n`);
+			count++;
 		}
-		offset++
+		offset++;
 	}
-}
+};

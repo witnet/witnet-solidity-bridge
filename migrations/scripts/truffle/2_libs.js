@@ -1,22 +1,18 @@
-const settings = require("../../settings/index").default
-const utils = require("../utils").default
+const settings = require("../../settings/index").default;
+const utils = require("../utils").default;
 
 module.exports = async (deployer, network, [, , from]) => {
-	const addresses = await utils.readJsonFromFile("./migrations/addresses.json")
-	if (!addresses[network]) addresses[network] = {}
-	if (!addresses[network]?.libs) addresses[network].libs = {}
+	const addresses = await utils.readJsonFromFile("./migrations/addresses.json");
+	if (!addresses[network]) addresses[network] = {};
+	if (!addresses[network]?.libs) addresses[network].libs = {};
 
-	const networkArtifacts = settings.getArtifacts(network)
-	const selection = utils.getWitnetArtifactsFromArgs()
+	const networkArtifacts = settings.getArtifacts(network);
+	const selection = utils.getWitnetArtifactsFromArgs();
 
 	for (const index in networkArtifacts.libs) {
-		const base = networkArtifacts.libs[index]
-		const impl = networkArtifacts.libs[base]
-		let libNetworkAddr = utils.getNetworkLibsArtifactAddress(
-			network,
-			addresses,
-			impl,
-		)
+		const base = networkArtifacts.libs[index];
+		const impl = networkArtifacts.libs[base];
+		let libNetworkAddr = utils.getNetworkLibsArtifactAddress(network, addresses, impl);
 
 		if (
 			process.argv.includes("--artifacts") &&
@@ -25,25 +21,22 @@ module.exports = async (deployer, network, [, , from]) => {
 			!selection.includes(impl) &&
 			!selection.includes(base)
 		) {
-			utils.traceHeader(`Skipped '${impl}`)
-			console.info(`   > library address:    \x1b[92m${libNetworkAddr}\x1b[0m`)
-			continue
+			utils.traceHeader(`Skipped '${impl}`);
+			console.info(`   > library address:    \x1b[92m${libNetworkAddr}\x1b[0m`);
+			continue;
 		}
 
-		const libImplArtifact = artifacts.require(impl)
-		let bytecodeChanged = false
+		const libImplArtifact = artifacts.require(impl);
+		let bytecodeChanged = false;
 		try {
-			const networkCode = (await web3.eth.getCode(libNetworkAddr)).slice(0, -86)
-			let targetCode = libImplArtifact.toJSON().deployedBytecode
-			targetCode =
-				targetCode.slice(0, 4) +
-				libNetworkAddr.slice(2).toLowerCase() +
-				targetCode.slice(44, -86)
+			const networkCode = (await web3.eth.getCode(libNetworkAddr)).slice(0, -86);
+			let targetCode = libImplArtifact.toJSON().deployedBytecode;
+			targetCode = targetCode.slice(0, 4) + libNetworkAddr.slice(2).toLowerCase() + targetCode.slice(44, -86);
 			if (targetCode !== networkCode) {
-				bytecodeChanged = true
+				bytecodeChanged = true;
 			}
 		} catch (err) {
-			console.error(`Cannot get code from ${libNetworkAddr}: ${err}`)
+			console.error(`Cannot get code from ${libNetworkAddr}: ${err}`);
 		}
 
 		if (
@@ -53,43 +46,29 @@ module.exports = async (deployer, network, [, , from]) => {
 			// or, no address found in addresses file, or no actual code deployed there
 			utils.isNullAddress(libNetworkAddr) ||
 			// or. --libs specified on CLI
-			process.argv.includes(
-				"--upgrade-all",
-			) /*&& libTargetAddr !== libNetworkAddr*/
+			process.argv.includes("--upgrade-all") /*&& libTargetAddr !== libNetworkAddr*/
 		) {
 			if (utils.isNullAddress(libNetworkAddr) || bytecodeChanged) {
-				await deployer.deploy(libImplArtifact, { from })
-				addresses[network].libs[impl] = libImplArtifact.address
-				libNetworkAddr = libImplArtifact.address
-				await utils.overwriteJsonFile("./migrations/addresses.json", addresses)
-				bytecodeChanged = false
+				await deployer.deploy(libImplArtifact, { from });
+				addresses[network].libs[impl] = libImplArtifact.address;
+				libNetworkAddr = libImplArtifact.address;
+				await utils.overwriteJsonFile("./migrations/addresses.json", addresses);
+				bytecodeChanged = false;
 			} else {
-				utils.traceHeader(
-					`Skipping '${impl}': no changes in deployed bytecode.`,
-				)
+				utils.traceHeader(`Skipping '${impl}': no changes in deployed bytecode.`);
 			}
 		} else {
-			utils.traceHeader(`Deployed '${impl}'`)
+			utils.traceHeader(`Deployed '${impl}'`);
 		}
 
 		// settle Truffle artifact address to the one found in file:
-		libImplArtifact.address = utils.getNetworkLibsArtifactAddress(
-			network,
-			addresses,
-			impl,
-		)
+		libImplArtifact.address = utils.getNetworkLibsArtifactAddress(network, addresses, impl);
 
 		if (bytecodeChanged) {
-			console.info(
-				`   > library address:  \x1b[30;43m${libImplArtifact.address}\x1b[0m`,
-			)
+			console.info(`   > library address:  \x1b[30;43m${libImplArtifact.address}\x1b[0m`);
 		} else {
-			console.info(
-				"   > library address:  \x1b[92m",
-				libImplArtifact.address,
-				"\x1b[0m",
-			)
+			console.info("   > library address:  \x1b[92m", libImplArtifact.address, "\x1b[0m");
 		}
-		console.info()
+		console.info();
 	}
-}
+};

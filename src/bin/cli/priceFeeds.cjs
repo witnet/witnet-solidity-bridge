@@ -1,32 +1,25 @@
-const helpers = require("../helpers.cjs")
-const moment = require("moment")
-const prompt = require("inquirer").createPromptModule()
+const helpers = require("../helpers.cjs");
+const moment = require("moment");
+const prompt = require("inquirer").createPromptModule();
 
-const { Witnet } = require("@witnet/sdk")
-const { utils, WitOracle } = require("../../../dist/src")
+const { Witnet } = require("@witnet/sdk");
+const { utils, WitOracle } = require("../../../dist/src");
 
 module.exports = async (options = {}, args = []) => {
-	;[args] = helpers.deleteExtraFlags(args)
+	[args] = helpers.deleteExtraFlags(args);
 
-	const witOracle = await WitOracle.fromJsonRpcUrl(
-		`http://127.0.0.1:${options?.port || 8545}`,
-		options?.signer,
-	)
+	const witOracle = await WitOracle.fromJsonRpcUrl(`http://127.0.0.1:${options?.port || 8545}`, options?.signer);
 
-	const { network, provider } = witOracle
-	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan)
-	const framework = await helpers.prompter(
-		utils.fetchWitOracleFramework(provider),
-	)
+	const { network, provider } = witOracle;
+	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);
+	const framework = await helpers.prompter(utils.fetchWitOracleFramework(provider));
 
-	let target = args[0]
-	let chosen = false
+	let target = args[0];
+	let chosen = false;
 	if (!target) {
-		const artifacts = Object.entries(framework).filter(([key]) =>
-			key.startsWith("WitPriceFeeds"),
-		)
+		const artifacts = Object.entries(framework).filter(([key]) => key.startsWith("WitPriceFeeds"));
 		if (artifacts.length === 1) {
-			target = artifacts[0][1].address
+			target = artifacts[0][1].address;
 		} else {
 			const selection = await prompt([
 				{
@@ -35,96 +28,81 @@ module.exports = async (options = {}, args = []) => {
 					name: "target",
 					type: "rawlist",
 				},
-			])
-			target = selection.target
-			chosen = true
+			]);
+			target = selection.target;
+			chosen = true;
 		}
 	}
 
-	let pfs
+	let pfs;
 	try {
-		pfs = await witOracle.getWitPriceFeedsAt(target)
+		pfs = await witOracle.getWitPriceFeedsAt(target);
 	} catch {
-		pfs = await witOracle.getWitPriceFeedsLegacyAt(target)
+		pfs = await witOracle.getWitPriceFeedsLegacyAt(target);
 	}
-	const artifact = await pfs.getEvmImplClass()
+	const artifact = await pfs.getEvmImplClass();
 	if (artifact.indexOf("Legacy") >= 0) {
-		pfs = await witOracle.getWitPriceFeedsLegacyAt(target)
+		pfs = await witOracle.getWitPriceFeedsLegacyAt(target);
 	}
-	const version = await pfs.getEvmImplVersion()
-	const maxWidth = Math.max(21, artifact.length + 2)
+	const version = await pfs.getEvmImplVersion();
+	const maxWidth = Math.max(21, artifact.length + 2);
 	console.info(
 		`> ${helpers.colors.lwhite(artifact)}:${" ".repeat(
 			maxWidth - artifact.length,
-		)}${chosen ? "" : `${helpers.colors.lblue(target)} `}${helpers.colors.blue(
-			`[ ${version} ]`,
-		)}`,
-	)
+		)}${chosen ? "" : `${helpers.colors.lblue(target)} `}${helpers.colors.blue(`[ ${version} ]`)}`,
+	);
 
-	let priceFeeds = (await pfs.lookupPriceFeeds()).sort((a, b) =>
-		a.symbol.localeCompare(b.symbol),
-	)
+	let priceFeeds = (await pfs.lookupPriceFeeds()).sort((a, b) => a.symbol.localeCompare(b.symbol));
 
 	if (!options["trace-back"]) {
-		const registry = await witOracle.getWitOracleRadonRegistry()
+		const registry = await witOracle.getWitOracleRadonRegistry();
 		priceFeeds = await helpers.prompter(
 			Promise.all(
 				priceFeeds.map(async (pf) => {
-					let providers = []
+					let providers = [];
 					if (pf?.oracle && pf.oracle.class === "Witnet") {
-						const bytecode = await registry.lookupRadonRequestBytecode(
-							pf.oracle.sources,
-						)
-						const request = Witnet.Radon.RadonRequest.fromBytecode(bytecode)
+						const bytecode = await registry.lookupRadonRequestBytecode(pf.oracle.sources);
+						const request = Witnet.Radon.RadonRequest.fromBytecode(bytecode);
 						try {
-							const dryrun = JSON.parse(await request.execDryRun(true))
+							const dryrun = JSON.parse(await request.execDryRun(true));
 							// const result = dryrun.tally.result
 							providers = request.sources
 								.map((source, index) => {
-									let authority = source.authority.split(".").slice(-2)[0]
-									authority = authority[0].toUpperCase() + authority.slice(1)
+									let authority = source.authority.split(".").slice(-2)[0];
+									authority = authority[0].toUpperCase() + authority.slice(1);
 									return dryrun.retrieve[index].result?.RadonInteger
 										? helpers.colors.mmagenta(authority)
-										: helpers.colors.red(authority)
+										: helpers.colors.red(authority);
 								})
-								.sort((a, b) =>
-									helpers.colorstrip(a).localeCompare(helpers.colorstrip(b)),
-								)
+								.sort((a, b) => helpers.colorstrip(a).localeCompare(helpers.colorstrip(b)));
 						} catch (_err) {
 							providers = request.sources
 								.map((source) => {
-									const authority = source.authority.split(".").slice(-2)[0]
-									return helpers.colors.magenta(
-										authority[0].toUpperCase() + authority.slice(1),
-									)
+									const authority = source.authority.split(".").slice(-2)[0];
+									return helpers.colors.magenta(authority[0].toUpperCase() + authority.slice(1));
 								})
-								.sort((a, b) =>
-									helpers.colorstrip(a).localeCompare(helpers.colorstrip(b)),
-								)
+								.sort((a, b) => helpers.colorstrip(a).localeCompare(helpers.colorstrip(b)));
 						}
 					} else if (pf?.oracle) {
 						providers = [
 							helpers.colors.mblue(
 								`${pf.oracle.class}:${
-									pf.oracle.sources !==
-									"0x0000000000000000000000000000000000000000000000000000000000000000"
+									pf.oracle.sources !== "0x0000000000000000000000000000000000000000000000000000000000000000"
 										? `${pf.oracle.target}:${pf.oracle.sources.slice(2, 10)}`
 										: pf.oracle.target
 								}`,
 							),
-						]
+						];
 					} else if (pf?.mapper) {
-						providers = pf.mapper.deps.map((dep) =>
-							helpers.colors.gray(dep.split(".").pop().toLowerCase()),
-						)
+						providers = pf.mapper.deps.map((dep) => helpers.colors.gray(dep.split(".").pop().toLowerCase()));
 					}
 					return {
 						...pf,
 						providers,
-					}
+					};
 				}),
 			).catch((err) => console.error(err)),
-		)
+		);
 	}
 
 	if (priceFeeds?.length > 0) {
@@ -133,26 +111,17 @@ module.exports = async (options = {}, args = []) => {
 				pf.id4,
 				pf.symbol,
 				pf.lastUpdate.timestamp ? pf.lastUpdate.price.toFixed(6) : "",
-				pf.lastUpdate.timestamp
-					? moment.unix(Number(pf.lastUpdate.timestamp)).fromNow()
-					: "",
+				pf.lastUpdate.timestamp ? moment.unix(Number(pf.lastUpdate.timestamp)).fromNow() : "",
 				...(options["trace-back"]
 					? [
-							pf.lastUpdate.trail !==
-							"0x0000000000000000000000000000000000000000000000000000000000000000"
+							pf.lastUpdate.trail !== "0x0000000000000000000000000000000000000000000000000000000000000000"
 								? helpers.colors.mmagenta(pf.lastUpdate.trail.slice(2))
 								: "",
 						]
 					: [pf?.providers?.join(" ")]),
 			]),
 			{
-				colors: [
-					helpers.colors.lwhite,
-					helpers.colors.mgreen,
-					helpers.colors.mcyan,
-					helpers.colors.yellow,
-					undefined,
-				],
+				colors: [helpers.colors.lwhite, helpers.colors.mgreen, helpers.colors.mcyan, helpers.colors.yellow, undefined],
 				headlines: [
 					":ID4",
 					":CAPTION",
@@ -163,8 +132,8 @@ module.exports = async (options = {}, args = []) => {
 						: ":DATA PROVIDERS",
 				],
 			},
-		)
+		);
 	} else {
-		console.info("> No price feeds currently supported.")
+		console.info("> No price feeds currently supported.");
 	}
-}
+};

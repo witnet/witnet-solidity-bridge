@@ -1,34 +1,19 @@
-import type { Witnet } from "@witnet/sdk"
-import {
-	type BlockTag,
-	Contract,
-	type EventLog,
-	JsonRpcProvider,
-	type JsonRpcSigner,
-} from "ethers"
-import type {
-	WitOracleQuery,
-	WitOracleQueryParams,
-	WitOracleQueryResponse,
-	WitOracleQueryStatus,
-} from "../types.js"
-import {
-	abiDecodeQueryStatus,
-	abiEncodeWitOracleQueryParams,
-	getEvmNetworkByChainId,
-} from "../utils.js"
+import type { Witnet } from "@witnet/sdk";
+import { type BlockTag, Contract, type EventLog, JsonRpcProvider, type JsonRpcSigner } from "ethers";
+import type { WitOracleQuery, WitOracleQueryParams, WitOracleQueryResponse, WitOracleQueryStatus } from "../types.js";
+import { abiDecodeQueryStatus, abiEncodeWitOracleQueryParams, getEvmNetworkByChainId } from "../utils.js";
 
-import { WitArtifact } from "./WitArtifact.js"
-import { WitOracleConsumer } from "./WitOracleConsumer.js"
-import { WitOracleRadonRegistry } from "./WitOracleRadonRegistry.js"
+import { WitArtifact } from "./WitArtifact.js";
+import { WitOracleConsumer } from "./WitOracleConsumer.js";
+import { WitOracleRadonRegistry } from "./WitOracleRadonRegistry.js";
 import {
 	WitOracleRadonRequestFactory,
 	WitOracleRadonRequestModal,
 	WitOracleRadonRequestTemplate,
-} from "./WitOracleRadonRequestFactory.js"
-import { WitPriceFeeds } from "./WitPriceFeeds.js"
-import { WitPriceFeedsLegacy } from "./WitPriceFeedsLegacy.js"
-import { WitRandomness } from "./WitRandomness.js"
+} from "./WitOracleRadonRequestFactory.js";
+import { WitPriceFeeds } from "./WitPriceFeeds.js";
+import { WitPriceFeedsLegacy } from "./WitPriceFeedsLegacy.js";
+import { WitRandomness } from "./WitRandomness.js";
 
 /**
  * Wrapper class for the Wit/Oracle contract as deployed in some specified EVM network.
@@ -39,7 +24,7 @@ import { WitRandomness } from "./WitRandomness.js"
  */
 export class WitOracle extends WitArtifact {
 	constructor(signer: JsonRpcSigner, network: string) {
-		super(signer, network, "WitOracle")
+		super(signer, network, "WitOracle");
 	}
 
 	/**
@@ -49,35 +34,27 @@ export class WitOracle extends WitArtifact {
 	 * @param url ETH/RPC endpoint URL.
 	 * @param signer Specific signer address, other than default, to use for signing EVM transactions.
 	 */
-	public static async fromJsonRpcUrl(
-		url: string,
-		signerId?: number | string,
-	): Promise<WitOracle> {
+	public static async fromJsonRpcUrl(url: string, signerId?: number | string): Promise<WitOracle> {
 		const provider = new JsonRpcProvider(url, undefined, {
 			pollingInterval: 5000,
-		})
-		const signer = await provider.getSigner(signerId)
-		const chainId = Number((await provider.getNetwork()).chainId)
-		const network = getEvmNetworkByChainId(chainId)
+		});
+		const signer = await provider.getSigner(signerId);
+		const chainId = Number((await provider.getNetwork()).chainId);
+		const network = getEvmNetworkByChainId(chainId);
 		if (!network) {
-			throw new Error(`WitOracle: unsupported chain id: ${chainId}`)
+			throw new Error(`WitOracle: unsupported chain id: ${chainId}`);
 		}
-		return new WitOracle(signer, network)
+		return new WitOracle(signer, network);
 	}
 
 	public async estimateBaseFee(evmGasPrice: bigint): Promise<bigint> {
-		return this.contract
-			.getFunction("estimateBaseFee(uint256)")
-			.staticCall(evmGasPrice)
+		return this.contract.getFunction("estimateBaseFee(uint256)").staticCall(evmGasPrice);
 	}
 
-	public async estimateBaseFeeWithCallback(
-		evmGasPrice: bigint,
-		evmCallbackGas: number,
-	): Promise<bigint> {
+	public async estimateBaseFeeWithCallback(evmGasPrice: bigint, evmCallbackGas: number): Promise<bigint> {
 		return this.contract
 			.getFunction("estimateBaseFeeWithCallback(uint256,uint24)")
-			.staticCall(evmGasPrice, evmCallbackGas)
+			.staticCall(evmGasPrice, evmCallbackGas);
 	}
 
 	public async estimateExtraFee(
@@ -87,33 +64,29 @@ export class WitOracle extends WitArtifact {
 	): Promise<bigint> {
 		return this.contract
 			.getFunction("estimateExtraFee(uint256,uint256,(uint16,uint16,uint64)")
-			.staticCall(
-				evmGasPrice,
-				evmWitPrice,
-				abiEncodeWitOracleQueryParams(queryParams),
-			)
+			.staticCall(evmGasPrice, evmWitPrice, abiEncodeWitOracleQueryParams(queryParams));
 	}
 
 	public async filterWitOracleQueryEvents(options: {
-		fromBlock: BlockTag
-		toBlock?: BlockTag
+		fromBlock: BlockTag;
+		toBlock?: BlockTag;
 		where?: {
-			evmRequester?: string
-			queryRadHash?: Witnet.Hash
-		}
+			evmRequester?: string;
+			queryRadHash?: Witnet.Hash;
+		};
 	}): Promise<
 		Array<{
-			evmBlockNumber: bigint
-			evmRequester: string
-			evmTransactionHash: string
-			queryId: bigint
-			queryRadHash: Witnet.Hash
-			queryParams: WitOracleQueryParams
+			evmBlockNumber: bigint;
+			evmRequester: string;
+			evmTransactionHash: string;
+			queryId: bigint;
+			queryRadHash: Witnet.Hash;
+			queryParams: WitOracleQueryParams;
 		}>
 	> {
 		const witOracleQueryEvent = this.contract.filters[
 			"WitOracleQuery(address indexed,uint256,uint256,uint64,bytes32,(uint16,uint16,uint64))"
-		](options?.where?.evmRequester)
+		](options?.where?.evmRequester);
 		return this.contract
 			.queryFilter(witOracleQueryEvent, options.fromBlock, options?.toBlock)
 			.then((logs) =>
@@ -122,9 +95,7 @@ export class WitOracle extends WitArtifact {
 						!log.removed &&
 						// && (!options?.where?.evmRequester || (log as EventLog).args?.requester === options.where.evmRequester)
 						(!options?.where?.queryRadHash ||
-							(log as EventLog).args?.radonHash.indexOf(
-								options.where.queryRadHash,
-							) >= 0),
+							(log as EventLog).args?.radonHash.indexOf(options.where.queryRadHash) >= 0),
 				),
 			)
 			.then((logs) =>
@@ -140,35 +111,35 @@ export class WitOracle extends WitArtifact {
 						resultMaxSize: (log as EventLog).args.radonParams[0] as number,
 					} as WitOracleQueryParams,
 				})),
-			)
+			);
 	}
 
 	public async filterWitOracleReportEvents(options: {
-		fromBlock: BlockTag
-		toBlock?: BlockTag
+		fromBlock: BlockTag;
+		toBlock?: BlockTag;
 		where?: {
-			evmOrigin?: string
-			evmConsumer?: string
-			queryRadHash?: Witnet.Hash
-		}
+			evmOrigin?: string;
+			evmConsumer?: string;
+			queryRadHash?: Witnet.Hash;
+		};
 	}): Promise<
 		Array<{
-			evmBlockNumber: bigint
-			evmOrigin: string
-			evmConsumer: string
-			evmReporter: string
-			evmTransactionHash: string
-			witDrTxHash: Witnet.Hash
-			queryRadHash: Witnet.Hash
-			queryParams: WitOracleQueryParams
-			resultCborBytes: Witnet.HexString
-			resultTimestamp: number
+			evmBlockNumber: bigint;
+			evmOrigin: string;
+			evmConsumer: string;
+			evmReporter: string;
+			evmTransactionHash: string;
+			witDrTxHash: Witnet.Hash;
+			queryRadHash: Witnet.Hash;
+			queryParams: WitOracleQueryParams;
+			resultCborBytes: Witnet.HexString;
+			resultTimestamp: number;
 		}>
 	> {
 		const witOracleReportEvent = this.contract.filters.WitOracleReport(
 			options?.where?.evmOrigin,
 			options?.where?.evmConsumer,
-		)
+		);
 		return this.contract
 			.queryFilter(witOracleReportEvent, options.fromBlock, options?.toBlock)
 			.then((logs) =>
@@ -176,9 +147,7 @@ export class WitOracle extends WitArtifact {
 					(log) =>
 						!log.removed &&
 						(!options?.where?.queryRadHash ||
-							(log as EventLog).args?.queryRadHash.indexOf(
-								options.where.queryRadHash,
-							) >= 0),
+							(log as EventLog).args?.queryRadHash.indexOf(options.where.queryRadHash) >= 0),
 				),
 			)
 			.then((logs) =>
@@ -198,19 +167,19 @@ export class WitOracle extends WitArtifact {
 					resultCborBytes: (log as EventLog).args.resultCborBytes,
 					resultTimestamp: Number((log as EventLog).args.resultTimestamp),
 				})),
-			)
+			);
 	}
 
 	public async getEvmChainId(): Promise<number> {
-		return this.provider.getNetwork().then((network) => Number(network.chainId))
+		return this.provider.getNetwork().then((network) => Number(network.chainId));
 	}
 
 	public async getEvmChannel(): Promise<Witnet.HexString> {
-		return this.contract.getFunction("channel()").staticCall()
+		return this.contract.getFunction("channel()").staticCall();
 	}
 
 	public async getNextQueryId(): Promise<bigint> {
-		return this.contract.getFunction("getNextQueryId()").staticCall()
+		return this.contract.getFunction("getNextQueryId()").staticCall();
 	}
 
 	public async getQuery(queryId: bigint): Promise<WitOracleQuery> {
@@ -234,65 +203,46 @@ export class WitOracle extends WitArtifact {
 				resultDrTxHash: result[1][2],
 				resultCborBytes: result[1][3],
 			},
-		}))
+		}));
 	}
 
-	public async getQueryResponse(
-		queryId: bigint,
-	): Promise<WitOracleQueryResponse> {
-		return this.contract.getQueryResponse
-			.staticCall(queryId)
-			.then((result) => ({
-				disputer: result[4],
-				reporter: result[0],
-				resultTimestamp: Number(result[1].toString()),
-				resultDrTxHash: result[2],
-				resultCborBytes: result[3],
-			}))
+	public async getQueryResponse(queryId: bigint): Promise<WitOracleQueryResponse> {
+		return this.contract.getQueryResponse.staticCall(queryId).then((result) => ({
+			disputer: result[4],
+			reporter: result[0],
+			resultTimestamp: Number(result[1].toString()),
+			resultDrTxHash: result[2],
+			resultCborBytes: result[3],
+		}));
 	}
 
-	public async getQueryResultStatusDescription(
-		queryId: bigint,
-	): Promise<string> {
-		let reason
+	public async getQueryResultStatusDescription(queryId: bigint): Promise<string> {
+		let reason;
 		try {
 			try {
-				reason =
-					await this.contract.getQueryResultStatusDescription.staticCall(
-						queryId,
-					)
+				reason = await this.contract.getQueryResultStatusDescription.staticCall(queryId);
 			} catch {
 				const legacy = new Contract(
 					this.address,
-					[
-						"function getQueryResultError(uint256) public view returns ((uint8,string))",
-					],
+					["function getQueryResultError(uint256) public view returns ((uint8,string))"],
 					this.signer,
-				)
-				reason = await legacy.getQueryResultError
-					.staticCall(queryId)
-					.then((result) => result[1])
+				);
+				reason = await legacy.getQueryResultError.staticCall(queryId).then((result) => result[1]);
 			}
 		} catch {
-			reason = "(unparsable error)"
+			reason = "(unparsable error)";
 		}
-		return reason
+		return reason;
 	}
 
-	public async getQueryStatuses(
-		queryIds: bigint[],
-	): Promise<Array<WitOracleQueryStatus>> {
+	public async getQueryStatuses(queryIds: bigint[]): Promise<Array<WitOracleQueryStatus>> {
 		return this.contract.getQueryStatusBatch
 			.staticCall(queryIds)
-			.then((statuses: Array<bigint>) =>
-				statuses.map((value) => abiDecodeQueryStatus(value)),
-			)
+			.then((statuses: Array<bigint>) => statuses.map((value) => abiDecodeQueryStatus(value)));
 	}
 
-	public async getWitOracleConsumerAt(
-		target: string,
-	): Promise<WitOracleConsumer> {
-		return WitOracleConsumer.at(this, target)
+	public async getWitOracleConsumerAt(target: string): Promise<WitOracleConsumer> {
+		return WitOracleConsumer.at(this, target);
 	}
 
 	/**
@@ -302,7 +252,7 @@ export class WitOracle extends WitArtifact {
 	 * or Wit/Oracle query results pushed into smart contracts from offchain workflows.
 	 */
 	public async getWitOracleRadonRegistry(): Promise<WitOracleRadonRegistry> {
-		return new WitOracleRadonRegistry(this.signer, this.network)
+		return new WitOracleRadonRegistry(this.signer, this.network);
 	}
 
 	/**
@@ -312,10 +262,7 @@ export class WitOracle extends WitArtifact {
 	 * the set of data sources they are built on.
 	 */
 	public async getWitOracleRadonRequestFactory(): Promise<WitOracleRadonRequestFactory> {
-		return WitOracleRadonRequestFactory.deployed(
-			this,
-			await this.getWitOracleRadonRegistry(),
-		)
+		return WitOracleRadonRequestFactory.deployed(this, await this.getWitOracleRadonRegistry());
 	}
 
 	/**
@@ -323,10 +270,8 @@ export class WitOracle extends WitArtifact {
 	 * `IWitOracleRadonRequestTemplate` contracts enable smart contracts to formally verify Radon Requests
 	 * built out out of a set of parameterized Witnet-compliant data sources, on the fly.
 	 */
-	public async getWitOracleRadonRequestTemplateAt(
-		target: string,
-	): Promise<WitOracleRadonRequestTemplate> {
-		return WitOracleRadonRequestTemplate.at(this, target)
+	public async getWitOracleRadonRequestTemplateAt(target: string): Promise<WitOracleRadonRequestTemplate> {
+		return WitOracleRadonRequestTemplate.at(this, target);
 	}
 
 	/**
@@ -335,23 +280,19 @@ export class WitOracle extends WitArtifact {
 	 * built out out of a single Radon Retrieval and multiple data providers, all of them expected to
 	 * provided exactly the same data.
 	 */
-	public async getWitOracleRadonRequestModalAt(
-		target: string,
-	): Promise<WitOracleRadonRequestModal> {
-		return WitOracleRadonRequestModal.arguments(this, target)
+	public async getWitOracleRadonRequestModalAt(target: string): Promise<WitOracleRadonRequestModal> {
+		return WitOracleRadonRequestModal.arguments(this, target);
 	}
 
 	public async getWitPriceFeedsAt(target: string): Promise<WitPriceFeeds> {
-		return WitPriceFeeds.at(this, target)
+		return WitPriceFeeds.at(this, target);
 	}
 
-	public async getWitPriceFeedsLegacyAt(
-		target: string,
-	): Promise<WitPriceFeedsLegacy> {
-		return WitPriceFeedsLegacy.at(this, target)
+	public async getWitPriceFeedsLegacyAt(target: string): Promise<WitPriceFeedsLegacy> {
+		return WitPriceFeedsLegacy.at(this, target);
 	}
 
 	public async getWitRandomnessAt(target: string): Promise<WitRandomness> {
-		return WitRandomness.at(this, target)
+		return WitRandomness.at(this, target);
 	}
 }

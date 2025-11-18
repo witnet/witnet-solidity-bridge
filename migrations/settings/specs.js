@@ -7,10 +7,8 @@ export default {
 				types: ["(uint32, uint32, uint32, uint32)"],
 				values: [
 					[
-						/* _reportResultGasBase */ 58282,
-						/* _reportResultWithCallbackGasBase */ 65273,
-						/* _reportResultWithCallbackRevertGasBase */ 69546,
-						/* _sstoreFromZeroGas */ 20000,
+						/* _reportResultGasBase */ 58282, /* _reportResultWithCallbackGasBase */ 65273,
+						/* _reportResultWithCallbackRevertGasBase */ 69546, /* _sstoreFromZeroGas */ 20000,
 					],
 				],
 			},
@@ -20,10 +18,7 @@ export default {
 			baseLibs: ["WitOracleTrustlessDataLib"],
 			immutables: {
 				types: ["uint256", "uint256"],
-				values: [
-					/* _evmQueryAwaitingBlocks */ 16,
-					/* _evmQueryReportingStake */ "1000000000000000000",
-				],
+				values: [/* _evmQueryAwaitingBlocks */ 16, /* _evmQueryReportingStake */ "1000000000000000000"],
 			},
 		},
 		WitOracleRadonRegistry: {
@@ -31,10 +26,7 @@ export default {
 			vanity: 6765579443, // 0x000B61Fe075F545fd37767f40391658275900000
 		},
 		WitOracleRadonRequestFactory: {
-			baseDeps: [
-				"WitOracleRadonRequestFactoryModals",
-				"WitOracleRadonRequestFactoryTemplates",
-			],
+			baseDeps: ["WitOracleRadonRequestFactoryModals", "WitOracleRadonRequestFactoryTemplates"],
 			vanity: 260368098, // 0x000FF9f888B1415Da64cc985f775380a94b40000
 		},
 		WitOracleRadonRequestFactoryModals: {
@@ -74,4 +66,4 @@ export default {
 			},
 		},
 	},
-}
+};

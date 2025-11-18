@@ -27,8 +27,7 @@ export default {
 		symbol: "AVAX",
 		verify: {
 			apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
-			apiUrl:
-				"https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan/api",
+			apiUrl: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan/api",
 			explorerUrl: "https://snowtrace.io",
 		},
 	},
@@ -38,8 +37,7 @@ export default {
 		symbol: "AVAX",
 		verify: {
 			apiKey: process.env.ETHERSCAN_ROUTESCAN_API_KEY,
-			apiUrl:
-				"https://api.routescan.io/v2/network/testnet/evm/43113/etherscan/api",
+			apiUrl: "https://api.routescan.io/v2/network/testnet/evm/43113/etherscan/api",
 			explorerUrl: "https://testnet.snowtrace.io",
 		},
 	},
@@ -173,8 +171,7 @@ export default {
 		symbol: "CRO",
 		verify: {
 			apiKey: process.env.ETHERSCAN_CRONOS_API_KEY,
-			apiUrl:
-				"https://explorer-api.cronos.org/testnet/api/v1/hardhat/contract?apikey=G99km4eqHKfvEgpk6Lscsg3Y15QVLQLK",
+			apiUrl: "https://explorer-api.cronos.org/testnet/api/v1/hardhat/contract?apikey=G99km4eqHKfvEgpk6Lscsg3Y15QVLQLK",
 			explorerUrl: "https://explorer.cronos.org/testnet",
 		},
 	},
@@ -409,8 +406,7 @@ export default {
 		network_id: 65,
 		symbol: "OKT",
 		verify: {
-			apiUrl:
-				"https://www.oklink.com/api/explorer/v1/contract/verify/async/api",
+			apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api",
 			explorerUrl: "https://www.okx.com/explorer/oktc",
 		},
 	},
@@ -420,8 +416,7 @@ export default {
 		network_id: 66,
 		symbol: "OKT",
 		verify: {
-			apiUrl:
-				"https://www.oklink.com/api/explorer/v1/contract/verify/async/api/okctest",
+			apiUrl: "https://www.oklink.com/api/explorer/v1/contract/verify/async/api/okctest",
 			explorerUrl: "https://www.okx.com/explorer/oktc-test",
 		},
 	},
@@ -594,4 +589,4 @@ export default {
 			explorerUrl: "https://sepolia-era.zksync.network",
 		},
 	},
-}
+};

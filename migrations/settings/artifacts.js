@@ -9,12 +9,9 @@ export default {
 		core: {
 			WitOracle: "WitOracleTrustableDefault",
 			WitOracleRadonRegistry: "WitOracleRadonRegistryUpgradableDefault",
-			WitOracleRadonRequestFactory:
-				"WitOracleRadonRequestFactoryUpgradableDefault",
-			WitOracleRadonRequestFactoryModals:
-				"WitOracleRadonRequestFactoryModalsDefault",
-			WitOracleRadonRequestFactoryTemplates:
-				"WitOracleRadonRequestFactoryTemplatesDefault",
+			WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableDefault",
+			WitOracleRadonRequestFactoryModals: "WitOracleRadonRequestFactoryModalsDefault",
+			WitOracleRadonRequestFactoryTemplates: "WitOracleRadonRequestFactoryTemplatesDefault",
 		},
 		libs: {
 			WitOracleDataLib: "WitOracleDataLib",
@@ -33,8 +30,7 @@ export default {
 	"conflux:core": {
 		WitnetDeployer: "WitnetDeployerConfluxCore",
 		core: {
-			WitOracleRadonRequestFactory:
-				"WitOracleRadonRequestFactoryUpgradableConfluxCore",
+			WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore",
 		},
 	},
 	"ethereum:sepolia": {
@@ -48,8 +44,7 @@ export default {
 	meter: {
 		WitnetDeployer: "WitnetDeployerMeter",
 		core: {
-			WitOracleRadonRequestFactory:
-				"WitOracleRadonRequestFactoryUpgradableConfluxCore",
+			WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore",
 		},
 	},
 	optimism: {
@@ -81,4 +76,4 @@ export default {
 		WitnetDeployer: "WitnetDeployerDeferred",
 		core: { WitOracle: "WitOracleTrustableObscuro" },
 	},
-}
+};
