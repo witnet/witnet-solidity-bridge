@@ -68,7 +68,7 @@ export default {
 			enabled: true,
 		},
 		etherscan: {
-			apiKey: process.env.ETHERSCAN_API_KEY_V2,
+			apiKey: process.env.ETHERSCAN_API_KEY_V2 || "MY_API_KEY",
 		},
 		sourcify: {
 			enabled: false,
