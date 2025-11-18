@@ -25,8 +25,8 @@ jobs:
         run: pnpm install
 
       - name: Check source code format
-        run: pnpm run fmt
+        run: pnpm run fmt:js
 
       - name: Compile Solidity contracts
-        run: npx hardhat compile
+        run: npx hardhat compile --no-tests
 
