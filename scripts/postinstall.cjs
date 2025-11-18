@@ -7,6 +7,5 @@ if (!fs.existsSync(".no-postinstall") && !fs.existsSync(`${process.env.INIT_CWD}
 }
 
 if (fs.existsSync("./build/contracts")) {
-	exec('sed -i -- \"/\bsourcePath\b/d\" ./build/contracts/*.json');
+	exec('sed -i -- "/\bsourcePath\b/d" ./build/contracts/*.json');
 }
-
