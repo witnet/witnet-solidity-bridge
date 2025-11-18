@@ -1,4 +1,15 @@
+.bak
 .dockerignore
-.old
+.gitingore
+.npmignore
+.solhint.json
+.solhintignore
+biome.json
+artifacts/
+build/
+cache/
+dist/
 docker/
+node_modules/
 **/.env
+**/*.tgz

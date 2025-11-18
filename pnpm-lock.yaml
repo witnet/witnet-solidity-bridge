@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@witnet/sdk':
-        specifier: ^1.2.7
-        version: 1.2.7(@types/node@24.10.0)(bufferutil@4.0.7)(typescript@5.9.3)(utf-8-validate@5.0.10)
+        specifier: ^3.0.0
+        version: 3.0.0(@types/node@24.10.0)(bufferutil@4.0.7)(typescript@5.9.3)(utf-8-validate@5.0.10)
       cbor:
         specifier: ^10.0.11
         version: 10.0.11
@@ -1236,8 +1236,8 @@ packages:
   '@types/ws@8.5.3':
     resolution: {integrity: sha512-6YOoWjruKj1uLf3INHH7D3qTXwFfEsg1kf3c0uDdSBJwfa/llkwIjrAGV7j7mVgGNbzTQ3HiHKKDXl6bJPD97w==}
 
-  '@witnet/sdk@1.2.7':
-    resolution: {integrity: sha512-Wa4Ks4h9FIl86m82oUIjCgLzVInQcSV0aV5bVNV4a3jtJi/Y50RWgLEqyrI+3aGn9klG4po33Eps92fNCmZoRA==}
+  '@witnet/sdk@3.0.0':
+    resolution: {integrity: sha512-q3mHebCDPJOBTUUF8pgBBS+ufkS1xeZBjJZjV0Qh+j06PD3a53gjuf7g7/92UpdH/sJsXthMIBbpLz45Wh3IXg==}
     hasBin: true
 
   abi-to-sol@0.7.1:
@@ -6565,7 +6565,7 @@ snapshots:
     dependencies:
       '@types/node': 24.10.0
 
-  '@witnet/sdk@1.2.7(@types/node@24.10.0)(bufferutil@4.0.7)(typescript@5.9.3)(utf-8-validate@5.0.10)':
+  '@witnet/sdk@3.0.0(@types/node@24.10.0)(bufferutil@4.0.7)(typescript@5.9.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@bitcoinerlab/secp256k1': 1.2.0
       axios: 1.13.2

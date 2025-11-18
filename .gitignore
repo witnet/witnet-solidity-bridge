@@ -4,15 +4,14 @@ build/
 cache*/
 deployments*/
 dist/
-flattened/
 node_modules/
 
 **/missing*.json
 
-**/.env
+.bak
 .idea
 .vscode
 
-*.tgz
-*.tmp
-.old
+**/.env
+**/*.tgz
+**/*.tmp
