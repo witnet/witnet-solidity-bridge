@@ -1,6 +1,6 @@
 .bak
 .dockerignore
-.gitingore
+.gitignore
 .npmignore
 .solhint.json
 .solhintignore
@@ -12,4 +12,5 @@ dist/
 docker/
 node_modules/
 **/.env
+**/*.md
 **/*.tgz

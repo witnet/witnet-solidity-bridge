@@ -1,6 +1,6 @@
 {
 	"name": "@witnet/solidity",
-	"version": "3.0.14",
+	"version": "3.0.15",
 	"description": "Wit/Oracle Solidity Framework for EVM-compatible chains",
 	"author": "Witnet Foundation <info@witnet.foundation>",
 	"license": "MIT",
@@ -130,7 +130,7 @@
 			"@apollo/protobufjs", 
 			"@trufflesuite/bigint-buffer",
 			"@witnet/sdk", 
-			"bufferutil", 
+			"buffer-util",
 			"core-js", 
 			"es5-ext", 
 			"esbuild", 
@@ -139,7 +139,7 @@
 			"protobufjs", 
 			"secp256k1", 
 			"truffle", 
-			"utf-8-validate", 
+			"utf-8-validate",
 			"web3", 
 			"web3-bzz",
 			"web3-shh"
