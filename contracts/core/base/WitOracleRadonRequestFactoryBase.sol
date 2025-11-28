@@ -13,6 +13,8 @@ abstract contract WitOracleRadonRequestFactoryBase
 {
     using Witnet for Witnet.RadonHash;
     
+    address immutable public override witOracle;
+
     WitOracleRadonRequestFactoryModals immutable public witOracleRadonRequestModalsBuilder;
     WitOracleRadonRequestFactoryTemplates immutable public witOracleRadonRequestTemplatesBuilder;
 
@@ -35,6 +37,53 @@ abstract contract WitOracleRadonRequestFactoryBase
     /// ===============================================================================================================
     /// --- Implementation of IWitOracleRadonRequestFactory -----------------------------------------------------------
 
+    /// @notice Build a new single-source Radon Request based on the specified Data Source,
+    /// and the crowd-attestation Radon Reducer.
+    /// @dev Reverts if an unsupported Radon Reducer is passed.
+    function buildRadonRequest(
+            Witnet.DataSource calldata dataSource,
+            Witnet.RadonReducer calldata crowdAttestationTally
+        )
+        virtual override
+        external 
+        returns (Witnet.RadonHash)
+    {
+        IWitOracleRadonRegistry _witOracleRadonRegistry = IWitOracle(witOracle).registry();
+        return _witOracleRadonRegistry.verifyRadonRequest(
+            Witnet.intoDynArray([
+                _witOracleRadonRegistry.verifyDataSource(dataSource)
+            ]),
+            Witnet.RadonReducer({
+                method: Witnet.RadonReducerMethods.Mode,
+                filters: new Witnet.RadonFilter[](0)
+            }),
+            crowdAttestationTally
+        );
+    }
+
+    /// @notice Build a new multi-source Radon Request, based on the specified Data Sources,
+    /// and the passed source-aggregation and crowd-attestation Radon Reducers. 
+    /// @dev Reverts if unsupported Radon Reducers are passed.
+    function buildRadonRequest(
+            Witnet.DataSource[] calldata dataSources,
+            Witnet.RadonReducer calldata dataSourcesAggregator,
+            Witnet.RadonReducer calldata crowdAttestationTally
+        )
+        virtual override external 
+        returns (Witnet.RadonHash)
+    {
+        IWitOracleRadonRegistry _witOracleRadonRegistry = IWitOracle(witOracle).registry();
+        return _witOracleRadonRegistry.verifyRadonRequest(
+            __verifyDataSources(_witOracleRadonRegistry, dataSources),
+            dataSourcesAggregator,
+            crowdAttestationTally
+        );
+    }
+
+    /// @notice Build a new Radon Modal request factory, based on the specified Data Source Request,
+    /// and the passed crowd-attestation Radon Reducer.
+    /// @dev Reverts if the Data Source Request is not parameterized, or
+    /// if an unsupported Radon Reducer is passed.
     function buildRadonRequestModal(
             Witnet.DataSourceRequest calldata modalRequest,
             Witnet.RadonReducer memory crowdAttestationTally
@@ -66,6 +115,13 @@ abstract contract WitOracleRadonRequestFactoryBase
         return IWitOracleRadonRequestModal(_modal);
     }
 
+    /// @notice Build a new Radon Template request factory, based on pre-registered Data Sources,
+    /// and the passed source-aggregation and crowd-attestation Radon Reducers.
+    /// @dev Reverts if:
+    ///      - data-incompatible data sources are passed
+    ///      - none of data sources is parameterized
+    ///      - unsupported source-aggregation reducer is passed
+    ///      - unsupported crowd-attesation reducer is passed
     function buildRadonRequestTemplate(
             bytes32[] memory templateRetrievals,
             Witnet.RadonReducer memory dataSourcesAggregator,
@@ -95,6 +151,13 @@ abstract contract WitOracleRadonRequestFactoryBase
         return IWitOracleRadonRequestTemplate(_template);
     }
 
+    /// @notice Build a new Radon Template request factory, based on the specified Data Sources,
+    /// and the passed source-aggregation and crowd-attestation Radon Reducers.
+    /// @dev Reverts if:
+    ///      - data-incompatible data sources are passed
+    ///      - none of data sources is parameterized
+    ///      - unsupported source-aggregation reducer is passed
+    ///      - unsupported crowd-attesation reducer is passed
     function buildRadonRequestTemplate(
             Witnet.DataSource[] calldata dataSources,
             Witnet.RadonReducer calldata dataSourcesAggregator,
@@ -111,14 +174,28 @@ abstract contract WitOracleRadonRequestFactoryBase
         );
     }
 
-    function verifyDataSource(Witnet.DataSource calldata dataSource) 
+    /// @notice Registers on-chain the specified Data Source. 
+    /// Returns a hash value that uniquely identifies the verified Data Source (aka. Radon Retrieval).
+    /// All parameters but the request method are parameterizable by using embedded wildcard `\x\` substrings (with `x = 0..9`).
+    /// @dev Reverts if:
+    /// - unsupported request method is given;
+    /// - no URL is provided in HTTP/* requests;
+    /// - non-empty strings given on WIT/RNG requests.
+    function registerDataSource(Witnet.DataSource calldata dataSource) 
         virtual override public
         returns (bytes32)
     {
         return IWitOracle(witOracle).registry().verifyDataSource(dataSource);
     }
 
-    function verifyDataSources(Witnet.DataSource[] calldata dataSources)
+    /// @notice Registers on-chain the specified Data Sources. 
+    /// Returns a hash value that uniquely identifies the verified Data Source (aka. Radon Retrieval).
+    /// All parameters but the request method are parameterizable by using embedded wildcard `\x\` substrings (with `x = 0..9`).
+    /// @dev Reverts if:
+    /// - unsupported request method is given;
+    /// - no URL is provided in HTTP/* requests;
+    /// - non-empty strings given on WIT/RNG requests.
+    function registerDataSources(Witnet.DataSource[] calldata dataSources)
         virtual override public
         returns (bytes32[] memory)
     {
@@ -126,44 +203,7 @@ abstract contract WitOracleRadonRequestFactoryBase
             IWitOracle(witOracle).registry(),
             dataSources
         );
-    }
-
-    function verifyRadonRequest(
-            Witnet.DataSource calldata dataSource,
-            Witnet.RadonReducer calldata crowdAttestationTally
-        )
-        virtual override
-        external 
-        returns (Witnet.RadonHash)
-    {
-        IWitOracleRadonRegistry _witOracleRadonRegistry = IWitOracle(witOracle).registry();
-        return _witOracleRadonRegistry.verifyRadonRequest(
-            Witnet.intoDynArray([
-                _witOracleRadonRegistry.verifyDataSource(dataSource)
-            ]),
-            Witnet.RadonReducer({
-                method: Witnet.RadonReducerMethods.Mode,
-                filters: new Witnet.RadonFilter[](0)
-            }),
-            crowdAttestationTally
-        );
-    }
-
-    function verifyRadonRequest(
-            Witnet.DataSource[] calldata dataSources,
-            Witnet.RadonReducer calldata dataSourcesAggregator,
-            Witnet.RadonReducer calldata crowdAttestationTally
-        )
-        virtual override external 
-        returns (Witnet.RadonHash)
-    {
-        IWitOracleRadonRegistry _witOracleRadonRegistry = IWitOracle(witOracle).registry();
-        return _witOracleRadonRegistry.verifyRadonRequest(
-            __verifyDataSources(_witOracleRadonRegistry, dataSources),
-            dataSourcesAggregator,
-            crowdAttestationTally
-        );
-    }
+    } 
 
 
     /// ===============================================================================================================
