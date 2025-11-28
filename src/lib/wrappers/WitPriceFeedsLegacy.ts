@@ -1,5 +1,5 @@
 import type { Witnet } from "@witnet/sdk";
-import type { PriceFeed } from "../types.js";
+import type { PriceFeedInfo } from "../types.js";
 import { WitAppliance } from "./WitAppliance.js";
 import type { WitOracle } from "./WitOracle.js";
 
@@ -33,8 +33,8 @@ export class WitPriceFeedsLegacy extends WitAppliance {
 		return this.contract.lookupDecimals.staticCall(id4).then((result) => Number(result));
 	}
 
-	public async lookupPriceFeeds(): Promise<Array<PriceFeed>> {
-		const priceFeeds: Array<PriceFeed> = await this.contract.supportedFeeds.staticCall().then((results) => {
+	public async lookupPriceFeeds(): Promise<Array<PriceFeedInfo>> {
+		const priceFeeds: Array<PriceFeedInfo> = await this.contract.supportedFeeds.staticCall().then((results) => {
 			const [id4s, captions, dataSources] = results;
 			return id4s.map((id4: string, index: number) => ({
 				id4,

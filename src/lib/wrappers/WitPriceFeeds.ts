@@ -8,7 +8,7 @@ import {
 } from "ethers";
 import {
 	type DataPushReport,
-	type PriceFeed,
+	type PriceFeedInfo,
 	PriceFeedMappers,
 	PriceFeedOracles,
 	type PriceFeedUpdate,
@@ -412,7 +412,7 @@ export class WitPriceFeeds extends WitAppliance {
 		return this.contract.supportsCaption.staticCall(caption);
 	}
 
-	public async lookupPriceFeed(id4: Witnet.HexString): Promise<PriceFeed> {
+	public async lookupPriceFeed(id4: Witnet.HexString): Promise<PriceFeedInfo> {
 		return this.contract.lookupPriceFeed.staticCall(id4).then((result: any) => ({
 			id: result.id,
 			id4: result.id.slice(0, 10),
@@ -462,7 +462,7 @@ export class WitPriceFeeds extends WitAppliance {
 		return this.contract.lookupPriceFeedID.staticCall(id4);
 	}
 
-	public async lookupPriceFeeds(): Promise<Array<PriceFeed>> {
+	public async lookupPriceFeeds(): Promise<Array<PriceFeedInfo>> {
 		return this.contract.lookupPriceFeeds.staticCall().then((results) =>
 			results.map((result: any) => ({
 				id: result.id,
