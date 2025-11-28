@@ -5,18 +5,43 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     Witnet, 
     WitRandomness, 
-    IWitRandomness
+    IWitRandomness,
+    IWitRandomnessEvents
 } from "./WitRandomness.sol";
 
-abstract contract UsingWitRandomness {
-    WitRandomness immutable public WIT_RANDOMNESS;
+abstract contract UsingWitRandomness
+    is
+        IWitRandomnessEvents
+{
+    WitRandomness immutable internal __witRandomness;
+
+    /// @dev Provides a way for blocking execution of business logic if no Witnet-certified
+    /// randomness has yet been provided for the specified block number.
+    modifier blockIsRandomized(uint256 _evmBlockNumber) {
+        require(
+            __witRandomness.isRandomized(_evmBlockNumber),
+            "UsingWitRandomness: pending randomize"
+        ); _;
+    }
     
     constructor (address randomizer) {
-        assert(
-            randomizer.code.length > 0
-                && WitRandomness(randomizer).specs() == type(IWitRandomness).interfaceId
+        require(
+            randomizer != address(0)
+                && randomizer.code.length > 0
+                && WitRandomness(randomizer).specs() == type(IWitRandomness).interfaceId,
+            "UsingWitRandomness: uncompliant WitRandomness"            
         );
-        WIT_RANDOMNESS = WitRandomness(randomizer);    
+        __witRandomness = WitRandomness(randomizer);
+    }
+
+    /// @dev Estimate the minimum randomize fee to pay if willing to actively pull a new randomize request.
+    function _estimateRandomizeFee() virtual internal view returns (uint256) {
+        return _estimateRandomizeFee(tx.gasprice);
+    }
+
+    /// @dev Estimate the minimum randomize fee to pay if willing to actively pull a new randomize request.
+    function _estimateRandomizeFee(uint256 _evmGasPrice) virtual internal view returns (uint256) {
+        return __witRandomness.estimateRandomizeFee(_evmGasPrice);
     }
 
     /// @notice Retrieves the result of keccak256-hashing the specified block number with the randomness value 
@@ -30,7 +55,7 @@ abstract contract UsingWitRandomness {
     function _fetchRandomnessAfter(uint256 _blockNumber) virtual internal view returns (bytes32) {
         return keccak256(
             abi.encode(
-                WIT_RANDOMNESS.fetchRandomnessAfter(_blockNumber),
+                __witRandomness.fetchRandomnessAfter(_blockNumber),
                 address(this)
             )
         );
@@ -39,7 +64,7 @@ abstract contract UsingWitRandomness {
     /// @notice Generates a pseudo-random number uniformly distributed within the range [0 .. _faces), 
     /// by using the specified `_nonce` and `_seed`.
     /// @dev Fails under same conditions as `_fetchRandomnessAfter(uint256)` does.
-    function _randomDice(uint64 _faces, uint256 _nonce, bytes32 _seed) internal pure returns (uint64) {
+    function _generateUniformDice(uint64 _faces, uint256 _nonce, bytes32 _seed) internal pure returns (uint64) {
         return Witnet.randomUniformUint64(
             _faces,
             _nonce,
@@ -48,7 +73,7 @@ abstract contract UsingWitRandomness {
     }
 
     /// @notice Generates a pseudo-random uniformly distributed extraction, with repetitions. 
-    function _randomExtractionWithReps(
+    function _generateUniformExtractionWithReps(
             uint64  _range, 
             uint16  _extractions, 
             bytes32 _seed
@@ -69,7 +94,7 @@ abstract contract UsingWitRandomness {
     }
 
     /// @notice Generates a pseudo-random uniformly distributed extraction, with no repetitions. 
-    function _randomExtractionNoReps(
+    function _generateUniformExtractionNoReps(
             uint64  _range, 
             uint16  _extractions, 
             bytes32 _seed
@@ -93,5 +118,10 @@ abstract contract UsingWitRandomness {
                 _numbers[_pos] = _numbers[_range - 1 - _jx];
             }
         }
+    }
+
+    /// @notice Reference to the underlying Wit/Oracle Framework.
+    function witOracle() virtual public view returns (address) {
+        return __witRandomness.witOracle();
     }
 }

@@ -11,10 +11,6 @@ abstract contract UsingWitOracle
     is
         IWitOracleQueriableEvents
 {   
-    /// @notice Immutable reference to the WitOracle contract.
-    function witOracle() virtual public view returns (address) {
-        return address(__witOracle);
-    }
     WitOracle internal immutable __witOracle;
     
     /// @dev Percentage over base fee to pay on every data request, 
@@ -36,14 +32,14 @@ abstract contract UsingWitOracle
             _queryStatus == Witnet.QueryStatus.Finalized
                 || _queryStatus == Witnet.QueryStatus.Expired
                 || _queryStatus == Witnet.QueryStatus.Disputed
-            , "UsingWitOracle: unsolved query"
+            , "UsingWitOracle: pending query"
         ); _;
     }
 
     /// @param _witOracle Address of the WitOracle bridging contract.
     constructor(address _witOracle) {
         require(
-            IWitAppliance(_witOracle).specs() == (
+            WitOracle(_witOracle).specs() == (
                 type(IWitOracle).interfaceId
                     ^ type(IWitOracleQueriable).interfaceId
             ), "UsingWitOracle: uncompliant WitOracle"
@@ -52,7 +48,7 @@ abstract contract UsingWitOracle
         __witOracleDefaultQueryParams = Witnet.QuerySLA({
             witResultMaxSize: 32, // defaults to 32 bytes
             witCommitteeSize: 3,  // defaults to 10 witnesses
-            witUnitaryReward: 2 * 10 ** 8 // defaults to 0.2 $WIT
+            witUnitaryReward: 1   // defaults to 1 nanowit
         });
         
         __witOracleBaseFeeOverheadPercentage = 33; // defaults to 33%
@@ -77,5 +73,10 @@ abstract contract UsingWitOracle
             __witOracle.estimateBaseFee(_evmGasPrice)
                 * (100 + __witOracleBaseFeeOverheadPercentage)
         ) / 100;
+    }
+
+    /// @notice Immutable reference to the WitOracle contract.
+    function witOracle() virtual public view returns (address) {
+        return address(__witOracle);
     }
 }
