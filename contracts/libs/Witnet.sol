@@ -861,6 +861,10 @@ library Witnet {
     /// ===============================================================================================================
     /// --- RadonFilter helper methods --------------------------------------------------------------------------------
 
+    function intoDynArray(RadonFilter memory _values) internal pure returns (RadonFilter[] memory) {
+        return abi.decode(abi.encode(uint256(32), 1, _value), (RadonFilter[]));
+    }
+
     function intoDynArray(RadonFilter[1] memory _values) internal pure returns (RadonFilter[] memory) {
         return abi.decode(abi.encode(uint256(32), 1, _values), (RadonFilter[]));
     }
@@ -955,6 +959,10 @@ library Witnet {
 
     /// ===============================================================================================================
     /// --- 'bytes*' helper methods -----------------------------------------------------------------------------------
+
+    function intoDynArray(bytes32 _value) internal pure returns (bytes32[] memory) {
+        return abi.decode(abi.encode(uint256(32), 1, _value), (bytes32[]));
+    }
 
     function intoDynArray(bytes32[1] memory _values) internal pure returns (bytes32[] memory) {
         return abi.decode(abi.encode(uint256(32), 1, _values), (bytes32[]));
@@ -1131,6 +1139,10 @@ library Witnet {
     /// ===============================================================================================================
     /// --- 'string' helper methods -----------------------------------------------------------------------------------
 
+    function intoDynArray(string memory _value) internal pure returns (string[] memory) {
+        return abi.decode(abi.encode(uint256(32), 1, _value), (string[]));
+    }
+
     function intoDynArray(string[1] memory _values) internal pure returns (string[] memory) {
         return abi.decode(abi.encode(uint256(32), 1, _values), (string[]));
     }
@@ -1145,6 +1157,10 @@ library Witnet {
 
     function intoDynArray(string[4] memory _values) internal pure returns (string[] memory) {
         return abi.decode(abi.encode(uint256(32), 4, _values), (string[]));
+    }
+
+    function intoDynArray(string[2] memory _values) internal pure returns (string[2][] memory) {
+        return abi.decode(abi.encode(uint256(32), 1, _values), (string[2][]));
     }
 
     function intoDynArray(string[2][1] memory _values) internal pure returns (string[2][] memory) {
