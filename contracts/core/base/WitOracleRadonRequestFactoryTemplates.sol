@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../../interfaces/IWitOracle.sol";
 import "../../interfaces/IWitOracleAppliance.sol";
-import "../../interfaces/IWitOracleRadonRequestTemplate.sol";
+import "../../interfaces/IWitOracleRadonRequestTemplateFactory.sol";
 
 import "../../patterns/Clonable.sol";
 
@@ -12,19 +12,19 @@ abstract contract WitOracleRadonRequestFactoryTemplates
     is
         Clonable,
         IWitOracleAppliance,
-        IWitOracleRadonRequestTemplate 
+        IWitOracleRadonRequestTemplateFactory
 {
     function specs() virtual override public view returns (bytes4) {
         return (
             initialized()
-                ? type(IWitOracleRadonRequestTemplate).interfaceId
-                : bytes4(0xdccf450a) // bytes4(keccak256(abi.encodePacked("buildRadonRequestTemplate(bytes32[],bytes15,bytes15)")))
+                ? type(IWitOracleRadonRequestTemplateFactory).interfaceId
+                : bytes4(0x4bc837d3) // bytes4(keccak256(abi.encodePacked("buildRadonRequestTemplateFactory(bytes32[],bytes15,bytes15)")))
                     ^ bytes4(0x5613166e) // bytes4(keccak256(abi.encodePacked("determineAddress(bytes32[],bytes15,bytes15)")))
         );
     }
 
-    /// @notice Reference to the Witnet Request Board that all templates built out from this factory will refer to.
-    address immutable public override(IWitOracleAppliance, IWitOracleRadonRequestTemplate) witOracle;
+    /// @notice The Wit/Oracle core address where the Radon Requests built out of this factory will be bound to. 
+    address immutable public override(IWitOracleAppliance, IWitOracleRadonRequestTemplateFactory) witOracle;
 
     IWitOracleRadonRegistry internal immutable __witOracleRadonRegistry;
     
@@ -52,15 +52,14 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         __witOracleRadonRegistry = IWitOracle(witOracle).registry();
     }
 
-    function buildRadonRequestTemplate(
+    function buildRadonRequestTemplateFactory(
             bytes32[] calldata _dataRetrieveHashes,
             bytes15 _dataSourcesAggregatorHash,
             bytes15 _crowdAttestationTallyHash
         ) 
-        virtual //override
-        external
+        virtual external
         notOnClones
-        returns (IWitOracleRadonRequestTemplate)
+        returns (IWitOracleRadonRequestTemplateFactory)
     {
         return WitOracleRadonRequestFactoryTemplates(
             __cloneDeterministic(_determineSaltAndPepper(
@@ -80,8 +79,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
             bytes15 _dataSourcesAggregatorHash,
             bytes15 _crowdAttestationTallyHash
         )
-        virtual //override
-        external view 
+        virtual external view 
         notOnClones
         returns (address)
     {
@@ -107,7 +105,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         virtual
         public 
         initializer
-        returns (IWitOracleRadonRequestTemplate)
+        returns (IWitOracleRadonRequestTemplateFactory)
     {
         __witOracleRadonRegistry.isVerifiedRadonReducer(_dataSourcesAggregatorHash);
         __witOracleRadonRegistry.isVerifiedRadonReducer(_crowdAttestationTallyHash);
@@ -130,7 +128,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         __storage.radonAggregateHash = _dataSourcesAggregatorHash;
         __storage.radonTallyHash = _crowdAttestationTallyHash;
         __storage.resultDataType = _resultDataType;
-        return IWitOracleRadonRequestTemplate(address(this));
+        return IWitOracleRadonRequestTemplateFactory(address(this));
     }
 
 
@@ -148,8 +146,27 @@ abstract contract WitOracleRadonRequestFactoryTemplates
 
 
     /// ===============================================================================================================
-    /// --- IWitOracleRadonRequestTemplate -------------------------------------------------------------------------------
+    /// --- IWitOracleRadonRequestTemplateFactory ---------------------------------------------------------------------
 
+    /// @notice Build a new Radon Request by replacing the `templateArgs` into the factory's
+    /// data sources, and the factory's aggregate and tally Radon Reducers.
+    /// The returned identifier will be accepted as a valid RAD hash on the witOracle() contract from now on. 
+    /// @dev Reverts if the ranks of passed array don't fulfill the actual number of required parameters.
+    function buildRadonRequest(string[][] calldata templateArgs)
+        virtual override
+        external 
+        onlyOnClones
+        returns (Witnet.RadonHash)
+    {
+        return __witOracleRadonRegistry.verifyRadonTemplateRequest(
+            __storage.radonRetrieveHashes,
+            templateArgs,
+            __storage.radonAggregateHash,
+            __storage.radonTallyHash
+        );
+    }
+
+    /// @notice Returns an array containing the number of arguments expected for each data source.
     function getArgsCount()
         virtual override
         external view
@@ -159,6 +176,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         return __storage.radonRetrieveArgsCount;
     }
     
+    /// @notice Returns the Radon Reducer applied upon tally of values revealed by witnessing nodes in Witnet.
     function getCrowdAttestationTally()
         virtual override
         external view 
@@ -170,6 +188,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         );
     }
 
+    /// @notice Returns the expected data type upon sucessfull resolution of Radon Request built out of this factory.
     function getDataResultType()
         virtual override
         external view 
@@ -179,20 +198,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         return __storage.resultDataType;
     }
 
-    function getDataSources()
-        virtual override
-        external view
-        onlyOnClones
-        returns (Witnet.RadonRetrieval[] memory _dataSources)
-    {
-        _dataSources = new Witnet.RadonRetrieval[](__storage.radonRetrieveHashes.length);
-        for (uint _ix = 0; _ix < _dataSources.length; ++ _ix) {
-            _dataSources[_ix] = __witOracleRadonRegistry.lookupRadonRetrieval(
-                __storage.radonRetrieveHashes[_ix]
-            );
-        }
-    }
-
+    /// @notice Returns the Radon Reducer applied to data collected from each data source upon each query resolution. 
     function getDataSourcesAggregator() 
         virtual override
         external view
@@ -204,18 +210,28 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         );
     }
 
-    function verifyRadonRequest(string[][] calldata args)
+    /// @notice Returns the underlying Data Sources used by this factory to build new Radon Requests.
+    function getDataSources()
         virtual override
-        external 
+        external view
         onlyOnClones
-        returns (Witnet.RadonHash)
+        returns (Witnet.DataSource[] memory _dataSources)
     {
-        return __witOracleRadonRegistry.verifyRadonTemplateRequest(
-            __storage.radonRetrieveHashes,
-            args,
-            __storage.radonAggregateHash,
-            __storage.radonTallyHash
-        );
+        _dataSources = new Witnet.DataSource[](__storage.radonRetrieveHashes.length);
+        for (uint _ix = 0; _ix < _dataSources.length; ++ _ix) {
+            Witnet.RadonRetrieval memory _retrieval = __witOracleRadonRegistry.lookupRadonRetrieval(
+                __storage.radonRetrieveHashes[_ix]
+            );
+            _dataSources[_ix] = Witnet.DataSource({
+                url: _retrieval.url,
+                request: Witnet.DataSourceRequest({
+                    method: _retrieval.method,
+                    body: _retrieval.body,
+                    headers: _retrieval.headers,
+                    script: _retrieval.radonScript
+                })
+            });
+        }
     }
 
     

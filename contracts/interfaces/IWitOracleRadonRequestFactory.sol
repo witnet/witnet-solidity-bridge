@@ -2,13 +2,13 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./IWitOracleRadonRequestModal.sol";
-import "./IWitOracleRadonRequestTemplate.sol";
+import "./IWitOracleRadonRequestModalFactory.sol";
+import "./IWitOracleRadonRequestTemplateFactory.sol";
 
 interface IWitOracleRadonRequestFactory {
 
-    event NewRadonRequestModal(address witOracleRadonRequestModal);
-    event NewRadonRequestTemplate(address witOracleRadonRequestTemplate);
+    event NewRadonRequestModalFactory(address witOracleRadonRequestModalFactory);
+    event NewRadonRequestTemplateFactory(address witOracleRadonRequestTemplateFactory);
 
     /// @notice Build a new single-source Radon Request based on the specified Data Source,
     /// and the crowd-attestation Radon Reducer.
@@ -33,11 +33,11 @@ interface IWitOracleRadonRequestFactory {
     /// and the passed crowd-attestation Radon Reducer.
     /// @dev Reverts if the Data Source Request is not parameterized, or
     /// if an unsupported Radon Reducer is passed.
-    function buildRadonRequestModal(
+    function buildRadonRequestModalFactory(
             Witnet.DataSourceRequest calldata modalRequest,
             Witnet.RadonReducer calldata crowdAttestationTally
         )
-        external returns (IWitOracleRadonRequestModal);
+        external returns (IWitOracleRadonRequestModalFactory);
 
     /// @notice Build a new Radon Template request factory, based on pre-registered Data Sources,
     /// and the passed source-aggregation and crowd-attestation Radon Reducers.
@@ -46,11 +46,11 @@ interface IWitOracleRadonRequestFactory {
     ///      - none of data sources is parameterized
     ///      - unsupported source-aggregation reducer is passed
     ///      - unsupported crowd-attesation reducer is passed
-    function buildRadonRequestTemplate(
+    function buildRadonRequestTemplateFactory(
             bytes32[] calldata dataRetrieveHashes,
             Witnet.RadonReducer calldata dataSourcesAggregator,
             Witnet.RadonReducer calldata crowdAttestationTally
-        ) external returns (IWitOracleRadonRequestTemplate);
+        ) external returns (IWitOracleRadonRequestTemplateFactory);
         
     /// @notice Build a new Radon Template request factory, based on the specified Data Sources,
     /// and the passed source-aggregation and crowd-attestation Radon Reducers.
@@ -59,12 +59,12 @@ interface IWitOracleRadonRequestFactory {
     ///      - none of data sources is parameterized
     ///      - unsupported source-aggregation reducer is passed
     ///      - unsupported crowd-attesation reducer is passed
-    function buildRadonRequestTemplate(
+    function buildRadonRequestTemplateFactory(
             Witnet.DataSource[] calldata dataSources,
             Witnet.RadonReducer calldata dataSourcesAggregator,
             Witnet.RadonReducer calldata crowdAttestationTally
         )
-        external returns (IWitOracleRadonRequestTemplate);
+        external returns (IWitOracleRadonRequestTemplateFactory);
 
     /// @notice Registers on-chain the specified Data Source/s. 
     /// Returns a hash value that uniquely identifies the verified Data Source (aka. Radon Retrieval).

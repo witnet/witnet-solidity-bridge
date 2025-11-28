@@ -84,13 +84,13 @@ abstract contract WitOracleRadonRequestFactoryBase
     /// and the passed crowd-attestation Radon Reducer.
     /// @dev Reverts if the Data Source Request is not parameterized, or
     /// if an unsupported Radon Reducer is passed.
-    function buildRadonRequestModal(
+    function buildRadonRequestModalFactory(
             Witnet.DataSourceRequest calldata modalRequest,
             Witnet.RadonReducer memory crowdAttestationTally
         )
         virtual override
         external 
-        returns (IWitOracleRadonRequestModal)
+        returns (IWitOracleRadonRequestModalFactory)
     {
         IWitOracleRadonRegistry _witOracleRadonRegistry = IWitOracle(witOracle).registry();
         bytes32 _modalRetrieve = _witOracleRadonRegistry.verifyDataSource(Witnet.DataSource({
@@ -105,14 +105,14 @@ abstract contract WitOracleRadonRequestFactoryBase
             _crowdAttestationTallyHash
         );
         if (_modal.code.length == 0) {
-            witOracleRadonRequestModalsBuilder.buildRadonRequestModal(
+            witOracleRadonRequestModalsBuilder.buildRadonRequestModalFactory(
                 _modalRetrieve,
                 _crowdAttestationTallyHash
             );
             _checkCloneWasDeployed(_modal);
-            emit NewRadonRequestModal(_modal);
+            emit NewRadonRequestModalFactory(_modal);
         }
-        return IWitOracleRadonRequestModal(_modal);
+        return IWitOracleRadonRequestModalFactory(_modal);
     }
 
     /// @notice Build a new Radon Template request factory, based on pre-registered Data Sources,
@@ -122,14 +122,14 @@ abstract contract WitOracleRadonRequestFactoryBase
     ///      - none of data sources is parameterized
     ///      - unsupported source-aggregation reducer is passed
     ///      - unsupported crowd-attesation reducer is passed
-    function buildRadonRequestTemplate(
+    function buildRadonRequestTemplateFactory(
             bytes32[] memory templateRetrievals,
             Witnet.RadonReducer memory dataSourcesAggregator,
             Witnet.RadonReducer memory crowdAttestationTally
         )
         virtual override
         public
-        returns (IWitOracleRadonRequestTemplate)
+        returns (IWitOracleRadonRequestTemplateFactory)
     {
         IWitOracleRadonRegistry _witOracleRadonRegistry = IWitOracle(witOracle).registry();
         bytes15 _dataSourcesAggregatorHash = bytes15(_witOracleRadonRegistry.verifyRadonReducer(dataSourcesAggregator));
@@ -140,15 +140,15 @@ abstract contract WitOracleRadonRequestFactoryBase
             _crowdAttestationTallyHash
         );
         if (_template.code.length == 0) {
-            witOracleRadonRequestTemplatesBuilder.buildRadonRequestTemplate(
+            witOracleRadonRequestTemplatesBuilder.buildRadonRequestTemplateFactory(
                 templateRetrievals,
                 _dataSourcesAggregatorHash,
                 _crowdAttestationTallyHash
             );
             _checkCloneWasDeployed(_template);
-            emit NewRadonRequestTemplate(_template);
+            emit NewRadonRequestTemplateFactory(_template);
         }
-        return IWitOracleRadonRequestTemplate(_template);
+        return IWitOracleRadonRequestTemplateFactory(_template);
     }
 
     /// @notice Build a new Radon Template request factory, based on the specified Data Sources,
@@ -158,16 +158,16 @@ abstract contract WitOracleRadonRequestFactoryBase
     ///      - none of data sources is parameterized
     ///      - unsupported source-aggregation reducer is passed
     ///      - unsupported crowd-attesation reducer is passed
-    function buildRadonRequestTemplate(
+    function buildRadonRequestTemplateFactory(
             Witnet.DataSource[] calldata dataSources,
             Witnet.RadonReducer calldata dataSourcesAggregator,
             Witnet.RadonReducer calldata crowdAttestationTally
         )
         virtual override
         external 
-        returns (IWitOracleRadonRequestTemplate)
+        returns (IWitOracleRadonRequestTemplateFactory)
     {
-        return buildRadonRequestTemplate(
+        return buildRadonRequestTemplateFactory(
             __verifyDataSources(IWitOracle(witOracle).registry(), dataSources),
             dataSourcesAggregator,
             crowdAttestationTally
