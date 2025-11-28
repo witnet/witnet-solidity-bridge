@@ -42,12 +42,12 @@ contract TestWitOracleRadonEncodingLib {
 
   function testEncodeRadonReducerOpcodes() external {
     bytes memory bytecode = WitOracleRadonEncodingLib.encode(
-      Witnet.RadonReduceOpcodes.StandardDeviation
+      Witnet.RadonReducerMethods.StandardDeviation
     );
     Assert.equal(
       keccak256(bytecode),
       keccak256(hex"1007"),
-      "bad encode(Witnet.RadonReduceOpcodes)"
+      "bad encode(Witnet.RadonReducerMethods)"
     );
   }
 
@@ -71,9 +71,9 @@ contract TestWitOracleRadonEncodingLib {
 
   function testEncodeRadonReducer1Filter() external {
     Witnet.RadonReducer memory reducer;
-    reducer.opcode = Witnet.RadonReduceOpcodes.Mode;
+    reducer.opcode = Witnet.RadonReducerMethods.Mode;
     reducer.filters = new Witnet.RadonFilter[](1);
-    reducer.filters[0].opcode = Witnet.RadonFilterOpcodes.StandardDeviation;
+    reducer.filters[0].opcode = Witnet.RadonFilterMethods.StandardDeviation;
     reducer.filters[0].cborArgs = hex"fa40200000";
     bytes memory bytecode = WitOracleRadonEncodingLib.encode(reducer);
     // emit Log(bytecode);

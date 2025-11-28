@@ -448,12 +448,12 @@ library Witnet {
     /// Structure defining some data filtering that can be applied at the Aggregation or the Tally stages
     /// within a Witnet Data Request resolution workflow.
     struct RadonFilter {
-        RadonFilterOpcodes opcode;
+        RadonFilterMethods method;
         bytes cborArgs;
     }
 
     /// Filtering methods currently supported on the Witnet blockchain. 
-    enum RadonFilterOpcodes {
+    enum RadonFilterMethods {
         /* 0x00 */ Reserved0x00, //GreaterThan,
         /* 0x01 */ Reserved0x01, //LessThan,
         /* 0x02 */ Reserved0x02, //Equals,
@@ -469,12 +469,12 @@ library Witnet {
     /// Structure defining the array of filters and reducting function to be applied at either the Aggregation
     /// or the Tally stages within a Witnet Data Request resolution workflow.
     struct RadonReducer {
-        RadonReduceOpcodes opcode;
+        RadonReducerMethods method;
         RadonFilter[] filters;
     }
 
     /// Reducting functions currently supported on the Witnet blockchain.
-    enum RadonReduceOpcodes {
+    enum RadonReducerMethods {
         /* 0x00 */ Reserved0x00, //Minimum,
         /* 0x01 */ Reserved0x01, //Maximum,
         /* 0x02 */ Mode,
@@ -859,6 +859,22 @@ library Witnet {
 
 
     /// ===============================================================================================================
+    /// --- RadonFilter helper methods --------------------------------------------------------------------------------
+
+    function intoDynArray(RadonFilter[1] memory _values) internal pure returns (RadonFilter[] memory) {
+        return abi.decode(abi.encode(uint256(32), 1, _values), (RadonFilter[]));
+    }
+
+    function intoDynArray(RadonFilter[2] memory _values) internal pure returns (RadonFilter[] memory) {
+        return abi.decode(abi.encode(uint256(32), 2, _values), (RadonFilter[]));
+    }
+
+    function intoDynArray(RadonFilter[3] memory _values) internal pure returns (RadonFilter[] memory) {
+        return abi.decode(abi.encode(uint256(32), 3, _values), (RadonFilter[]));
+    }
+
+
+    /// ===============================================================================================================
     /// --- RadonHash helper methods ----------------------------------------------------------------------------------
 
     function eq(RadonHash a, RadonHash b) internal pure returns (bool) {
@@ -1129,10 +1145,6 @@ library Witnet {
 
     function intoDynArray(string[4] memory _values) internal pure returns (string[] memory) {
         return abi.decode(abi.encode(uint256(32), 4, _values), (string[]));
-    }
-
-    function intoDynArray(string[2] memory _values) internal pure returns (string[] memory) {
-        return abi.decode(abi.encode(uint256(32), 2, _values), (string[]));
     }
 
     function intoDynArray(string[2][1] memory _values) internal pure returns (string[2][] memory) {

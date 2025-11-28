@@ -93,7 +93,7 @@ abstract contract WitOracleRadonRegistryBase
     /// @notice Tells whether the specified Radon Reducer has been formally verified into the registry.
     function isVerifiedRadonReducer(bytes32 _radonReducerHash) external view override returns (bool) {
         return (
-            uint8(__database().reducers[_radonReducerHash].opcode) != uint8(0)
+            uint8(__database().reducers[_radonReducerHash].method) != uint8(0)
         );
     }
 
@@ -119,7 +119,7 @@ abstract contract WitOracleRadonRegistryBase
         returns (Witnet.RadonReducer memory _reducer)
     {   
         _reducer = __database().reducers[_hash];
-        _require(uint8(_reducer.opcode) != 0, "unverified data reducer");
+        _require(uint8(_reducer.method) != 0, "unverified data reducer");
     }
 
     /// @notice Returns the Witnet-compliant RAD bytecode for some Radon Request 
@@ -259,11 +259,11 @@ abstract contract WitOracleRadonRegistryBase
         hash = bytes32(bytes15(keccak256(abi.encode(_reducer))));
         Witnet.RadonReducer storage __reducer = __database().reducers[hash];
         if (
-            uint8(__reducer.opcode) == 0
+            uint8(__reducer.method) == 0
                 // && __reducer.filters.length == 0
         ) {
             _reducer.validate();
-            __reducer.opcode = _reducer.opcode;
+            __reducer.method = _reducer.method;
             __pushRadonReducerFilters(__reducer, _reducer.filters);
             emit NewRadonReducer(hash);
         }

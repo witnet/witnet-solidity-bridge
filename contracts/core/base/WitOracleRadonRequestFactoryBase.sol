@@ -142,7 +142,7 @@ abstract contract WitOracleRadonRequestFactoryBase
                 _witOracleRadonRegistry.verifyDataSource(dataSource)
             ]),
             Witnet.RadonReducer({
-                opcode: Witnet.RadonReduceOpcodes.Mode,
+                method: Witnet.RadonReducerMethods.Mode,
                 filters: new Witnet.RadonFilter[](0)
             }),
             crowdAttestationTally

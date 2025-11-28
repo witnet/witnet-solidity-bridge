@@ -43,7 +43,7 @@ abstract contract WitOracleRadonRequestFactoryModals
         __witOracleRadonRegistry = IWitOracle(witOracle).registry();
         __radonAggregateHash = bytes16(__witOracleRadonRegistry.verifyRadonReducer(
             Witnet.RadonReducer({
-                opcode: Witnet.RadonReduceOpcodes.Mode,
+                method: Witnet.RadonReducerMethods.Mode,
                 filters: new Witnet.RadonFilter[](0)
             })
         ));

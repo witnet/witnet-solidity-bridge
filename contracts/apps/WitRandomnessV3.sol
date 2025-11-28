@@ -152,12 +152,12 @@ contract WitRandomnessV3
                 }))
             ]),
             Witnet.RadonReducer({
-                opcode: Witnet.RadonReduceOpcodes.Mode,
-                filters: new Witnet.RadonFilter[](0)
+                filters: new Witnet.RadonFilter[](0),
+                method: Witnet.RadonReducerMethods.Mode
             }),
             Witnet.RadonReducer({
-                opcode: Witnet.RadonReduceOpcodes.ConcatenateAndHash,
-                filters: new Witnet.RadonFilter[](0)
+                filters: new Witnet.RadonFilter[](0),
+                method: Witnet.RadonReducerMethods.ConcatenateAndHash
             })
         );
 
