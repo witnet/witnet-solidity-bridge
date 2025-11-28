@@ -166,7 +166,7 @@ contract WitRandomnessV3
         __storage().callbackGasLimit = _WIT_ORACLE_MIN_CALLBACK_GAS_LIMIT;
         __storage().randomizeWaitingBlocks = _DEFAULT_RANDOMIZE_WAITING_BLOCKS;
         __storage().witCommitteeSize = 3;
-        __storage().witInclusionFees = 0;
+        __storage().witInclusionFees = 1;
     }
 
     receive() virtual external payable {
