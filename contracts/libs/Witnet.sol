@@ -75,6 +75,18 @@ library Witnet {
         bytes resultCborBytes;
     }
 
+    struct DataSource {
+        string url;
+        DataSourceRequest request;
+    }
+
+    struct DataSourceRequest {
+        RadonRetrievalMethods method;
+        string body;
+        string[2][] headers;
+        bytes script;
+    }
+
     /// Data struct containing the Witnet-provided result to a Data Request.
     struct DataResult {
         ResultStatus status;
@@ -475,13 +487,6 @@ library Witnet {
         /* 0x09 */ Reserved0x09, //MedianDeviation,
         /* 0x0A */ Reserved0x10, //MaximumDeviation,
         /* 0x0B */ ConcatenateAndHash
-    }
-    
-    /// Structure containing the Retrieve-Attestation-Delivery parts of a Witnet-compliant Data Request.
-    struct RadonRequest {
-        RadonRetrieval[] retrieve;
-        RadonReducer aggregate;
-        RadonReducer tally;
     }
 
     /// Structure containing all the parameters that fully describe a Witnet Radon Retrieval within a Witnet Data Request.
@@ -935,35 +940,35 @@ library Witnet {
     /// ===============================================================================================================
     /// --- 'bytes*' helper methods -----------------------------------------------------------------------------------
 
-    function intoMemArray(bytes32[1] memory _values) internal pure returns (bytes32[] memory) {
+    function intoDynArray(bytes32[1] memory _values) internal pure returns (bytes32[] memory) {
         return abi.decode(abi.encode(uint256(32), 1, _values), (bytes32[]));
     }
 
-    function intoMemArray(bytes32[2] memory _values) internal pure returns (bytes32[] memory) {
+    function intoDynArray(bytes32[2] memory _values) internal pure returns (bytes32[] memory) {
         return abi.decode(abi.encode(uint256(32), 2, _values), (bytes32[]));
     }
 
-    function intoMemArray(bytes32[3] memory _values) internal pure returns (bytes32[] memory) {
+    function intoDynArray(bytes32[3] memory _values) internal pure returns (bytes32[] memory) {
         return abi.decode(abi.encode(uint256(32), 3, _values), (bytes32[]));
     }
 
-    function intoMemArray(bytes32[4] memory _values) internal pure returns (bytes32[] memory) {
+    function intoDynArray(bytes32[4] memory _values) internal pure returns (bytes32[] memory) {
         return abi.decode(abi.encode(uint256(32), 4, _values), (bytes32[]));
     }
 
-    function intoMemArray(bytes32[5] memory _values) internal pure returns (bytes32[] memory) {
+    function intoDynArray(bytes32[5] memory _values) internal pure returns (bytes32[] memory) {
         return abi.decode(abi.encode(uint256(32), 5, _values), (bytes32[]));
     }
 
-    function intoMemArray(bytes32[6] memory _values) internal pure returns (bytes32[] memory) {
+    function intoDynArray(bytes32[6] memory _values) internal pure returns (bytes32[] memory) {
         return abi.decode(abi.encode(uint256(32), 6, _values), (bytes32[]));
     }
 
-    function intoMemArray(bytes32[7] memory _values) internal pure returns (bytes32[] memory) {
+    function intoDynArray(bytes32[7] memory _values) internal pure returns (bytes32[] memory) {
         return abi.decode(abi.encode(uint256(32), 7, _values), (bytes32[]));
     }
 
-    function intoMemArray(bytes32[8] memory _values) internal pure returns (bytes32[] memory) {
+    function intoDynArray(bytes32[8] memory _values) internal pure returns (bytes32[] memory) {
         return abi.decode(abi.encode(uint256(32), 8, _values), (bytes32[]));
     }
     
@@ -1109,6 +1114,42 @@ library Witnet {
 
     /// ===============================================================================================================
     /// --- 'string' helper methods -----------------------------------------------------------------------------------
+
+    function intoDynArray(string[1] memory _values) internal pure returns (string[] memory) {
+        return abi.decode(abi.encode(uint256(32), 1, _values), (string[]));
+    }
+
+    function intoDynArray(string[2] memory _values) internal pure returns (string[] memory) {
+        return abi.decode(abi.encode(uint256(32), 2, _values), (string[]));
+    }
+
+    function intoDynArray(string[3] memory _values) internal pure returns (string[] memory) {
+        return abi.decode(abi.encode(uint256(32), 3, _values), (string[]));
+    }
+
+    function intoDynArray(string[4] memory _values) internal pure returns (string[] memory) {
+        return abi.decode(abi.encode(uint256(32), 4, _values), (string[]));
+    }
+
+    function intoDynArray(string[2] memory _values) internal pure returns (string[] memory) {
+        return abi.decode(abi.encode(uint256(32), 2, _values), (string[]));
+    }
+
+    function intoDynArray(string[2][1] memory _values) internal pure returns (string[2][] memory) {
+        return abi.decode(abi.encode(uint256(32), 1, _values), (string[2][]));
+    }
+
+    function intoDynArray(string[2][2] memory _values) internal pure returns (string[2][] memory) {
+        return abi.decode(abi.encode(uint256(32), 2, _values), (string[2][]));
+    }
+
+    function intoDynArray(string[2][3] memory _values) internal pure returns (string[2][] memory) {
+        return abi.decode(abi.encode(uint256(32), 3, _values), (string[2][]));
+    }
+
+    function intoDynArray(string[2][4] memory _values) internal pure returns (string[2][] memory) {
+        return abi.decode(abi.encode(uint256(32), 4, _values), (string[2][]));
+    }
 
     function toLowerCase(string memory str)
         internal pure

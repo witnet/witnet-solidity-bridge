@@ -7,6 +7,8 @@ import "./interfaces/IWitOracleAppliance.sol";
 import "./interfaces/IWitOracleQueriable.sol";
 import "./interfaces/IWitOracleQueriableEvents.sol";
 
+import "./WitOracleRadonRequestFactory.sol";
+
 /// @title Witnet Request Board functionality base contract.
 /// @author The Witnet Foundation.
 abstract contract WitOracle

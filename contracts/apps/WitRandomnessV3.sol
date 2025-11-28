@@ -140,14 +140,16 @@ contract WitRandomnessV3
         // Build Witnet-compliant randomness request:
         IWitOracleRadonRegistry _witOracleRadonRegistry = IWitOracle(_witOracle).registry();
         __WIT_ORACLE_RNG_RADON_HASH = _witOracleRadonRegistry.verifyRadonRequest(
-            Witnet.intoMemArray([
-                _witOracleRadonRegistry.verifyRadonRetrieval(
-                    Witnet.RadonRetrievalMethods.RNG,
-                    "", // no request url
-                    "", // no request body
-                    new string[2][](0), // no request headers
-                    hex"80" // no request Radon script
-                )
+            Witnet.intoDynArray([
+                _witOracleRadonRegistry.verifyDataSource(Witnet.DataSource({
+                    url: "", // no request url
+                    request: Witnet.DataSourceRequest({
+                        method: Witnet.RadonRetrievalMethods.RNG,
+                        body: "", // no request body
+                        headers: new string[2][](0), // no request headers
+                        script: hex"80" // no request Radon script
+                    })
+                }))
             ]),
             Witnet.RadonReducer({
                 opcode: Witnet.RadonReduceOpcodes.Mode,

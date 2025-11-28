@@ -197,7 +197,7 @@ abstract contract WitOracleRadonRequestFactoryModals
                 "mismatching args"
             );
         }
-        return __witOracleRadonRegistry.verifyRadonRequest(
+        return __witOracleRadonRegistry.verifyRadonModalRequest(
             _retrieveHash,
             modalArgs,
             modalUrls,

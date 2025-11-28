@@ -12,9 +12,11 @@ abstract contract WitOracleRadonRequestFactory
         IWitOracleRadonRegistryEvents,
         IWitOracleRadonRequestFactory
 {
+    address immutable public override(IWitOracleAppliance, IWitOracleRadonRequestFactory) witOracle;
+
     function specs() virtual override external pure returns (bytes4) {
         return (
-            type(WitOracleRadonRequestFactory).interfaceId
+            type(IWitOracleRadonRequestFactory).interfaceId
         );
     }
 }

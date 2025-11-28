@@ -210,7 +210,7 @@ abstract contract WitOracleRadonRequestFactoryTemplates
         onlyOnClones
         returns (Witnet.RadonHash)
     {
-        return __witOracleRadonRegistry.verifyRadonRequest(
+        return __witOracleRadonRegistry.verifyRadonTemplateRequest(
             __storage.radonRetrieveHashes,
             args,
             __storage.radonAggregateHash,
