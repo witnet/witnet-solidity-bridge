@@ -146,19 +146,7 @@ contract WitPriceFeedsV3Upgradable
         virtual override 
         internal
     {
-        if (
-            __proxiable().codehash == bytes32(0)
-                || !_validateUpdateConditions(__storage().defaultUpdateConditions)
-        ) {
-            __storage().defaultUpdateConditions = UpdateConditions({
-                callbackGas: 1_000_000,
-                computeEma: false,
-                cooldownSecs: 15 minutes,
-                heartbeatSecs: 1 days,
-                maxDeviation1000: 0, // oo
-                minWitnesses: 3
-            });
-        }
+        // nothing to initialize
     }
 
     

@@ -40,7 +40,7 @@ library WitPriceFeedsDataLib {
         mapping (IWitPriceFeedsTypes.ID4 => PriceFeed) records;
         mapping (IWitPriceFeedsTypes.ID4 => IWitPriceFeedsTypes.ID4[]) reverseDeps;
         mapping (Witnet.RadonHash => IWitPriceFeedsTypes.ID4) reverseIds;
-        IWitPriceFeedsTypes.UpdateConditions defaultUpdateConditions;
+        IWitPriceFeedsTypes.UpdateConditions _reserved;
         address consumer;
         bytes4  footprint;
     }
@@ -205,7 +205,7 @@ library WitPriceFeedsDataLib {
         returns (IWitPriceFeedsTypes.Price memory)
     {
         PriceFeed storage __record = seekPriceFeed(id4);
-        IWitPriceFeedsTypes.UpdateConditions memory _conditions = coalesce(__record.updateConditions);
+        IWitPriceFeedsTypes.UpdateConditions memory _conditions = __record.updateConditions;
 
         PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, _conditions.heartbeatSecs);
         

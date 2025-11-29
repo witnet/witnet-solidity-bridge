@@ -249,18 +249,15 @@ contract WitPriceFeedsLegacyUpgradableBypass
     /// --- IWitFeedsLegacy -------------------------------------------------------------------------------------------
     
     function defaultRadonSLA() 
-        external view 
+        external pure
         returns (IWitPriceFeedsLegacy.RadonSLAv1 memory)
     {
-        IWitPriceFeeds.UpdateConditions memory _conditions = surrogate.defaultUpdateConditions();
-        uint8 _numWitnesses = uint8(_conditions.minWitnesses);
-        uint64 _unitaryReward = 2 * 10 ** 8; // 0.2 WIT
         return IWitPriceFeedsLegacy.RadonSLAv1({
-            numWitnesses: _numWitnesses,
-            minConsensusPercentage: 51,
-            witnessReward: _unitaryReward,
-            witnessCollateral: _unitaryReward * _numWitnesses,
-            minerCommitRevealFee: _unitaryReward / _numWitnesses
+            numWitnesses: 5, 
+            minConsensusPercentage: 51, 
+            minerCommitRevealFee: 2 * 1e6, // 0.002 WIT
+            witnessCollateral: 1 * 1e9,    // 1.0   WIT
+            witnessReward: 1 * 1e7         // 0.01  WIT
         });
     }
 

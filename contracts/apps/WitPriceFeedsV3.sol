@@ -88,32 +88,17 @@ contract WitPriceFeedsV3
                 || _witOracleSpecs == type(IWitOracle).interfaceId ^ type(IWitOracleQueriable).interfaceId,
             "uncompliant wit/oracle"
         );
-        __WIT_ORACLE = _witOracle;
-        __storage().defaultUpdateConditions = UpdateConditions({
-            callbackGas: 1_000_000,
-            computeEma: false,
-            cooldownSecs: 15 minutes,
-            heartbeatSecs: 1 days,
-            maxDeviation1000: 0, // oo
-            minWitnesses: 3
-        });
+        __witOracle = IWitOracle(_witOracle);
     }
 
-    function initializeClone(
-            address _curator, 
-            UpdateConditions calldata _defaultUpdateConditions
-        )
-        external
+    function initializeClone(address _curator)
+        virtual external
         onlyOnClones
         initializer
         returns (address)
     {
-        _require(_curator != address(0), "zero curator");
+        _require(_curator != address(0), "zero address");
         _transferOwnership(_curator);
-        
-        _require(_validateUpdateConditions(_defaultUpdateConditions), "invalid conditions");
-        __storage().defaultUpdateConditions = _defaultUpdateConditions;
-
         return address(this);
     }
 
@@ -122,7 +107,7 @@ contract WitPriceFeedsV3
     /// --- Clonable --------------------------------------------------------------------------------------------------
 
     function initialized() virtual override public view returns (bool) {
-        return __storage().defaultUpdateConditions.minWitnesses > 0;
+        return owner() != address(0);
     }
     
     
@@ -136,7 +121,7 @@ contract WitPriceFeedsV3
     {
         ID4 _id4 = ID4.wrap(bytes4(_id));
         WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_id4);
-        UpdateConditions memory _updateConditions = __record.updateConditions.coalesce();
+        UpdateConditions memory _updateConditions = __record.updateConditions;
         WitPriceFeedsDataLib.PriceData memory _lastUpdate = __record.fetchLastUpdate(_id4, _updateConditions.heartbeatSecs);
         _value = int(uint(_lastUpdate.emaPrice > 0 ? _lastUpdate.emaPrice : _lastUpdate.price));
         _timestamp = uint(Witnet.Timestamp.unwrap(_lastUpdate.timestamp));
@@ -265,10 +250,7 @@ contract WitPriceFeedsV3
         external
         returns (address)
     {
-        return WitPriceFeedsV3(__clone()).initializeClone(
-            _curator,
-            __storage().defaultUpdateConditions
-        );
+        return WitPriceFeedsV3(__clone()).initializeClone(_curator);
     }
 
     /// Creates a Chainlink Aggregator proxy to the specified symbol.
@@ -436,13 +418,6 @@ contract WitPriceFeedsV3
         Ownable2Step.acceptOwnership();
     }
 
-    function defaultUpdateConditions()
-        external view override
-        returns (UpdateConditions memory)
-    {
-        return __storage().defaultUpdateConditions;
-    }
-
     function owner()
         virtual override (IWitPriceFeedsAdmin, Ownable)
         public view 
@@ -464,6 +439,7 @@ contract WitPriceFeedsV3
         public 
         onlyOwner
     {
+        _require(_newOwner != address(0), "zero address");
         Ownable.transferOwnership(_newOwner);
     }
 
@@ -495,14 +471,6 @@ contract WitPriceFeedsV3
             "invalid consumer"
         );
         __storage().consumer = _consumer;
-    }
-
-    function settleDefaultUpdateConditions(UpdateConditions calldata _conditions)
-        external override
-        onlyOwner
-    {
-        _require(_validateUpdateConditions(_conditions), "invalid conditions");
-        __storage().defaultUpdateConditions = _conditions;
     }
 
     function settlePriceFeedMapper(
@@ -655,7 +623,7 @@ contract WitPriceFeedsV3
             InvalidUpdateDataSource()
         );
         WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_id4);
-        UpdateConditions memory _updateConditions = __record.updateConditions.coalesce();
+        UpdateConditions memory _updateConditions = __record.updateConditions;
         require(
             report.queryParams.witCommitteeSize >= _updateConditions.minWitnesses,
             InvalidGovernanceTarget()

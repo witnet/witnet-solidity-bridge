@@ -13,7 +13,6 @@ interface IWitPriceFeedsAdmin {
     function removePriceFeed(string calldata, bool) external returns (bytes4);
     
     function settleConsumer(address) external;
-    function settleDefaultUpdateConditions(IWitPriceFeedsTypes.UpdateConditions calldata) external;
     
     function settlePriceFeedMapper(
             string calldata caption, 
