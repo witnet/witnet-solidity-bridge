@@ -2,12 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    Witnet, 
-    WitRandomness, 
-    IWitRandomness,
-    IWitRandomnessEvents
-} from "./WitRandomness.sol";
+import "./WitRandomness.sol";
 
 abstract contract UsingWitRandomness
     is
@@ -23,15 +18,29 @@ abstract contract UsingWitRandomness
             "UsingWitRandomness: pending randomize"
         ); _;
     }
-    
-    constructor (address randomizer) {
+
+    /// @dev On contracts implementing `IWitRandomnessConsumer`, provides a way to verify
+    /// that the contract reporting Witnet-certified randomness is legit:
+    modifier onlyFromWitnet {
         require(
-            randomizer != address(0)
-                && randomizer.code.length > 0
-                && WitRandomness(randomizer).specs() == type(IWitRandomness).interfaceId,
+            msg.sender == address(__witRandomness),
+            "UsingWitRandomness: invalid randomizer"
+        ); _;
+    }
+    
+    constructor (IWitRandomness randomizer) {
+        require(
+            address(randomizer) != address(0)
+                && address(randomizer).code.length > 0
+                && WitRandomness(address(randomizer)).specs() == type(IWitRandomness).interfaceId,
             "UsingWitRandomness: uncompliant WitRandomness"            
         );
-        __witRandomness = WitRandomness(randomizer);
+        __witRandomness = WitRandomness(address(randomizer));
+    }
+
+    /// @notice Reference to the underlying Wit/Oracle Framework.
+    function witOracle() virtual public view returns (address) {
+        return __witRandomness.witOracle();
     }
 
     /// @dev Estimate the minimum randomize fee to pay if willing to actively pull a new randomize request.
@@ -61,19 +70,50 @@ abstract contract UsingWitRandomness
         );
     }
 
+
+    /// ===============================================================================================================
+    /// --- Internal helper pure methods ------------------------------------------------------------------------------
+
     /// @notice Generates a pseudo-random number uniformly distributed within the range [0 .. _faces), 
     /// by using the specified `_nonce` and `_seed`.
-    /// @dev Fails under same conditions as `_fetchRandomnessAfter(uint256)` does.
-    function _generateUniformDice(uint64 _faces, uint256 _nonce, bytes32 _seed) internal pure returns (uint64) {
+    function _castADice(uint8 _faces, uint256 _nonce, bytes32 _seed) internal pure returns (uint8) {
+        return uint8(Witnet.randomUniformUint64(
+            _faces,
+            _nonce,
+            _seed
+        ));
+    }
+
+    function _castALargeDice(uint64 _faces, uint256 _nonce, bytes32 _seed) internal pure returns (uint64) {
         return Witnet.randomUniformUint64(
             _faces,
             _nonce,
             _seed
         );
     }
+    
 
     /// @notice Generates a pseudo-random uniformly distributed extraction, with repetitions. 
-    function _generateUniformExtractionWithReps(
+    function _generateExtractionWithReps(
+            uint8   _range, 
+            uint16  _extractions, 
+            bytes32 _seed
+        )
+        internal pure
+        returns (bytes memory _balls)
+    {
+        unchecked {
+            _balls = new bytes(_extractions);
+            for (uint16 _ix; _ix < _extractions; _ix ++) {
+                _balls[_ix] = bytes1(uint8(Witnet.randomUniformUint64(
+                    _range, 
+                    _ix, 
+                    _seed
+                )));
+            }
+        }
+    }
+    function _generateLargeExtractionWithReps(
             uint64  _range, 
             uint16  _extractions, 
             bytes32 _seed
@@ -94,7 +134,32 @@ abstract contract UsingWitRandomness
     }
 
     /// @notice Generates a pseudo-random uniformly distributed extraction, with no repetitions. 
-    function _generateUniformExtractionNoReps(
+    function _generateExtractionNoReps(
+            uint8   _range,
+            uint8   _extractions,
+            bytes32 _seed
+        )
+        internal pure
+        returns (bytes memory _balls)
+    {
+        unchecked {
+            bytes memory _numbers = new bytes(_range);
+            for (uint8 _ix; _ix < _range; _ix ++) {
+                _numbers[_ix] = bytes1(_ix);
+            }
+            _balls = new bytes(_extractions);
+            for (uint8 _jx; _jx < _extractions; _jx ++) {
+                uint8 _pos = uint8(Witnet.randomUniformUint64(
+                    _range - _jx, 
+                    _jx, 
+                    _seed
+                ));
+                _balls[_jx] = _numbers[_pos];
+                _numbers[_pos] = _numbers[_range - 1 - _jx];
+            }
+        }
+    }
+    function _generateLargeExtractionNoReps(
             uint64  _range, 
             uint16  _extractions, 
             bytes32 _seed
@@ -118,10 +183,5 @@ abstract contract UsingWitRandomness
                 _numbers[_pos] = _numbers[_range - 1 - _jx];
             }
         }
-    }
-
-    /// @notice Reference to the underlying Wit/Oracle Framework.
-    function witOracle() virtual public view returns (address) {
-        return __witRandomness.witOracle();
     }
 }
