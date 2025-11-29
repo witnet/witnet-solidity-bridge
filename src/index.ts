@@ -15,11 +15,11 @@ export const ABIs: any = {
 		.abi,
 	WitOracleRadonRequestFactory:
 		require("../../artifacts/contracts/WitOracleRadonRequestFactory.sol/WitOracleRadonRequestFactory.json").abi,
-	WitOracleRadonRequestModal:
-		require("../../artifacts/contracts/interfaces/IWitOracleRadonRequestModal.sol/IWitOracleRadonRequestModal.json")
+	WitOracleRadonRequestModalFactory:
+		require("../../artifacts/contracts/interfaces/IWitOracleRadonRequestModalFactory.sol/IWitOracleRadonRequestModalFactory.json")
 			.abi,
-	WitOracleRadonRequestTemplate:
-		require("../../artifacts/contracts/interfaces/IWitOracleRadonRequestTemplate.sol/IWitOracleRadonRequestTemplate.json")
+	WitOracleRadonRequestTemplateFactory:
+		require("../../artifacts/contracts/interfaces/IWitOracleRadonRequestTemplateFactory.sol/IWitOracleRadonRequestTemplateFactory.json")
 			.abi,
 	WitPriceFeeds: require("../../artifacts/contracts/WitPriceFeeds.sol/WitPriceFeeds.json").abi,
 	WitPriceFeedsLegacy: require("../../artifacts/contracts/WitPriceFeedsLegacy.sol/WitPriceFeedsLegacy.json").abi,

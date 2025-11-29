@@ -4,7 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./interfaces/IWitOracle.sol";
 import "./interfaces/IWitOracleAppliance.sol";
+import "./interfaces/IWitOracleConsumer.sol";
 import "./interfaces/IWitOracleQueriable.sol";
+import "./interfaces/IWitOracleQueriableConsumer.sol";
 import "./interfaces/IWitOracleQueriableEvents.sol";
 
 import "./WitOracleRadonRequestFactory.sol";

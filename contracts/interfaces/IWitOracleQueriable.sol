@@ -67,7 +67,7 @@ interface IWitOracleQueriable {
     /// @notice Request real world data from the Wit/Oracle sidechain. 
     /// @notice The paid fee is escrowed as a reward for the reporter that eventually relays back 
     /// @notice a valid query result from the Wit/Oracle sidechain.
-    /// @notice Query results are CBOR-encoded, and can contain either some     data, or an error.
+    /// @notice Query results are CBOR-encoded, and can contain either some data, or an error.
     /// @dev Reasons to revert:
     /// @dev - the data request's RAD hash was not previously verified into the WitOracleRadonRegistry contract;
     /// @dev - invalid query SLA parameters were provided;

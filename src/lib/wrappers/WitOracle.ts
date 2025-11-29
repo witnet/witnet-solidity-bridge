@@ -8,8 +8,8 @@ import { WitOracleConsumer } from "./WitOracleConsumer.js";
 import { WitOracleRadonRegistry } from "./WitOracleRadonRegistry.js";
 import {
 	WitOracleRadonRequestFactory,
-	WitOracleRadonRequestModal,
-	WitOracleRadonRequestTemplate,
+	WitOracleRadonRequestModalFactory,
+	WitOracleRadonRequestTemplateFactory,
 } from "./WitOracleRadonRequestFactory.js";
 import { WitPriceFeeds } from "./WitPriceFeeds.js";
 import { WitPriceFeedsLegacy } from "./WitPriceFeedsLegacy.js";
@@ -18,7 +18,7 @@ import { WitRandomness } from "./WitRandomness.js";
 /**
  * Wrapper class for the Wit/Oracle contract as deployed in some specified EVM network.
  * It provides wrappers to other main artifacts of the Wit/Oracle Framework, as well
- * as factory methods for wrapping existing `WitOracleRadonRequestTemplate` and `WitOracleConsumer`
+ * as factory methods for wrapping existing `WitOracleRadonRequestTemplateFactory` and `WitOracleConsumer`
  * compliant contracts, provably bound to the Wit/Oracle core contract.
  *
  */
@@ -257,7 +257,7 @@ export class WitOracle extends WitArtifact {
 
 	/**
 	 * Wrapper class for the Wit/Oracle Request Factory core contract as deployed in some supported EVM network.
-	 * It allows construction of `WitOracleRadonRequestTemplate` minimal-proxy contracts out of one ore more
+	 * It allows construction of `WitOracleRadonRequestTemplateFactory` minimal-proxy contracts out of one ore more
 	 * parameterized Radon Retievals (Witnet-compliant data sources). Template addresses are counter-factual to
 	 * the set of data sources they are built on.
 	 */
@@ -270,8 +270,8 @@ export class WitOracle extends WitArtifact {
 	 * `IWitOracleRadonRequestTemplate` contracts enable smart contracts to formally verify Radon Requests
 	 * built out out of a set of parameterized Witnet-compliant data sources, on the fly.
 	 */
-	public async getWitOracleRadonRequestTemplateAt(target: string): Promise<WitOracleRadonRequestTemplate> {
-		return WitOracleRadonRequestTemplate.at(this, target);
+	public async getWitOracleRadonRequestTemplateFactoryAt(target: string): Promise<WitOracleRadonRequestTemplateFactory> {
+		return WitOracleRadonRequestTemplateFactory.at(this, target);
 	}
 
 	/**
@@ -280,8 +280,8 @@ export class WitOracle extends WitArtifact {
 	 * built out out of a single Radon Retrieval and multiple data providers, all of them expected to
 	 * provided exactly the same data.
 	 */
-	public async getWitOracleRadonRequestModalAt(target: string): Promise<WitOracleRadonRequestModal> {
-		return WitOracleRadonRequestModal.arguments(this, target);
+	public async getWitOracleRadonRequestModalFactoryAt(target: string): Promise<WitOracleRadonRequestModalFactory> {
+		return WitOracleRadonRequestModalFactory.arguments(this, target);
 	}
 
 	public async getWitPriceFeedsAt(target: string): Promise<WitPriceFeeds> {

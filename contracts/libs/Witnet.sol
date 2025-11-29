@@ -940,8 +940,8 @@ library Witnet {
     /// ===============================================================================================================
     /// --- Timestamp helper methods ----------------------------------------------------------------------------------
 
-    function gt(Timestamp a, Timestamp b) internal pure returns (bool) {
-        return Timestamp.unwrap(a) > Timestamp.unwrap(b);
+    function eq(Timestamp a, Timestamp b) internal pure returns (bool) {
+        return Timestamp.unwrap(a) == Timestamp.unwrap(b);
     }
 
     function egt(Timestamp a, Timestamp b) internal pure returns (bool) {
@@ -950,6 +950,10 @@ library Witnet {
 
     function elt(Timestamp a, Timestamp b) internal pure returns (bool) {
         return Timestamp.unwrap(a) <= Timestamp.unwrap(b);
+    }
+
+    function gt(Timestamp a, Timestamp b) internal pure returns (bool) {
+        return Timestamp.unwrap(a) > Timestamp.unwrap(b);
     }
 
     function isZero(Timestamp t) internal pure returns (bool) {

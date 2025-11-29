@@ -42,7 +42,7 @@ export class WitOracleRadonRequestFactory extends WitAppliance {
 			 */
 			onVerifyRadonRetrievalReceipt?: (receipt: ContractTransactionReceipt | null) => any;
 		},
-	): Promise<WitOracleRadonRequestTemplate> {
+	): Promise<WitOracleRadonRequestTemplateFactory> {
 		const hashes: Array<string> = [];
 		for (const index in template.sources) {
 			const retrieval = template.sources[index];
@@ -68,7 +68,7 @@ export class WitOracleRadonRequestFactory extends WitAppliance {
 				}
 			});
 
-		return await WitOracleRadonRequestTemplate.at(this.witOracle, target);
+		return await WitOracleRadonRequestTemplateFactory.at(this.witOracle, target);
 	}
 
 	public async deployRadonRequestModal(
@@ -88,7 +88,7 @@ export class WitOracleRadonRequestFactory extends WitAppliance {
 			 */
 			onVerifyRadonRetrievalReceipt?: (receipt: ContractTransactionReceipt | null) => any;
 		},
-	): Promise<WitOracleRadonRequestModal> {
+	): Promise<WitOracleRadonRequestModalFactory> {
 		const retrieval = [
 			modal.sources[0].method,
 			modal.sources[0].body || "",
@@ -110,7 +110,7 @@ export class WitOracleRadonRequestFactory extends WitAppliance {
 				}
 			});
 
-		return await WitOracleRadonRequestModal.at(this.witOracle, target);
+		return await WitOracleRadonRequestModalFactory.at(this.witOracle, target);
 	}
 
 	public async verifyRadonRequest(
@@ -137,17 +137,17 @@ export class WitOracleRadonRequestFactory extends WitAppliance {
 	}
 }
 
-export class WitOracleRadonRequestModal extends WitAppliance {
+export class WitOracleRadonRequestModalFactory extends WitAppliance {
 	protected constructor(witOracle: WitOracle, at: string) {
-		super(witOracle, "WitOracleRadonRequestModal", at);
+		super(witOracle, "WitOracleRadonRequestModalFactory", at);
 	}
 
-	static async at(witOracle: WitOracle, target: string): Promise<WitOracleRadonRequestModal> {
-		const template = new WitOracleRadonRequestModal(witOracle, target);
+	static async at(witOracle: WitOracle, target: string): Promise<WitOracleRadonRequestModalFactory> {
+		const template = new WitOracleRadonRequestModalFactory(witOracle, target);
 		const templateWitOracleAddr = await template.contract.witOracle.staticCall();
 		if (templateWitOracleAddr !== witOracle.address) {
 			throw new Error(
-				`${WitOracleRadonRequestModal.constructor.name} at ${target}: mismatching Wit/Oracle address (${templateWitOracleAddr})`,
+				`${WitOracleRadonRequestModalFactory.constructor.name} at ${target}: mismatching Wit/Oracle address (${templateWitOracleAddr})`,
 			);
 		}
 		return template;
@@ -234,17 +234,17 @@ export class WitOracleRadonRequestModal extends WitAppliance {
 	}
 }
 
-export class WitOracleRadonRequestTemplate extends WitAppliance {
+export class WitOracleRadonRequestTemplateFactory extends WitAppliance {
 	protected constructor(witOracle: WitOracle, at: string) {
-		super(witOracle, "WitOracleRadonRequestTemplate", at);
+		super(witOracle, "WitOracleRadonRequestTemplateFactory", at);
 	}
 
-	static async at(witOracle: WitOracle, target: string): Promise<WitOracleRadonRequestTemplate> {
-		const template = new WitOracleRadonRequestTemplate(witOracle, target);
+	static async at(witOracle: WitOracle, target: string): Promise<WitOracleRadonRequestTemplateFactory> {
+		const template = new WitOracleRadonRequestTemplateFactory(witOracle, target);
 		const templateWitOracleAddr = await template.contract.witOracle.staticCall();
 		if (templateWitOracleAddr !== witOracle.address) {
 			throw new Error(
-				`${WitOracleRadonRequestTemplate.constructor.name} at ${target}: mismatching Wit/Oracle address (${templateWitOracleAddr})`,
+				`${WitOracleRadonRequestTemplateFactory.constructor.name} at ${target}: mismatching Wit/Oracle address (${templateWitOracleAddr})`,
 			);
 		}
 		return template;

@@ -69,7 +69,7 @@ module.exports = async (flags = {}, params = []) => {
 								},
 								onDeployRadonRequestModal: (address) => {
 									process.stdout.write(
-										`  > Replacing WitOracleRadonRequestModal => ${helpers.colors.mblue(address)} ... `,
+										`  > Replacing WitOracleRadonRequestModalFactory => ${helpers.colors.mblue(address)} ... `,
 									);
 								},
 								onDeployRadonRequestModalReceipt: (receipt) => {
@@ -138,7 +138,7 @@ module.exports = async (flags = {}, params = []) => {
 								onDeployRadonRequestTemplate: (address) => {
 									target = address;
 									process.stdout.write(
-										`  > Replacing WitOracleRadonRequestTemplate => ${helpers.colors.mblue(address)} ... `,
+										`  > Replacing WitOracleRadonRequestTemplateFactory => ${helpers.colors.mblue(address)} ... `,
 									);
 								},
 								onDeployRadonRequestTemplateReceipt: (receipt) => {
@@ -151,7 +151,7 @@ module.exports = async (flags = {}, params = []) => {
 								console.error(err);
 								throw err;
 							});
-						// process.stdout.write(`  > WitOracleRadonRequestTemplate address: ${helpers.colors.mcyan(target)}\n`)
+						// process.stdout.write(`  > WitOracleRadonRequestTemplateFactory address: ${helpers.colors.mcyan(target)}\n`)
 						deployables.templates[network][key] = template.address;
 						helpers.saveWitnetJsonFiles({ templates: deployables.templates });
 

@@ -37,6 +37,7 @@
 		"worldchain"
 	],
 	"bin": {
+		"cli": "src/bin/index.cjs",
 		"witeth": "src/bin/index.cjs",
 		"witnet-ethers": "src/bin/index.cjs",
 		"witnet-solidity": "src/bin/index.cjs",

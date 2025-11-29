@@ -11,17 +11,18 @@ abstract contract UsingWitOracle
     is
         IWitOracleQueriableEvents
 {   
-    WitOracle internal immutable __witOracle;
-    
-    /// @dev Percentage over base fee to pay on every data request, 
-    /// @dev as to deal with volatility of evmGasPrice and evmWitPrice during the live time of 
-    /// @dev a data request (since being posted until a result gets reported back), at both the EVM and 
-    /// @dev the Witnet blockchain levels, respectivelly. 
-    uint16 internal __witOracleBaseFeeOverheadPercentage;
+    using Witnet for Witnet.*;
 
-    /// @notice Default SLA data security parameters to be fulfilled by the Wit/Oracle blockchain
-    /// @notice when solving a data request.
-    Witnet.QuerySLA internal __witOracleDefaultQueryParams;
+    WitOracle internal immutable __witOracle;
+
+    /// @dev On contracts implementing `IWitOracleQueriableConsumer`, provides a way to verify
+    /// that the contract reporting Witnet-certified query results is legit:
+    modifier onlyFromWitnet {
+        require(
+            msg.sender == address(__witOracle),
+            "UsingWitOracle: invalid reporter"
+        ); _;
+    }
 
     /// @dev Provides a convenient way for client contracts extending this to block the execution of the main logic of the
     /// @dev contract until a particular request has been successfully solved and reported from the Wit/Oracle blockchain,
@@ -36,8 +37,26 @@ abstract contract UsingWitOracle
         ); _;
     }
 
-    /// @param _witOracle Address of the WitOracle bridging contract.
-    constructor(address _witOracle) {
+    /// @notice Immutable reference to the WitOracle contract.
+    function witOracle() virtual external view returns (address) {
+        return address(__witOracle);
+    }
+    
+    /// @dev Percentage over base fee to pay on every data request, 
+    /// @dev as to deal with volatility of evmGasPrice and evmWitPrice during the live time of 
+    /// @dev a data request (since being posted until a result gets reported back), at both the EVM and 
+    /// @dev the Witnet blockchain levels, respectivelly. 
+    uint16 internal __witOracleBaseFeeOverheadPercentage;
+
+    /// @notice Default SLA data security parameters to be fulfilled by the Wit/Oracle blockchain
+    /// @notice when solving a data request.
+    Witnet.QuerySLA internal __witOracleDefaultQueryParams;
+
+    constructor(
+            // Address of the Wit/Oracle contract.
+            address _witOracle
+        )
+    {
         require(
             WitOracle(_witOracle).specs() == (
                 type(IWitOracle).interfaceId
@@ -64,19 +83,14 @@ abstract contract UsingWitOracle
     }
 
     /// @dev Estimate the minimum reward required for posting a data request (based on `tx.gasprice`).
-    function _witOracleEstimateBaseFee() virtual internal view returns (uint256) {
-        return _witOracleEstimateBaseFee(tx.gasprice);
+    function _estimateWitOracleFee() virtual internal view returns (uint256) {
+        return _estimateWitOracleFee(tx.gasprice);
     }
 
-    function _witOracleEstimateBaseFee(uint256 _evmGasPrice) virtual internal view returns (uint256) {
+    function _estimateWitOracleFee(uint256 _evmGasPrice) virtual internal view returns (uint256) {
         return (
             __witOracle.estimateBaseFee(_evmGasPrice)
                 * (100 + __witOracleBaseFeeOverheadPercentage)
         ) / 100;
-    }
-
-    /// @notice Immutable reference to the WitOracle contract.
-    function witOracle() virtual public view returns (address) {
-        return address(__witOracle);
     }
 }
