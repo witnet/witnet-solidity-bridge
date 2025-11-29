@@ -13,6 +13,8 @@ import {
     Witnet
 } from "../WitOracle.sol";
 
+import {WitPythChainlinkAggregator} from "../mockups/WitPythChainlinkAggregator.sol";
+
 import "../libs/Slices.sol";
 
 /// @title WitPriceFeeds data model.
@@ -113,6 +115,24 @@ library WitPriceFeedsDataLib {
 
     // ================================================================================================================
     // --- Public methods ---------------------------------------------------------------------------------------------
+
+    function createChainlinkAggregator(IWitPriceFeedsTypes.ID4 id4) public returns (address) {
+        bytes memory _initcode = type(WitPythChainlinkAggregator).creationCode;
+        bytes memory _params = abi.encodePacked(address(this), id4);
+        address _aggregator = _determineCreate2Address(_initcode, _params);
+        if (_aggregator.code.length == 0) {
+            bytes memory _bytecode = _completeInitCode(_initcode, _params);
+            assembly {
+                _aggregator := create2(
+                    0,
+                    add(_bytecode, 0x20),
+                    mload(_bytecode),
+                    0
+                )
+            }
+        }
+        return _aggregator;
+    }
 
     function fetchLastUpdate(PriceFeed storage self, IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat)
         public view 
@@ -268,6 +288,19 @@ library WitPriceFeedsDataLib {
             price: _lastUpdate.emaPrice > 0 ? _lastUpdate.emaPrice : _lastUpdate.price,
             timestamp: _lastUpdate.timestamp,
             trail: _lastUpdate.trail
+        });
+    }
+
+    function lookupPriceFeedInfo(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.Info memory _info) {
+        PriceFeed storage self = seekPriceFeed(id4);
+        _info = IWitPriceFeedsTypes.Info({
+            id: data().ids[self.index],
+            exponent: self.exponent,
+            symbol: self.symbol,
+            mapper: lookupPriceFeedMapper(id4),
+            oracle: lookupPriceFeedOracle(id4),
+            updateConditions: self.updateConditions,
+            lastUpdate: getPriceUnsafe(id4)
         });
     }
 

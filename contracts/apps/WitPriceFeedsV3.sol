@@ -19,7 +19,6 @@ import {
 } from "../WitPriceFeeds.sol";
 
 import {WitPriceFeedsDataLib} from "../data/WitPriceFeedsDataLib.sol";
-import {WitPythChainlinkAggregator} from "../mockups/WitPythChainlinkAggregator.sol";
 
 import {Clonable} from "../patterns/Clonable.sol";
 import {Ownable, Ownable2Step} from "../patterns/Ownable2Step.sol";
@@ -260,21 +259,9 @@ contract WitPriceFeedsV3
         returns (address)
     {
         require(supportsCaption(symbol), PriceFeedNotFound());
-        bytes memory _initcode = type(WitPythChainlinkAggregator).creationCode;
-        bytes memory _params = abi.encodePacked(address(this), _intoID4(hash(symbol)));
-        address _aggregator = _determineCreate2Address(_initcode, _params);
-        if (_aggregator.code.length == 0) {
-            bytes memory _bytecode = _completeInitCode(_initcode, _params);
-            assembly {
-                _aggregator := create2(
-                    0,
-                    add(_bytecode, 0x20),
-                    mload(_bytecode),
-                    0
-                )
-            }
-        }
-        return _aggregator;
+        return WitPriceFeedsDataLib.createChainlinkAggregator(
+            _intoID4(hash(symbol))
+        );
     }
 
 
@@ -345,41 +332,8 @@ contract WitPriceFeedsV3
         return WitPriceFeedsDataLib.getPriceUnsafe(_id4);
     }
     
-    function lookupPriceFeed(ID4 _id4)
-        override 
-        public view 
-        returns (Info memory)
-    {
-        WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_id4);
-        Mappers _mapper = __record.mapper;
-        string[] memory _mapperDeps;
-        if (_mapper != Mappers.None) {
-            ID4[] memory _deps = _id4.deps();
-            _mapperDeps = new string[](_deps.length);
-            for (uint _ix = 0; _ix < _deps.length; ++ _ix) {
-                _mapperDeps[_ix] = __storage().records[_deps[_ix]].symbol;
-            }
-        }
-        Oracles _oracle = __record.oracle;
-        bytes32 _oracleSources = __record.oracleSources;
-        address _oracleAddress = __record.oracleAddress;
-
-        return Info({
-            id: _intoID(_id4),
-            exponent: __record.exponent,
-            symbol: __record.symbol,
-            mapper: Mapper({
-                class: _mapper,
-                deps: _mapperDeps
-            }),
-            oracle: Oracle({
-                class: _oracle,
-                target: _oracleAddress,
-                sources: _oracleSources
-            }),
-            updateConditions: __record.updateConditions.coalesce(),
-            lastUpdate: WitPriceFeedsDataLib.getPriceUnsafe(_id4)
-        });
+    function lookupPriceFeed(ID4 _id4) override public view returns (Info memory) {
+        return _id4.lookupPriceFeedInfo();
     }
 
     function lookupPriceFeedCaption(ID4 _id4) external override view returns (string memory _symbol) {
@@ -704,32 +658,6 @@ contract WitPriceFeedsV3
     
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
-
-    function _completeInitCode(bytes memory initcode, bytes memory params)
-        private pure
-        returns (bytes memory)
-    {
-        return abi.encodePacked(
-            initcode,
-            params
-        );
-    }
-
-    function _determineCreate2Address(bytes memory initcode, bytes memory params)
-        private view
-        returns (address)
-    {
-        return address(
-            uint160(uint(keccak256(
-                abi.encodePacked(
-                    bytes1(0xff),
-                    address(this),
-                    bytes32(0),
-                    keccak256(_completeInitCode(initcode, params))
-                )
-            )))
-        );
-    }
 
     function _intoID(ID4 id4) internal view returns (ID) {
         return __storage().ids[__storage().records[id4].index];
