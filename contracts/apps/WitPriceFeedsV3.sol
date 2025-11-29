@@ -61,14 +61,14 @@ contract WitPriceFeedsV3
     using WitPriceFeedsDataLib for UpdateConditions;
     using WitPriceFeedsDataLib for WitPriceFeedsDataLib.PriceFeed;
 
-    address immutable internal __WIT_ORACLE;
+    IWitOracle immutable internal __witOracle;
 
     function class() virtual override public pure returns (string memory) {
         return type(WitPriceFeedsV3).name;
     }
 
     function witOracle() virtual override external view returns (address) {
-        return __WIT_ORACLE;
+        return address(__witOracle);
     }
 
     constructor(
@@ -363,13 +363,18 @@ contract WitPriceFeedsV3
     function lookupPriceFeedOracle(ID4 _id4) external override view returns (Oracle memory) {
         return _id4.lookupPriceFeedOracle();
     }
+    function lookupPriceFeedRadonBytecode(ID4 _id4) external override view returns (bytes memory) {
+        return __witOracle.registry().lookupRadonRequestBytecode(
+            _id4.lookupPriceFeedRadonHash()
+        );
+    }
+    
     function lookupPriceFeedRadonHash(ID4 _id4) public override view returns (Witnet.RadonHash _radonHash) {
         return _id4.lookupPriceFeedRadonHash();
     }
 
     function supportsCaption(string calldata _caption) public override view returns (bool) {
-        WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_intoID4(hash(_caption)));
-        return __record.settled();
+        return __seekPriceFeed(_intoID4(hash(_caption))).settled();
     }
 
 
@@ -502,7 +507,7 @@ contract WitPriceFeedsV3
                 _symbol,
                 _radonBytecode,
                 _exponent,
-                IWitOracle(__WIT_ORACLE).registry()
+                __witOracle.registry()
             )
         returns (bytes4 _footprint, Witnet.RadonHash _radonHash) {
             emit PriceFeedOracle(
@@ -538,7 +543,7 @@ contract WitPriceFeedsV3
                 _symbol,
                 _radonHash,
                 _exponent,
-                IWitOracle(__WIT_ORACLE).registry()
+                __witOracle.registry()
             )
         returns (bytes4 _footprint) {
             emit PriceFeedOracle(
@@ -593,7 +598,7 @@ contract WitPriceFeedsV3
             report.queryParams.witCommitteeSize >= _updateConditions.minWitnesses,
             InvalidGovernanceTarget()
         );
-        Witnet.DataResult memory _dataResult = IWitOracle(__WIT_ORACLE).pushDataReport(
+        Witnet.DataResult memory _dataResult = __witOracle.pushDataReport(
             report,
             proof
         );
