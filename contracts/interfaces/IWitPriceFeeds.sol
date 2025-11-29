@@ -8,6 +8,8 @@ import {IWitPriceFeedsEvents} from "./IWitPriceFeedsEvents.sol";
 import {IWitPriceFeedsTypes} from "./IWitPriceFeedsTypes.sol";
 import {IWitPyth} from "./legacy/IWitPyth.sol";
 
+import {Witnet} from "../libs/Witnet.sol";
+
 interface IWitPriceFeeds
     is
         IWitPriceFeedsAdmin,
@@ -87,6 +89,7 @@ interface IWitPriceFeeds
     function lookupPriceFeedID(ID4 id4) external view returns (bytes32);
     function lookupPriceFeedMapper(ID4 id4) external view returns (Mapper memory);
     function lookupPriceFeedOracle(ID4 id4) external view returns (Oracle memory);
+    function lookupPriceFeedRadonHash(ID4 id4) external view returns (Witnet.RadonHash);
     /// @notice Returns last known price updates and deviations for all supported price feeds without any sanity checks.    
     function lookupPriceFeeds() external view returns (Info[] memory);
     

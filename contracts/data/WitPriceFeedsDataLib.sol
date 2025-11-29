@@ -323,6 +323,12 @@ library WitPriceFeedsDataLib {
         _oracle.target = self.oracleAddress;
         _oracle.sources = self.oracleSources;
     }
+    function lookupPriceFeedRadonHash(IWitPriceFeedsTypes.ID4 id4) public view returns (Witnet.RadonHash _radonHash) {
+        PriceFeed storage self = seekPriceFeed(id4);
+        if (self.oracle == IWitPriceFeedsTypes.Oracles.Witnet) {
+            return Witnet.RadonHash.wrap(self.oracleSources);    
+        }
+    }
 
     
     // ================================================================================================================
