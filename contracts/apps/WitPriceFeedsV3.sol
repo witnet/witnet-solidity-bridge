@@ -356,6 +356,10 @@ contract WitPriceFeedsV3
         }
     }
 
+    function lookupPriceFeedMapper(ID4 _id4) external override view returns (Mapper memory) {
+        return _id4.lookupPriceFeedMapper();
+    }
+
     function supportsCaption(string calldata _caption) public override view returns (bool) {
         WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_intoID4(hash(_caption)));
         return __record.settled();

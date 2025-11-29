@@ -85,7 +85,7 @@ interface IWitPriceFeeds
     function lookupPriceFeedCaption(ID4 id4) external view returns (string memory);
     function lookupPriceFeedExponent(ID4 id4) external view returns (int8);
     function lookupPriceFeedID(ID4 id4) external view returns (bytes32);
-
+    function lookupPriceFeedMapper(ID4 id4) external view returns (Mapper memory);
     /// @notice Returns last known price updates and deviations for all supported price feeds without any sanity checks.    
     function lookupPriceFeeds() external view returns (Info[] memory);
     

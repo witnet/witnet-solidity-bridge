@@ -304,6 +304,19 @@ library WitPriceFeedsDataLib {
         });
     }
 
+    function lookupPriceFeedMapper(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.Mapper memory _mapper) {
+        PriceFeed storage self = seekPriceFeed(id4);
+        _mapper.class = self.mapper;
+        if (_mapper.class != IWitPriceFeedsTypes.Mappers.None) {
+            IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
+            string[] memory _symbols = new string[](_deps.length);
+            for (uint8 _ix; _ix < _symbols.length; ++ _ix) {
+                _symbols[_ix] = seekPriceFeed(_deps[_ix]).symbol;
+            }
+            _mapper.deps = _symbols;
+        }
+    }
+
     
     // ================================================================================================================
     // --- Price-feed admin methods -----------------------------------------------------------------------------------
