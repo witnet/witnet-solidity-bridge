@@ -317,6 +317,13 @@ library WitPriceFeedsDataLib {
         }
     }
 
+    function lookupPriceFeedOracle(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.Oracle memory _oracle) {
+        PriceFeed storage self = seekPriceFeed(id4);
+        _oracle.class = self.oracle;
+        _oracle.target = self.oracleAddress;
+        _oracle.sources = self.oracleSources;
+    }
+
     
     // ================================================================================================================
     // --- Price-feed admin methods -----------------------------------------------------------------------------------

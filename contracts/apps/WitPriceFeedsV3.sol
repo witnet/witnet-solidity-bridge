@@ -360,6 +360,10 @@ contract WitPriceFeedsV3
         return _id4.lookupPriceFeedMapper();
     }
 
+    function lookupPriceFeedOracle(ID4 _id4) external override view returns (Oracle memory) {
+        return _id4.lookupPriceFeedOracle();
+    }
+
     function supportsCaption(string calldata _caption) public override view returns (bool) {
         WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_intoID4(hash(_caption)));
         return __record.settled();
