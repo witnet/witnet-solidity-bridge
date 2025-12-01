@@ -82,8 +82,6 @@
 		"fmt!": "pnpm run fmt!:js && pnpm run fmt!:sol",
 		"fmt": "pnpm run fmt:js && pnpm run fmt:sol",
 		"deploy": "npx truffle migrate --config ./truffle-config.cjs",
-		"ops:wrb:acls": "npx truffle migrate --config ./truffle-config.cjs --migrations_directory ./migrations/ops/wrb/acls --compile-none --network",
-		"ops:curator": "npx truffle migrate --config ./truffle-config.cjs --migrations_directory ./migrations/ops/wrb/curator --compile-none --network",
 		"postinstall": "node ./scripts/postinstall.cjs",
 		"prepare": "npx truffle compile --all --config ./truffle-config.cjs && npx hardhat compile --no-tests --force && npm run build && node ./scripts/prepare.cjs",
 		"verify": "npx hardhat run ./scripts/verify.js 2>&1",

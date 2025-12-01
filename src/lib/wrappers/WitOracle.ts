@@ -270,7 +270,9 @@ export class WitOracle extends WitArtifact {
 	 * `IWitOracleRadonRequestTemplate` contracts enable smart contracts to formally verify Radon Requests
 	 * built out out of a set of parameterized Witnet-compliant data sources, on the fly.
 	 */
-	public async getWitOracleRadonRequestTemplateFactoryAt(target: string): Promise<WitOracleRadonRequestTemplateFactory> {
+	public async getWitOracleRadonRequestTemplateFactoryAt(
+		target: string,
+	): Promise<WitOracleRadonRequestTemplateFactory> {
 		return WitOracleRadonRequestTemplateFactory.at(this, target);
 	}
 
