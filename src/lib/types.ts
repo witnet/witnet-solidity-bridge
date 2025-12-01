@@ -41,6 +41,16 @@ export enum PriceFeedOracles {
 	// Redstone,
 }
 
+export type PriceFeedQoS = {
+	computesEMA: boolean;
+	maxDeviationPercentage: number;
+	maxSecsBetweenUpdates: number;
+	minSecsBetweenUpdates: number;
+	numFallbackOracles: number;
+	numTrackableDataSources: number;
+	witnessingCommitteeSize: number;
+};
+
 export type PriceFeedUpdate = {
 	price: number;
 	deltaPrice?: number;
