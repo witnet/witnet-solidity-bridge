@@ -4,18 +4,23 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitPriceFeeds.sol";
 
-/// @title The UsingWitPriceFeeds contract
-/// @dev Contracts willing to interact with a WitPriceFeeds appliance, freshly updated by a third-party.
+/// @title The UsingWitPriceFeeds contract.
 /// @author The Witnet Foundation.
 abstract contract UsingWitPriceFeeds {
-    IWitPriceFeeds immutable public WIT_PRICE_FEEDS;
+    WitPriceFeeds immutable internal __witPriceFeeds;
     
-    constructor(address _witPriceFeeds) {
+    constructor(IWitPriceFeeds router) {
         require(
-            _witPriceFeeds.code.length > 0
-                && IWitAppliance(_witPriceFeeds).specs() == type(IWitPriceFeeds).interfaceId,
-            "uncompliant wit/price feeds appliance"
+            address(router) != address(0)
+                && address(router).code.length > 0
+                && WitPriceFeeds(address(router)).specs() == type(IWitPriceFeeds).interfaceId,
+            "UsingWitPriceFeeds: uncompliant WitPriceFeeds"
         );
-        WIT_PRICE_FEEDS = IWitPriceFeeds(_witPriceFeeds);
+        __witPriceFeeds = WitPriceFeeds(address(router));
+    }
+
+    /// @notice Reference to the underlying Wit/Oracle Framework.
+    function witOracle() virtual public view returns (address) {
+        return __witPriceFeeds.witOracle();
     }
 }

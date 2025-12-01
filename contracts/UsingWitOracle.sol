@@ -4,15 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitOracle.sol";
 
-/// @title The UsingWitOracle contract
-/// @dev Witnet-aware contracts can inherit from this contract in order to interact with Witnet.
+/// @title The UsingWitOracle contract. 
+/// Witnet-aware contracts can inherit from this contract in order to interact with the Wit/Oracle Framework
 /// @author The Witnet Foundation.
 abstract contract UsingWitOracle
     is
         IWitOracleQueriableEvents
 {   
-    using Witnet for Witnet.*;
-
     WitOracle internal immutable __witOracle;
 
     /// @dev On contracts implementing `IWitOracleQueriableConsumer`, provides a way to verify

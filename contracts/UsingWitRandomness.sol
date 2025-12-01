@@ -4,6 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./WitRandomness.sol";
 
+/// @title The UsingWitRandomness contract.
+/// @author The Witnet Foundation.
 abstract contract UsingWitRandomness
     is
         IWitRandomnessEvents
@@ -159,6 +161,7 @@ abstract contract UsingWitRandomness
             }
         }
     }
+    
     function _generateLargeExtractionNoReps(
             uint64  _range, 
             uint16  _extractions, 
