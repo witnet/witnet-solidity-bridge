@@ -5,8 +5,8 @@ pragma solidity >=0.8.17 <0.9.0;
 import {IWitPriceFeedsTypes, Witnet} from "./IWitPriceFeedsTypes.sol";
 
 interface IWitPriceFeedsEvents {
-    /// Emitted when a new routed price feed gets settled.
-    event PriceFeedMapper(
+    /// Emitted when the curator settles a new routed price feed.
+    event PriceFeedMapperSettled(
             address indexed from, 
             IWitPriceFeedsTypes.ID4 id4, 
             string caption, 
@@ -15,8 +15,8 @@ interface IWitPriceFeedsEvents {
             string[] dependencies
         );
 
-    /// Emitted when a new oraclized price feed gets settled.
-    event PriceFeedOracle(
+    /// Emitted when the curator settles a new oraclized price feed.
+    event PriceFeedOracleSettled(
             address indexed from, 
             IWitPriceFeedsTypes.ID4 id4, 
             string caption, 
@@ -26,15 +26,16 @@ interface IWitPriceFeedsEvents {
             bytes32 oracleSources
         );
 
-    /// Emitted when a price feeds gets removed from the list of supported price feeds.
+    /// Emitted when the curator removes a price feeds from the list of supported price feeds.
     event PriceFeedRemoved(
         address indexed from, 
         IWitPriceFeedsTypes.ID4 id4, 
         string caption
     );
 
+    /// Emitted when someone permissionlessly report a valid Witnet-certified update on the specified price feed,
     event PriceFeedUpdate(
-        IWitPriceFeedsTypes.ID4 indexed ID4,
+        IWitPriceFeedsTypes.ID4 indexed id4,
         Witnet.Timestamp timestamp, 
         Witnet.TransactionHash trail,
         uint64 price,
@@ -42,11 +43,11 @@ interface IWitPriceFeedsEvents {
         int8 exponent
     );
 
-    /// Emitted when the update conditions of some existing price feed get altered.
-    event PriceFeedUpdateConditions(
+    /// Emitted when the curator updates conditions of some existing price feed get altered.
+    event PriceFeedUpdateConditionsSettled(
         address indexed from, 
         IWitPriceFeedsTypes.ID4 id4, 
         string caption,
-        IWitPriceFeedsTypes.UpdateConditions conditions
+        IWitPriceFeedsTypes.PriceUpdateConditions conditions
     );
 }

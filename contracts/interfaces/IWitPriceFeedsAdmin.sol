@@ -43,7 +43,7 @@ interface IWitPriceFeedsAdmin {
 
     function settlePriceFeedUpdateConditions(
             string calldata caption, 
-            IWitPriceFeedsTypes.UpdateConditions calldata conditions
+            IWitPriceFeedsTypes.PriceUpdateConditions calldata conditions
         ) external;
 
     function transferOwnership(address) external;

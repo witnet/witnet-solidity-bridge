@@ -147,7 +147,7 @@ contract WitPriceFeedsLegacyUpgradableBypass
         external view
         returns (bytes4[] memory _ids, string[] memory _captions, bytes32[] memory _solvers)
     {
-        IWitPriceFeeds.Info[] memory _pfs = surrogate.lookupPriceFeeds();
+        IWitPriceFeeds.PriceFeedInfo[] memory _pfs = surrogate.lookupPriceFeeds();
         _ids = new bytes4[](_pfs.length);
         _captions = new string[](_pfs.length);
         _solvers = new bytes32[](_pfs.length);
@@ -203,7 +203,7 @@ contract WitPriceFeedsLegacyUpgradableBypass
         external view
         returns (bytes memory)
     {
-        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
+        IWitPriceFeeds.PriceFeedInfo memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
         if (_info.oracle.class == IWitPriceFeedsTypes.Oracles.Witnet) {
             Witnet.RadonHash _radHash = Witnet.RadonHash.wrap(_info.oracle.sources);
             return registry.lookupRadonRequestBytecode(_radHash);
@@ -216,7 +216,7 @@ contract WitPriceFeedsLegacyUpgradableBypass
         external view
         returns (bytes32 _void)
     {
-        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
+        IWitPriceFeeds.PriceFeedInfo memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
         if (_info.oracle.class == IWitPriceFeedsTypes.Oracles.Witnet) {
             return _info.oracle.sources;
         } else {
@@ -228,7 +228,7 @@ contract WitPriceFeedsLegacyUpgradableBypass
         external view
         returns (Witnet.RadonRetrieval[] memory _void)
     {
-        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
+        IWitPriceFeeds.PriceFeedInfo memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
         if (_info.oracle.class == IWitPriceFeedsTypes.Oracles.Witnet) {
             Witnet.RadonHash _radHash = Witnet.RadonHash.wrap(_info.oracle.sources);
             return registry.lookupRadonRequestRetrievals(_radHash);
@@ -392,7 +392,7 @@ contract WitPriceFeedsLegacyUpgradableBypass
         external view
         returns (address _solverAddress, string[] memory _solverDeps)
     {
-        IWitPriceFeeds.Info memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
+        IWitPriceFeeds.PriceFeedInfo memory _info = surrogate.lookupPriceFeed(IWitPriceFeedsTypes.ID4.wrap(feedId));
         if (_info.mapper.class != IWitPriceFeedsTypes.Mappers.None) {
             _solverAddress = address(surrogate);
             _solverDeps = _info.mapper.deps;

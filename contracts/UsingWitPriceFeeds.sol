@@ -6,7 +6,11 @@ import "./WitPriceFeeds.sol";
 
 /// @title The UsingWitPriceFeeds contract.
 /// @author The Witnet Foundation.
-abstract contract UsingWitPriceFeeds {
+abstract contract UsingWitPriceFeeds
+    is
+        IWitPriceFeedsEvents,
+        IWitPriceFeedsTypes
+{
     WitPriceFeeds immutable internal __witPriceFeeds;
     
     constructor(IWitPriceFeeds router) {

@@ -8,7 +8,8 @@ import "./WitRandomness.sol";
 /// @author The Witnet Foundation.
 abstract contract UsingWitRandomness
     is
-        IWitRandomnessEvents
+        IWitRandomnessEvents,
+        IWitRandomnessTypes
 {
     WitRandomness immutable internal __witRandomness;
 

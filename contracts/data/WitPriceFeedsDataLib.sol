@@ -42,7 +42,7 @@ library WitPriceFeedsDataLib {
         mapping (IWitPriceFeedsTypes.ID4 => PriceFeed) records;
         mapping (IWitPriceFeedsTypes.ID4 => IWitPriceFeedsTypes.ID4[]) reverseDeps;
         mapping (Witnet.RadonHash => IWitPriceFeedsTypes.ID4) reverseIds;
-        IWitPriceFeedsTypes.UpdateConditions _reserved;
+        IWitPriceFeedsTypes.PriceUpdateConditions _reserved;
         address consumer;
         bytes4  footprint;
     }
@@ -98,7 +98,7 @@ library WitPriceFeedsDataLib {
         bytes32 mapperDeps;
 
         /// @dev Price-feed specific update conditions, if other than defaults.
-        IWitPriceFeedsTypes.UpdateConditions updateConditions;
+        IWitPriceFeedsTypes.PriceUpdateConditions updateConditions;
 
         /// @dev Last valid update data retrieved from the Wit/Oracle, if any.
         PriceData lastUpdate;
@@ -217,7 +217,7 @@ library WitPriceFeedsDataLib {
         returns (IWitPriceFeedsTypes.Price memory)
     {
         PriceFeed storage __record = seekPriceFeed(id4);
-        IWitPriceFeedsTypes.UpdateConditions memory _conditions = __record.updateConditions;
+        IWitPriceFeedsTypes.PriceUpdateConditions memory _conditions = __record.updateConditions;
 
         PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, _conditions.heartbeatSecs);
         
@@ -283,9 +283,9 @@ library WitPriceFeedsDataLib {
         });
     }
 
-    function lookupPriceFeedInfo(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.Info memory _info) {
+    function lookupPriceFeedInfo(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.PriceFeedInfo memory _info) {
         PriceFeed storage self = seekPriceFeed(id4);
-        _info = IWitPriceFeedsTypes.Info({
+        _info = IWitPriceFeedsTypes.PriceFeedInfo({
             id: data().ids[self.index],
             exponent: self.exponent,
             symbol: self.symbol,
@@ -296,7 +296,7 @@ library WitPriceFeedsDataLib {
         });
     }
 
-    function lookupPriceFeedMapper(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.Mapper memory _mapper) {
+    function lookupPriceFeedMapper(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.PriceFeedMapper memory _mapper) {
         PriceFeed storage self = seekPriceFeed(id4);
         _mapper.class = self.mapper;
         if (_mapper.class != IWitPriceFeedsTypes.Mappers.None) {
@@ -309,7 +309,7 @@ library WitPriceFeedsDataLib {
         }
     }
 
-    function lookupPriceFeedOracle(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.Oracle memory _oracle) {
+    function lookupPriceFeedOracle(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.PriceFeedOracle memory _oracle) {
         PriceFeed storage self = seekPriceFeed(id4);
         _oracle.class = self.oracle;
         _oracle.target = self.oracleAddress;
@@ -321,10 +321,10 @@ library WitPriceFeedsDataLib {
             IWitOracleRadonRegistry registry
         ) 
         public view 
-        returns (IWitPriceFeedsTypes.QoS memory _qos)
+        returns (IWitPriceFeedsTypes.PriceFeedQoS memory _qos)
     {
         PriceFeed storage self = seekPriceFeed(id4);
-        IWitPriceFeedsTypes.UpdateConditions memory _updateConditions = self.updateConditions;
+        IWitPriceFeedsTypes.PriceUpdateConditions memory _updateConditions = self.updateConditions;
         
         if (
             self.oracle == IWitPriceFeedsTypes.Oracles.Witnet 
@@ -806,8 +806,8 @@ library WitPriceFeedsDataLib {
     // --- Private methods --------------------------------------------------------------------------------------------
 
     function _coalesceQoS(
-            IWitPriceFeedsTypes.QoS memory self,
-            IWitPriceFeedsTypes.QoS memory next
+            IWitPriceFeedsTypes.PriceFeedQoS memory self,
+            IWitPriceFeedsTypes.PriceFeedQoS memory next
         )
         private pure
     {
@@ -900,7 +900,7 @@ library WitPriceFeedsDataLib {
     }
 
     function _foldQoS(
-            IWitPriceFeedsTypes.QoS memory qos,
+            IWitPriceFeedsTypes.PriceFeedQoS memory qos,
             IWitOracleRadonRegistry registry,
             bytes32 mapperDeps
         ) 
