@@ -131,7 +131,7 @@
 			"@apollo/protobufjs", 
 			"@trufflesuite/bigint-buffer",
 			"@witnet/sdk", 
-			"buffer-util",
+			"bufferutil",
 			"core-js", 
 			"es5-ext", 
 			"esbuild", 

@@ -77,12 +77,12 @@ contract WitPriceFeedsV3
         )
         Ownable(_operator != address(0) ? _operator : msg.sender)
     {
-        require(
+        _require(
             _witOracle.code.length > 0,
             "inexistent wit/oracle"
         );
         bytes4 _witOracleSpecs = IWitAppliance(address(_witOracle)).specs();
-        require(
+        _require(
             _witOracleSpecs == type(IWitOracle).interfaceId 
                 || _witOracleSpecs == type(IWitOracle).interfaceId ^ type(IWitOracleQueriable).interfaceId,
             "uncompliant wit/oracle"
@@ -363,6 +363,13 @@ contract WitPriceFeedsV3
     function lookupPriceFeedOracle(ID4 _id4) external override view returns (Oracle memory) {
         return _id4.lookupPriceFeedOracle();
     }
+
+    function lookupPriceFeedQualityMetrics(ID4 _id4) external override view returns (QoS memory) {
+        return _id4.lookupPriceFeedQoS(
+            __witOracle.registry()
+        );
+    }
+
     function lookupPriceFeedRadonBytecode(ID4 _id4) external override view returns (bytes memory) {
         return __witOracle.registry().lookupRadonRequestBytecode(
             _id4.lookupPriceFeedRadonHash()
@@ -643,7 +650,7 @@ contract WitPriceFeedsV3
         __record.lastUpdate.timestamp = _dataResult.timestamp;
         __record.lastUpdate.trail = _dataResult.drTxHash;
 
-        if (_updateConditions.computeEma) {
+        if (_updateConditions.computeEMA) {
             // TODO
             // ...
             /// __record.lastUpdate.emaPrice = x;
@@ -758,7 +765,7 @@ contract WitPriceFeedsV3
         ID4 _id4 = _intoID4(hash(_symbol));
         WitPriceFeedsDataLib.PriceFeed storage __pf = __seekPriceFeed(_id4);
         __pf.updateConditions = _conditions;
-        if (!_conditions.computeEma) {
+        if (!_conditions.computeEMA) {
             __pf.lastUpdate.emaPrice = 0;
         }
         emit PriceFeedUpdateConditions(

@@ -51,9 +51,20 @@ interface IWitPriceFeedsTypes {
         bytes32 sources;
     }
 
+    struct QoS {
+        bool   computesEMA;
+        uint16 maxDeviation1000;
+        uint24 maxSecsBetweenUpdates;
+        uint24 minSecsBetweenUpdates;
+        uint16 numFallbackOracles;
+        uint16 numMappedPriceFeeds;
+        uint16 numTrackableDataSources;
+        uint16 witnessingCommitteeSize;
+    }
+
     struct UpdateConditions {
         uint24 callbackGas;
-        bool   computeEma;
+        bool   computeEMA;
         uint24 cooldownSecs;
         uint24 heartbeatSecs;
         uint16 maxDeviation1000;

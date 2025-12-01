@@ -89,6 +89,7 @@ interface IWitPriceFeeds
     function lookupPriceFeedID(ID4 id4) external view returns (bytes32);
     function lookupPriceFeedMapper(ID4 id4) external view returns (Mapper memory);
     function lookupPriceFeedOracle(ID4 id4) external view returns (Oracle memory);
+    function lookupPriceFeedQualityMetrics(ID4 id4) external view returns (QoS memory);
     function lookupPriceFeedRadonBytecode(ID4 id4) external view returns (bytes memory);
     function lookupPriceFeedRadonHash(ID4 id4) external view returns (Witnet.RadonHash);
     

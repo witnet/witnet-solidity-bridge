@@ -434,7 +434,7 @@ export class WitPriceFeeds extends WitAppliance {
 					}),
 			updateConditions: {
 				callbackGas: Number(result.updateConditions.callbackGas),
-				computeEMA: result.updateConditions.computeEma,
+				computeEMA: result.updateConditions.computeEMA,
 				cooldownSecs: Number(result.updateConditions.cooldownSecs),
 				heartbeatSecs: Number(result.updateConditions.heartbeatSecs),
 				maxDeviationPercentage: Number(result.updateConditions.maxDeviation1000) / 10,
@@ -485,7 +485,7 @@ export class WitPriceFeeds extends WitAppliance {
 						}),
 				updateConditions: {
 					callbackGas: Number(result.updateConditions.callbackGas),
-					computeEMA: result.updateConditions.computeEma,
+					computeEMA: result.updateConditions.computeEMA,
 					cooldownSecs: Number(result.updateConditions.cooldownSecs),
 					heartbeatSecs: Number(result.updateConditions.heartbeatSecs),
 					maxDeviationPercentage: Number(result.updateConditions.maxDeviation1000) / 10,
