@@ -584,7 +584,14 @@ contract WitPriceFeedsV3
         external override
         onlyOwner
     {
-        _require(_validateUpdateConditions(_conditions), "invalid conditions");
+    
+        WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(computeID4(_caption));
+        _require(
+            __record.mapper == Mappers.None // no update conditions accepted on mapped price feeds,
+                && (__record.oracle != Oracles.Witnet || __record.oracleAddress == address(0)) // nor on Witnet-oraclized price feeds
+                && _validateUpdateConditions(__storage().consumer, __record.oracle, _conditions),
+            "invalid conditions"
+        );
         __settlePriceFeedUpdateConditions(_caption, _conditions);
     }
 
@@ -655,10 +662,16 @@ contract WitPriceFeedsV3
         __record.lastUpdate.timestamp = _dataResult.timestamp;
         __record.lastUpdate.trail = _dataResult.drTxHash;
 
-        if (_updateConditions.computeEMA) {
-            // TODO
-            // ...
-            /// __record.lastUpdate.emaPrice = x;
+        if (
+            _updateConditions.computeEMA 
+                && _updateConditions.heartbeatSecs > 0
+        ) {
+            __record.lastUpdate.emaPrice = WitPriceFeedsDataLib.computeEMA(
+                _deltaSecs, // dt
+                _updateConditions.heartbeatSecs, // tau
+                _nextPrice, 
+                __record.lastUpdate.emaPrice
+            );
         }
         
         if (__storage().consumer == address(0)) {
@@ -708,14 +721,35 @@ contract WitPriceFeedsV3
         _revert("unhandled revert");
     }
 
-    function _validateUpdateConditions(PriceUpdateConditions memory _conditions)
+    function _validateUpdateConditions(
+            address _consumer,
+            Oracles _oracle, 
+            PriceUpdateConditions memory _conditions
+        )
         internal pure
         returns (bool)
     {
         return (
-            _conditions.callbackGas > 0
-                && _conditions.heartbeatSecs > 0
-                && _conditions.minWitnesses > 0
+            !(
+                // callbackGas must be set on Witnet price feeds, if a consumer contract is settled:
+                (_consumer != address(0) && _oracle == Oracles.Witnet && _conditions.callbackGas == 0)
+                // callbackGas cannot be set on third-party oraclized price feeds:
+                || (_oracle != Oracles.Witnet && _conditions.callbackGas > 0)
+            ) && (
+                // computeEMA cannot be settled on oraclized price feeds other than Witnet or Pyth:
+                !_conditions.computeEMA || _oracle == Oracles.Witnet || _oracle == Oracles.Pyth
+            ) && (
+                // heartbetSecs cannot be zero if computeEMA is settleed:
+                !_conditions.computeEMA || _conditions.heartbeatSecs > 0
+            ) && (
+                // heartbeatSecs must be greater than cooldownSecs, if settled:
+                _conditions.heartbeatSecs == 0 || _conditions.heartbeatSecs >= _conditions.cooldownSecs
+            ) && (
+                // numWitnesses can only be settled on Witnet-oraclized price feeds:
+                (_oracle != Oracles.Witnet && _conditions.minWitnesses == 0)
+                // numWitnesses must be settled on Witnet-oraclized price feeds:
+                || (_oracle == Oracles.Witnet && _conditions.minWitnesses > 0)
+            )
         );
     }
 

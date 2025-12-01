@@ -48,7 +48,7 @@ library WitPriceFeedsDataLib {
     }
 
     struct PriceData {
-        /// @dev Exponentially moving average proportional to actual time since previous update.
+        /// @dev Exponentially Moving Average proportional to actual time since previous update.
         uint64 emaPrice;
         
         /// @dev Price attested on the Witnet blockchain.
@@ -185,7 +185,7 @@ library WitPriceFeedsDataLib {
                 _mapper == IWitPriceFeedsTypes.Mappers.Product 
                     || _mapper == IWitPriceFeedsTypes.Mappers.Inverse
             ) {
-                return fetchLastUpdateFromProduct(
+                return _fetchLastUpdateFromProduct(
                     id4, 
                     heartbeat, 
                     self.exponent, 
@@ -193,14 +193,14 @@ library WitPriceFeedsDataLib {
                 );
 
             } else if (_mapper == IWitPriceFeedsTypes.Mappers.Hottest) {
-                return fetchLastUpdateFromHottest(
+                return _fetchLastUpdateFromHottest(
                     id4, 
                     heartbeat,
                     self.exponent
                 );
             
             } else if (_mapper == IWitPriceFeedsTypes.Mappers.Fallback) {
-                return fetchLastUpdateFromFallback(
+                return _fetchLastUpdateFromFallback(
                     id4, 
                     heartbeat,
                     self.exponent
@@ -578,6 +578,62 @@ library WitPriceFeedsDataLib {
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
 
+    uint256 private constant WAD = 1e18;
+    uint256 private constant X_MAX = 1e18;
+    uint256 private constant C120 = 120 * WAD;
+
+    function computeEMA(uint256 dt, uint256 tau, uint256 nextPrice, uint256 lastEmaPrice)
+        internal pure
+        returns (uint64 ema)
+    {
+        if (lastEmaPrice == 0) {
+            return uint64(nextPrice);
+        }
+        
+        // ------------------------------------------------------
+        // x = dt / tau (1e18 WAD)
+        //
+        uint256 x = (dt * WAD) / tau;
+
+        // ------------------------------------------------------
+        // Branchless clamp: x <= X_MAX
+        //
+        // x_sat = x if x <= X_MAX
+        // x_sat = X_MAX if x > X_MAX
+        //
+        int256 diff = int256(x) - int256(X_MAX);
+        uint256 mask = uint256(diff >> 255);
+        uint256 x_sat = (x & mask) | (X_MAX & ~mask);
+
+        // ------------------------------------------------------
+        // Compute exp(-x_sat) using [5/5] Pade
+        //
+        // P(x) = 120 - 60x + 12x^2 - x^3
+        // Q(x) = 120 + 60x + 12x*2 + x^3
+        //
+        uint256 x2 = (x_sat * x_sat) / WAD;
+        uint256 x3 = (x2 * x_sat) / WAD;
+
+        uint256 P_x = C120 - 60 * x_sat + 12 * x2 - x3;
+        uint256 Q_x = C120 + 60 * x_sat + 12 * x2 + x3;
+
+        uint256 Q_safe = Q_x | 1; // ensure non-zero denominator
+        uint256 exp_neg = (P_x * WAD) / Q_safe;
+
+        // ------------------------------------------------------
+        // α = 1 - exp(-x)
+        //
+        uint256 alpha = WAD - exp_neg;
+
+        // ------------------------------------------------------
+        // nextEma = α·nextPrice + (1−α).lastEmaPrice
+        //
+        return uint64(
+            (alpha * nextPrice) / WAD 
+                + (exp_neg * lastEmaPrice) / WAD
+        );
+    }
+
     /// @notice Returns storage pointer to where Storage data is located. 
     function data() internal pure returns (Storage storage _ptr) {
         assembly {
@@ -614,123 +670,6 @@ library WitPriceFeedsDataLib {
             IWitPriceFeedsTypes.ID4.unwrap(a)
                 == IWitPriceFeedsTypes.ID4.unwrap(b)
         );
-    }
-
-    function fetchLastUpdateFromProduct(
-            IWitPriceFeedsTypes.ID4 id4, 
-            uint24 heartbeat, 
-            int8 exponent, 
-            bool inverse
-        )
-        internal view 
-        returns (PriceData memory _lastUpdate)
-    {
-        IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
-        int[3] memory _regs;
-        // _regs[0] -> _lastPrice
-        // _regs[1] -> _lastEmaPrice
-        // _regs[2] -> _exponent
-        unchecked {
-            for (uint _ix; _ix < _deps.length; ++ _ix) {
-                PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]), _deps[_ix], heartbeat);
-                if (_ix == 0) {
-                    if (_depLastUpdate.emaPrice > 0) {
-                        _regs[1] = int64(_depLastUpdate.emaPrice);
-                    } else {
-                        _regs[0] = int64(_depLastUpdate.price);
-                    }
-                    _lastUpdate.timestamp = _depLastUpdate.timestamp;
-                    _lastUpdate.trail = _depLastUpdate.trail;
-                    
-                } else {
-                    if (_regs[1] > 0) {
-                        _regs[1] *= int64(_depLastUpdate.emaPrice);
-                    } else {
-                        _regs[0] *= int64(_depLastUpdate.price);
-                    }
-                    if (_lastUpdate.timestamp.gt(_depLastUpdate.timestamp)) {
-                        // on Product: timestamp belong to oldest of all deps
-                        _lastUpdate.timestamp = _depLastUpdate.timestamp;
-                        _lastUpdate.trail = _depLastUpdate.trail;
-                    }
-                }
-                _regs[2] += inverse ? _depLastUpdate.exponent : - _depLastUpdate.exponent;
-            }
-        }
-        _regs[2] += exponent;
-        if (_regs[2] <= 0) {
-            if (inverse) {
-                uint _factor = 10 ** uint(-_regs[2]);
-                if (_regs[1] > 0) {
-                    _lastUpdate.emaPrice = uint64(_factor / uint(_regs[1]));
-                } else if (_regs[0] > 0) {
-                    _lastUpdate.price = uint64(_factor / uint(_regs[0]));
-                } else {
-                    _lastUpdate.price = 0; // avoid unhandled reverts
-                }
-            } else {
-                uint _divisor = 10 ** uint(-_regs[2]);
-                if (_regs[1] > 0) {
-                    _lastUpdate.emaPrice = uint64(uint(_regs[1]) / _divisor);
-                } else {
-                    _lastUpdate.price = uint64(uint(_regs[0]) / _divisor);
-                }
-            }
-        } else {
-            uint _factor = 10 ** uint(_regs[2]);
-            if (_regs[1] > 0) {
-                _lastUpdate.emaPrice = uint64(uint(_regs[1]) * _factor);
-            } else {
-                _lastUpdate.price = uint64(uint(_regs[0]) * _factor);
-            }
-        }
-        _lastUpdate.exponent = exponent;
-    }
-
-    function fetchLastUpdateFromHottest(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
-        internal view 
-        returns (PriceData memory _lastUpdate)
-    {
-        IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
-        for (uint _ix; _ix < _deps.length; ++ _ix) {
-            PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]),  _deps[_ix], heartbeat);
-            if (
-                _ix == 0
-                    || _depLastUpdate.timestamp.gt(_lastUpdate.timestamp)
-            ) {
-                _lastUpdate = _depLastUpdate;
-            }
-        }
-        if (exponent < _lastUpdate.exponent) {
-            _lastUpdate.price *= uint64(10 ** uint8(_lastUpdate.exponent - exponent));
-            _lastUpdate.exponent = exponent;
-        } else if (exponent > _lastUpdate.exponent) {
-            _lastUpdate.price /= uint64(10 ** uint8(exponent - _lastUpdate.exponent));
-            _lastUpdate.exponent = exponent;
-        }
-    }
-
-    function fetchLastUpdateFromFallback(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
-        internal view 
-        returns (PriceData memory _lastUpdate)
-    {
-        IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
-        for (uint _ix; _ix < _deps.length; ++ _ix) {
-            PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]), _deps[_ix], heartbeat);
-            if (
-                heartbeat == 0
-                    || Witnet.Timestamp.unwrap(_depLastUpdate.timestamp) > uint64(block.timestamp - heartbeat)
-            ) {
-                return _depLastUpdate;
-            }
-        }
-        if (exponent < _lastUpdate.exponent) {
-            _lastUpdate.price *= uint64(10 ** uint8(_lastUpdate.exponent - exponent));
-            _lastUpdate.exponent = exponent;
-        } else if (exponent > _lastUpdate.exponent) {
-            _lastUpdate.price /= uint64(10 ** uint8(exponent - _lastUpdate.exponent));
-            _lastUpdate.exponent = exponent;
-        }
     }
 
     function hash(string memory symbol) internal pure returns (bytes32) {
@@ -897,6 +836,123 @@ library WitPriceFeedsDataLib {
                 )
             )))
         );
+    }
+
+    function _fetchLastUpdateFromProduct(
+            IWitPriceFeedsTypes.ID4 id4, 
+            uint24 heartbeat, 
+            int8 exponent, 
+            bool inverse
+        )
+        internal view 
+        returns (PriceData memory _lastUpdate)
+    {
+        IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
+        int[3] memory _regs;
+        // _regs[0] -> _lastPrice
+        // _regs[1] -> _lastEmaPrice
+        // _regs[2] -> _exponent
+        unchecked {
+            for (uint _ix; _ix < _deps.length; ++ _ix) {
+                PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]), _deps[_ix], heartbeat);
+                if (_ix == 0) {
+                    if (_depLastUpdate.emaPrice > 0) {
+                        _regs[1] = int64(_depLastUpdate.emaPrice);
+                    } else {
+                        _regs[0] = int64(_depLastUpdate.price);
+                    }
+                    _lastUpdate.timestamp = _depLastUpdate.timestamp;
+                    _lastUpdate.trail = _depLastUpdate.trail;
+                    
+                } else {
+                    if (_regs[1] > 0) {
+                        _regs[1] *= int64(_depLastUpdate.emaPrice);
+                    } else {
+                        _regs[0] *= int64(_depLastUpdate.price);
+                    }
+                    if (_lastUpdate.timestamp.gt(_depLastUpdate.timestamp)) {
+                        // on Product: timestamp belong to oldest of all deps
+                        _lastUpdate.timestamp = _depLastUpdate.timestamp;
+                        _lastUpdate.trail = _depLastUpdate.trail;
+                    }
+                }
+                _regs[2] += inverse ? _depLastUpdate.exponent : - _depLastUpdate.exponent;
+            }
+        }
+        _regs[2] += exponent;
+        if (_regs[2] <= 0) {
+            if (inverse) {
+                uint _factor = 10 ** uint(-_regs[2]);
+                if (_regs[1] > 0) {
+                    _lastUpdate.emaPrice = uint64(_factor / uint(_regs[1]));
+                } else if (_regs[0] > 0) {
+                    _lastUpdate.price = uint64(_factor / uint(_regs[0]));
+                } else {
+                    _lastUpdate.price = 0; // avoid unhandled reverts
+                }
+            } else {
+                uint _divisor = 10 ** uint(-_regs[2]);
+                if (_regs[1] > 0) {
+                    _lastUpdate.emaPrice = uint64(uint(_regs[1]) / _divisor);
+                } else {
+                    _lastUpdate.price = uint64(uint(_regs[0]) / _divisor);
+                }
+            }
+        } else {
+            uint _factor = 10 ** uint(_regs[2]);
+            if (_regs[1] > 0) {
+                _lastUpdate.emaPrice = uint64(uint(_regs[1]) * _factor);
+            } else {
+                _lastUpdate.price = uint64(uint(_regs[0]) * _factor);
+            }
+        }
+        _lastUpdate.exponent = exponent;
+    }
+
+    function _fetchLastUpdateFromHottest(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
+        internal view 
+        returns (PriceData memory _lastUpdate)
+    {
+        IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
+        for (uint _ix; _ix < _deps.length; ++ _ix) {
+            PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]),  _deps[_ix], heartbeat);
+            if (
+                _ix == 0
+                    || _depLastUpdate.timestamp.gt(_lastUpdate.timestamp)
+            ) {
+                _lastUpdate = _depLastUpdate;
+            }
+        }
+        if (exponent < _lastUpdate.exponent) {
+            _lastUpdate.price *= uint64(10 ** uint8(_lastUpdate.exponent - exponent));
+            _lastUpdate.exponent = exponent;
+        } else if (exponent > _lastUpdate.exponent) {
+            _lastUpdate.price /= uint64(10 ** uint8(exponent - _lastUpdate.exponent));
+            _lastUpdate.exponent = exponent;
+        }
+    }
+
+    function _fetchLastUpdateFromFallback(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
+        internal view 
+        returns (PriceData memory _lastUpdate)
+    {
+        IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
+        for (uint _ix; _ix < _deps.length; ++ _ix) {
+            PriceData memory _depLastUpdate = fetchLastUpdate(seekPriceFeed(_deps[_ix]), _deps[_ix], heartbeat);
+            if (
+                heartbeat == 0
+                    || Witnet.Timestamp.unwrap(_depLastUpdate.timestamp) > uint64(block.timestamp - heartbeat)
+            ) {
+                return _depLastUpdate;
+            }
+        }
+        if (exponent < _lastUpdate.exponent) {
+            _lastUpdate.price *= uint64(10 ** uint8(_lastUpdate.exponent - exponent));
+            _lastUpdate.exponent = exponent;
+        } else if (exponent > _lastUpdate.exponent) {
+            _lastUpdate.price /= uint64(10 ** uint8(exponent - _lastUpdate.exponent));
+            _lastUpdate.exponent = exponent;
+        }
     }
 
     function _foldQoS(
