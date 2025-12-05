@@ -157,20 +157,18 @@ async function main() {
 					},
 					priceFeeds: {
 						hint: `Show latest Wit/PriceFeeds updates on ${helpers.colors.mcyan(ethRpcNetwork.toUpperCase())}.`,
-						params: "[EVM_ADDRESS]",
 						flags: ["trace-back"],
 					},
 					queries: {
 						hint: `Show latest Wit/Oracle queries pulled from smart contracts in ${helpers.colors.mcyan(ethRpcNetwork.toUpperCase())}.`,
 						params: "[IDS ...]",
 						flags: ["trace-back", "voids"],
-						options: ["filter-radHash", "filter-requester", "limit", "offset", "since"],
+						options: ["filter-radHash", "filter-requester", "limit", "offset", "since", "target"],
 					},
 					randomness: {
 						hint: `Show latest Wit/Randomness seeds randomized from ${helpers.colors.mcyan(ethRpcNetwork.toUpperCase())}.`,
-						params: "[EVM_ADDRESS]",
 						flags: ["clone", "randomize", "trace-back"],
-						options: ["limit", "offset", "since", "gasPrice", "signer"],
+						options: ["limit", "offset", "since", "gasPrice", "signer", "target"],
 						envars: [],
 					},
 					reports: {

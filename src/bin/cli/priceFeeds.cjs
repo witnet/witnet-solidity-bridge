@@ -14,7 +14,7 @@ module.exports = async (options = {}, args = []) => {
 	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);
 	const framework = await helpers.prompter(utils.fetchWitOracleFramework(provider));
 
-	let target = args[0];
+	let { target } = options
 	let chosen = false;
 	if (!target) {
 		const artifacts = Object.entries(framework).filter(([key]) => key.startsWith("WitPriceFeeds"));
