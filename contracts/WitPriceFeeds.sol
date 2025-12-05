@@ -4,9 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "ado-contracts/contracts/interfaces/IERC2362.sol";
 
-import "./interfaces/IWitAppliance.sol";
+import "./interfaces/IWitOracleAppliance.sol";
 import "./interfaces/IWitOracleConsumer.sol";
 import "./interfaces/IWitPriceFeeds.sol";
+import "./interfaces/IWitPriceFeedsConsumer.sol";
 
 /// @title WitPriceFeeds: Price Feeds repository powered by the Wit/Oracle, 
 /// @title and yet usable from both Chainlink and Pyth clients.

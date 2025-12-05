@@ -19,7 +19,6 @@ import {
 } from "../WitPriceFeeds.sol";
 
 import {WitPriceFeedsDataLib} from "../data/WitPriceFeedsDataLib.sol";
-import {WitPythChainlinkAggregator} from "../mockups/WitPythChainlinkAggregator.sol";
 
 import {Clonable} from "../patterns/Clonable.sol";
 import {Ownable, Ownable2Step} from "../patterns/Ownable2Step.sol";
@@ -59,17 +58,17 @@ contract WitPriceFeedsV3
     using WitPriceFeedsDataLib for ID4;
     using WitPriceFeedsDataLib for Mappers;
     using WitPriceFeedsDataLib for Oracles;
-    using WitPriceFeedsDataLib for UpdateConditions;
+    using WitPriceFeedsDataLib for PriceUpdateConditions;
     using WitPriceFeedsDataLib for WitPriceFeedsDataLib.PriceFeed;
 
-    address immutable internal __WIT_ORACLE;
+    IWitOracle immutable internal __witOracle;
 
     function class() virtual override public pure returns (string memory) {
         return type(WitPriceFeedsV3).name;
     }
 
     function witOracle() virtual override external view returns (address) {
-        return __WIT_ORACLE;
+        return address(__witOracle);
     }
 
     constructor(
@@ -78,42 +77,27 @@ contract WitPriceFeedsV3
         )
         Ownable(_operator != address(0) ? _operator : msg.sender)
     {
-        require(
+        _require(
             _witOracle.code.length > 0,
             "inexistent wit/oracle"
         );
         bytes4 _witOracleSpecs = IWitAppliance(address(_witOracle)).specs();
-        require(
+        _require(
             _witOracleSpecs == type(IWitOracle).interfaceId 
                 || _witOracleSpecs == type(IWitOracle).interfaceId ^ type(IWitOracleQueriable).interfaceId,
             "uncompliant wit/oracle"
         );
-        __WIT_ORACLE = _witOracle;
-        __storage().defaultUpdateConditions = UpdateConditions({
-            callbackGas: 1_000_000,
-            computeEma: false,
-            cooldownSecs: 15 minutes,
-            heartbeatSecs: 1 days,
-            maxDeviation1000: 0, // oo
-            minWitnesses: 3
-        });
+        __witOracle = IWitOracle(_witOracle);
     }
 
-    function initializeClone(
-            address _curator, 
-            UpdateConditions calldata _defaultUpdateConditions
-        )
-        external
+    function initializeClone(address _curator)
+        virtual external
         onlyOnClones
         initializer
         returns (address)
     {
-        _require(_curator != address(0), "zero curator");
+        _require(_curator != address(0), "zero address");
         _transferOwnership(_curator);
-        
-        _require(_validateUpdateConditions(_defaultUpdateConditions), "invalid conditions");
-        __storage().defaultUpdateConditions = _defaultUpdateConditions;
-
         return address(this);
     }
 
@@ -122,7 +106,7 @@ contract WitPriceFeedsV3
     /// --- Clonable --------------------------------------------------------------------------------------------------
 
     function initialized() virtual override public view returns (bool) {
-        return __storage().defaultUpdateConditions.minWitnesses > 0;
+        return owner() != address(0);
     }
     
     
@@ -136,7 +120,7 @@ contract WitPriceFeedsV3
     {
         ID4 _id4 = ID4.wrap(bytes4(_id));
         WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_id4);
-        UpdateConditions memory _updateConditions = __record.updateConditions.coalesce();
+        PriceUpdateConditions memory _updateConditions = __record.updateConditions;
         WitPriceFeedsDataLib.PriceData memory _lastUpdate = __record.fetchLastUpdate(_id4, _updateConditions.heartbeatSecs);
         _value = int(uint(_lastUpdate.emaPrice > 0 ? _lastUpdate.emaPrice : _lastUpdate.price));
         _timestamp = uint(Witnet.Timestamp.unwrap(_lastUpdate.timestamp));
@@ -265,10 +249,7 @@ contract WitPriceFeedsV3
         external
         returns (address)
     {
-        return WitPriceFeedsV3(__clone()).initializeClone(
-            _curator,
-            __storage().defaultUpdateConditions
-        );
+        return WitPriceFeedsV3(__clone()).initializeClone(_curator);
     }
 
     /// Creates a Chainlink Aggregator proxy to the specified symbol.
@@ -278,21 +259,9 @@ contract WitPriceFeedsV3
         returns (address)
     {
         require(supportsCaption(symbol), PriceFeedNotFound());
-        bytes memory _initcode = type(WitPythChainlinkAggregator).creationCode;
-        bytes memory _params = abi.encodePacked(address(this), _intoID4(hash(symbol)));
-        address _aggregator = _determineCreate2Address(_initcode, _params);
-        if (_aggregator.code.length == 0) {
-            bytes memory _bytecode = _completeInitCode(_initcode, _params);
-            assembly {
-                _aggregator := create2(
-                    0,
-                    add(_bytecode, 0x20),
-                    mload(_bytecode),
-                    0
-                )
-            }
-        }
-        return _aggregator;
+        return WitPriceFeedsDataLib.createChainlinkAggregator(
+            computeID4(symbol)
+        );
     }
 
 
@@ -300,6 +269,16 @@ contract WitPriceFeedsV3
 
     function base() virtual override (Clonable, IWitPriceFeeds) public view returns (address) {
         return super.base();
+    }
+
+    /// Determines the unique 4-byte ID4 for the specified caption.
+    function computeID4(string memory _caption) public pure returns (ID4) {
+        return ID4.wrap(bytes4(WitPriceFeedsDataLib.hash(_caption)));
+    }
+
+    /// Determines the unique 32-byte ID for the specified caption.
+    function computeID32(string memory _caption) external pure returns (bytes32) {
+        return WitPriceFeedsDataLib.hash(_caption);
     }
 
     /// Returns the consumer address where all price updates will be reported to.
@@ -320,18 +299,13 @@ contract WitPriceFeedsV3
         return __storage().footprint;
     }
     
-    /// Determines unique ID for specified `symbol` string.
-    function hash(string memory _symbol) public pure returns (ID) {
-        return ID.wrap(WitPriceFeedsDataLib.hash(_symbol));
-    }
-    
     /// @notice Returns last update price for the specified ID4 price feed.
     /// Note: This function is sanity-checked version of `getPriceUnsafe` which is useful in applications and
     /// smart contracts that require recentl updated price, and no hint of market deviation being currently excessive. 
     ///
     /// @dev Reverts if:
-    /// - `StalePrice()`: the price feed has not been updated within the last `UpdateConditions.heartbeatSecs`,
-    /// - `DeviantPrice()`: a deviation greater than `UpdateConditions.maxDeviation1000` was detected upon last update attempt.
+    /// - `StalePrice()`: the price feed has not been updated within the last `PriceUpdateConditions.heartbeatSecs`,
+    /// - `DeviantPrice()`: a deviation greater than `PriceUpdateConditions.maxDeviation1000` was detected upon last update attempt.
     /// - `InvalidGovernanceTarget()`: no EMA is curretly settled to be computed for this price feed.
     ///
     /// @param _id4 Unique ID4 identifier of a price feed supported by this contract.
@@ -363,44 +337,11 @@ contract WitPriceFeedsV3
         return WitPriceFeedsDataLib.getPriceUnsafe(_id4);
     }
     
-    function lookupPriceFeed(ID4 _id4)
-        override 
-        public view 
-        returns (Info memory)
-    {
-        WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_id4);
-        Mappers _mapper = __record.mapper;
-        string[] memory _mapperDeps;
-        if (_mapper != Mappers.None) {
-            ID4[] memory _deps = _id4.deps();
-            _mapperDeps = new string[](_deps.length);
-            for (uint _ix = 0; _ix < _deps.length; ++ _ix) {
-                _mapperDeps[_ix] = __storage().records[_deps[_ix]].symbol;
-            }
-        }
-        Oracles _oracle = __record.oracle;
-        bytes32 _oracleSources = __record.oracleSources;
-        address _oracleAddress = __record.oracleAddress;
-
-        return Info({
-            id: _intoID(_id4),
-            exponent: __record.exponent,
-            symbol: __record.symbol,
-            mapper: Mapper({
-                class: _mapper,
-                deps: _mapperDeps
-            }),
-            oracle: Oracle({
-                class: _oracle,
-                target: _oracleAddress,
-                sources: _oracleSources
-            }),
-            updateConditions: __record.updateConditions.coalesce(),
-            lastUpdate: WitPriceFeedsDataLib.getPriceUnsafe(_id4)
-        });
+    function lookupPriceFeed(ID4 _id4) override public view returns (PriceFeedInfo memory) {
+        return _id4.lookupPriceFeedInfo();
     }
 
-    function lookupPriceFeedCaption(ID4 _id4) external override view returns (string memory _symbol) {
+    function lookupPriceFeedCaption(ID4 _id4) external override view returns (string memory _caption) {
         return __seekPriceFeed(_id4).symbol;
     }
 
@@ -408,21 +349,44 @@ contract WitPriceFeedsV3
         return __seekPriceFeed(_id4).exponent;
     }
 
-    function lookupPriceFeedID(ID4 _id4) override public view returns (bytes32) {
+    function lookupPriceFeedID32(ID4 _id4) override public view returns (bytes32) {
         return ID.unwrap(_intoID(_id4));
     }
-    
-    function lookupPriceFeeds() external override view returns (Info[] memory _infos) {
+
+    function lookupPriceFeedMapper(ID4 _id4) external override view returns (PriceFeedMapper memory) {
+        return _id4.lookupPriceFeedMapper();
+    }
+
+    function lookupPriceFeedOracle(ID4 _id4) external override view returns (PriceFeedOracle memory) {
+        return _id4.lookupPriceFeedOracle();
+    }
+
+    function lookupPriceFeedQualityMetrics(ID4 _id4) external override view returns (PriceFeedQoS memory) {
+        return _id4.lookupPriceFeedQoS(
+            __witOracle.registry()
+        );
+    }
+
+    function lookupPriceFeedRadonBytecode(ID4 _id4) external override view returns (bytes memory) {
+        return __witOracle.registry().lookupRadonRequestBytecode(
+            _id4.lookupPriceFeedRadonHash()
+        );
+    }
+
+    function lookupPriceFeedRadonHash(ID4 _id4) public override view returns (Witnet.RadonHash _radonHash) {
+        return _id4.lookupPriceFeedRadonHash();
+    }
+
+    function lookupPriceFeeds() external override view returns (PriceFeedInfo[] memory _infos) {
         ID[] storage __ids = __storage().ids;
-        _infos = new Info[](__ids.length);
+        _infos = new PriceFeedInfo[](__ids.length);
         for (uint _ix; _ix < _infos.length; ++ _ix) {
             _infos[_ix] = lookupPriceFeed(_intoID4(__ids[_ix]));
         }
     }
 
     function supportsCaption(string calldata _caption) public override view returns (bool) {
-        WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_intoID4(hash(_caption)));
-        return __record.settled();
+        return __seekPriceFeed(computeID4(_caption)).settled();
     }
 
 
@@ -434,13 +398,6 @@ contract WitPriceFeedsV3
         public
     {
         Ownable2Step.acceptOwnership();
-    }
-
-    function defaultUpdateConditions()
-        external view override
-        returns (UpdateConditions memory)
-    {
-        return __storage().defaultUpdateConditions;
     }
 
     function owner()
@@ -464,20 +421,21 @@ contract WitPriceFeedsV3
         public 
         onlyOwner
     {
+        _require(_newOwner != address(0), "zero address");
         Ownable.transferOwnership(_newOwner);
     }
 
-    function removePriceFeed(string calldata _symbol, bool _recursively) 
+    function removePriceFeed(string calldata _caption, bool _recursively) 
         external override
         onlyOwner
         returns (bytes4 _footprint)
     {
-        ID4 _id4 = _intoID4(hash(_symbol));
+        ID4 _id4 = computeID4(_caption);
         WitPriceFeedsDataLib.removePriceFeed(_id4, _recursively);
         emit PriceFeedRemoved(
             msg.sender, 
             _id4, 
-            _symbol
+            _caption
         );
         return WitPriceFeedsDataLib.settlePriceFeedFootprint();
     }
@@ -497,16 +455,8 @@ contract WitPriceFeedsV3
         __storage().consumer = _consumer;
     }
 
-    function settleDefaultUpdateConditions(UpdateConditions calldata _conditions)
-        external override
-        onlyOwner
-    {
-        _require(_validateUpdateConditions(_conditions), "invalid conditions");
-        __storage().defaultUpdateConditions = _conditions;
-    }
-
     function settlePriceFeedMapper(
-            string calldata _symbol, 
+            string calldata _caption, 
             int8 _exponent,
             Mappers _mapper,
             string[] calldata _deps
@@ -517,16 +467,16 @@ contract WitPriceFeedsV3
     {
         try WitPriceFeedsDataLib
             .settlePriceFeedMapper(
-                _symbol, 
+                _caption, 
                 _exponent, 
                 _mapper,
                 _deps
             )
         returns (bytes4 _footprint) { 
-            emit PriceFeedMapper(
+            emit PriceFeedMapperSettled(
                 msg.sender,
-                _intoID4(hash(_symbol)),
-                _symbol,
+                computeID4(_caption),
+                _caption,
                 _exponent,
                 _mapper,
                 _deps
@@ -542,7 +492,7 @@ contract WitPriceFeedsV3
     }
 
     function settlePriceFeedOracle(
-            string calldata _symbol, 
+            string calldata _caption, 
             int8 _exponent,
             Oracles _oracle,
             address _oracleAddress,
@@ -552,11 +502,11 @@ contract WitPriceFeedsV3
         onlyOwner
         returns (bytes4)
     {
-        return __settlePriceFeedOracle(_symbol, _exponent, _oracle, _oracleAddress, _oracleSources);
+        return __settlePriceFeedOracle(_caption, _exponent, _oracle, _oracleAddress, _oracleSources);
     }
 
     function settlePriceFeedRadonBytecode(
-            string calldata _symbol, 
+            string calldata _caption, 
             int8 _exponent,
             bytes calldata _radonBytecode
         )
@@ -566,16 +516,16 @@ contract WitPriceFeedsV3
     {
         try WitPriceFeedsDataLib
             .settlePriceFeedRadonBytecode(
-                _symbol,
+                _caption,
                 _radonBytecode,
                 _exponent,
-                IWitOracle(__WIT_ORACLE).registry()
+                __witOracle.registry()
             )
         returns (bytes4 _footprint, Witnet.RadonHash _radonHash) {
-            emit PriceFeedOracle(
+            emit PriceFeedOracleSettled(
                 msg.sender,
-                _intoID4(hash(_symbol)),
-                _symbol,
+                computeID4(_caption),
+                _caption,
                 _exponent,
                 Oracles.Witnet,
                 address(this),
@@ -592,7 +542,7 @@ contract WitPriceFeedsV3
     }
 
     function settlePriceFeedRadonHash(
-            string calldata _symbol, 
+            string calldata _caption, 
             int8 _exponent,
             Witnet.RadonHash _radonHash
         )
@@ -602,16 +552,16 @@ contract WitPriceFeedsV3
     {
         try WitPriceFeedsDataLib
             .settlePriceFeedRadonHash(
-                _symbol,
+                _caption,
                 _radonHash,
                 _exponent,
-                IWitOracle(__WIT_ORACLE).registry()
+                __witOracle.registry()
             )
         returns (bytes4 _footprint) {
-            emit PriceFeedOracle(
+            emit PriceFeedOracleSettled(
                 msg.sender,
-                _intoID4(hash(_symbol)),
-                _symbol,
+                computeID4(_caption),
+                _caption,
                 _exponent,
                 Oracles.Witnet,
                 address(this),
@@ -628,14 +578,21 @@ contract WitPriceFeedsV3
     }
 
     function settlePriceFeedUpdateConditions(
-            string calldata _symbol, 
-            UpdateConditions calldata _conditions
+            string calldata _caption, 
+            PriceUpdateConditions calldata _conditions
         )
         external override
         onlyOwner
     {
-        _require(_validateUpdateConditions(_conditions), "invalid conditions");
-        __settlePriceFeedUpdateConditions(_symbol, _conditions);
+    
+        WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(computeID4(_caption));
+        _require(
+            __record.mapper == Mappers.None // no update conditions accepted on mapped price feeds,
+                && (__record.oracle != Oracles.Witnet || __record.oracleAddress == address(0)) // nor on Witnet-oraclized price feeds
+                && _validateUpdateConditions(__storage().consumer, __record.oracle, _conditions),
+            "invalid conditions"
+        );
+        __settlePriceFeedUpdateConditions(_caption, _conditions);
     }
 
 
@@ -655,12 +612,12 @@ contract WitPriceFeedsV3
             InvalidUpdateDataSource()
         );
         WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_id4);
-        UpdateConditions memory _updateConditions = __record.updateConditions.coalesce();
+        PriceUpdateConditions memory _updateConditions = __record.updateConditions;
         require(
             report.queryParams.witCommitteeSize >= _updateConditions.minWitnesses,
             InvalidGovernanceTarget()
         );
-        Witnet.DataResult memory _dataResult = IWitOracle(__WIT_ORACLE).pushDataReport(
+        Witnet.DataResult memory _dataResult = __witOracle.pushDataReport(
             report,
             proof
         );
@@ -705,10 +662,16 @@ contract WitPriceFeedsV3
         __record.lastUpdate.timestamp = _dataResult.timestamp;
         __record.lastUpdate.trail = _dataResult.drTxHash;
 
-        if (_updateConditions.computeEma) {
-            // TODO
-            // ...
-            /// __record.lastUpdate.emaPrice = x;
+        if (
+            _updateConditions.computeEMA 
+                && _updateConditions.heartbeatSecs > 0
+        ) {
+            __record.lastUpdate.emaPrice = WitPriceFeedsDataLib.computeEMA(
+                _deltaSecs, // dt
+                _updateConditions.heartbeatSecs, // tau
+                _nextPrice, 
+                __record.lastUpdate.emaPrice
+            );
         }
         
         if (__storage().consumer == address(0)) {
@@ -737,32 +700,6 @@ contract WitPriceFeedsV3
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
 
-    function _completeInitCode(bytes memory initcode, bytes memory params)
-        private pure
-        returns (bytes memory)
-    {
-        return abi.encodePacked(
-            initcode,
-            params
-        );
-    }
-
-    function _determineCreate2Address(bytes memory initcode, bytes memory params)
-        private view
-        returns (address)
-    {
-        return address(
-            uint160(uint(keccak256(
-                abi.encodePacked(
-                    bytes1(0xff),
-                    address(this),
-                    bytes32(0),
-                    keccak256(_completeInitCode(initcode, params))
-                )
-            )))
-        );
-    }
-
     function _intoID(ID4 id4) internal view returns (ID) {
         return __storage().ids[__storage().records[id4].index];
     }
@@ -784,14 +721,35 @@ contract WitPriceFeedsV3
         _revert("unhandled revert");
     }
 
-    function _validateUpdateConditions(UpdateConditions memory _conditions)
+    function _validateUpdateConditions(
+            address _consumer,
+            Oracles _oracle, 
+            PriceUpdateConditions memory _conditions
+        )
         internal pure
         returns (bool)
     {
         return (
-            _conditions.callbackGas > 0
-                && _conditions.heartbeatSecs > 0
-                && _conditions.minWitnesses > 0
+            !(
+                // callbackGas must be set on Witnet price feeds, if a consumer contract is settled:
+                (_consumer != address(0) && _oracle == Oracles.Witnet && _conditions.callbackGas == 0)
+                // callbackGas cannot be set on third-party oraclized price feeds:
+                || (_oracle != Oracles.Witnet && _conditions.callbackGas > 0)
+            ) && (
+                // computeEMA cannot be settled on oraclized price feeds other than Witnet or Pyth:
+                !_conditions.computeEMA || _oracle == Oracles.Witnet || _oracle == Oracles.Pyth
+            ) && (
+                // heartbetSecs cannot be zero if computeEMA is settleed:
+                !_conditions.computeEMA || _conditions.heartbeatSecs > 0
+            ) && (
+                // heartbeatSecs must be greater than cooldownSecs, if settled:
+                _conditions.heartbeatSecs == 0 || _conditions.heartbeatSecs >= _conditions.cooldownSecs
+            ) && (
+                // numWitnesses can only be settled on Witnet-oraclized price feeds:
+                (_oracle != Oracles.Witnet && _conditions.minWitnesses == 0)
+                // numWitnesses must be settled on Witnet-oraclized price feeds:
+                || (_oracle == Oracles.Witnet && _conditions.minWitnesses > 0)
+            )
         );
     }
 
@@ -800,7 +758,7 @@ contract WitPriceFeedsV3
     }
 
     function __settlePriceFeedOracle(
-            string memory _symbol, 
+            string memory _caption, 
             int8 _exponent,
             Oracles _oracle,
             address _oracleAddress,
@@ -811,17 +769,17 @@ contract WitPriceFeedsV3
     {
         try WitPriceFeedsDataLib
             .settlePriceFeedOracle(
-                _symbol, 
+                _caption, 
                 _exponent, 
                 _oracle,
                 _oracleAddress,
                 _oracleSources
             )
         returns (bytes4 _footprint) { 
-            emit PriceFeedOracle(
+            emit PriceFeedOracleSettled(
                 msg.sender,
-                _intoID4(hash(_symbol)),
-                _symbol,
+                computeID4(_caption),
+                _caption,
                 _exponent,
                 _oracle,
                 _oracleAddress,
@@ -838,21 +796,21 @@ contract WitPriceFeedsV3
     }
 
     function __settlePriceFeedUpdateConditions(
-            string memory _symbol,
-            UpdateConditions memory _conditions
+            string memory _caption,
+            PriceUpdateConditions memory _conditions
         )
         virtual internal 
     {
-        ID4 _id4 = _intoID4(hash(_symbol));
+        ID4 _id4 = computeID4(_caption);
         WitPriceFeedsDataLib.PriceFeed storage __pf = __seekPriceFeed(_id4);
         __pf.updateConditions = _conditions;
-        if (!_conditions.computeEma) {
+        if (!_conditions.computeEMA) {
             __pf.lastUpdate.emaPrice = 0;
         }
-        emit PriceFeedUpdateConditions(
+        emit PriceFeedUpdateConditionsSettled(
             _msgSender(),
             _id4,
-            _symbol,
+            _caption,
             _conditions
         );
     }

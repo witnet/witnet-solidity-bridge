@@ -1,6 +1,6 @@
 {
 	"name": "@witnet/solidity",
-	"version": "3.0.15",
+	"version": "3.1.0",
 	"description": "Wit/Oracle Solidity Framework for EVM-compatible chains",
 	"author": "Witnet Foundation <info@witnet.foundation>",
 	"license": "MIT",
@@ -37,6 +37,7 @@
 		"worldchain"
 	],
 	"bin": {
+		"cli": "src/bin/index.cjs",
 		"witeth": "src/bin/index.cjs",
 		"witnet-ethers": "src/bin/index.cjs",
 		"witnet-solidity": "src/bin/index.cjs",
@@ -81,8 +82,6 @@
 		"fmt!": "pnpm run fmt!:js && pnpm run fmt!:sol",
 		"fmt": "pnpm run fmt:js && pnpm run fmt:sol",
 		"deploy": "npx truffle migrate --config ./truffle-config.cjs",
-		"ops:wrb:acls": "npx truffle migrate --config ./truffle-config.cjs --migrations_directory ./migrations/ops/wrb/acls --compile-none --network",
-		"ops:curator": "npx truffle migrate --config ./truffle-config.cjs --migrations_directory ./migrations/ops/wrb/curator --compile-none --network",
 		"postinstall": "node ./scripts/postinstall.cjs",
 		"prepare": "npx truffle compile --all --config ./truffle-config.cjs && npx hardhat compile --no-tests --force && npm run build && node ./scripts/prepare.cjs",
 		"verify": "npx hardhat run ./scripts/verify.js 2>&1",
@@ -90,7 +89,7 @@
 		"witeth": "cross-env-shell WITNET_SDK_RADON_ASSETS_PATH='../..' node ./src/bin/index.cjs"
 	},
 	"dependencies": {
-		"@witnet/sdk": "^3.0.0",
+		"@witnet/sdk": "^3.0.2",
 		"cbor": "^10.0.11",
 		"commander": "^14.0.2",
 		"cross-env": "^10.1.0",
@@ -130,7 +129,7 @@
 			"@apollo/protobufjs", 
 			"@trufflesuite/bigint-buffer",
 			"@witnet/sdk", 
-			"buffer-util",
+			"bufferutil",
 			"core-js", 
 			"es5-ext", 
 			"esbuild", 

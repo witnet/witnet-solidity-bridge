@@ -260,7 +260,7 @@ library WitOracleRadonEncodingLib {
             }
             bytecode = abi.encodePacked(
                 bytecode,
-                encode(reducer.opcode)
+                encode(reducer.method)
             );
         // } else {
         //     return abi.encodePacked(
@@ -275,7 +275,7 @@ library WitOracleRadonEncodingLib {
         returns (bytes memory bytecode)
     {        
         bytecode = abi.encodePacked(
-            encode(uint64(filter.opcode), bytes1(0x08)),
+            encode(uint64(filter.method), bytes1(0x08)),
             filter.cborArgs.length > 0
                 ? abi.encodePacked(
                     encode(uint64(filter.cborArgs.length), bytes1(0x12)),
@@ -288,7 +288,7 @@ library WitOracleRadonEncodingLib {
         );
     }
 
-    function encode(Witnet.RadonReduceOpcodes opcode)
+    function encode(Witnet.RadonReducerMethods opcode)
         public pure
         returns (bytes memory)
     {
@@ -448,22 +448,22 @@ library WitOracleRadonEncodingLib {
         public pure
     {
         if (
-            filter.opcode == Witnet.RadonFilterOpcodes.StandardDeviation
+            filter.method == Witnet.RadonFilterMethods.StandardDeviation
         ) {
             // check filters that require arguments
             if (filter.cborArgs.length == 0) {
-                revert UnsupportedRadonFilterArgs(uint8(filter.opcode), filter.cborArgs);
+                revert UnsupportedRadonFilterArgs(uint8(filter.method), filter.cborArgs);
             }
         } else if (
-            filter.opcode == Witnet.RadonFilterOpcodes.Mode
+            filter.method == Witnet.RadonFilterMethods.Mode
         ) {
             // check filters that don't require any arguments
             if (filter.cborArgs.length > 0) {
-                revert UnsupportedRadonFilterArgs(uint8(filter.opcode), filter.cborArgs);
+                revert UnsupportedRadonFilterArgs(uint8(filter.method), filter.cborArgs);
             }
         } else {
             // reject unsupported opcodes
-            revert UnsupportedRadonFilterOpcode(uint8(filter.opcode));
+            revert UnsupportedRadonFilterOpcode(uint8(filter.method));
         }
     }
 
@@ -472,13 +472,13 @@ library WitOracleRadonEncodingLib {
     {
         // if (reducer.script.length == 0) {
             if (!(
-                reducer.opcode == Witnet.RadonReduceOpcodes.AverageMean 
-                    || reducer.opcode == Witnet.RadonReduceOpcodes.StandardDeviation
-                    || reducer.opcode == Witnet.RadonReduceOpcodes.Mode
-                    || reducer.opcode == Witnet.RadonReduceOpcodes.ConcatenateAndHash
-                    || reducer.opcode == Witnet.RadonReduceOpcodes.AverageMedian
+                reducer.method == Witnet.RadonReducerMethods.AverageMean 
+                    || reducer.method == Witnet.RadonReducerMethods.StandardDeviation
+                    || reducer.method == Witnet.RadonReducerMethods.Mode
+                    || reducer.method == Witnet.RadonReducerMethods.ConcatenateAndHash
+                    || reducer.method == Witnet.RadonReducerMethods.AverageMedian
             )) {
-                revert UnsupportedRadonReducerOpcode(uint8(reducer.opcode));
+                revert UnsupportedRadonReducerOpcode(uint8(reducer.method));
             }
             for (uint ix = 0; ix < reducer.filters.length; ix ++) {
                 validate(reducer.filters[ix]);

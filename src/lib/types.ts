@@ -3,7 +3,7 @@ import type { ContractWrapper } from "./wrappers/ContractWrapper.js";
 
 export type DataPushReport = Witnet.DataPushReport;
 
-export type PriceFeed = {
+export type PriceFeedInfo = {
 	id?: string;
 	id4: string;
 	exponent: number;
@@ -40,6 +40,16 @@ export enum PriceFeedOracles {
 	Pyth,
 	// Redstone,
 }
+
+export type PriceFeedQoS = {
+	computesEMA: boolean;
+	maxDeviationPercentage: number;
+	maxSecsBetweenUpdates: number;
+	minSecsBetweenUpdates: number;
+	numFallbackOracles: number;
+	numTrackableDataSources: number;
+	witnessingCommitteeSize: number;
+};
 
 export type PriceFeedUpdate = {
 	price: number;

@@ -8,9 +8,10 @@ import {
 } from "ethers";
 import {
 	type DataPushReport,
-	type PriceFeed,
+	type PriceFeedInfo,
 	PriceFeedMappers,
 	PriceFeedOracles,
+	PriceFeedQoS,
 	type PriceFeedUpdate,
 	type PriceFeedUpdateConditions,
 } from "../types.js";
@@ -412,7 +413,7 @@ export class WitPriceFeeds extends WitAppliance {
 		return this.contract.supportsCaption.staticCall(caption);
 	}
 
-	public async lookupPriceFeed(id4: Witnet.HexString): Promise<PriceFeed> {
+	public async lookupPriceFeed(id4: Witnet.HexString): Promise<PriceFeedInfo> {
 		return this.contract.lookupPriceFeed.staticCall(id4).then((result: any) => ({
 			id: result.id,
 			id4: result.id.slice(0, 10),
@@ -434,7 +435,7 @@ export class WitPriceFeeds extends WitAppliance {
 					}),
 			updateConditions: {
 				callbackGas: Number(result.updateConditions.callbackGas),
-				computeEMA: result.updateConditions.computeEma,
+				computeEMA: result.updateConditions.computeEMA,
 				cooldownSecs: Number(result.updateConditions.cooldownSecs),
 				heartbeatSecs: Number(result.updateConditions.heartbeatSecs),
 				maxDeviationPercentage: Number(result.updateConditions.maxDeviation1000) / 10,
@@ -462,7 +463,11 @@ export class WitPriceFeeds extends WitAppliance {
 		return this.contract.lookupPriceFeedID.staticCall(id4);
 	}
 
-	public async lookupPriceFeeds(): Promise<Array<PriceFeed>> {
+	public async lookupPriceFeedQualityMetrics(id4: Witnet.HexString): Promise<PriceFeedQoS> {
+		return this.contract.lookupPriceFeedQualityMetrics.staticCall(id4).then((result: any) => result as PriceFeedQoS);
+	}
+
+	public async lookupPriceFeeds(): Promise<Array<PriceFeedInfo>> {
 		return this.contract.lookupPriceFeeds.staticCall().then((results) =>
 			results.map((result: any) => ({
 				id: result.id,
@@ -485,7 +490,7 @@ export class WitPriceFeeds extends WitAppliance {
 						}),
 				updateConditions: {
 					callbackGas: Number(result.updateConditions.callbackGas),
-					computeEMA: result.updateConditions.computeEma,
+					computeEMA: result.updateConditions.computeEMA,
 					cooldownSecs: Number(result.updateConditions.cooldownSecs),
 					heartbeatSecs: Number(result.updateConditions.heartbeatSecs),
 					maxDeviationPercentage: Number(result.updateConditions.maxDeviation1000) / 10,

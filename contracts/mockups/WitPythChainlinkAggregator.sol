@@ -18,7 +18,7 @@ contract WitPythChainlinkAggregator
     
     constructor(address _witOracle, bytes4 _id4) {
         id4 = _id4;
-        priceId = IWitPriceFeeds(address(_witOracle)).lookupPriceFeedID(ID4.wrap(id4));
+        priceId = IWitPriceFeeds(address(_witOracle)).lookupPriceFeedID32(ID4.wrap(id4));
         pyth = _witOracle;
         witOracle = _witOracle;
     }

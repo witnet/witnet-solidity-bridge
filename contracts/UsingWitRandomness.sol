@@ -2,21 +2,58 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    Witnet, 
-    WitRandomness, 
-    IWitRandomness
-} from "./WitRandomness.sol";
+import "./WitRandomness.sol";
 
-abstract contract UsingWitRandomness {
-    WitRandomness immutable public WIT_RANDOMNESS;
+/// @title The UsingWitRandomness contract.
+/// @author The Witnet Foundation.
+abstract contract UsingWitRandomness
+    is
+        IWitRandomnessEvents,
+        IWitRandomnessTypes
+{
+    WitRandomness immutable internal __witRandomness;
+
+    /// @dev Provides a way for blocking execution of business logic if no Witnet-certified
+    /// randomness has yet been provided for the specified block number.
+    modifier blockIsRandomized(uint256 _evmBlockNumber) {
+        require(
+            __witRandomness.isRandomized(_evmBlockNumber),
+            "UsingWitRandomness: pending randomize"
+        ); _;
+    }
+
+    /// @dev On contracts implementing `IWitRandomnessConsumer`, provides a way to verify
+    /// that the contract reporting Witnet-certified randomness is legit:
+    modifier onlyFromWitnet {
+        require(
+            msg.sender == address(__witRandomness),
+            "UsingWitRandomness: invalid randomizer"
+        ); _;
+    }
     
-    constructor (address randomizer) {
-        assert(
-            randomizer.code.length > 0
-                && WitRandomness(randomizer).specs() == type(IWitRandomness).interfaceId
+    constructor (IWitRandomness randomizer) {
+        require(
+            address(randomizer) != address(0)
+                && address(randomizer).code.length > 0
+                && WitRandomness(address(randomizer)).specs() == type(IWitRandomness).interfaceId,
+            "UsingWitRandomness: uncompliant WitRandomness"            
         );
-        WIT_RANDOMNESS = WitRandomness(randomizer);    
+        __witRandomness = WitRandomness(address(randomizer));
+    }
+
+    /// @notice Reference to the underlying Wit/Oracle Framework.
+    function witOracle() virtual public view returns (address) {
+        return __witRandomness.witOracle();
+    }
+
+    /// @dev Estimate the minimum randomize fee to pay if willing to actively pull a new randomize request.
+    function _estimateRandomizeFee() virtual internal view returns (uint256) {
+        return _estimateRandomizeFee(tx.gasprice);
+    }
+
+    /// @dev Estimate the minimum randomize fee to pay if willing to actively pull a new randomize request.
+    function _estimateRandomizeFee(uint256 _evmGasPrice) virtual internal view returns (uint256) {
+        return __witRandomness.estimateRandomizeFee(_evmGasPrice);
     }
 
     /// @notice Retrieves the result of keccak256-hashing the specified block number with the randomness value 
@@ -30,25 +67,56 @@ abstract contract UsingWitRandomness {
     function _fetchRandomnessAfter(uint256 _blockNumber) virtual internal view returns (bytes32) {
         return keccak256(
             abi.encode(
-                WIT_RANDOMNESS.fetchRandomnessAfter(_blockNumber),
+                __witRandomness.fetchRandomnessAfter(_blockNumber),
                 address(this)
             )
         );
     }
 
+
+    /// ===============================================================================================================
+    /// --- Internal helper pure methods ------------------------------------------------------------------------------
+
     /// @notice Generates a pseudo-random number uniformly distributed within the range [0 .. _faces), 
     /// by using the specified `_nonce` and `_seed`.
-    /// @dev Fails under same conditions as `_fetchRandomnessAfter(uint256)` does.
-    function _randomDice(uint64 _faces, uint256 _nonce, bytes32 _seed) internal pure returns (uint64) {
+    function _castADice(uint8 _faces, uint256 _nonce, bytes32 _seed) internal pure returns (uint8) {
+        return uint8(Witnet.randomUniformUint64(
+            _faces,
+            _nonce,
+            _seed
+        ));
+    }
+
+    function _castALargeDice(uint64 _faces, uint256 _nonce, bytes32 _seed) internal pure returns (uint64) {
         return Witnet.randomUniformUint64(
             _faces,
             _nonce,
             _seed
         );
     }
+    
 
     /// @notice Generates a pseudo-random uniformly distributed extraction, with repetitions. 
-    function _randomExtractionWithReps(
+    function _generateExtractionWithReps(
+            uint8   _range, 
+            uint16  _extractions, 
+            bytes32 _seed
+        )
+        internal pure
+        returns (bytes memory _balls)
+    {
+        unchecked {
+            _balls = new bytes(_extractions);
+            for (uint16 _ix; _ix < _extractions; _ix ++) {
+                _balls[_ix] = bytes1(uint8(Witnet.randomUniformUint64(
+                    _range, 
+                    _ix, 
+                    _seed
+                )));
+            }
+        }
+    }
+    function _generateLargeExtractionWithReps(
             uint64  _range, 
             uint16  _extractions, 
             bytes32 _seed
@@ -69,7 +137,33 @@ abstract contract UsingWitRandomness {
     }
 
     /// @notice Generates a pseudo-random uniformly distributed extraction, with no repetitions. 
-    function _randomExtractionNoReps(
+    function _generateExtractionNoReps(
+            uint8   _range,
+            uint8   _extractions,
+            bytes32 _seed
+        )
+        internal pure
+        returns (bytes memory _balls)
+    {
+        unchecked {
+            bytes memory _numbers = new bytes(_range);
+            for (uint8 _ix; _ix < _range; _ix ++) {
+                _numbers[_ix] = bytes1(_ix);
+            }
+            _balls = new bytes(_extractions);
+            for (uint8 _jx; _jx < _extractions; _jx ++) {
+                uint8 _pos = uint8(Witnet.randomUniformUint64(
+                    _range - _jx, 
+                    _jx, 
+                    _seed
+                ));
+                _balls[_jx] = _numbers[_pos];
+                _numbers[_pos] = _numbers[_range - 1 - _jx];
+            }
+        }
+    }
+    
+    function _generateLargeExtractionNoReps(
             uint64  _range, 
             uint16  _extractions, 
             bytes32 _seed

@@ -30,30 +30,41 @@ interface IWitPriceFeedsTypes {
         Witnet.TransactionHash trail;
     }
 
-    struct Info {
+    struct PriceFeedInfo {
         IWitPyth.ID id;
         int8 exponent;
         string symbol;
-        Mapper mapper;
-        Oracle oracle;
-        UpdateConditions updateConditions;
+        PriceFeedMapper mapper;
+        PriceFeedOracle oracle;
+        PriceUpdateConditions updateConditions;
         Price lastUpdate;
     }
 
-    struct Mapper {
+    struct PriceFeedMapper {
         Mappers class;
         string[] deps;
     }
 
-    struct Oracle {
+    struct PriceFeedOracle {
         Oracles class;
         address target;
         bytes32 sources;
     }
 
-    struct UpdateConditions {
+    struct PriceFeedQoS {
+        bool   computesEMA;
+        uint16 maxDeviation1000;
+        uint24 maxSecsBetweenUpdates;
+        uint24 minSecsBetweenUpdates;
+        uint16 numFallbackOracles;
+        uint16 numMappedPriceFeeds;
+        uint16 numTrackableDataSources;
+        uint16 witnessingCommitteeSize;
+    }
+
+    struct PriceUpdateConditions {
         uint24 callbackGas;
-        bool   computeEma;
+        bool   computeEMA;
         uint24 cooldownSecs;
         uint24 heartbeatSecs;
         uint16 maxDeviation1000;

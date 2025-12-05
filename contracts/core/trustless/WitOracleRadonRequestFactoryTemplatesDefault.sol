@@ -13,7 +13,7 @@ contract WitOracleRadonRequestFactoryTemplatesDefault
     function class() virtual override public view  returns (string memory) {
         return (
             initialized() 
-                ? type(IWitOracleRadonRequestTemplate).name  
+                ? type(IWitOracleRadonRequestTemplateFactory).name  
                 : type(WitOracleRadonRequestFactoryTemplatesDefault).name
         );
     }

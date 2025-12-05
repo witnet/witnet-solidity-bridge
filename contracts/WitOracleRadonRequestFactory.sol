@@ -14,7 +14,7 @@ abstract contract WitOracleRadonRequestFactory
 {
     function specs() virtual override external pure returns (bytes4) {
         return (
-            type(WitOracleRadonRequestFactory).interfaceId
+            type(IWitOracleRadonRequestFactory).interfaceId
         );
     }
 }

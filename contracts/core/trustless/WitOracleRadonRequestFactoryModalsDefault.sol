@@ -13,7 +13,7 @@ contract WitOracleRadonRequestFactoryModalsDefault
     function class() virtual override public view returns (string memory) {
         return (
             initialized() 
-                ? type(IWitOracleRadonRequestModal).name  
+                ? type(IWitOracleRadonRequestModalFactory).name  
                 : type(WitOracleRadonRequestFactoryModalsDefault).name
         );
     }

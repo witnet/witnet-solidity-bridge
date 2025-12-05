@@ -25,7 +25,7 @@ export class WitOracleConsumer extends WitAppliance {
 		options?: {
 			confirmations?: number;
 			gasPrice?: bigint;
-			gasLimit?: bigint;
+			gasLimit?: number;
 			onDataPushReportTransaction?: (txHash: string) => any;
 			timeout?: number;
 		},
@@ -34,7 +34,7 @@ export class WitOracleConsumer extends WitAppliance {
 			.populateTransaction(abiEncodeDataPushReport(report), report?.evm_proof)
 			.then((tx) => {
 				tx.gasPrice = options?.gasPrice || tx?.gasPrice;
-				tx.gasLimit = options?.gasLimit || tx?.gasLimit;
+				tx.gasLimit = options?.gasLimit ? BigInt(options.gasLimit) : tx?.gasLimit;
 				return this.signer.sendTransaction(tx);
 			})
 			.then((response) => {

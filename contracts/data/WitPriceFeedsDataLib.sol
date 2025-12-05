@@ -13,6 +13,8 @@ import {
     Witnet
 } from "../WitOracle.sol";
 
+import {WitPythChainlinkAggregator} from "../mockups/WitPythChainlinkAggregator.sol";
+
 import "../libs/Slices.sol";
 
 /// @title WitPriceFeeds data model.
@@ -40,13 +42,13 @@ library WitPriceFeedsDataLib {
         mapping (IWitPriceFeedsTypes.ID4 => PriceFeed) records;
         mapping (IWitPriceFeedsTypes.ID4 => IWitPriceFeedsTypes.ID4[]) reverseDeps;
         mapping (Witnet.RadonHash => IWitPriceFeedsTypes.ID4) reverseIds;
-        IWitPriceFeedsTypes.UpdateConditions defaultUpdateConditions;
+        IWitPriceFeedsTypes.PriceUpdateConditions _reserved;
         address consumer;
         bytes4  footprint;
     }
 
     struct PriceData {
-        /// @dev Exponentially moving average proportional to actual time since previous update.
+        /// @dev Exponentially Moving Average proportional to actual time since previous update.
         uint64 emaPrice;
         
         /// @dev Price attested on the Witnet blockchain.
@@ -64,14 +66,6 @@ library WitPriceFeedsDataLib {
         /// @dev Auditory trail: price witnessing act on the Witnet blockchain.
         Witnet.TransactionHash trail;
     }
-
-    // struct Price {
-    //     /// @dev Price data point to be read is just one single SLOAD.
-    //     PriceData data;
-        
-    //     /// @dev Auditory trail: price witnessing act on the Witnet blockchain.
-    //     Witnet.TransactionHash trail;
-    // }
 
     struct PriceFeed {
         /// @dev Human-readable symbol for this price feed.
@@ -104,7 +98,7 @@ library WitPriceFeedsDataLib {
         bytes32 mapperDeps;
 
         /// @dev Price-feed specific update conditions, if other than defaults.
-        IWitPriceFeedsTypes.UpdateConditions updateConditions;
+        IWitPriceFeedsTypes.PriceUpdateConditions updateConditions;
 
         /// @dev Last valid update data retrieved from the Wit/Oracle, if any.
         PriceData lastUpdate;
@@ -113,6 +107,24 @@ library WitPriceFeedsDataLib {
 
     // ================================================================================================================
     // --- Public methods ---------------------------------------------------------------------------------------------
+
+    function createChainlinkAggregator(IWitPriceFeedsTypes.ID4 id4) public returns (address) {
+        bytes memory _initcode = type(WitPythChainlinkAggregator).creationCode;
+        bytes memory _params = abi.encodePacked(address(this), id4);
+        address _aggregator = _determineCreate2Address(_initcode, _params);
+        if (_aggregator.code.length == 0) {
+            bytes memory _bytecode = _completeInitCode(_initcode, _params);
+            assembly {
+                _aggregator := create2(
+                    0,
+                    add(_bytecode, 0x20),
+                    mload(_bytecode),
+                    0
+                )
+            }
+        }
+        return _aggregator;
+    }
 
     function fetchLastUpdate(PriceFeed storage self, IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat)
         public view 
@@ -128,7 +140,7 @@ library WitPriceFeedsDataLib {
                 
                 } else {
                     return (
-                        self.updateConditions.computeEma
+                        self.updateConditions.computeEMA
                             ? _intoEmaPriceData(IWitPriceFeeds(self.oracleAddress).getPriceNotOlderThan(
                                 IWitPriceFeedsTypes.ID4.wrap(bytes4(self.oracleSources)), 
                                 heartbeat
@@ -154,7 +166,7 @@ library WitPriceFeedsDataLib {
             
             } else if (_oracle == IWitPriceFeedsTypes.Oracles.Pyth) {
                 IWitPyth.PythPrice memory _price;
-                if (self.updateConditions.computeEma) {
+                if (self.updateConditions.computeEMA) {
                     _price = IWitPyth(self.oracleAddress).getEmaPriceUnsafe(IWitPyth.ID.wrap(self.oracleSources));
                     _lastUpdate.emaPrice = uint64(_price.price);
                 } else {
@@ -173,7 +185,7 @@ library WitPriceFeedsDataLib {
                 _mapper == IWitPriceFeedsTypes.Mappers.Product 
                     || _mapper == IWitPriceFeedsTypes.Mappers.Inverse
             ) {
-                return fetchLastUpdateFromProduct(
+                return _fetchLastUpdateFromProduct(
                     id4, 
                     heartbeat, 
                     self.exponent, 
@@ -181,14 +193,14 @@ library WitPriceFeedsDataLib {
                 );
 
             } else if (_mapper == IWitPriceFeedsTypes.Mappers.Hottest) {
-                return fetchLastUpdateFromHottest(
+                return _fetchLastUpdateFromHottest(
                     id4, 
                     heartbeat,
                     self.exponent
                 );
             
             } else if (_mapper == IWitPriceFeedsTypes.Mappers.Fallback) {
-                return fetchLastUpdateFromFallback(
+                return _fetchLastUpdateFromFallback(
                     id4, 
                     heartbeat,
                     self.exponent
@@ -205,7 +217,7 @@ library WitPriceFeedsDataLib {
         returns (IWitPriceFeedsTypes.Price memory)
     {
         PriceFeed storage __record = seekPriceFeed(id4);
-        IWitPriceFeedsTypes.UpdateConditions memory _conditions = coalesce(__record.updateConditions);
+        IWitPriceFeedsTypes.PriceUpdateConditions memory _conditions = __record.updateConditions;
 
         PriceData memory _lastUpdate = fetchLastUpdate(__record, id4, _conditions.heartbeatSecs);
         
@@ -269,6 +281,97 @@ library WitPriceFeedsDataLib {
             timestamp: _lastUpdate.timestamp,
             trail: _lastUpdate.trail
         });
+    }
+
+    function lookupPriceFeedInfo(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.PriceFeedInfo memory _info) {
+        PriceFeed storage self = seekPriceFeed(id4);
+        _info = IWitPriceFeedsTypes.PriceFeedInfo({
+            id: data().ids[self.index],
+            exponent: self.exponent,
+            symbol: self.symbol,
+            mapper: lookupPriceFeedMapper(id4),
+            oracle: lookupPriceFeedOracle(id4),
+            updateConditions: self.updateConditions,
+            lastUpdate: getPriceUnsafe(id4)
+        });
+    }
+
+    function lookupPriceFeedMapper(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.PriceFeedMapper memory _mapper) {
+        PriceFeed storage self = seekPriceFeed(id4);
+        _mapper.class = self.mapper;
+        if (_mapper.class != IWitPriceFeedsTypes.Mappers.None) {
+            IWitPriceFeedsTypes.ID4[] memory _deps = deps(id4);
+            string[] memory _symbols = new string[](_deps.length);
+            for (uint8 _ix; _ix < _symbols.length; ++ _ix) {
+                _symbols[_ix] = seekPriceFeed(_deps[_ix]).symbol;
+            }
+            _mapper.deps = _symbols;
+        }
+    }
+
+    function lookupPriceFeedOracle(IWitPriceFeedsTypes.ID4 id4) public view returns (IWitPriceFeedsTypes.PriceFeedOracle memory _oracle) {
+        PriceFeed storage self = seekPriceFeed(id4);
+        _oracle.class = self.oracle;
+        _oracle.target = self.oracleAddress;
+        _oracle.sources = self.oracleSources;
+    }
+
+    function lookupPriceFeedQoS(
+            IWitPriceFeedsTypes.ID4 id4, 
+            IWitOracleRadonRegistry registry
+        ) 
+        public view 
+        returns (IWitPriceFeedsTypes.PriceFeedQoS memory _qos)
+    {
+        PriceFeed storage self = seekPriceFeed(id4);
+        IWitPriceFeedsTypes.PriceUpdateConditions memory _updateConditions = self.updateConditions;
+        
+        if (
+            self.oracle == IWitPriceFeedsTypes.Oracles.Witnet 
+                && self.oracleSources != bytes32(0)
+        ) {
+            _qos.witnessingCommitteeSize = _updateConditions.minWitnesses;
+            if (self.oracleAddress == address(0)) {
+                _qos.computesEMA = _updateConditions.computeEMA;
+                _qos.maxDeviation1000 = _updateConditions.maxDeviation1000;
+                _qos.maxSecsBetweenUpdates = _updateConditions.heartbeatSecs;
+                _qos.minSecsBetweenUpdates = _updateConditions.cooldownSecs;
+                _qos.numTrackableDataSources = registry.lookupRadonRequestRetrievalsCount(
+                    Witnet.RadonHash.wrap(self.oracleSources)
+                );
+            } else {
+                // no updateConditions stored for Witnet-oraclized price feeds
+                _qos = IWitPriceFeeds(self.oracleAddress).lookupPriceFeedQualityMetrics(
+                    IWitPriceFeedsTypes.ID4.wrap(bytes4(self.oracleSources))
+                );
+            }
+        } else if (self.mapper == IWitPriceFeedsTypes.Mappers.None) {
+            // no updateConditions stored for mapped price feeds
+            _qos.computesEMA = _updateConditions.computeEMA;
+            _qos.maxSecsBetweenUpdates = _updateConditions.heartbeatSecs;
+            _qos.minSecsBetweenUpdates = _updateConditions.cooldownSecs;
+        }
+
+        if (self.mapper != IWitPriceFeedsTypes.Mappers.None) {
+            if (
+                self.mapperDeps != bytes32(0)
+                    && (
+                        self.mapper == IWitPriceFeedsTypes.Mappers.Fallback 
+                            || self.mapper == IWitPriceFeedsTypes.Mappers.Hottest
+                    ) 
+            ) {
+                _qos.numFallbackOracles = _countBaseDeps(self.mapperDeps) - 1;
+            } 
+            _qos.numMappedPriceFeeds = _countDeepDeps(self.mapperDeps);
+            _foldQoS(_qos, registry, self.mapperDeps);
+        }
+    }
+
+    function lookupPriceFeedRadonHash(IWitPriceFeedsTypes.ID4 id4) public view returns (Witnet.RadonHash _radonHash) {
+        PriceFeed storage self = seekPriceFeed(id4);
+        if (self.oracle == IWitPriceFeedsTypes.Oracles.Witnet) {
+            return Witnet.RadonHash.wrap(self.oracleSources);    
+        }
     }
 
     
@@ -475,37 +578,60 @@ library WitPriceFeedsDataLib {
     // ================================================================================================================
     // --- Internal methods -------------------------------------------------------------------------------------------
 
-    function coalesce(IWitPriceFeedsTypes.UpdateConditions storage self) 
-        internal view 
-        returns (IWitPriceFeedsTypes.UpdateConditions memory)
-    {
-        IWitPriceFeedsTypes.UpdateConditions storage __default = data().defaultUpdateConditions;
-        return IWitPriceFeedsTypes.UpdateConditions({
-            callbackGas: self.callbackGas == 0 ? __default.callbackGas : self.callbackGas,
-            computeEma: self.computeEma || __default.computeEma,
-            cooldownSecs:  self.cooldownSecs == 0 ? __default.cooldownSecs : self.cooldownSecs,
-            heartbeatSecs: self.heartbeatSecs == 0 ? __default.heartbeatSecs : self.heartbeatSecs,
-            maxDeviation1000: self.maxDeviation1000 == 0 ? __default.maxDeviation1000 : self.maxDeviation1000,
-            minWitnesses: self.minWitnesses == 0 ? __default.minWitnesses : self.minWitnesses                
-        });
-    }
+    uint256 private constant WAD = 1e18;
+    uint256 private constant X_MAX = 1e18;
+    uint256 private constant C120 = 120 * WAD;
 
-    function coalesce(
-            IWitPriceFeedsTypes.UpdateConditions storage self, 
-            IWitPriceFeedsTypes.UpdateConditions memory _default
-        ) 
+    function computeEMA(uint256 dt, uint256 tau, uint256 nextPrice, uint256 lastEmaPrice)
         internal pure
-        returns (IWitPriceFeedsTypes.UpdateConditions memory)
+        returns (uint64 ema)
     {
-        IWitPriceFeedsTypes.UpdateConditions memory _self = self;
-        return IWitPriceFeedsTypes.UpdateConditions({
-            callbackGas: _self.callbackGas == 0 ? _default.callbackGas : _self.callbackGas,
-            computeEma: _self.computeEma || _default.computeEma,
-            cooldownSecs:  _self.cooldownSecs == 0 ? _default.cooldownSecs : _self.cooldownSecs,
-            heartbeatSecs: _self.heartbeatSecs == 0 ? _default.heartbeatSecs : _self.heartbeatSecs,
-            maxDeviation1000: _self.maxDeviation1000 == 0 ? _default.maxDeviation1000 : _self.maxDeviation1000,
-            minWitnesses: _self.minWitnesses == 0 ? _default.minWitnesses : _self.minWitnesses
-        });
+        if (lastEmaPrice == 0) {
+            return uint64(nextPrice);
+        }
+        
+        // ------------------------------------------------------
+        // x = dt / tau (1e18 WAD)
+        //
+        uint256 x = (dt * WAD) / tau;
+
+        // ------------------------------------------------------
+        // Branchless clamp: x <= X_MAX
+        //
+        // x_sat = x if x <= X_MAX
+        // x_sat = X_MAX if x > X_MAX
+        //
+        int256 diff = int256(x) - int256(X_MAX);
+        uint256 mask = uint256(diff >> 255);
+        uint256 x_sat = (x & mask) | (X_MAX & ~mask);
+
+        // ------------------------------------------------------
+        // Compute exp(-x_sat) using [5/5] Pade
+        //
+        // P(x) = 120 - 60x + 12x^2 - x^3
+        // Q(x) = 120 + 60x + 12x*2 + x^3
+        //
+        uint256 x2 = (x_sat * x_sat) / WAD;
+        uint256 x3 = (x2 * x_sat) / WAD;
+
+        uint256 P_x = C120 - 60 * x_sat + 12 * x2 - x3;
+        uint256 Q_x = C120 + 60 * x_sat + 12 * x2 + x3;
+
+        uint256 Q_safe = Q_x | 1; // ensure non-zero denominator
+        uint256 exp_neg = (P_x * WAD) / Q_safe;
+
+        // ------------------------------------------------------
+        // α = 1 - exp(-x)
+        //
+        uint256 alpha = WAD - exp_neg;
+
+        // ------------------------------------------------------
+        // nextEma = α·nextPrice + (1−α).lastEmaPrice
+        //
+        return uint64(
+            (alpha * nextPrice) / WAD 
+                + (exp_neg * lastEmaPrice) / WAD
+        );
     }
 
     /// @notice Returns storage pointer to where Storage data is located. 
@@ -546,7 +672,173 @@ library WitPriceFeedsDataLib {
         );
     }
 
-    function fetchLastUpdateFromProduct(
+    function hash(string memory symbol) internal pure returns (bytes32) {
+        return keccak256(abi.encode(symbol));
+    }
+
+    function isZero(IWitPriceFeedsTypes.ID4 id4) internal pure returns (bool) {
+        return IWitPriceFeedsTypes.ID4.unwrap(id4) == 0;
+    }
+
+    function seekPriceFeed(IWitPriceFeedsTypes.ID4 id4) internal view returns (PriceFeed storage) {
+        return data().records[id4];
+    }
+
+    function settled(PriceFeed storage self) internal view returns (bool) {
+        return(
+            self.oracleSources != bytes32(0)
+                || uint8(self.mapper) != 0
+                || self.oracleAddress != address(0)
+        );
+    }
+
+    function settleMapper(
+            PriceFeed storage self, 
+            int8 exponent,
+            IWitPriceFeedsTypes.Mappers mapper, 
+            bytes32 mapperDeps
+        )
+        internal
+    {
+        require(!self.settled(), "already settled");
+        self.exponent = exponent;
+        self.mapper = mapper;
+        self.mapperDeps = mapperDeps;
+    }
+
+    function settleOracle(
+            PriceFeed storage self,
+            int8 exponent,
+            IWitPriceFeedsTypes.Oracles oracle,
+            address oracleAddress,
+            bytes32 oracleSources
+        )
+        internal
+    {
+        require(!self.settled(), "already settled");
+        self.exponent = exponent;
+        self.oracle = oracle;
+        self.oracleAddress = oracleAddress;
+        self.oracleSources = oracleSources;
+    }
+
+    function toERC165Id(IWitPriceFeedsTypes.Oracles oracle) public pure returns (bytes4) {
+        if (oracle == IWitPriceFeedsTypes.Oracles.Witnet) {
+            return type(IWitOracle).interfaceId;
+        
+        } else if (oracle == IWitPriceFeedsTypes.Oracles.ERC2362) {
+            return type(IERC2362).interfaceId;
+        
+        } else if (oracle == IWitPriceFeedsTypes.Oracles.Chainlink) {
+            return type(IChainlinkAggregatorV3).interfaceId;
+        
+        } else if (oracle == IWitPriceFeedsTypes.Oracles.Pyth) {
+            return type(IWitPyth).interfaceId;
+        
+        } else {
+            return 0x0;
+        }
+    }
+
+
+    // ================================================================================================================
+    // --- Private methods --------------------------------------------------------------------------------------------
+
+    function _coalesceQoS(
+            IWitPriceFeedsTypes.PriceFeedQoS memory self,
+            IWitPriceFeedsTypes.PriceFeedQoS memory next
+        )
+        private pure
+    {
+        if (!self.computesEMA) {
+            // computes EMA if at least one in the hierarchy computes EMA:
+            self.computesEMA = next.computesEMA;
+        }
+        if (
+            self.maxDeviation1000 > 0 
+                && next.maxDeviation1000 > 0 
+                && self.maxDeviation1000 < next.maxDeviation1000
+        ) {
+            // takes the greatest of all max deviations, among all that have it set:
+            self.maxDeviation1000 = next.maxDeviation1000;
+        } else {
+            // final max deviation will be 0 (i.e. oo), if at least one in hierarchy has none set:
+            self.maxDeviation1000 = 0;
+        }
+        if (
+            next.maxSecsBetweenUpdates > 0
+                && self.maxSecsBetweenUpdates > next.maxSecsBetweenUpdates
+        ) {
+            // take the lowest of all set-up heartbeats:
+            self.maxSecsBetweenUpdates = next. maxSecsBetweenUpdates;
+        }
+        if (
+            next.minSecsBetweenUpdates > 0 
+                && self.minSecsBetweenUpdates > next.minSecsBetweenUpdates
+        ) {
+            // take the lowest of all set-up cooldowns:
+            self.minSecsBetweenUpdates = next.minSecsBetweenUpdates;
+        }
+        if (
+            next.witnessingCommitteeSize > 0
+                && self.witnessingCommitteeSize > next.witnessingCommitteeSize
+        ) {
+            // take the smallest of the witnessing commitees, among all that have it set:
+            self.witnessingCommitteeSize = next.witnessingCommitteeSize;
+        }
+        // take the sum of all set-up fallback oracles:
+        self.numFallbackOracles += next.numFallbackOracles;
+        // take the sum of all trackable data sources:
+        self.numTrackableDataSources += next.numTrackableDataSources;
+    }
+
+    /// @dev Quick count of mapped price feeds.
+    function _countBaseDeps(bytes32 mapperDeps) private pure returns (uint8 _count) {
+        for (; bytes4(mapperDeps) != 0; mapperDeps <<= 32) {
+            ++ _count;
+        }
+    }
+
+    /// @dev Recursively sum up the number of deps for each price feed in `mapperDeps`.
+    function _countDeepDeps(bytes32 mapperDeps) private view returns (uint16 _count) {
+        for (; bytes4(mapperDeps) != 0; mapperDeps <<= 32) {
+            _count += 1 + _countDeepDeps(
+                seekPriceFeed(IWitPriceFeedsTypes.ID4.wrap(bytes4(mapperDeps))).mapperDeps
+            );
+        }
+    }
+
+    function _completeInitCode(bytes memory initcode, bytes memory params) private pure returns (bytes memory) {
+        return abi.encodePacked(
+            initcode,
+            params
+        );
+    }
+
+    function _computePriceFeedsFootprint() private view returns (bytes4 _footprint) {
+        uint _totalIds = data().ids.length;
+        if (_totalIds > 0) {
+            _footprint = _footprintOf(_intoID4(data().ids[0]));
+            for (uint _ix = 1; _ix < _totalIds; ++ _ix) {
+                _footprint ^= _footprintOf(_intoID4(data().ids[_ix]));
+            }
+        }
+    }
+
+    function _determineCreate2Address(bytes memory initcode, bytes memory params) private view returns (address) {
+        return address(
+            uint160(uint(keccak256(
+                abi.encodePacked(
+                    bytes1(0xff),
+                    address(this),
+                    bytes32(0),
+                    keccak256(_completeInitCode(initcode, params))
+                )
+            )))
+        );
+    }
+
+    function _fetchLastUpdateFromProduct(
             IWitPriceFeedsTypes.ID4 id4, 
             uint24 heartbeat, 
             int8 exponent, 
@@ -617,7 +909,7 @@ library WitPriceFeedsDataLib {
         _lastUpdate.exponent = exponent;
     }
 
-    function fetchLastUpdateFromHottest(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
+    function _fetchLastUpdateFromHottest(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
         internal view 
         returns (PriceData memory _lastUpdate)
     {
@@ -640,7 +932,7 @@ library WitPriceFeedsDataLib {
         }
     }
 
-    function fetchLastUpdateFromFallback(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
+    function _fetchLastUpdateFromFallback(IWitPriceFeedsTypes.ID4 id4, uint24 heartbeat, int8 exponent)
         internal view 
         returns (PriceData memory _lastUpdate)
     {
@@ -663,135 +955,20 @@ library WitPriceFeedsDataLib {
         }
     }
 
-    function hash(string memory symbol) internal pure returns (bytes32) {
-        return keccak256(abi.encode(symbol));
-    }
-
-    function isZero(IWitPriceFeedsTypes.ID4 id4) internal pure returns (bool) {
-        return IWitPriceFeedsTypes.ID4.unwrap(id4) == 0;
-    }
-
-    // function pushDataResult(
-    //         Witnet.DataResult memory result,
-    //         IWitPriceFeedsTypes.UpdateConditions memory defaultUpdateConditions,
-    //         IWitPriceFeedsTypes.ID4 id4
-    //     )
-    //     internal
-    // {
-    //     PriceFeed storage __record = seekPriceFeed(id4);
-    //     PriceData memory _lastUpdate = __record.lastUpdate.data;
-    //     IWitPriceFeedsTypes.UpdateConditions memory _updateConditions = coalesce(
-    //         __record.updateConditions, 
-    //         defaultUpdateConditions
-    //     );
-        
-    //     // consider updating price-feed's last update only if reported value is more recent:
-    //     if (
-    //         Witnet.Timestamp.unwrap(_lastUpdate.timestamp) + _updateConditions.cooldownSecs
-    //             < Witnet.Timestamp.unwrap(result.timestamp)
-    //     ) {
-    //         // revert if any of the allegedly fresh updates actually contains 
-    //         // no integer value:
-    //         require(
-    //             result.dataType == Witnet.RadonDataTypes.Integer
-    //                 && result.status == Witnet.ResultStatus.NoErrors,
-    //             IWitPythErrors.InvalidUpdateData()
-    //         );
-
-    //         // compute next data point based on `_result` and `_lastUpdate`
-    //         __record.lastUpdate = _computeNextPrice(
-    //             result, 
-    //             _lastUpdate, 
-    //             _updateConditions
-    //         );
-    //     }
-    // }
-
-    function seekPriceFeed(IWitPriceFeedsTypes.ID4 id4) internal view returns (PriceFeed storage) {
-        return data().records[id4];
-    }
-
-    function settled(PriceFeed storage self) internal view returns (bool) {
-        return(
-            self.oracleSources != bytes32(0)
-                || uint8(self.mapper) != 0
-                || self.oracleAddress != address(0)
-        );
-    }
-
-    function settleMapper(
-            PriceFeed storage self, 
-            int8 exponent,
-            IWitPriceFeedsTypes.Mappers mapper, 
+    function _foldQoS(
+            IWitPriceFeedsTypes.PriceFeedQoS memory qos,
+            IWitOracleRadonRegistry registry,
             bytes32 mapperDeps
-        )
-        internal
+        ) 
+        private view 
     {
-        require(!self.settled(), "already settled");
-        self.exponent = exponent;
-        self.mapper = mapper;
-        self.mapperDeps = mapperDeps;
-    }
-
-    function settleOracle(
-            PriceFeed storage self,
-            int8 exponent,
-            IWitPriceFeedsTypes.Oracles oracle,
-            address oracleAddress,
-            bytes32 oracleSources
-        )
-        internal
-    {
-        require(!self.settled(), "already settled");
-        self.exponent = exponent;
-        self.oracle = oracle;
-        self.oracleAddress = oracleAddress;
-        self.oracleSources = oracleSources;
-    }
-
-    // function settleWitOracle(
-    //         PriceFeed storage self, 
-    //         int8 exponent,
-    //         Witnet.RadonHash radonHash
-    //     )
-    //     internal
-    // {
-    //     require(!self.settled(), "already settled");
-    //     self.exponent = exponent;
-    //     self.oracle = IWitPriceFeedsTypes.Oracles.Witnet;
-    //     self.oracleAddress = address(this);
-    //     self.oracleSources = Witnet.RadonHash.unwrap(radonHash);
-    //     self.lastUpdate.data.exponent = exponent;
-    // }
-
-    function toERC165Id(IWitPriceFeedsTypes.Oracles oracle) public pure returns (bytes4) {
-        if (oracle == IWitPriceFeedsTypes.Oracles.Witnet) {
-            return type(IWitOracle).interfaceId;
-        
-        } else if (oracle == IWitPriceFeedsTypes.Oracles.ERC2362) {
-            return type(IERC2362).interfaceId;
-        
-        } else if (oracle == IWitPriceFeedsTypes.Oracles.Chainlink) {
-            return type(IChainlinkAggregatorV3).interfaceId;
-        
-        } else if (oracle == IWitPriceFeedsTypes.Oracles.Pyth) {
-            return type(IWitPyth).interfaceId;
-        
-        } else {
-            return 0x0;
-        }
-    }
-
-
-    // ================================================================================================================
-    // --- Private methods --------------------------------------------------------------------------------------------
-
-    function _computePriceFeedsFootprint() private view returns (bytes4 _footprint) {
-        uint _totalIds = data().ids.length;
-        if (_totalIds > 0) {
-            _footprint = _footprintOf(_intoID4(data().ids[0]));
-            for (uint _ix = 1; _ix < _totalIds; ++ _ix) {
-                _footprint ^= _footprintOf(_intoID4(data().ids[_ix]));
+        for (; bytes4(mapperDeps) != 0; mapperDeps <<= 32) {
+            IWitPriceFeedsTypes.ID4 id4 = IWitPriceFeedsTypes.ID4.wrap(bytes4(mapperDeps));
+            PriceFeed storage dependency = seekPriceFeed(id4);
+            if (dependency.mapper == IWitPriceFeedsTypes.Mappers.None) {
+               _coalesceQoS(qos, lookupPriceFeedQoS(id4, registry));
+            } else {
+               _foldQoS(qos, registry, dependency.mapperDeps);
             }
         }
     }
@@ -848,40 +1025,6 @@ library WitPriceFeedsDataLib {
             exponent: _price.exponent
         });
     }
-
-    // function _intoWitPythPriceFeed(
-    //         IWitPriceFeeds.ID priceId,
-    //         Witnet.DataResult memory result,
-    //         PriceData memory prevData,
-    //         IWitPriceFeedsTypes.UpdateConditions memory updateConditions
-    //     )
-    //     private pure
-    //     returns (IWitPyth.PriceFeed memory)
-    // {
-    //     Price memory _next = _computeNextPrice(result, prevData, updateConditions);
-    //     uint64 _nextDeviation1000 = uint64(
-    //         _next.data.deltaPrice >= 0 
-    //             ? int64(_next.data.deltaPrice) 
-    //             : int64(-_next.data.deltaPrice)
-    //     );
-    //     return IWitPyth.PriceFeed({
-    //         id: priceId,
-    //         price: IWitPyth.Price({
-    //             price: _next.data.price,
-    //             conf: _nextDeviation1000,
-    //             expo: _next.data.exponent,
-    //             publishTime: _next.data.timestamp,
-    //             track: _next.trail
-    //         }),
-    //         emaPrice: IWitPyth.Price({
-    //             price: _next.data.emaPrice,
-    //             conf: _nextDeviation1000,
-    //             expo: _next.data.exponent,
-    //             publishTime: _next.data.timestamp,
-    //             track: _next.trail
-    //         })
-    //     });
-    // }
 
     function _settlePriceFeedSymbol(string calldata symbol) private returns (IWitPriceFeedsTypes.ID4 id4) {
         bytes32 _id = hash(symbol);
