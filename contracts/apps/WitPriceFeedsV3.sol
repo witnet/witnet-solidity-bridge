@@ -588,7 +588,10 @@ contract WitPriceFeedsV3
         WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(computeID4(_caption));
         _require(
             __record.mapper == Mappers.None // no update conditions accepted on mapped price feeds,
-                && (__record.oracle != Oracles.Witnet || __record.oracleAddress == address(0)) // nor on Witnet-oraclized price feeds
+                && (__record.oracle != Oracles.Witnet 
+                    || __record.oracleAddress == address(0)
+                    || __record.oracleAddress == address(this)
+                ) // nor on external Witnet-oraclized price feeds
                 && _validateUpdateConditions(__storage().consumer, __record.oracle, _conditions),
             "invalid conditions"
         );

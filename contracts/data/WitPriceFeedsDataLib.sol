@@ -510,7 +510,7 @@ library WitPriceFeedsDataLib {
         __record.settleOracle(
             exponent, 
             IWitPriceFeedsTypes.Oracles.Witnet,
-            address(this),
+            address(0),
             Witnet.RadonHash.unwrap(_radonHash)
         );
         require(
@@ -537,7 +537,7 @@ library WitPriceFeedsDataLib {
         __record.settleOracle(
             exponent, 
             IWitPriceFeedsTypes.Oracles.Witnet,
-            address(this),
+            address(0),
             Witnet.RadonHash.unwrap(radonHash)
         );
         require(
