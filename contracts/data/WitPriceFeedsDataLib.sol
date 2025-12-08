@@ -325,34 +325,9 @@ library WitPriceFeedsDataLib {
     {
         PriceFeed storage self = seekPriceFeed(id4);
         IWitPriceFeedsTypes.PriceUpdateConditions memory _updateConditions = self.updateConditions;
-        
-        if (
-            self.oracle == IWitPriceFeedsTypes.Oracles.Witnet 
-                && self.oracleSources != bytes32(0)
-        ) {
-            _qos.witnessingCommitteeSize = _updateConditions.minWitnesses;
-            if (self.oracleAddress == address(0)) {
-                _qos.computesEMA = _updateConditions.computeEMA;
-                _qos.maxDeviation1000 = _updateConditions.maxDeviation1000;
-                _qos.maxSecsBetweenUpdates = _updateConditions.heartbeatSecs;
-                _qos.minSecsBetweenUpdates = _updateConditions.cooldownSecs;
-                _qos.numTrackableDataSources = registry.lookupRadonRequestRetrievalsCount(
-                    Witnet.RadonHash.wrap(self.oracleSources)
-                );
-            } else {
-                // no updateConditions stored for Witnet-oraclized price feeds
-                _qos = IWitPriceFeeds(self.oracleAddress).lookupPriceFeedQualityMetrics(
-                    IWitPriceFeedsTypes.ID4.wrap(bytes4(self.oracleSources))
-                );
-            }
-        } else if (self.mapper == IWitPriceFeedsTypes.Mappers.None) {
-            // no updateConditions stored for mapped price feeds
-            _qos.computesEMA = _updateConditions.computeEMA;
-            _qos.maxSecsBetweenUpdates = _updateConditions.heartbeatSecs;
-            _qos.minSecsBetweenUpdates = _updateConditions.cooldownSecs;
-        }
 
         if (self.mapper != IWitPriceFeedsTypes.Mappers.None) {
+            // no updateConditions stored for mapped price feeds
             if (
                 self.mapperDeps != bytes32(0)
                     && (
@@ -364,6 +339,30 @@ library WitPriceFeedsDataLib {
             } 
             _qos.numMappedPriceFeeds = _countDeepDeps(self.mapperDeps);
             _foldQoS(_qos, registry, self.mapperDeps);
+        
+        } else if (
+            self.oracle == IWitPriceFeedsTypes.Oracles.Witnet 
+                && self.oracleSources != bytes32(0)
+        ) {
+            if (self.oracleAddress == address(0) || self.oracleAddress == address(this)) {
+                _qos.computesEMA = _updateConditions.computeEMA;
+                _qos.maxDeviation1000 = _updateConditions.maxDeviation1000;
+                _qos.maxSecsBetweenUpdates = _updateConditions.heartbeatSecs;
+                _qos.minSecsBetweenUpdates = _updateConditions.cooldownSecs;
+                _qos.numTrackableDataSources = uint16(registry.lookupRadonRequestRetrievalsCount(
+                    Witnet.RadonHash.wrap(self.oracleSources)
+                ));
+                _qos.witnessingCommitteeSize = _updateConditions.minWitnesses;
+            } else {
+                // no updateConditions stored for Witnet-oraclized price feeds
+                _qos = IWitPriceFeeds(self.oracleAddress).lookupPriceFeedQualityMetrics(
+                    IWitPriceFeedsTypes.ID4.wrap(bytes4(self.oracleSources))
+                );
+            }
+        
+        } else if (self.mapper == IWitPriceFeedsTypes.Mappers.None) {
+            _qos.computesEMA = _updateConditions.computeEMA;
+            _qos.maxSecsBetweenUpdates = _updateConditions.heartbeatSecs;
         }
     }
 
@@ -755,33 +754,40 @@ library WitPriceFeedsDataLib {
             self.computesEMA = next.computesEMA;
         }
         if (
-            self.maxDeviation1000 > 0 
-                && next.maxDeviation1000 > 0 
-                && self.maxDeviation1000 < next.maxDeviation1000
+            self.maxDeviation1000 == 0 || (
+                next.maxDeviation1000 > 0 
+                    && self.maxDeviation1000 < next.maxDeviation1000
+            )
         ) {
             // takes the greatest of all max deviations, among all that have it set:
             self.maxDeviation1000 = next.maxDeviation1000;
-        } else {
+        } else if (next.maxDeviation1000 == 0) {
             // final max deviation will be 0 (i.e. oo), if at least one in hierarchy has none set:
             self.maxDeviation1000 = 0;
         }
         if (
-            next.maxSecsBetweenUpdates > 0
-                && self.maxSecsBetweenUpdates > next.maxSecsBetweenUpdates
+            self.maxSecsBetweenUpdates == 0 || (
+                next.maxSecsBetweenUpdates > 0
+                    && self.maxSecsBetweenUpdates > next.maxSecsBetweenUpdates
+            )
         ) {
             // take the lowest of all set-up heartbeats:
-            self.maxSecsBetweenUpdates = next. maxSecsBetweenUpdates;
+            self.maxSecsBetweenUpdates = next.maxSecsBetweenUpdates;
         }
         if (
-            next.minSecsBetweenUpdates > 0 
-                && self.minSecsBetweenUpdates > next.minSecsBetweenUpdates
+            self.minSecsBetweenUpdates == 0 || (
+                next.minSecsBetweenUpdates > 0 
+                    && self.minSecsBetweenUpdates > next.minSecsBetweenUpdates
+            )
         ) {
             // take the lowest of all set-up cooldowns:
             self.minSecsBetweenUpdates = next.minSecsBetweenUpdates;
         }
         if (
-            next.witnessingCommitteeSize > 0
-                && self.witnessingCommitteeSize > next.witnessingCommitteeSize
+            self.witnessingCommitteeSize == 0 || (
+                next.witnessingCommitteeSize > 0
+                    && self.witnessingCommitteeSize > next.witnessingCommitteeSize
+            )
         ) {
             // take the smallest of the witnessing commitees, among all that have it set:
             self.witnessingCommitteeSize = next.witnessingCommitteeSize;
@@ -966,7 +972,7 @@ library WitPriceFeedsDataLib {
             IWitPriceFeedsTypes.ID4 id4 = IWitPriceFeedsTypes.ID4.wrap(bytes4(mapperDeps));
             PriceFeed storage dependency = seekPriceFeed(id4);
             if (dependency.mapper == IWitPriceFeedsTypes.Mappers.None) {
-               _coalesceQoS(qos, lookupPriceFeedQoS(id4, registry));
+                _coalesceQoS(qos, lookupPriceFeedQoS(id4, registry));
             } else {
                _foldQoS(qos, registry, dependency.mapperDeps);
             }

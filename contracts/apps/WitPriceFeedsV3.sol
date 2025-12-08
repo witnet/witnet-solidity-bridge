@@ -579,12 +579,11 @@ contract WitPriceFeedsV3
 
     function settlePriceFeedUpdateConditions(
             string calldata _caption, 
-            PriceUpdateConditions calldata _conditions
+            PriceUpdateConditions memory _conditions
         )
         external override
         onlyOwner
     {
-    
         WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(computeID4(_caption));
         _require(
             __record.mapper == Mappers.None // no update conditions accepted on mapped price feeds,
@@ -748,10 +747,8 @@ contract WitPriceFeedsV3
                 // heartbeatSecs must be greater than cooldownSecs, if settled:
                 _conditions.heartbeatSecs == 0 || _conditions.heartbeatSecs >= _conditions.cooldownSecs
             ) && (
-                // numWitnesses can only be settled on Witnet-oraclized price feeds:
-                (_oracle != Oracles.Witnet && _conditions.minWitnesses == 0)
                 // numWitnesses must be settled on Witnet-oraclized price feeds:
-                || (_oracle == Oracles.Witnet && _conditions.minWitnesses > 0)
+                _oracle != Oracles.Witnet || _conditions.minWitnesses > 0
             )
         );
     }
