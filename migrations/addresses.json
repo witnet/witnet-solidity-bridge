@@ -203,22 +203,22 @@
     "ethereum:sepolia": {
         "libs": {
             "WitOracleDataLib": "0xfC62b6B0ec3eCF1Fa031B31b468be51E025a36f1",
-            "WitOracleRadonEncodingLib": "0x179b1b1E77613925707D38916b28024a46146DfB",
+            "WitOracleRadonEncodingLib": "0x55627Fc911339102992DE6aEcA0Df43D655FcEc5",
             "WitOracleResultStatusLib": "0xd5Ef8E34a8e459110373eF2f8f141893921d367A",
             "WitPriceFeedsLegacyDataLib": "0xA7389B84D6ABC46b40e88aAD2bbDAf9921649E9E",
-            "WitPriceFeedsDataLib": "0x5f77274C347406DD7A445f154e2822c0A906fD26"
+            "WitPriceFeedsDataLib": "0x40Cd972B81123DECaA7B97Df039A21943F87e030"
         },
         "core": {
-            "WitOracleTrustableDefault": "0xA9772b60E4B52C7b1e7Af993E2fB1927D9c153cA",
-            "WitOracleRadonRegistryUpgradableDefault": "0xd3a66d1cec3585727aB457dfAB14c21F6704e309",
+            "WitOracleTrustableDefault": "0x7089e7e7bf532d934fb2f511bfB6b5d06C4a5FE3",
+            "WitOracleRadonRegistryUpgradableDefault": "0xB4Ff9f77f7478061aA4B9b99F324B606635b0474",
             "WitOracleRadonRequestFactoryModalsDefault": "0xD28237c5d7C8C386377A13e6661642294657F35e",
             "WitOracleRadonRequestFactoryTemplatesDefault": "0x300c8ccc9526495BB7e5911105f0663Cb4c3a137",
-            "WitOracleRadonRequestFactoryUpgradableDefault": "0xf184027798Edc08E676857C81Ac40e83aB3AAdf3"
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0x24Ee1fA03Dd9De4ee4455F179D5DF0fE40C0c16C"
         },
         "apps": {
             "WitPriceFeedsLegacyUpgradable": "0xb8776103adBfe48366E4B632d9b8cb322E3D524F",
-            "WitPriceFeedsV3Upgradable": "0x00c98e3C1Ec7323A19999Cc8E3d4c5B651974dcb",
-            "WitPriceFeedsLegacyUpgradableBypass": "0x6513C7453cd05ce7F99c9C81b60a7849c0640347"
+            "WitPriceFeedsV3Upgradable": "0xFec4De957851537b29Ca13afdd4911429dcFC548",
+            "WitPriceFeedsLegacyUpgradableBypass": "0xEd74148F6290076Ec22A367823A3EF48e13E9942"
         }
     },
     "gnosis:mainnet": {
