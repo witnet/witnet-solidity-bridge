@@ -464,7 +464,16 @@ export class WitPriceFeeds extends WitAppliance {
 	}
 
 	public async lookupPriceFeedQualityMetrics(id4: Witnet.HexString): Promise<PriceFeedQoS> {
-		return this.contract.lookupPriceFeedQualityMetrics.staticCall(id4).then((result: any) => result as PriceFeedQoS);
+		return this.contract.lookupPriceFeedQualityMetrics.staticCall(id4).then((result: any) => ({
+			computesEMA: result[0],
+			maxDeviationPercentage: Number(result[1]),
+			maxSecsBetweenUpdates: Number(result[2]),
+			minSecsBetweenUpdates: Number(result[3]),
+			numFallbackOracles: Number(result[4]),
+			numMappedPriceFeeds: Number(result[5]),
+			numTrackableDataSources: Number(result[6]),
+			witnessingCommitteeSize: Number(result[7]),
+		}));
 	}
 
 	public async lookupPriceFeeds(): Promise<Array<PriceFeedInfo>> {

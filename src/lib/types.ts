@@ -47,6 +47,7 @@ export type PriceFeedQoS = {
 	maxSecsBetweenUpdates: number;
 	minSecsBetweenUpdates: number;
 	numFallbackOracles: number;
+	numMappedPriceFeeds: number;
 	numTrackableDataSources: number;
 	witnessingCommitteeSize: number;
 };
