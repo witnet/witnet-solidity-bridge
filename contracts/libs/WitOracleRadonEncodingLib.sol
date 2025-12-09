@@ -276,9 +276,12 @@ library WitOracleRadonEncodingLib {
     {        
         bytecode = abi.encodePacked(
             encode(uint64(filter.method), bytes1(0x08)),
-            abi.encodePacked(
+            filter.cborArgs.length > 0 ? abi.encodePacked(
                 encode(uint64(filter.cborArgs.length), bytes1(0x12)),
                 filter.cborArgs
+            ) : abi.encodePacked(
+                encode(uint64(1), bytes1(0x12)),
+                hex"80"
             )
         );
         return abi.encodePacked(
