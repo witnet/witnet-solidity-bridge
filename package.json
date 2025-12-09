@@ -89,7 +89,7 @@
 		"witeth": "cross-env-shell WITNET_SDK_RADON_ASSETS_PATH='../..' node ./src/bin/index.cjs"
 	},
 	"dependencies": {
-		"@witnet/sdk": "^3.0.2",
+		"@witnet/sdk": "^3.0.3",
 		"cbor": "^10.0.11",
 		"commander": "^14.0.2",
 		"cross-env": "^10.1.0",
