@@ -1143,7 +1143,7 @@ library Witnet {
     /// ===============================================================================================================
     /// --- 'string' helper methods -----------------------------------------------------------------------------------
 
-    function intoDynArray(string memory _string) internal pure returns (string[] memory) {
+    function intoDynArray(string memory _string) internal pure returns (string[] memory _dyn) {
         return abi.decode(abi.encode(uint256(32), 1, _string), (string[]));
     }
 
@@ -1163,20 +1163,30 @@ library Witnet {
         return abi.decode(abi.encode(uint256(32), 4, _strings), (string[]));
     }
 
-    function intoDynArray(string[2][1] memory _tuples) internal pure returns (string[2][] memory) {
-        return abi.decode(abi.encode(uint256(32), 1, _tuples), (string[2][]));
+    function intoDynArray(string[2][1] memory _tuples) internal pure returns (string[2][] memory _dynArray) {
+        _dynArray = new string[2][](1);
+        _dynArray[0] = _tuples[0];
     }
 
-    function intoDynArray(string[2][2] memory _tuples) internal pure returns (string[2][] memory) {
-        return abi.decode(abi.encode(uint256(32), 2, _tuples), (string[2][]));
+    function intoDynArray(string[2][2] memory _tuples) internal pure returns (string[2][] memory _dynArray) {
+        _dynArray = new string[2][](2);
+        _dynArray[0] = _tuples[0];
+        _dynArray[1] = _tuples[1];
     }
 
-    function intoDynArray(string[2][3] memory _tuples) internal pure returns (string[2][] memory) {
-        return abi.decode(abi.encode(uint256(32), 3, _tuples), (string[2][]));
+    function intoDynArray(string[2][3] memory _tuples) internal pure returns (string[2][] memory _dynArray) {
+        _dynArray = new string[2][](3);
+        _dynArray[0] = _tuples[0];
+        _dynArray[1] = _tuples[1];
+        _dynArray[2] = _tuples[2];
     }
 
-    function intoDynArray(string[2][4] memory _tuples) internal pure returns (string[2][] memory) {
-        return abi.decode(abi.encode(uint256(32), 4, _tuples), (string[2][]));
+    function intoDynArray(string[2][4] memory _tuples) internal pure returns (string[2][] memory _dynArray) {
+        _dynArray = new string[2][](4);
+        _dynArray[0] = _tuples[0];
+        _dynArray[1] = _tuples[1];
+        _dynArray[2] = _tuples[2];
+        _dynArray[3] = _tuples[3];
     }
 
     function toLowerCase(string memory str)
