@@ -861,20 +861,26 @@ library Witnet {
     /// ===============================================================================================================
     /// --- RadonFilter helper methods --------------------------------------------------------------------------------
 
-    function intoDynArray(RadonFilter memory _filter) internal pure returns (RadonFilter[] memory) {
-        return abi.decode(abi.encode(uint256(32), 1, _filter), (RadonFilter[]));
+    function intoDynArray(RadonFilter memory _filter) internal pure returns (RadonFilter[] memory _dynArray) {
+        return intoDynArray([_filter]);
     }
 
-    function intoDynArray(RadonFilter[1] memory _filters) internal pure returns (RadonFilter[] memory) {
-        return abi.decode(abi.encode(uint256(32), 1, _filters), (RadonFilter[]));
+    function intoDynArray(RadonFilter[1] memory _filters) internal pure returns (RadonFilter[] memory _dynArray) {
+        _dynArray = new RadonFilter[](1);
+        _dynArray[0] = _filters[0];
     }
 
-    function intoDynArray(RadonFilter[2] memory _filters) internal pure returns (RadonFilter[] memory) {
-        return abi.decode(abi.encode(uint256(32), 2, _filters), (RadonFilter[]));
+    function intoDynArray(RadonFilter[2] memory _filters) internal pure returns (RadonFilter[] memory _dynArray) {
+        _dynArray = new RadonFilter[](2);
+        _dynArray[0] = _filters[0];
+        _dynArray[1] = _filters[1];
     }
 
-    function intoDynArray(RadonFilter[3] memory _filters) internal pure returns (RadonFilter[] memory) {
-        return abi.decode(abi.encode(uint256(32), 3, _filters), (RadonFilter[]));
+    function intoDynArray(RadonFilter[3] memory _filters) internal pure returns (RadonFilter[] memory _dynArray) {
+        _dynArray = new RadonFilter[](3);
+        _dynArray[0] = _filters[0];
+        _dynArray[1] = _filters[1];
+        _dynArray[2] = _filters[2]; 
     }
 
 
