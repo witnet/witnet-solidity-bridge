@@ -11,7 +11,7 @@ import {
 	type PriceFeedInfo,
 	PriceFeedMappers,
 	PriceFeedOracles,
-	PriceFeedQoS,
+	type PriceFeedQoS,
 	type PriceFeedUpdate,
 	type PriceFeedUpdateConditions,
 } from "../types.js";
@@ -460,13 +460,13 @@ export class WitPriceFeeds extends WitAppliance {
 	}
 
 	public async lookupPriceFeedID(id4: Witnet.HexString): Promise<Witnet.Hash> {
-		return this.contract.lookupPriceFeedID.staticCall(id4);
+		return this.contract.lookupPriceFeedID32.staticCall(id4);
 	}
 
 	public async lookupPriceFeedQualityMetrics(id4: Witnet.HexString): Promise<PriceFeedQoS> {
 		return this.contract.lookupPriceFeedQualityMetrics.staticCall(id4).then((result: any) => ({
 			computesEMA: result[0],
-			maxDeviationPercentage: Number(result[1]),
+			maxDeviationPercentage: Number(result[1]) / 10,
 			maxSecsBetweenUpdates: Number(result[2]),
 			minSecsBetweenUpdates: Number(result[3]),
 			numFallbackOracles: Number(result[4]),

@@ -71,9 +71,9 @@ contract TestWitOracleRadonEncodingLib {
 
   function testEncodeRadonReducer1Filter() external {
     Witnet.RadonReducer memory reducer;
-    reducer.opcode = Witnet.RadonReducerMethods.Mode;
+    reducer.method = Witnet.RadonReducerMethods.Mode;
     reducer.filters = new Witnet.RadonFilter[](1);
-    reducer.filters[0].opcode = Witnet.RadonFilterMethods.StandardDeviation;
+    reducer.filters[0].method = Witnet.RadonFilterMethods.StandardDeviation;
     reducer.filters[0].cborArgs = hex"fa40200000";
     bytes memory bytecode = WitOracleRadonEncodingLib.encode(reducer);
     // emit Log(bytecode);

@@ -267,7 +267,7 @@ export class WitOracle extends WitArtifact {
 
 	/**
 	 * Wrapper class for Wit/Oracle Radon Template artifacts as deployed in some supported EVM network.
-	 * `IWitOracleRadonRequestTemplate` contracts enable smart contracts to formally verify Radon Requests
+	 * `IWitOracleRadonRequestTemplateFactory` contracts enable smart contracts to formally verify Radon Requests
 	 * built out out of a set of parameterized Witnet-compliant data sources, on the fly.
 	 */
 	public async getWitOracleRadonRequestTemplateFactoryAt(
