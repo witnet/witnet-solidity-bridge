@@ -28,6 +28,14 @@ interface IWitOracleRadonRegistryLegacy {
             string[][] calldata args
         ) external returns (bytes32 radHash);
 
+    function verifyRadonRequest(
+            bytes32 modalRetrieval,
+            string[] calldata modalArgs,
+            string[] calldata modalUrls,
+            bytes32 verifiedDataSourcesAggregator,
+            bytes32 verifiedCrowdAttestationTally
+        ) external returns (Witnet.RadonHash);
+
     function verifyRadonRetrieval(
             Witnet.RadonRetrievalMethods requestMethod,
             string calldata requestURL,

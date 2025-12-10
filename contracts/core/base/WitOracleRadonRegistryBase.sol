@@ -380,7 +380,7 @@ abstract contract WitOracleRadonRegistryBase
             bytes32 verifiedDataSourcesAggregator,
             bytes32 verifiedCrowdAttestationTally
         )
-        override external 
+        override public 
         returns (Witnet.RadonHash _radHash)
     {
         bytes32 hash = keccak256(abi.encode(
@@ -505,6 +505,25 @@ abstract contract WitOracleRadonRegistryBase
             _aggregateReducerHash,
             _tallyReducerHash
         ));
+    }
+
+    function verifyRadonRequest(
+            bytes32 modalRetrieval,
+            string[] calldata modalArgs,
+            string[] calldata modalUrls,
+            bytes32 verifiedDataSourcesAggregator,
+            bytes32 verifiedCrowdAttestationTally
+        )
+        override external 
+        returns (Witnet.RadonHash)
+    {
+        return verifyRadonModalRequest(
+            modalRetrieval,
+            modalArgs,
+            modalUrls,
+            verifiedDataSourcesAggregator,
+            verifiedCrowdAttestationTally
+        );
     }
 
     function lookupRadonRequestTally(Witnet.RadonHash _radHash)
