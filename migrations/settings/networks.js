@@ -282,12 +282,22 @@ export default {
 		port: 8527,
 		network_id: 1001,
 		symbol: "KAIA",
+		verify: {
+			apiKey: "MY_API_KEY",
+			apiUrl: "https://kairos.kaiascan.io/api",
+			explorerUrl: "https://kairos.kaiascan.io/",
+		},
 	},
 	"kaia:mainnet": {
 		mainnet: true,
 		port: 9527,
 		network_id: 8217,
 		symbol: "KAIA",
+		verify: {
+			apiKey: "MY_API_KEY",
+			apiUrl: "https://kaiascan.io/api",
+			explorerUrl: "https://kaiascan.io/",
+		},
 	},
 	"kava:testnet": {
 		port: 8526,
@@ -565,6 +575,7 @@ export default {
 		symbol: "ULX",
 	},
 	"worldchain:mainnet": {
+		mainnet: true,
 		port: 9501,
 		network_id: 480,
 		verify: {

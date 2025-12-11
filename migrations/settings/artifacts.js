@@ -33,19 +33,40 @@ export default {
 			WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore",
 		},
 	},
+	"conflux:core:testnet": {
+		core: { WitOracle: "WitOracleTrustablePushOnly" },
+	},
+	"conflux:espace:testnet": {
+		core: { WitOracle: "WitOracleTrustablePushOnly" },
+	},
 	"ethereum:sepolia": {
 		apps: {
 			WitPriceFeedsLegacy: "WitPriceFeedsLegacyUpgradableBypass",
 		},
 	},
+	"kcc:testnet": {
+		core: { WitOracle: "WitOracleTrustablePushOnly" },
+	},
 	mantle: {
 		core: { WitOracle: "WitOracleTrustableOvm2" },
+	},
+	"mantle:sepolia": {
+		core: { WitOracle: "WitOracleTrustablePushOnly" },
 	},
 	meter: {
 		WitnetDeployer: "WitnetDeployerMeter",
 		core: {
 			WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore",
 		},
+	},
+	"metis:sepolia": {
+		core: { WitOracle: "WitOracleTrustablePushOnly" },
+	},
+	"moonbeam:moonbase": {
+		core: { WitOracle: "WitOracleTrustablePushOnly" },
+	},
+	"moonbeam:moonriver": {
+		core: { WitOracle: "WitOracleTrustablePushOnly" },
 	},
 	optimism: {
 		core: { WitOracle: "WitOracleTrustableOvm2" },
@@ -76,4 +97,7 @@ export default {
 		WitnetDeployer: "WitnetDeployerDeferred",
 		core: { WitOracle: "WitOracleTrustableObscuro" },
 	},
+	"ultron:testnet": {
+		core: { WitOracle: "WitOracleTrustablePushOnly" },
+	}
 };

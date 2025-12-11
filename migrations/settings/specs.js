@@ -33,13 +33,13 @@ export default {
 			baseDeps: ["WitOracle"],
 		},
 		WitOracleRadonRequestFactoryModalsDefault: {
-			vanity: 525250, // 0xffC4147d7b973B1766FB335bC847C7288c4365ff
+			vanity: 655348, // 0xff0c2aAB49afE9358D6364C8d7b1Aa21853808ff
 		},
 		WitOracleRadonRequestFactoryTemplates: {
 			baseDeps: ["WitOracle"],
 		},
 		WitOracleRadonRequestFactoryTemplatesDefault: {
-			vanity: 692892, // 0xFF5ad05D038fcc04354B2fca1fb657eA345594FF
+			vanity: 1136326, // 0xFF507f5c0B1732C64688fc2921636e794041eaFF
 		},
 		WitPriceFeeds: {
 			baseLibs: ["WitPriceFeedsDataLib"],
