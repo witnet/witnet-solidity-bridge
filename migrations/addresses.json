@@ -357,7 +357,6 @@
             "WitOracleRadonRequestFactoryTemplatesDefault": "0x300c8ccc9526495BB7e5911105f0663Cb4c3a137",
             "WitOracleRadonRequestFactoryUpgradableDefault": "0xa71E58A4Fc8c37F30d89382f74946B02B8221020",
             "WitOraclePushOnlyTrustableDefault": "0xC30D4f821ca4bD73fe9dc9344aAaBc3341035833"
-            
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
@@ -368,21 +367,24 @@
     },
     "moonbeam:moonriver": {
         "libs": {
-            "WitOracleDataLib": "0xb99FA0430C73E7B82604Aa99d351d6aFdCe46A16",
-            "WitOracleRadonEncodingLib": "0xC467B6E0F700D3E044C9F20BB76957eEC0B33c8C",
-            "WitOracleResultStatusLib": "0x6Af31B632A20185ff96FC47a8576a6980Cd99FEC",
-            "WitPriceFeedsDataLib": "0x7AA219C444f68eDBD5789d89076efA8A3f09996b",
-            "WitPriceFeedsLegacyDataLib": "0xc45c93083F7B97Cdb700D4D2ADE6a727E04793ff"
+            "WitOracleDataLib": "0x3D47B3e8D674c81827f08019E27CAEA28270E857",
+            "WitOracleRadonEncodingLib": "0x10536C5cC94E8f6F9939645cCD35c29D5DA5dD1A",
+            "WitOracleResultStatusLib": "0xed6BFff87210608831220704f6F96C725f57b139",
+            "WitPriceFeedsDataLib": "0x33f3f62DD989cAE77aB164E951444e4598828CeD",
+            "WitPriceFeedsLegacyDataLib": "0x7B03AD311bfbD1050816eb6681599dCFCF2FB72A"
         },
         "core": {
+            "WitOraclePushOnlyTrustableDefault": "0xD5F2CfA62Fe9Ad906DE943823BC49c622324068B",
+            "WitOracleRadonRegistryUpgradableDefault": "0x6B6c6F1634337b9CC0bA6348a40AA43F383B3913",
             "WitOracleRadonRequestFactoryModalsDefault": "0xD28237c5d7C8C386377A13e6661642294657F35e",
             "WitOracleRadonRequestFactoryTemplatesDefault": "0x300c8ccc9526495BB7e5911105f0663Cb4c3a137",
-            "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000",
-            "WitOracleRadonRegistryUpgradableDefault": "0xD8c2F34703751a36aC5a9186B93b7087526fa5cF",
-            "WitOracleTrustableDefault": "0xc318631DE2b7F8FA07feEDc732B64A9b9cFa7B6C"
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0x84030EceF14A7C9A7D55a56721BFd444F1Bf5e5a"
         },
         "apps": {
-            "WitPriceFeedsLegacyUpgradable": "0x00B43C170FD71728BFCF2b5425fB5906728BA06D"
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsV3Upgradable": "0x362a0Ae38635632A506fc8095C1c9799cFaA7E4b",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x3710cD1862C8A34D3654F473760CB3F665f2f508",
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
     "okx:xlayer:sepolia": {},

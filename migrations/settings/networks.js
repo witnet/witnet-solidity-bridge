@@ -340,8 +340,8 @@ export default {
 		network_id: 5003,
 		symbol: "MNT",
 		verify: {
-			apiUrl: "https://api-sepolia.mantlescan.xyz/api",
-			explorerUrl: "https://sepolia.mantlescan.xyz",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=5003",
+			explorerUrl: "https://sepolia.mantlescan.xyz/",
 		},
 	},
 	"mantle:mainnet": {
