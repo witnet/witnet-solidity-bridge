@@ -9,9 +9,7 @@
             "WitOracle": "0x77703aE126B971c9946d562F41Dd47071dA00777",
             "WitOracleRadonRegistry": "0x000B61Fe075F545fd37767f40391658275900000",
             "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000",
-            "WitOracleRequestFactory": "0x000DB36997AF1F02209A6F995883B9B699900000",
-            "WitOracleRadonRequestFactoryModalsDefault": "0xff0c2aAB49afE9358D6364C8d7b1Aa21853808ff",
-            "WitOracleRadonRequestFactoryTemplatesDefault": "0xFF507f5c0B1732C64688fc2921636e794041eaFF"
+            "WitOracleRequestFactory": "0x000DB36997AF1F02209A6F995883B9B699900000"
         },
         "WitnetDeployer": "0x03232aBE800D1638B30432FeEF300581De323a4E"
     },
@@ -93,13 +91,16 @@
     },
     "conflux:core": {
         "apps": {
+            "WitPriceFeeds": "0x806fd13488E5FFF030aE8d82C81aF96B4fFa36B8",
             "WitPriceFeedsLegacy": "0x8ba3C59e1029cd90010e8C731461ddFC5f49091b",
             "WitRandomnessV2": "0x897832C89ec306A74f9eC29abfFcaDBfCb11A13B"
         },
         "core": {
-            "WitOracle": "0x8346D6ba3b7a04923492007cC3A2eE7135Db7463",
-            "WitOracleRadonRegistry": "0x85d3E5577f947BcA1A12C00940087129A5F8B2eb",
-            "WitOracleRequestFactory": "0x8daDc231C8C810CBbe2d555338bDa94DA648f964"
+            "WitOracle": "0x8ce6Cbc149E46c67e19d66bD3e2905161ff4Cb06",
+            "WitOracleRadonRegistry": "0x87C49D7Ee36496d75823495ad4c7112a819771f8",
+            "WitOracleRadonRequestFactory": "0x8c0D9F2748eCf8011220Aa05f736EceE0c451Ecb",
+            "WitOracleRadonRequestFactoryTemplatesDefault": "0x8b4f72C2E1183E3d43Ef49041588b1e083293A15",
+            "WitOracleRadonRequestFactoryModalsDefault": "0x81F17Da987477D1A2c9e6E5ae3053e04987575b3"
         },
         "WitnetDeployer": "0x8785dBa05D3B90c55c009D0C47f12A2d976C5e47",
         "WitnetProxy": "0x8529DA52FF40990685B61432BA49246b94850d86"
@@ -114,10 +115,21 @@
     },
     "conflux:core:testnet": {
         "libs": {
-            "WitOracleDataLib": "0x81cfB91911F6C8fa582033149582a63EBa39D0D3",
-            "WitOracleRadonEncodingLib": "0x80Ea106BE90aB7b4FCac2b3D4aCe4Ea262918188",
-            "WitOracleResultErrorsLib": "0x899325905515049B49e726AF5d5f24f723a5eab2",
-            "WitPriceFeedsLib": "0x8Ac628741A0983869d237AF759f39a553aE91e47"
+            "WitOracleDataLib": "0x811b31fF781113D209d332Db39ef0262bcDA6a48",
+            "WitOracleRadonEncodingLib": "0x811B5AFEcDC19231Ed9b9bd41880893aBC3e5807",
+            "WitOracleResultStatusLib": "0x8Aa9C80F48175F7FC1701170fC32782B6954960A",
+            "WitPriceFeedsDataLib": "0x8983B56baC644FAA5fA7287D1592cF88E855c0ea",
+            "WitPriceFeedsLegacyDataLib": "0x89e7607Be8547FEdDB0e80AD448b257cB4C86444"
+        },
+        "core": {
+            "WitOracleRadonRegistryUpgradableDefault": "0x88CC20a80db339ef1ED3D6D31739730fBBD40963",
+            "WitOracleRadonRequestFactoryUpgradableConfluxCore": "0x8B1567D1d168c4289D9F06Fa6505feA79A2A343b",
+            "WitOraclePushOnlyTrustableDefault": "0x8a583f9E962cC19891cDa9C8aD66ab9ECdeE6880"
+        },
+        "apps": {
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x89A5dc9b659052d2b0DEbF217d61d6400eed1154",
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
     "conflux:espace:mainnet": {

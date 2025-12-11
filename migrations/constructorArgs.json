@@ -68,9 +68,13 @@
         "WitRandomnessV2": "0000000000000000000000008346d6ba3b7a04923492007cc3a2ee7135db74630000000000000000000000001169bf81ecf738d02fd8d3824dfe02153b334ef7"
     },
     "conflux:core:testnet": {
-        "WitOracle": "",
-        "WitOracleRadonRegistry": "",
-        "WitOracleRequestFactory": ""
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e302d643037383261302d623165393032380000000000000000000000\",true]}",
+        "WitOracleRadonRequestFactoryModalsDefault": "{\"types\":[\"address\"],\"values\":[\"0x8346D6ba3b7a04923492007cC3A2eE7135Db7463\"]}",
+        "WitOracleRadonRequestFactoryTemplatesDefault": "{\"types\":[\"address\"],\"values\":[\"0x8346D6ba3b7a04923492007cC3A2eE7135Db7463\"]}",
+        "WitOracleRadonRequestFactoryUpgradableConfluxCore": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x81F17Da987477D1A2c9e6E5ae3053e04987575b3\",\"0x8b4f72C2E1183E3d43Ef49041588b1e083293A15\",\"0x332e312e302d643037383261302d373532373837300000000000000000000000\",true]}",
+        "WitOraclePushOnlyTrustableDefault": "{\"types\":[\"address\",\"bytes32\"],\"values\":[\"0x87C49D7Ee36496d75823495ad4c7112a819771f8\",\"0x332e312e302d643037383261302d386530643135630000000000000000000000\"]}",
+        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x8ce6Cbc149E46c67e19d66bD3e2905161ff4Cb06\",\"0x332e312e302d643037383261302d333931323338350000000000000000000000\",true]}",
+        "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x806fd13488E5FFF030aE8d82C81aF96B4fFa36B8\",\"0x332e312e302d643037383261302d663230623033340000000000000000000000\",true]}"
     },
     "conflux:espace:mainnet": {
         "WitOracle": "",
