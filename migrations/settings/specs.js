@@ -3,6 +3,9 @@ export default {
 		WitOracle: {
 			baseDeps: ["WitOracleRadonRegistry"],
 			baseLibs: ["WitOracleDataLib", "WitOracleResultStatusLib"],
+			vanity: 13710368043, // 0x77703aE126B971c9946d562F41Dd47071dA00777
+		},
+		WitOracleTrustable: {
 			immutables: {
 				types: ["(uint32, uint32, uint32, uint32)"],
 				values: [
@@ -12,13 +15,19 @@ export default {
 					],
 				],
 			},
-			vanity: 13710368043, // 0x77703aE126B971c9946d562F41Dd47071dA00777
 		},
 		WitOracleTrustless: {
 			baseLibs: ["WitOracleTrustlessDataLib"],
 			immutables: {
-				types: ["uint256", "uint256"],
-				values: [/* _evmQueryAwaitingBlocks */ 16, /* _evmQueryReportingStake */ "1000000000000000000"],
+				types: ["(uint32, uint32, uint32, uint32)", "uint256", "uint256"],
+				values: [
+					[
+						/* _reportResultGasBase */ 58282, /* _reportResultWithCallbackGasBase */ 65273,
+						/* _reportResultWithCallbackRevertGasBase */ 69546, /* _sstoreFromZeroGas */ 20000,
+					],
+					/* _evmQueryAwaitingBlocks */ 16, 
+					/* _evmQueryReportingStake */ "1000000000000000000"
+				],
 			},
 		},
 		WitOracleRadonRegistry: {
@@ -33,13 +42,13 @@ export default {
 			baseDeps: ["WitOracle"],
 		},
 		WitOracleRadonRequestFactoryModalsDefault: {
-			vanity: 525250, // 0xffC4147d7b973B1766FB335bC847C7288c4365ff
+			vanity: 655348, // 0xff0c2aAB49afE9358D6364C8d7b1Aa21853808ff
 		},
 		WitOracleRadonRequestFactoryTemplates: {
 			baseDeps: ["WitOracle"],
 		},
 		WitOracleRadonRequestFactoryTemplatesDefault: {
-			vanity: 692892, // 0xFF5ad05D038fcc04354B2fca1fb657eA345594FF
+			vanity: 1136326, // 0xFF507f5c0B1732C64688fc2921636e794041eaFF
 		},
 		WitPriceFeeds: {
 			baseLibs: ["WitPriceFeedsDataLib"],
@@ -56,7 +65,7 @@ export default {
 			vanity: 1060132513, // 0xC0FFEE98AD1434aCbDB894BbB752e138c1006fAB
 		},
 		WitRandomnessV3: {
-			vanity: 2000244871103, // 0xC0FFEE00B76e0E48b967f2963ae6190dA32a536C
+			vanity: 1000004944751, // 0xC0FFeE9596C504Cf357E2A6038863A59Ee5E550A
 		},
 	},
 	reef: {
