@@ -333,21 +333,25 @@
     "moonbeam:mainnet": {},
     "moonbeam:moonbase": {
         "libs": {
-            "WitOracleDataLib": "0x2340dC2C938f765144be51b85Ac920B74F40a307",
-            "WitOracleRadonEncodingLib": "0xb5aff00A290D7c9bd8dD7f984f3d2b31e1BCD63e",
-            "WitOracleResultStatusLib": "0x7Cee33697F8579aD806e43528d3aafc924726b5D",
-            "WitPriceFeedsDataLib": "0xAb72a4B22404CE09A29E8A97D828317885Bb83B7",
-            "WitPriceFeedsLegacyDataLib": "0x7Bd6FdaEf3e6773d1580590d913cF4dB0CD88829"
+            "WitOracleDataLib": "0x1c19cc594887B3423f24601cA618Fe545eCD1D95",
+            "WitOracleRadonEncodingLib": "0xca7e9D37088e5438AE4C221f3639F480681f5A14",
+            "WitOracleResultStatusLib": "0x546338E647E6F578cbD8E80Ad19E9808CDb9DCf1",
+            "WitPriceFeedsDataLib": "0x17d0Af3235C594a0CEa7Ee3EB5A871362ae3e05D",
+            "WitPriceFeedsLegacyDataLib": "0x736D1Fb7E5FcD1d5066dBd7dfd926CB306cf6e96"
         },
         "core": {
-            "WitOracleRadonRegistryUpgradableDefault": "0x5faf757A0960a5A7c0dfACb6585E9e2CDd0C8DFf",
-            "WitOracleTrustableDefault": "0x8F7752e9E826f89C81071E2084125E1f8f07dB3e",
+            "WitOracleRadonRegistryUpgradableDefault": "0xB2db8F7292a6EB431d2C36Bb9BbB7293571DFfb9",
             "WitOracleRadonRequestFactoryModalsDefault": "0xD28237c5d7C8C386377A13e6661642294657F35e",
             "WitOracleRadonRequestFactoryTemplatesDefault": "0x300c8ccc9526495BB7e5911105f0663Cb4c3a137",
-            "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000"
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0xa71E58A4Fc8c37F30d89382f74946B02B8221020",
+            "WitOraclePushOnlyTrustableDefault": "0xC30D4f821ca4bD73fe9dc9344aAaBc3341035833"
+            
         },
         "apps": {
-            "WitPriceFeedsLegacyUpgradable": "0xF784FB888Af690e82779d4Dbce57cb692507e372"
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x1fc317c0D741362c905B3DBd7ac5c072743e1A54",
+            "WitPriceFeedsV3Upgradable": "0x38166266Cb4D0944f20d8c5d9efb31F6d22999C2",
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
     "moonbeam:moonriver": {

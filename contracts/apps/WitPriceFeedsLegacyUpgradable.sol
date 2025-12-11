@@ -49,11 +49,14 @@ contract WitPriceFeedsLegacyUpgradable
             address(_witOracle).code.length > 0,
             "inexistent oracle"
         );
+        bytes4 _witOracleSpecs = _witOracle.specs();
         _require(
-            _witOracle.specs() == (
-                type(IWitOracle).interfaceId
-                    ^ type(IWitOracleQueriable).interfaceId
-            ), "uncompliant oracle"
+            _witOracleSpecs == type(IWitOracle).interfaceId
+                || _witOracleSpecs == (
+                    type(IWitOracle).interfaceId
+                        ^ type(IWitOracleQueriable).interfaceId
+                ),
+            "uncompliant oracle"
         );
         witOracle = address(_witOracle);
     }
