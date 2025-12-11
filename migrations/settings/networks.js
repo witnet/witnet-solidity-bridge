@@ -148,8 +148,8 @@ export default {
 		symbol: "CFX",
 		verify: {
 			apiKey: "espace",
-			apiUrl: "https://evmapi-testnet.confluxscan.io/api",
-			explorerUrl: "https://evmtestnet.confluxscan.io",
+			apiUrl: "https://evmapi-testnet.confluxscan.net/api",
+			explorerUrl: "https://evmtestnet.confluxscan.org",
 		},
 	},
 	"conflux:espace:mainnet": {
