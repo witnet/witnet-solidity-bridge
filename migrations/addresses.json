@@ -9,6 +9,8 @@
             "WitOracle": "0x77703aE126B971c9946d562F41Dd47071dA00777",
             "WitOracleRadonRegistry": "0x000B61Fe075F545fd37767f40391658275900000",
             "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000",
+            "WitOracleRadonRequestFactoryModalsDefault": "0xff0c2aAB49afE9358D6364C8d7b1Aa21853808ff",
+            "WitOracleRadonRequestFactoryTemplatesDefault": "0xFF507f5c0B1732C64688fc2921636e794041eaFF",
             "WitOracleRequestFactory": "0x000DB36997AF1F02209A6F995883B9B699900000"
         },
         "WitnetDeployer": "0x03232aBE800D1638B30432FeEF300581De323a4E"
@@ -502,10 +504,22 @@
     "ultron:testnet": {},
     "unichain:sepolia": {
         "libs": {
-            "WitOracleDataLib": "0x5C787d6DAb26D6c9D0F3f03498138e904b583386",
-            "WitOracleRadonEncodingLib": "0xe3EB2408a637Bb51Feb6e39f1B494cD4973DA402",
-            "WitOracleResultStatusLib": "0x1C15Af858B7Af00BAFEAaa267d3059266Efdfa8e",
-            "WitPriceFeedsLegacyDataLib": "0x1949a56d396ba542AA6573b43bE12dCf721adb45"
+            "WitOracleDataLib": "0xA1276094aB5450Cd14bC5a7ed7901Ff2020d0740",
+            "WitOracleRadonEncodingLib": "0x8fbBf7445E8bC8d7400107613d59163476d1f2e2",
+            "WitOracleResultStatusLib": "0x59526A531c29c6DEb7C008e45A111e2cEd7BE815",
+            "WitPriceFeedsLegacyDataLib": "0x546338E647E6F578cbD8E80Ad19E9808CDb9DCf1",
+            "WitPriceFeedsDataLib": "0xca7e9D37088e5438AE4C221f3639F480681f5A14"
+        },
+        "core": {
+            "WitOracleRadonRegistryUpgradableDefault": "0xB56171A1292C51529EC5874D35D56248fEd0F105",
+            "WitOraclePushOnlyTrustableDefault": "0xbFE72d114611CE7Fc6506F20c7D14C5C6f5077C8",
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0xC2177392ccA460F476d5156368B05c345787aafa"
+        },
+        "apps": {
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsV3Upgradable": "0x8Eeb8fD944161f8efF45cdD01222F348258caA2a",
+            "WitPriceFeedsLegacyUpgradableBypass": "0xF9f86FEC2d6Bc2407221F5628F38867e20E74088",
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
     "worldchain:mainnet": {},

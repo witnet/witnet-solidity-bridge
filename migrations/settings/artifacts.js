@@ -94,5 +94,8 @@ export default {
 	},
 	"ultron:testnet": {
 		core: { WitOracle: "WitOraclePushOnlyTrustableDefault" },
+	},
+	"unichain:sepolia": {
+		core: { WitOracle: "WitOraclePushOnlyTrustableDefault" },
 	}
 };
