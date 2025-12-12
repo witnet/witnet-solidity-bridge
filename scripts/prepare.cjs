@@ -11,17 +11,17 @@ if (fs.existsSync("./artifacts")) {
 }
 
 if (fs.existsSync("./build") && fs.existsSync("./build/contracts")) {
-	exec('sed -i -- /\\bsourcePath\\b/d ./build/contracts/*.json');
+	exec("sed -i -- /\\bsourcePath\\b/d ./build/contracts/*.json");
 }
 
 if (fs.existsSync("./migrations/frosts")) {
-	exec('sed -i -- /\\bsourcePath\\b/d ./migrations/frosts/*.json');
+	exec("sed -i -- /\\bsourcePath\\b/d ./migrations/frosts/*.json");
 }
 
 if (fs.existsSync("./migrations/frosts/apps")) {
-	exec('sed -i -- /\\bsourcePath\\b/d ./migrations/frosts/apps/*.json', { shell: true });
+	exec("sed -i -- /\\bsourcePath\\b/d ./migrations/frosts/apps/*.json", { shell: true });
 }
 
 if (fs.existsSync("./migrations/frosts/core")) {
-	exec('sed -i -- /\\bsourcePath\\b/d ./migrations/frosts/core/*.json');
+	exec("sed -i -- /\\bsourcePath\\b/d ./migrations/frosts/core/*.json");
 }

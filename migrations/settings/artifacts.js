@@ -54,9 +54,6 @@ export default {
 			WitOracleRadonRequestFactory: "WitOracleRadonRequestFactoryUpgradableConfluxCore",
 		},
 	},
-	"metis:sepolia": {
-		core: { WitOracle: "WitOraclePushOnlyTrustableDefault" },
-	},
 	"moonbeam:moonbase": {
 		core: { WitOracle: "WitOraclePushOnlyTrustableDefault" },
 	},
@@ -92,10 +89,7 @@ export default {
 		WitnetDeployer: "WitnetDeployerDeferred",
 		core: { WitOracle: "WitOracleTrustableObscuro" },
 	},
-	"ultron:testnet": {
-		core: { WitOracle: "WitOraclePushOnlyTrustableDefault" },
-	},
 	"unichain:sepolia": {
 		core: { WitOracle: "WitOraclePushOnlyTrustableDefault" },
-	}
+	},
 };

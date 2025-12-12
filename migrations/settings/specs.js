@@ -25,8 +25,8 @@ export default {
 						/* _reportResultGasBase */ 58282, /* _reportResultWithCallbackGasBase */ 65273,
 						/* _reportResultWithCallbackRevertGasBase */ 69546, /* _sstoreFromZeroGas */ 20000,
 					],
-					/* _evmQueryAwaitingBlocks */ 16, 
-					/* _evmQueryReportingStake */ "1000000000000000000"
+					/* _evmQueryAwaitingBlocks */ 16,
+					/* _evmQueryReportingStake */ "1000000000000000000",
 				],
 			},
 		},
