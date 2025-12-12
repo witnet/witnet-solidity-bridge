@@ -15,8 +15,8 @@ import "../../libs/WitOracleRadonEncodingLib.sol";
 abstract contract WitOracleRadonRegistryBase
     is 
         WitOracleRadonRegistry,
-        WitOracleRadonRegistryData
-        // IWitOracleRadonRegistryLegacy
+        WitOracleRadonRegistryData,
+        IWitOracleRadonRegistryLegacy
 {   
     using Witnet for bytes;
     using Witnet for string;
@@ -442,52 +442,52 @@ abstract contract WitOracleRadonRegistryBase
         return lookupRadonRequestBytecode(_radHash);
     }
 
-    // function lookupRadonRequest(Witnet.RadonHash _radHash)
-    //     override external view
-    //     returns (IWitOracleRadonRegistryLegacy.RadonRequest memory)
-    // {
-    //     return IWitOracleRadonRegistryLegacy.RadonRequest({
-    //         retrieve:  lookupRadonRequestRetrievals(_radHash),
-    //         aggregate: lookupRadonRequestAggregator(_radHash),
-    //         tally:     lookupRadonRequestTally(_radHash)
-    //     });
-    // }
+    function lookupRadonRequest(Witnet.RadonHash _radHash)
+        override external view
+        returns (IWitOracleRadonRegistryLegacy.RadonRequest memory)
+    {
+        return IWitOracleRadonRegistryLegacy.RadonRequest({
+            retrieve:  lookupRadonRequestRetrievals(_radHash),
+            aggregate: lookupRadonRequestAggregator(_radHash),
+            tally:     lookupRadonRequestTally(_radHash)
+        });
+    }
 
-    // function lookupRadonRequestAggregator(Witnet.RadonHash _radHash)
-    //     override public view
-    //     radonRequestExists(_radHash)
-    //     returns (Witnet.RadonReducer memory)
-    // {
-    //     if (__requests(_radHash).legacyTallyHash != bytes32(0)) {
-    //         return lookupRadonReducer(__requests(_radHash).aggregateTallyHashes);
-    //     } else {
-    //         return lookupRadonReducer(bytes16(__requests(_radHash).aggregateTallyHashes));
-    //     }
-    // }
+    function lookupRadonRequestAggregator(Witnet.RadonHash _radHash)
+        override public view
+        radonRequestExists(_radHash)
+        returns (Witnet.RadonReducer memory)
+    {
+        if (__requests(_radHash).legacyTallyHash != bytes32(0)) {
+            return lookupRadonReducer(__requests(_radHash).aggregateTallyHashes);
+        } else {
+            return lookupRadonReducer(bytes16(__requests(_radHash).aggregateTallyHashes));
+        }
+    }
 
-    // function lookupRadonRequestResultMaxSize(bytes32 _radHash) 
-    //     override external view
-    //     radonRequestExists(Witnet.RadonHash.wrap(_radHash)) 
-    //     returns (uint16)
-    // {
-    //     return 32;
-    // }
+    function lookupRadonRequestResultMaxSize(bytes32 _radHash) 
+        override external view
+        radonRequestExists(Witnet.RadonHash.wrap(_radHash)) 
+        returns (uint16)
+    {
+        return 32;
+    }
 
-    // function lookupRadonRequestSources(bytes32 _radHash) 
-    //     override external view 
-    //     radonRequestExists(Witnet.RadonHash.wrap(_radHash))
-    //     returns (bytes32[] memory)
-    // {
-    //     return __requests(Witnet.RadonHash.wrap(_radHash)).retrievals;
-    // }
+    function lookupRadonRequestSources(bytes32 _radHash) 
+        override external view 
+        radonRequestExists(Witnet.RadonHash.wrap(_radHash))
+        returns (bytes32[] memory)
+    {
+        return __requests(Witnet.RadonHash.wrap(_radHash)).retrievals;
+    }
 
-    // function lookupRadonRequestSourcesCount(bytes32 _radHash)
-    //     override external view 
-    //     radonRequestExists(Witnet.RadonHash.wrap(_radHash))
-    //     returns (uint)
-    // {
-    //     return __requests(Witnet.RadonHash.wrap(_radHash)).retrievals.length;
-    // }
+    function lookupRadonRequestSourcesCount(bytes32 _radHash)
+        override external view 
+        radonRequestExists(Witnet.RadonHash.wrap(_radHash))
+        returns (uint)
+    {
+        return __requests(Witnet.RadonHash.wrap(_radHash)).retrievals.length;
+    }
 
     function verifyRadonRequest(
             bytes32[] calldata _retrieveHashes,
@@ -496,7 +496,7 @@ abstract contract WitOracleRadonRegistryBase
             uint16,
             string[][] calldata _retrieveArgsValues
         )
-        virtual public //override
+        virtual public override
         returns (bytes32)
     {
         return Witnet.RadonHash.unwrap(__verifyRadonRequest(
@@ -514,7 +514,7 @@ abstract contract WitOracleRadonRegistryBase
             bytes32 verifiedDataSourcesAggregator,
             bytes32 verifiedCrowdAttestationTally
         )
-        external //override
+        external override
         returns (Witnet.RadonHash)
     {
         return verifyRadonModalRequest(
@@ -526,17 +526,17 @@ abstract contract WitOracleRadonRegistryBase
         );
     }
 
-    // function lookupRadonRequestTally(Witnet.RadonHash _radHash)
-    //     override public view
-    //     radonRequestExists(_radHash)
-    //     returns (Witnet.RadonReducer memory)
-    // {
-    //     if (__requests(_radHash).legacyTallyHash != bytes32(0)) {
-    //         return lookupRadonReducer(__requests(_radHash).legacyTallyHash);
-    //     } else {
-    //         return lookupRadonReducer(bytes16(__requests(_radHash).aggregateTallyHashes << 128));
-    //     }
-    // }
+    function lookupRadonRequestTally(Witnet.RadonHash _radHash)
+        override public view
+        radonRequestExists(_radHash)
+        returns (Witnet.RadonReducer memory)
+    {
+        if (__requests(_radHash).legacyTallyHash != bytes32(0)) {
+            return lookupRadonReducer(__requests(_radHash).legacyTallyHash);
+        } else {
+            return lookupRadonReducer(bytes16(__requests(_radHash).aggregateTallyHashes << 128));
+        }
+    }
 
     function verifyRadonRetrieval(
             Witnet.RadonRetrievalMethods _requestMethod,
@@ -545,7 +545,7 @@ abstract contract WitOracleRadonRegistryBase
             string[2][] memory  _requestHeaders,
             bytes memory _requestRadonScript
         )
-        virtual public //override
+        virtual public override
         returns (bytes32 hash)
     {
         // validate data source params

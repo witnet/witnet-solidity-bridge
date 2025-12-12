@@ -381,7 +381,6 @@
         }
     },
     "metis:mainnet": {},
-    "metis:sepolia": {},
     "moonbeam:mainnet": {},
     "moonbeam:moonbase": {
         "libs": {
