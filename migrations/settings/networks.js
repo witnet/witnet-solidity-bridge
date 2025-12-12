@@ -148,8 +148,8 @@ export default {
 		symbol: "CFX",
 		verify: {
 			apiKey: "espace",
-			apiUrl: "https://evmapi-testnet.confluxscan.io/api",
-			explorerUrl: "https://evmtestnet.confluxscan.io",
+			apiUrl: "https://evmapi-testnet.confluxscan.net/api",
+			explorerUrl: "https://evmtestnet.confluxscan.org",
 		},
 	},
 	"conflux:espace:mainnet": {
@@ -282,12 +282,22 @@ export default {
 		port: 8527,
 		network_id: 1001,
 		symbol: "KAIA",
+		verify: {
+			apiKey: "MY_API_KEY",
+			apiUrl: "https://kairos.kaiascan.io/api",
+			explorerUrl: "https://kairos.kaiascan.io/",
+		},
 	},
 	"kaia:mainnet": {
 		mainnet: true,
 		port: 9527,
 		network_id: 8217,
 		symbol: "KAIA",
+		verify: {
+			apiKey: "MY_API_KEY",
+			apiUrl: "https://kaiascan.io/api",
+			explorerUrl: "https://kaiascan.io/",
+		},
 	},
 	"kava:testnet": {
 		port: 8526,
@@ -315,7 +325,7 @@ export default {
 		network_id: 322,
 		symbol: "KCS",
 		verify: {
-			apiUrl: "https://scan-testnet.kcc.network/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=322",
 			explorerUrl: "https://scan-testnet.kcc.network",
 		},
 	},
@@ -330,8 +340,8 @@ export default {
 		network_id: 5003,
 		symbol: "MNT",
 		verify: {
-			apiUrl: "https://api-sepolia.mantlescan.xyz/api",
-			explorerUrl: "https://sepolia.mantlescan.xyz",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=5003",
+			explorerUrl: "https://sepolia.mantlescan.xyz/",
 		},
 	},
 	"mantle:mainnet": {
@@ -565,6 +575,7 @@ export default {
 		symbol: "ULX",
 	},
 	"worldchain:mainnet": {
+		mainnet: true,
 		port: 9501,
 		network_id: 480,
 		verify: {

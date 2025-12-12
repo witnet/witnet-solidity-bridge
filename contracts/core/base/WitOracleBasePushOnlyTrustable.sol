@@ -32,7 +32,9 @@ abstract contract WitOracleBasePushOnlyTrustable
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     function __initializeUpgradableData(bytes memory _initData) virtual override internal {
-        WitOracleDataLib.setReporters(abi.decode(_initData, (address[])));
+        if (_initData.length > 0) {
+            WitOracleDataLib.setReporters(abi.decode(_initData, (address[])));
+        }
     }
 
     

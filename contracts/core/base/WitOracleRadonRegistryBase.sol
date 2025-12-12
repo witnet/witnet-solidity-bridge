@@ -435,7 +435,7 @@ abstract contract WitOracleRadonRegistryBase
     // --- IWitOracleRadonRegistryLegacy ------------------------------------------------------------------------------
 
     function bytecodeOf(Witnet.RadonHash _radHash)
-        external view override
+        external view //override
         radonRequestExists(_radHash)
         returns (bytes memory)
     {
@@ -496,7 +496,7 @@ abstract contract WitOracleRadonRegistryBase
             uint16,
             string[][] calldata _retrieveArgsValues
         )
-        virtual override public
+        virtual public override
         returns (bytes32)
     {
         return Witnet.RadonHash.unwrap(__verifyRadonRequest(
@@ -514,7 +514,7 @@ abstract contract WitOracleRadonRegistryBase
             bytes32 verifiedDataSourcesAggregator,
             bytes32 verifiedCrowdAttestationTally
         )
-        override external 
+        external override
         returns (Witnet.RadonHash)
     {
         return verifyRadonModalRequest(
@@ -545,7 +545,7 @@ abstract contract WitOracleRadonRegistryBase
             string[2][] memory  _requestHeaders,
             bytes memory _requestRadonScript
         )
-        virtual override public
+        virtual public override
         returns (bytes32 hash)
     {
         // validate data source params

@@ -9,12 +9,12 @@ import "../base/WitOracleBasePushOnlyTrustable.sol";
 /// @dev This contract enables posting requests that Witnet bridges will insert into the Witnet network.
 /// The result of the requests will be posted back to this contract by the bridge nodes too.
 /// @author The Witnet Foundation
-contract WitOracleTrustablePushOnly
+contract WitOraclePushOnlyTrustableDefault
     is 
         WitOracleBasePushOnlyTrustable
 {
     function class() virtual override public view returns (string memory) {
-        return type(WitOracleTrustablePushOnly).name;
+        return type(WitOraclePushOnlyTrustableDefault).name;
     }
 
     constructor(

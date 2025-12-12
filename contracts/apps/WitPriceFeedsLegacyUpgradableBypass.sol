@@ -83,28 +83,28 @@ contract WitPriceFeedsLegacyUpgradableBypass
 
     /// @notice Re-initialize contract's storage context upon a new upgrade from a proxy.
     function __initializeUpgradableData(bytes memory) virtual override internal {
-        uint _length = __legacy().ids.length;
-        for (uint _ix; _ix < _length; ++ _ix) {
-            // turn legacy captions 'Price-*' into 'Caption.*' ...
-            bytes4 _v2Id = __legacy().ids[_ix];
-            string memory _captionV2 = __legacy().records[_v2Id].caption;
-            Slices.Slice memory _slice = _captionV2.toSlice();
-            Slices.Slice memory _delim = string("-").toSlice();
-            string[] memory _parts = new string[](_slice.count(_delim) + 1);
-            for (uint _px = 0; _px < _parts.length; _px ++) {
-                _parts[_px] = _slice.split(_delim).toString();
-            }
-            string memory _captionV3 = "Crypto.";
-            for (uint _px = 1; _px < _parts.length; _px ++) {
-                _captionV3 = string(abi.encodePacked(
-                    _captionV3,
-                    _parts[_px]
-                ));
-            }
-            IWitPriceFeedsTypes.ID4 _v3Id = IWitPriceFeedsTypes.ID4.wrap(bytes4(keccak256(bytes(_captionV3))));
-            __bypass().v2Ids[_v3Id] = _v2Id;
-            __bypass().v3Ids[_v2Id] = _v3Id;
-        }
+        // uint _length = __legacy().ids.length;
+        // for (uint _ix; _ix < _length; ++ _ix) {
+        //     // turn legacy captions 'Price-*' into 'Caption.*' ...
+        //     bytes4 _v2Id = __legacy().ids[_ix];
+        //     string memory _captionV2 = __legacy().records[_v2Id].caption;
+        //     Slices.Slice memory _slice = _captionV2.toSlice();
+        //     Slices.Slice memory _delim = string("-").toSlice();
+        //     string[] memory _parts = new string[](_slice.count(_delim) + 1);
+        //     for (uint _px = 0; _px < _parts.length; _px ++) {
+        //         _parts[_px] = _slice.split(_delim).toString();
+        //     }
+        //     string memory _captionV3 = "Crypto.";
+        //     for (uint _px = 1; _px < _parts.length; _px ++) {
+        //         _captionV3 = string(abi.encodePacked(
+        //             _captionV3,
+        //             _parts[_px]
+        //         ));
+        //     }
+        //     IWitPriceFeedsTypes.ID4 _v3Id = IWitPriceFeedsTypes.ID4.wrap(bytes4(keccak256(bytes(_captionV3))));
+        //     __bypass().v2Ids[_v3Id] = _v2Id;
+        //     __bypass().v3Ids[_v2Id] = _v3Id;
+        // }
     }
 
     /// Tells whether provided address could eventually upgrade the contract.

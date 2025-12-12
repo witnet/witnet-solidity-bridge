@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 
 const create2 = require("./eth-create2.cjs");
-const utils = require("../src/utils.js").default;
+const utils = require("../migrations/scripts/utils.js").default;
 
 const addresses = require("../migrations/addresses.json");
 const constructorArgs = require("../migrations/constructorArgs.json");
