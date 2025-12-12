@@ -165,9 +165,11 @@
         "WitOracleRequestFactory": ""
     },
     "kcc:testnet": {
-        "WitOracle": "",
-        "WitOracleRadonRegistry": "",
-        "WitOracleRequestFactory": ""
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e302d333335623462382d643965623136370000000000000000000000\",true]}",
+        "WitOraclePushOnlyTrustableDefault": "{\"types\":[\"address\",\"bytes32\"],\"values\":[\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e312e302d333335623462382d323330653233630000000000000000000000\"]}",
+        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x0A1E203C0b4f93c55B056751243C200905e19d86\",\"0x0b55C2Ee9e7A91590479b7a7d77F36EC04258D1b\",\"0x332e312e302d333335623462382d626364386536650000000000000000000000\",true]}",
+        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e312e302d333335623462382d343563336362300000000000000000000000\",true]}",
+        "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x3210564CFC8855cAD45D6d963118058fe2B80123\",\"0x332e312e302d333335623462382d623934663730360000000000000000000000\",true]}"
     },
     "mantle:mainnet": {
         "WitOracle": "",

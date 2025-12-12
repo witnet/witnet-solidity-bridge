@@ -325,7 +325,7 @@ export default {
 		network_id: 322,
 		symbol: "KCS",
 		verify: {
-			apiUrl: "https://scan-testnet.kcc.network/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=322",
 			explorerUrl: "https://scan-testnet.kcc.network",
 		},
 	},
