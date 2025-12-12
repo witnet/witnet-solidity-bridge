@@ -514,7 +514,6 @@
         }
     },
     "ultron:mainnet": {},
-    "ultron:testnet": {},
     "unichain:sepolia": {
         "libs": {
             "WitOracleDataLib": "0xA1276094aB5450Cd14bC5a7ed7901Ff2020d0740",
