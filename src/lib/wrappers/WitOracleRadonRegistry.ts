@@ -24,8 +24,8 @@ export class WitOracleRadonRegistry extends WitArtifact {
 	 */
 	public async determineRadonRetrievalHash(retrieval: Witnet.Radon.RadonRetrieval): Promise<string> {
 		return this.contract
-			.getFunction("verifyRadonRetrieval(uint8,string,string,string[2][],bytes)")
-			.staticCall(...abiEncodeRadonAsset(retrieval))
+			.getFunction("verifyDataSource((string,(uint8,string,string[2][],bytes)))")
+			.staticCall(abiEncodeRadonAsset(retrieval))
 			.then((hash) => {
 				return hash.slice(2);
 			});
@@ -176,8 +176,8 @@ export class WitOracleRadonRegistry extends WitArtifact {
 					options.onVerifyRadonRetrieval(hash);
 				}
 				await this.contract
-					.getFunction("verifyRadonRetrieval(uint8,string,string,string[2][],bytes)")
-					.send(...abiEncodeRadonAsset(retrieval))
+					.getFunction("verifyDataSource((string,(uint8,string,string[2][],bytes)))")
+					.send(abiEncodeRadonAsset(retrieval))
 					.then(async (tx) => {
 						const receipt = await tx.wait(options?.confirmations || 1);
 						if (options?.onVerifyRadonRetrievalReceipt) {

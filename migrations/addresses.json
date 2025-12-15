@@ -101,7 +101,9 @@
     },
     "celo:sepolia": {
         "apps": {
-            "WitPriceFeedsV3Upgradable": "0xbe09ec438d6b167b8fe810045c332B90ceFABB02"
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsV3Upgradable": "0xbe09ec438d6b167b8fe810045c332B90ceFABB02",
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         },
         "core": {
             "WitOracleRadonRegistryUpgradableDefault": "0xfC4EE2769EEA75aA57d7A16CD4FEE2209D8d96cc",

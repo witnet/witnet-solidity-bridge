@@ -303,11 +303,12 @@ export function abiEncodeWitOracleQueryParams(queryParams: WitOracleQueryParams)
 export function abiEncodeRadonAsset(asset: any): any {
 	if (asset instanceof Witnet.Radon.RadonRetrieval) {
 		return [
-			asset.method,
-			asset.url || "",
-			asset.body || "",
-			asset?.headers ? Object.entries(asset.headers) : [],
-			abiEncodeRadonAsset(asset.script) || "0x80",
+			asset.url || "", [
+				asset.method,
+				asset.body || "",
+				asset?.headers ? Object.entries(asset.headers) : [],
+				abiEncodeRadonAsset(asset.script) || "0x80",
+			]
 		];
 	} else if (asset instanceof Witnet.Radon.types.RadonScript) {
 		return asset.toBytecode();
