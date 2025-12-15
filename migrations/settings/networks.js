@@ -7,7 +7,7 @@ export default {
 		network_id: 421614,
 		port: 8517,
 		verify: {
-			apiUrl: "https://api-sepolia.arbiscan.io/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainId=421614",
 			explorerUrl: "https://sepolia.arbiscan.io",
 		},
 	},
