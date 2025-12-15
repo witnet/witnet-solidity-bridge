@@ -274,7 +274,7 @@ export default {
 		symbol: "xDAI",
 		verify: {
 			apiKey: "MY_API_KEY",
-			apiUrl: "https://gnosis-chiado.blockscout.com/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainId=10200",
 			explorerUrl: "https://gnosis-chiado.blockscout.com",
 		},
 	},
