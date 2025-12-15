@@ -77,11 +77,6 @@ export default {
 		WitnetDeployer: "WitnetDeployerDeferred",
 		core: { WitOracle: "WitOracleTrustableReef" },
 	},
-	scroll: {
-		core: {
-			WitOracleRadonRegistry: "WitOracleRadonRegistryUpgradableNoSha256",
-		},
-	},
 	"syscoin:rollux": {
 		core: { WitOracle: "WitOracleTrustableOvm2" },
 	},
