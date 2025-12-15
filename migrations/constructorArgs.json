@@ -57,10 +57,10 @@
         "WitRandomnessV2": "00000000000000000000000077703ae126b971c9946d562f41dd47071da00777000000000000000000000000f121b71715e71dded592f1125a06d4ed06f0694d"
     },
     "celo:sepolia": {
-        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e302e342d346364356138302d666333346161340000000000000000000000\",true]}",
-        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e302e342d346364356138302d653936346435300000000000000000000000\"]}",
-        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xffC4147d7b973B1766FB335bC847C7288c4365ff\",\"0xFF5ad05D038fcc04354B2fca1fb657eA345594FF\",\"0x332e302e342d346364356138302d326665396137610000000000000000000000\",true]}",
-        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e302e342d346364356138302d636334623861340000000000000000000000\",true]}"
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e302d653632616365612d653032373661630000000000000000000000\",true]}",
+        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e312e302d653632616365612d373633343632650000000000000000000000\"]}",
+        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xff0c2aAB49afE9358D6364C8d7b1Aa21853808ff\",\"0xFF507f5c0B1732C64688fc2921636e794041eaFF\",\"0x332e312e302d653632616365612d633330346565610000000000000000000000\",true]}",
+        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e312e302d653632616365612d353666326338330000000000000000000000\",true]}"
     },
     "celo:mainnet": {
         "WitOracle": "",

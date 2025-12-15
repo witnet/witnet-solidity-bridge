@@ -101,18 +101,18 @@
     },
     "celo:sepolia": {
         "apps": {
-            "WitPriceFeedsV3Upgradable": "0x94b2237BFbc1c0C3cE60E03fBdaF9e23D0dCB441"
+            "WitPriceFeedsV3Upgradable": "0xbe09ec438d6b167b8fe810045c332B90ceFABB02"
         },
         "core": {
-            "WitOracleRadonRegistryUpgradableDefault": "0x5c6c6eE04B7E9b0a66cB0a7CCE3eDB19a05CD853",
-            "WitOracleRadonRequestFactoryUpgradableDefault": "0xD8D786D81a0E8Ca10BdF038E16eFd1bCCd701fE5",
-            "WitOracleTrustableDefault": "0x2027FfcFEE67800AB154B8827A10FEd0a978bBe2"
+            "WitOracleRadonRegistryUpgradableDefault": "0xfC4EE2769EEA75aA57d7A16CD4FEE2209D8d96cc",
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0x65BeEC227B5f0ed4A05a9dDcFDe46aA0f74C9755",
+            "WitOracleTrustableDefault": "0x4D5Da06d30d25A954B22C33EE7e45189f9D48e38"
         },
         "libs": {
             "WitOracleDataLib": "0xA8f0487eaf3640e30F472b815A45a7d4e96f18CB",
-            "WitOracleRadonEncodingLib": "0xB5447342cA17A40e59d410b340ba412E22e36201",
+            "WitOracleRadonEncodingLib": "0xA1276094aB5450Cd14bC5a7ed7901Ff2020d0740",
             "WitOracleResultStatusLib": "0x50AA08187D2F648Dd428784AF6489c3F12e942CC",
-            "WitPriceFeedsDataLib": "0x8D20457d968c937b7cb65be6B8cC766613fBcF28",
+            "WitPriceFeedsDataLib": "0x8fbBf7445E8bC8d7400107613d59163476d1f2e2",
             "WitPriceFeedsLegacyDataLib": "0xB772f86004330738C1529cC1b0327D24aeF8c370"
         }
     },
