@@ -171,7 +171,7 @@ export default {
 		symbol: "CRO",
 		verify: {
 			apiKey: process.env.ETHERSCAN_CRONOS_API_KEY,
-			apiUrl: "https://explorer-api.cronos.org/testnet/api/v1/hardhat/contract?apikey=G99km4eqHKfvEgpk6Lscsg3Y15QVLQLK",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=338",
 			explorerUrl: "https://explorer.cronos.org/testnet",
 		},
 	},
