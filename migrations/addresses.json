@@ -564,19 +564,21 @@
     "ten:testnet": {
         "libs": {
             "WitOracleDataLib": "0x620e20d91C9b0e11ecAE439E7b85138DA2a1003F",
-            "WitOracleRadonEncodingLib": "0xB5447342cA17A40e59d410b340ba412E22e36201",
+            "WitOracleRadonEncodingLib": "0xA1276094aB5450Cd14bC5a7ed7901Ff2020d0740",
             "WitOracleResultStatusLib": "0x6bF6F65Ad0859e9Ee869DAD252a29c9daAa27449",
-            "WitPriceFeedsDataLib": "0xB4f1f8E27799256ec95C5b5A8d2A5722Bd542E69",
+            "WitPriceFeedsDataLib": "0x8fbBf7445E8bC8d7400107613d59163476d1f2e2",
             "WitPriceFeedsLegacyDataLib": "0xdC101573cB42EB7006Ad6C7E08ce8C91fEAcB62C"
         },
         "apps": {
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
             "WitPriceFeedsLegacyUpgradable": "0x34dC777fE9f0128d252349F8130ad48257082eEC",
-            "WitPriceFeedsV3Upgradable": "0x03577823cFD3dAb66F2ebfCA859C8F7d13fD4C94"
+            "WitPriceFeedsV3Upgradable": "0xbe09ec438d6b167b8fe810045c332B90ceFABB02",
+            "WitRandomnessV3": "0x0000000000000000000000000000000000000000"
         },
         "core": {
-            "WitOracleRadonRegistryUpgradableDefault": "0xA3996b86449c3b36b4Cc94Faa2885b4FeDe915B1",
-            "WitOracleTrustableObscuro": "0x0F27730943ab0D48D6E42Dc4D7733F67932c4584",
-            "WitOracleRadonRequestFactoryUpgradableDefault": "0xAef96881Bc0c8b9bc6418D20422DA2D31bF4f831"
+            "WitOracleRadonRegistryUpgradableDefault": "0xfC4EE2769EEA75aA57d7A16CD4FEE2209D8d96cc",
+            "WitOracleTrustableObscuro": "0xD1cf3c6Bf4De8e0806cd476E4BcD8824271F5B85",
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0x65BeEC227B5f0ed4A05a9dDcFDe46aA0f74C9755"
         }
     },
     "ultron:mainnet": {},

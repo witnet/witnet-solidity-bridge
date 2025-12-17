@@ -81,7 +81,6 @@ export default {
 		core: { WitOracle: "WitOracleTrustableOvm2" },
 	},
 	ten: {
-		WitnetDeployer: "WitnetDeployerDeferred",
 		core: { WitOracle: "WitOracleTrustableObscuro" },
 	},
 	"unichain:sepolia": {
