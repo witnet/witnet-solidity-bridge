@@ -1,6 +1,6 @@
 {
 	"name": "@witnet/solidity",
-	"version": "3.1.1",
+	"version": "3.1.2",
 	"description": "Wit/Oracle Solidity Framework for EVM-compatible chains",
 	"author": "Witnet Foundation <info@witnet.foundation>",
 	"license": "MIT",
