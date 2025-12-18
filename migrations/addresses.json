@@ -276,7 +276,7 @@
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x31A5A5e3d3E1C9a89a8d4322D040F1d1e94cbf53",
             "WitPriceFeedsV3Upgradable": "0xFec4De957851537b29Ca13afdd4911429dcFC548",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }

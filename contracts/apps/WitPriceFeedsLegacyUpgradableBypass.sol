@@ -155,7 +155,10 @@ contract WitPriceFeedsLegacyUpgradableBypass
             IWitPriceFeedsTypes.ID4 _v3Id = IWitPriceFeedsTypes.ID4.wrap(bytes4((IWitPyth.ID.unwrap(_pfs[_ix].id))));
             _ids[_ix] = (__bypass().v2Ids[_v3Id] == bytes4(0) ? IWitPriceFeedsTypes.ID4.unwrap(_v3Id) : __bypass().v2Ids[_v3Id]);
             _captions[_ix] = _pfs[_ix].symbol;
-            if (_pfs[_ix].mapper.class == IWitPriceFeedsTypes.Mappers.None) {
+            if (
+                _pfs[_ix].oracle.class == IWitPriceFeedsTypes.Oracles.Witnet
+                    && _pfs[_ix].oracle.target != address(0)
+            ) {
                 _solvers[_ix] = (_pfs[_ix].oracle.sources != bytes32(0)
                     ? _pfs[_ix].oracle.sources
                     : bytes32(bytes20(_pfs[_ix].oracle.target))
