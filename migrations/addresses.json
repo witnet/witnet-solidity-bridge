@@ -347,10 +347,22 @@
     },
     "kava:testnet": {
         "libs": {
-            "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
-            "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
-            "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676",
-            "WitnetPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837"
+            "WitOracleDataLib": "0xA1276094aB5450Cd14bC5a7ed7901Ff2020d0740",
+            "WitOracleRadonEncodingLib": "0x8fbBf7445E8bC8d7400107613d59163476d1f2e2",
+            "WitOracleResultStatusLib": "0x59526A531c29c6DEb7C008e45A111e2cEd7BE815",
+            "WitPriceFeedsDataLib": "0x1c19cc594887B3423f24601cA618Fe545eCD1D95",
+            "WitPriceFeedsLegacyDataLib": "0xca7e9D37088e5438AE4C221f3639F480681f5A14"
+        },
+        "core": {
+            "WitOracleRadonRegistryUpgradableDefault": "0xFcc653fc88C668Cc7DD461a6Af90E5b7Fe4aA4F5",
+            "WitOracleTrustableDefault": "0xF88590C2d307d875f99bD70796241F937A956fae",
+            "WitOracleRadonRequestFactoryModalsDefault": "0x0A1E203C0b4f93c55B056751243C200905e19d86",
+            "WitOracleRadonRequestFactoryTemplatesDefault": "0x0b55C2Ee9e7A91590479b7a7d77F36EC04258D1b"
+        },
+        "apps": {
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x7413F466d4675DeFD9FFaEAA0F5D18f792960926",
+            "WitRandomnessV3": "0xf84E418E50378fD965F2C763f3FD16C45cFF8825"
         }
     },
     "kcc:mainnet": {
