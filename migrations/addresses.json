@@ -39,7 +39,7 @@
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xbe09ec438d6b167b8fe810045c332B90ceFABB02",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
@@ -52,7 +52,7 @@
     "avalanche:testnet": {
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xA546e2055C1cCAAA40129e454a1a207F6aA30cA2",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         },
@@ -89,7 +89,7 @@
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x1df3e3F2505464d3d2b22A2fB693D0a4d1d04ba3",
             "WitPriceFeedsV3Upgradable": "0xA546e2055C1cCAAA40129e454a1a207F6aA30cA",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
@@ -101,8 +101,9 @@
     },
     "celo:sepolia": {
         "apps": {
-            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
             "WitPriceFeedsV3Upgradable": "0xbe09ec438d6b167b8fe810045c332B90ceFABB02",
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         },
         "core": {
@@ -212,12 +213,11 @@
         },
         "core": {
             "WitOracleRadonRegistryUpgradableDefault": "0xBe4661066fa7E11760a780f1D16E6D8C9a01cd7E",
-            "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000",
             "WitOracleTrustableDefault": "0x5C86219300cD8452909727084B15A97e9499d43B"
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xA546e2055C1cCAAA40129e454a1a207F6aA30cA2",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
@@ -275,9 +275,10 @@
             "WitOracleRadonRequestFactoryUpgradableDefault": "0x24Ee1fA03Dd9De4ee4455F179D5DF0fE40C0c16C"
         },
         "apps": {
-            "WitPriceFeedsLegacyUpgradable": "0xb8776103adBfe48366E4B632d9b8cb322E3D524F",
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xFec4De957851537b29Ca13afdd4911429dcFC548",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f"
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
     "gnosis:mainnet": {
@@ -303,7 +304,7 @@
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xA546e2055C1cCAAA40129e454a1a207F6aA30cA2",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
@@ -331,8 +332,8 @@
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xA546e2055C1cCAAA40129e454a1a207F6aA30cA2",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
@@ -399,7 +400,6 @@
             "WitPriceFeedsLegacyDataLib": "0x546338E647E6F578cbD8E80Ad19E9808CDb9DCf1"
         },
         "core": {
-            "WitOracleRadonRequestFactory": "0x000FF9f888B1415Da64cc985f775380a94b40000",
             "WitOracleRadonRegistryUpgradableDefault": "0x1cc3fdA3506Ec18E0bF45D38ce2FfEaf8de109c7",
             "WitOraclePushOnlyTrustableDefault": "0xC7Fd2dAebb9fFfA3f97AFF974CF25bC29562264c"
         },
@@ -482,9 +482,8 @@
     "optimism:sepolia": {
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradable": "0x23b3BABb466E25C3AB9611cAe59c511B80c6FEC1",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xA546e2055C1cCAAA40129e454a1a207F6aA30cA2",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         },
         "core": {
@@ -515,7 +514,7 @@
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xA546e2055C1cCAAA40129e454a1a207F6aA30cA2",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
@@ -556,7 +555,7 @@
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xFd4B0a4D24b37E5620c932D1C9E6E2c2BDd0DA9f",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xAE4A5BAd075e855BbF3CE4Ae05254d0B85C7926F",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
@@ -570,7 +569,6 @@
             "WitPriceFeedsLegacyDataLib": "0xdC101573cB42EB7006Ad6C7E08ce8C91fEAcB62C"
         },
         "apps": {
-            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
             "WitPriceFeedsLegacyUpgradable": "0x34dC777fE9f0128d252349F8130ad48257082eEC",
             "WitPriceFeedsV3Upgradable": "0xbe09ec438d6b167b8fe810045c332B90ceFABB02",
             "WitRandomnessV3": "0x0000000000000000000000000000000000000000"
@@ -591,14 +589,14 @@
             "WitPriceFeedsDataLib": "0xca7e9D37088e5438AE4C221f3639F480681f5A14"
         },
         "core": {
-            "WitOracleRadonRegistryUpgradableDefault": "0xB56171A1292C51529EC5874D35D56248fEd0F105",
+            "WitOracleRadonRegistryUpgradableDefault": "0x3c23909468b1eB08E99Fd769A8bBfa5840162eEd",
             "WitOraclePushOnlyTrustableDefault": "0xbFE72d114611CE7Fc6506F20c7D14C5C6f5077C8",
             "WitOracleRadonRequestFactoryUpgradableDefault": "0xC2177392ccA460F476d5156368B05c345787aafa"
         },
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
             "WitPriceFeedsV3Upgradable": "0x8Eeb8fD944161f8efF45cdD01222F348258caA2a",
-            "WitPriceFeedsLegacyUpgradableBypass": "0xF9f86FEC2d6Bc2407221F5628F38867e20E74088",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
@@ -606,7 +604,7 @@
     "worldchain:sepolia": {
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
-            "WitPriceFeedsLegacyUpgradable": "0xE7A932b4D8f62d9e11e785062F0bfEcad54F8480",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitPriceFeedsV3Upgradable": "0xA546e2055C1cCAAA40129e454a1a207F6aA30cA2",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         },
