@@ -64,7 +64,7 @@ module.exports = async (options = {}, args = []) => {
 						const bytecode = await registry.lookupRadonRequestBytecode(pf.oracle.sources);
 						const request = Witnet.Radon.RadonRequest.fromBytecode(bytecode);
 						try {
-							const dryrun = JSON.parse(await request.execDryRun(true));
+							const dryrun = JSON.parse(await request.execDryRun({ verbose: true }));
 							// const result = dryrun.tally.result
 							providers = request.sources
 								.map((source, index) => {
