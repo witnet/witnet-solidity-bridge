@@ -266,8 +266,8 @@ export default {
 		network_id: 100,
 		symbol: "DAI",
 		verify: {
-			apiUrl: "https://api.gnosisscan.io/api",
-			explorerUrl: "https://gnosisscan.io",
+			apiUrl: "https://api.etherscan.io/v2/api?chainId=100",
+			explorerUrl: "https://gnosis-chiado.blockscout.com",
 		},
 	},
 	"gnosis:testnet": {
