@@ -240,23 +240,20 @@
     },
     "ethereum:mainnet": {
         "libs": {
-            "WitOracleDataLib": "0x240C2aF76DDeD5D5cff893178d9d8bfa97b90E5F",
-            "WitOracleRadonEncodingLib": "0x5A13430A283701BE24cE7E1712B38F31d4B9ac58",
-            "WitOracleResultErrorsLib": "0x3b7AD1402C243Ba59D45a0364B17A31e260A4301",
-            "WitPriceFeedsLib": "0x751F77190Ce6212899D5848334838D56CF7eEe91",
-            "WitOracleResultStatusLib": "0xD038E50cD189BF94CC0393C19606688A38D63D77",
-            "WitPriceFeedsDataLib": "0x98B7D3282aa217148afC94Dfb8a6D0Ad1A91FBA7",
-            "WitPriceFeedsLegacyDataLib": "0xdC674D637f5DbF2D043c8BCeb2CbB9B61A1Bba8a"
+            "WitOracleDataLib": "0x97dA7a61C59cfbf55Eb13672479561D27D79181c",
+            "WitOracleRadonEncodingLib": "0x53329F6323F419c8CDFb58a98fbC3b97250Dc701",
+            "WitOracleResultStatusLib": "0xAcacc63110dBA2aAEb57B64Cd6854C79A6b8c262",
+            "WitPriceFeedsDataLib": "0x33d1b1F152363471d1807Aa7b7353abb70bEB024",
+            "WitPriceFeedsLegacyDataLib": "0xFFfDe7C9ddFD9d10a40BE1690b38E8bc890bCA84"
         },
         "core": {
-            "WitOracleRadonRequestFactoryModalsDefault": "0xD28237c5d7C8C386377A13e6661642294657F35e",
-            "WitOracleRadonRequestFactoryTemplatesDefault": "0x300c8ccc9526495BB7e5911105f0663Cb4c3a137",
-            "WitOracleRadonRegistryUpgradableDefault": "0xFFC8dA05ae9D063BD0AC613ea56f5fd706c70312",
-            "WitOracleTrustableDefault": "0xF5A1CB626096aB91BE148140c2921B8e0F72e845",
-            "WitOracleRadonRequestFactoryUpgradableDefault": "0xFf8c37Aa98736341bf392e867214661f4fdd0f02"
+            "WitOracleRadonRegistryUpgradableDefault": "0xe87632D1a7D9fD5D6208403438E3A209d607eD17",
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0x5E2871Eb95Ff366FcF9296Ed50494D7f0bd51d08",
+            "WitOracleTrustableDefault": "0x45b2fC279f17037C231DDf139802E6fBc5374825"
         },
         "apps": {
-            "WitPriceFeedsLegacyUpgradable": "0xF28Aaa3333559f7504b08c72e9511e032F6d7B3F"
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0909dB86d0f001a8704BB857f37FF7B982136d77",
+            "WitPriceFeedsV3Upgradable": "0x122B6FDe1dbC4E936042cdd7d582D25d6829A5d5"
         }
     },
     "ethereum:sepolia": {
