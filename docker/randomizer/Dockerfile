@@ -1,9 +1,11 @@
-FROM node:24-bookworm AS base
+FROM ubuntu:noble AS base
 
-RUN apt update && apt upgrade -y
-RUN apt install build-essential;
-RUN npm install -g pnpm
-RUN npm install -g node-gyp
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y curl ca-certificates gnupg build-essential python3 && \
+    curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN npm install -g pnpm node-gyp
 
 WORKDIR /app
 COPY . /app
