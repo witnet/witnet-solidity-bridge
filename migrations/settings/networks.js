@@ -179,11 +179,13 @@ export default {
 		mainnet: true,
 		port: 9530,
 		network_id: 25,
-		confirmations: 2,
+		confirmations: 4,
+		// gas: 2500000,
 		symbol: "CRO",
 		verify: {
-			apiUrl: "https://api.cronoscan.com/api",
-			explorerUrl: "https://cronoscan.com",
+			apiKey: process.env.ETHERSCAN_CRONOS_API_KEY,
+			apiUrl: "https://api-explorer.cronos.org/mainnet/api/v2",
+			explorerUrl: "https://explorer.cronos.org",
 		},
 	},
 	"cube:testnet": {
