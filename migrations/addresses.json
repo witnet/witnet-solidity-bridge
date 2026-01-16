@@ -370,7 +370,7 @@
         "core": {
             "WitOracleRadonRegistryUpgradableDefault": "0x83E444AB916cAF1cF0188805388d7e6ffa7df01e",
             "WitOracleRadonRequestFactoryUpgradableDefault": "0xc8a58C28EEa2a4CdE351Ca61737e4A022eC6b1B2",
-            "WitOracleTrustableDefault": "0x86731FF024B5be7Ed6de304F20EEd7EA77f44E0d"            
+            "WitOracleTrustableDefault": "0x86731FF024B5be7Ed6de304F20EEd7EA77f44E0d"
         },
         "apps": {
             "WitPriceFeedsLegacyUpgradableBypass": "0x0909dB86d0f001a8704BB857f37FF7B982136d77",
@@ -399,10 +399,24 @@
     },
     "kava:mainnet": {
         "libs": {
-            "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
-            "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
-            "WitnetPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837",
-            "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676"
+            "WitOracleDataLib": "0x33d1b1F152363471d1807Aa7b7353abb70bEB024",
+            "WitOracleRadonEncodingLib": "0xFFfDe7C9ddFD9d10a40BE1690b38E8bc890bCA84",
+            "WitOracleResultStatusLib": "0x053C355588d705E70192D1ACE1c72a1623D8F991",
+            "WitPriceFeedsDataLib": "0x10f8bbFf93dDEd5d8CD91b8D987dcB6a201a7c2B",
+            "WitPriceFeedsLegacyDataLib": "0x0CabD5A18d7fd9FC2c764fB7664477b65E6590f1"
+        },
+        "core": {
+            "WitOracleRadonRegistryUpgradableDefault": "0x605AB35DFba5bAC1f7DD1E993D4C054Cabcbce2c",
+            "WitOracleRadonRequestFactoryModalsDefault": "0xa1222e75CCa8537faFaDd640A3C7B2B6CBd08181",
+            "WitOracleRadonRequestFactoryTemplatesDefault": "0xeD7C334EdecF964A0f65B849800eCB4582208708",
+            "WitOracleTrustableDefault": "0xc8837Cef5E7D6F92a1C91ABf0f0437346f100DE0"
+        },
+        "apps": {
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x970905Cd2cD5511FbFBE5f33dD835060376a71d2",
+            "WitPriceFeedsV3Upgradable": "0x67Ea60Ef14CeDaa327DC22ab1cFfD0827CDBB43d",
+            "WitRandonessV2": "0x0000000000000000000000000000000000000000",
+            "WitRandomnessV3": "0xB6cE20Ae908A3aB3ED2E64F41a2C749577418C90"
         }
     },
     "kava:testnet": {

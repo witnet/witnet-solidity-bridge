@@ -316,7 +316,7 @@ export default {
 		port: 9526,
 		network_id: 2222,
 		symbol: "KAVA",
-		gas: 5000000,
+		gas: 10000000,
 		verify: {
 			apiKey: "MY_API_KEY",
 			apiUrl: "https://explorer.kavalabs.io/api",

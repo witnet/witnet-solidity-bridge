@@ -171,11 +171,12 @@
         "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x3210564CFC8855cAD45D6d963118058fe2B80123\",\"0x332e312e322d666563343265322d303339663264310000000000000000000000\",true]}"
     },
     "kava:mainnet": {
-        "WitOracle": "",
-        "WitOracleRadonRegistry": "",
-        "WitOracleRequestFactory": "",
-        "WitPriceFeeds": "",
-        "WitRandomnessV2": "00000000000000000000000077703ae126b971c9946d562f41dd47071da00777000000000000000000000000f121b71715e71dded592f1125a06d4ed06f0694d"
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e332d663333623335652d616261396162610000000000000000000000\",true]}",
+        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e312e332d663333623335652d376665656136360000000000000000000000\"]}",
+        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xa1222e75CCa8537faFaDd640A3C7B2B6CBd08181\",\"0xeD7C334EdecF964A0f65B849800eCB4582208708\",\"0x332e312e332d663333623335652d633836343830310000000000000000000000\",true]}",
+        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e312e332d663333623335652d373863623239310000000000000000000000\",true]}",
+        "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x3210564CFC8855cAD45D6d963118058fe2B80123\",\"0x332e312e332d663333623335652d643831653338310000000000000000000000\",true]}",
+        "WitRandomnessV3": "{\"types\":[\"address\",\"address\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x8E5E6Bf002F87c9Fe15BbABF3115dEd5cadA37e1\"]}"
     },
     "kava:testnet": {
         "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e322d666563343265322d643965623136370000000000000000000000\",true]}",
