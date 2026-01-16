@@ -389,8 +389,8 @@ export default {
 		network_id: 1284,
 		symbol: "GLMR",
 		verify: {
-			apiUrl: "https://api-moonbeam.moonscan.io/api",
-			explorerUrl: "https://moonscan.io",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=1284",
+			explorerUrl: "https://moonriver.moonscan.io",
 		},
 	},
 	"moonbeam:moonriver": {

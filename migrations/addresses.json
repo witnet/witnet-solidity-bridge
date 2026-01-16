@@ -492,8 +492,26 @@
             "WitPriceFeedsLib": "0xBD9Ec958409eC6FbaF4d833F7Ea4e3892A406c98"
         }
     },
-    "metis:mainnet": {},
-    "moonbeam:mainnet": {},
+    "moonbeam:mainnet": {
+        "libs": {
+            "WitOracleDataLib": "0x994E7639339bCD37C66eF983Bf235f11bD622b4E",
+            "WitOracleRadonEncodingLib": "0x275098A755cda6C8130c8b26BAaec9ed18a8ac64",
+            "WitOracleResultStatusLib": "0x5F8704825A79b1FBc25A02754e0877F29974F4D8",
+            "WitPriceFeedsDataLib": "0x45948c4B3fB997cE6A1b0DcFB783079e1B19e743",
+            "WitPriceFeedsLegacyDataLib": "0x97dA7a61C59cfbf55Eb13672479561D27D79181c"
+        },
+        "core": {
+            "WitOracleRadonRegistryUpgradableDefault": "0x83E444AB916cAF1cF0188805388d7e6ffa7df01e",
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0xc8a58C28EEa2a4CdE351Ca61737e4A022eC6b1B2",
+            "WitOracleTrustableDefault": "0x86731FF024B5be7Ed6de304F20EEd7EA77f44E0d"
+        },
+        "apps": {
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsV3Upgradable": "0x2e56E8AdB70978483044950a3C5A79D570F15985",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0909dB86d0f001a8704BB857f37FF7B982136d77",
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
+        }
+    },
     "moonbeam:moonbase": {
         "libs": {
             "WitOracleDataLib": "0x1c19cc594887B3423f24601cA618Fe545eCD1D95",
