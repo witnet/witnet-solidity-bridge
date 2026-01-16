@@ -1,12 +1,7 @@
 const settings = require("./migrations/settings/index").default
 const utils = require("./migrations/scripts/utils.js").default
 
-const { ecosystem, network } = utils.getRealmNetworkFromArgs()
-if (ecosystem) {
-	const header = console.info(`${ecosystem.toUpperCase()}`)
-	console.info(header)
-	console.info("=".repeat(header.length))
-}
+const [, network ] = utils.getRealmNetworkFromArgs()
 
 module.exports = {
 	build_directory: "./build/",

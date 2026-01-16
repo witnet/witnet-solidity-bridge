@@ -223,13 +223,13 @@ library WitPriceFeedsDataLib {
         
         require(
             !_lastUpdate.timestamp.isZero(), 
-            IWitPythErrors.PriceFeedNotFound()
+            "unknown price feed" //IWitPythErrors.PriceFeedNotFound()
         );
         
         require(
             _conditions.heartbeatSecs == 0
                 || block.timestamp <= Witnet.Timestamp.unwrap(_lastUpdate.timestamp) + _conditions.heartbeatSecs,
-            IWitPythErrors.StalePrice()
+            "stale price" //IWitPythErrors.StalePrice()
         );
 
         return IWitPriceFeedsTypes.Price({
@@ -250,12 +250,12 @@ library WitPriceFeedsDataLib {
 
         require(
             !_lastUpdate.timestamp.isZero(), 
-            IWitPythErrors.PriceFeedNotFound()
+            "unknown price feed" //IWitPythErrors.PriceFeedNotFound()
         );
 
         require(
             block.timestamp <= Witnet.Timestamp.unwrap(_lastUpdate.timestamp) + age,
-            IWitPythErrors.StalePrice()
+            "stale price" //IWitPythErrors.StalePrice()
         );
 
         return IWitPriceFeedsTypes.Price({

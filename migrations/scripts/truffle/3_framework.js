@@ -326,7 +326,9 @@ async function traceDeployedContractInfo(contract, from, targetVersion) {
 	try {
 		console.info("  ", "> contract curator:  \x1b[35m", await contract.owner.call({ from }), "\x1b[0m");
 	} catch {}
-	console.info("  ", "> contract class:    \x1b[1;39m", await contract.class.call({ from }), "\x1b[0m");
+	try {
+		console.info("  ", "> contract class:    \x1b[1;39m", await contract.class.call({ from }), "\x1b[0m");
+	} catch {}
 	try {
 		const deployedVersion = await contract.version.call({ from });
 		// if (versionTagOf(deployedVersion) !== versionTagOf(getArtifactVersion(impl))) {
