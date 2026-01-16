@@ -297,8 +297,8 @@ export default {
 		symbol: "KAIA",
 		verify: {
 			apiKey: "MY_API_KEY",
-			apiUrl: "https://kaiascan.io/api",
-			explorerUrl: "https://kaiascan.io/",
+			apiUrl: "https://mainnet-api.kaiascan.io/hardhat-verify",
+			explorerUrl: "https://kaiascan.io",
 		},
 	},
 	"kava:testnet": {
