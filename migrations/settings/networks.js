@@ -525,8 +525,8 @@ export default {
 		port: 9514,
 		network_id: 534352,
 		verify: {
-			apiUrl: "https://api.scrollscan.com/api",
-			explorerUrl: "https://scrollscan.com",
+			apiUrl: "https://api.etherscan.io/v2/api?chainId=534352",
+			explorerUrl: "https://sepolia.scrollscan.com",
 		},
 	},
 	"syscoin:testnet": {
