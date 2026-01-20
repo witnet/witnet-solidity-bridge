@@ -261,14 +261,6 @@
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
-    "dogechain:mainnet": {
-        "libs": {
-            "WitnetErrorsLib": "0xa57B9dd8420631248c3DFB535f4FC9f7E2f02B4B",
-            "WitnetEncodingLib": "0x268631E002eE8c23F4C124AfBb6fE5DBbaa6d58c",
-            "WitnetPriceFeedsLib": "0x579b4aD5E67E5B491a33A033A02A70769D7AF837",
-            "WitnetOracleDataLib": "0x561A6c8F9C9D6e7EbAEcd4963A8f27Ae13568676"
-        }
-    },
     "ethereum:mainnet": {
         "libs": {
             "WitOracleDataLib": "0x97dA7a61C59cfbf55Eb13672479561D27D79181c",
