@@ -119,13 +119,6 @@
         "WitOracleRadonRegistry": "",
         "WitOracleRequestFactory": ""
     },
-    "elastos:mainnet": {
-        "WitOracle": "",
-        "WitOracleRadonRegistry": "",
-        "WitOracleRequestFactory": "",
-        "WitPriceFeeds": "",
-        "WitRandomnessV2": "00000000000000000000000077703ae126b971c9946d562f41dd47071da00777000000000000000000000000f121b71715e71dded592f1125a06d4ed06f0694d"
-    },
     "ethereum:mainnet": {
         "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e332d383738663865372d346563636261300000000000000000000000\",true]}",
         "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xD28237c5d7C8C386377A13e6661642294657F35e\",\"0x300c8ccc9526495BB7e5911105f0663Cb4c3a137\",\"0x332e312e332d383738663865372d633330346565610000000000000000000000\",true]}",
