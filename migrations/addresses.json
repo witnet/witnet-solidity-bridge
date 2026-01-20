@@ -624,7 +624,6 @@
         }
     },
     "polygon:mainnet": {},
-    "polygon:zkevm:mainnet": {},
     "reef:mainnet": {
         "WitnetDeployer": "",
         "apps": {
