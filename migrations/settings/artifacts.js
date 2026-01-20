@@ -39,7 +39,7 @@ export default {
 	"conflux:espace:testnet": {
 		core: { WitOracle: "WitOraclePushOnlyTrustableDefault" },
 	},
-	"kcc:testnet": {
+	kcc: {
 		core: { WitOracle: "WitOraclePushOnlyTrustableDefault" },
 	},
 	mantle: {

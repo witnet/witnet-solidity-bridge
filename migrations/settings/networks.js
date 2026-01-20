@@ -337,6 +337,10 @@ export default {
 		port: 9537,
 		network_id: 321,
 		symbol: "KCS",
+		verify: {
+			apiUrl: "https://scan.kcc.io/api",
+			explorerUrl: "https://scan.kcc.io",
+		},
 	},
 	"mantle:sepolia": {
 		port: 8508,
