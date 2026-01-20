@@ -210,13 +210,6 @@
         "WitOracleRadonRegistry": "",
         "WitOracleRequestFactory": ""
     },
-    "metis:mainnet": {
-        "WitOracle": "",
-        "WitOracleRadonRegistry": "",
-        "WitOracleRequestFactory": "",
-        "WitPriceFeeds": "",
-        "WitRandomnessV2": "00000000000000000000000077703ae126b971c9946d562f41dd47071da00777000000000000000000000000f121b71715e71dded592f1125a06d4ed06f0694d"
-    },
     "moonbeam:moonbase": {
         "WitOraclePushOnlyTrustableDefault": "{\"types\":[\"address\",\"bytes32\"],\"values\":[\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e312e302d386262646137652d613637633766370000000000000000000000\"]}",
         "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e302d346335366135322d663232646564630000000000000000000000\",true]}",
