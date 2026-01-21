@@ -682,7 +682,6 @@
             "WitOracleRadonRequestFactoryUpgradableDefault": "0x65BeEC227B5f0ed4A05a9dDcFDe46aA0f74C9755"
         }
     },
-    "ultron:mainnet": {},
     "unichain:sepolia": {
         "libs": {
             "WitOracleDataLib": "0xA1276094aB5450Cd14bC5a7ed7901Ff2020d0740",
