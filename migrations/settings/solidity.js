@@ -28,7 +28,7 @@ export default {
 			evmVersion: "paris",		
 		}
 	},
-	"metis": {
+	"meter": {
 		version: "0.8.25",
 		settings: {
 			optimizer: {

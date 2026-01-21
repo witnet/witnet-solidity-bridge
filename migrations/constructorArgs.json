@@ -204,9 +204,13 @@
         "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x3210564CFC8855cAD45D6d963118058fe2B80123\",\"0x332e312e302d393065623036312d663230623033340000000000000000000000\",true]}"
     },
     "meter:mainnet": {
-        "WitOracle": "",
-        "WitOracleRadonRegistry": "",
-        "WitOracleRequestFactory": ""
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e332d333765383637332d373039353933320000000000000000000000\",true]}",
+        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0xBa84D2ffA26c8fC7EF2c5Bd4839B4b2E4d56D330\",\"0x332e312e332d333765383637332d333734346466310000000000000000000000\"]}",
+        "WitOracleRadonRequestFactoryModalsDefault": "{\"types\":[\"address\"],\"values\":[\"0x1f28E4d955eccE989c00b3871446AB22B3Fa9Cc8\"]}",
+        "WitOracleRadonRequestFactoryTemplatesDefault": "{\"types\":[\"address\"],\"values\":[\"0x1f28E4d955eccE989c00b3871446AB22B3Fa9Cc8\"]}",
+        "WitOracleRadonRequestFactoryUpgradableConfluxCore": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x2632329156331779B5580e303dF7274a83297b5a\",\"0xa9840DFb1802610CBc7E5C071A825324f15191F1\",\"0x332e312e332d333765383637332d366532303061360000000000000000000000\",true]}",
+        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x1f28E4d955eccE989c00b3871446AB22B3Fa9Cc8\",\"0x332e312e332d333765383637332d633338306166610000000000000000000000\",true]}",
+        "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x655f0f1cD67b191Aa1f69cDEF4dFf4e4e5c984D8\",\"0x332e312e332d333765383637332d643831653338310000000000000000000000\",true]}"
     },
     "moonbeam:moonbase": {
         "WitOraclePushOnlyTrustableDefault": "{\"types\":[\"address\",\"bytes32\"],\"values\":[\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e312e302d386262646137652d613637633766370000000000000000000000\"]}",

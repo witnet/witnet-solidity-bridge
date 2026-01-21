@@ -501,18 +501,25 @@
     "meter:mainnet": {
         "apps": {
             "WitPriceFeedsLegacy": "0x27EF7A3e155F96e68A9988EAdBF8bd3eFdba1438",
-            "WitRandomnessV2": "0x4d239f070e475E454148093781211c9eE34f476C"
+            "WitRandomnessV2": "0x4d239f070e475E454148093781211c9eE34f476C",
+            "WitPriceFeeds": "0x655f0f1cD67b191Aa1f69cDEF4dFf4e4e5c984D8",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x96D1F04431e29415F7D8803b21D726b4530F1088"
         },
         "core": {
             "WitOracle": "0x1f28E4d955eccE989c00b3871446AB22B3Fa9Cc8",
             "WitOracleRadonRegistry": "0xBa84D2ffA26c8fC7EF2c5Bd4839B4b2E4d56D330",
-            "WitOracleRequestFactory": "0xc5074dde3FEA0347d3B2E8C38e58e6A34FeEf8EF"
+            "WitOracleRadonRegistryUpgradableDefault": "0x2Aa6D13107A9CEC8Aa4dBb69d75891a4b506E722",
+            "WitOracleRadonRequestFactoryModalsDefault": "0x2632329156331779B5580e303dF7274a83297b5a",
+            "WitOracleRadonRequestFactoryTemplatesDefault": "0xa9840DFb1802610CBc7E5C071A825324f15191F1",
+            "WitOracleTrustableDefault": "0x23Bb273e685B224F3525B4595D2183f9B09c374f",
+            "WitOracleRadonRequestFactory": "0x418D0EFb4979720AD7525607FCcA486e729dFC4E"
         },
         "libs": {
-            "WitOracleDataLib": "0x70d501E01d0EE71F8DD3e533849F5fc454359d6F",
-            "WitOracleRadonEncodingLib": "0xfa52abc94415A334F6C846CA018290CE2755B13D",
-            "WitOracleResultErrorsLib": "0x5a59Ce1206B1771AcdE7ff85910F9e03Aef20EB8",
-            "WitPriceFeedsLib": "0xBD9Ec958409eC6FbaF4d833F7Ea4e3892A406c98"
+            "WitOracleDataLib": "0xd7DB1Aa3d3457efbeaf255A2a45Af4c231e93A65",
+            "WitOracleRadonEncodingLib": "0x6c637530d912249C97dd5116CdE4e82B2097EF8b",
+            "WitOracleResultStatusLib": "0x9eB35546b83dFb9d86fbE2640C4b0aD0bF15f2dC",
+            "WitPriceFeedsDataLib": "0x4ac332CefFBBCAf498576AbA3A4DaAf5586cBF5B",
+            "WitPriceFeedsLegacyDataLib": "0x0f8F18dc3Adbc39a35f3ee4d9e2E78bE1b8e4a8E"
         }
     },
     "moonbeam:mainnet": {
