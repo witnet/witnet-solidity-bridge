@@ -623,24 +623,6 @@
         }
     },
     "polygon:mainnet": {},
-    "reef:mainnet": {
-        "WitnetDeployer": "",
-        "apps": {
-            "WitPriceFeedsLegacy": "",
-            "WitRandomnessV2": ""
-        },
-        "core": {
-            "WitOracle": "",
-            "WitOracleRadonRegistry": "",
-            "WitOracleRequestFactory": ""
-        },
-        "libs": {
-            "WitOracleDataLib": "",
-            "WitOracleRadonEncodingLib": "",
-            "WitOracleResultErrorsLib": "",
-            "WitPriceFeedsLib": ""
-        }
-    },
     "scroll:mainnet": {
         "libs": {
             "WitOracleDataLib": "0x53329F6323F419c8CDFb58a98fbC3b97250Dc701",
