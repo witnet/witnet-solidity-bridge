@@ -258,7 +258,7 @@ contract WitPriceFeedsV3
         virtual override external
         returns (address)
     {
-        require(supportsCaption(symbol), "unknown price feed");//PriceFeedNotFound());
+        require(supportsCaption(symbol), PriceFeedNotFound());
         return WitPriceFeedsDataLib.createChainlinkAggregator(
             computeID4(symbol)
         );
@@ -611,13 +611,13 @@ contract WitPriceFeedsV3
         ID4 _id4 = __storage().reverseIds[report.queryRadHash];
         require(
             !_id4.isZero(), 
-            "invalid rad hash" //InvalidUpdateDataSource()
+            InvalidUpdateDataSource()
         );
         WitPriceFeedsDataLib.PriceFeed storage __record = __seekPriceFeed(_id4);
         PriceUpdateConditions memory _updateConditions = __record.updateConditions;
         require(
             report.queryParams.witCommitteeSize >= _updateConditions.minWitnesses,
-            "invalid witnesses" //InvalidGovernanceTarget()
+            InvalidGovernanceTarget()
         );
         Witnet.DataResult memory _dataResult = __witOracle.pushDataReport(
             report,
@@ -626,16 +626,16 @@ contract WitPriceFeedsV3
         require(
             _dataResult.status == Witnet.ResultStatus.NoErrors
                 && _dataResult.dataType == Witnet.RadonDataTypes.Integer,
-            "invalid data" //InvalidUpdateData()   
+            InvalidUpdateData()   
         );
         require(
             _dataResult.timestamp.gt(__record.lastUpdate.timestamp),
-            "no fresh update" //NoFreshUpdate()
+            NoFreshUpdate()
         );
         require(
             Witnet.Timestamp.unwrap(_dataResult.timestamp)
                 >= Witnet.Timestamp.unwrap(__record.lastUpdate.timestamp) + _updateConditions.cooldownSecs,
-            "hot price" //HotPrice()
+            HotPrice()
         );
         
         int8 _exponent = __record.exponent;
@@ -655,7 +655,7 @@ contract WitPriceFeedsV3
         
         require(
             _updateConditions.maxDeviation1000 == 0 || _deviation1000 <= _updateConditions.maxDeviation1000,
-            "deviant price" //DeviantPrice()
+            DeviantPrice()
         );
 
         __record.lastUpdate.deltaPrice = _deltaPrice;
