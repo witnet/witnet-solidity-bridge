@@ -144,7 +144,7 @@ export default {
 		port: 8529,
 		network_id: 71,
 		// networkCheckTimeout: 999999,
-		gas: 15000000,
+		// gas: 15000000,
 		symbol: "CFX",
 		verify: {
 			apiKey: "espace",
@@ -157,12 +157,12 @@ export default {
 		port: 9529,
 		network_id: 1030,
 		networkCheckTimeout: 999999,
-		gas: 15000000,
+		// gas: 15000000,
 		symbol: "CFX",
 		verify: {
 			apiKey: "espace",
-			apiUrl: "https://evmapi.confluxscan.io/api",
-			explorerUrl: "https://evm.confluxscan.io",
+			apiUrl: "https://evmapi.confluxscan.org/api",
+			explorerUrl: "https://evm.confluxscan.org",
 		},
 	},
 	"cronos:testnet": {
