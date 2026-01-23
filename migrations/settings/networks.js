@@ -46,9 +46,9 @@ export default {
 		network_id: 8453,
 		port: 9502,
 		verify: {
-			apiUrl: "https://api.basescan.org/api",
-			explorerUrl: "https://basescan.com",
-		},
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=8453",
+			explorerUrl: "https://basescan.org",
+		}
 	},
 	"base:sepolia": {
 		network_id: 84532,
