@@ -158,8 +158,8 @@
     },
     "celo:sepolia": {
         "apps": {
-            "WitPriceFeedsV3Upgradable": "0xbe09ec438d6b167b8fe810045c332B90ceFABB02",
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsV3Upgradable": "0xbe09ec438d6b167b8fe810045c332B90ceFABB02",
             "WitPriceFeedsLegacyUpgradableBypass": "0x0bb6C53c9Aa391B40Dbf373B1Cf957F60ADcC18C",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         },
@@ -421,13 +421,15 @@
             "WitPriceFeedsLegacyDataLib": "0x97dA7a61C59cfbf55Eb13672479561D27D79181c"
         },
         "core": {
-            "WitOracleRadonRegistryUpgradableDefault": "0x83E444AB916cAF1cF0188805388d7e6ffa7df01e",
+            "WitOracleRadonRegistryUpgradableDefault": "0xCD0652fa41477Fa65482b16AA7b777ADD3Ccc2fF",
             "WitOracleRadonRequestFactoryUpgradableDefault": "0xc8a58C28EEa2a4CdE351Ca61737e4A022eC6b1B2",
             "WitOracleTrustableDefault": "0x86731FF024B5be7Ed6de304F20EEd7EA77f44E0d"
         },
         "apps": {
-            "WitPriceFeedsLegacyUpgradableBypass": "0x0909dB86d0f001a8704BB857f37FF7B982136d77",
-            "WitPriceFeedsV3Upgradable": "0x0909dB86d0f001a8704BB857f37FF7B982136d77"
+            "WitPriceFeedsLegacy": "0x1111AbA2164AcdC6D291b08DfB374280035E1111",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0F0aC64F47B1E9f13C907f82167452ec4B8AF5E9",
+            "WitPriceFeedsV3Upgradable": "0xA05EB964e9e54fFcedc57D264CDF620CAf32F3b7",
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
     "kaia:testnet": {
