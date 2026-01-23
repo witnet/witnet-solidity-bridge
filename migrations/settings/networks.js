@@ -485,7 +485,7 @@ export default {
 		symbol: "POL",
 		verify: {
 			apiKey: process.env.ETHERSCAN_POLYGON_API_KEY,
-			apiUrl: "https://api.polygonscan.com/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=137",
 			explorerUrl: "https://polygonscan.com",
 		},
 	},
