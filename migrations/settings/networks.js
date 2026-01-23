@@ -357,7 +357,7 @@ export default {
 		network_id: 5000,
 		symbol: "MNT",
 		verify: {
-			apiUrl: "https://explorer.mantle.xyz/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=5000",
 			explorerUrl: "https://explorer.mantle.xyz",
 		},
 	},

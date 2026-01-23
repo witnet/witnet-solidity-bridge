@@ -193,11 +193,11 @@
         "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x3210564CFC8855cAD45D6d963118058fe2B80123\",\"0x332e312e302d333335623462382d623934663730360000000000000000000000\",true]}"
     },
     "mantle:mainnet": {
-        "WitOracle": "",
-        "WitOracleRadonRegistry": "",
-        "WitOracleRequestFactory": "",
-        "WitPriceFeeds": "",
-        "WitRandomnessV2": "00000000000000000000000077703ae126b971c9946d562f41dd47071da00777000000000000000000000000f121b71715e71dded592f1125a06d4ed06f0694d"
+        "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xff0c2aAB49afE9358D6364C8d7b1Aa21853808ff\",\"0xFF507f5c0B1732C64688fc2921636e794041eaFF\",\"0x332e312e332d333131383634642d633330346565610000000000000000000000\",true]}",
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e332d333131383634642d313163303536640000000000000000000000\",true]}",
+        "WitOracleTrustableOvm2": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e312e332d333131383634642d383434346234330000000000000000000000\"]}",
+        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e312e332d333131383634642d383261366265380000000000000000000000\",true]}",
+        "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x3210564CFC8855cAD45D6d963118058fe2B80123\",\"0x332e312e332d363963663132372d623531343937640000000000000000000000\",true]}"
     },
     "mantle:sepolia": {
         "WitOraclePushOnlyTrustableDefault": "{\"types\":[\"address\",\"bytes32\"],\"values\":[\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e312e302d363464626132382d376334373736310000000000000000000000\"]}",
