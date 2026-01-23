@@ -116,7 +116,7 @@ export default {
 		port: 9538,
 		symbol: "CELO",
 		verify: {
-			apiUrl: "https://api.celoscan.io/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainId=42220",
 			explorerUrl: "https://celoscan.io",
 		},
 	},

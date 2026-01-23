@@ -177,23 +177,25 @@
         }
     },
     "celo:mainnet": {
-        "apps": {},
-        "core": {},
-        "libs": {}
-    },
-    "conflux:core": {
         "apps": {
-            "WitPriceFeeds": "0x806fd13488E5FFF030aE8d82C81aF96B4fFa36B8",
-            "WitPriceFeedsLegacy": "0x8ba3C59e1029cd90010e8C731461ddFC5f49091b",
-            "WitRandomnessV2": "0x897832C89ec306A74f9eC29abfFcaDBfCb11A13B"
+            "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0F0aC64F47B1E9f13C907f82167452ec4B8AF5E9",
+            "WitPriceFeedsV3Upgradable": "0xB7D43E41fC21D74903f614A86C59582511885216",
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         },
         "core": {
-            "WitOracle": "0x8ce6Cbc149E46c67e19d66bD3e2905161ff4Cb06",
-            "WitOracleRadonRegistry": "0x87C49D7Ee36496d75823495ad4c7112a819771f8",
-            "WitOracleRadonRequestFactory": "0x8c0D9F2748eCf8011220Aa05f736EceE0c451Ecb",
-            "WitOracleRadonRequestFactoryTemplatesDefault": "0x8b4f72C2E1183E3d43Ef49041588b1e083293A15",
-            "WitOracleRadonRequestFactoryModalsDefault": "0x81F17Da987477D1A2c9e6E5ae3053e04987575b3"
+            "WitOracleRadonRegistryUpgradableDefault": "0x50Bd4E49723Bf9c8AE996ffcefD2fC778745e105",
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0xdE88E578892d82FFB7bFd7894d977D5d668D5F41",
+            "WitOracleTrustableDefault": "0x78388338FDB928fBB1159cf2BE47A928D40FbbDF"
         },
+        "libs": {
+            "WitOracleDataLib": "0x275098A755cda6C8130c8b26BAaec9ed18a8ac64",
+            "WitOracleRadonEncodingLib": "0x5F8704825A79b1FBc25A02754e0877F29974F4D8",
+            "WitOracleResultStatusLib": "0x45948c4B3fB997cE6A1b0DcFB783079e1B19e743",
+            "WitPriceFeedsDataLib": "0x97dA7a61C59cfbf55Eb13672479561D27D79181c",
+            "WitPriceFeedsLegacyDataLib": "0x53329F6323F419c8CDFb58a98fbC3b97250Dc701"
+        }
+    },
         "WitnetDeployer": "0x8785dBa05D3B90c55c009D0C47f12A2d976C5e47",
         "WitnetProxy": "0x8529DA52FF40990685B61432BA49246b94850d86"
     },
