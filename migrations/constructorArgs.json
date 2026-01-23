@@ -71,11 +71,14 @@
         "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x3210564CFC8855cAD45D6d963118058fe2B80123\",\"0x332e312e332d363963663132372d623531343937640000000000000000000000\",true]}"
     },
     "conflux:core:mainnet": {
-        "WitOracle": "",
-        "WitOracleRadonRegistry": "",
-        "WitOracleRequestFactory": "",
-        "WitPriceFeeds": "",
-        "WitRandomnessV2": "0000000000000000000000008346d6ba3b7a04923492007cc3a2ee7135db74630000000000000000000000001169bf81ecf738d02fd8d3824dfe02153b334ef7"
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e332d363963663132372d353265373337350000000000000000000000\",true]}",
+        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x884eD6a4c128b48dEBb33ac34cD8C0926f227a54\",\"0x332e312e332d363963663132372d346633666136320000000000000000000000\"]}",
+        "WitOracleRadonRequestFactoryModalsDefault": "{\"types\":[\"address\"],\"values\":[\"0x8671A55e7E517023c8679a04De70A59F21a3F856\"]}",
+        "WitOracleRadonRequestFactoryTemplatesDefault": "{\"types\":[\"address\"],\"values\":[\"0x8671A55e7E517023c8679a04De70A59F21a3F856\"]}",
+        "WitOracleRadonRequestFactoryUpgradableConfluxCore": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x8b79e847d695eADdCF16eB9A46D6Dfa4961019C4\",\"0x8034397Bc8d6C0BdAe6b9b537F4acc77267C9964\",\"0x332e312e332d363963663132372d373532373837300000000000000000000000\",true]}",
+        "WitRandomnessV3": "{\"types\":[\"address\",\"address\"],\"values\":[\"0x8671A55e7E517023c8679a04De70A59F21a3F856\",\"0x1E5e6BF002F87c9fE15bBaBf3115deD5caDA37e1\"]}",
+        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x8671A55e7E517023c8679a04De70A59F21a3F856\",\"0x332e312e332d363963663132372d343562626434370000000000000000000000\",true]}",
+        "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x8eAF1f75442e945121c874E10E310D53DB939dc8\",\"0x332e312e332d363963663132372d623531343937640000000000000000000000\",true]}"
     },
     "conflux:core:testnet": {
         "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e302d643037383261302d623165393032380000000000000000000000\",true]}",

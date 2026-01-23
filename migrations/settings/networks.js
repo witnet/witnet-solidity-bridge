@@ -136,8 +136,8 @@ export default {
 		symbol: "CFX",
 		verify: {
 			apiKey: "MY_API_KEY",
-			apiUrl: "https://api.confluxscan.io",
-			explorerUrl: "https://confluxscan.io",
+			apiUrl: "https://api.confluxscan.net",
+			explorerUrl: "https://confluxscan.net",
 		},
 	},
 	"conflux:espace:testnet": {
