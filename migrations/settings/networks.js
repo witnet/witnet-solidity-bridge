@@ -463,7 +463,7 @@ export default {
 		confirmations: 3,
 		verify: {
 			apiKey: process.env.ETHERSCAN_OPTIMISM_API_KEY,
-			apiUrl: "https://api-optimistic.etherscan.io/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=10",
 			explorerUrl: "https://optimistic.etherscan.io",
 		},
 	},
