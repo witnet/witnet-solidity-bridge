@@ -827,7 +827,24 @@
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000"
         }
     },
-    "worldchain:mainnet": {},
+    "worldchain:mainnet": {
+        "libs": {
+            "WitOracleDataLib": "0x53329F6323F419c8CDFb58a98fbC3b97250Dc701",
+            "WitOracleRadonEncodingLib": "0xAcacc63110dBA2aAEb57B64Cd6854C79A6b8c262",
+            "WitOracleResultStatusLib": "0x33d1b1F152363471d1807Aa7b7353abb70bEB024",
+            "WitPriceFeedsDataLib": "0xFFfDe7C9ddFD9d10a40BE1690b38E8bc890bCA84",
+            "WitPriceFeedsLegacyDataLib": "0x053C355588d705E70192D1ACE1c72a1623D8F991"
+        },
+        "core": {
+            "WitOracleRadonRegistryUpgradableDefault": "0xB884FF5Fb2D42Ac1684301D1052C0004d49C7A5b",
+            "WitOracleRadonRequestFactoryUpgradableDefault": "0x4777e994aDe91a3131c09Aad70C05de46016Dc25",
+            "WitOracleTrustableDefault": "0xFDc8bf652a2d4d15197A5ACAf81FaDFD446B025A"
+        },
+        "apps": {
+            "WitPriceFeedsLegacyUpgradableBypass": "0x0F0aC64F47B1E9f13C907f82167452ec4B8AF5E9",
+            "WitPriceFeedsV3Upgradable": "0x77f64Bb6d4361a1F9dAe2895596f8fe594Ca7430"
+        }
+    },
     "worldchain:sepolia": {
         "apps": {
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",

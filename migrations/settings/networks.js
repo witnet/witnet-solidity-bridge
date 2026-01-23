@@ -586,8 +586,7 @@ export default {
 		port: 9501,
 		network_id: 480,
 		verify: {
-			apiKey: "MY_API_KEY",
-			apiUrl: "https://worldchain-mainnet.explorer.alchemy.com/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=480",
 			explorerUrl: "https://worldchain-mainnet.explorer.alchemy.com",
 		},
 	},
