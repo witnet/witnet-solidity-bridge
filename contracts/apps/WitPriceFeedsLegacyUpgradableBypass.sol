@@ -157,7 +157,10 @@ contract WitPriceFeedsLegacyUpgradableBypass
             _captions[_ix] = _pfs[_ix].symbol;
             if (
                 _pfs[_ix].oracle.class == IWitPriceFeedsTypes.Oracles.Witnet
-                    && _pfs[_ix].oracle.target != address(0)
+                    && (
+                        _pfs[_ix].oracle.target == address(0)
+                            || _pfs[_ix].oracle.target == address(surrogate)
+                    )
             ) {
                 _solvers[_ix] = (_pfs[_ix].oracle.sources != bytes32(0)
                     ? _pfs[_ix].oracle.sources
