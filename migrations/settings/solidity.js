@@ -8,34 +8,34 @@ export default {
 			},
 		},
 	},
-	"kava": {
+	kava: {
 		version: "0.8.25",
 		settings: {
 			optimizer: {
 				enabled: true,
 				runs: 200,
 			},
-			evmVersion: "paris",		
-		}
+			evmVersion: "paris",
+		},
 	},
-	"kcc": {
+	kcc: {
 		version: "0.8.25",
 		settings: {
 			optimizer: {
 				enabled: true,
 				runs: 200,
 			},
-			evmVersion: "paris",		
-		}
+			evmVersion: "paris",
+		},
 	},
-	"meter": {
+	meter: {
 		version: "0.8.25",
 		settings: {
 			optimizer: {
 				enabled: true,
 				runs: 200,
 			},
-			evmVersion: "paris",		
-		}
-	}
+			evmVersion: "paris",
+		},
+	},
 };

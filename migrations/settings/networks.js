@@ -48,7 +48,7 @@ export default {
 		verify: {
 			apiUrl: "https://api.etherscan.io/v2/api?chainid=8453",
 			explorerUrl: "https://basescan.org",
-		}
+		},
 	},
 	"base:sepolia": {
 		network_id: 84532,
@@ -452,7 +452,7 @@ export default {
 		network_id: 11155420,
 		confirmations: 3,
 		verify: {
-			apiUrl: "https://api.etherscan.io/v2/api?chainid=111554200",
+			apiUrl: "https://api.etherscan.io/v2/api?chainid=11155420",
 			explorerUrl: "https://sepolia-optimism.etherscan.io/address",
 		},
 	},
