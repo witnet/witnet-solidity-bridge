@@ -205,7 +205,7 @@
             "WitOracleDataLib": "0x8Ea4ebB7f52c75a62C34E043EdC5F1eE094686F3",
             "WitOracleRadonEncodingLib": "0x891c080495b7a4E4A4e734B85BA0b922a034040e",
             "WitOracleResultStatusLib": "0x8164d32835FAa70467DD7f76EDEdc803a03f706d",
-            "WitPriceFeedsDataLib": "0x82A4e29626835603DaC255e3A7a51De907f34898",
+            "WitPriceFeedsDataLib": "0x894edf27a0bcB8A0E40DA47Fb46d13eB352A9788",
             "WitPriceFeedsLegacyDataLib": "0x8fA0B384837ebeeA18bf50351BCB28AB9a62ed6E"
         },
         "core": {
@@ -219,7 +219,7 @@
         },
         "apps": {
             "WitPriceFeeds": "0x8eAF1f75442e945121c874E10E310D53DB939dc8",
-            "WitPriceFeedsV3Upgradable": "0x8E006B27189d53977a901Ed966E86C851AC9b6d3",
+            "WitPriceFeedsV3Upgradable": "0x83a768A053dcf9a19cC7A546403d0A78cd6Bf617",
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
             "WitPriceFeedsLegacyUpgradableBypass": "0x8a8B39F20Cd0138ee5171786A88a06F91B7E9AF9",
             "WitRandomnessV2": "0x0000000000000000000000000000000000000000",

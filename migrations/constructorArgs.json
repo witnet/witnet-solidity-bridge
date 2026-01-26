@@ -77,7 +77,7 @@
         "WitOracleRadonRequestFactoryTemplatesDefault": "{\"types\":[\"address\"],\"values\":[\"0x8671A55e7E517023c8679a04De70A59F21a3F856\"]}",
         "WitOracleRadonRequestFactoryUpgradableConfluxCore": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x8b79e847d695eADdCF16eB9A46D6Dfa4961019C4\",\"0x8034397Bc8d6C0BdAe6b9b537F4acc77267C9964\",\"0x332e312e332d363963663132372d373532373837300000000000000000000000\",true]}",
         "WitRandomnessV3": "{\"types\":[\"address\",\"address\"],\"values\":[\"0x8671A55e7E517023c8679a04De70A59F21a3F856\",\"0x1E5e6BF002F87c9fE15bBaBf3115deD5caDA37e1\"]}",
-        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x8671A55e7E517023c8679a04De70A59F21a3F856\",\"0x332e312e332d363963663132372d343562626434370000000000000000000000\",true]}",
+        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x8671A55e7E517023c8679a04De70A59F21a3F856\",\"0x332e312e342d376538626466362d373933343637340000000000000000000000\",true]}",
         "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x8eAF1f75442e945121c874E10E310D53DB939dc8\",\"0x332e312e332d363963663132372d623531343937640000000000000000000000\",true]}"
     },
     "conflux:core:testnet": {
