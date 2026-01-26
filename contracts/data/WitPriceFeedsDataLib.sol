@@ -700,6 +700,7 @@ library WitPriceFeedsDataLib {
         internal
     {
         require(!self.settled(), "already settled");
+        require(exponent >= -38 && exponent <= 38, "invalid exponent");
         self.exponent = exponent;
         self.mapper = mapper;
         self.mapperDeps = mapperDeps;
@@ -715,6 +716,7 @@ library WitPriceFeedsDataLib {
         internal
     {
         require(!self.settled(), "already settled");
+        require(exponent >= -38 && exponent <= 38, "invalid exponent");
         self.exponent = exponent;
         self.oracle = oracle;
         self.oracleAddress = oracleAddress;
@@ -882,34 +884,31 @@ library WitPriceFeedsDataLib {
                         _lastUpdate.trail = _depLastUpdate.trail;
                     }
                 }
-                _regs[2] += inverse ? _depLastUpdate.exponent : - _depLastUpdate.exponent;
+                _regs[2] += inverse ? -_depLastUpdate.exponent : _depLastUpdate.exponent;
             }
         }
-        _regs[2] += exponent;
-        if (_regs[2] <= 0) {
-            if (inverse) {
-                uint _factor = 10 ** uint(-_regs[2]);
-                if (_regs[1] > 0) {
-                    _lastUpdate.emaPrice = uint64(_factor / uint(_regs[1]));
-                } else if (_regs[0] > 0) {
-                    _lastUpdate.price = uint64(_factor / uint(_regs[0]));
-                } else {
-                    _lastUpdate.price = 0; // avoid unhandled reverts
-                }
-            } else {
-                uint _divisor = 10 ** uint(-_regs[2]);
-                if (_regs[1] > 0) {
-                    _lastUpdate.emaPrice = uint64(uint(_regs[1]) / _divisor);
-                } else {
-                    _lastUpdate.price = uint64(uint(_regs[0]) / _divisor);
-                }
-            }
+        _regs[2] -= exponent;
+
+        uint _magnitude = 10 ** uint(_regs[2] < 0 ? -_regs[2] : _regs[2]);
+        bool _useEma = _regs[1] > 0;
+        uint64 _baseValue = _useEma ? uint64(uint(_regs[1])) : uint64(uint(_regs[0]));
+        if (!inverse) {
+            // normal product
+            uint64 _result = _regs[2] <= 0 
+                ? _baseValue / uint64(_magnitude)   // downscale 
+                : _baseValue * uint64(_magnitude);  // upscale
+            if (_useEma) _lastUpdate.emaPrice = _result;
+            else _lastUpdate.price = _result;
         } else {
-            uint _factor = 10 ** uint(_regs[2]);
-            if (_regs[1] > 0) {
-                _lastUpdate.emaPrice = uint64(uint(_regs[1]) * _factor);
+            if (_regs[2] >= 0 && _baseValue > 0) {
+                // inversion leads to integer price
+                uint64 _result = uint64(_magnitude / uint(_baseValue));
+                if (_useEma) _lastUpdate.emaPrice = _result;
+                else if (_baseValue > 0) _lastUpdate.price = _result;
             } else {
-                _lastUpdate.price = uint64(uint(_regs[0]) * _factor);
+                // inversion would lead to either divide-by-zero or zero output
+                _lastUpdate.emaPrice = 0;
+                _lastUpdate.price = 0;
             }
         }
         _lastUpdate.exponent = exponent;
