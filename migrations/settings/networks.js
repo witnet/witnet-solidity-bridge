@@ -16,7 +16,7 @@ export default {
 		network_id: 42161,
 		port: 9517,
 		verify: {
-			apiUrl: "https://api.arbiscan.io/api",
+			apiUrl: "https://api.etherscan.io/v2/api?chainId=42161",
 			explorerUrl: "https://arbiscan.io",
 		},
 	},
@@ -171,7 +171,7 @@ export default {
 		symbol: "CRO",
 		verify: {
 			apiKey: process.env.ETHERSCAN_CRONOS_API_KEY,
-			apiUrl: "https://api.etherscan.io/v2/api?chainid=338",
+			apiUrl: "https://explorer-api.cronos.org/testnet/api/v2",
 			explorerUrl: "https://explorer.cronos.org/testnet",
 		},
 	},
@@ -316,7 +316,7 @@ export default {
 		port: 9526,
 		network_id: 2222,
 		symbol: "KAVA",
-		gas: 10000000,
+		// gas: 10000000,
 		verify: {
 			apiKey: "MY_API_KEY",
 			apiUrl: "https://explorer.kavalabs.io/api",

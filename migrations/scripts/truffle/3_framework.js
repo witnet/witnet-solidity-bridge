@@ -20,7 +20,7 @@ module.exports = async (_, network, [, , coreCurator, appsCurator, reporter]) =>
 	const networkArtifacts = settings.getArtifacts(network);
 	const networkSpecs = settings.getSpecs(network);
 
-	const WitnetDeployer = artifacts.require("WitnetDeployer");//networkArtifacts.WitnetDeployer);
+	const WitnetDeployer = artifacts.require("WitnetDeployer"); //networkArtifacts.WitnetDeployer);
 	witnetDeployer = await WitnetDeployer.deployed();
 
 	// Settle the order in which (some of the) framework artifacts must be deployed first
