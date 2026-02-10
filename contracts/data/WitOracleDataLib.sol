@@ -466,7 +466,7 @@ library WitOracleDataLib {
         for (uint _ix = 0; _ix < queryIds.length; _ix ++) {
             uint256 _queryId = Witnet.QueryId.unwrap(queryIds[_ix]);
             WitOracleDataLib.Query storage __query = seekQuery(_queryId);
-            bytecodes[_ix] = (__query.request.radonHash != bytes32(0)
+            bytecodes[_ix] = (__query.request.radonBytecode.length == 0
                 ? registry.bytecodeOf(Witnet.RadonHash.wrap(__query.request.radonHash), __query.slaParams)
                 : registry.bytecodeOf(__query.request.radonBytecode, __query.slaParams)
             );

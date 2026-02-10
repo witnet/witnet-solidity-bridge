@@ -626,7 +626,7 @@ contract WitPriceFeedsV3
         require(
             _dataResult.status == Witnet.ResultStatus.NoErrors
                 && _dataResult.dataType == Witnet.RadonDataTypes.Integer,
-            InvalidUpdateData()   
+            InvalidUpdateData()
         );
         require(
             _dataResult.timestamp.gt(__record.lastUpdate.timestamp),

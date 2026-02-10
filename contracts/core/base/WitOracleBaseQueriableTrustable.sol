@@ -360,6 +360,30 @@ abstract contract WitOracleBaseQueriableTrustable
         );
     }
 
+    function postRequestWithCallback(
+        bytes calldata _radonBytecode,
+        IWitOracleLegacy.RadonSLA calldata _querySLA,
+        uint24 _queryCallbackGas
+    )
+    virtual override
+    external payable
+    returns (uint256 _queryId)
+    {
+        _queryId = queryDataWithCallback(
+            Witnet.radHash(_radonBytecode),
+            Witnet.QuerySLA({
+                witResultMaxSize: 32,
+                witCommitteeSize: _querySLA.numWitnesses,
+                witUnitaryReward: _querySLA.witnessReward
+            }),
+            Witnet.QueryCallback({
+                consumer: msg.sender,
+                gasLimit: _queryCallbackGas
+            })
+        );
+        WitOracleDataLib.seekQuery(_queryId).request.radonBytecode = _radonBytecode;
+    }
+
     function reportResult(
             uint256 queryId,
             uint32 resultTimestamp,

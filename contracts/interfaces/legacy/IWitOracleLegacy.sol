@@ -89,6 +89,7 @@ interface IWitOracleLegacy {
     function fetchQueryResponse(uint256 queryId) external returns (bytes memory);
     function postRequest(bytes32, RadonSLA calldata) external payable returns (uint256);
     function postRequestWithCallback(bytes32, RadonSLA calldata, uint24) external payable returns (uint256);
+    function postRequestWithCallback(bytes calldata, RadonSLA calldata, uint24) external payable returns (uint256);
     function reportResult(uint256, uint32, bytes32, bytes calldata) external returns (uint256);
     function reportResult(uint256, bytes32, bytes calldata) external returns (uint256);
 
