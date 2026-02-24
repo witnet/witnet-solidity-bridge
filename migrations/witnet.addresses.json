@@ -297,7 +297,7 @@
             "WitnetBytecodesImplementation": "0x79c27c0555C95DBfd38e97023c3257376aaa154d",
             "WitnetRequestFactory": "0xA9DE27b01Eaa3702dafF488d47b1328413C64Ee1",
             "WitnetRequestFactoryImplementation": "0xBfe1c2091A70FF1a2731B7eeF13b8227CAB81C28",
-            "WitnetRequestBoardImplementation": "0xB68c0127e74dC705d18162621035f9782b23D609",
+            "WitnetRequestBoardImplementation": "0x1561b551f1399e368AE14BBB33A1bD81F57a6B85",
             "WitnetRequestBoardTrustableDefault": "0x6020665A4F6dcEFfBDb9655C8bF904C51CB94951"
         }
     },

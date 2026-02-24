@@ -18,7 +18,7 @@ const WitnetErrorsLib = artifacts.require("WitnetErrorsLib")
 const WitnetRequestFactory = artifacts.require("WitnetRequestFactory")
 const WitnetRequestBoard = artifacts.require("WitnetRequestBoard")
 
-module.exports = async function (deployer, network, [, from, reporter]) {
+module.exports = async function (deployer, network, [,, from, reporter]) {
   const isDryRun = network === "test" || network.split("-")[1] === "fork" || network.split("-")[0] === "develop"
   const ecosystem = utils.getRealmNetworkFromArgs()[0]
   network = network.split("-")[0]
