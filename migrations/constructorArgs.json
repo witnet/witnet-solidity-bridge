@@ -104,10 +104,10 @@
         "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x3210564CFC8855cAD45D6d963118058fe2B80123\",\"0x332e312e302d643037383261302d663230623033340000000000000000000000\",true]}"
     },
     "cronos:mainnet": {
-        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e342d376538626466362d373837306264380000000000000000000000\",true]}",
-        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e312e332d383738663865372d316465663764380000000000000000000000\"]}",
+        "WitOracleRadonRegistryUpgradableDefault": "{\"types\":[\"bytes32\",\"bool\"],\"values\":[\"0x332e312e362d303161366362342d373837306264380000000000000000000000\",true]}",
+        "WitOracleTrustableDefault": "{\"types\":[\"(uint32, uint32, uint32, uint32)\",\"address\",\"bytes32\"],\"values\":[[58282,65273,69546,20000],\"0x000B61Fe075F545fd37767f40391658275900000\",\"0x332e312e352d376538626466362d636335373563310000000000000000000000\"]}",
         "WitOracleRadonRequestFactoryUpgradableDefault": "{\"types\":[\"address\",\"address\",\"bytes32\",\"bool\"],\"values\":[\"0xff0c2aAB49afE9358D6364C8d7b1Aa21853808ff\",\"0xFF507f5c0B1732C64688fc2921636e794041eaFF\",\"0x332e312e332d383738663865372d633330346565610000000000000000000000\",true]}",
-        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e312e342d376538626466362d363538656435330000000000000000000000\",true]}",
+        "WitPriceFeedsV3Upgradable": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x77703aE126B971c9946d562F41Dd47071dA00777\",\"0x332e312e362d303161366362342d656435383332660000000000000000000000\",true]}",
         "WitPriceFeedsLegacyUpgradableBypass": "{\"types\":[\"address\",\"bytes32\",\"bool\"],\"values\":[\"0x3210564CFC8855cAD45D6d963118058fe2B80123\",\"0x332e312e332d383738663865372d386632393164300000000000000000000000\",true]}"
     },
     "cronos:testnet": {
