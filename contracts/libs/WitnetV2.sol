@@ -58,6 +58,15 @@ library WitnetV2 {
         uint64  witnessingFeeNanoWit;
     }
 
+    /// Data struct containing the Witnet-provided result to a Data Request.
+    struct DataResult {
+        Witnet.ResultErrorCodes status;
+        Witnet.RadonDataTypes dataType;
+        bytes32 drTxHash;
+        uint256 finality;
+        uint64  timestamp;
+        WitnetCBOR.CBOR value;
+    }
     
     /// ===============================================================================================================
     /// --- 'WitnetV2.RadonSLA' helper methods ------------------------------------------------------------------------

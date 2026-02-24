@@ -38,6 +38,17 @@ abstract contract WitnetOracleV20
     function specs() virtual external view returns (bytes4);
 }
 
+interface IWitOracleQueriableConsumer {
+    /// Method to be called from the WitOracle contract as soon as the given Witnet `queryId` gets reported.
+    /// @dev It should revert if called from an address different to the WitOracle instance being used by consumer.
+    /// @param queryId The unique identifier of the Witnet query being reported.
+    /// @param queryResult Abi-encoded Witnet.DataResult containing the CBOR-encoded query's result, and metadata.
+    function reportWitOracleQueryResult(
+            uint256 queryId,
+            bytes calldata queryResult
+        ) external;
+}
+
 /// @title Witnet Request Board bypass implementation to V2.0 
 /// @author The Witnet Foundation
 contract WitnetRequestBoardBypassV20
@@ -45,6 +56,7 @@ contract WitnetRequestBoardBypassV20
         IWitnetConsumer,
         IWitnetOracleEvents,
         IWitnetRequestBoardEvents,
+        IWitOracleQueriableConsumer,
         WitnetUpgradableBase,
         WitnetOracleV07,
         WitnetBoardDataACLs
@@ -101,9 +113,8 @@ contract WitnetRequestBoardBypassV20
     {
         legacy = _legacy;
         require(
-            address(_surrogate).code.length > 0
-                && _surrogate.specs() == type(IWitnetOracle).interfaceId,
-            "WitnetRequestBoardBypassV20: uncompliant WitnetOracle"
+            address(_surrogate).code.length > 0,
+            "WitnetRequestBoardBypassV20: missing surrogate"
         );
         surrogate = _surrogate;
         require(
@@ -199,7 +210,32 @@ contract WitnetRequestBoardBypassV20
 
 
     // ================================================================================================================
-    // --- Implementation of 'IWitnetConsumer' ------------------------------------------------------------------------
+    // --- Implementation of 'IWitOracleQueriableConsumer' (V3.x) -----------------------------------------------------
+
+    /// Method to be called from the WitOracle contract as soon as the given Witnet `queryId` gets reported.
+    /// @dev It should revert if called from an address different to the WitOracle instance being used by consumer.
+    /// @param _witnetQueryId The unique identifier of the Witnet query being reported.
+    /// @param _witnetQueryResultBytes Abi-encoded Witnet.DataResult containing the CBOR-encoded query's result, and metadata.
+    function reportWitOracleQueryResult(
+            uint256 _witnetQueryId,
+            bytes calldata _witnetQueryResultBytes
+        ) 
+        external override
+        onlySurrogate
+    {
+        _witnetQueryId += __storage().numQueries;
+        WitnetV2.DataResult memory _queryResult = abi.decode(_witnetQueryResultBytes, (WitnetV2.DataResult));
+        require(
+            _statusOf(_witnetQueryId) == Witnet.QueryStatus.Posted,
+            "WitnetRequestBoardBypassV20: not in Posted status"
+        );
+        __storage().queries[_witnetQueryId].response.cborBytes = _queryResult.value.buffer.data;
+        emit PostedResult(_witnetQueryId, msg.sender);
+    }
+
+
+    // ================================================================================================================
+    // --- Implementation of 'IWitnetConsumer' (V2.x) -----------------------------------------------------------------
 
     /// @notice Method to be called from the WitnetOracle contract as soon as the given Witnet `queryId`
     /// @notice gets reported, if reported with no errors.
