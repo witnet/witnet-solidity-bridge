@@ -2,19 +2,36 @@ import type { Witnet } from "@witnet/sdk";
 import type { PriceFeedInfo } from "../types.js";
 import { WitAppliance } from "./WitAppliance.js";
 import type { WitOracle } from "./WitOracle.js";
+import { AbiCoder, Addressable } from "ethers";
 
 export class WitPriceFeedsLegacy extends WitAppliance {
-	protected constructor(witOracle: WitOracle, at: string) {
-		super(witOracle, "WitPriceFeedsLegacy", at);
+
+	public static async fromWitOracle(witOracle: WitOracle, target?: string | Addressable): Promise<WitPriceFeedsLegacy> {
+		const priceFeeds = new WitPriceFeedsLegacy({ witOracle, target });
+		let priceFeedsWitOracleAddr;
+		try {
+			priceFeedsWitOracleAddr = await priceFeeds.contract.witOracle.staticCall();
+		} catch {
+			priceFeedsWitOracleAddr = await priceFeeds.provider
+				.call({
+					to: target,
+					data: "0x46d1d21a", // funcSig for 'witnet()'
+				})
+				.then((result) => AbiCoder.defaultAbiCoder().decode(["address"], result))
+				.then((result) => result.toString());
+		}
+		if (priceFeedsWitOracleAddr !== witOracle.address) {
+			throw new Error(`${WitPriceFeedsLegacy.constructor.name} at ${target}: mismatching Wit/Oracle address (${priceFeedsWitOracleAddr})`);
+		} else {
+			return priceFeeds;
+		}
 	}
 
-	static async at(witOracle: WitOracle, target: string): Promise<WitPriceFeedsLegacy> {
-		const priceFeeds = new WitPriceFeedsLegacy(witOracle, target);
-		const oracleAddr = await priceFeeds.contract.witnet.staticCall();
-		if (oracleAddr !== witOracle.address) {
-			throw new Error(`WitPriceFeedsLegacy at ${target}: mismatching Wit/Oracle address (${oracleAddr})`);
-		}
-		return priceFeeds;
+	protected constructor(specs: {
+		witOracle: WitOracle, 
+		target?: string | Addressable,
+	}) {
+		super({ ...specs, artifact: "WitPriceFeedsLegacy" });
 	}
 
 	public async getEvmFootprint(): Promise<string> {

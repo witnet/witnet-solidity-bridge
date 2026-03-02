@@ -1,6 +1,6 @@
 import type { Witnet } from "@witnet/sdk";
 import {
-	AbiCoder,
+	Addressable,
 	type ContractTransaction,
 	type ContractTransactionReceipt,
 	formatUnits,
@@ -21,28 +21,21 @@ import { WitAppliance } from "./WitAppliance.js";
 import type { WitOracle } from "./WitOracle.js";
 
 export class WitPriceFeeds extends WitAppliance {
-	protected constructor(witOracle: WitOracle, at: string) {
-		super(witOracle, "WitPriceFeeds", at);
-	}
 
-	static async at(witOracle: WitOracle, target: string): Promise<WitPriceFeeds> {
-		const priceFeeds = new WitPriceFeeds(witOracle, target);
-		let oracleAddr;
-		try {
-			oracleAddr = await priceFeeds.contract.witOracle.staticCall();
-		} catch {
-			oracleAddr = await priceFeeds.provider
-				.call({
-					to: target,
-					data: "0x46d1d21a", // funcSig for 'witnet()'
-				})
-				.then((result) => AbiCoder.defaultAbiCoder().decode(["address"], result))
-				.then((result) => result.toString());
-		}
-		if (oracleAddr !== witOracle.address) {
-			throw new Error(`${WitPriceFeeds.constructor.name} at ${target}: mismatching Wit/Oracle address (${oracleAddr})`);
+	public static async fromWitOracle(witOracle: WitOracle, target?: string | Addressable): Promise<WitPriceFeeds> {
+		const priceFeeds = new WitPriceFeeds({ witOracle, target });
+		const priceFeedsWitOracleAddr = await priceFeeds.contract.witOracle.staticCall();
+		if (priceFeedsWitOracleAddr !== witOracle.address) {
+			throw new Error(`${WitPriceFeeds.constructor.name} at ${target}: mismatching Wit/Oracle address (${priceFeedsWitOracleAddr})`);
 		}
 		return priceFeeds;
+	}
+
+	protected constructor(specs: {
+		witOracle: WitOracle, 
+		target?: string | Addressable,
+	}) {
+		super({ ...specs, artifact: "WitPriceFeeds" });
 	}
 
 	public async createChainlinkAggregator(
@@ -57,7 +50,7 @@ export class WitPriceFeeds extends WitAppliance {
 	): Promise<ContractTransactionReceipt | TransactionReceipt | null> {
 		const evmTransaction: ContractTransaction = await this.contract.createChainlinkAggregator.populateTransaction(id4);
 		evmTransaction.gasPrice = options?.evmGasPrice || evmTransaction?.gasPrice;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(evmTransaction)
 			.then((response) => {
 				if (options?.onTransaction) {
@@ -85,6 +78,7 @@ export class WitPriceFeeds extends WitAppliance {
 			onTransactionReceipt?: (receipt: TransactionReceipt | null) => any;
 		},
 	): Promise<ContractTransactionReceipt | TransactionReceipt | null> {
+		const signer = this._checkSigner();
 		return this.contract.pushDataReport
 			.populateTransaction(abiEncodeDataPushReport(report), report?.evm_proof)
 			.then((tx) => {
@@ -100,7 +94,7 @@ export class WitPriceFeeds extends WitAppliance {
 				}
 				tx.gasPrice = options?.gasPrice || tx?.gasPrice;
 				tx.gasLimit = options?.gasLimit || tx?.gasLimit;
-				return this.signer.sendTransaction(tx);
+				return signer.sendTransaction(tx);
 			})
 			.then((response) => {
 				if (options?.onTransaction) {
@@ -134,7 +128,7 @@ export class WitPriceFeeds extends WitAppliance {
 			radHash,
 		);
 		evmTransaction.gasPrice = options?.evmGasPrice || evmTransaction?.gasPrice;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(evmTransaction)
 			.then((response) => {
 				if (options?.onTransaction) {
@@ -172,7 +166,7 @@ export class WitPriceFeeds extends WitAppliance {
 			sources || "0x0000000000000000000000000000000000000000000000000000000000000000",
 		);
 		evmTransaction.gasPrice = options?.evmGasPrice || evmTransaction?.gasPrice;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(evmTransaction)
 			.then((response) => {
 				if (options?.onTransaction) {
@@ -208,7 +202,7 @@ export class WitPriceFeeds extends WitAppliance {
 			dependencies,
 		);
 		evmTransaction.gasPrice = options?.evmGasPrice || evmTransaction?.gasPrice;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(evmTransaction)
 			.then((response) => {
 				if (options?.onTransaction) {
@@ -236,7 +230,7 @@ export class WitPriceFeeds extends WitAppliance {
 	): Promise<ContractTransactionReceipt | TransactionReceipt | null> {
 		const evmTransaction: ContractTransaction = await this.contract.removePriceFeed.populateTransaction(caption, true);
 		evmTransaction.gasPrice = options?.evmGasPrice || evmTransaction?.gasPrice;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(evmTransaction)
 			.then((response) => {
 				if (options?.onTransaction) {
@@ -266,7 +260,7 @@ export class WitPriceFeeds extends WitAppliance {
 			abiEncodePriceFeedUpdateConditions(conditions),
 		);
 		evmTransaction.gasPrice = options?.evmGasPrice || evmTransaction?.gasPrice;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(evmTransaction)
 			.then((response) => {
 				if (options?.onTransaction) {
@@ -298,7 +292,7 @@ export class WitPriceFeeds extends WitAppliance {
 			abiEncodePriceFeedUpdateConditions(conditions),
 		);
 		evmTransaction.gasPrice = options?.evmGasPrice || evmTransaction?.gasPrice;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(evmTransaction)
 			.then((response) => {
 				if (options?.onTransaction) {
@@ -326,7 +320,7 @@ export class WitPriceFeeds extends WitAppliance {
 	): Promise<ContractTransactionReceipt | TransactionReceipt | null> {
 		const tx: ContractTransaction = await this.contract.clone.populateTransaction(curator);
 		tx.gasPrice = options?.evmGasPrice || tx?.gasPrice;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(tx)
 			.then((response) => {
 				if (options?.onTransaction) {

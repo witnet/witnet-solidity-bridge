@@ -1,7 +1,9 @@
 import { utils, Witnet } from "@witnet/sdk";
-import type { ContractTransactionReceipt, JsonRpcSigner, Result } from "ethers";
+import type { ContractTransactionReceipt, Result } from "ethers";
 import { abiEncodeRadonAsset } from "../utils.js";
 import { WitArtifact } from "./WitArtifact.js";
+import { ContractRunner } from "ethers";
+import { WitOracle } from "./WitOracle.js";
 
 /**
  * Wrapper class for the Wit/Oracle Radon Registry core contract as deployed in some supported EVM network.
@@ -10,8 +12,27 @@ import { WitArtifact } from "./WitArtifact.js";
  * or Wit/Oracle query results pushed into smart contracts from offchain workflows.
  */
 export class WitOracleRadonRegistry extends WitArtifact {
-	constructor(signer: JsonRpcSigner, network: string) {
-		super(signer, network, "WitOracleRadonRegistry");
+
+	/**
+	 * Creates a new instance of the WitOracleRadonRegistry wrapper, connected to the same EVM network as the given WitOracle instance.
+	 * @param witOracle An instance of the WitOracle wrapper class, connected to the same EVM network as the target Radon Registry.
+	 */
+	public static async fromWitOracle(witOracle: WitOracle): Promise<WitOracleRadonRegistry> {
+		return new WitOracleRadonRegistry({
+			network: witOracle.network,
+			networkId: witOracle.networkId,
+			runner: witOracle.runner,
+			target: await witOracle.contract.registry.staticCall(),
+		});
+	}
+
+	protected constructor(specs: {
+		network: string, 
+		networkId: number, 
+		runner: ContractRunner,
+		target: string,
+	}) {
+		super({ ...specs, artifact: "WitOracleRadonRegistry"});
 	}
 
 	/// ===========================================================================================================

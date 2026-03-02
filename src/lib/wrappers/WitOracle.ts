@@ -1,19 +1,19 @@
 import type { Witnet } from "@witnet/sdk";
 import { type BlockTag, Contract, type EventLog, JsonRpcProvider, type JsonRpcSigner } from "ethers";
 import type { WitOracleQuery, WitOracleQueryParams, WitOracleQueryResponse, WitOracleQueryStatus } from "../types.js";
-import { abiDecodeQueryStatus, abiEncodeWitOracleQueryParams, getEvmNetworkByChainId } from "../utils.js";
+import { abiDecodeQueryStatus, abiEncodeWitOracleQueryParams } from "../utils.js";
 
 import { WitArtifact } from "./WitArtifact.js";
 import { WitOracleConsumer } from "./WitOracleConsumer.js";
 import { WitOracleRadonRegistry } from "./WitOracleRadonRegistry.js";
-import {
-	WitOracleRadonRequestFactory,
-	WitOracleRadonRequestModalFactory,
-	WitOracleRadonRequestTemplateFactory,
-} from "./WitOracleRadonRequestFactory.js";
+import { WitOracleRadonRequestFactory } from "./WitOracleRadonRequestFactory.js";
 import { WitPriceFeeds } from "./WitPriceFeeds.js";
 import { WitPriceFeedsLegacy } from "./WitPriceFeedsLegacy.js";
 import { WitRandomness } from "./WitRandomness.js";
+import { ContractRunner } from "ethers/providers";
+
+import { fetchEvmNetworkFromProvider } from "../utils.js";
+import { Addressable } from "ethers";
 
 /**
  * Wrapper class for the Wit/Oracle contract as deployed in some specified EVM network.
@@ -23,28 +23,51 @@ import { WitRandomness } from "./WitRandomness.js";
  *
  */
 export class WitOracle extends WitArtifact {
-	constructor(signer: JsonRpcSigner, network: string) {
-		super(signer, network, "WitOracle");
+
+	/**
+	 * Factory method to create a `WitOracle` wrapper instance from an existing `JsonRpcProvider`.
+	 * The provider must be connected to an EVM network where the Wit/Oracle Framework is deployed.
+	 * @param provider An ethers.js `JsonRpcProvider` instance connected to an EVM network where the Wit/Oracle Framework is deployed.
+	 * @returns A `WitOracle` wrapper instance connected to the same EVM network as the given provider.
+	 */
+	public static async fromEthRpcProvider(provider: JsonRpcProvider): Promise<WitOracle> {
+		const network = await fetchEvmNetworkFromProvider(provider);
+		if (!network) {
+			throw new Error(`WitOracle: unsupported network at given JsonRpcProvider`);
+		}
+		return new WitOracle({ network: network.name, networkId: network.id, runner: provider });
 	}
 
 	/**
-	 * Create a WitOracle attached to the Wit/Oracle main address on the connected EVM network.
-	 * Fails if the EVM network served at the specified JSON ETH/RPC endpoint, is not currently bridged
-	 * to the Witnet blockchain.
-	 * @param url ETH/RPC endpoint URL.
-	 * @param signer Specific signer address, other than default, to use for signing EVM transactions.
+	 * Factory method to create a `WitOracle` wrapper instance from an existing `JsonRpcSigner`.
+	 * The signer must be connected to an EVM network where the Wit/Oracle Framework is deployed.
+	 * @param signer 
+	 * @returns 
 	 */
-	public static async fromJsonRpcUrl(url: string, signerId?: number | string): Promise<WitOracle> {
-		const provider = new JsonRpcProvider(url, undefined, {
-			pollingInterval: 5000,
-		});
-		const signer = await provider.getSigner(signerId);
-		const chainId = Number((await provider.getNetwork()).chainId);
-		const network = getEvmNetworkByChainId(chainId);
+	public static async fromEthRpcSigner(signer: JsonRpcSigner): Promise<WitOracle> {
+		const network = await fetchEvmNetworkFromProvider(signer.provider);
 		if (!network) {
-			throw new Error(`WitOracle: unsupported chain id: ${chainId}`);
+			throw new Error(`WitOracle: unsupported network at given JsonRpcSigner`);
 		}
-		return new WitOracle(signer, network);
+		return new WitOracle({ network: network.name, networkId: network.id, runner: signer });
+	}
+
+	/**
+	 * Factory method to create a `WitOracle` wrapper instance from an Ethereum JSON-RPC URL.
+	 * The URL must point to an EVM network where the Wit/Oracle Framework is deployed.
+	 * @param url 
+	 * @returns 
+	 */
+	public static async fromEthRpcUrl(url: string): Promise<WitOracle> {
+		return this.fromEthRpcProvider(new JsonRpcProvider(url));
+	}
+
+	private constructor(specs: {
+		network: string, 
+		networkId: number,
+		runner: ContractRunner,
+	}) {
+		super({ ...specs, artifact: "WitOracle" });
 	}
 
 	public async estimateBaseFee(evmGasPrice: bigint): Promise<bigint> {
@@ -225,7 +248,7 @@ export class WitOracle extends WitArtifact {
 				const legacy = new Contract(
 					this.address,
 					["function getQueryResultError(uint256) public view returns ((uint8,string))"],
-					this.signer,
+					this.runner,
 				);
 				reason = await legacy.getQueryResultError.staticCall(queryId).then((result) => result[1]);
 			}
@@ -241,8 +264,8 @@ export class WitOracle extends WitArtifact {
 			.then((statuses: Array<bigint>) => statuses.map((value) => abiDecodeQueryStatus(value)));
 	}
 
-	public async getWitOracleConsumerAt(target: string): Promise<WitOracleConsumer> {
-		return WitOracleConsumer.at(this, target);
+	public async _getWitOracleConsumerAt(target: string): Promise<WitOracleConsumer> {
+		return WitOracleConsumer.fromWitOracle(this, target);
 	}
 
 	/**
@@ -251,8 +274,8 @@ export class WitOracle extends WitArtifact {
 	 * as to be securely referred on both Wit/Oracle queries pulled from within smart contracts,
 	 * or Wit/Oracle query results pushed into smart contracts from offchain workflows.
 	 */
-	public async getWitOracleRadonRegistry(): Promise<WitOracleRadonRegistry> {
-		return new WitOracleRadonRegistry(this.signer, this.network);
+	public async _getWitOracleRadonRegistry(): Promise<WitOracleRadonRegistry> {
+		return WitOracleRadonRegistry.fromWitOracle(this);
 	}
 
 	/**
@@ -261,40 +284,44 @@ export class WitOracle extends WitArtifact {
 	 * parameterized Radon Retievals (Witnet-compliant data sources). Template addresses are counter-factual to
 	 * the set of data sources they are built on.
 	 */
-	public async getWitOracleRadonRequestFactory(): Promise<WitOracleRadonRequestFactory> {
-		return WitOracleRadonRequestFactory.deployed(this, await this.getWitOracleRadonRegistry());
+	public async _getWitOracleRadonRequestFactory(at?: string | Addressable): Promise<WitOracleRadonRequestFactory> {
+		return WitOracleRadonRequestFactory.fromWitOracle(this, at);
 	}
 
 	/**
-	 * Wrapper class for Wit/Oracle Radon Template artifacts as deployed in some supported EVM network.
-	 * `IWitOracleRadonRequestTemplateFactory` contracts enable smart contracts to formally verify Radon Requests
-	 * built out out of a set of parameterized Witnet-compliant data sources, on the fly.
+	 * Wrapper class for the Wit/Price Feeds core contract as deployed in some supported EVM network.
+	 * It allows formal verification of Witnet-compliant price feeds into such network,
+	 * as to be securely referred on both Wit/Oracle queries pulled from within smart contracts,
+	 * or Wit/Oracle query results pushed into smart contracts from offchain workflows.
+	 * @param at The address of the Wit/Price Feeds contract to be wrapped, other than framework's default.
+	 * @returns A `WitPriceFeeds` instance wrapping the specified contract.
 	 */
-	public async getWitOracleRadonRequestTemplateFactoryAt(
-		target: string,
-	): Promise<WitOracleRadonRequestTemplateFactory> {
-		return WitOracleRadonRequestTemplateFactory.at(this, target);
+	public async _getWitPriceFeeds(at?: string | Addressable): Promise<WitPriceFeeds> {
+		return WitPriceFeeds.fromWitOracle(this, at);
 	}
 
 	/**
-	 * Wrapper class for Wit/Oracle Radon Modal artifacts as deployed in some supported EVM network.
-	 * `IWitOracleRadonRequestModal` contracts enable smart contracts to formally verify Radon Requests
-	 * built out out of a single Radon Retrieval and multiple data providers, all of them expected to
-	 * provided exactly the same data.
+	 * Wrapper class for the legacy Wit/Price Feeds core contract as deployed in some supported EVM network.
+	 * It allows formal verification of legacy Witnet-compliant price feeds into such network,
+	 * as to be securely referred on both Wit/Oracle queries pulled from within smart contracts,
+	 * or Wit/Oracle query results pushed into smart contracts from offchain workflows.
+	 * @param at The address of the legacy Wit/Price Feeds contract to be wrapped, other than framework's default.
+	 * @returns A `WitPriceFeedsLegacy` instance wrapping the specified contract.
+	 * Note: this contract is deprecated and should only be used for backwards compatibility with existing deployments.
 	 */
-	public async getWitOracleRadonRequestModalFactoryAt(target: string): Promise<WitOracleRadonRequestModalFactory> {
-		return WitOracleRadonRequestModalFactory.arguments(this, target);
+	public async _getWitPriceFeedsLegacy(at?: string | Addressable): Promise<WitPriceFeedsLegacy> {
+		return WitPriceFeedsLegacy.fromWitOracle(this, at);
 	}
 
-	public async getWitPriceFeedsAt(target: string): Promise<WitPriceFeeds> {
-		return WitPriceFeeds.at(this, target);
-	}
-
-	public async getWitPriceFeedsLegacyAt(target: string): Promise<WitPriceFeedsLegacy> {
-		return WitPriceFeedsLegacy.at(this, target);
-	}
-
-	public async getWitRandomnessAt(target: string): Promise<WitRandomness> {
-		return WitRandomness.at(this, target);
+	/**
+	 * Wrapper class for the Wit/Randomness core contract as deployed in some supported EVM network.
+	 * It allows formal verification of Witnet-compliant randomness requests into such network,
+	 * as to be securely referred on both Wit/Oracle queries pulled from within smart contracts,
+	 * or Wit/Oracle query results pushed into smart contracts from offchain workflows.
+	 * @param at The address of the Wit/Randomness contract to be wrapped, other than framework's default.
+	 * @returns A `WitRandomness` instance wrapping the specified contract.
+	 */
+	public async _getWitRandomness(at?: string | Addressable): Promise<WitRandomness> {
+		return WitRandomness.fromWitOracle(this, at);
 	}
 }

@@ -1,5 +1,7 @@
 import type { Witnet } from "@witnet/sdk";
 import {
+	AbiCoder,
+	Addressable,
 	type BlockTag,
 	Contract,
 	type ContractTransaction,
@@ -14,34 +16,40 @@ import { WitAppliance } from "./WitAppliance.js";
 import type { WitOracle } from "./WitOracle.js";
 
 export class WitRandomness extends WitAppliance {
-	protected _legacy: Contract;
 
-	protected constructor(witOracle: WitOracle, at: string) {
-		super(witOracle, "WitRandomnessV3", at);
-		this._legacy = new Contract(at, ABIs.WitRandomnessV2, this.signer);
-	}
-
-	static async at(witOracle: WitOracle, target: string): Promise<WitRandomness> {
-		const randomizer = new WitRandomness(witOracle, target);
-		try {
-			let oracleAddr;
+	public static async fromWitOracle(witOracle: WitOracle, target?: string | Addressable): Promise<WitRandomness> {
+			const randomness = new WitRandomness({ witOracle, target });
+			let randomnessWitOracleAddr;
 			try {
-				oracleAddr = await randomizer.contract.witOracle.staticCall();
-			} catch {
-				const abi = ["function witnet() public view returns (address)"];
-				const contract = new Contract(target, abi, randomizer.signer);
-				oracleAddr = await contract.witnet.staticCall();
+				randomnessWitOracleAddr = await randomness.provider
+					.call({
+						to: target,
+						data: "0x46d1d21a", // funcSig for 'witnet()'
+					})
+					.then((result) => AbiCoder.defaultAbiCoder().decode(["address"], result))
+					.then((result) => result.toString());
+			} catch (error) {
+				randomnessWitOracleAddr = await randomness.contract.witOracle.staticCall();
 			}
-			if (oracleAddr !== witOracle.address) {
-				throw new Error(`WitRandomness at ${target}: mismatching Wit/Oracle address (${oracleAddr})`);
+			if (randomnessWitOracleAddr !== witOracle.address) {
+				throw new Error(`${WitRandomness.constructor.name} at ${target}: mismatching Wit/Oracle address (${randomnessWitOracleAddr})`);
+			} else {
+				return randomness;
 			}
-		} catch (error: any) {
-			throw new Error(
-				`WitRandomness at ${target}: cannot fetch Wit/Oracle address\n${error?.stack?.split("\n")[0] || error}`,
-			);
 		}
-		return randomizer;
+
+	protected constructor(specs: {
+		witOracle: WitOracle, 
+		target?: string | Addressable
+	}) {
+		super({ ...specs, artifact: "WitRandomnessV3" })
+		this._legacy = new Contract(this.address, ABIs.WitRandomnessV2, this.runner);
 	}
+
+	/**
+	 * The underlying Ethers' contract wrapper for the V2 implementation, used for event filtering and backward compatibility with V2 methods.
+	 */
+	protected _legacy: Contract;
 
 	public async clone(
 		curator: string,
@@ -55,7 +63,7 @@ export class WitRandomness extends WitAppliance {
 	): Promise<ContractTransactionReceipt | TransactionReceipt | null> {
 		const tx: ContractTransaction = await this.contract.clone.populateTransaction(curator);
 		tx.gasPrice = options?.evmGasPrice || tx?.gasPrice;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(tx)
 			.then((response) => {
 				if (options?.onTransaction) {
@@ -199,7 +207,7 @@ export class WitRandomness extends WitAppliance {
 		const evmTransaction: ContractTransaction = await this.contract.getFunction("randomize()").populateTransaction();
 		evmTransaction.gasPrice = evmGasPrice || evmTransaction?.gasPrice;
 		evmTransaction.value = evmRandomizeFee;
-		return this.signer
+		return this._checkSigner()
 			.sendTransaction(evmTransaction)
 			.then((response) => {
 				if (options?.onRandomizeTransaction) options.onRandomizeTransaction(response.hash);

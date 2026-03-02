@@ -1,30 +1,85 @@
 import {
 	AbiCoder,
-	type Addressable,
 	Contract,
+	type Addressable,
 	type ContractRunner,
 	type Interface,
 	type InterfaceAbi,
 	type JsonRpcApiProvider,
-	type JsonRpcSigner,
+	JsonRpcSigner,
 } from "ethers";
 
 export abstract class ContractWrapper {
-	constructor(signer: JsonRpcSigner, network: string, abi: Interface | InterfaceAbi, target: string | Addressable) {
-		this._address = target;
-		this._contract = new Contract(target, abi, signer as ContractRunner);
+
+	constructor(target: string | Addressable, abi: Interface | InterfaceAbi, runner: ContractRunner) {
 		this.abi = abi;
-		this.network = network;
-		this.provider = signer.provider;
-		this.signer = signer;
+		this._address = target;
+		this._contract = new Contract(target, abi, runner);
+		this._runner = runner;
+		[this._provider, this._signer] = this._getProviderAndSignerFromContractRunner(runner);
+	}
+
+	/**
+	 * Check if a signer is available for contract interactions.
+	 * @returns The signer if available, otherwise throws an error.
+	 */
+	protected _checkSigner(): JsonRpcSigner {
+		if (!this.signer) {
+			throw new Error(`${this.constructor.name}: No signer is available.`);
+		} else {
+			return this.signer;
+		}
+	}
+
+	/**
+	 * Get the provider and signer from a ContractRunner.
+	 * @param runner The ContractRunner to extract the provider and signer from.
+	 * @return An array containing the provider and signer (if available).
+	 * @throws An error if the ContractRunner does not have a provider property.
+	 * @remarks The method checks if the runner has a provider property, and if so, it returns the provider and signer (if the runner is a JsonRpcSigner). If the runner does not have a provider property, it throws an error.
+	 * @example
+	 * // Assuming `contractWrapper` is an instance of a class that extends ContractWrapper:
+	 * const provider = contractWrapper.provider; // Get the provider
+	 * const signer = contractWrapper.signer; // Get the signer (if available)	
+	 */
+	protected _getProviderAndSignerFromContractRunner(runner: ContractRunner): any[] {
+		if ("provider" in runner) {
+			return [
+				runner.provider as JsonRpcApiProvider,
+				// ...this._getNetworkFromProvider(runner.provider as JsonRpcApiProvider),
+				runner instanceof JsonRpcSigner ? runner as JsonRpcSigner : undefined
+			];
+		} else {
+			throw new Error(`${this.constructor.name}: ContractRunner does not have provider property`);
+		}
 	}
 
 	protected _address: string | Addressable;
 	protected _contract: Contract;
+	protected _provider: JsonRpcApiProvider;
+	protected _runner: ContractRunner;
+	protected _signer?: JsonRpcSigner;
 
-	public attach(target: string | Addressable): any {
-		this._contract = new Contract(target, this.abi, this.signer);
+	/**
+	 * Attach the contract wrapper to a different address.
+	 * @param target New address to attach to.
+	 * @returns The contract wrapper instance, connected to the new address.
+	 */
+	public async attach(target: string | Addressable): Promise<ContractWrapper> {
+		this._contract = this._contract.attach(target) as Contract;
 		this._address = target;
+		return this;
+	}
+
+	/**
+	 * Connect the contract wrapper to a different ContractRunner (e.g. signer or provider).
+	 * @param runner New ContractRunner to connect to.
+	 * @returns The contract wrapper instance, connected to the new ContractRunner.
+	 */
+	protected async connect(runner: ContractRunner): Promise<ContractWrapper> {
+		[this._provider, this._signer] = this._getProviderAndSignerFromContractRunner(runner);
+		this._contract = this._contract.connect(runner) as Contract
+		this._runner = runner;
 		return this;
 	}
 
@@ -48,20 +103,27 @@ export abstract class ContractWrapper {
 	}
 
 	/**
-	 * The EVM network currently connected to.
-	 */
-	public readonly network: string;
-
-	/**
 	 * The ETH/RPC provider used of contract interactions.
 	 */
-	public readonly provider: JsonRpcApiProvider;
+	public get provider(): JsonRpcApiProvider {
+		return this._provider;
+	}
+
+	/**
+	 * The ContractRunner (e.g. signer or provider) used for contract interactions.
+	 */
+	public get runner(): ContractRunner {
+		return this._runner;
+	}
 
 	/**
 	 * The EVM address that will sign contract interaction transactions, when required.
 	 */
-	public readonly signer: JsonRpcSigner;
+	public get signer(): JsonRpcSigner | undefined {
+		return this._signer;
+	}
 
+	// public readonly runner: ContractRunner;
 	/**
 	 * Name of the underlying logic implementation contract.
 	 * @returns Contract name.
@@ -96,5 +158,20 @@ export abstract class ContractWrapper {
 			return "(immutable)";
 		}
 		return version;
+	}
+
+	/**
+	 * Set the contract wrapper's signer to a different address, and connect the underlying contract to it.
+	 * If the contract wrapper was not connected to a signer before, it will now be able to sign transactions.
+	 * If the contract wrapper was already connected to a signer, it will now be connected to the new signer.
+	 * @param address Address or index of the new signer to set. If not provided, the default signer will be used.
+	 * @returns The new signer.
+	 */
+	public async setSigner(address?: number | string): Promise<JsonRpcSigner> {
+		return this._provider.getSigner(address).then((signer) => {
+			this._signer = signer;
+			this._contract = this._contract.connect(signer) as Contract;
+			return signer;
+		});
 	}
 }
