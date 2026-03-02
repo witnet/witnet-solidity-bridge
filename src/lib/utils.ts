@@ -164,6 +164,17 @@ function _versionLastCommitOf(version?: string) {
 	}
 }
 
+export async function fetchEvmNetworkFromProvider(provider: JsonRpcApiProvider): Promise<{ name: string; id: number } | undefined> {
+	return provider.getNetwork().then((value) => {
+		const network = getEvmNetworkByChainId(Number(value.chainId));
+		if (network) {
+			return { name: network, id: Number(value.chainId) };
+		} else {
+			return undefined;
+		}
+	});
+}
+
 export function getEvmNetworkAddresses(network: string): any {
 	return helpers.getNetworkAddresses(network);
 }
@@ -178,7 +189,7 @@ export function getEvmNetworkByChainId(chainId: number): string | undefined {
 
 export function getEvmNetworkId(network: string): number | undefined {
 	const found = Object.entries(helpers.supportedNetworks()).find(
-		([key]: [string, any]) => key.toLowerCase() === network.toLowerCase(),
+		([key]: [string, any]) => network && key.toLowerCase() === network.toLowerCase(),
 	);
 	if (found) return (found[1] as any)?.network_id;
 	else return undefined;
@@ -186,7 +197,7 @@ export function getEvmNetworkId(network: string): number | undefined {
 
 export function getEvmNetworkSymbol(network: string): string {
 	const found = Object.entries(helpers.supportedNetworks()).find(
-		([key]: [string, any]) => key.toLowerCase() === network.toLowerCase(),
+		([key]: [string, any]) => network && key.toLowerCase() === network.toLowerCase(),
 	);
 	if (found) return (found[1] as any)?.symbol;
 	else return "ETH";
@@ -197,7 +208,7 @@ export function getEvmNetworks(): string[] {
 }
 
 export function isEvmNetworkMainnet(network: string): boolean {
-	const found = Object.entries(helpers.supportedNetworks()).find(([key]) => key === network.toLowerCase());
+	const found = Object.entries(helpers.supportedNetworks()).find(([key]) => network && key === network.toLowerCase());
 	return (found as any)?.[1].mainnet;
 }
 
