@@ -470,7 +470,7 @@
             "WitPriceFeedsLegacy": "0x0000000000000000000000000000000000000000",
             "WitPriceFeedsLegacyUpgradableBypass": "0x970905Cd2cD5511FbFBE5f33dD835060376a71d2",
             "WitPriceFeedsV3Upgradable": "0x67Ea60Ef14CeDaa327DC22ab1cFfD0827CDBB43d",
-            "WitRandonessV2": "0x0000000000000000000000000000000000000000",
+            "WitRandomnessV2": "0x0000000000000000000000000000000000000000",
             "WitRandomnessV3": "0xB6cE20Ae908A3aB3ED2E64F41a2C749577418C90"
         }
     },
