@@ -1,8 +1,8 @@
 import type { Witnet } from "@witnet/sdk";
-import { type BlockTag, Contract, type EventLog, JsonRpcProvider, type JsonRpcSigner } from "ethers";
+import { type Addressable, type BlockTag, Contract, type EventLog, JsonRpcProvider, type JsonRpcSigner } from "ethers";
+import type { ContractRunner } from "ethers/providers";
 import type { WitOracleQuery, WitOracleQueryParams, WitOracleQueryResponse, WitOracleQueryStatus } from "../types.js";
-import { abiDecodeQueryStatus, abiEncodeWitOracleQueryParams } from "../utils.js";
-
+import { abiDecodeQueryStatus, abiEncodeWitOracleQueryParams, fetchEvmNetworkFromProvider } from "../utils.js";
 import { WitArtifact } from "./WitArtifact.js";
 import { WitOracleConsumer } from "./WitOracleConsumer.js";
 import { WitOracleRadonRegistry } from "./WitOracleRadonRegistry.js";
@@ -10,10 +10,6 @@ import { WitOracleRadonRequestFactory } from "./WitOracleRadonRequestFactory.js"
 import { WitPriceFeeds } from "./WitPriceFeeds.js";
 import { WitPriceFeedsLegacy } from "./WitPriceFeedsLegacy.js";
 import { WitRandomness } from "./WitRandomness.js";
-import { ContractRunner } from "ethers/providers";
-
-import { fetchEvmNetworkFromProvider } from "../utils.js";
-import { Addressable } from "ethers";
 
 /**
  * Wrapper class for the Wit/Oracle contract as deployed in some specified EVM network.
@@ -23,7 +19,6 @@ import { Addressable } from "ethers";
  *
  */
 export class WitOracle extends WitArtifact {
-
 	/**
 	 * Factory method to create a `WitOracle` wrapper instance from an existing `JsonRpcProvider`.
 	 * The provider must be connected to an EVM network where the Wit/Oracle Framework is deployed.
@@ -41,8 +36,8 @@ export class WitOracle extends WitArtifact {
 	/**
 	 * Factory method to create a `WitOracle` wrapper instance from an existing `JsonRpcSigner`.
 	 * The signer must be connected to an EVM network where the Wit/Oracle Framework is deployed.
-	 * @param signer 
-	 * @returns 
+	 * @param signer
+	 * @returns
 	 */
 	public static async fromEthRpcSigner(signer: JsonRpcSigner): Promise<WitOracle> {
 		const network = await fetchEvmNetworkFromProvider(signer.provider);
@@ -55,17 +50,17 @@ export class WitOracle extends WitArtifact {
 	/**
 	 * Factory method to create a `WitOracle` wrapper instance from an Ethereum JSON-RPC URL.
 	 * The URL must point to an EVM network where the Wit/Oracle Framework is deployed.
-	 * @param url 
-	 * @returns 
+	 * @param url
+	 * @returns
 	 */
 	public static async fromEthRpcUrl(url: string): Promise<WitOracle> {
-		return this.fromEthRpcProvider(new JsonRpcProvider(url));
+		return WitOracle.fromEthRpcProvider(new JsonRpcProvider(url));
 	}
 
 	private constructor(specs: {
-		network: string, 
-		networkId: number,
-		runner: ContractRunner,
+		network: string;
+		networkId: number;
+		runner: ContractRunner;
 	}) {
 		super({ ...specs, artifact: "WitOracle" });
 	}

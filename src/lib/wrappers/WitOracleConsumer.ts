@@ -1,28 +1,26 @@
-import type { ContractTransactionReceipt, TransactionReceipt } from "ethers";
+import type { Addressable, ContractTransactionReceipt, TransactionReceipt } from "ethers";
 import type { DataPushReport } from "../types.js";
 import { abiEncodeDataPushReport } from "../utils.js";
 import { WitAppliance } from "./WitAppliance.js";
 import type { WitOracle } from "./WitOracle.js";
-import { Addressable } from "ethers";
 
 export class WitOracleConsumer extends WitAppliance {
-
 	public static async fromWitOracle(witOracle: WitOracle, target: string | Addressable): Promise<WitOracleConsumer> {
 		const consumer = new WitOracleConsumer({ target, witOracle });
 		const consumerWitOracleAddr = await consumer.contract.witOracle.staticCall();
 		if (consumerWitOracleAddr !== witOracle.address) {
 			throw new Error(
-				`${WitOracleConsumer.constructor.name}: contract at ${target} not bound to the specified WitOracle at ${witOracle.address} in EVM network ${witOracle.network}.`
+				`${WitOracleConsumer.constructor.name}: contract at ${target} not bound to the specified WitOracle at ${witOracle.address} in EVM network ${witOracle.network}.`,
 			);
 		}
 		return consumer;
 	}
 
 	protected constructor(specs: {
-		target: string | Addressable,
-		witOracle: WitOracle
+		target: string | Addressable;
+		witOracle: WitOracle;
 	}) {
-		super({ ...specs, artifact: "WitOracleConsumer" })
+		super({ ...specs, artifact: "WitOracleConsumer" });
 	}
 
 	public async pushDataReport(
@@ -36,8 +34,7 @@ export class WitOracleConsumer extends WitAppliance {
 		},
 	): Promise<ContractTransactionReceipt | TransactionReceipt | null> {
 		const signer = this._checkSigner();
-		return this.contract
-			.pushDataReport
+		return this.contract.pushDataReport
 			.populateTransaction(abiEncodeDataPushReport(report), report?.evm_proof)
 			.then((tx) => {
 				tx.gasPrice = options?.gasPrice || tx?.gasPrice;

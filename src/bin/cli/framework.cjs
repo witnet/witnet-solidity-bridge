@@ -35,9 +35,10 @@ module.exports = async (flags = {}, params = []) => {
 		if (flags?.modals) {
 			const dict = utils.flattenRadonModals(assets);
 			if (Object.keys(dict).length > 0 && deployables.modals[network]) {
-				artifacts.push(...Object.entries(deployables.modals[network])
-					.filter(([key]) => dict[key] !== undefined)
-					.map(([key, address]) => [key, { address }])
+				artifacts.push(
+					...Object.entries(deployables.modals[network])
+						.filter(([key]) => dict[key] !== undefined)
+						.map(([key, address]) => [key, { address }]),
 				);
 			}
 		}

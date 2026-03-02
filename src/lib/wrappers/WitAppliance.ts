@@ -1,17 +1,16 @@
 import type { Addressable, Interface, InterfaceAbi } from "ethers";
 import { ABIs } from "../../index.js";
 import { getEvmNetworkAddresses } from "../utils.js";
-import type { WitOracle } from "./WitOracle.js";
 import { WitArtifact } from "./WitArtifact.js";
+import type { WitOracle } from "./WitOracle.js";
 
 export abstract class WitAppliance extends WitArtifact {
-	
 	public readonly witOracle: WitOracle;
 
 	constructor(specs: {
-		artifact: string,
-		target?: string | Addressable,
-		witOracle: WitOracle,
+		artifact: string;
+		target?: string | Addressable;
+		witOracle: WitOracle;
 	}) {
 		const { artifact, target: at, witOracle } = specs;
 		const abis: Record<string, Interface | InterfaceAbi> = ABIs;
@@ -31,18 +30,23 @@ export abstract class WitAppliance extends WitArtifact {
 	 */
 	public async attach(target: string | Addressable): Promise<WitAppliance> {
 		const contract = this._contract.attach(target);
-		return contract.getFunction("witOracle()")
+		return contract
+			.getFunction("witOracle()")
 			.staticCall()
 			.then((witOracleAddress) => {
 				if (witOracleAddress.toLowerCase() !== this.witOracle.address.toString().toLowerCase()) {
-					throw new Error(`${this.constructor.name}: Target address ${target} in EVM network ${this.witOracle.network} bound to a different WitOracle (${witOracleAddress}).`);
+					throw new Error(
+						`${this.constructor.name}: Target address ${target} in EVM network ${this.witOracle.network} bound to a different WitOracle (${witOracleAddress}).`,
+					);
 				} else {
 					super.attach(target);
 					return this;
 				}
 			})
 			.catch((error) => {
-				throw new Error(`${this.constructor.name}: Failed to attach to address ${target} in EVM network ${this.witOracle.network}: ${error.message}`);
+				throw new Error(
+					`${this.constructor.name}: Failed to attach to address ${target} in EVM network ${this.witOracle.network}: ${error.message}`,
+				);
 			});
 	}
 }

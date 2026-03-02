@@ -16,13 +16,16 @@ module.exports = async (options = {}, args = []) => {
 	let { target } = options;
 	let chosen = false;
 	if (!target) {
-		const { apps } = utils.getEvmNetworkAddresses(network)
-		const targets = Object.entries(apps || {}).filter(([key, address]) => (
-			key.startsWith("WitPriceFeeds")
-				&& key.indexOf("Upgradable") === -1
-				&& key.indexOf("Trustable") === -1
-				&& address !== "0x0000000000000000000000000000000000000000"
-		)).map(([, address]) => address);
+		const { apps } = utils.getEvmNetworkAddresses(network);
+		const targets = Object.entries(apps || {})
+			.filter(
+				([key, address]) =>
+					key.startsWith("WitPriceFeeds") &&
+					key.indexOf("Upgradable") === -1 &&
+					key.indexOf("Trustable") === -1 &&
+					address !== "0x0000000000000000000000000000000000000000",
+			)
+			.map(([, address]) => address);
 		if (targets.length === 1) {
 			target = targets[0];
 		} else {
@@ -51,17 +54,21 @@ module.exports = async (options = {}, args = []) => {
 		}
 	}
 
-	let { client: priceFeedClient, legacy: isLegacy } = await helpers.prompter(_resolvePriceFeeds(target)).catch((err) => {
-		console.error(helpers.colors.mred(`Fatal: unable to initialize PriceFeeds wrapper: ${err.message || err}`));
-		process.exit(0);
-	});
+	let { client: priceFeedClient, legacy: isLegacy } = await helpers
+		.prompter(_resolvePriceFeeds(target))
+		.catch((err) => {
+			console.error(helpers.colors.mred(`Fatal: unable to initialize PriceFeeds wrapper: ${err.message || err}`));
+			process.exit(0);
+		});
 
 	let artifact = await priceFeedClient.getEvmImplClass();
 	// if the implementation class reports legacy but we already have a
 	// modern client, switch over to the fully-baked legacy helper.
 	if (artifact.includes("Legacy") && !isLegacy) {
 		priceFeedClient = await helpers.prompter(witOracle._getWitPriceFeedsLegacy(target)).catch((err) => {
-			console.error(helpers.colors.mred(`Fatal: unable to initialize legacy PriceFeeds wrapper: ${err.message || err}`));
+			console.error(
+				helpers.colors.mred(`Fatal: unable to initialize legacy PriceFeeds wrapper: ${err.message || err}`),
+			);
 			process.exit(0);
 		});
 		artifact = await priceFeedClient.getEvmImplClass();
@@ -80,7 +87,7 @@ module.exports = async (options = {}, args = []) => {
 		priceFeeds = (await priceFeedClient.lookupPriceFeeds()).sort((a, b) => a.symbol.localeCompare(b.symbol));
 	} catch (err) {
 		throw new Error(`Failed to lookup price feeds: ${err.message}`);
-	}	
+	}
 
 	if (!options["trace-back"]) {
 		const registry = await witOracle._getWitOracleRadonRegistry();

@@ -84,7 +84,7 @@ async function main() {
 
 	program.parse();
 
-	const { host, maxGasPrice, minBalance, network, port, schedule, scheduleOverlap, scheduleTimezone, signer,target } =
+	const { host, maxGasPrice, minBalance, network, port, schedule, scheduleOverlap, scheduleTimezone, signer, target } =
 		program.opts();
 
 	traceHeader(`@WITNET/SOLIDITY RANDOMIZER BOT v${require("../../../package.json").version}`, colors.white);

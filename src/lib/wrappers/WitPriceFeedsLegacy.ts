@@ -1,11 +1,10 @@
 import type { Witnet } from "@witnet/sdk";
+import { AbiCoder, type Addressable } from "ethers";
 import type { PriceFeedInfo } from "../types.js";
 import { WitAppliance } from "./WitAppliance.js";
 import type { WitOracle } from "./WitOracle.js";
-import { AbiCoder, Addressable } from "ethers";
 
 export class WitPriceFeedsLegacy extends WitAppliance {
-
 	public static async fromWitOracle(witOracle: WitOracle, target?: string | Addressable): Promise<WitPriceFeedsLegacy> {
 		const priceFeeds = new WitPriceFeedsLegacy({ witOracle, target });
 		let priceFeedsWitOracleAddr;
@@ -21,15 +20,17 @@ export class WitPriceFeedsLegacy extends WitAppliance {
 				.then((result) => result.toString());
 		}
 		if (priceFeedsWitOracleAddr !== witOracle.address) {
-			throw new Error(`${WitPriceFeedsLegacy.constructor.name} at ${target}: mismatching Wit/Oracle address (${priceFeedsWitOracleAddr})`);
+			throw new Error(
+				`${WitPriceFeedsLegacy.constructor.name} at ${target}: mismatching Wit/Oracle address (${priceFeedsWitOracleAddr})`,
+			);
 		} else {
 			return priceFeeds;
 		}
 	}
 
 	protected constructor(specs: {
-		witOracle: WitOracle, 
-		target?: string | Addressable,
+		witOracle: WitOracle;
+		target?: string | Addressable;
 	}) {
 		super({ ...specs, artifact: "WitPriceFeedsLegacy" });
 	}

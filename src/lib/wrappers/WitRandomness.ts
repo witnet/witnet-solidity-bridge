@@ -1,7 +1,7 @@
 import type { Witnet } from "@witnet/sdk";
 import {
 	AbiCoder,
-	Addressable,
+	type Addressable,
 	type BlockTag,
 	Contract,
 	type ContractTransaction,
@@ -16,33 +16,34 @@ import { WitAppliance } from "./WitAppliance.js";
 import type { WitOracle } from "./WitOracle.js";
 
 export class WitRandomness extends WitAppliance {
-
 	public static async fromWitOracle(witOracle: WitOracle, target?: string | Addressable): Promise<WitRandomness> {
-			const randomness = new WitRandomness({ witOracle, target });
-			let randomnessWitOracleAddr;
-			try {
-				randomnessWitOracleAddr = await randomness.provider
-					.call({
-						to: target,
-						data: "0x46d1d21a", // funcSig for 'witnet()'
-					})
-					.then((result) => AbiCoder.defaultAbiCoder().decode(["address"], result))
-					.then((result) => result.toString());
-			} catch (error) {
-				randomnessWitOracleAddr = await randomness.contract.witOracle.staticCall();
-			}
-			if (randomnessWitOracleAddr !== witOracle.address) {
-				throw new Error(`${WitRandomness.constructor.name} at ${target}: mismatching Wit/Oracle address (${randomnessWitOracleAddr})`);
-			} else {
-				return randomness;
-			}
+		const randomness = new WitRandomness({ witOracle, target });
+		let randomnessWitOracleAddr;
+		try {
+			randomnessWitOracleAddr = await randomness.provider
+				.call({
+					to: target,
+					data: "0x46d1d21a", // funcSig for 'witnet()'
+				})
+				.then((result) => AbiCoder.defaultAbiCoder().decode(["address"], result))
+				.then((result) => result.toString());
+		} catch (_error) {
+			randomnessWitOracleAddr = await randomness.contract.witOracle.staticCall();
 		}
+		if (randomnessWitOracleAddr !== witOracle.address) {
+			throw new Error(
+				`${WitRandomness.constructor.name} at ${target}: mismatching Wit/Oracle address (${randomnessWitOracleAddr})`,
+			);
+		} else {
+			return randomness;
+		}
+	}
 
 	protected constructor(specs: {
-		witOracle: WitOracle, 
-		target?: string | Addressable
+		witOracle: WitOracle;
+		target?: string | Addressable;
 	}) {
-		super({ ...specs, artifact: "WitRandomnessV3" })
+		super({ ...specs, artifact: "WitRandomnessV3" });
 		this._legacy = new Contract(this.address, ABIs.WitRandomnessV2, this.runner);
 	}
 

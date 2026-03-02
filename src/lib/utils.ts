@@ -2,7 +2,7 @@ import { Witnet } from "@witnet/sdk";
 
 import { default as cbor } from "cbor";
 
-import { AbiCoder, Contract, JsonRpcApiProvider, type JsonRpcProvider, solidityPackedKeccak256 } from "ethers";
+import { AbiCoder, Contract, type JsonRpcApiProvider, type JsonRpcProvider, solidityPackedKeccak256 } from "ethers";
 import { default as merge } from "lodash.merge";
 import { default as helpers } from "../bin/helpers.cjs";
 import { ABIs } from "../index.js";
@@ -52,11 +52,11 @@ export async function fetchWitOracleFramework(
 					.filter(([key, address]) => {
 						const base = _findBase(contracts, key);
 						return (
-							address
-								&& address !== "0x0000000000000000000000000000000000000000"
-								&& targets.includes(key)
-								&& !exclusions.includes(base)
-								&& (ABIs[key] || ABIs[base])
+							address &&
+							address !== "0x0000000000000000000000000000000000000000" &&
+							targets.includes(key) &&
+							!exclusions.includes(base) &&
+							(ABIs[key] || ABIs[base])
 						);
 					})
 					.map(async ([key, address]) => {
@@ -169,7 +169,9 @@ function _versionLastCommitOf(version?: string) {
 	}
 }
 
-export async function fetchEvmNetworkFromProvider(provider: JsonRpcApiProvider): Promise<{ name: string; id: number } | undefined> {
+export async function fetchEvmNetworkFromProvider(
+	provider: JsonRpcApiProvider,
+): Promise<{ name: string; id: number } | undefined> {
 	return provider.getNetwork().then((value) => {
 		const network = getEvmNetworkByChainId(Number(value.chainId));
 		if (network) {

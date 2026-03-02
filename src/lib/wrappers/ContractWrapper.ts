@@ -1,7 +1,7 @@
 import {
 	AbiCoder,
-	Contract,
 	type Addressable,
+	Contract,
 	type ContractRunner,
 	type Interface,
 	type InterfaceAbi,
@@ -10,7 +10,6 @@ import {
 } from "ethers";
 
 export abstract class ContractWrapper {
-
 	constructor(target: string | Addressable, abi: Interface | InterfaceAbi, runner: ContractRunner) {
 		this.abi = abi;
 		this._address = target;
@@ -40,14 +39,14 @@ export abstract class ContractWrapper {
 	 * @example
 	 * // Assuming `contractWrapper` is an instance of a class that extends ContractWrapper:
 	 * const provider = contractWrapper.provider; // Get the provider
-	 * const signer = contractWrapper.signer; // Get the signer (if available)	
+	 * const signer = contractWrapper.signer; // Get the signer (if available)
 	 */
 	protected _getProviderAndSignerFromContractRunner(runner: ContractRunner): any[] {
 		if ("provider" in runner) {
 			return [
 				runner.provider as JsonRpcApiProvider,
 				// ...this._getNetworkFromProvider(runner.provider as JsonRpcApiProvider),
-				runner instanceof JsonRpcSigner ? runner as JsonRpcSigner : undefined
+				runner instanceof JsonRpcSigner ? (runner as JsonRpcSigner) : undefined,
 			];
 		} else {
 			throw new Error(`${this.constructor.name}: ContractRunner does not have provider property`);
@@ -78,7 +77,7 @@ export abstract class ContractWrapper {
 	 */
 	protected async connect(runner: ContractRunner): Promise<ContractWrapper> {
 		[this._provider, this._signer] = this._getProviderAndSignerFromContractRunner(runner);
-		this._contract = this._contract.connect(runner) as Contract
+		this._contract = this._contract.connect(runner) as Contract;
 		this._runner = runner;
 		return this;
 	}

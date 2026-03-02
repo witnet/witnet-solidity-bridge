@@ -70,9 +70,7 @@ module.exports = async (options = {}, args = []) => {
 	// apply limit/offset filter
 	logs =
 		!since || BigInt(since) < 0n
-			? logs
-					.slice(offset || 0)
-					.slice(0, limit || DEFAULT_LIMIT) // oldest first
+			? logs.slice(offset || 0).slice(0, limit || DEFAULT_LIMIT) // oldest first
 			: logs
 					.reverse()
 					.slice(offset || 0)

@@ -7,10 +7,12 @@ import type { WitOracle } from "./WitOracle.js";
 import type { WitOracleRadonRegistry } from "./WitOracleRadonRegistry.js";
 
 export class WitOracleRadonRequestFactory extends WitAppliance {
-
 	public readonly registry: WitOracleRadonRegistry;
 
-	public static async fromWitOracle(witOracle: WitOracle, at?: string | Addressable): Promise<WitOracleRadonRequestFactory> {
+	public static async fromWitOracle(
+		witOracle: WitOracle,
+		at?: string | Addressable,
+	): Promise<WitOracleRadonRequestFactory> {
 		const factory = new WitOracleRadonRequestFactory({
 			target: at,
 			witOracle,
@@ -19,16 +21,16 @@ export class WitOracleRadonRequestFactory extends WitAppliance {
 		const factoryWitOracleAddr = await factory.contract.witOracle.staticCall();
 		if (factoryWitOracleAddr !== witOracle.address) {
 			throw new Error(
-				`${this.constructor.name}: contract at ${factory.address} not bound to the specified WitOracle at ${witOracle.address} in EVM network ${witOracle.network}.`
+				`${WitOracleRadonRequestFactory.constructor.name}: contract at ${factory.address} not bound to the specified WitOracle at ${witOracle.address} in EVM network ${witOracle.network}.`,
 			);
 		}
 		return factory;
 	}
 
 	protected constructor(specs: {
-		target?: string | Addressable,
-		witOracle: WitOracle, 
-		witOracleRadonRegistry: WitOracleRadonRegistry,
+		target?: string | Addressable;
+		witOracle: WitOracle;
+		witOracleRadonRegistry: WitOracleRadonRegistry;
 	}) {
 		super({ ...specs, artifact: "WitOracleRadonRequestFactory" });
 		this.registry = specs.witOracleRadonRegistry;
@@ -147,28 +149,30 @@ export class WitOracleRadonRequestFactory extends WitAppliance {
 }
 
 export class WitOracleRadonRequestModalFactory extends WitAppliance {
-
 	public readonly registry: WitOracleRadonRegistry;
 
-	public static async at(witOracle: WitOracle, target: string | Addressable): Promise<WitOracleRadonRequestModalFactory> {
-		const factory = new WitOracleRadonRequestModalFactory({ 
-			target, 
-			witOracle, 
-			witOracleRadonRegistry: await witOracle._getWitOracleRadonRegistry() 
+	public static async at(
+		witOracle: WitOracle,
+		target: string | Addressable,
+	): Promise<WitOracleRadonRequestModalFactory> {
+		const factory = new WitOracleRadonRequestModalFactory({
+			target,
+			witOracle,
+			witOracleRadonRegistry: await witOracle._getWitOracleRadonRegistry(),
 		});
 		const factoryWitOracleAddr = await factory.contract.witOracle.staticCall();
 		if (factoryWitOracleAddr !== witOracle.address) {
 			throw new Error(
-				`${this.constructor.name}: contract at ${factory.address} not bound to the specified WitOracle at ${witOracle.address} in EVM network ${witOracle.network}.`
+				`${WitOracleRadonRequestModalFactory.constructor.name}: contract at ${factory.address} not bound to the specified WitOracle at ${witOracle.address} in EVM network ${witOracle.network}.`,
 			);
 		}
 		return factory;
 	}
 
 	protected constructor(specs: {
-		target: string | Addressable,
-		witOracle: WitOracle, 
-		witOracleRadonRegistry: WitOracleRadonRegistry,
+		target: string | Addressable;
+		witOracle: WitOracle;
+		witOracleRadonRegistry: WitOracleRadonRegistry;
 	}) {
 		super({ ...specs, artifact: "WitOracleRadonRequestModalFactory" });
 		this.registry = specs.witOracleRadonRegistry;
@@ -256,28 +260,30 @@ export class WitOracleRadonRequestModalFactory extends WitAppliance {
 }
 
 export class WitOracleRadonRequestTemplateFactory extends WitAppliance {
-
 	public readonly registry: WitOracleRadonRegistry;
 
-	public static async at(witOracle: WitOracle, target: string | Addressable): Promise<WitOracleRadonRequestTemplateFactory> {
-		const factory = new WitOracleRadonRequestTemplateFactory({ 
+	public static async at(
+		witOracle: WitOracle,
+		target: string | Addressable,
+	): Promise<WitOracleRadonRequestTemplateFactory> {
+		const factory = new WitOracleRadonRequestTemplateFactory({
 			target,
-			witOracle, 
-			witOracleRadonRegistry: await witOracle._getWitOracleRadonRegistry()
+			witOracle,
+			witOracleRadonRegistry: await witOracle._getWitOracleRadonRegistry(),
 		});
 		const factoryWitOracleAddr = await factory.contract.witOracle.staticCall();
 		if (factoryWitOracleAddr !== witOracle.address) {
 			throw new Error(
-				`${this.constructor.name}: contract at ${factory.address} not bound to the specified WitOracle at ${witOracle.address} in EVM network ${witOracle.network}.`
+				`${WitOracleRadonRequestTemplateFactory.constructor.name}: contract at ${factory.address} not bound to the specified WitOracle at ${witOracle.address} in EVM network ${witOracle.network}.`,
 			);
 		}
 		return factory;
 	}
-	
+
 	protected constructor(specs: {
-		target: string | Addressable,
-		witOracle: WitOracle, 
-		witOracleRadonRegistry: WitOracleRadonRegistry,
+		target: string | Addressable;
+		witOracle: WitOracle;
+		witOracleRadonRegistry: WitOracleRadonRegistry;
 	}) {
 		super({ ...specs, artifact: "WitOracleRadonRequestTemplateFactory" });
 		this.registry = specs.witOracleRadonRegistry;
@@ -362,7 +368,7 @@ export class WitOracleRadonRequestTemplateFactory extends WitAppliance {
 		}
 		const method = this.contract.getFunction("verifyRadonRequest(string[][])");
 		const radHash = (await method.staticCall(encodedArgs)).slice(2);
-	
+
 		try {
 			await this.registry.lookupRadonRequestBytecode(radHash);
 		} catch {

@@ -15,15 +15,16 @@ module.exports = async (options = {}, args = []) => {
 
 	const { network, provider } = witOracle;
 	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);
-	
+
 	let { target } = options;
 	let chosen = false;
 	if (!target) {
-		const { apps } = utils.getEvmNetworkAddresses(network)
-		const targets = Object.entries(apps || {}).filter(([key, address]) => (
-			key.startsWith("WitRandomness")
-				&& address !== "0x0000000000000000000000000000000000000000"
-		)).map(([, address]) => address);
+		const { apps } = utils.getEvmNetworkAddresses(network);
+		const targets = Object.entries(apps || {})
+			.filter(
+				([key, address]) => key.startsWith("WitRandomness") && address !== "0x0000000000000000000000000000000000000000",
+			)
+			.map(([, address]) => address);
 		if (targets.length === 1) {
 			target = targets[0];
 		} else {
@@ -39,7 +40,7 @@ module.exports = async (options = {}, args = []) => {
 			chosen = true;
 		}
 	}
-	
+
 	const randomizer = await helpers.prompter(witOracle._getWitRandomness(target)).catch((err) => {
 		console.error(colors.mred(`Fatal: unable to initialize WitRandomness wrapper: ${err.message || err}`));
 		process.exit(0);
@@ -184,9 +185,7 @@ module.exports = async (options = {}, args = []) => {
 	// apply limit/offset filter
 	logs =
 		!since || BigInt(since) < 0n
-			? logs
-					.slice(offset || 0)
-					.slice(0, limit || DEFAULT_LIMIT) // oldest first
+			? logs.slice(offset || 0).slice(0, limit || DEFAULT_LIMIT) // oldest first
 			: logs
 					.reverse()
 					.slice(offset || 0)
