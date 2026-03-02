@@ -5,7 +5,3 @@ if (!fs.existsSync(".no-postinstall") && !fs.existsSync(`${process.env.INIT_CWD}
 	console.info(`Copying .env_witnet file from ${process.env.INIT_CWD}...`);
 	fs.cpSync(".env_witnet", `${process.env.INIT_CWD}/.env_witnet`);
 }
-
-if (fs.existsSync("./build/contracts")) {
-	exec('sed -i -- "/\bsourcePath\b/d" ./build/contracts/*.json');
-}
