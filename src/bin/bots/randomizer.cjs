@@ -31,11 +31,6 @@ async function main() {
 
 	program
 		.option(
-			"--chain <ecosystem:network>",
-			"Make sure the randomizer bot connects to this EVM chain.",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_NETWORK || undefined,
-		)
-		.option(
 			"--host <host>",
 			"Host name or IP address where the signing ETH/RPC gateway is expected to be running.",
 			(host) => host.replace(/\/$/, ""),
@@ -52,9 +47,9 @@ async function main() {
 			process.env.WITNET_SOLIDITY_RANDOMIZER_MIN_BALANCE || 0.01,
 		)
 		.option(
-			"--patron <evm_addr>",
-			"Signer address that will pay for every randomize request, other than the gateway's default.",
-			process.env.WITNET_SOLIDITY_RANDOMIZER_SIGNER || undefined,
+			"--network <ecosystem:network>",
+			"Make sure the randomizer bot connects to this EVM chain.",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_NETWORK || undefined,
 		)
 		.option(
 			"--port <port>",
@@ -76,6 +71,11 @@ async function main() {
 			"Randomizing time sonze (see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).",
 			process.env.WITNET_SOLIDITY_RANDOMIZER_SCHEDULE_TIMEZONE || "Europe/Madrid",
 		)
+		.option(
+			"--signer <evm_addr>",
+			"Signer address that will pay for every randomize request, other than the gateway's default.",
+			process.env.WITNET_SOLIDITY_RANDOMIZER_SIGNER || undefined,
+		)
 		.requiredOption(
 			"--target <evm_addr>",
 			"Address of the WitRandomness contract to be randomized.",
@@ -84,25 +84,23 @@ async function main() {
 
 	program.parse();
 
-	const { chain, host, maxGasPrice, minBalance, patron, port, schedule, scheduleOverlap, scheduleTimezone, target } =
+	const { host, maxGasPrice, minBalance, network, port, schedule, scheduleOverlap, scheduleTimezone, signer,target } =
 		program.opts();
 
 	traceHeader(`@WITNET/SOLIDITY RANDOMIZER BOT v${require("../../../package.json").version}`, colors.white);
 
 	console.info(`> ETH/RPC gateway:  ${host}:${port}`);
 
-	const witOracle = patron
-		? await WitOracle.fromJsonRpcUrl(`${host}:${port}`, patron)
-		: await WitOracle.fromJsonRpcUrl(`${host}:${port}`);
-	const { network, provider, signer } = witOracle;
+	const witOracle = await WitOracle.fromEthRpcUrl(`${host}:${port}`);
 
-	if (chain && network !== chain) {
-		throw new Error(`Fatal: connected to wrong network: ${network.toUpperCase()}`);
+	if (network && network !== witOracle.network) {
+		console.error(`Fatal: connected to wrong network: ${network.toUpperCase()}`);
+		process.exit(1);
 	}
 
-	console.info(`> ETH/RPC network:  ${network}`);
+	console.info(`> ETH/RPC network:  ${witOracle.network}`);
 
-	const randomizer = await witOracle.getWitRandomnessAt(target);
+	const randomizer = await witOracle._getWitRandomness(target);
 	const artifact = await randomizer.getEvmImplClass();
 	const symbol = utils.getEvmNetworkSymbol(network);
 	const version = await randomizer.getEvmImplVersion();
@@ -116,13 +114,20 @@ async function main() {
 		randomizeWaitBlocks = settings.randomizeWaitBlocks;
 	}
 
+	try {
+		await randomizer.setSigner(signer);
+	} catch (err) {
+		console.error(`Fatal: failed to set signer to ${signer}: ${err.message}`);
+		process.exit(1);
+	}
+
 	// check initial balance
 	const balance = await checkBalance();
 	if (Number(ethers.formatEther(balance)) < minBalance) {
 		console.error(`> Fatal: insufficient balance: ${ethers.formatEther(balance)} < ${minBalance} ${symbol}`);
 		process.exit(1);
 	}
-	console.info(`> Signer address: ${signer.address}`);
+	console.info(`> Signer address: ${randomizer.signer.address}`);
 
 	// max acceptable gas price
 	if (maxGasPrice) {
@@ -146,11 +151,11 @@ async function main() {
 	setInterval(checkBalance, (CHECK_BALANCE_SECS || 900) * 1000);
 
 	async function checkBalance() {
-		return provider
-			.getBalance(signer)
+		return randomizer.provider
+			.getBalance(randomizer.signer.address)
 			.then((balance) => {
 				if (Number(ethers.formatEther(balance)) < minBalance) {
-					console.info(`> Low balance !!! ${ethers.formatEther(balance)} ${symbol} (${signer.address})`);
+					console.info(`> Low balance !!! ${ethers.formatEther(balance)} ${symbol} (${randomizer.signer.address})`);
 				} else {
 					console.info(`> Signer balance: ${ethers.formatEther(balance)} ${symbol}`);
 				}

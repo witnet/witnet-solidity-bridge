@@ -8,22 +8,27 @@ const { utils, WitOracle } = require("../../../dist/src");
 module.exports = async (options = {}, args = []) => {
 	[args] = helpers.deleteExtraFlags(args);
 
-	const witOracle = await WitOracle.fromJsonRpcUrl(`http://127.0.0.1:${options?.port || 8545}`, options?.signer);
+	const witOracle = await WitOracle.fromEthRpcUrl(`http://127.0.0.1:${options?.port || 8545}`);
 
-	const { network, provider } = witOracle;
+	const { network } = witOracle;
 	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);
-	const framework = await helpers.prompter(utils.fetchWitOracleFramework(provider));
 
 	let { target } = options;
 	let chosen = false;
 	if (!target) {
-		const artifacts = Object.entries(framework).filter(([key]) => key.startsWith("WitPriceFeeds"));
-		if (artifacts.length === 1) {
-			target = artifacts[0][1].address;
+		const { apps } = utils.getEvmNetworkAddresses(network)
+		const targets = Object.entries(apps || {}).filter(([key, address]) => (
+			key.startsWith("WitPriceFeeds")
+				&& key.indexOf("Upgradable") === -1
+				&& key.indexOf("Trustable") === -1
+				&& address !== "0x0000000000000000000000000000000000000000"
+		)).map(([, address]) => address);
+		if (targets.length === 1) {
+			target = targets[0];
 		} else {
 			const selection = await prompt([
 				{
-					choices: artifacts.map(([, artifact]) => artifact.address),
+					choices: targets,
 					message: "Price feeds contract:",
 					name: "target",
 					type: "rawlist",
@@ -34,17 +39,35 @@ module.exports = async (options = {}, args = []) => {
 		}
 	}
 
-	let pfs;
-	try {
-		pfs = await witOracle.getWitPriceFeedsAt(target);
-	} catch {
-		pfs = await witOracle.getWitPriceFeedsLegacyAt(target);
+	// helper to transparently handle legacy price feed contracts
+	// returns both the client and a flag indicating if the legacy implementation
+	// was used (so we can avoid redundant RPC calls later).
+	async function _resolvePriceFeeds(target) {
+		try {
+			return { client: await witOracle._getWitPriceFeeds(target), legacy: false };
+		} catch (err) {
+			console.warn(helpers.colors.yellow(`> Unable to initialize modern PriceFeeds (${err}), falling back to legacy`));
+			return { client: await witOracle._getWitPriceFeedsLegacy(target), legacy: true };
+		}
 	}
-	const artifact = await pfs.getEvmImplClass();
-	if (artifact.indexOf("Legacy") >= 0) {
-		pfs = await witOracle.getWitPriceFeedsLegacyAt(target);
+
+	let { client: priceFeedClient, legacy: isLegacy } = await helpers.prompter(_resolvePriceFeeds(target)).catch((err) => {
+		console.error(helpers.colors.mred(`Fatal: unable to initialize PriceFeeds wrapper: ${err.message || err}`));
+		process.exit(0);
+	});
+
+	let artifact = await priceFeedClient.getEvmImplClass();
+	// if the implementation class reports legacy but we already have a
+	// modern client, switch over to the fully-baked legacy helper.
+	if (artifact.includes("Legacy") && !isLegacy) {
+		priceFeedClient = await helpers.prompter(witOracle._getWitPriceFeedsLegacy(target)).catch((err) => {
+			console.error(helpers.colors.mred(`Fatal: unable to initialize legacy PriceFeeds wrapper: ${err.message || err}`));
+			process.exit(0);
+		});
+		artifact = await priceFeedClient.getEvmImplClass();
+		isLegacy = true;
 	}
-	const version = await pfs.getEvmImplVersion();
+	const version = await priceFeedClient.getEvmImplVersion();
 	const maxWidth = Math.max(21, artifact.length + 2);
 	console.info(
 		`> ${helpers.colors.lwhite(artifact)}:${" ".repeat(
@@ -52,10 +75,15 @@ module.exports = async (options = {}, args = []) => {
 		)}${chosen ? "" : `${helpers.colors.lblue(target)} `}${helpers.colors.blue(`[ ${version} ]`)}`,
 	);
 
-	let priceFeeds = (await pfs.lookupPriceFeeds()).sort((a, b) => a.symbol.localeCompare(b.symbol));
+	let priceFeeds = [];
+	try {
+		priceFeeds = (await priceFeedClient.lookupPriceFeeds()).sort((a, b) => a.symbol.localeCompare(b.symbol));
+	} catch (err) {
+		throw new Error(`Failed to lookup price feeds: ${err.message}`);
+	}	
 
 	if (!options["trace-back"]) {
-		const registry = await witOracle.getWitOracleRadonRegistry();
+		const registry = await witOracle._getWitOracleRadonRegistry();
 		priceFeeds = await helpers.prompter(
 			Promise.all(
 				priceFeeds.map(async (pf) => {
@@ -134,6 +162,6 @@ module.exports = async (options = {}, args = []) => {
 			},
 		);
 	} else {
-		console.info("> No price feeds currently supported.");
+		console.info(helpers.colors.yellow("^ No price feeds are currently supported."));
 	}
 };

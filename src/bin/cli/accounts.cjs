@@ -2,7 +2,7 @@ const helpers = require("../helpers.cjs");
 const { WitOracle } = require("../../../dist/src");
 
 module.exports = async (flags = {}) => {
-	const witOracle = await WitOracle.fromJsonRpcUrl(`http://127.0.0.1:${flags?.port || 8545}`);
+	const witOracle = await WitOracle.fromEthRpcUrl(`http://127.0.0.1:${flags?.port || 8545}`);
 
 	const { provider, network } = witOracle;
 	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);

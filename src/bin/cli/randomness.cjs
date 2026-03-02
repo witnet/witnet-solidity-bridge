@@ -9,23 +9,27 @@ const { colors, DEFAULT_LIMIT, DEFAULT_SINCE } = helpers;
 module.exports = async (options = {}, args = []) => {
 	[args] = helpers.deleteExtraFlags(args);
 
-	const { limit, offset, since, clone } = options;
+	const { limit, offset, since, clone, randomize, signer } = options;
 
-	const witOracle = await WitOracle.fromJsonRpcUrl(`http://127.0.0.1:${options?.port || 8545}`, options?.signer);
+	const witOracle = await WitOracle.fromEthRpcUrl(`http://127.0.0.1:${options?.port || 8545}`);
 
 	const { network, provider } = witOracle;
 	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);
-	const framework = await helpers.prompter(utils.fetchWitOracleFramework(provider));
+	
 	let { target } = options;
 	let chosen = false;
 	if (!target) {
-		const artifacts = Object.entries(framework).filter(([key]) => key.startsWith("WitRandomness"));
-		if (artifacts.length === 1) {
-			target = artifacts[0][1].address;
+		const { apps } = utils.getEvmNetworkAddresses(network)
+		const targets = Object.entries(apps || {}).filter(([key, address]) => (
+			key.startsWith("WitRandomness")
+				&& address !== "0x0000000000000000000000000000000000000000"
+		)).map(([, address]) => address);
+		if (targets.length === 1) {
+			target = targets[0];
 		} else {
 			const selection = await prompt([
 				{
-					choices: artifacts.map(([_key, artifact]) => artifact.address),
+					choices: targets,
 					message: "Randomness contract:",
 					name: "target",
 					type: "rawlist",
@@ -35,7 +39,12 @@ module.exports = async (options = {}, args = []) => {
 			chosen = true;
 		}
 	}
-	const randomizer = await witOracle.getWitRandomnessAt(target);
+	
+	const randomizer = await helpers.prompter(witOracle._getWitRandomness(target)).catch((err) => {
+		console.error(colors.mred(`Fatal: unable to initialize WitRandomness wrapper: ${err.message || err}`));
+		process.exit(0);
+	});
+
 	const symbol = utils.getEvmNetworkSymbol(network);
 	const [artifact, version, base, consumer] = await Promise.all([
 		await randomizer.getEvmImplClass(),
@@ -53,11 +62,15 @@ module.exports = async (options = {}, args = []) => {
 	);
 	if (base !== randomizer.address) {
 		console.info(`> Master address:      ${colors.blue(base)}`);
-		if (randomizer.signer.address !== curator) {
-			console.info(`> Curator address:     ${colors.magenta(curator)}`);
-		} else {
+		if (randomizer?.signer.address === curator) {
 			console.info(`> Curator address:     ${colors.mmagenta(curator)}`);
+		} else {
+			console.info(`> Curator address:     ${colors.magenta(curator)}`);
 		}
+	}
+
+	if (clone || randomize) {
+		await randomizer.setSigner(signer);
 	}
 
 	if (clone) {
@@ -97,7 +110,7 @@ module.exports = async (options = {}, args = []) => {
 					helpers.saveWitnetJsonFiles({ addresses });
 				}
 			} else {
-				console.error(colors.mred(`  Error: no Cloned event was emitted.`));
+				console.error(colors.mred(`  > FAIL: No Cloned event was emitted.`));
 				process.exit(0);
 			}
 			curator = answer.curator;
@@ -108,7 +121,7 @@ module.exports = async (options = {}, args = []) => {
 		}
 	}
 
-	if (options?.randomize) {
+	if (randomize) {
 		console.info(colors.lyellow(`\n  >>> REQUESTING NEW RANDOMIZE <<<`));
 		const receipt = await randomizer
 			.randomize({
@@ -124,9 +137,10 @@ module.exports = async (options = {}, args = []) => {
 				},
 			})
 			.catch((err) => {
-				process.stdout.write(`${helpers.colors.mred("FAIL")}`);
-				console.error(err);
-				throw err;
+				const errorMessage = err.info?.error?.message || err.message || err;
+				const parsedMessage = errorMessage.match(/"message":"([^"]+)"/);
+				console.error(colors.mred(`  >>> FAIL: ${parsedMessage ? parsedMessage[1] : errorMessage}`));
+				process.exit(0);
 			});
 		if (receipt) {
 			console.info(
@@ -294,9 +308,10 @@ async function _invokeAdminTask(func, ...params) {
 			process.stdout.write(`${helpers.colors.lwhite("OK")}\n`);
 		},
 	}).catch((err) => {
-		process.stdout.write(`${helpers.colors.mred("FAIL:\n")}`);
-		console.error(err);
-		process.exit(1);
+		const errorMessage = err.info?.error?.message || err.message || err;
+		const parsedMessage = errorMessage.match(/"message":"([^"]+)"/);
+		process.stdout.write(colors.mred(`  >>> FAIL: ${parsedMessage ? parsedMessage[1] : errorMessage}\n`));
+		process.exit(0);
 	});
 	if (receipt) {
 		console.info(`  - EVM block number:  ${helpers.colors.lwhite(helpers.commas(receipt?.blockNumber))}`);

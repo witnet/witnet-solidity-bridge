@@ -21,26 +21,23 @@ module.exports = async (flags = {}, params = []) => {
 	}
 	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);
 
-	let artifacts = {};
+	let artifacts = [];
 	if (flags?.templates || flags?.modals) {
 		const assets = helpers.importRadonAssets(flags);
 		if (flags?.templates) {
 			const dict = utils.flattenRadonTemplates(assets);
 			if (Object.keys(dict).length > 0 && deployables.templates[network]) {
-				artifacts.templates = Object.fromEntries(
-					Object.entries(deployables.templates[network])
-						.filter(([key]) => dict[key] !== undefined)
-						.map(([key, address]) => [key, { address }]),
-				);
+				artifacts = Object.entries(deployables.templates[network])
+					.filter(([key]) => dict[key] !== undefined)
+					.map(([key, address]) => [key, { address }]);
 			}
 		}
 		if (flags?.modals) {
 			const dict = utils.flattenRadonModals(assets);
 			if (Object.keys(dict).length > 0 && deployables.modals[network]) {
-				artifacts.modals = Object.fromEntries(
-					Object.entries(deployables.modals[network])
-						.filter(([key]) => dict[key] !== undefined)
-						.map(([key, address]) => [key, { address }]),
+				artifacts.push(...Object.entries(deployables.modals[network])
+					.filter(([key]) => dict[key] !== undefined)
+					.map(([key, address]) => [key, { address }])
 				);
 			}
 		}
@@ -53,30 +50,34 @@ module.exports = async (flags = {}, params = []) => {
 			args = ["WitOracle"];
 		}
 	}
-	helpers.traceTable(
-		artifacts.map(([key, obj]) => {
-			const match = includes(args, key);
-			return [
-				match ? helpers.colors.lwhite(key) : helpers.colors.white(key),
-				match ? helpers.colors.mblue(obj.address) : helpers.colors.blue(obj.address),
-				match ? helpers.colors.mgreen(obj?.interfaceId || "") : helpers.colors.green(obj?.interfaceId || ""),
-				...(flags?.verbose
-					? [
-							match ? helpers.colors.myellow(obj?.class || "") : helpers.colors.yellow(obj?.class || ""),
-							match ? helpers.colors.white(obj?.version || "") : helpers.colors.gray(obj?.version || ""),
-						]
-					: []),
-			];
-		}),
-		{
-			headlines: [
-				":WIT/ORACLE FRAMEWORK",
-				":EVM CONTRACT ADDRESS",
-				":EVM SPECS",
-				...(flags?.verbose ? [":EVM CONTRACT CLASS", ":EVM VERSION TAG"] : []),
-			],
-		},
-	);
+	if (artifacts.length) {
+		helpers.traceTable(
+			artifacts.map(([key, obj]) => {
+				const match = includes(args, key);
+				return [
+					match ? helpers.colors.lwhite(key) : helpers.colors.white(key),
+					match ? helpers.colors.mblue(obj.address) : helpers.colors.blue(obj.address),
+					match ? helpers.colors.mgreen(obj?.interfaceId || "") : helpers.colors.green(obj?.interfaceId || ""),
+					...(flags?.verbose
+						? [
+								match ? helpers.colors.myellow(obj?.class || "") : helpers.colors.yellow(obj?.class || ""),
+								match ? helpers.colors.white(obj?.version || "") : helpers.colors.gray(obj?.version || ""),
+							]
+						: []),
+				];
+			}),
+			{
+				headlines: [
+					":WIT/ORACLE FRAMEWORK",
+					":EVM CONTRACT ADDRESS",
+					":EVM SPECS",
+					...(flags?.verbose ? [":EVM CONTRACT CLASS", ":EVM VERSION TAG"] : []),
+				],
+			},
+		);
+	} else {
+		console.info(helpers.colors.yellow("^ No framework artifacts found for this network."));
+	}
 };
 
 const includes = (selection, key) => {

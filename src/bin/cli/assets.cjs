@@ -10,7 +10,11 @@ const deployables = helpers.readWitnetJsonFiles("modals", "requests", "templates
 module.exports = async (flags = {}, params = []) => {
 	const [args] = helpers.deleteExtraFlags(params);
 
-	const witOracle = await WitOracle.fromJsonRpcUrl(`http://127.0.0.1:${flags?.port || 8545}`, flags?.signer);
+	const witOracle = await WitOracle.fromEthRpcUrl(`http://127.0.0.1:${flags?.port || 8545}`);
+
+	if (flags?.deploy) {
+		witOracle.setSigner(flags?.signer);
+	}
 
 	const { force } = flags;
 	const { network } = witOracle;
@@ -19,8 +23,8 @@ module.exports = async (flags = {}, params = []) => {
 	if (!deployables.requests[network]) deployables.requests[network] = {};
 	if (!deployables.templates[network]) deployables.templates[network] = {};
 
-	const registry = await witOracle.getWitOracleRadonRegistry();
-	const deployer = await witOracle.getWitOracleRadonRequestFactory();
+	const registry = await witOracle._getWitOracleRadonRegistry();
+	const deployer = await witOracle._getWitOracleRadonRequestFactory();
 
 	if (!flags?.force) helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);
 

@@ -10,7 +10,7 @@ module.exports = async (options = {}, args = []) => {
 
 	const { limit, offset, since } = options;
 
-	const witOracle = await WitOracle.fromJsonRpcUrl(`http://127.0.0.1:${options?.port || 8545}`, options?.signer);
+	const witOracle = await WitOracle.fromEthRpcUrl(`http://127.0.0.1:${options?.port || 8545}`);
 
 	const { address, network, provider } = witOracle;
 	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);
