@@ -2,7 +2,7 @@ import { Witnet } from "@witnet/sdk";
 
 import { default as cbor } from "cbor";
 
-import { AbiCoder, Contract, type JsonRpcProvider, solidityPackedKeccak256 } from "ethers";
+import { AbiCoder, Contract, JsonRpcApiProvider, type JsonRpcProvider, solidityPackedKeccak256 } from "ethers";
 import { default as merge } from "lodash.merge";
 import { default as helpers } from "../bin/helpers.cjs";
 import { ABIs } from "../index.js";
@@ -13,14 +13,7 @@ import type {
 	WitOracleQueryParams,
 	WitOracleQueryStatus,
 } from "./types.js";
-import {
-	WitOracle,
-	WitOracleRadonRegistry,
-	WitOracleRadonRequestFactory,
-	WitPriceFeeds,
-	WitPriceFeedsLegacy,
-	WitRandomness,
-} from "./wrappers.js";
+import { WitOracle } from "./wrappers.js";
 
 export * from "@witnet/sdk/utils";
 
@@ -56,89 +49,101 @@ export async function fetchWitOracleFramework(
 				Object.entries(helpers.flattenObject(addresses))
 					.map(([key, address]) => [key.split(".").pop(), address])
 					.sort(([a], [b]) => (a as string).localeCompare(b))
-					.filter(([key]) => {
+					.filter(([key, address]) => {
 						const base = _findBase(contracts, key);
-						return targets.includes(key) && !exclusions.includes(base) && (ABIs[key] || ABIs[base]);
+						return (
+							address
+								&& address !== "0x0000000000000000000000000000000000000000"
+								&& targets.includes(key)
+								&& !exclusions.includes(base)
+								&& (ABIs[key] || ABIs[base])
+						);
 					})
 					.map(async ([key, address]) => {
-						const bytecode = await provider.getCode(address).catch((err) => console.error(`Warning: ${key}: ${err}`));
-						if (bytecode?.length && bytecode.length > 2) {
-							let impl,
-								isUpgradable = false,
-								interfaceId,
-								version;
-							const appliance = new Contract(address, ABIs.WitAppliance, provider);
-							try {
-								impl = await appliance.class.staticCall();
-							} catch {
-								impl = key;
-							}
-							try {
-								interfaceId = await appliance.specs.staticCall();
-							} catch {}
-							const upgradable = new Contract(address, ABIs.WitnetUpgradableBase, provider);
-							try {
-								isUpgradable = await upgradable.isUpgradable.staticCall();
-							} catch {
-								isUpgradable = false;
-							}
-							try {
-								version = await upgradable.version.staticCall();
-							} catch {}
-							return [
-								key,
-								{
-									abi: ABIs[key] || ABIs[impl],
-									address,
-									class: impl,
-									gitHash: _versionLastCommitOf(version),
-									interfaceId,
-									isUpgradable,
-									semVer: _versionTagOf(version),
-									version,
-								} as WitOracleArtifact,
-							];
-						} else {
+						const bytecode = await provider.getCode(address).catch((err) => {
+							console.error(`Warning: ${key}: ${err}`);
+							return undefined;
+						});
+						if (!bytecode?.length || bytecode.length <= 2) {
 							return [key, undefined];
 						}
+
+						const appliance = new Contract(address, ABIs.WitAppliance, provider);
+						const upgradable = new Contract(address, ABIs.WitnetUpgradableBase, provider);
+
+						// Execute all contract calls in parallel for better performance
+						const [impl, interfaceId, isUpgradable, version] = await Promise.allSettled([
+							appliance.class.staticCall(),
+							appliance.specs.staticCall(),
+							upgradable.isUpgradable.staticCall(),
+							upgradable.version.staticCall(),
+						]).then((results) => [
+							(results[0].status === "fulfilled" ? results[0].value : key) as string,
+							(results[1].status === "fulfilled" ? results[1].value : undefined) as string | undefined,
+							(results[2].status === "fulfilled" ? results[2].value : false) as boolean,
+							(results[3].status === "fulfilled" ? results[3].value : undefined) as string | undefined,
+						]);
+
+						return [
+							key,
+							{
+								abi: ABIs[key] || (typeof impl === "string" ? ABIs[impl] : undefined),
+								address,
+								class: impl,
+								gitHash: _versionLastCommitOf(version?.toString()),
+								interfaceId,
+								isUpgradable,
+								semVer: _versionTagOf(version?.toString()),
+								version,
+							} as WitOracleArtifact,
+						];
 					}),
 			)
 				.then((artifacts) => artifacts.filter(([, artifact]) => artifact !== undefined))
 				.then(async (artifacts) => {
-					if (Object.fromEntries(artifacts).WitOracle) {
-						const signer = await provider.getSigner();
-						const witOracle = new WitOracle(signer, network);
-						let witOracleRadonRegistry: WitOracleRadonRegistry;
-						if (Object.fromEntries(artifacts).WitOraclRadonRegistry) {
-							witOracleRadonRegistry = new WitOracleRadonRegistry(signer, network);
-						}
+					const artifactMap = Object.fromEntries(artifacts);
+					if (artifactMap.WitOracle) {
+						const witOracle = await WitOracle.fromEthRpcProvider(provider);
 						artifacts = await Promise.all(
 							artifacts.map(async ([key, artifact]) => {
-								let wrapper;
+								let wrapper: any;
 								switch (key) {
 									case "WitOracle":
 										wrapper = witOracle;
 										break;
 									case "WitOracleRadonRegistry":
-										wrapper = witOracleRadonRegistry;
+										wrapper = await witOracle._getWitOracleRadonRegistry().catch((err) => {
+											console.error("Error getting WitOracleRadonRegistry wrapper:", err);
+											return undefined;
+										});
 										break;
 									case "WitOracleRadonRequestFactory":
-										if (witOracleRadonRegistry) {
-											wrapper = await WitOracleRadonRequestFactory.deployed(witOracle, witOracleRadonRegistry);
-										}
+										wrapper = await witOracle._getWitOracleRadonRequestFactory().catch((err) => {
+											console.error("Error getting WitOracleRadonRequestFactory wrapper:", err);
+											return undefined;
+										});
 										break;
 									case "WitPriceFeeds":
-										wrapper = await WitPriceFeeds.at(witOracle, artifact.address);
+										wrapper = await witOracle._getWitPriceFeeds(artifact.address).catch((err) => {
+											console.error("Error getting WitPriceFeeds wrapper:", err);
+											return undefined;
+										});
 										break;
 									case "WitPriceFeedsLegacy":
-										wrapper = await WitPriceFeedsLegacy.at(witOracle, artifact.address);
+										wrapper = await witOracle._getWitPriceFeedsLegacy(artifact.address).catch((err) => {
+											console.error("Error getting WitPriceFeedsLegacy wrapper:", err);
+											return undefined;
+										});
 										break;
 									default:
 										if (key.startsWith("WitRandomness") || key.startsWith("WitnetRandomness")) {
-											wrapper = await WitRandomness.at(witOracle, artifact.address);
+											wrapper = await witOracle._getWitRandomness(artifact.address).catch((err) => {
+												console.error(`Error getting ${key} wrapper:`, err);
+												return undefined;
+											});
 										}
 								}
-								return [key, { ...artifact, wrapper } as WitOracleArtifact];
+								return [key, wrapper ? { ...artifact, wrapper } : artifact];
 							}),
 						);
 					}
