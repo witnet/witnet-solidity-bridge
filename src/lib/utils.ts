@@ -2,7 +2,14 @@ import { Witnet } from "@witnet/sdk";
 
 import { default as cbor } from "cbor";
 
-import { AbiCoder, Contract, type JsonRpcApiProvider, type JsonRpcProvider, solidityPackedKeccak256 } from "ethers";
+import {
+	AbiCoder,
+	Contract,
+	isAddress,
+	type JsonRpcApiProvider,
+	type JsonRpcProvider,
+	solidityPackedKeccak256,
+} from "ethers";
 import { default as merge } from "lodash.merge";
 import { default as helpers } from "../bin/helpers.cjs";
 import { ABIs } from "../index.js";
@@ -232,6 +239,15 @@ export function isEvmNetworkMainnet(network: string): boolean {
 
 export function isEvmNetworkSupported(network: string): boolean {
 	return helpers.supportsNetwork(network);
+}
+
+export function isValidEvmAddress(address?: string): boolean {
+	return (
+		address !== undefined &&
+		address !== "0x0000000000000000000000000000000000000000" &&
+		/^0x[0-9a-fA-F]{40}$/.test(address) &&
+		isAddress(address)
+	);
 }
 
 export function abiDecodeQueryStatus(status: bigint): WitOracleQueryStatus {

@@ -38,7 +38,7 @@ module.exports = async (flags = {}, [ecosystem]) => {
 				]),
 		),
 	);
-	
+
 	if (networks.length > 0) {
 		helpers.traceTable(
 			networks.map((network) => [
