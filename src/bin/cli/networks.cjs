@@ -11,40 +11,56 @@ module.exports = async (flags = {}, [ecosystem]) => {
 			ecosystem = utils.getEvmNetworkByChainId(chainId);
 		} catch (_err) {}
 	}
-	const networks = Object.fromEntries(
-		Object.entries(helpers.supportedNetworks())
-			.filter(([, config]) => {
-				return (
-					!flags ||
-					(flags?.mainnets && config.mainnet) ||
-					(flags?.testnets && !config.mainnet) ||
-					(!flags?.mainnets && !flags?.testnets)
-				);
-			})
-			.map(([network, config]) => [
-				network,
-				{
-					browser: config?.verified,
-					id: config?.network_id,
-					mainnet: config?.mainnet,
-					match: ecosystem && network.toLowerCase().indexOf(ecosystem.toLowerCase()) > -1,
-					name: network,
-					symbol: config?.symbol,
-				},
+
+	const networks = Object.values(
+		Object.fromEntries(
+			Object.entries(utils.getEvmNetworks())
+				.filter(([, config]) => {
+					return (
+						!flags ||
+						(flags?.mainnets && config.mainnet) ||
+						(flags?.testnets && !config.mainnet) ||
+						(!flags?.mainnets && !flags?.testnets)
+					);
+				})
+				.map(([network, config]) => [
+					network,
+					{
+						explorerUrl: config?.explorerUrl,
+						id: config?.chainId,
+						mainnet: config?.mainnet,
+						match: ecosystem && network.toLowerCase().indexOf(ecosystem.toLowerCase()) > -1,
+						name: config.name || network,
+						symbol: config?.symbol,
+						pushOnly: config?.pushOnly || false,
+						addresses: config?.addresses || {},
+					},
+				]),
+		),
+	);
+	
+	if (networks.length > 0) {
+		helpers.traceTable(
+			networks.map((network) => [
+				network.name,
+				network.symbol,
+				network.id,
+				network.pushOnly ? "PUSH ONLY" : "PUSH & PULL",
+				network.explorerUrl,
 			]),
-	);
-	helpers.traceTable(
-		Object.values(networks).map((network) => [
-			network.match ? helpers.colors.mcyan(network.name) : helpers.colors.cyan(network.name),
-			network.match ? helpers.colors.lwhite(network.symbol) : helpers.colors.white(network.symbol),
-			network.match
-				? helpers.colors.myellow(helpers.commas(network.id))
-				: helpers.colors.yellow(helpers.commas(network.id)),
-			network.match ? helpers.colors.white(network.browser || "") : helpers.colors.gray(network.browser || ""),
-		]),
-		{
-			headlines: [":Network", ":Fee token", "Network Id", ":Verified Block Explorer"],
-		},
-	);
-	console.info(`^ Listed ${Object.keys(networks).length} networks.`);
+			{
+				headlines: [":Network", ":Fee Token", "Network Id", ":Oracle Model", ":Verified Block Explorer"],
+				colors: [
+					helpers.colors.mcyan,
+					helpers.colors.lwhite,
+					helpers.colors.myellow,
+					helpers.colors.lmagenta,
+					helpers.colors.white,
+				],
+			},
+		);
+		console.info(`^ Listed ${Object.keys(networks).length} networks.`);
+	} else {
+		console.info("^ No networks found with the given filters.");
+	}
 };
