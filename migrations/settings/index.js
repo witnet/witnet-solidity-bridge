@@ -26,14 +26,17 @@ export default {
 				.filter((entry) => entry[0].indexOf(":") > -1)
 				.map((entry) => {
 					const [ecosystem, network] = utils.getRealmNetworkFromString(entry[0]);
-					return [network.toLowerCase(), merge({}, networks.default || {}, networks[ecosystem] || {}, networks[entry[0]] || {})];
+					return [
+						network.toLowerCase(),
+						merge({}, networks.default || {}, networks[ecosystem] || {}, networks[entry[0]] || {}),
+					];
 				}),
 		);
 	},
 	getSpecs: (network) => {
-			let res = merge({}, specs.default || {});
+		let res = merge({}, specs.default || {});
 		utils.getNetworkTagsFromString(network).forEach((net) => {
-				res = merge({}, res, specs[net] || {});
+			res = merge({}, res, specs[net] || {});
 		});
 		return res;
 	},

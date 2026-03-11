@@ -12,6 +12,13 @@ const WITNET_SDK_RADON_ASSETS_PATH = process.env.WITNET_SDK_RADON_ASSETS_PATH ||
 
 const isModuleInitialized = fs.existsSync("./witnet/assets/index.cjs");
 
+function camelize(str) {
+	return str
+		.split(/[\s-_]+/)
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+		.join("");
+}
+
 function* chunks(arr, n) {
 	for (let i = 0; i < arr.length; i += n) {
 		yield arr.slice(i, i + n);
@@ -125,7 +132,9 @@ function getNetworkAddresses(network) {
 	tags.forEach((net) => {
 		res = merge({}, res, addresses?.[net] || {});
 	});
-	return merge({}, res,
+	return merge(
+		{},
+		res,
 		fs.existsSync(`${WITNET_SDK_RADON_ASSETS_PATH}/../addresses.json`)
 			? require(`${WITNET_SDK_RADON_ASSETS_PATH}/../addresses.json`)[network.toLowerCase()]
 			: {},
@@ -225,14 +234,33 @@ function supportedNetworks(ecosystem) {
 			.sort()
 			.filter((network) => network.indexOf(":") >= 0 && (!ecosystem || network.startsWith(ecosystem.toLowerCase())))
 			.map((network) => {
+				const addrs = { ...getNetworkAddresses(network) };
+				const _artfs = { ...getNetworkArtifacts(network) };
+				const {
+					core: { WitOracle },
+					apps: { WitRandomnessV2, WitRandomnessV3, WitPriceFeeds },
+				} = addrs;
 				return [
 					network,
 					{
+						addresses: {
+							WitOracle,
+							WitRandomness: WitRandomnessV3 || WitRandomnessV2,
+							WitPriceFeeds,
+						},
+						chainId: networks[network].network_id,
+						ecosystem: network.split(":")[0].toLowerCase(),
+						explorerUrl: networks[network]?.verify?.explorerUrl,
 						mainnet: networks[network]?.mainnet || false,
-						network_id: networks[network].network_id,
+						name:
+							networks[network]?.name ||
+							network
+								.split(":")
+								.map((part) => camelize(part))
+								.join(" "),
 						port: networks[network].port,
+						pushOnly: getNetworkArtifacts(network)?.core?.WitOracle.indexOf("PushOnly") >= 0 ?? false,
 						symbol: networks[network]?.symbol || "ETH",
-						verified: networks[network]?.verify?.explorerUrl,
 					},
 				];
 			}),

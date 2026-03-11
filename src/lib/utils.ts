@@ -210,8 +210,19 @@ export function getEvmNetworkSymbol(network: string): string {
 	else return "ETH";
 }
 
-export function getEvmNetworks(): string[] {
-	return Object.keys(helpers.supportedNetworks());
+export function getEvmNetworks(): {
+	[key: string]: {
+		name: string;
+		chainId: number;
+		ecosystem: string;
+		mainnet: boolean;
+		port: number;
+		pushOnly: boolean;
+		symbol: string;
+		addresses?: any;
+	};
+} {
+	return helpers.supportedNetworks();
 }
 
 export function isEvmNetworkMainnet(network: string): boolean {
