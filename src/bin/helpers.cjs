@@ -120,12 +120,12 @@ function flattenObject(ob) {
 }
 
 function getNetworkAddresses(network) {
-	let res = addresses?.default;
-	getNetworkTagsFromString(network).forEach((net) => {
-		res = merge(res, addresses[net]);
+	let res = merge({}, addresses?.default || {});
+	const tags = getNetworkTagsFromString(network);
+	tags.forEach((net) => {
+		res = merge({}, res, addresses?.[net] || {});
 	});
-	return merge(
-		res,
+	return merge({}, res,
 		fs.existsSync(`${WITNET_SDK_RADON_ASSETS_PATH}/../addresses.json`)
 			? require(`${WITNET_SDK_RADON_ASSETS_PATH}/../addresses.json`)[network.toLowerCase()]
 			: {},
@@ -133,9 +133,9 @@ function getNetworkAddresses(network) {
 }
 
 function getNetworkArtifacts(network) {
-	let res = artifacts?.default;
+	let res = merge({}, artifacts?.default || {});
 	getNetworkTagsFromString(network).forEach((net) => {
-		res = merge(res, artifacts[net]);
+		res = merge({}, res, artifacts?.[net] || {});
 	});
 	return res;
 }
