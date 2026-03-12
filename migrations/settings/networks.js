@@ -4,6 +4,7 @@ export default {
 		skipDryRun: true,
 	},
 	"arbitrum:sepolia": {
+		name: "Arbitrum Sepolia",
 		network_id: 421614,
 		port: 8517,
 		verify: {
@@ -12,6 +13,7 @@ export default {
 		},
 	},
 	"arbitrum:one": {
+		name: "Arbitrum One",
 		mainnet: true,
 		network_id: 42161,
 		port: 9517,
@@ -21,6 +23,7 @@ export default {
 		},
 	},
 	"avalanche:mainnet": {
+		name: "Avalanche",
 		mainnet: true,
 		network_id: 43114,
 		port: 9533,
@@ -32,6 +35,7 @@ export default {
 		},
 	},
 	"avalanche:testnet": {
+		name: "Avalanche Fuji",
 		network_id: 43113,
 		port: 8533,
 		symbol: "AVAX",
@@ -42,6 +46,7 @@ export default {
 		},
 	},
 	"base:mainnet": {
+		name: "Base",
 		mainnet: true,
 		network_id: 8453,
 		port: 9502,
@@ -51,6 +56,7 @@ export default {
 		},
 	},
 	"base:sepolia": {
+		name: "Base Sepolia",
 		network_id: 84532,
 		port: 8502,
 		verify: {
@@ -60,6 +66,7 @@ export default {
 		},
 	},
 	"boba:bnb:testnet": {
+		name: "Boba BNB Testnet",
 		network_id: 9728,
 		port: 8510,
 		confirmations: 4,
@@ -70,6 +77,7 @@ export default {
 		},
 	},
 	"boba:bnb:mainnet": {
+		name: "Boba BNB Mainnet",
 		mainnet: true,
 		network_id: 56288,
 		port: 9510,
@@ -81,6 +89,7 @@ export default {
 		},
 	},
 	"boba:eth:mainnet": {
+		name: "Boba",
 		mainnet: true,
 		network_id: 288,
 		port: 9539,
@@ -92,6 +101,7 @@ export default {
 		},
 	},
 	"boba:eth:goerli": {
+		name: "Boba Goerli",
 		network_id: 2888,
 		port: 8515,
 		symbol: "BOBA",
@@ -101,6 +111,7 @@ export default {
 		},
 	},
 	"celo:sepolia": {
+		name: "Celo Sepolia",
 		confirmations: 5,
 		network_id: 11142220,
 		port: 8538,
@@ -111,6 +122,7 @@ export default {
 		},
 	},
 	"celo:mainnet": {
+		name: "Celo",
 		mainnet: true,
 		network_id: 42220,
 		port: 9538,
@@ -121,6 +133,7 @@ export default {
 		},
 	},
 	"conflux:core:testnet": {
+		name: "Conflux Core",
 		port: 8540,
 		network_id: 70,
 		symbol: "CFX",
@@ -130,6 +143,7 @@ export default {
 		},
 	},
 	"conflux:core:mainnet": {
+		name: "Conflux Core",
 		mainnet: true,
 		port: 9540,
 		network_id: 1029,
@@ -141,6 +155,7 @@ export default {
 		},
 	},
 	"conflux:espace:testnet": {
+		name: "Conflux eSpace",
 		port: 8529,
 		network_id: 71,
 		// networkCheckTimeout: 999999,
@@ -153,6 +168,7 @@ export default {
 		},
 	},
 	"conflux:espace:mainnet": {
+		name: "Conflux eSpace",
 		mainnet: true,
 		port: 9529,
 		network_id: 1030,
@@ -166,6 +182,7 @@ export default {
 		},
 	},
 	"cronos:testnet": {
+		name: "Cronos Testnet",
 		port: 8530,
 		network_id: 338,
 		symbol: "CRO",
@@ -176,6 +193,7 @@ export default {
 		},
 	},
 	"cronos:mainnet": {
+		name: "Cronos",
 		mainnet: true,
 		port: 9530,
 		network_id: 25,
@@ -189,10 +207,12 @@ export default {
 		},
 	},
 	"cube:testnet": {
+		name: "Cube Testnet",
 		port: 8522,
 		network_id: 1819,
 	},
 	"dogechain:testnet": {
+		name: "Dogechain Testnet",
 		port: 8519,
 		network_id: 568,
 		gas: 6000000,
@@ -204,6 +224,7 @@ export default {
 		},
 	},
 	"dogechain:mainnet": {
+		name: "Dogechain",
 		mainnet: true,
 		port: 9519,
 		network_id: 2000,
@@ -215,6 +236,7 @@ export default {
 		},
 	},
 	"elastos:testnet": {
+		name: "Elastos Testnet",
 		port: 8513,
 		network_id: 21,
 		symbol: "ELA",
@@ -224,6 +246,7 @@ export default {
 		},
 	},
 	"elastos:mainnet": {
+		name: "Elastos",
 		mainnet: true,
 		port: 9513,
 		network_id: 20,
@@ -234,6 +257,7 @@ export default {
 		},
 	},
 	"ethereum:mainnet": {
+		name: "Ethereum",
 		mainnet: true,
 		network_id: 1,
 		port: 9545,
@@ -243,6 +267,7 @@ export default {
 		},
 	},
 	"ethereum:sepolia": {
+		name: "Ethereum Sepolia",
 		confirmations: 2,
 		network_id: 11155111,
 		port: 8506,
@@ -252,6 +277,7 @@ export default {
 		},
 	},
 	"fuse:testnet": {
+		name: "Fuse Testnet",
 		port: 8511,
 		network_id: 123,
 		verify: {
@@ -261,6 +287,7 @@ export default {
 		},
 	},
 	"gnosis:mainnet": {
+		name: "Gnosis",
 		mainnet: true,
 		port: 9509,
 		network_id: 100,
@@ -271,6 +298,7 @@ export default {
 		},
 	},
 	"gnosis:testnet": {
+		name: "Gnosis Chiado",
 		port: 8509,
 		network_id: 10200,
 		symbol: "xDAI",
@@ -281,6 +309,7 @@ export default {
 		},
 	},
 	"kaia:testnet": {
+		name: "Kaia Testnet",
 		port: 8527,
 		network_id: 1001,
 		symbol: "KAIA",
@@ -291,6 +320,7 @@ export default {
 		},
 	},
 	"kaia:mainnet": {
+		name: "Kaia",
 		mainnet: true,
 		port: 9527,
 		network_id: 8217,
@@ -302,6 +332,7 @@ export default {
 		},
 	},
 	"kava:testnet": {
+		name: "Kava Testnet",
 		port: 8526,
 		network_id: 2221,
 		symbol: "KAVA",
@@ -312,6 +343,7 @@ export default {
 		},
 	},
 	"kava:mainnet": {
+		name: "Kava",
 		mainnet: true,
 		port: 9526,
 		network_id: 2222,
@@ -324,6 +356,7 @@ export default {
 		},
 	},
 	"kcc:testnet": {
+		name: "KCC Testnet",
 		port: 8537,
 		network_id: 322,
 		symbol: "KCS",
@@ -333,6 +366,7 @@ export default {
 		},
 	},
 	"kcc:mainnet": {
+		name: "KCC",
 		mainnet: true,
 		port: 9537,
 		network_id: 321,
@@ -343,6 +377,7 @@ export default {
 		},
 	},
 	"mantle:sepolia": {
+		name: "Mantle Sepolia",
 		port: 8508,
 		network_id: 5003,
 		symbol: "MNT",
@@ -352,6 +387,7 @@ export default {
 		},
 	},
 	"mantle:mainnet": {
+		name: "Mantle",
 		mainnet: true,
 		port: 9508,
 		network_id: 5000,
@@ -362,12 +398,14 @@ export default {
 		},
 	},
 	"metis:mainnet": {
+		name: "Metis",
 		mainnet: true,
 		port: 7536,
 		network_id: 1088,
 		symbol: "METIS",
 	},
 	"metis:sepolia": {
+		name: "Metis Sepolia",
 		port: 8536,
 		network_id: 59902,
 		symbol: "METIS",
@@ -378,17 +416,20 @@ export default {
 		},
 	},
 	"meter:testnet": {
+		name: "Meter Testnet",
 		port: 8523,
 		network_id: 83,
 		symbol: "MTR",
 	},
 	"meter:mainnet": {
+		name: "Meter",
 		mainnet: true,
 		port: 9523,
 		network_id: 82,
 		symbol: "MTR",
 	},
 	"moonbeam:mainnet": {
+		name: "Moonbeam",
 		mainnet: true,
 		port: 9531,
 		network_id: 1284,
@@ -399,6 +440,7 @@ export default {
 		},
 	},
 	"moonbeam:moonriver": {
+		name: "Moonriver",
 		mainnet: true,
 		port: 7531,
 		network_id: 1285,
@@ -409,6 +451,7 @@ export default {
 		},
 	},
 	"moonbeam:moonbase": {
+		name: "Moonbase",
 		port: 8531,
 		network_id: 1287,
 		gas: 15000000,
@@ -419,6 +462,7 @@ export default {
 		},
 	},
 	"okx:oktchain:testnet": {
+		name: "OKX Testnet",
 		port: 8528,
 		network_id: 65,
 		symbol: "OKT",
@@ -428,6 +472,7 @@ export default {
 		},
 	},
 	"okx:oktchain:mainnet": {
+		name: "OKX",
 		mainnet: true,
 		port: 9528,
 		network_id: 66,
@@ -438,6 +483,7 @@ export default {
 		},
 	},
 	"okx:x1:sepolia": {
+		name: "XLayer Sepolia",
 		port: 8505,
 		network_id: 195,
 		symbol: "OKB",
@@ -447,6 +493,7 @@ export default {
 		},
 	},
 	"optimism:sepolia": {
+		name: "OP Sepolia",
 		chain_type: "op",
 		port: 8503,
 		network_id: 11155420,
@@ -457,6 +504,7 @@ export default {
 		},
 	},
 	"optimism:mainnet": {
+		name: "Optimism",
 		mainnet: true,
 		port: 9520,
 		network_id: 10,
@@ -468,6 +516,7 @@ export default {
 		},
 	},
 	"polygon:amoy": {
+		name: "Polygon Amoy",
 		port: 8535,
 		network_id: 80002,
 		confirmations: 2,
@@ -479,6 +528,7 @@ export default {
 		},
 	},
 	"polygon:mainnet": {
+		name: "Polygon",
 		mainnet: true,
 		port: 9535,
 		network_id: 137,
@@ -490,6 +540,7 @@ export default {
 		},
 	},
 	"polygon:zkevm:testnet": {
+		name: "Polygon zkEVM",
 		port: 8512,
 		network_id: 1442,
 		verify: {
@@ -498,6 +549,7 @@ export default {
 		},
 	},
 	"polygon:zkevm:mainnet": {
+		name: "Polygon zkEVM",
 		mainnet: true,
 		port: 9512,
 		network_id: 1101,
@@ -507,17 +559,20 @@ export default {
 		},
 	},
 	"reef:testnet": {
+		name: "Reef Testnet",
 		port: 8532,
 		network_id: 13939,
 		symbol: "REEF",
 	},
 	"reef:mainnet": {
+		name: "Reef",
 		mainnet: true,
 		port: 9532,
 		network_id: 13939,
 		symbol: "REEF",
 	},
 	"scroll:sepolia": {
+		name: "Scroll Sepolia",
 		port: 8514,
 		network_id: 534351,
 		verify: {
@@ -526,6 +581,7 @@ export default {
 		},
 	},
 	"scroll:mainnet": {
+		name: "Scroll",
 		mainnet: true,
 		port: 9514,
 		network_id: 534352,
@@ -535,17 +591,20 @@ export default {
 		},
 	},
 	"syscoin:testnet": {
+		name: "Syscoin Testnet",
 		port: 8521,
 		network_id: 5700,
 		symbol: "SYS",
 	},
 	"syscoin:mainnet": {
+		name: "Syscoin",
 		mainnet: true,
 		port: 9521,
 		network_id: 57,
 		symbol: "SYS",
 	},
 	"syscoin:rollux:testnet": {
+		name: "Syscoin Rollux Testnet",
 		port: 8507,
 		network_id: 57000,
 		symbol: "SYS",
@@ -556,12 +615,14 @@ export default {
 		},
 	},
 	"ten:testnet": {
+		name: "TEN Testnet",
 		port: 8504,
 		network_id: 8443,
 		gas: 15000000,
 		symbol: "ETH",
 	},
 	"unichain:sepolia": {
+		name: "UniChain Sepolia",
 		port: 8500,
 		network_id: 1301,
 		confirmations: 8,
@@ -571,17 +632,20 @@ export default {
 		},
 	},
 	"ultron:testnet": {
+		name: "Ultron Testnet",
 		port: 8516,
 		network_id: 1230,
 		symbol: "ULX",
 	},
 	"ultron:mainnet": {
+		name: "Ultron",
 		mainnet: true,
 		port: 9516,
 		network_id: 1231,
 		symbol: "ULX",
 	},
 	"worldchain:mainnet": {
+		name: "Worldchain",
 		mainnet: true,
 		port: 9501,
 		network_id: 480,
@@ -591,6 +655,7 @@ export default {
 		},
 	},
 	"worldchain:sepolia": {
+		name: "Worldchain Sepolia",
 		port: 8501,
 		network_id: 4801,
 		verify: {
@@ -599,6 +664,7 @@ export default {
 		},
 	},
 	"zksync:sepolia": {
+		name: "zkSync Sepolia",
 		port: 8499,
 		network_id: 300,
 		verify: {
