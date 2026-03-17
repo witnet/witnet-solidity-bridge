@@ -195,7 +195,7 @@ export function getEvmNetworkAddresses(network: string): any {
 
 export function getEvmNetworkByChainId(chainId: number): string | undefined {
 	const found = Object.entries(helpers.supportedNetworks()).find(
-		([, config]: [string, any]) => config?.network_id.toString() === chainId.toString(),
+		([, config]: [string, any]) => config?.chainId?.toString() === chainId?.toString(),
 	);
 	if (found) return found[0];
 	else return undefined;
@@ -205,7 +205,7 @@ export function getEvmNetworkId(network: string): number | undefined {
 	const found = Object.entries(helpers.supportedNetworks()).find(
 		([key]: [string, any]) => network && key.toLowerCase() === network.toLowerCase(),
 	);
-	if (found) return (found[1] as any)?.network_id;
+	if (found) return (found[1] as any)?.chainId;
 	else return undefined;
 }
 
