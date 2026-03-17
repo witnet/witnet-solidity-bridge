@@ -13,7 +13,7 @@ module.exports = async (options = {}, args = []) => {
 	const { network } = witOracle;
 	helpers.traceHeader(`${network.toUpperCase()}`, helpers.colors.lcyan);
 
-	let { target } = options;
+	let { target, verbose } = options;
 	let chosen = false;
 	if (!target) {
 		const { apps } = utils.getEvmNetworkAddresses(network);
@@ -98,25 +98,29 @@ module.exports = async (options = {}, args = []) => {
 					if (pf?.oracle && pf.oracle.class === "Witnet") {
 						const bytecode = await registry.lookupRadonRequestBytecode(pf.oracle.sources);
 						const request = Witnet.Radon.RadonRequest.fromBytecode(bytecode);
-						try {
-							const dryrun = JSON.parse(await request.execDryRun({ verbose: true }));
-							// const result = dryrun.tally.result
-							providers = request.sources
-								.map((source, index) => {
-									let authority = source.authority.split(".").slice(-2)[0];
-									authority = authority[0].toUpperCase() + authority.slice(1);
-									return dryrun.retrieve[index].result?.RadonInteger
-										? helpers.colors.mmagenta(authority)
-										: helpers.colors.red(authority);
-								})
-								.sort((a, b) => helpers.colorstrip(a).localeCompare(helpers.colorstrip(b)));
-						} catch (_err) {
-							providers = request.sources
-								.map((source) => {
-									const authority = source.authority.split(".").slice(-2)[0];
-									return helpers.colors.magenta(authority[0].toUpperCase() + authority.slice(1));
-								})
-								.sort((a, b) => helpers.colorstrip(a).localeCompare(helpers.colorstrip(b)));
+						if (verbose) {
+							providers = [request.radHash];
+						} else {
+							try {
+								const dryrun = JSON.parse(await request.execDryRun({ verbose: true }));
+								// const result = dryrun.tally.result
+								providers = request.sources
+									.map((source, index) => {
+										let authority = source.authority.split(".").slice(-2)[0];
+										authority = authority[0].toUpperCase() + authority.slice(1);
+										return dryrun.retrieve[index].result?.RadonInteger
+											? helpers.colors.mmagenta(authority)
+											: helpers.colors.red(authority);
+									})
+									.sort((a, b) => helpers.colorstrip(a).localeCompare(helpers.colorstrip(b)));
+							} catch (_err) {
+								providers = request.sources
+									.map((source) => {
+										const authority = source.authority.split(".").slice(-2)[0];
+										return helpers.colors.magenta(authority[0].toUpperCase() + authority.slice(1));
+									})
+									.sort((a, b) => helpers.colorstrip(a).localeCompare(helpers.colorstrip(b)));
+							}
 						}
 					} else if (pf?.oracle) {
 						providers = [
@@ -164,7 +168,9 @@ module.exports = async (options = {}, args = []) => {
 					"FRESHNESS:",
 					options["trace-back"]
 						? `DATA WITNESSING TRAIL ON ${helpers.colors.lwhite(`WITNET ${utils.isEvmNetworkMainnet(network) ? "MAINNET" : "TESTNET"}`)}`
-						: ":DATA PROVIDERS",
+						: verbose
+							? ":RADON REQUEST HASH"
+							: ":DATA PROVIDERS",
 				],
 			},
 		);
